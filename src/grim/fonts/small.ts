@@ -1,8 +1,8 @@
 // Port of grim/fonts/small.py
 
-import { type WebGLContext } from '../webgl.ts';
-import { type SmallFontData } from '../assets.ts';
-import { Vec2 } from '../geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
 
 export type { SmallFontData };
 

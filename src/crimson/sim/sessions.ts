@@ -1,14 +1,14 @@
 // Port of crimson/sim/sessions.py
 
-import type { CrandLike } from '../../grim/rand.ts';
-import { RecordingCrand } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { advanceSurvivalSpawnStage, tickRushModeSpawns, tickSurvivalWaveSpawns } from '../creatures/spawn.ts';
-import { GameMode } from '../game-modes.ts';
-import { perkSelectionOpenChoices, perkSelectionPick } from '../perks/selection.ts';
-import type { SpawnEntry } from '../quests/types.ts';
-import { tickQuestCompletionTransition } from '../quests/runtime.ts';
-import { questSpawnTableEmpty, tickQuestModeSpawns } from '../quests/timeline.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { RecordingCrand } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { advanceSurvivalSpawnStage, tickRushModeSpawns, tickSurvivalWaveSpawns } from '@crimson/creatures/spawn.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { perkSelectionOpenChoices, perkSelectionPick } from '@crimson/perks/selection.ts';
+import type { SpawnEntry } from '@crimson/quests/types.ts';
+import { tickQuestCompletionTransition } from '@crimson/quests/runtime.ts';
+import { questSpawnTableEmpty, tickQuestModeSpawns } from '@crimson/quests/timeline.ts';
 import { PlayerInput } from './input.ts';
 import { normalizeInputFrame } from './input-frame.ts';
 import type {
@@ -27,11 +27,11 @@ import {
 import { TerrainFxScratch } from './terrain-fx.ts';
 import { FrameTiming } from './timing.ts';
 
-import { survivalUpdateWeaponHandouts } from '../gameplay.ts';
-import { preparePerkAvailability } from '../perks/availability.ts';
-import { prepareWeaponAvailability } from '../weapon-runtime/availability.ts';
-import { allQuests } from '../quests/index.ts';
-import { applyTypoCommand } from '../typo/runtime.ts';
+import { survivalUpdateWeaponHandouts } from '@crimson/gameplay.ts';
+import { preparePerkAvailability } from '@crimson/perks/availability.ts';
+import { prepareWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
+import { allQuests } from '@crimson/quests/index.ts';
+import { applyTypoCommand } from '@crimson/typo/runtime.ts';
 import type { WorldState } from './world-state.ts';
 export type { WorldState };
 

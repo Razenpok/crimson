@@ -1,17 +1,17 @@
 // Port of crimson/creatures/damage.py
 
-import { RGBA } from '../../grim/color.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import type { EffectPool } from '../effects.ts';
-import { EffectId } from '../effects-atlas.ts';
-import { f32 } from '../math-parity.ts';
-import { OwnerRef } from '../owner-ref.ts';
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import type { PlayerState } from '../sim/state-types.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import type { EffectPool } from '@crimson/effects.ts';
+import { EffectId } from '@crimson/effects-atlas.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { CreatureDamageType } from './damage-types.ts';
 import { CREATURE_LIFECYCLE_ALIVE } from './lifecycle.ts';
 import { CreatureFlags, CreatureTypeId } from './spawn-ids.ts';

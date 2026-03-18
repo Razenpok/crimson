@@ -1,6 +1,6 @@
 // Port of crimson/weapons.py
 
-import { SfxId } from '../grim/sfx-map.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 import { ProjectileTemplateId } from './projectiles/types.ts';
 
 export enum WeaponId {

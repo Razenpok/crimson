@@ -1,11 +1,11 @@
 // Port of crimson/text_input.py
 
-import { InputState } from '../../grim/input.ts';
-import { CrimsonConfig } from '../../grim/config.ts';
-import { CrandLike } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { INPUT_CODE_UNBOUND, inputCodeIsDown } from '../input-codes.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import { InputState } from '@grim/input.ts';
+import { CrimsonConfig } from '@grim/config.ts';
+import { CrandLike } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { INPUT_CODE_UNBOUND, inputCodeIsDown } from '@crimson/input-codes.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 
 const _CONTROL_BIND_SLOTS = 5;
 

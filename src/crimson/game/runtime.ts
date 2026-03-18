@@ -5,20 +5,20 @@
 // wires up the GameState, registers console commands, and hands off to the
 // GameLoopView via the engine App.
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { defaultCrimsonConfig } from '../../grim/config.ts';
-import { type ConsoleState, type CommandHandler, createConsole } from '../../grim/console.ts';
-import { Crand } from '../../grim/rand.ts';
-import { loadMusicTrack, queueTrack } from '../../grim/music.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { defaultCrimsonConfig } from '@grim/config.ts';
+import { type ConsoleState, type CommandHandler, createConsole } from '@grim/console.ts';
+import { Crand } from '@grim/rand.ts';
+import { loadMusicTrack, queueTrack } from '@grim/music.ts';
 
-import { GameMode } from '../game-modes.ts';
-import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '../render/rtx/mode.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
   DEMO_QUEST_GRACE_TIME_MS,
   DEMO_TOTAL_PLAY_TIME_MS,
   demoTrialOverlayInfo,
   formatDemoTrialTime,
-} from '../demo-trial.ts';
+} from '@crimson/demo-trial.ts';
 import { type GameConfig, GameState } from './types.ts';
 import { GameLoopView } from './loop-view.ts';
 

@@ -1,9 +1,9 @@
 // Port of crimson/typo/spawns.py — Typ'o'Shooter spawn logic
 
-import { Vec2 } from '../../grim/geom.ts';
-import { RGBA } from '../../grim/color.ts';
-import { clamp } from '../../grim/math.ts';
-import { CreatureTypeId } from '../creatures/spawn-ids.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { RGBA } from '@grim/color.ts';
+import { clamp } from '@grim/math.ts';
+import { CreatureTypeId } from '@crimson/creatures/spawn-ids.ts';
 
 export interface TypoSpawnCall {
   readonly pos: Vec2;

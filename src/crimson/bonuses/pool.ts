@@ -1,14 +1,14 @@
 // Port of crimson/bonuses/pool.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { GameMode } from '../game-modes.ts';
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import type { CreatureDamageApplier } from '../projectiles/types.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from '../sim/state-types.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import type { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { CreatureState } from './apply-context.ts';
-import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '../weapons.ts';
+import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { BONUS_BY_ID, BonusId, bonusDisplayName } from './ids.ts';
 import { bonusPickRandomType } from './selection.ts';
 
@@ -459,5 +459,5 @@ export function bonusLabelForEntry(entry: BonusEntry, preserveBugs = false): str
 }
 
 // Wired-up imports
-import { weaponPickRandomAvailable } from '../weapon-runtime/availability.ts';
+import { weaponPickRandomAvailable } from '@crimson/weapon-runtime/availability.ts';
 import { bonusApply } from './apply.ts';

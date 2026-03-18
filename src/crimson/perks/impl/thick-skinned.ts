@@ -1,7 +1,7 @@
 // crimson/perks/impl/thick_skinned.py
 
-import { PerkId } from '../ids.ts';
-import type { PerkApplyCtx } from "../runtime/apply-context.js";
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { PerkApplyCtx } from "@crimson/perks/runtime/apply-context.js";
 
 export function applyThickSkinned(ctx: PerkApplyCtx): void {
   for (const player of ctx.players) {

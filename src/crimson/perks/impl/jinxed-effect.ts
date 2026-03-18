@@ -1,10 +1,10 @@
-import { SfxId } from "../../../grim/sfx-map.ts";
-import type { PlayerState } from "../../sim/state-types.ts";
-import { f32 } from "../../math-parity.ts";
-import { perkActive } from "../helpers.ts";
-import { PerkId } from "../ids.ts";
-import { RngCallerStatic } from "../../rng-caller-static.ts";
-import type { PerksUpdateEffectsCtx } from "../runtime/effects-context.ts";
+import { SfxId } from "@grim/sfx-map.ts";
+import type { PlayerState } from "@crimson/sim/state-types.ts";
+import { f32 } from "@crimson/math-parity.ts";
+import { perkActive } from "@crimson/perks/helpers.ts";
+import { PerkId } from "@crimson/perks/ids.ts";
+import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
+import type { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.ts";
 
 function awardExperienceOnceFromReward(player: PlayerState, reward_value: number): number {
   const rewardF32 = f32(reward_value);

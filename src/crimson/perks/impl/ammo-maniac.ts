@@ -1,10 +1,10 @@
 // Port of crimson/perks/impl/ammo_maniac.py
 
-import { weaponAssignPlayer } from '../../weapon-runtime/assign.ts';
-import { WeaponId } from '../../weapons.ts';
-import { PerkId } from '../ids.ts';
-import type { PerkApplyCtx } from '../runtime/apply-context.ts';
-import type { PerkHooks } from '../runtime/hook-types.ts';
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/assign.ts';
+import { WeaponId } from '@crimson/weapons.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyAmmoManiac(ctx: PerkApplyCtx): void {
   if (ctx.players.length > 1) {

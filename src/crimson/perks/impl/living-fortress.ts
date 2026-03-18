@@ -1,8 +1,8 @@
 // Port of crimson/perks/impl/living_fortress.py
 
-import { perkActive } from '../helpers.ts';
-import { PerkId } from '../ids.ts';
-import { PlayerPerkTickCtx } from "../runtime/player-tick-context.js";
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
 
 export function tickLivingFortress(ctx: PlayerPerkTickCtx): void {
   if (perkActive(ctx.player, PerkId.LIVING_FORTRESS)) {

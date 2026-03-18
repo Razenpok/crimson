@@ -4,11 +4,11 @@
 // float32 determinism via f32(), identical control flow, and native-parity
 // heading/movement math.
 
-import { Vec2 } from '../grim/geom.ts';
-import { AimScheme, MovementControlType } from '../grim/config.ts';
-import type { CrandLike } from '../grim/rand.ts';
-import { Crand } from '../grim/rand.ts';
-import { SfxId } from '../grim/sfx-map.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { AimScheme, MovementControlType } from '@grim/config.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { Crand } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 
 import { BonusHudState } from './bonuses/hud.ts';
 import { BonusPool } from './bonuses/pool.ts';

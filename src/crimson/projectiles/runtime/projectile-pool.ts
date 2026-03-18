@@ -1,16 +1,16 @@
-import { Vec2 } from '../../../grim/geom.ts';
-import type { CrandLike } from '../../../grim/rand.ts';
-import type { SfxId } from '../../../grim/sfx-map.ts';
-import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '../../creatures/lifecycle.ts';
-import type { EffectPool } from '../../effects.ts';
-import type { CreatureStateLike } from '../../effects.ts';
-import { f32, NATIVE_HALF_PI } from '../../math-parity.ts';
-import { OwnerRef } from '../../owner-ref.ts';
-import { PerkId } from '../../perks/ids.ts';
-import { RngCallerStatic } from '../../rng-caller-static.ts';
-import type { GameplayState } from '../../sim/state-types.ts';
-import type { PlayerState } from '../../sim/state-types.ts';
-import { weaponEntryForProjectileTypeId } from '../../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import type { SfxId } from '@grim/sfx-map.ts';
+import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
+import type { EffectPool } from '@crimson/effects.ts';
+import type { CreatureStateLike } from '@crimson/effects.ts';
+import { f32, NATIVE_HALF_PI } from '@crimson/math-parity.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { GameplayState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import {
   MAIN_PROJECTILE_POOL_SIZE,
   type CreatureDamageApplier,
@@ -18,7 +18,7 @@ import {
   type ProjectileCollisionProfile,
   type ProjectileHit,
   ProjectileTemplateId,
-} from '../types.ts';
+} from '@crimson/projectiles/types.ts';
 import {
   PROJECTILE_HIT_PERK_HOOKS,
   ProjectileUpdateCtx,

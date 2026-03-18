@@ -1,9 +1,9 @@
 // Port of crimson/perks/runtime/player_tick_context.py
 
-import type { Vec2 } from '../../../grim/geom.ts';
-import type { OwnerRef } from '../../owner-ref.ts';
-import type { GameplayState, PlayerState } from '../../sim/state-types.ts';
-import { ProjectileTemplateId } from "../../projectiles/types.js";
+import type { Vec2 } from '@grim/geom.ts';
+import type { OwnerRef } from '@crimson/owner-ref.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { ProjectileTemplateId } from "@crimson/projectiles/types.js";
 
 export type ProjectileSpawnFn = (
   state: GameplayState,

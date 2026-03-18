@@ -1,10 +1,10 @@
 // Port of crimson/bonuses/weapon.py
 
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import { WeaponSlot } from '../sim/state-types.ts';
-import { weaponAssignPlayer } from '../weapon-runtime/assign.ts';
-import { WeaponId } from '../weapons.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { WeaponSlot } from '@crimson/sim/state-types.ts';
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/assign.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyWeapon(ctx: BonusApplyCtx): void {

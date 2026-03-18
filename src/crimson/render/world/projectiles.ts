@@ -1,18 +1,18 @@
 // Port of crimson/render/world/projectiles.py
 
-import { TextureId, getTexture } from '../../../grim/assets.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { BlendMode } from '../../../grim/webgl.ts';
-import { PerkId } from '../../perks/ids.ts';
-import { perkActive } from '../../perks/helpers.ts';
-import { KNOWN_PROJ_FRAMES } from '../../sim/world-defs.ts';
-import type { Projectile, SecondaryProjectile } from '../../projectiles/types.ts';
-import { knownProjRgb } from '../projectile-render-registry.ts';
-import { drawProjectileFromRegistry } from '../projectile-draw/primary-dispatch.ts';
-import { drawSecondaryProjectileFromRegistry } from '../projectile-draw/secondary-dispatch.ts';
-import type { ProjectileDrawCtx } from '../projectile-draw/types.ts';
-import type { SecondaryProjectileDrawCtx } from '../projectile-draw/types.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { BlendMode } from '@grim/webgl.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
+import type { Projectile, SecondaryProjectile } from '@crimson/projectiles/types.ts';
+import { knownProjRgb } from '@crimson/render/projectile-render-registry.ts';
+import { drawProjectileFromRegistry } from '@crimson/render/projectile-draw/primary-dispatch.ts';
+import { drawSecondaryProjectileFromRegistry } from '@crimson/render/projectile-draw/secondary-dispatch.ts';
+import type { ProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
+import type { SecondaryProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
 import { WorldRenderCtx } from './context.ts';
 
 export function drawProjectile(

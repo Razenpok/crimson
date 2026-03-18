@@ -1,14 +1,14 @@
 // Port of crimson/world/runtime.py
 
-import type { AudioState } from '../../grim/audio.ts';
-import type { CrimsonConfig } from '../../grim/config.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import type { WebGLContext } from '../../grim/webgl.ts';
-import type { RenderFrame } from '../render/frame.ts';
-import { RtxRenderMode } from '../render/rtx/mode.ts';
-import * as viewport from '../render/world/viewport.ts';
-import { WorldRenderer } from '../render/world/renderer.ts';
+import type { AudioState } from '@grim/audio.ts';
+import type { CrimsonConfig } from '@grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import type { WebGLContext } from '@grim/webgl.ts';
+import type { RenderFrame } from '@crimson/render/frame.ts';
+import { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import * as viewport from '@crimson/render/world/viewport.ts';
+import { WorldRenderer } from '@crimson/render/world/renderer.ts';
 import { AudioBridge } from './audio-bridge.ts';
 import { RenderResources } from './render-resources.ts';
 import { SimWorldState } from './sim-world-state.ts';

@@ -1,7 +1,7 @@
 // Port of crimson/sim/world_defs.py
 
-import { CreatureTypeId } from '../creatures/spawn-ids.ts';
-import { ProjectileTemplateId } from '../projectiles/types.ts';
+import { CreatureTypeId } from '@crimson/creatures/spawn-ids.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 
 export interface CreatureAnimInfo {
   readonly base: number;

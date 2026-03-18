@@ -1,6 +1,6 @@
 // Port of crimson/projectiles/runtime/secondary_rules.py
 
-import { SecondaryProjectileTypeId } from '../types.ts';
+import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 
 export interface DetonationRule {
   readonly tag: 'detonation';

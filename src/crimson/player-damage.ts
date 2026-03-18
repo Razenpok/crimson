@@ -1,6 +1,6 @@
 // Port of crimson/player_damage.py — player damage intake helpers
 
-import { SfxId } from '../grim/sfx-map.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 import { f32 } from './math-parity.ts';
 import { PerkId } from './perks/ids.ts';
 import { perkActive } from './perks/helpers.ts';

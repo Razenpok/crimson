@@ -1,9 +1,9 @@
 // Port of crimson/bonuses/apply.py
 
-import type { Vec2 } from '../../grim/geom.ts';
-import { perkCountGet } from '../perks/helpers.ts';
-import { PerkId } from '../perks/ids.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
+import type { Vec2 } from '@grim/geom.ts';
+import { perkCountGet } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { BonusApplyHandler, CreatureState } from './apply-context.ts';
 import { BonusApplyCtx } from './apply-context.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';

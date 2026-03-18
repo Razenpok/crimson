@@ -1,10 +1,10 @@
 // Port of crimson/sim/session_builders.py
 
-import { GameMode } from '../game-modes.ts';
-import type { QuestLevel } from '../quests/level.ts';
-import type { SpawnEntry } from '../quests/types.ts';
-import { weaponAssignPlayer } from '../weapon-runtime/index.ts';
-import { WeaponId } from '../weapons.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import type { SpawnEntry } from '@crimson/quests/types.ts';
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import type { PlayerInput } from './input.ts';
 import {
   DeterministicSession,
@@ -21,20 +21,20 @@ import {
 } from './sessions.ts';
 
 // Tutorial and Typo runtime imports
-import { TutorialOverlayState, TutorialState, resetTutorialState } from '../tutorial/state.ts';
+import { TutorialOverlayState, TutorialState, resetTutorialState } from '@crimson/tutorial/state.ts';
 import {
   type TutorialWorldState,
   tutorialBeforeStep,
   tutorialInputTransform,
   tutorialPostStep,
-} from '../tutorial/runtime.ts';
-import { resetTypoState } from '../typo/state.ts';
+} from '@crimson/tutorial/runtime.ts';
+import { resetTypoState } from '@crimson/typo/state.ts';
 import {
   typoBeforeStep,
   typoInputTransform,
   typoMidStep,
   typoPostStep,
-} from '../typo/runtime.ts';
+} from '@crimson/typo/runtime.ts';
 
 // ---------------------------------------------------------------------------
 // Rush constants

@@ -1,8 +1,8 @@
 // Port of crimson/sim/bootstrap.py
 
-import type { CrandLike } from '../../grim/rand';
-import type { TerrainSlotTriplet } from '../terrain-slots';
-import { chooseUnlockTerrainSlots } from '../terrain-slots';
+import type { CrandLike } from '@grim/rand';
+import type { TerrainSlotTriplet } from '@crimson/terrain-slots';
+import { chooseUnlockTerrainSlots } from '@crimson/terrain-slots';
 
 const TERRAIN_RANDOM_PRELUDE_DRAWS = 3;
 const TERRAIN_DENSITY_BASE = 800;

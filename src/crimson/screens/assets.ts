@@ -1,7 +1,7 @@
 // Port of crimson/screens/assets.py
 
-import type { RuntimeResources } from '../../grim/assets.ts';
-import type { GameState } from '../game/types.ts';
+import type { RuntimeResources } from '@grim/assets.ts';
+import type { GameState } from '@crimson/game/types.ts';
 
 export function requireRuntimeResources(state: GameState): RuntimeResources {
   if (state.resources === null) {

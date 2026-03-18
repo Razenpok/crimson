@@ -1,7 +1,7 @@
 // Port of crimson/screens/transitions.py
 
-import type { WebGLContext } from '../../grim/webgl.ts';
-import type { GameState } from '../game/types.ts';
+import type { WebGLContext } from '@grim/webgl.ts';
+import type { GameState } from '@crimson/game/types.ts';
 
 export const SCREEN_FADE_OUT_RATE = 2.0;
 export const SCREEN_FADE_IN_RATE = 10.0;

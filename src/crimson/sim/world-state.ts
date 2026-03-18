@@ -1,18 +1,18 @@
 // Port of crimson/sim/world_state.py — WorldState class with step() method
 
-import { Vec2 } from '../../grim/geom.ts';
-import type { SfxId } from '../../grim/sfx-map.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { SfxId } from '@grim/sfx-map.ts';
 
-import { emitBonusPickupEffects } from '../bonuses/pickup-fx.ts';
-import { bonusUpdate, bonusUpdatePrePickupTimers } from '../bonuses/update.ts';
-import { type CameraShakeState, cameraShakeUpdate } from '../camera.ts';
-import { creatureAnimAdvancePhase } from '../creatures/anim.ts';
-import { creatureApplyDamageWithLethalFollowup } from '../creatures/damage.ts';
+import { emitBonusPickupEffects } from '@crimson/bonuses/pickup-fx.ts';
+import { bonusUpdate, bonusUpdatePrePickupTimers } from '@crimson/bonuses/update.ts';
+import { type CameraShakeState, cameraShakeUpdate } from '@crimson/camera.ts';
+import { creatureAnimAdvancePhase } from '@crimson/creatures/anim.ts';
+import { creatureApplyDamageWithLethalFollowup } from '@crimson/creatures/damage.ts';
 import {
   type CreatureDeath,
   CreaturePool,
   type SpawnEnv,
-} from '../creatures/runtime.ts';
+} from '@crimson/creatures/runtime.ts';
 import {
   CreatureAiMode,
   CreatureFlags,
@@ -20,14 +20,14 @@ import {
   buildSpawnPlan,
   resolveTint,
   tickSpawnSlot,
-} from '../creatures/spawn.ts';
-import type { FxQueue, FxQueueRotated } from '../effects.ts';
-import { GameMode } from '../game-modes.ts';
-import type { OwnerRef } from '../owner-ref.ts';
-import { perksUpdateEffects } from '../perks/runtime/effects.ts';
-import { PLAYER_DEATH_HOOKS, WORLD_DT_STEPS } from '../perks/runtime/manifest.ts';
-import { playerTakeProjectileDamage } from '../player-damage.ts';
-import type { ProjectileHit } from '../projectiles/types.ts';
+} from '@crimson/creatures/spawn.ts';
+import type { FxQueue, FxQueueRotated } from '@crimson/effects.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { OwnerRef } from '@crimson/owner-ref.ts';
+import { perksUpdateEffects } from '@crimson/perks/runtime/effects.ts';
+import { PLAYER_DEATH_HOOKS, WORLD_DT_STEPS } from '@crimson/perks/runtime/manifest.ts';
+import { playerTakeProjectileDamage } from '@crimson/player-damage.ts';
+import type { ProjectileHit } from '@crimson/projectiles/types.ts';
 import { PlayerInput } from './input.ts';
 import { normalizeInputFrame } from './input-frame.ts';
 import {
@@ -44,7 +44,7 @@ import {
   playerFrameDtAfterRoundtrip,
   survivalProgressionUpdate,
   survivalEnforceRewardWeaponGuard,
-} from '../gameplay.ts';
+} from '@crimson/gameplay.ts';
 
 // ---------------------------------------------------------------------------
 // WorldEvents

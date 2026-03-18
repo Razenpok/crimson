@@ -4,42 +4,42 @@
 // to the WebGL single-player port.  All LAN-related state is stubbed as no-ops
 // so that subclass call-sites compile without change.
 
-import { Vec2 } from '../../grim/geom.ts';
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type CrimsonConfig } from '../../grim/config.ts';
-import { type AudioState, audioUpdate, audioStopMusic } from '../../grim/audio.ts';
-import { type ConsoleState } from '../../grim/console.ts';
-import { type CrandLike } from '../../grim/rand.ts';
-import { type SmallFontData, measureSmallTextWidth } from '../../grim/fonts/small.ts';
-import { drawSmallText } from '../../grim/fonts/small.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { InputState } from '../../grim/input.ts';
-import { type GroundRenderer } from '../../grim/terrain-render.ts';
-import { type RuntimeResources } from '../../grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { type AudioState, audioUpdate, audioStopMusic } from '@grim/audio.ts';
+import { type ConsoleState } from '@grim/console.ts';
+import { type CrandLike } from '@grim/rand.ts';
+import { type SmallFontData, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { InputState } from '@grim/input.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { type RuntimeResources } from '@grim/assets.ts';
 
-import type { CreatureDeath, CreaturePool } from '../creatures/runtime.ts';
-import { GameMode } from '../game-modes.ts';
-import type { GameplayState } from '../sim/state-types.ts';
-import { LocalInputInterpreter, clearInputEdges } from '../local-input.ts';
-import { PerkId } from '../perks/ids.ts';
-import { perkCountGet } from '../perks/helpers.ts';
-import { perkSelectionOpenChoices } from '../perks/selection.ts';
-import { creatureFindInRadius } from '../perks/runtime/effects-context.ts';
-import { RtxRenderMode } from '../render/rtx/mode.ts';
-import { WorldRenderer } from '../render/world/renderer.ts';
-import { FixedStepClock } from '../sim/clock.ts';
+import type { CreatureDeath, CreaturePool } from '@crimson/creatures/runtime.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { GameplayState } from '@crimson/sim/state-types.ts';
+import { LocalInputInterpreter, clearInputEdges } from '@crimson/local-input.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkCountGet } from '@crimson/perks/helpers.ts';
+import { perkSelectionOpenChoices } from '@crimson/perks/selection.ts';
+import { creatureFindInRadius } from '@crimson/perks/runtime/effects-context.ts';
+import { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import { WorldRenderer } from '@crimson/render/world/renderer.ts';
+import { FixedStepClock } from '@crimson/sim/clock.ts';
 import {
   type PresentationTickOutput,
   applyPresentationOutputs,
   applySimMetadataTickResult,
-} from '../sim/batch-apply.ts';
-import { advanceTickRunnerFrame } from '../sim/frame-pump.ts';
+} from '@crimson/sim/batch-apply.ts';
+import { advanceTickRunnerFrame } from '@crimson/sim/frame-pump.ts';
 import {
   type LanFrameSample,
   type LanSyncCallbacks,
   type TickResult,
-} from '../sim/hooks.ts';
-import { PlayerInput } from '../sim/input.ts';
+} from '@crimson/sim/hooks.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
 import {
   type FrameContext,
   type GameCommand,
@@ -48,30 +48,30 @@ import {
   PerkMenuOpenCommand,
   PerkPickCommand,
   TickSupply,
-} from '../sim/input-providers.ts';
+} from '@crimson/sim/input-providers.ts';
 import {
   type PostApplyReaction,
   applyPostApplyReaction,
   buildPostApplyReaction,
-} from '../sim/presentation-reactions.ts';
-import type { DeterministicSession, DeterministicSessionTick } from '../sim/sessions.ts';
-import type { PlayerState } from '../sim/state-types.ts';
-import { TickBatchResult, TickRunner } from '../sim/tick-runner.ts';
-import type { WorldEvents } from '../sim/world-state.ts';
-import type { TerrainSlotTriplet } from '../terrain-slots.ts';
+} from '@crimson/sim/presentation-reactions.ts';
+import type { DeterministicSession, DeterministicSessionTick } from '@crimson/sim/sessions.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { TickBatchResult, TickRunner } from '@crimson/sim/tick-runner.ts';
+import type { WorldEvents } from '@crimson/sim/world-state.ts';
+import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
 import { shotsFromState, buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 import type { PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
-import { drawTargetHealthBar, HudState } from '../ui/hud.ts';
-import type { HighScoreRecord } from '../screens/results/game-over.ts';
-import { GameOverUi } from '../screens/results/game-over.ts';
-import type { GameState } from '../game/types.ts';
-import { WorldRuntime } from '../world/runtime.ts';
-import type { SimWorldState } from '../world/sim-world-state.ts';
-import type { RenderResources } from '../world/render-resources.ts';
-import type { AudioBridge } from '../world/audio-bridge.ts';
-import type { TerrainRuntime } from '../world/terrain-runtime.ts';
-import type { PresentationStepCommands } from '../sim/presentation-step.ts';
-import type { TerrainFxBatch } from '../sim/terrain-fx.ts';
+import { drawTargetHealthBar, HudState } from '@crimson/ui/hud.ts';
+import type { HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import { GameOverUi } from '@crimson/screens/results/game-over.ts';
+import type { GameState } from '@crimson/game/types.ts';
+import { WorldRuntime } from '@crimson/world/runtime.ts';
+import type { SimWorldState } from '@crimson/world/sim-world-state.ts';
+import type { RenderResources } from '@crimson/world/render-resources.ts';
+import type { AudioBridge } from '@crimson/world/audio-bridge.ts';
+import type { TerrainRuntime } from '@crimson/world/terrain-runtime.ts';
+import type { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
+import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 
 /** Replay is not applicable to WebGL port; stubs retained for structure. */
 interface ReplayRecorder {

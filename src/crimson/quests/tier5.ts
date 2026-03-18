@@ -1,7 +1,7 @@
-import { Vec2 } from '../../grim/geom.ts';
-import { SpawnId } from '../creatures/spawn-ids.ts';
-import { PerkId } from '../perks/ids.ts';
-import { WeaponId } from '../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import {
   centerPoint,
   ringPoints,

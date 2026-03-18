@@ -1,7 +1,7 @@
 // Port of crimson/bonuses/apply_context.py
 
-import type { Vec2 } from '../../grim/geom.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
+import type { Vec2 } from '@grim/geom.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { BonusHudState } from './hud.ts';
 import { timerRef } from './hud.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';

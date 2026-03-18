@@ -1,8 +1,8 @@
 // Port of crimson/weapon_runtime/fire_recipes.py
 
-import { ParticleStyleId } from '../effects.ts';
-import { ProjectileTemplateId, SecondaryProjectileTypeId } from '../projectiles/types.ts';
-import { WeaponId, projectileTypeIdForWeaponId } from '../weapons.ts';
+import { ParticleStyleId } from '@crimson/effects.ts';
+import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
+import { WeaponId, projectileTypeIdForWeaponId } from '@crimson/weapons.ts';
 
 // --- Pellet jitter rules ---
 

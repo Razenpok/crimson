@@ -1,11 +1,11 @@
 // Port of crimson/modes/components/perk_prompt_controller.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type RuntimeResources } from '../../../grim/assets.ts';
-import { type CrimsonConfig } from '../../../grim/config.ts';
-import { type Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { inputCodeIsDown, inputCodeIsPressed, inputPrimaryJustPressed } from '../../input-codes.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources } from '@grim/assets.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { type Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { inputCodeIsDown, inputCodeIsPressed, inputPrimaryJustPressed } from '@crimson/input-codes.ts';
 import { PerkPromptUi, PERK_PROMPT_MAX_TIMER_MS, type UiTextWidthFn } from './perk-prompt-ui.ts';
 
 export interface PerkMenuUiContext {

@@ -1,17 +1,17 @@
 // Port of crimson/screens/high_scores_view/main_panel.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { GameMode } from '../../game-modes.ts';
-import type { HighScoresRequest } from '../../game/types.ts';
-import type { QuestLevel } from '../../quests/level.ts';
-import { questLevelText, questLevelGlobalIndex } from '../../quests/level.ts';
-import { questByLevel } from '../../quests/index.ts';
-import { buttonDraw, buttonWidth } from '../../ui/perk-menu.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { HighScoresRequest } from '@crimson/game/types.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import { questLevelText, questLevelGlobalIndex } from '@crimson/quests/level.ts';
+import { questByLevel } from '@crimson/quests/index.ts';
+import { buttonDraw, buttonWidth } from '@crimson/ui/perk-menu.ts';
 import {
   HS_BACK_BUTTON_X,
   HS_BACK_BUTTON_Y,
@@ -25,7 +25,7 @@ import {
   HS_SCORE_FRAME_X,
   HS_SCORE_FRAME_Y,
   HS_TITLE_UNDERLINE_Y,
-} from '../high-scores-layout.ts';
+} from '@crimson/screens/high-scores-layout.ts';
 import { modeLabel } from './shared.ts';
 import type { HighScoresView } from './view.ts';
 

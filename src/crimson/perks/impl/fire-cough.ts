@@ -1,13 +1,13 @@
-import { Vec2 } from '../../../grim/geom.ts';
-import { RGBA } from '../../../grim/color.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import type { OwnerRef } from '../../owner-ref.ts';
-import { ProjectileTemplateId } from '../../projectiles/types.ts';
-import type { GameplayState, PlayerState } from "../../sim/state-types.ts";
-import { perkActive } from '../helpers.ts';
-import { PerkId } from '../ids.ts';
-import { RngCallerStatic } from '../../rng-caller-static.ts';
-import { ProjectileSpawnFn } from "../runtime/player-tick-context.js";
+import { Vec2 } from '@grim/geom.ts';
+import { RGBA } from '@grim/color.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import type { OwnerRef } from '@crimson/owner-ref.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import type { GameplayState, PlayerState } from "@crimson/sim/state-types.ts";
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import { ProjectileSpawnFn } from "@crimson/perks/runtime/player-tick-context.js";
 
 export interface FireCoughCtx {
   readonly state: GameplayState;

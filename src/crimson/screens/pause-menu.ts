@@ -1,16 +1,16 @@
 // Port of crimson/screens/pause_menu.py — Pause menu screen (standalone, not a panel subclass)
 
-import { Vec2, Rect } from '../../grim/geom.ts';
-import { type WebGLContext, BlendMode } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { audioPlaySfx, audioUpdate } from '../../grim/audio.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { fxDetailEnabled } from '../../grim/config.ts';
-import { InputState } from '../../grim/input.ts';
-import { drawMenuCursor } from '../ui/cursor.ts';
-import { menuWidescreenYShift } from '../ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '../ui/shadow.ts';
-import { type GameState } from '../game/types.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
+import { InputState } from '@grim/input.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import { type GameState } from '@crimson/game/types.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
 import {

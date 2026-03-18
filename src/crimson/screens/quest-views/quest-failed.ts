@@ -1,26 +1,26 @@
 // Port of crimson/screens/quest_views/quest_failed.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { GameMode } from '../../game-modes.ts';
-import type { QuestLevel } from '../../quests/level.ts';
-import { questByLevel } from '../../quests/index.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
-import { drawMenuCursor } from '../../ui/cursor.ts';
-import { menuWidescreenYShift } from '../../ui/layout.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import { questByLevel } from '@crimson/quests/index.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
-} from '../../ui/perk-menu.ts';
-import { drawScreenFade } from '../transitions.ts';
+} from '@crimson/ui/perk-menu.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import {
   QUEST_FAILED_BANNER_H,
   QUEST_FAILED_BANNER_W,

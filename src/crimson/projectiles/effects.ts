@@ -1,12 +1,12 @@
 // Port of crimson/projectiles/effects.py
 
-import { RGBA } from '../../grim/color.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { EffectPool } from '../effects.ts';
-import { EffectId } from '../effects-atlas.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { EffectPool } from '@crimson/effects.ts';
+import { EffectId } from '@crimson/effects-atlas.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { ProjectileTemplateId } from './types.ts';
 
 export { _spawnShrinkifierHitEffects as spawnShrinkifierHitEffects };

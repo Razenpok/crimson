@@ -1,7 +1,7 @@
 // Port of crimson/render/world/viewport.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { CrimsonConfig } from '../../../grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { CrimsonConfig } from '@grim/config.ts';
 
 export interface WorldViewportState {
   readonly worldSize: number;

@@ -2,7 +2,7 @@
 // Stubbed for WebGL2 — RTX beam shader functions return false (classic mode fallback).
 // The actual shader compilation can be implemented later.
 
-import { Vec2 } from '../../../grim/geom.ts';
+import { Vec2 } from '@grim/geom.ts';
 
 // Shader constants (kept for future shader implementation)
 export const SHADER_STAMP_ANALYTIC_RADIUS_SCALE = 16.0;

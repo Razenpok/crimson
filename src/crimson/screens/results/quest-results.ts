@@ -1,37 +1,37 @@
 // Port of crimson/screens/results/quest_results.py
 
-import { type WebGLContext, type GlTexture } from '../../../grim/webgl.ts';
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { type CrimsonConfig } from '../../../grim/config.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { type CrandLike } from '../../../grim/rand.ts';
-import { type QuestLevel, questLevelEqual } from '../../quests/level.ts';
+import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { type CrandLike } from '@grim/rand.ts';
+import { type QuestLevel, questLevelEqual } from '@crimson/quests/level.ts';
 import {
   type QuestFinalTime,
   QuestResultsBreakdownAnim,
   tickQuestResultsBreakdownAnim,
-} from '../../quests/results.ts';
-import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '../../weapons.ts';
-import { drawMenuCursor } from '../../ui/cursor.ts';
-import { formatOrdinal, formatTimeMmSs } from '../../ui/formatting.ts';
-import { menuWidescreenYShift, uiScale } from '../../ui/layout.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
+} from '@crimson/quests/results.ts';
+import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
+import { menuWidescreenYShift, uiScale } from '@crimson/ui/layout.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
   drawUiText,
-} from '../../ui/perk-menu.ts';
+} from '@crimson/ui/perk-menu.ts';
 import {
   flushTextInputEvents,
   gameplayControlsHeld,
   updateNameEntryText,
-} from '../../ui/text-input.ts';
+} from '@crimson/ui/text-input.ts';
 import {
   type HighScoreRecord,
   TABLE_MAX,

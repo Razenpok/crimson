@@ -1,6 +1,6 @@
 // Port of crimson/wire/float32_wire.py
 
-import { f32 } from '../math-parity.ts';
+import { f32 } from '@crimson/math-parity.ts';
 
 export function wireF32(value: number, field?: string): number {
   const narrowed = f32(value);

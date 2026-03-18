@@ -1,11 +1,11 @@
 // Port of demo_trial_overlay.py
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { clamp } from '../../grim/math.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { drawSmallText } from '../../grim/fonts/small.ts';
-import { DemoTrialOverlayInfo } from '../demo-trial.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
+import { DemoTrialOverlayInfo } from '@crimson/demo-trial.ts';
 import { UiButtonState, buttonDraw, buttonUpdate, buttonWidth } from './perk-menu.ts';
 import { drawMenuCursor } from './cursor.ts';
 

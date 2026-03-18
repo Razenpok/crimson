@@ -1,13 +1,13 @@
 // Port of crimson/render/world/bonuses.py
 
-import { TextureId, getTexture } from '../../../grim/assets.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { type GlTexture } from '../../../grim/webgl.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { BONUS_BY_ID, BonusId } from '../../bonuses/ids.ts';
-import { bonusFindAimHoverEntry, bonusLabelForEntry } from '../../bonuses/pool.ts';
-import { WEAPON_BY_ID, WeaponId } from '../../weapons.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { type GlTexture } from '@grim/webgl.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { BONUS_BY_ID, BonusId } from '@crimson/bonuses/ids.ts';
+import { bonusFindAimHoverEntry, bonusLabelForEntry } from '@crimson/bonuses/pool.ts';
+import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 

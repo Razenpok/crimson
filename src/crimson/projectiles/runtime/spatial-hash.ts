@@ -1,5 +1,5 @@
-import { Vec2 } from '../../../grim/geom.ts';
-import { CreatureStateLike } from '../../effects.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { CreatureStateLike } from '@crimson/effects.ts';
 
 const _SPATIAL_BUCKET_SIZE = 64.0;
 const _NATIVE_FIND_SIZE_SCALE = 0.14285715;

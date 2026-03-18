@@ -1,4 +1,4 @@
-import { f32 } from '../math-parity.ts';
+import { f32 } from '@crimson/math-parity.ts';
 
 export function ftolMsI32(dtSeconds: number): number {
   const dtF32 = f32(dtSeconds);

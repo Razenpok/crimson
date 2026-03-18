@@ -1,16 +1,16 @@
 // Port of crimson/screens/panels/databases_weapons.py — Unlocked Weapons Database view
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { type GameState } from '../../game/types.ts';
-import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } from '../../weapons.ts';
-import { buildWeaponAvailability, type WeaponAvailabilityStatus } from '../../weapon-runtime/availability.ts';
-import { allQuests } from '../../quests/index.ts';
-import { weaponsDbRightDetailXShift } from '../high-scores-layout.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { type GameState } from '@crimson/game/types.ts';
+import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { buildWeaponAvailability, type WeaponAvailabilityStatus } from '@crimson/weapon-runtime/availability.ts';
+import { allQuests } from '@crimson/quests/index.ts';
+import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
 type Color = [number, number, number, number];

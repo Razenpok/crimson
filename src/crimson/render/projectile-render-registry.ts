@@ -1,6 +1,6 @@
 // Port of crimson/render/projectile_render_registry.py
 
-import { ProjectileTemplateId } from '../projectiles/types.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 
 export interface PlasmaProjectileRenderConfig {
   readonly rgb: [number, number, number];

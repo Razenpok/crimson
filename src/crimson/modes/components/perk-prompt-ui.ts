@@ -1,10 +1,10 @@
 // Port of crimson/modes/components/perk_prompt_ui.py
 
-import { type WebGLContext, BlendMode } from '../../../grim/webgl.ts';
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type CrimsonConfig } from '../../../grim/config.ts';
-import { drawUiText } from '../../ui/perk-menu.ts';
+import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { drawUiText } from '@crimson/ui/perk-menu.ts';
 
 export const PERK_PROMPT_MAX_TIMER_MS = 200.0;
 const PERK_PROMPT_OUTSET_X = 50.0;

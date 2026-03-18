@@ -1,49 +1,49 @@
 // Port of crimson/modes/tutorial_mode.py
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { type AudioState } from '../../grim/audio.ts';
-import { type CrimsonConfig } from '../../grim/config.ts';
-import { type ConsoleState } from '../../grim/console.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { InputState } from '../../grim/input.ts';
-import { clamp } from '../../grim/math.ts';
-import { Crand } from '../../grim/rand.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type AudioState } from '@grim/audio.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { type ConsoleState } from '@grim/console.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
+import { clamp } from '@grim/math.ts';
+import { Crand } from '@grim/rand.ts';
 
-import { inputCodeIsDown, inputCodeIsPressed } from '../input-codes.ts';
-import { GameMode } from '../game-modes.ts';
+import { inputCodeIsDown, inputCodeIsPressed } from '@crimson/input-codes.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
 
-} from '../sim/sessions.ts';
-import { buildTutorialSession } from '../sim/session-builders.ts';
-import { advanceUnlockTerrain } from '../sim/bootstrap.ts';
-import { perkSelectionPreparedChoices } from '../perks/selection.ts';
-import { WeaponId } from '../weapons.ts';
-import { weaponAssignPlayer } from '../weapon-runtime/index.ts';
+} from '@crimson/sim/sessions.ts';
+import { buildTutorialSession } from '@crimson/sim/session-builders.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
+import { perkSelectionPreparedChoices } from '@crimson/perks/selection.ts';
+import { WeaponId } from '@crimson/weapons.ts';
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
 
-import { PlayerInput } from '../sim/input.ts';
-import { drawMenuCursor } from '../ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '../ui/hud.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import {
   type TutorialOverlayState,
   tutorialPromptPanelRect,
   drawTutorialOverlayPanels,
-} from '../ui/overlays/tutorial-run.ts';
+} from '@crimson/ui/overlays/tutorial-run.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
-} from '../ui/perk-menu.ts';
+} from '@crimson/ui/perk-menu.ts';
 
 import {
   BaseGameplayMode,
   type GameStatus,
 } from './base-gameplay-mode.ts';
 import { PerkMenuController, type PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
-import type { TutorialState } from '../tutorial/state.ts';
+import type { TutorialState } from '@crimson/tutorial/state.ts';
 
 // ---------------------------------------------------------------------------
 // Constants

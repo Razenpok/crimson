@@ -1,3 +1,3 @@
 // Port of crimson/render/pipeline.py
 
-export { RenderPipeline } from '../../grim/render-pipeline.ts';
+export { RenderPipeline } from '@grim/render-pipeline.ts';

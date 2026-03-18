@@ -1,8 +1,8 @@
 // crimson/perks/impl/reflex_boosted.py
 
-import type { PlayerState } from '../../sim/state-types.ts';
-import { perkActive } from '../helpers.ts';
-import { PerkId } from '../ids.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
 
 export function applyReflexBoostedDt(dt: number, players: PlayerState[]): number {
   // Apply Reflex Boosted dt scaling from perk effects.

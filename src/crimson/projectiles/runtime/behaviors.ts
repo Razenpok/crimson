@@ -1,26 +1,26 @@
 // Port of crimson/projectiles/runtime/behaviors.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import type { CrandLike } from '../../../grim/rand.ts';
-import type { SfxId } from '../../../grim/sfx-map.ts';
-import { CreatureDamageType } from '../../creatures/damage-types.ts';
-import { creatureLifecycleIsCollidable } from '../../creatures/lifecycle.ts';
-import { CreatureFlags } from '../../creatures/spawn-ids.ts';
-import type { EffectPool, CreatureStateLike } from '../../effects.ts';
-import { f32 } from '../../math-parity.ts';
-import { OwnerRef } from '../../owner-ref.ts';
-import { RngCallerStatic } from '../../rng-caller-static.ts';
-import { weaponEntryForProjectileTypeId } from '../../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import type { SfxId } from '@grim/sfx-map.ts';
+import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
+import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
+import { CreatureFlags } from '@crimson/creatures/spawn-ids.ts';
+import type { EffectPool, CreatureStateLike } from '@crimson/effects.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import {
   spawnIonHitEffects,
   spawnPlasmaCannonHitEffects,
   spawnShrinkifierHitEffects,
   spawnSplitterHitEffects,
-} from '../effects.ts';
+} from '@crimson/projectiles/effects.ts';
 import {
   Projectile,
   ProjectileTemplateId,
-} from '../types.ts';
+} from '@crimson/projectiles/types.ts';
 import { applyDamageToCreature, hitRadiusFor } from './collision.ts';
 
 export type CreatureStateForBehavior = CreatureStateLike;

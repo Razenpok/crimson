@@ -6,58 +6,58 @@
 // Networking (LAN lobby, lockstep, rollback, network sessions) is excluded;
 // all network-related paths are stubbed as no-ops.
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type View, ViewContext } from '../../grim/view.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { type CrandLike } from '../../grim/rand.ts';
-import { type AudioState, audioStopMusic } from '../../grim/audio.ts';
-import { type GroundRenderer } from '../../grim/terrain-render.ts';
-import { InputState } from '../../grim/input.ts';
-import { inputBeginFrame } from '../input-codes.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type View, ViewContext } from '@grim/view.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type CrandLike } from '@grim/rand.ts';
+import { type AudioState, audioStopMusic } from '@grim/audio.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { InputState } from '@grim/input.ts';
+import { inputBeginFrame } from '@crimson/input-codes.ts';
 
-import { GameMode } from '../game-modes.ts';
-import { type RtxRenderMode, cycleRtxRenderMode } from '../render/rtx/mode.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { type RtxRenderMode, cycleRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import { type Screen, type GameState, type PauseBackground } from './types.ts';
 import {
   type DemoTrialOverlayInfo,
   demoTrialOverlayInfo,
   tickDemoTrialTimers,
-} from '../demo-trial.ts';
-import { updateScreenFade } from '../screens/transitions.ts';
+} from '@crimson/demo-trial.ts';
+import { updateScreenFade } from '@crimson/screens/transitions.ts';
 
-import { BootView } from '../screens/boot.ts';
-import { DemoView } from '../demo.ts';
-import { MenuView, ensureMenuGround } from '../screens/menu.ts';
-import { HighScoresView } from '../screens/high-scores-view/view.ts';
-import { PauseMenuView } from '../screens/pause-menu.ts';
+import { BootView } from '@crimson/screens/boot.ts';
+import { DemoView } from '@crimson/demo.ts';
+import { MenuView, ensureMenuGround } from '@crimson/screens/menu.ts';
+import { HighScoresView } from '@crimson/screens/high-scores-view/view.ts';
+import { PauseMenuView } from '@crimson/screens/pause-menu.ts';
 
-import { PlayGameMenuView } from '../screens/panels/play-game.ts';
-import { OptionsMenuView } from '../screens/panels/options.ts';
-import { ControlsMenuView } from '../screens/panels/controls.ts';
-import { StatisticsMenuView } from '../screens/panels/stats.ts';
-import { UnlockedWeaponsDatabaseView } from '../screens/panels/databases-weapons.ts';
-import { UnlockedPerksDatabaseView } from '../screens/panels/databases-perks.ts';
-import { CreditsView } from '../screens/panels/credits.ts';
-import { AlienZooKeeperView } from '../screens/panels/alien-zookeeper.ts';
-import { ModsMenuView } from '../screens/panels/mods.ts';
-import { PanelMenuView } from '../screens/panels/base.ts';
+import { PlayGameMenuView } from '@crimson/screens/panels/play-game.ts';
+import { OptionsMenuView } from '@crimson/screens/panels/options.ts';
+import { ControlsMenuView } from '@crimson/screens/panels/controls.ts';
+import { StatisticsMenuView } from '@crimson/screens/panels/stats.ts';
+import { UnlockedWeaponsDatabaseView } from '@crimson/screens/panels/databases-weapons.ts';
+import { UnlockedPerksDatabaseView } from '@crimson/screens/panels/databases-perks.ts';
+import { CreditsView } from '@crimson/screens/panels/credits.ts';
+import { AlienZooKeeperView } from '@crimson/screens/panels/alien-zookeeper.ts';
+import { ModsMenuView } from '@crimson/screens/panels/mods.ts';
+import { PanelMenuView } from '@crimson/screens/panels/base.ts';
 
-import { QuestsMenuView } from '../screens/quest-views/quests-menu.ts';
-import { QuestResultsView } from '../screens/quest-views/quest-results.ts';
-import { QuestFailedView } from '../screens/quest-views/quest-failed.ts';
-import { EndNoteView } from '../screens/quest-views/end-note.ts';
+import { QuestsMenuView } from '@crimson/screens/quest-views/quests-menu.ts';
+import { QuestResultsView } from '@crimson/screens/quest-views/quest-results.ts';
+import { QuestFailedView } from '@crimson/screens/quest-views/quest-failed.ts';
+import { EndNoteView } from '@crimson/screens/quest-views/end-note.ts';
 
-import { type QuestLevel } from '../quests/level.ts';
-import { type GameStatus } from '../modes/base-gameplay-mode.ts';
-import { QuestMode } from '../modes/quest-mode.ts';
-import { SurvivalMode } from '../modes/survival-mode.ts';
-import { RushMode } from '../modes/rush-mode.ts';
-import { TypoShooterMode } from '../modes/typo-mode.ts';
-import { TutorialMode } from '../modes/tutorial-mode.ts';
+import { type QuestLevel } from '@crimson/quests/level.ts';
+import { type GameStatus } from '@crimson/modes/base-gameplay-mode.ts';
+import { QuestMode } from '@crimson/modes/quest-mode.ts';
+import { SurvivalMode } from '@crimson/modes/survival-mode.ts';
+import { RushMode } from '@crimson/modes/rush-mode.ts';
+import { TypoShooterMode } from '@crimson/modes/typo-mode.ts';
+import { TutorialMode } from '@crimson/modes/tutorial-mode.ts';
 
-import { DEMO_PURCHASE_URL } from '../demo.ts';
-import { DemoTrialOverlayUi } from '../ui/demo-trial-overlay.ts';
-import { WorldRuntime } from '../world/runtime.ts';
+import { DEMO_PURCHASE_URL } from '@crimson/demo.ts';
+import { DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
+import { WorldRuntime } from '@crimson/world/runtime.ts';
 
 import { type GameStatusPersist } from './runtime.ts';
 

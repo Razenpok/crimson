@@ -1,11 +1,11 @@
 // Port of crimson/screens/boot.py — Boot/splash screen with company logos
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '../../grim/assets.ts';
-import { audioPlayMusic, audioStopMusic, audioUpdate, initAudioState } from '../../grim/audio.ts';
-import { queueTrack } from '../../grim/music.ts';
-import { InputState } from '../../grim/input.ts';
-import { type GameState } from '../game/types.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '@grim/assets.ts';
+import { audioPlayMusic, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
+import { queueTrack } from '@grim/music.ts';
+import { InputState } from '@grim/input.ts';
+import { type GameState } from '@crimson/game/types.ts';
 
 // ---------------------------------------------------------------------------
 // Constants

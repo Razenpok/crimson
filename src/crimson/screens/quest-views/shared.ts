@@ -1,8 +1,8 @@
 // Port of crimson/screens/quest_views/shared.py
 
-import type { QuestLevel } from '../../quests/level.ts';
-import { questLevelFromGlobalIndex, questLevelGlobalIndex, QUEST_COUNT } from '../../quests/level.ts';
-import type { CrimsonConfig } from '../../../grim/config.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import { questLevelFromGlobalIndex, questLevelGlobalIndex, QUEST_COUNT } from '@crimson/quests/level.ts';
+import type { CrimsonConfig } from '@grim/config.ts';
 
 // ---------------------------------------------------------------------------
 // Quest menu layout constants

@@ -1,28 +1,28 @@
 // Port of crimson/projectiles/runtime/secondary_pool.py
 
-import { RGBA } from '../../../grim/color.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import type { CrandLike } from '../../../grim/rand.ts';
-import { Crand } from '../../../grim/rand.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { nativeFindSizeMargin } from '../../collision-math.ts';
-import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '../../creatures/lifecycle.ts';
-import type { EffectPool, FxQueue, SpriteEffectPool } from '../../effects.ts';
-import type { CreatureStateLike } from '../../effects.ts';
-import { EffectId } from '../../effects-atlas.ts';
-import { f32 } from '../../math-parity.ts';
-import { OwnerRef } from '../../owner-ref.ts';
-import { RngCallerStatic } from '../../rng-caller-static.ts';
-import type { GameplayState } from '../../sim/state-types.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { Crand } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
+import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
+import type { EffectPool, FxQueue, SpriteEffectPool } from '@crimson/effects.ts';
+import type { CreatureStateLike } from '@crimson/effects.ts';
+import { EffectId } from '@crimson/effects-atlas.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { GameplayState } from '@crimson/sim/state-types.ts';
 import {
   SECONDARY_PROJECTILE_POOL_SIZE,
   SecondaryProjectileTypeId,
   SecondaryProjectile,
-} from '../types.ts';
+} from '@crimson/projectiles/types.ts';
 import type {
   CreatureDamageApplier,
   SecondaryDetonationKillHandler,
-} from '../types.ts';
+} from '@crimson/projectiles/types.ts';
 
 const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
   [

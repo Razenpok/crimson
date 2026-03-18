@@ -1,18 +1,18 @@
 // Port of crimson/render/world/draw.py — main draw orchestrator
 
-import { RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { RGBA } from '../../../grim/color.ts';
-import { fxDetailEnabled } from '../../../grim/config.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { type GlTexture, BlendMode } from '../../../grim/webgl.ts';
-import { CreatureFlags, CreatureTypeId } from '../../creatures/spawn.ts';
-import type { CreatureState } from '../../creatures/runtime.ts';
-import { EffectId, effectSrcRect } from '../../effects-atlas.ts';
-import { PerkId } from '../../perks/ids.ts';
-import { perkActive } from '../../perks/helpers.ts';
-import type { PlayerState } from '../../sim/state-types.ts';
-import { CREATURE_ANIM, CREATURE_ASSET } from '../../sim/world-defs.ts';
+import { RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { RGBA } from '@grim/color.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { type GlTexture, BlendMode } from '@grim/webgl.ts';
+import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import { EffectId, effectSrcRect } from '@crimson/effects-atlas.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { CREATURE_ANIM, CREATURE_ASSET } from '@crimson/sim/world-defs.ts';
 import { drawBonusHoverLabels, drawBonusPickups } from './bonuses.ts';
 import { monsterVisionFadeAlpha, RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
@@ -24,7 +24,7 @@ import { drawProjectile, drawSecondaryProjectile, drawSharpshooterLaserSight } f
 import { drawPlayerTrooperSprite } from './trooper.ts';
 import * as viewport from './viewport.ts';
 
-import { drawAimCursor } from '../../ui/cursor.ts';
+import { drawAimCursor } from '@crimson/ui/cursor.ts';
 
 const CREATURE_TEXTURE_IDS: Record<string, TextureId> = {
   alien: TextureId.ALIEN,

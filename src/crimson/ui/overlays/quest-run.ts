@@ -1,8 +1,8 @@
 // Port of crimson/ui/overlays/quest_run.py
 
-import { type GlTexture, type WebGLContext } from '../../../grim/webgl.ts';
-import { type GrimMonoFont } from '../../../grim/fonts/grim-mono.ts';
-import { clamp } from '../../../grim/math.ts';
+import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
+import { type GrimMonoFont } from '@grim/fonts/grim-mono.ts';
+import { clamp } from '@grim/math.ts';
 import { drawQuestTitleOverlay } from './quest-title.ts';
 
 const QUEST_TITLE_FADE_IN_MS = 500.0;

@@ -1,17 +1,17 @@
 // Port of crimson/typo/runtime.py — Typ'o'Shooter runtime hooks
 
-import { Vec2 } from '../../grim/geom.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { CreatureTypeId, CreatureAiMode, CreatureFlags } from '../creatures/spawn-ids.ts';
-import type { CreatureInit } from '../creatures/runtime.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import { PlayerInput } from '../sim/input.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { CreatureTypeId, CreatureAiMode, CreatureFlags } from '@crimson/creatures/spawn-ids.ts';
+import type { CreatureInit } from '@crimson/creatures/runtime.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
 import {
   TypoCharCommand,
   TypoBackspaceCommand,
   TypoSubmitCommand,
-} from '../sim/input-providers.ts';
-import type { WorldState, MidStepContext, PostStepContext } from '../sim/sessions.ts';
+} from '@crimson/sim/input-providers.ts';
+import type { WorldState, MidStepContext, PostStepContext } from '@crimson/sim/sessions.ts';
 import { enforceTypoPlayerFrame } from './player.ts';
 import { tickTypoSpawns } from './spawns.ts';
 

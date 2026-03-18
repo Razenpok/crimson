@@ -1,11 +1,11 @@
 // Port of crimson/bonuses/fire_bullets.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import { f32 } from '../math-parity.ts';
-import type { ProjectileHit } from '../projectiles/types.ts';
-import type { FxQueue } from '../effects.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import type { ProjectileHit } from '@crimson/projectiles/types.ts';
+import type { FxQueue } from '@crimson/effects.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 import { bonusApplySeconds } from './apply-context.ts';
 

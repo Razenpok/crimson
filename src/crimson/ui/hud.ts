@@ -1,15 +1,15 @@
 // Port of crimson/ui/hud.py — HUD overlay rendering
 
-import { type WebGLContext, type GlTexture } from '../../grim/webgl.ts';
-import { type RuntimeResources, type SmallFontData, TextureId, getTexture } from '../../grim/assets.ts';
-import { RGBA } from '../../grim/color.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { drawSmallText } from '../../grim/fonts/small.ts';
-import { type BonusHudState } from '../bonuses/hud.ts';
-import { GameMode } from '../game-modes.ts';
-import { survivalLevelThreshold } from '../gameplay.ts';
-import { type PlayerState } from '../sim/state-types.ts';
-import { WEAPON_BY_ID, WeaponId, weaponDisplayName } from '../weapons.ts';
+import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
+import { type RuntimeResources, type SmallFontData, TextureId, getTexture } from '@grim/assets.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
+import { type BonusHudState } from '@crimson/bonuses/hud.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { survivalLevelThreshold } from '@crimson/gameplay.ts';
+import { type PlayerState } from '@crimson/sim/state-types.ts';
+import { WEAPON_BY_ID, WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
 
 // ---------------------------------------------------------------------------
 // Color constants (0..1 float tuples)

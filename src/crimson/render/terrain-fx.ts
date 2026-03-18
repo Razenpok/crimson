@@ -1,9 +1,9 @@
 // Port of crimson/render/terrain_fx.py
 
-import { GlTexture } from '../../grim/webgl.ts';
-import { GroundRenderer, GroundDecal, GroundCorpseDecal } from '../../grim/terrain-render.ts';
-import { effectSrcRect } from '../effects-atlas.ts';
-import { TerrainFxBatch } from '../sim/terrain-fx.ts';
+import { GlTexture } from '@grim/webgl.ts';
+import { GroundRenderer, GroundDecal, GroundCorpseDecal } from '@grim/terrain-render.ts';
+import { effectSrcRect } from '@crimson/effects-atlas.ts';
+import { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 
 export interface FxQueueTextures {
   readonly particles: GlTexture;

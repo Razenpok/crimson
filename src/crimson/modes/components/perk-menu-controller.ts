@@ -1,17 +1,17 @@
 // Port of crimson/modes/components/perk_menu_controller.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { clamp } from '../../../grim/math.ts';
-import { InputState } from '../../../grim/input.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { PerkId, perkDisplayName, perkDisplayDescription } from '../../perks/ids.ts';
-import { type PlayerState } from '../../sim/state-types.ts';
-import { uiOrigin, uiScale } from '../../ui/layout.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { clamp } from '@grim/math.ts';
+import { InputState } from '@grim/input.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { PerkId, perkDisplayName, perkDisplayDescription } from '@crimson/perks/ids.ts';
+import { type PlayerState } from '@crimson/sim/state-types.ts';
+import { uiOrigin, uiScale } from '@crimson/ui/layout.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import {
   PERK_MENU_TRANSITION_MS,
   PerkMenuLayout,
@@ -24,7 +24,7 @@ import {
   menuItemHitRect,
   perkMenuComputeLayout,
   perkMenuPanelSlideX,
-} from '../../ui/perk-menu.ts';
+} from '@crimson/ui/perk-menu.ts';
 
 export type PlaySfxFn = (sfxId: SfxId) => void;
 export type OnCloseFn = () => void;

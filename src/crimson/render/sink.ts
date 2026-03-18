@@ -1,6 +1,6 @@
 // Port of crimson/render/sink.py
 
-import { type RenderSink, WindowSink } from '../../grim/render-pipeline.ts';
+import { type RenderSink, WindowSink } from '@grim/render-pipeline.ts';
 
 export { type RenderSink, WindowSink };
 

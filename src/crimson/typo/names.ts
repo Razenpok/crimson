@@ -1,7 +1,7 @@
 // Port of crimson/typo/names.py — creature name generation and table
 
-import type { CrandLike } from '../../grim/rand.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 
 export const NAME_MAX_CHARS = 16;
 

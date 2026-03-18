@@ -1,7 +1,7 @@
 // Port of crimson/camera.py — Camera shake logic
 
-import { Vec2 } from '../grim/geom.ts';
-import { type CrandLike } from '../grim/rand.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type CrandLike } from '@grim/rand.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
 
 export interface CameraShakeState {

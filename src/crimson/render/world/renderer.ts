@@ -1,9 +1,9 @@
 // Port of crimson/render/world/renderer.py
 
-import { CrimsonConfig } from '../../../grim/config.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import type { RenderFrame } from '../frame.ts';
+import { CrimsonConfig } from '@grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import type { RenderFrame } from '@crimson/render/frame.ts';
 import * as viewport from './viewport.ts';
 import { buildWorldRenderCtx } from './context.ts';
 import { drawWorld } from './draw.ts';

@@ -1,7 +1,7 @@
 // Port of crimson/ui/overlays/tutorial_run.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2 } from '../../../grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
 
 export interface TutorialOverlayState {
   promptText: string;

@@ -1,30 +1,30 @@
 // Port of crimson/perks/runtime/manifest.py
 
-import type { PerkId } from '../ids.ts';
-import { HOOKS as AMMO_MANIAC_HOOKS } from '../impl/ammo-maniac.ts';
-import { HOOKS as BANDAGE_HOOKS } from '../impl/bandage.ts';
-import { HOOKS as BREATHING_ROOM_HOOKS } from '../impl/breathing-room.ts';
-import { HOOKS as DEATH_CLOCK_HOOKS } from '../impl/death-clock.ts';
-import { HOOKS as EVIL_EYES_HOOKS } from '../impl/evil-eyes-effect.ts';
-import { HOOKS as FATAL_LOTTERY_HOOKS } from '../impl/fatal-lottery.ts';
-import { FINAL_REVENGE_HOOKS } from '../impl/final-revenge.ts';
-import { FIRE_COUGH_HOOKS } from '../impl/fire-cough.ts';
-import { HOOKS as GRIM_DEAL_HOOKS } from '../impl/grim-deal.ts';
-import { HOT_TEMPERED_HOOKS } from '../impl/hot-tempered.ts';
-import { HOOKS as INFERNAL_CONTRACT_HOOKS } from '../impl/infernal-contract.ts';
-import { HOOKS as INSTANT_WINNER_HOOKS } from '../impl/instant-winner.ts';
-import { JINXED_HOOKS } from '../impl/jinxed-effect.ts';
-import { HOOKS as LEAN_MEAN_EXP_MACHINE_HOOKS } from '../impl/lean-mean-exp-machine-effect.ts';
-import { HOOKS as LIFELINE_50_50_HOOKS } from '../impl/lifeline-50-50.ts';
-import { LIVING_FORTRESS_HOOKS } from '../impl/living-fortress.ts';
-import { MAN_BOMB_HOOKS } from '../impl/man-bomb.ts';
-import { HOOKS as MY_FAVOURITE_WEAPON_HOOKS } from '../impl/my-favourite-weapon.ts';
-import { HOOKS as PLAGUEBEARER_HOOKS } from '../impl/plaguebearer.ts';
-import { PYROKINETIC_HOOKS } from '../impl/pyrokinetic-effect.ts';
-import { RANDOM_WEAPON_HOOKS } from '../impl/random-weapon.ts';
-import { REFLEX_BOOSTED_HOOKS } from '../impl/reflex-boosted.ts';
-import { REGENERATION_HOOKS } from '../impl/regeneration-effect.ts';
-import { THICK_SKINNED_HOOKS } from '../impl/thick-skinned.ts';
+import type { PerkId } from '@crimson/perks/ids.ts';
+import { HOOKS as AMMO_MANIAC_HOOKS } from '@crimson/perks/impl/ammo-maniac.ts';
+import { HOOKS as BANDAGE_HOOKS } from '@crimson/perks/impl/bandage.ts';
+import { HOOKS as BREATHING_ROOM_HOOKS } from '@crimson/perks/impl/breathing-room.ts';
+import { HOOKS as DEATH_CLOCK_HOOKS } from '@crimson/perks/impl/death-clock.ts';
+import { HOOKS as EVIL_EYES_HOOKS } from '@crimson/perks/impl/evil-eyes-effect.ts';
+import { HOOKS as FATAL_LOTTERY_HOOKS } from '@crimson/perks/impl/fatal-lottery.ts';
+import { FINAL_REVENGE_HOOKS } from '@crimson/perks/impl/final-revenge.ts';
+import { FIRE_COUGH_HOOKS } from '@crimson/perks/impl/fire-cough.ts';
+import { HOOKS as GRIM_DEAL_HOOKS } from '@crimson/perks/impl/grim-deal.ts';
+import { HOT_TEMPERED_HOOKS } from '@crimson/perks/impl/hot-tempered.ts';
+import { HOOKS as INFERNAL_CONTRACT_HOOKS } from '@crimson/perks/impl/infernal-contract.ts';
+import { HOOKS as INSTANT_WINNER_HOOKS } from '@crimson/perks/impl/instant-winner.ts';
+import { JINXED_HOOKS } from '@crimson/perks/impl/jinxed-effect.ts';
+import { HOOKS as LEAN_MEAN_EXP_MACHINE_HOOKS } from '@crimson/perks/impl/lean-mean-exp-machine-effect.ts';
+import { HOOKS as LIFELINE_50_50_HOOKS } from '@crimson/perks/impl/lifeline-50-50.ts';
+import { LIVING_FORTRESS_HOOKS } from '@crimson/perks/impl/living-fortress.ts';
+import { MAN_BOMB_HOOKS } from '@crimson/perks/impl/man-bomb.ts';
+import { HOOKS as MY_FAVOURITE_WEAPON_HOOKS } from '@crimson/perks/impl/my-favourite-weapon.ts';
+import { HOOKS as PLAGUEBEARER_HOOKS } from '@crimson/perks/impl/plaguebearer.ts';
+import { PYROKINETIC_HOOKS } from '@crimson/perks/impl/pyrokinetic-effect.ts';
+import { RANDOM_WEAPON_HOOKS } from '@crimson/perks/impl/random-weapon.ts';
+import { REFLEX_BOOSTED_HOOKS } from '@crimson/perks/impl/reflex-boosted.ts';
+import { REGENERATION_HOOKS } from '@crimson/perks/impl/regeneration-effect.ts';
+import { THICK_SKINNED_HOOKS } from '@crimson/perks/impl/thick-skinned.ts';
 import type { PerkApplyHandler } from './apply-context.ts';
 import type {
   PerkHooks,

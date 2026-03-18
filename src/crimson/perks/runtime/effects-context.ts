@@ -1,11 +1,11 @@
 // Port of crimson/perks/runtime/effects_context.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { nativeFindSizeMargin } from '../../collision-math.ts';
-import type { CreatureState } from '../../creatures/runtime.ts';
-import { creatureLifecycleIsCollidable } from '../../creatures/lifecycle.ts';
-import type { FxQueue } from '../../effects.ts';
-import type { GameplayState, PlayerState } from '../../sim/state-types.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
+import type { FxQueue } from '@crimson/effects.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 
 export function creatureFindInRadius(
   creatures: readonly CreatureState[],

@@ -1,7 +1,7 @@
-import { perkActive } from "../helpers.ts";
-import { PerkId } from "../ids.ts";
-import { RngCallerStatic } from "../../rng-caller-static.ts";
-import type { PerksUpdateEffectsCtx } from "../runtime/effects-context.ts";
+import { perkActive } from "@crimson/perks/helpers.ts";
+import { PerkId } from "@crimson/perks/ids.ts";
+import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
+import type { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.ts";
 
 export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
   if (ctx.creatures === null) {

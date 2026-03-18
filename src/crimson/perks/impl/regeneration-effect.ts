@@ -1,8 +1,8 @@
-import type { CrandLike } from '../../../grim/rand.ts';
-import type { PlayerState } from '../../sim/state-types.ts';
-import { perkActive } from '../helpers.ts';
-import { PerkId } from '../ids.ts';
-import { RngCallerStatic } from '../../rng-caller-static.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 
 export interface RegenerationStateLike {
   preserveBugs: boolean;

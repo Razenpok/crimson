@@ -1,4 +1,4 @@
-import { WebGLContext, GlTexture } from '../../grim/webgl.ts';
+import { WebGLContext, GlTexture } from '@grim/webgl.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from './shadow.ts';
 
 const MENU_PANEL_INSET = 1.0;

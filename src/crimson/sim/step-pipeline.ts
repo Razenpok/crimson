@@ -1,7 +1,7 @@
 // Port of crimson/sim/step_pipeline.py
 
-import { SfxId } from '../../grim/sfx-map.ts';
-import { f32 } from '../math-parity.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { f32 } from '@crimson/math-parity.ts';
 import { PresentationStepCommands } from './presentation-step.ts';
 import { TerrainFxBatch, EMPTY_TERRAIN_FX_BATCH } from './terrain-fx.ts';
 import { FrameTiming } from './timing.ts';

@@ -1,8 +1,8 @@
 // Port of crimson/ui/overlays/quest_title.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { type GrimMonoFont, drawGrimMonoText } from '../../../grim/fonts/grim-mono.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type GrimMonoFont, drawGrimMonoText } from '@grim/fonts/grim-mono.ts';
 
 const QUEST_TITLE_ALPHA = 1.0;
 const QUEST_NUMBER_ALPHA_RATIO = 0.5;

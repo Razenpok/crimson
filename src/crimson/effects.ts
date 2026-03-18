@@ -1,10 +1,10 @@
 // Port of crimson/effects.py — particle, sprite effect, and effect pools + FX queues
 
-import { RGBA } from '../grim/color.ts';
-import { Vec2 } from '../grim/geom.ts';
-import { clamp } from '../grim/math.ts';
-import type { CallerStatic, CrandLike } from '../grim/rand.ts';
-import { Crand } from '../grim/rand.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import type { CallerStatic, CrandLike } from '@grim/rand.ts';
+import { Crand } from '@grim/rand.ts';
 import { creatureLifecycleIsCollidable } from './creatures/lifecycle.ts';
 import { EffectId } from './effects-atlas.ts';
 import { f32 } from './math-parity.ts';

@@ -1,7 +1,7 @@
 // Port of crimson/projectiles/types.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { OwnerRef } from '../owner-ref.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
 
 export const MAIN_PROJECTILE_POOL_SIZE = 0x60;
 export const SECONDARY_PROJECTILE_POOL_SIZE = 0x40;

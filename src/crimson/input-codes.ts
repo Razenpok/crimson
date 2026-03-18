@@ -1,6 +1,6 @@
 // Port of crimson/input_codes.py — simplified for WebGL (DOM KeyboardEvent.keyCode)
 
-import { InputState } from '../grim/input.ts';
+import { InputState } from '@grim/input.ts';
 
 export const INPUT_CODE_UNBOUND = 0x17E;
 const AXIS_DEADZONE = 0.2;

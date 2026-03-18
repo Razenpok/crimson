@@ -1,5 +1,5 @@
-import { Vec2 } from '../../grim/geom.ts';
-import type { SpawnId } from '../creatures/spawn-ids.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
 import type { SpawnEntry } from './types.ts';
 
 export interface EdgePoints {

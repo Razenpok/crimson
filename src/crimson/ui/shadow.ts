@@ -1,6 +1,6 @@
 // Port of crimson/ui/shadow.py
 
-import { WebGLContext, GlTexture, BlendMode } from '../../grim/webgl.ts';
+import { WebGLContext, GlTexture, BlendMode } from '@grim/webgl.ts';
 
 // ui_element_render (0x446c40): shadow pass uses offset (7, 7), tint 0x44444444, and
 // blend factors (src=ZERO, dst=ONE_MINUS_SRC_ALPHA).

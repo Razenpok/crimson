@@ -1,6 +1,6 @@
 // Port of crimson/bonuses/weapon_power_up.py
 
-import { f32 } from '../math-parity.ts';
+import { f32 } from '@crimson/math-parity.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyWeaponPowerUp(ctx: BonusApplyCtx): void {

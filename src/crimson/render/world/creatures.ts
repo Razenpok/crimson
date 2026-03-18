@@ -1,11 +1,11 @@
 // Port of crimson/render/world/creatures.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { type GlTexture } from '../../../grim/webgl.ts';
-import { creatureAnimSelectFrame } from '../../creatures/anim.ts';
-import { CreatureFlags, CreatureTypeId } from '../../creatures/spawn.ts';
-import { CREATURE_ANIM } from '../../sim/world-defs.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { type GlTexture } from '@grim/webgl.ts';
+import { creatureAnimSelectFrame } from '@crimson/creatures/anim.ts';
+import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
+import { CREATURE_ANIM } from '@crimson/sim/world-defs.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 

@@ -1,13 +1,13 @@
 // Port of crimson/creatures/runtime.py — creature runtime pool
 
-import { RGBA } from '../../grim/color.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import { Crand } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { Crand } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 
-import type { BonusId } from '../bonuses/ids.ts';
-import type { EffectPool, FxQueue, FxQueueRotated, CreatureStateLike } from '../effects.ts';
+import type { BonusId } from '@crimson/bonuses/ids.ts';
+import type { EffectPool, FxQueue, FxQueueRotated, CreatureStateLike } from '@crimson/effects.ts';
 import {
   NATIVE_HALF_PI,
   NATIVE_PI,
@@ -17,22 +17,22 @@ import {
   f32Vec2,
   headingAddPiF32,
   headingToDirectionF32,
-} from '../math-parity.ts';
-import { OwnerRef } from '../owner-ref.ts';
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import { playerTakeDamage } from '../player-damage.ts';
-import { ProjectilePool } from '../projectiles/runtime/projectile-pool.ts';
-import { ProjectileTemplateId } from '../projectiles/types.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+} from '@crimson/math-parity.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { playerTakeDamage } from '@crimson/player-damage.ts';
+import { ProjectilePool } from '@crimson/projectiles/runtime/projectile-pool.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import {
   awardExperience as _gameplayAwardExperience,
   awardExperienceFromReward as _gameplayAwardExperienceFromReward,
   survivalRecordRecentDeath as _gameplaySurvivalRecordRecentDeath,
-} from '../gameplay.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
-import { weaponEntryForProjectileTypeId } from '../weapons.ts';
-import { applyFinalRevengeOnPlayerDeath } from '../perks/impl/final-revenge.ts';
+} from '@crimson/gameplay.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
+import { applyFinalRevengeOnPlayerDeath } from '@crimson/perks/impl/final-revenge.ts';
 import { creatureAi7TickLinkTimer, creatureAiUpdateTarget } from './ai.ts';
 import { CreatureDamageType } from './damage-types.ts';
 import { creatureApplyDamageWithLethalFollowup } from './damage.ts';

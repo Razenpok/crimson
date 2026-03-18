@@ -1,10 +1,10 @@
 // Port of crimson/weapon_runtime/spawn.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { OwnerRef } from '../owner-ref.ts';
-import { ProjectileTemplateId } from '../projectiles/types.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
-import { weaponEntryForProjectileTypeId } from '../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 
 export function ownerRefForPlayer(playerIndex: number): OwnerRef {
   return OwnerRef.fromPlayer(playerIndex | 0);

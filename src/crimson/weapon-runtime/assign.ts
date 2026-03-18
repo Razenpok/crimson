@@ -1,11 +1,11 @@
 // Port of crimson/weapon_runtime/assign.py
 
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
-import { WeaponSlot } from '../sim/state-types.ts';
-import { WEAPON_BY_ID, WeaponId } from '../weapons.ts';
-import type { Weapon } from '../weapons.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { WeaponSlot } from '@crimson/sim/state-types.ts';
+import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
+import type { Weapon } from '@crimson/weapons.ts';
 
 export function weaponEntry(weaponId: WeaponId): Weapon {
   const entry = WEAPON_BY_ID.get(weaponId);

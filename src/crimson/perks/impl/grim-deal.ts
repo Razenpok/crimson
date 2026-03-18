@@ -1,8 +1,8 @@
 // Port of crimson/perks/impl/grim_deal.py
 
-import { PerkId } from '../ids.ts';
-import type { PerkApplyCtx } from '../runtime/apply-context.ts';
-import type { PerkHooks } from '../runtime/hook-types.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyGrimDeal(ctx: PerkApplyCtx): void {
   ctx.owner.health = -1.0;

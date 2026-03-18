@@ -1,9 +1,9 @@
 // Port of crimson/perks/impl/lean_mean_exp_machine_effect.py
 
-import { perkCountGet } from '../helpers.ts';
-import { PerkId } from '../ids.ts';
-import type { PerksUpdateEffectsCtx } from '../runtime/effects-context.ts';
-import type { PerkHooks } from '../runtime/hook-types.ts';
+import { perkCountGet } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function updateLeanMeanExpMachine(ctx: PerksUpdateEffectsCtx): void {
   ctx.state.leanMeanExpTimer -= ctx.dt;

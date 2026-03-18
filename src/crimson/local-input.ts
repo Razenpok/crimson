@@ -1,12 +1,12 @@
 // Port of crimson/local_input.py — local input interpretation for players
 
-import { Vec2 } from '../grim/geom.ts';
+import { Vec2 } from '@grim/geom.ts';
 import {
   AimScheme,
   MovementControlType,
   type CrimsonConfig,
   type CrimsonPlayerControls,
-} from '../grim/config.ts';
+} from '@grim/config.ts';
 import {
   inputCodeIsDown,
   inputCodeIsPressed,

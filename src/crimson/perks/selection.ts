@@ -1,15 +1,15 @@
 // Port of crimson/perks/selection.py
 
-import { GameMode } from '../game-modes.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
-import { WeaponId } from '../weapons.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import { perkCanOffer } from './availability.ts';
 import { perkActive } from './helpers.ts';
 import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
 import { perkApply } from './runtime/apply.ts';
 import type { PerkSelectionState } from './state.ts';
-import type { CreatureState } from '../creatures/runtime.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 export const PERK_ID_MAX: number = (() => {
   let maxId = 0;

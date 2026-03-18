@@ -1,9 +1,9 @@
 // Port of crimson/perks/runtime/hook_types.py
 
-import type { CreaturePool, CreatureDeath } from '../../creatures/runtime.ts';
-import type { FxQueue } from '../../effects.ts';
-import type { GameplayState, PlayerState } from '../../sim/state-types.ts';
-import type { PerkId } from '../ids.ts';
+import type { CreaturePool, CreatureDeath } from '@crimson/creatures/runtime.ts';
+import type { FxQueue } from '@crimson/effects.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyHandler } from './apply-context.ts';
 import type { PerksUpdateEffectsStep } from './effects-context.ts';
 export type { PerksUpdateEffectsStep } from './effects-context.ts';

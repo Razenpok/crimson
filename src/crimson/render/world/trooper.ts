@@ -1,14 +1,14 @@
 // Port of crimson/render/world/trooper.py
 
-import { TextureId, getTexture } from '../../../grim/assets.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { type GlTexture, BlendMode } from '../../../grim/webgl.ts';
-import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '../../effects-atlas.ts';
-import { PerkId } from '../../perks/ids.ts';
-import { perkActive } from '../../perks/helpers.ts';
-import { WEAPON_BY_ID } from '../../weapons.ts';
-import type { PlayerState } from '../../sim/state-types.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { type GlTexture, BlendMode } from '@grim/webgl.ts';
+import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { WEAPON_BY_ID } from '@crimson/weapons.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 

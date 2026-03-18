@@ -1,11 +1,11 @@
 // Port of crimson/bonuses/selection.py
 
-import { GameMode } from '../game-modes.ts';
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { BonusPool } from './pool.ts';
 
 function bonusEnabled(bonusId: BonusId): boolean {

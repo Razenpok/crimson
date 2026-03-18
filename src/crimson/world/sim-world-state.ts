@@ -1,16 +1,16 @@
 // Port of crimson/world/sim_world_state.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import type { CreaturePool } from '../creatures/runtime.ts';
-import type { SpawnEnv } from '../creatures/runtime.ts';
-import { type GameplayState, PlayerState } from '../sim/state-types.ts';
-import { PresentationStepCommands } from '../sim/presentation-step.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CreaturePool } from '@crimson/creatures/runtime.ts';
+import type { SpawnEnv } from '@crimson/creatures/runtime.ts';
+import { type GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import {
   type WorldEvents,
   WorldState,
-} from '../sim/world-state.ts';
-import { weaponAssignPlayer, initDefaultAltWeapon } from '../weapon-runtime/index.ts';
-import { WEAPON_TABLE, WeaponId } from '../weapons.ts';
+} from '@crimson/sim/world-state.ts';
+import { weaponAssignPlayer, initDefaultAltWeapon } from '@crimson/weapon-runtime/index.ts';
+import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
 
 // ---------------------------------------------------------------------------
 // Weapon damage scale map (built once from the weapon table)

@@ -1,6 +1,6 @@
 // Port of crimson/render/world/constants.py
 
-import { clamp } from '../../../grim/math.ts';
+import { clamp } from '@grim/math.ts';
 
 export const RAD_TO_DEG = 57.29577951308232;
 

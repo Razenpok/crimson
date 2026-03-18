@@ -1,8 +1,8 @@
 // Port of crimson/world/terrain_runtime.py
 
-import type { TextureId } from '../../grim/assets.ts';
-import type { TerrainSlotTriplet } from '../terrain-slots.ts';
-import { resolveTerrainSlots } from '../terrain-slots.ts';
+import type { TextureId } from '@grim/assets.ts';
+import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
+import { resolveTerrainSlots } from '@crimson/terrain-slots.ts';
 import type { RenderResources } from './render-resources.ts';
 
 export class TerrainRuntime {

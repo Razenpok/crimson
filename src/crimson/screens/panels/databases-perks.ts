@@ -1,22 +1,22 @@
 // Port of crimson/screens/panels/databases_perks.py — Unlocked Perks Database view
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { audioPlaySfx } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { type GameState } from '../../game/types.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { audioPlaySfx } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { type GameState } from '@crimson/game/types.ts';
 import {
   PerkId,
   PERK_BY_ID,
   perkDisplayName,
   perkDisplayDescription,
-} from '../../perks/ids.ts';
-import { buildPerkAvailability, type GameStatus } from '../../perks/availability.ts';
-import { allQuests } from '../../quests/index.ts';
-import { perksDbRightDetailXShift } from '../high-scores-layout.ts';
+} from '@crimson/perks/ids.ts';
+import { buildPerkAvailability, type GameStatus } from '@crimson/perks/availability.ts';
+import { allQuests } from '@crimson/quests/index.ts';
+import { perksDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
 type Color = [number, number, number, number];

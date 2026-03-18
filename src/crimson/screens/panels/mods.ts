@@ -1,9 +1,9 @@
 // Port of crimson/screens/panels/mods.py — Mods panel
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type RuntimeResources } from '../../../grim/assets.ts';
-import { drawSmallText } from '../../../grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources } from '@grim/assets.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
 import {
   MENU_PANEL_WIDTH,
   type PanelGameState,

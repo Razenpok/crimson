@@ -1,6 +1,6 @@
 // Port of crimson/render/projectile_draw/secondary_dispatch.py
 
-import { SecondaryProjectileTypeId } from '../../projectiles/types.ts';
+import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import { drawSecondaryDetonation } from './secondary-detonation.ts';
 import { drawSecondaryRocket, drawSecondaryType4Fallback } from './secondary-rocket.ts';
 import type { SecondaryProjectileDrawCtx } from './types.ts';

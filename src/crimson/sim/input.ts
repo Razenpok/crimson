@@ -1,7 +1,7 @@
 // Port of crimson/sim/input.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { AimScheme, MovementControlType } from '../../grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { AimScheme, MovementControlType } from '@grim/config.ts';
 
 export class PlayerInput {
   readonly move: Vec2;

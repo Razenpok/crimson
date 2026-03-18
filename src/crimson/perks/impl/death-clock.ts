@@ -1,11 +1,11 @@
 // Port of crimson/perks/impl/death_clock.py
 
-import { perkActive, perkCountGet } from '../helpers.ts';
-import { PerkId } from '../ids.ts';
-import type { PerkApplyCtx } from '../runtime/apply-context.ts';
-import { adjustPerkCount } from '../runtime/counts.ts';
-import type { PerksUpdateEffectsCtx } from '../runtime/effects-context.ts';
-import type { PerkHooks } from '../runtime/hook-types.ts';
+import { perkActive, perkCountGet } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
+import { adjustPerkCount } from '@crimson/perks/runtime/counts.ts';
+import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyDeathClock(ctx: PerkApplyCtx): void {
   adjustPerkCount(

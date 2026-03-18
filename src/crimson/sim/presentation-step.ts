@@ -1,18 +1,18 @@
 // Port of crimson/sim/presentation_step.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { freezeBonusActive } from '../bonuses/freeze.ts';
-import type { FxQueue } from '../effects.ts';
-import { queueProjectileLargeStreakDecal } from '../features/presentation/projectile-decals.ts';
-import { GameMode } from '../game-modes.ts';
-import { PerkId } from '../perks/ids.ts';
-import { perkActive } from '../perks/helpers.ts';
-import type { ProjectileHit } from '../projectiles/types.ts';
-import { ProjectileTemplateId } from '../projectiles/types.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from '../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { freezeBonusActive } from '@crimson/bonuses/freeze.ts';
+import type { FxQueue } from '@crimson/effects.ts';
+import { queueProjectileLargeStreakDecal } from '@crimson/features/presentation/projectile-decals.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import type { ProjectileHit } from '@crimson/projectiles/types.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import type { BonusPickupEvent, GameplayState, PlayerState } from './state-types.ts';
 import { BEAM_TYPES } from './world-defs.ts';
 

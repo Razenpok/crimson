@@ -1,18 +1,18 @@
 // Port of crimson/screens/panels/options.py — Options menu panel
 
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type WebGLContext, type GlTexture } from '../../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { audioSetSfxVolume, audioSetMusicVolume } from '../../../grim/audio.ts';
-import { type CrimsonConfig, applyDetailPreset } from '../../../grim/config.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { audioSetSfxVolume, audioSetMusicVolume } from '@grim/audio.ts';
+import { type CrimsonConfig, applyDetailPreset } from '@grim/config.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
-} from '../../ui/perk-menu.ts';
+} from '@crimson/ui/perk-menu.ts';
 import {
   PanelMenuView,
   type PanelGameState,

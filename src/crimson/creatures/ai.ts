@@ -1,10 +1,10 @@
 // Port of crimson/creatures/ai.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { CrandLike } from '../../grim/rand.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { CrandLike } from '@grim/rand.ts';
 
-import { NATIVE_PI, f32, f32Vec2, headingFromDeltaF32 } from '../math-parity.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import { NATIVE_PI, f32, f32Vec2, headingFromDeltaF32 } from '@crimson/math-parity.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { CreatureAiMode, CreatureFlags } from './spawn-ids.ts';
 
 const _FLAG_AI7_LINK_TIMER = CreatureFlags.AI7_LINK_TIMER as number;

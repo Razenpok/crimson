@@ -1,6 +1,6 @@
 // Port of crimson/projectiles/runtime/primary_rules.py
 
-import { Projectile, ProjectileTemplateId } from '../types.ts';
+import { Projectile, ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import {
   lingerDefault,
   lingerGaussGun,

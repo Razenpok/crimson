@@ -1,34 +1,34 @@
 // Port of crimson/modes/typo_mode.py
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { type AudioState } from '../../grim/audio.ts';
-import { type CrimsonConfig } from '../../grim/config.ts';
-import { type ConsoleState } from '../../grim/console.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { InputState } from '../../grim/input.ts';
-import { Crand } from '../../grim/rand.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type AudioState } from '@grim/audio.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { type ConsoleState } from '@grim/console.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
+import { Crand } from '@grim/rand.ts';
 
-import { GameMode } from '../game-modes.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
 
-} from '../sim/sessions.ts';
-import { buildTypoSession } from '../sim/session-builders.ts';
-import { advanceUnlockTerrain } from '../sim/bootstrap.ts';
+} from '@crimson/sim/sessions.ts';
+import { buildTypoSession } from '@crimson/sim/session-builders.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 import {
   TypoCharCommand,
   TypoBackspaceCommand,
   TypoSubmitCommand,
-} from '../sim/input-providers.ts';
+} from '@crimson/sim/input-providers.ts';
 
-import { typoShotCounts } from '../typo/state.ts';
-import { buildTypoPlayerInput } from '../typo/player.ts';
-import { PlayerInput } from '../sim/input.ts';
-import { drawMenuCursor } from '../ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '../ui/hud.ts';
-import { drawTypingBox, drawTypoNameLabels } from '../ui/overlays/typo-run.ts';
+import { typoShotCounts } from '@crimson/typo/state.ts';
+import { buildTypoPlayerInput } from '@crimson/typo/player.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
+import { drawTypingBox, drawTypoNameLabels } from '@crimson/ui/overlays/typo-run.ts';
 
 import {
   BaseGameplayMode,

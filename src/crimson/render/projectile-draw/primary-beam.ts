@@ -1,19 +1,19 @@
 // Port of crimson/render/projectile_draw/primary_beam.py
 
-import { TextureId, getTexture } from '../../../grim/assets.ts';
-import { RGBA } from '../../../grim/color.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { type GlTexture, BlendMode } from '../../../grim/webgl.ts';
-import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '../../effects-atlas.ts';
-import { creatureLifecycleIsCollidable } from '../../creatures/lifecycle.ts';
-import { PerkId } from '../../perks/ids.ts';
-import { perkActive } from '../../perks/helpers.ts';
-import { ProjectileTemplateId } from '../../projectiles/types.ts';
-import { drawBeamFastStampedBody, drawBeamFastStampedHead } from '../rtx/beam.ts';
-import { RtxRenderMode } from '../rtx/mode.ts';
-import { BEAM_TYPES, ION_TYPES } from '../../sim/world-defs.ts';
-import { beamEffectScale } from '../projectile-render-registry.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { type GlTexture, BlendMode } from '@grim/webgl.ts';
+import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
+import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import { drawBeamFastStampedBody, drawBeamFastStampedHead } from '@crimson/render/rtx/beam.ts';
+import { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import { BEAM_TYPES, ION_TYPES } from '@crimson/sim/world-defs.ts';
+import { beamEffectScale } from '@crimson/render/projectile-render-registry.ts';
 import { RAD_TO_DEG, projOrigin } from './common.ts';
 import type { ProjectileDrawCtx } from './types.ts';
 

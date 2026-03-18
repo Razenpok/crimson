@@ -1,9 +1,9 @@
 // Port of crimson/audio_router.py
 
-import type { AudioState } from '../grim/audio.ts';
-import { audioPlaySfx, audioTriggerGameTune } from '../grim/audio.ts';
-import type { CrandLike } from '../grim/rand.ts';
-import { SfxId } from '../grim/sfx-map.ts';
+import type { AudioState } from '@grim/audio.ts';
+import { audioPlaySfx, audioTriggerGameTune } from '@grim/audio.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 import type { PresentationAudioSink } from './sim/presentation-step.ts';
 import type { PlayerState } from './sim/state-types.ts';
 import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from './weapons.ts';

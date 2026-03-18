@@ -1,11 +1,11 @@
 // Port of crimson/projectiles/runtime/collision.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { nativeFindSizeMargin } from '../../collision-math.ts';
-import { creatureLifecycleIsAlive } from '../../creatures/lifecycle.ts';
-import type { CreatureStateLike } from '../../effects.ts';
-import { OwnerRef } from '../../owner-ref.ts';
-import { CreatureDamageApplier } from '../types.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
+import { creatureLifecycleIsAlive } from '@crimson/creatures/lifecycle.ts';
+import type { CreatureStateLike } from '@crimson/effects.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
 
 export type CreatureStateForCollision = CreatureStateLike;
 

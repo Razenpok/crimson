@@ -1,6 +1,6 @@
 // Port of crimson/screens/high_scores_view/shared.py
 
-import { GameMode } from '../../game-modes.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 
 export interface HighScoreRecord {
   name(): string;

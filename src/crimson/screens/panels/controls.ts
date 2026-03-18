@@ -1,21 +1,21 @@
 // Port of crimson/screens/panels/controls.py — Controls menu panel (979 lines)
 
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
 import {
   AimScheme,
   MovementControlType,
   type CrimsonControlsConfig,
   defaultCrimsonConfig,
-} from '../../../grim/config.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
-import { type DropdownLayoutBase } from '../../ui/layout.ts';
+} from '@grim/config.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { type DropdownLayoutBase } from '@crimson/ui/layout.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
-import { INPUT_CODE_UNBOUND, inputCodeName } from '../../input-codes.ts';
+import { INPUT_CODE_UNBOUND, inputCodeName } from '@crimson/input-codes.ts';
 import {
   PanelMenuView,
   type PanelGameState,

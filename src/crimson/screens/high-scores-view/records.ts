@@ -1,8 +1,8 @@
 // Port of crimson/screens/high_scores_view/records.py
 
-import { GameMode } from '../../game-modes.ts';
-import type { GameState, HighScoresRequest } from '../../game/types.ts';
-import type { QuestLevel } from '../../quests/level.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
 import type { HighScoreRecord } from './shared.ts';
 
 export function resolveRequest(state: GameState): HighScoresRequest {

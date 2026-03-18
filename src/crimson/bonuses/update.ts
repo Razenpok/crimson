@@ -1,9 +1,9 @@
 // Port of crimson/bonuses/update.py
 
-import { f32 } from '../math-parity.ts';
-import { perkActive } from '../perks/helpers.ts';
-import { PerkId } from '../perks/ids.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from '../sim/state-types.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { bonusApply } from './apply.ts';
 import type { CreatureState } from './apply-context.ts';
 import { bonusHudUpdate } from './hud.ts';

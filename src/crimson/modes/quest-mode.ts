@@ -1,47 +1,47 @@
 // Port of crimson/modes/quest_mode.py
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { type AudioState, audioPlayMusic } from '../../grim/audio.ts';
-import { type CrimsonConfig } from '../../grim/config.ts';
-import { type ConsoleState } from '../../grim/console.ts';
-import { type GrimMonoFont, createGrimMonoFont } from '../../grim/fonts/grim-mono.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { InputState } from '../../grim/input.ts';
-import { Crand } from '../../grim/rand.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type AudioState, audioPlayMusic } from '@grim/audio.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { type ConsoleState } from '@grim/console.ts';
+import { type GrimMonoFont, createGrimMonoFont } from '@grim/fonts/grim-mono.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
+import { Crand } from '@grim/rand.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 
-import { GameMode } from '../game-modes.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
   QuestSpawnState,
 
-} from '../sim/sessions.ts';
+} from '@crimson/sim/sessions.ts';
 import {
   buildQuestSession,
-} from '../sim/session-builders.ts';
-import { advanceExplicitTerrain, advanceUnlockTerrain } from '../sim/bootstrap.ts';
-import { type QuestLevel, questLevelText, questLevelFromGlobalIndex } from '../quests/level.ts';
+} from '@crimson/sim/session-builders.ts';
+import { advanceExplicitTerrain, advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
+import { type QuestLevel, questLevelText, questLevelFromGlobalIndex } from '@crimson/quests/level.ts';
 import {
   type QuestDefinition,
   type SpawnEntry,
   type QuestContext,
-} from '../quests/types.ts';
-import { questByLevel } from '../quests/index.ts';
-import { buildQuestSpawnTable } from '../quests/runtime.ts';
-import { trackedQuestGamesCounterIndex } from '../quests/status.ts';
-import { perkSelectionPreparedChoices } from '../perks/selection.ts';
-import { WeaponId, WEAPON_BY_ID } from '../weapons.ts';
-import { weaponAssignPlayer, mostUsedWeaponIdForPlayer } from '../weapon-runtime/index.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+} from '@crimson/quests/types.ts';
+import { questByLevel } from '@crimson/quests/index.ts';
+import { buildQuestSpawnTable } from '@crimson/quests/runtime.ts';
+import { trackedQuestGamesCounterIndex } from '@crimson/quests/status.ts';
+import { perkSelectionPreparedChoices } from '@crimson/perks/selection.ts';
+import { WeaponId, WEAPON_BY_ID } from '@crimson/weapons.ts';
+import { weaponAssignPlayer, mostUsedWeaponIdForPlayer } from '@crimson/weapon-runtime/index.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 
-import { drawMenuCursor } from '../ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '../ui/hud.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import {
   drawQuestTitleTimerOverlay,
   drawQuestCompleteBannerOverlay,
-} from '../ui/overlays/quest-run.ts';
+} from '@crimson/ui/overlays/quest-run.ts';
 
 import {
   BaseGameplayMode,
@@ -50,14 +50,14 @@ import {
   type LanStepAction,
 } from './base-gameplay-mode.ts';
 import { PerkMenuController } from './components/perk-menu-controller.ts';
-import { PerkId } from '../perks/ids.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
 import { PerkPromptState } from './components/perk-prompt-controller.ts';
 import {
   type PostApplyReaction,
   buildPostApplyReaction,
   applyPostApplyReaction,
-} from '../sim/presentation-reactions.ts';
-import type { TickResult } from '../sim/hooks.ts';
+} from '@crimson/sim/presentation-reactions.ts';
+import type { TickResult } from '@crimson/sim/hooks.ts';
 
 // ---------------------------------------------------------------------------
 // Constants

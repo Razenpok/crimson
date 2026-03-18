@@ -1,7 +1,7 @@
 // Port of grim/fonts/grim_mono.py
 
-import { type GlTexture, type WebGLContext } from '../webgl.ts';
-import { Vec2 } from '../geom.ts';
+import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
 
 export const GRIM_MONO_ADVANCE = 16.0;
 export const GRIM_MONO_DRAW_SIZE = 32.0;

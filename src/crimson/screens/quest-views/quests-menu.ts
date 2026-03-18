@@ -1,26 +1,26 @@
 // Port of crimson/screens/quest_views/quests_menu.py — Quest selection menu
 
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { GameMode } from '../../game-modes.ts';
-import type { QuestLevel } from '../../quests/level.ts';
-import { questLevelGlobalIndex } from '../../quests/level.ts';
-import { questByLevel } from '../../quests/index.ts';
-import { questGamesCounterIndex, questCompletedCounterIndex } from '../../quests/status.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
-import { drawMenuCursor } from '../../ui/cursor.ts';
-import { menuWidescreenYShift } from '../../ui/layout.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import { questLevelGlobalIndex } from '@crimson/quests/level.ts';
+import { questByLevel } from '@crimson/quests/index.ts';
+import { questGamesCounterIndex, questCompletedCounterIndex } from '@crimson/quests/status.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
-} from '../../ui/perk-menu.ts';
+} from '@crimson/ui/perk-menu.ts';
 import {
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
@@ -36,9 +36,9 @@ import {
   MENU_SCALE_SMALL_THRESHOLD,
   uiElementAnim,
   signLayoutScale,
-} from '../panels/base.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '../../ui/shadow.ts';
-import { drawScreenFade } from '../transitions.ts';
+} from '@crimson/screens/panels/base.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import type { QuestMenuLayout } from './shared.ts';
 import {
   QUEST_MENU_BASE_X,

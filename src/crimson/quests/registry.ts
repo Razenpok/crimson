@@ -1,5 +1,5 @@
-import { terrainSlotsForQuest } from '../terrain-slots.ts';
-import { WeaponId } from '../weapons.ts';
+import { terrainSlotsForQuest } from '@crimson/terrain-slots.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import type { QuestLevel } from './level.ts';
 import { questLevelParse, questLevelGlobalIndex, questLevelKey } from './level.ts';
 import type { QuestBuilder, QuestDefinition, TerrainSlotTriplet } from './types.ts';

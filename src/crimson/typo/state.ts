@@ -1,6 +1,6 @@
 // Port of crimson/typo/state.py
 
-import { Vec2 } from '../../grim/geom.ts';
+import { Vec2 } from '@grim/geom.ts';
 import { CreatureNameTable } from './names.ts';
 import { TypingBuffer } from './typing.ts';
 

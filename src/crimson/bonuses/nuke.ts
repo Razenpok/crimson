@@ -1,11 +1,11 @@
 // Port of crimson/bonuses/nuke.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { OwnerRef } from '../owner-ref.ts';
-import { ProjectileTemplateId } from '../projectiles/types.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import { ownerRefForPlayer, projectileSpawn } from '../weapon-runtime/spawn.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import { ownerRefForPlayer, projectileSpawn } from '@crimson/weapon-runtime/spawn.ts';
 import type { BonusApplyCtx } from "./apply-context.js";
 
 export function applyNuke(

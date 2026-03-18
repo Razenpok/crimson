@@ -1,7 +1,7 @@
 // Port of crimson/tutorial/timeline.py
 
-import { Vec2 } from '../../grim/geom.ts';
-import { BonusId } from '../bonuses/ids.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { BonusId } from '@crimson/bonuses/ids.ts';
 import {
   SpawnId,
   type SpawnTemplateCall,
@@ -9,7 +9,7 @@ import {
   buildTutorialStage4ClearSpawns,
   buildTutorialStage5RepeatSpawns,
   buildTutorialStage6PerksDoneSpawns,
-} from '../creatures/spawn.ts';
+} from '@crimson/creatures/spawn.ts';
 import { TutorialState } from './state.ts';
 
 

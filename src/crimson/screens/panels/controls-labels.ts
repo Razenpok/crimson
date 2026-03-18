@@ -1,6 +1,6 @@
 // Port of crimson/screens/panels/controls_labels.py — rebind row specs and label helpers
 
-import { AimScheme, MovementControlType } from '../../../grim/config.ts';
+import { AimScheme, MovementControlType } from '@grim/config.ts';
 
 // ---------------------------------------------------------------------------
 // RebindTarget — identifies which config field a rebind row controls

@@ -1,27 +1,27 @@
 // Port of crimson/screens/high_scores_view/view.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { audioPlaySfx, audioUpdate } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { type GroundRenderer } from '../../../grim/terrain-render.ts';
-import { InputState } from '../../../grim/input.ts';
-import { GameMode } from '../../game-modes.ts';
-import type { GameState, HighScoresRequest } from '../../game/types.ts';
-import type { QuestLevel } from '../../quests/level.ts';
-import { questLevelGlobalIndex, questLevelFromGlobalIndex } from '../../quests/level.ts';
-import { HighScoreDateMode } from '../../../grim/config.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
-import { UiButtonState, buttonUpdate, buttonWidth } from '../../ui/perk-menu.ts';
-import { drawMenuCursor } from '../../ui/cursor.ts';
-import { menuWidescreenYShift, type DropdownLayoutBase } from '../../ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '../../ui/shadow.ts';
-import { requireRuntimeResources } from '../assets.ts';
-import { drawScreenFade } from '../transitions.ts';
-import { mouseInsideRectWithPadding } from '../panels/hit-test.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { InputState } from '@grim/input.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import { questLevelGlobalIndex, questLevelFromGlobalIndex } from '@crimson/quests/level.ts';
+import { HighScoreDateMode } from '@grim/config.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { UiButtonState, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift, type DropdownLayoutBase } from '@crimson/ui/layout.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
 import {
   uiElementAnim,
   signLayoutScale,
@@ -38,7 +38,7 @@ import {
   MENU_SIGN_POS_Y_SMALL,
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
-} from '../panels/base.ts';
+} from '@crimson/screens/panels/base.ts';
 import {
   HS_LEFT_PANEL_POS_Y,
   HS_LEFT_PANEL_HEIGHT,
@@ -68,7 +68,7 @@ import {
   hsLeftPanelPosX,
   hsRightPanelPosX,
   hsRightOptionsXShift,
-} from '../high-scores-layout.ts';
+} from '@crimson/screens/high-scores-layout.ts';
 import type { HighScoreRecord } from './shared.ts';
 import { drawMainPanel } from './main-panel.ts';
 import { drawRightPanel } from './right-panel.ts';

@@ -1,16 +1,16 @@
 // Port of crimson/screens/high_scores_view/right_panel.py
 
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type SmallFontData } from '../../../grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '../../../grim/fonts/small.ts';
-import { GameMode } from '../../game-modes.ts';
-import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '../../weapons.ts';
-import { formatOrdinal, formatTimeMmSs } from '../../ui/formatting.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type SmallFontData } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
 import { formatScoreDate } from './shared.ts';
-import { mouseInsideRectWithPadding } from '../panels/hit-test.ts';
-import { InputState } from '../../../grim/input.ts';
+import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
+import { InputState } from '@grim/input.ts';
 import {
   HS_LOCAL_CLOCK_X,
   HS_LOCAL_CLOCK_Y,
@@ -79,7 +79,7 @@ import {
   HS_RIGHT_SHOW_SCORES_Y,
   hsRightLocalCardXShift,
   hsRightOptionsXShift,
-} from '../high-scores-layout.ts';
+} from '@crimson/screens/high-scores-layout.ts';
 import type { HighScoresView } from './view.ts';
 
 type Color = [number, number, number, number];

@@ -1,6 +1,6 @@
-import { WebGLContext, GlTexture, BlendMode } from "../../grim/webgl.ts";
-import { Vec2 } from "../../grim/geom.ts";
-import { effectSrcRect, EffectId } from "../effects-atlas.ts";
+import { WebGLContext, GlTexture, BlendMode } from "@grim/webgl.ts";
+import { Vec2 } from "@grim/geom.ts";
+import { effectSrcRect, EffectId } from "@crimson/effects-atlas.ts";
 
 type Color = [number, number, number, number];
 type Rect = [number, number, number, number];

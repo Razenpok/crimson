@@ -9,9 +9,9 @@
 //
 // Rendering methods are stubbed with TODO comments for future WebGL renderer integration.
 
-import { audioUpdate, type AudioState } from '../grim/audio.ts';
-import { Vec2 } from '../grim/geom.ts';
-import { InputState } from '../grim/input.ts';
+import { audioUpdate, type AudioState } from '@grim/audio.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
 
 import type { CreatureState } from './creatures/runtime.ts';
 import { RANDOM_HEADING_SENTINEL, SpawnId } from './creatures/spawn-ids.ts';

@@ -16,10 +16,8 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@engine/*": ["src/engine/*"],
-      "@game/*": ["src/game/*"],
-      "@ui/*": ["src/ui/*"],
-      "@modes/*": ["src/modes/*"]
+      "@grim/*": ["src/grim/*"],
+      "@crimson/*": ["src/crimson/*"],
     }
   },
   "include": ["src"]

@@ -1,6 +1,6 @@
 // Port of crimson/ui/layout.py
 
-import { Vec2 } from '../../grim/geom.ts';
+import { Vec2 } from '@grim/geom.ts';
 
 export const UI_BASE_WIDTH = 640.0;
 export const UI_BASE_HEIGHT = 480.0;

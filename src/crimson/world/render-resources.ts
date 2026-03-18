@@ -5,23 +5,23 @@ import {
   type TextureId,
   getTexture,
   runtimeResourcesFor,
-} from '../../grim/assets.ts';
-import { TextureId as TId } from '../../grim/assets.ts';
-import type { CrimsonConfig } from '../../grim/config.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { GroundRenderer } from '../../grim/terrain-render.ts';
-import type { GlTexture, WebGLContext } from '../../grim/webgl.ts';
-import { creatureCorpseFrameForType } from '../creatures/anim.ts';
-import type { CreaturePool } from '../creatures/runtime.ts';
-import type { GameplayState, PlayerState } from '../sim/state-types.ts';
-import type { RenderFrame } from '../render/frame.ts';
-import type { RtxRenderMode } from '../render/rtx/mode.ts';
+} from '@grim/assets.ts';
+import { TextureId as TId } from '@grim/assets.ts';
+import type { CrimsonConfig } from '@grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { GroundRenderer } from '@grim/terrain-render.ts';
+import type { GlTexture, WebGLContext } from '@grim/webgl.ts';
+import { creatureCorpseFrameForType } from '@crimson/creatures/anim.ts';
+import type { CreaturePool } from '@crimson/creatures/runtime.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { RenderFrame } from '@crimson/render/frame.ts';
+import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
   type FxQueueTextures,
   bakeTerrainFxBatch,
-} from '../render/terrain-fx.ts';
-import type { TerrainFxBatch } from '../sim/terrain-fx.ts';
-import { terrainFxBatchIsEmpty } from '../sim/terrain-fx.ts';
+} from '@crimson/render/terrain-fx.ts';
+import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
+import { terrainFxBatchIsEmpty } from '@crimson/sim/terrain-fx.ts';
 
 export class RenderResources {
   private _ctx: WebGLContext;

@@ -1,12 +1,12 @@
 // Port of crimson/world/audio_bridge.py
 
-import type { AudioState } from '../../grim/audio.ts';
-import type { CrandLike } from '../../grim/rand.ts';
+import type { AudioState } from '@grim/audio.ts';
+import type { CrandLike } from '@grim/rand.ts';
 import {
   type PresentationStepCommands,
   applyPresentationPlan,
-} from '../sim/presentation-step.ts';
-import { AudioRouter } from '../audio-router.ts';
+} from '@crimson/sim/presentation-step.ts';
+import { AudioRouter } from '@crimson/audio-router.ts';
 
 function _zeroReflexBoost(): number {
   return 0.0;

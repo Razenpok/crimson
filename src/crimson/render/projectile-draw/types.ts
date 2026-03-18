@@ -1,9 +1,9 @@
 // Port of crimson/render/projectile_draw/types.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type GlTexture } from '../../../grim/webgl.ts';
-import type { Projectile, SecondaryProjectile } from '../../projectiles/types.ts';
-import type { WorldRenderCtx } from '../world/context.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type GlTexture } from '@grim/webgl.ts';
+import type { Projectile, SecondaryProjectile } from '@crimson/projectiles/types.ts';
+import type { WorldRenderCtx } from '@crimson/render/world/context.ts';
 
 export interface ProjectileDrawCtx {
   readonly renderer: WorldRenderCtx;

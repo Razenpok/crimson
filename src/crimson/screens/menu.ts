@@ -1,18 +1,18 @@
 // Port of crimson/screens/menu.py — Main menu screen
 
-import { Vec2, Rect } from '../../grim/geom.ts';
-import { type WebGLContext, type GlTexture, BlendMode } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { audioPlaySfx, audioPlayMusic, audioStopMusic, audioUpdate } from '../../grim/audio.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { fxDetailEnabled } from '../../grim/config.ts';
-import { InputState } from '../../grim/input.ts';
-import { GroundRenderer } from '../../grim/terrain-render.ts';
-import { drawMenuCursor } from '../ui/cursor.ts';
-import { menuWidescreenYShift } from '../ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '../ui/shadow.ts';
-import { type GameState } from '../game/types.ts';
-import { advanceUnlockTerrain } from '../sim/bootstrap.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type WebGLContext, type GlTexture, BlendMode } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { audioPlaySfx, audioPlayMusic, audioStopMusic, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
+import { InputState } from '@grim/input.ts';
+import { GroundRenderer } from '@grim/terrain-render.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import { type GameState } from '@crimson/game/types.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
 

@@ -1,16 +1,16 @@
 // Port of crimson/game/types.py — excluding networking (net, rollback, lockstep)
 
-import type { Vec2 } from '../../grim/geom.ts';
-import type { Crand } from '../../grim/rand.ts';
-import type { CrimsonConfig } from '../../grim/config.ts';
-import type { RuntimeResources } from '../../grim/assets.ts';
-import type { AudioState } from '../../grim/audio.ts';
-import type { ConsoleState } from '../../grim/console.ts';
-import type { GroundRenderer } from '../../grim/terrain-render.ts';
-import type { WebGLContext } from '../../grim/webgl.ts';
-import type { GameMode } from '../game-modes.ts';
-import type { RtxRenderMode } from '../render/rtx/mode.ts';
-import type { QuestLevel } from '../quests/level.ts';
+import type { Vec2 } from '@grim/geom.ts';
+import type { Crand } from '@grim/rand.ts';
+import type { CrimsonConfig } from '@grim/config.ts';
+import type { RuntimeResources } from '@grim/assets.ts';
+import type { AudioState } from '@grim/audio.ts';
+import type { ConsoleState } from '@grim/console.ts';
+import type { GroundRenderer } from '@grim/terrain-render.ts';
+import type { WebGLContext } from '@grim/webgl.ts';
+import type { GameMode } from '@crimson/game-modes.ts';
+import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
 
 // ---------------------------------------------------------------------------
 // GameConfig — frozen (interface)

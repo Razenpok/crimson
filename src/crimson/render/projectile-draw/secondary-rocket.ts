@@ -1,12 +1,12 @@
 // Port of crimson/render/projectile_draw/secondary_rocket.py
 
-import { TextureId, getTexture } from '../../../grim/assets.ts';
-import { RGBA } from '../../../grim/color.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { BlendMode } from '../../../grim/webgl.ts';
-import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '../../effects-atlas.ts';
-import { SecondaryProjectileTypeId } from '../../projectiles/types.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { BlendMode } from '@grim/webgl.ts';
+import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
+import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import type { SecondaryProjectileDrawCtx } from './types.ts';
 
 export interface SecondaryRocketStyle {

@@ -1,6 +1,6 @@
 // Port of crimson/sim/presentation_reactions.py
 
-import { SfxId } from '../../grim/sfx-map.ts';
+import { SfxId } from '@grim/sfx-map.ts';
 import type { TickResult } from './hooks.ts';
 import type { QuestSpawnState } from './sessions.ts';
 

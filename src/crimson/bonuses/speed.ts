@@ -1,6 +1,6 @@
 // Port of crimson/bonuses/speed.py
 
-import { f32 } from '../math-parity.ts';
+import { f32 } from '@crimson/math-parity.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applySpeed(ctx: BonusApplyCtx): void {

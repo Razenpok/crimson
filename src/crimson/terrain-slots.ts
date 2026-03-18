@@ -1,7 +1,7 @@
 // Port of crimson/terrain_slots.py
 
-import type { CrandLike } from '../grim/rand';
-import { TextureId } from '../grim/assets.ts';
+import type { CrandLike } from '@grim/rand';
+import { TextureId } from '@grim/assets.ts';
 import { RngCallerStatic } from './rng-caller-static';
 
 export type TerrainSlotTriplet = readonly [number, number, number];

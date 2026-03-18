@@ -1,11 +1,11 @@
 // Port of crimson/typo/player.py — Typ'o'Shooter player frame enforcement
 
-import { Vec2 } from '../../grim/geom.ts';
-import { PlayerInput } from '../sim/input.ts';
-import type { PlayerState } from '../sim/state-types.ts';
-import type { GameplayState } from '../gameplay.ts';
-import { weaponAssignPlayer } from '../weapon-runtime/assign.ts';
-import { WeaponId } from '../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/assign.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 
 export const TYPO_WEAPON_ID = WeaponId.SAWED_OFF_SHOTGUN;
 

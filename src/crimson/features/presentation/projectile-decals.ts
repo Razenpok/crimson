@@ -1,11 +1,11 @@
 // Port of crimson/features/presentation/projectile_decals.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import type { CrandLike } from '../../../grim/rand.ts';
-import type { FxQueue } from '../../effects.ts';
-import type { ProjectileHit } from '../../projectiles/types.ts';
-import { ProjectileTemplateId } from '../../projectiles/types.ts';
-import { queueLargeHitDecalStreak } from '../../bonuses/fire-bullets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import type { FxQueue } from '@crimson/effects.ts';
+import type { ProjectileHit } from '@crimson/projectiles/types.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import { queueLargeHitDecalStreak } from '@crimson/bonuses/fire-bullets.ts';
 
 export function queueProjectileLargeStreakDecal(
   hit: ProjectileHit,

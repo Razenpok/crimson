@@ -1,27 +1,27 @@
 // Port of crimson/screens/quest_views/end_note.py — End-note ("victory") screen
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { drawSmallText } from '../../../grim/fonts/small.ts';
-import { InputState } from '../../../grim/input.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { GameMode } from '../../game-modes.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
-import { drawMenuCursor } from '../../ui/cursor.ts';
-import { menuWidescreenYShift } from '../../ui/layout.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
+import { InputState } from '@grim/input.ts';
+import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
-} from '../../ui/perk-menu.ts';
+} from '@crimson/ui/perk-menu.ts';
 import {
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
-} from '../panels/base.ts';
-import { drawScreenFade } from '../transitions.ts';
+} from '@crimson/screens/panels/base.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import {
   END_NOTE_AFTER_BODY_Y_GAP,
   END_NOTE_BODY_X_OFFSET,

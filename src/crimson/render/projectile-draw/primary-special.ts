@@ -1,11 +1,11 @@
 // Port of crimson/render/projectile_draw/primary_special.py
 
-import { RGBA } from '../../../grim/color.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import { clamp } from '../../../grim/math.ts';
-import { BlendMode } from '../../../grim/webgl.ts';
-import { ProjectileTemplateId } from '../../projectiles/types.ts';
-import { KNOWN_PROJ_FRAMES } from '../../sim/world-defs.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import { BlendMode } from '@grim/webgl.ts';
+import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
 import { projOrigin } from './common.ts';
 import type { ProjectileDrawCtx } from './types.ts';
 

@@ -1,8 +1,8 @@
 // Port of crimson/ui/overlays/typo_run.py
 
-import { type GlTexture, type WebGLContext } from '../../../grim/webgl.ts';
-import { Vec2 } from '../../../grim/geom.ts';
-import type { CreatureState } from '../../creatures/runtime.ts';
+import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 const NAME_LABEL_SCALE = 1.0;
 const NAME_LABEL_BG_ALPHA = 0.67;

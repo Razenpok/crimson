@@ -1,18 +1,18 @@
 // Port of crimson/screens/panels/base.py — Base panel class for all menu panels
 
-import { Vec2, Rect } from '../../../grim/geom.ts';
-import { type WebGLContext, BlendMode } from '../../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../../grim/assets.ts';
-import { type AudioState } from '../../../grim/audio.ts';
-import { audioPlaySfx, audioUpdate } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { InputState } from '../../../grim/input.ts';
-import { type GroundRenderer } from '../../../grim/terrain-render.ts';
-import { drawClassicMenuPanel } from '../../ui/menu-panel.ts';
-import { drawMenuCursor } from '../../ui/cursor.ts';
-import { menuWidescreenYShift } from '../../ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '../../ui/shadow.ts';
-import { drawSmallText } from '../../../grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type AudioState } from '@grim/audio.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { InputState } from '@grim/input.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
 
 // ---------------------------------------------------------------------------
 // Menu layout constants (re-exported from the menu module in the Python port)

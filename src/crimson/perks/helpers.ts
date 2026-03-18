@@ -1,6 +1,6 @@
 // Port of crimson/perks/helpers.py
 
-import type { PlayerState } from '../sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { PerkId } from './ids.ts';
 
 export function perkCountGet(player: PlayerState, perkId: PerkId): number {

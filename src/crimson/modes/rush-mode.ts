@@ -1,26 +1,26 @@
 // Port of crimson/modes/rush_mode.py
 
-import { type WebGLContext } from '../../grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '../../grim/assets.ts';
-import { type AudioState } from '../../grim/audio.ts';
-import { type CrimsonConfig } from '../../grim/config.ts';
-import { type ConsoleState } from '../../grim/console.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { InputState } from '../../grim/input.ts';
-import { Crand } from '../../grim/rand.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type AudioState } from '@grim/audio.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
+import { type ConsoleState } from '@grim/console.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
+import { Crand } from '@grim/rand.ts';
 
-import { GameMode } from '../game-modes.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
   RushSpawnState,
 
-} from '../sim/sessions.ts';
-import { buildRushSession, enforceRushLoadout } from '../sim/session-builders.ts';
-import { advanceUnlockTerrain } from '../sim/bootstrap.ts';
+} from '@crimson/sim/sessions.ts';
+import { buildRushSession, enforceRushLoadout } from '@crimson/sim/session-builders.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 
-import { drawMenuCursor } from '../ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '../ui/hud.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 
 import {
   BaseGameplayMode,

@@ -1,6 +1,6 @@
 // Port of crimson/screens/panels/hit_test.py
 
-import { type SupportsXY } from '../../../grim/geom.ts';
+import { type SupportsXY } from '@grim/geom.ts';
 
 export function mouseInsideRectWithPadding(
   mouse: SupportsXY,

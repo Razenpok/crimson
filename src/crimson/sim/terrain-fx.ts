@@ -1,8 +1,8 @@
 // Port of crimson/sim/terrain_fx.py
 
-import { RGBA } from '../../grim/color.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { FxQueue, FxQueueRotated } from '../effects.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { FxQueue, FxQueueRotated } from '@crimson/effects.ts';
 
 export interface TerrainDecalFx {
   readonly effectId: number;

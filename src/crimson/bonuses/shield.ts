@@ -1,6 +1,6 @@
 // Port of crimson/bonuses/shield.py
 
-import { f32 } from '../math-parity.ts';
+import { f32 } from '@crimson/math-parity.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyShield(ctx: BonusApplyCtx): void {

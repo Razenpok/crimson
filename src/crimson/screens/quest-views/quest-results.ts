@@ -1,21 +1,21 @@
 // Port of crimson/screens/quest_views/quest_results.py
 
-import { Vec2 } from '../../../grim/geom.ts';
-import { type WebGLContext } from '../../../grim/webgl.ts';
-import type { CrimsonConfig } from '../../../grim/config.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '../../../grim/audio.ts';
-import { SfxId } from '../../../grim/sfx-map.ts';
-import { GameMode } from '../../game-modes.ts';
-import type { QuestLevel } from '../../quests/level.ts';
-import { questLevelEqual, questLevelGlobalIndex } from '../../quests/level.ts';
-import { questByLevel } from '../../quests/index.ts';
-import { trackedQuestCompletedCounterIndex } from '../../quests/status.ts';
-import { type QuestFinalTime, computeQuestFinalTime } from '../../quests/results.ts';
-import { weaponDisplayName } from '../../weapons.ts';
-import { perkDisplayName } from '../../perks/ids.ts';
-import { drawScreenFade } from '../transitions.ts';
-import { type HighScoreRecord } from '../results/game-over.ts';
-import { QuestResultsUi as QuestResultsUiImpl } from '../results/quest-results.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type WebGLContext } from '@grim/webgl.ts';
+import type { CrimsonConfig } from '@grim/config.ts';
+import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import type { QuestLevel } from '@crimson/quests/level.ts';
+import { questLevelEqual, questLevelGlobalIndex } from '@crimson/quests/level.ts';
+import { questByLevel } from '@crimson/quests/index.ts';
+import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
+import { type QuestFinalTime, computeQuestFinalTime } from '@crimson/quests/results.ts';
+import { weaponDisplayName } from '@crimson/weapons.ts';
+import { perkDisplayName } from '@crimson/perks/ids.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import { QuestResultsUi as QuestResultsUiImpl } from '@crimson/screens/results/quest-results.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
 
 // ---------------------------------------------------------------------------

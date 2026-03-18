@@ -1,8 +1,8 @@
 // Port of crimson/sim/state_types.py — shared types used across modules.
 
-import { Vec2 } from '../../grim/geom.ts';
-import { WeaponId } from '../weapons.ts';
-import type { BonusId } from '../bonuses/ids.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { WeaponId } from '@crimson/weapons.ts';
+import type { BonusId } from '@crimson/bonuses/ids.ts';
 
 export const PERK_COUNT_SIZE = 0x80;
 
@@ -95,4 +95,4 @@ export interface BonusTimers {
 }
 
 // Re-export the full GameplayState class so all existing import sites work.
-export { GameplayState } from '../gameplay.ts';
+export { GameplayState } from '@crimson/gameplay.ts';

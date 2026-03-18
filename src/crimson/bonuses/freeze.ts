@@ -1,12 +1,12 @@
 // Port of crimson/bonuses/freeze.py
 
-import { RGBA } from '../../grim/color.ts';
-import { Vec2 } from '../../grim/geom.ts';
-import { SfxId } from '../../grim/sfx-map.ts';
-import { CREATURE_CORPSE_DESPAWN_LIFECYCLE } from '../creatures/lifecycle.ts';
-import { f32 } from '../math-parity.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
-import type { BonusPickupEvent, GameplayState } from '../sim/state-types.ts';
+import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { SfxId } from '@grim/sfx-map.ts';
+import { CREATURE_CORPSE_DESPAWN_LIFECYCLE } from '@crimson/creatures/lifecycle.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
 import type { BonusApplyCtx } from "./apply-context.js";
 
 export interface DeferredFreezeCorpseFx {

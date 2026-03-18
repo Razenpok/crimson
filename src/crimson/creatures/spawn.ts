@@ -1,8 +1,8 @@
-import { Vec2 } from '../../grim/geom.ts';
-import { CrandLike } from '../../grim/rand.ts';
-import { BonusId } from '../bonuses/ids.ts';
-import { f32 } from '../math-parity.ts';
-import { RngCallerStatic } from '../rng-caller-static.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { CrandLike } from '@grim/rand.ts';
+import { BonusId } from '@crimson/bonuses/ids.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import {
   HAS_SPAWN_SLOT_FLAG,
   RANDOM_HEADING_SENTINEL,

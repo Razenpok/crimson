@@ -1,7 +1,7 @@
-import { Vec2 } from '../../grim/geom.ts';
-import type { CrandLike } from '../../grim/rand.ts';
-import type { SpawnId } from '../creatures/spawn-ids.ts';
-import type { WeaponId } from '../weapons.ts';
+import { Vec2 } from '@grim/geom.ts';
+import type { CrandLike } from '@grim/rand.ts';
+import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import type { WeaponId } from '@crimson/weapons.ts';
 import type { QuestLevel } from './level.ts';
 
 export interface QuestContext {
