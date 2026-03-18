@@ -1,0 +1,191 @@
+// Port of crimson/world/render_resources.py
+
+import {
+  type RuntimeResources,
+  type TextureId,
+  getTexture,
+  runtimeResourcesFor,
+} from '../../grim/assets.ts';
+import { TextureId as TId } from '../../grim/assets.ts';
+import type { CrimsonConfig } from '../../grim/config.ts';
+import { Vec2 } from '../../grim/geom.ts';
+import { GroundRenderer } from '../../grim/terrain-render.ts';
+import type { GlTexture, WebGLContext } from '../../grim/webgl.ts';
+import { creatureCorpseFrameForType } from '../creatures/anim.ts';
+import type { CreaturePool } from '../creatures/runtime.ts';
+import type { GameplayState, PlayerState } from '../sim/state-types.ts';
+import type { RenderFrame } from '../render/frame.ts';
+import type { RtxRenderMode } from '../render/rtx/mode.ts';
+import {
+  type FxQueueTextures,
+  bakeTerrainFxBatch,
+} from '../render/terrain-fx.ts';
+import type { TerrainFxBatch } from '../sim/terrain-fx.ts';
+import { terrainFxBatchIsEmpty } from '../sim/terrain-fx.ts';
+
+export class RenderResources {
+  private _ctx: WebGLContext;
+  private _assetsUrl: string;
+  worldSize: number;
+  config: CrimsonConfig | null;
+
+  ground: GroundRenderer | null = null;
+  fxTextures: FxQueueTextures | null = null;
+  private _pendingTerrainFxBatches: TerrainFxBatch[] = [];
+  private _resources: RuntimeResources | null = null;
+
+  constructor(ctx: WebGLContext, worldSize: number = 1024.0, config: CrimsonConfig | null = null, assetsUrl: string = './assets') {
+    this._ctx = ctx;
+    this._assetsUrl = assetsUrl;
+    this.worldSize = worldSize;
+    this.config = config;
+  }
+
+  get resources(): RuntimeResources {
+    if (this._resources !== null) return this._resources;
+    return runtimeResourcesFor(this._assetsUrl);
+  }
+
+  set resources(value: RuntimeResources | null) {
+    this._resources = value;
+  }
+
+  registryTexture(textureId: TextureId): GlTexture {
+    return getTexture(this.resources, textureId);
+  }
+
+  syncGroundSettings(): void {
+    if (this.ground === null) return;
+    if (this.config === null) {
+      this.ground.textureScale = 1.0;
+      return;
+    }
+    this.ground.textureScale = this.config.display.textureScale;
+  }
+
+  setGroundTextures(base: GlTexture, overlay: GlTexture, detail: GlTexture): void {
+    this.clearPendingTerrainFx();
+    if (this.ground === null) {
+      this.ground = new GroundRenderer(
+        this._ctx,
+        base,
+        overlay,
+        detail,
+      );
+      this.ground.width = Math.floor(this.worldSize);
+      this.ground.height = Math.floor(this.worldSize);
+      this.ground.textureScale = 1.0;
+    } else {
+      this.ground.texture = base;
+      this.ground.overlay = overlay;
+      this.ground.overlayDetail = detail;
+    }
+    this.syncGroundSettings();
+  }
+
+  scheduleGroundGeneration(seed: number): void {
+    if (this.ground === null) return;
+    this.ground.scheduleGenerate(seed);
+  }
+
+  processGroundPending(): void {
+    if (this.ground === null) return;
+    this.ground.processPending();
+    if (this.ground.textureFailed) {
+      this.clearPendingTerrainFx();
+      return;
+    }
+    if (!this.ground.renderTargetReady()) return;
+    if (this.fxTextures === null || this._pendingTerrainFxBatches.length === 0) return;
+
+    const pending = [...this._pendingTerrainFxBatches];
+    this._pendingTerrainFxBatches.length = 0;
+    for (const batch of pending) {
+      this._bakeTerrainFxBatch(batch, creatureCorpseFrameForType);
+    }
+  }
+
+  open(terrainSeed: number): void {
+    this.close();
+    const resources = this.resources;
+
+    const base = getTexture(resources, TId.TER_Q1_BASE);
+    const overlay = getTexture(resources, TId.TER_Q1_OVERLAY);
+    this.setGroundTextures(base, overlay, base);
+    this.scheduleGroundGeneration(terrainSeed);
+    this.fxTextures = {
+      particles: getTexture(resources, TId.PARTICLES),
+      bodyset: getTexture(resources, TId.BODYSET),
+    };
+  }
+
+  close(): void {
+    if (this.ground !== null) {
+      this.ground.destroy();
+    }
+    this.ground = null;
+
+    this._resources = null;
+    this.fxTextures = null;
+    this.clearPendingTerrainFx();
+  }
+
+  clearPendingTerrainFx(): void {
+    this._pendingTerrainFxBatches.length = 0;
+  }
+
+  private _bakeTerrainFxBatch(
+    batch: TerrainFxBatch,
+    corpseFrameForType: (creatureTypeId: number) => number = creatureCorpseFrameForType,
+  ): void {
+    if (this.ground === null || this.fxTextures === null) return;
+    if (terrainFxBatchIsEmpty(batch)) return;
+    bakeTerrainFxBatch(this.ground, batch, this.fxTextures, corpseFrameForType);
+  }
+
+  consumeTerrainFxBatch(
+    batch: TerrainFxBatch,
+    corpseFrameForType: (creatureTypeId: number) => number = creatureCorpseFrameForType,
+  ): void {
+    if (terrainFxBatchIsEmpty(batch)) return;
+    const ground = this.ground;
+    if (ground === null || ground.textureFailed || this.fxTextures === null) return;
+    if (ground.renderTargetReady()) {
+      this._bakeTerrainFxBatch(batch, corpseFrameForType);
+      return;
+    }
+    this._pendingTerrainFxBatches.push(batch);
+  }
+
+  buildRenderFrame(opts: {
+    state: GameplayState;
+    players: PlayerState[];
+    creatures: CreaturePool;
+    camera: Vec2;
+    demoModeActive: boolean;
+    elapsedMs: number;
+    bonusAnimPhase: number;
+    lanPlayerRingsEnabled: boolean;
+    lanLocalAimIndicatorsOnly: boolean;
+    lanLocalPlayerSlotIndex: number;
+    rtxMode: RtxRenderMode;
+  }): RenderFrame {
+    return {
+      worldSize: this.worldSize,
+      demoModeActive: Boolean(opts.demoModeActive),
+      config: this.config,
+      camera: opts.camera,
+      ground: this.ground,
+      state: opts.state,
+      players: opts.players,
+      creatures: opts.creatures,
+      resources: this.resources,
+      elapsedMs: opts.elapsedMs,
+      bonusAnimPhase: opts.bonusAnimPhase,
+      lanPlayerRingsEnabled: Boolean(opts.lanPlayerRingsEnabled),
+      lanLocalAimIndicatorsOnly: Boolean(opts.lanLocalAimIndicatorsOnly),
+      lanLocalPlayerSlotIndex: opts.lanLocalPlayerSlotIndex | 0,
+      rtxMode: opts.rtxMode,
+    };
+  }
+}

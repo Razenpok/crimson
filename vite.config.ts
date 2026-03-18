@@ -11,10 +11,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@engine': resolve(__dirname, 'src/engine'),
-      '@game': resolve(__dirname, 'src/game'),
-      '@ui': resolve(__dirname, 'src/ui'),
-      '@modes': resolve(__dirname, 'src/modes'),
+      '@engine': resolve(__dirname, 'src/grim'),
+      '@game': resolve(__dirname, 'src/crimson'),
     },
   },
 });

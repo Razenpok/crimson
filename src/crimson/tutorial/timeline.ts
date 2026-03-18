@@ -1,0 +1,317 @@
+// Port of crimson/tutorial/timeline.py
+
+import { Vec2 } from '../../grim/geom.ts';
+import { BonusId } from '../bonuses/ids.ts';
+import {
+  SpawnId,
+  type SpawnTemplateCall,
+  buildTutorialStage3FireSpawns,
+  buildTutorialStage4ClearSpawns,
+  buildTutorialStage5RepeatSpawns,
+  buildTutorialStage6PerksDoneSpawns,
+} from '../creatures/spawn.ts';
+import { TutorialState } from './state.ts';
+
+
+const TUTORIAL_STAGE_TEXT: readonly string[] = [
+  "In this tutorial you'll learn how to play Crimsonland",
+  'First learn to move by pushing the arrow keys.',
+  'Now pick up the bonuses by walking over them',
+  'Now learn to shoot and move at the same time.\nClick the left Mouse button to shoot.',
+  'Now, move the mouse to aim at the monsters',
+  'It will help you to move and shoot at the same time. Just keep moving!',
+  "Now let's learn about Perks. You'll receive a perk when you gain enough experience points.",
+  'Perks can give you extra abilities, or boost your skills. Choose wisely!',
+  'Great! Now you are ready to start playing Crimsonland',
+];
+
+const TUTORIAL_HINT_TEXT: readonly string[] = [
+  'This is the speed powerup, it makes you move faster!',
+  'This is a weapon powerup. Picking it up gives you a new weapon.',
+  'This powerup doubles all experience points you gain while it\'s active.',
+  'This is the nuke powerup, picking it up causes a huge\nexplosion harming all monsters nearby!',
+  'Reflex Boost powerup slows down time giving you a chance to react better',
+  '',
+  '',
+];
+
+const TUTORIAL_HINT_TEXT_BUGS: readonly string[] = [
+  'This is the speed powerup, it makes you move faster!',
+  'This is a weapon powerup. Picking it you gets a new weapon.',
+  'This powerup doubles all experience points you gain while it\'s active.',
+  'This is the nuke powerup, picking it up causes a huge\nexposion harming all monsters nearby!',
+  'Reflex Boost powerup slows down time giving you a chance to react better',
+  '',
+  '',
+];
+
+
+export interface BonusSpawnCall {
+  readonly bonusId: BonusId;
+  readonly amount: number;
+  readonly pos: Vec2;
+}
+
+
+export interface TutorialFrameActions {
+  readonly promptText: string;
+  readonly promptAlpha: number;
+  readonly hintText: string;
+  readonly hintAlpha: number;
+  readonly spawnTemplates: readonly SpawnTemplateCall[];
+  readonly spawnBonuses: readonly BonusSpawnCall[];
+  readonly stage5BonusCarrierDrop: [BonusId, number] | null;
+  readonly playLevelupSfx: boolean;
+  readonly forcePlayerHealth: number;
+  readonly forcePlayerExperience: number | null;
+}
+
+
+export function tutorialStage5BonusCarrierConfig(repeatSpawnCount: number): [BonusId, number] | null {
+  const n = repeatSpawnCount | 0;
+  if (n === 1) return [BonusId.SPEED, -1];
+  if (n === 2) return [BonusId.WEAPON, 5];
+  if (n === 3) return [BonusId.DOUBLE_EXPERIENCE, -1];
+  if (n === 4) return [BonusId.NUKE, -1];
+  if (n === 5) return [BonusId.REFLEX_BOOST, -1];
+  return null;
+}
+
+
+function clamp01(value: number): number {
+  if (value <= 0.0) return 0.0;
+  if (value >= 1.0) return 1.0;
+  return value;
+}
+
+
+function tickStageTransition(
+  stageIndex: number,
+  transitionTimerMs: number,
+  frameDtMs: number,
+): [number, number] {
+  stageIndex = stageIndex | 0;
+  transitionTimerMs = transitionTimerMs | 0;
+  const dtMs = frameDtMs | 0;
+
+  if (transitionTimerMs < -1) {
+    transitionTimerMs += dtMs;
+    if (transitionTimerMs < -1) {
+      return [stageIndex, transitionTimerMs];
+    }
+    stageIndex += 1;
+    if (stageIndex === 9) {
+      stageIndex = 0;
+    }
+    transitionTimerMs = 0;
+    return [stageIndex, transitionTimerMs];
+  }
+
+  if (-1 < transitionTimerMs) {
+    transitionTimerMs += dtMs;
+  }
+  if (1000 < transitionTimerMs) {
+    transitionTimerMs = -1;
+  }
+  return [stageIndex, transitionTimerMs];
+}
+
+
+function promptAlpha(stageIndex: number, stageTimerMs: number, transitionTimerMs: number): number {
+  stageIndex = stageIndex | 0;
+  stageTimerMs = stageTimerMs | 0;
+  transitionTimerMs = transitionTimerMs | 0;
+
+  if (stageIndex < 0) return 0.0;
+
+  let alpha: number;
+  if (transitionTimerMs < -1) {
+    alpha = (-transitionTimerMs) * 0.001;
+  } else if (transitionTimerMs < 0) {
+    alpha = 1.0;
+  } else {
+    alpha = transitionTimerMs * 0.001;
+  }
+
+  if (stageIndex === 5) {
+    if (stageTimerMs > 5000 && transitionTimerMs > -2) {
+      alpha = 1.0 - (stageTimerMs - 5000) * 0.001;
+    }
+    if (stageTimerMs >= 0x1771) {
+      alpha = 0.0;
+    }
+  }
+
+  return clamp01(alpha);
+}
+
+
+function tickHint(
+  state: TutorialState,
+  frameDtMs: number,
+  hintBonusDied: boolean,
+): [SpawnTemplateCall[], string, number] {
+  const hintSpawns: SpawnTemplateCall[] = [];
+
+  if (!state.hintFadeIn && hintBonusDied) {
+    state.hintFadeIn = true;
+    state.hintIndex = (state.hintIndex | 0) + 1;
+    hintSpawns.push(
+      { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(128.0, 128.0), heading: 3.1415927 },
+      { templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26, pos: new Vec2(152.0, 160.0), heading: 3.1415927 },
+    );
+  }
+
+  const delta = (frameDtMs | 0) * 3;
+  state.hintAlpha = (state.hintAlpha | 0) + (state.hintFadeIn ? delta : -delta);
+  if (state.hintAlpha < 0) {
+    state.hintAlpha = 0;
+  } else if (state.hintAlpha > 1000) {
+    state.hintAlpha = 1000;
+  }
+
+  const hintTextTable = state.preserveBugs ? TUTORIAL_HINT_TEXT_BUGS : TUTORIAL_HINT_TEXT;
+  const idx = state.hintIndex | 0;
+  const text = (idx >= 0 && idx < hintTextTable.length) ? hintTextTable[idx] : '';
+  const alpha = text ? (state.hintAlpha | 0) * 0.001 : 0.0;
+  return [hintSpawns, text, clamp01(alpha)];
+}
+
+
+/** Clone a TutorialState (shallow copy). */
+function cloneState(s: TutorialState): TutorialState {
+  const c = new TutorialState();
+  c.stageIndex = s.stageIndex;
+  c.stageTimerMs = s.stageTimerMs;
+  c.stageTransitionTimerMs = s.stageTransitionTimerMs;
+  c.hintIndex = s.hintIndex;
+  c.hintAlpha = s.hintAlpha;
+  c.hintFadeIn = s.hintFadeIn;
+  c.repeatSpawnCount = s.repeatSpawnCount;
+  c.hintBonusCreatureRef = s.hintBonusCreatureRef;
+  c.preserveBugs = s.preserveBugs;
+  c.moveActiveThisTick = s.moveActiveThisTick;
+  c.fireActiveThisTick = s.fireActiveThisTick;
+  c.hintBonusAliveBeforeTick = s.hintBonusAliveBeforeTick;
+  return c;
+}
+
+
+export function tickTutorialTimeline(
+  stateIn: TutorialState,
+  frameDtMs: number,
+  anyMoveActive: boolean,
+  anyFireActive: boolean,
+  creaturesNoneActive: boolean,
+  bonusPoolEmpty: boolean,
+  perkPendingCount: number,
+  hintBonusDied = false,
+): [TutorialState, TutorialFrameActions] {
+  const dtMs = frameDtMs | 0;
+  const state = cloneState(stateIn);
+  state.stageTimerMs = (state.stageTimerMs | 0) + dtMs;
+
+  const [stageIndex, transitionTimerMs] = tickStageTransition(
+    state.stageIndex,
+    state.stageTransitionTimerMs,
+    dtMs,
+  );
+  state.stageIndex = stageIndex | 0;
+  state.stageTransitionTimerMs = transitionTimerMs | 0;
+
+  let basePromptText = (stageIndex >= 0 && stageIndex < TUTORIAL_STAGE_TEXT.length)
+    ? TUTORIAL_STAGE_TEXT[stageIndex]
+    : '';
+  let basePromptAlpha = promptAlpha(stageIndex, state.stageTimerMs, transitionTimerMs);
+  if (stageIndex === 6 && (perkPendingCount | 0) < 1) {
+    basePromptText = '';
+    basePromptAlpha = 0.0;
+  }
+
+  const [hintSpawns, hintText, hintAlphaVal] = tickHint(state, dtMs, hintBonusDied);
+
+  // Base actions — before stage triggers
+  const baseForceExperience = stageIndex !== 6 ? 0 : null;
+
+  const spawnTemplates: SpawnTemplateCall[] = [...hintSpawns];
+  const spawnBonuses: BonusSpawnCall[] = [];
+  let playLevelupSfx = false;
+  let stage5BonusCarrierDrop: [BonusId, number] | null = null;
+  let forceExperience = baseForceExperience;
+
+  if (stageIndex === 0) {
+    if (state.stageTimerMs > 6000 && state.stageTransitionTimerMs === -1) {
+      state.repeatSpawnCount = 0;
+      state.hintIndex = state.stageTransitionTimerMs | 0;
+      state.hintFadeIn = false;
+      state.stageTransitionTimerMs = -1000;
+    }
+  } else if (stageIndex === 1) {
+    if (anyMoveActive && state.stageTransitionTimerMs === -1) {
+      state.stageTransitionTimerMs = -1000;
+      playLevelupSfx = true;
+      spawnBonuses.push(
+        { bonusId: BonusId.POINTS, amount: 500, pos: new Vec2(260.0, 260.0) },
+        { bonusId: BonusId.POINTS, amount: 1000, pos: new Vec2(600.0, 400.0) },
+        { bonusId: BonusId.POINTS, amount: 500, pos: new Vec2(300.0, 400.0) },
+      );
+    }
+  } else if (stageIndex === 2) {
+    if (bonusPoolEmpty && state.stageTransitionTimerMs === -1) {
+      state.stageTransitionTimerMs = -1000;
+      playLevelupSfx = true;
+    }
+  } else if (stageIndex === 3) {
+    if (anyFireActive && state.stageTransitionTimerMs === -1) {
+      state.stageTransitionTimerMs = -1000;
+      playLevelupSfx = true;
+      spawnTemplates.push(...buildTutorialStage3FireSpawns());
+    }
+  } else if (stageIndex === 4) {
+    if (creaturesNoneActive && state.stageTransitionTimerMs === -1) {
+      state.stageTimerMs = 1000;
+      state.stageTransitionTimerMs = -1000;
+      playLevelupSfx = true;
+      state.repeatSpawnCount = 0;
+      spawnTemplates.push(...buildTutorialStage4ClearSpawns());
+    }
+  } else if (stageIndex === 5) {
+    if (bonusPoolEmpty && creaturesNoneActive) {
+      state.repeatSpawnCount = (state.repeatSpawnCount | 0) + 1;
+      if ((state.repeatSpawnCount | 0) < 8) {
+        state.hintFadeIn = false;
+        state.hintBonusCreatureRef = null;
+        spawnTemplates.push(...buildTutorialStage5RepeatSpawns(state.repeatSpawnCount | 0));
+        stage5BonusCarrierDrop = tutorialStage5BonusCarrierConfig(state.repeatSpawnCount | 0);
+      } else if (state.stageTransitionTimerMs === -1) {
+        state.stageTransitionTimerMs = -1000;
+        playLevelupSfx = true;
+        forceExperience = 3000;
+      }
+    }
+  } else if (stageIndex === 6) {
+    if ((perkPendingCount | 0) < 1 && state.stageTransitionTimerMs === -1) {
+      state.stageTransitionTimerMs = -1000;
+      spawnTemplates.push(...buildTutorialStage6PerksDoneSpawns());
+    }
+  } else if (stageIndex === 7) {
+    if (bonusPoolEmpty && creaturesNoneActive && state.stageTransitionTimerMs === -1) {
+      state.stageTransitionTimerMs = -1000;
+    }
+  }
+
+  const actions: TutorialFrameActions = {
+    promptText: basePromptText,
+    promptAlpha: basePromptAlpha,
+    hintText,
+    hintAlpha: hintAlphaVal,
+    spawnTemplates,
+    spawnBonuses,
+    stage5BonusCarrierDrop,
+    playLevelupSfx,
+    forcePlayerHealth: 100.0,
+    forcePlayerExperience: forceExperience,
+  };
+
+  return [state, actions];
+}

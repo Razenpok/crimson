@@ -1,0 +1,78 @@
+import { Vec2 } from '../../../grim/geom.ts';
+import { RGBA } from '../../../grim/color.ts';
+import { SfxId } from '../../../grim/sfx-map.ts';
+import type { OwnerRef } from '../../owner-ref.ts';
+import { ProjectileTemplateId } from '../../projectiles/types.ts';
+import type { GameplayState, PlayerState } from "../../sim/state-types.ts";
+import { perkActive } from '../helpers.ts';
+import { PerkId } from '../ids.ts';
+import { RngCallerStatic } from '../../rng-caller-static.ts';
+import { ProjectileSpawnFn } from "../runtime/player-tick-context.js";
+
+export interface FireCoughCtx {
+  readonly state: GameplayState;
+  readonly player: PlayerState;
+  readonly players: PlayerState[] | null;
+  readonly dt: number;
+  readonly playerPosBeforeMove: Vec2;
+  ownerRefForPlayerProjectiles(state: GameplayState, playerIndex: number): OwnerRef;
+  projectileSpawn: ProjectileSpawnFn;
+}
+
+export function tickFireCough(ctx: FireCoughCtx): void {
+  if (!perkActive(ctx.player, PerkId.FIRE_CAUGH)) {
+    ctx.player.fireCoughTimer = 0.0;
+    return;
+  }
+
+  ctx.player.fireCoughTimer += ctx.dt;
+  if (ctx.player.fireCoughTimer <= ctx.state.perkIntervals.fireCough) {
+    return;
+  }
+
+  const owner = ctx.ownerRefForPlayerProjectiles(ctx.state, ctx.player.index);
+  ctx.state.sfxQueue.push(SfxId.AUTORIFLE_FIRE);
+  ctx.state.sfxQueue.push(SfxId.PLASMAMINIGUN_FIRE);
+
+  const aimHeading = ctx.player.aimHeading;
+  const originPos = ctx.playerPosBeforeMove;
+  const muzzle = originPos.add(Vec2.fromHeading(aimHeading).rotated(-0.150915).mul(16.0));
+
+  const aim = ctx.player.aim;
+  const dist = aim.sub(originPos).length();
+  const maxOffset = dist * ctx.player.spreadHeat * 0.5;
+  const dirRoll = ctx.state.rng.rand(
+    RngCallerStatic.PLAYER_UPDATE_FIRE_COUGH_SPREAD_DIR,
+  );
+  const dirAngle = (dirRoll & 0x1ff) * (Math.PI * 2.0 / 512.0);
+  const magRoll = ctx.state.rng.rand(
+    RngCallerStatic.PLAYER_UPDATE_FIRE_COUGH_SPREAD_MAG,
+  );
+  const mag = (magRoll & 0x1ff) * (1.0 / 512.0);
+  const offset = maxOffset * mag;
+  const jitter = aim.add(Vec2.fromAngle(dirAngle).mul(offset));
+  const angle = jitter.sub(originPos).toHeading();
+  ctx.projectileSpawn(
+    ctx.state,
+    [ctx.player],
+    muzzle,
+    angle,
+    ProjectileTemplateId.FIRE_BULLETS,
+    owner,
+    ctx.player.index,
+  );
+
+  const vel = Vec2.fromAngle(aimHeading).mul(25.0);
+  ctx.state.spriteEffects.spawn(muzzle, vel, 1.0, new RGBA(0.5, 0.5, 0.5, 0.413));
+
+  ctx.player.fireCoughTimer -= ctx.state.perkIntervals.fireCough;
+  const intervalRoll = ctx.state.rng.rand(
+    RngCallerStatic.PLAYER_UPDATE_FIRE_COUGH_INTERVAL_RESET,
+  );
+  ctx.state.perkIntervals.fireCough = (intervalRoll % 4) + 2.0;
+}
+
+export const FIRE_COUGH_HOOKS = {
+  perkId: PerkId.FIRE_CAUGH as const,
+  playerTickSteps: [tickFireCough] as const,
+};

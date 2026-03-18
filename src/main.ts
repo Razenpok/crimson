@@ -1,11 +1,11 @@
 // Crimsonland WebGL — Entry Point
 
-import { WebGLContext } from './engine/webgl.ts';
-import { App } from './engine/app.ts';
-import { InputState } from './engine/input.ts';
-import { type View } from './engine/view.ts';
-import { runGame } from './game/runtime.ts';
-import { type GameConfig } from './game/types.ts';
+import { WebGLContext } from './grim/webgl.ts';
+import { App } from './grim/app.ts';
+import { InputState } from './grim/input.ts';
+import { type View } from './grim/view.ts';
+import { runGame } from './crimson/game/runtime.ts';
+import { type GameConfig } from './crimson/game/types.ts';
 
 /**
  * Minimal boot view that loads assets asynchronously, then switches to the
