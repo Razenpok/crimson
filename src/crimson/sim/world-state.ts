@@ -5,7 +5,7 @@ import type { SfxId } from '@grim/sfx-map.ts';
 
 import { emitBonusPickupEffects } from '@crimson/bonuses/pickup-fx.ts';
 import { bonusUpdate, bonusUpdatePrePickupTimers } from '@crimson/bonuses/update.ts';
-import { type CameraShakeState, cameraShakeUpdate } from '@crimson/camera.ts';
+import { cameraShakeUpdate } from '@crimson/camera.ts';
 import { creatureAnimAdvancePhase } from '@crimson/creatures/anim.ts';
 import { creatureApplyDamageWithLethalFollowup } from '@crimson/creatures/damage.ts';
 import {
@@ -484,8 +484,7 @@ export class WorldState {
     // --- Camera shake ---
 
     if (!deferCameraShake) {
-      const shakeState = this._cameraShakeAdapter();
-      cameraShakeUpdate(shakeState, dt);
+      cameraShakeUpdate(this.state, dt);
     }
 
     // --- Survival progression / perk level-up ---
@@ -761,21 +760,6 @@ export class WorldState {
   // -------------------------------------------------------------------------
   // _advancePlayerAnim
   // -------------------------------------------------------------------------
-
-  /** Adapter that maps GameplayState fields to the CameraShakeState interface. */
-  private _cameraShakeAdapter(): CameraShakeState {
-    const s = this.state;
-    return {
-      get cameraShakePulses() { return s.cameraShakePulses; },
-      set cameraShakePulses(v: number) { s.cameraShakePulses = v; },
-      get cameraShakeTimer() { return s.cameraShakeTimer; },
-      set cameraShakeTimer(v: number) { s.cameraShakeTimer = v; },
-      get cameraShakeOffset() { return s.cameraShakeOffset; },
-      set cameraShakeOffset(v) { s.cameraShakeOffset = v; },
-      get rng() { return s.rng; },
-      get bonusReflexBoost() { return s.bonuses.reflexBoost; },
-    };
-  }
 
   private _advancePlayerAnim(dt: number, prevPositions: [number, number][]): void {
     const info = CREATURE_ANIM.get(CreatureTypeId.TROOPER);

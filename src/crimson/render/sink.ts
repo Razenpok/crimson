@@ -11,3 +11,5 @@ export class NullSink implements RenderSink {
   flush(): void {}
   close(): void {}
 }
+
+// TODO: VideoSink

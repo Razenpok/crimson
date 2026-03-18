@@ -1,3 +1,5 @@
+// Port of crimson/quests/level.py
+
 export const QUEST_STAGE_COUNT = 5;
 export const QUESTS_PER_STAGE = 10;
 export const QUEST_COUNT = QUEST_STAGE_COUNT * QUESTS_PER_STAGE;

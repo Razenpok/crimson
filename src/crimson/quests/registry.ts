@@ -1,8 +1,10 @@
-import { terrainSlotsForQuest } from '@crimson/terrain-slots.ts';
-import { WeaponId } from '@crimson/weapons.ts';
-import type { QuestLevel } from './level.ts';
-import { questLevelParse, questLevelGlobalIndex, questLevelKey } from './level.ts';
-import type { QuestBuilder, QuestDefinition, TerrainSlotTriplet } from './types.ts';
+// Port of crimson/quests/registry.py
+
+import { terrainSlotsForQuest, TerrainSlotTriplet } from "@crimson/terrain-slots.ts";
+import { WeaponId } from "@crimson/weapons.ts";
+import type { QuestLevel } from "./level.ts";
+import { questLevelGlobalIndex, questLevelKey, questLevelParse } from "./level.ts";
+import type { QuestBuilder, QuestDefinition } from "./types.ts";
 
 const _QUESTS: Map<string, QuestDefinition> = new Map();
 
@@ -17,10 +19,6 @@ export function registerQuest(opts: {
 }): (builder: QuestBuilder) => QuestBuilder {
   return (builder: QuestBuilder): QuestBuilder => {
     const questLevel = questLevelParse(opts.level);
-    const resolvedTerrainSlots =
-      opts.terrainSlots != null ? opts.terrainSlots : terrainSlotsForQuest(questLevel);
-    const normalizedUnlockWeaponId =
-      opts.unlockWeaponId != null ? opts.unlockWeaponId : null;
     const quest: QuestDefinition = {
       level: questLevel,
       title: opts.title,
@@ -28,8 +26,8 @@ export function registerQuest(opts: {
       timeLimitMs: opts.timeLimitMs,
       startWeaponId: opts.startWeaponId,
       unlockPerkId: opts.unlockPerkId ?? null,
-      unlockWeaponId: normalizedUnlockWeaponId,
-      terrainSlots: resolvedTerrainSlots,
+      unlockWeaponId: opts.unlockWeaponId ?? null,
+      terrainSlots: opts.terrainSlots ?? terrainSlotsForQuest(questLevel),
     };
     const key = questLevelKey(quest.level);
     const existing = _QUESTS.get(key);

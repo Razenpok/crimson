@@ -11,7 +11,7 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
   const renderer = ctx.renderer;
   if (ctx.projType !== 3) return false;
 
-  // Secondary projectile detonation visuals.
+  // Secondary projectile detonation visuals (secondary_projectile_update + render).
   const t = clamp(ctx.proj.detonationT, 0.0, 1.0);
   const detScale = ctx.proj.detonationScale;
   const fade = (1.0 - t) * ctx.alpha;
@@ -20,13 +20,7 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
   const scale = ctx.scale;
   const gl = renderer.gl;
 
-  let particlesTexture;
-  try {
-    particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
-  } catch {
-    particlesTexture = null;
-  }
-
+  const particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
   if (particlesTexture === null) {
     // Fallback: approximate circle outline with a white-texture quad
     const radius = Math.max(1.0, detScale * t * 80.0);

@@ -1,4 +1,4 @@
-// Port of crimson/sim/state_types.py — shared types used across modules.
+// Port of crimson/sim/state_types.py
 
 import { Vec2 } from '@grim/geom.ts';
 import { WeaponId } from '@crimson/weapons.ts';
@@ -79,19 +79,6 @@ export interface BonusPickupEvent {
   readonly bonusId: BonusId;
   readonly amount: number;
   readonly pos: Vec2;
-}
-
-export interface QuestLevel {
-  readonly major: number;
-  readonly minor: number;
-}
-
-export interface BonusTimers {
-  weaponPowerUp: number;
-  reflexBoost: number;
-  energizer: number;
-  doubleExperience: number;
-  freeze: number;
 }
 
 // Re-export the full GameplayState class so all existing import sites work.

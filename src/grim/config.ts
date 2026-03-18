@@ -1,5 +1,7 @@
 // Port of grim/config.py — simplified for WebGL (no binary cfg file I/O)
 
+import { QuestLevel } from "@crimson/quests/level.js";
+
 export enum GameMode {
   DEMO = 0,
   SURVIVAL = 1,
@@ -58,7 +60,7 @@ export interface CrimsonGameplayConfig {
   mode: GameMode;
   playerCount: number;
   hardcore: boolean;
-  questLevel: number | null;
+  questLevel: QuestLevel | null;
   showInfoTexts: boolean;
 }
 

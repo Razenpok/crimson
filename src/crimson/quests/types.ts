@@ -1,8 +1,11 @@
+// Port of crimson/quests/types.py
+
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
 import type { WeaponId } from '@crimson/weapons.ts';
 import type { QuestLevel } from './level.ts';
+import { TerrainSlotTriplet } from "@crimson/terrain-slots.js";
 
 export interface QuestContext {
   readonly width: number;
@@ -22,8 +25,6 @@ export type QuestBuilder = (
   ctx: QuestContext,
   opts: { rng: CrandLike; fullVersion?: boolean },
 ) => SpawnEntry[];
-
-export type TerrainSlotTriplet = readonly [number, number, number];
 
 export interface QuestDefinition {
   readonly level: QuestLevel;

@@ -16,6 +16,8 @@ export function bakeTerrainFxBatch(
   textures: FxQueueTextures,
   corpseFrameForType: (creatureTypeId: number) => number,
 ): [boolean, boolean] {
+  // Bake terrain FX batch into the ground render target (port of `fx_queue_render`).
+
   const decals: GroundDecal[] = [];
   for (const entry of batch.decals) {
     const src = effectSrcRect(

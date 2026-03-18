@@ -1,30 +1,22 @@
+// Port of crimson/sim/timing.py
+
 import { f32 } from '@crimson/math-parity.ts';
 
 export function ftolMsI32(dtSeconds: number): number {
+  // Convert seconds -> integer milliseconds via float32 scale + truncation.
   const dtF32 = f32(dtSeconds);
   const scaledMsF32 = f32(dtF32 * 1000.0);
   return Math.trunc(scaledMsF32);
 }
 
 export class FrameTiming {
-  readonly dt: number;
-  readonly timeScaleActiveEntry: boolean;
-  readonly timeScaleFactor: number;
-  readonly zeroGateActive: boolean;
-  readonly dtSim: number;
-
   private constructor(
-    dt: number,
-    timeScaleActiveEntry: boolean,
-    timeScaleFactor: number,
-    zeroGateActive: boolean,
-    dtSim: number,
+    public readonly dt: number,
+    public readonly timeScaleActiveEntry: boolean,
+    public readonly timeScaleFactor: number,
+    public readonly zeroGateActive: boolean,
+    public readonly dtSim: number,
   ) {
-    this.dt = dt;
-    this.timeScaleActiveEntry = timeScaleActiveEntry;
-    this.timeScaleFactor = timeScaleFactor;
-    this.zeroGateActive = zeroGateActive;
-    this.dtSim = dtSim;
   }
 
   get dtMsI32(): number {
@@ -54,7 +46,7 @@ export class FrameTiming {
     if (!Number.isFinite(dtF32)) {
       throw new Error(`dt must be finite, got ${dt}`);
     }
-    const active = Boolean(opts.timeScaleActiveEntry);
+    const active = opts.timeScaleActiveEntry;
     const factor = f32(opts.timeScaleFactor);
     if (active && (!Number.isFinite(factor) || factor <= 0.0)) {
       throw new Error(

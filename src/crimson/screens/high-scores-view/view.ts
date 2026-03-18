@@ -597,7 +597,7 @@ export class HighScoresView {
       index = Math.max(0, Math.min(maxIndex, index));
       const newLevel = questLevelFromGlobalIndex(index);
       request.questLevel = newLevel;
-      this.state.config.gameplay.questLevel = newLevel as unknown as number | null;
+      this.state.config.gameplay.questLevel = newLevel;
       this._dirty = true;
       this._reloadRecords();
     };

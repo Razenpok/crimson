@@ -2,70 +2,30 @@
 
 import type { Vec2 } from '@grim/geom.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
-import type { BonusHudState } from './hud.ts';
 import { timerRef } from './hud.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';
-
-export { BONUS_BY_ID };
-
-export interface CreatureState {
-  active: boolean;
-  pos: Vec2;
-  size: number;
-  hp: number;
-  lifecycleStage: number;
-  vel: Vec2;
-  heading: number;
-  flags: number;
-}
+import { CreatureState } from "@crimson/creatures/runtime.js";
 
 export class BonusApplyCtx {
-  state: GameplayState;
-  player: PlayerState;
-  bonusId: BonusId;
-  amount: number;
-  originPos: Vec2;
-  creatures: readonly CreatureState[];
-  players: PlayerState[];
-  detailPreset: number;
-  economistMultiplier: number;
-  label: string;
-  iconId: number;
-  deferFreezeCorpseFx: boolean;
-  freezeCorpseIndices: Set<number> | null;
-
   constructor(
-    state: GameplayState,
-    player: PlayerState,
-    bonusId: BonusId,
-    amount: number,
-    originPos: Vec2,
-    creatures: readonly CreatureState[],
-    players: PlayerState[],
-    detailPreset: number,
-    economistMultiplier: number,
-    label: string,
-    iconId: number,
-    deferFreezeCorpseFx: boolean = false,
-    freezeCorpseIndices: Set<number> | null = null,
+    public state: GameplayState,
+    public player: PlayerState,
+    public bonusId: BonusId,
+    public amount: number,
+    public originPos: Vec2,
+    public creatures: readonly CreatureState[],
+    public players: PlayerState[],
+    public detailPreset: number,
+    public economistMultiplier: number,
+    public label: string,
+    public iconId: number,
+    public deferFreezeCorpseFx: boolean = false,
+    public freezeCorpseIndices: Set<number> | null = null,
   ) {
-    this.state = state;
-    this.player = player;
-    this.bonusId = bonusId;
-    this.amount = amount;
-    this.originPos = originPos;
-    this.creatures = creatures;
-    this.players = players;
-    this.detailPreset = detailPreset;
-    this.economistMultiplier = economistMultiplier;
-    this.label = label;
-    this.iconId = iconId;
-    this.deferFreezeCorpseFx = deferFreezeCorpseFx;
-    this.freezeCorpseIndices = freezeCorpseIndices;
   }
 
   registerGlobal(timerKey: string): void {
-    (this.state.bonusHud as BonusHudState).register(
+    this.state.bonusHud.register(
       this.bonusId,
       this.label,
       this.iconId,
@@ -75,7 +35,7 @@ export class BonusApplyCtx {
 
   registerPlayer(timerKey: string): void {
     if (this.players.length > 1) {
-      (this.state.bonusHud as BonusHudState).register(
+      this.state.bonusHud.register(
         this.bonusId,
         this.label,
         this.iconId,
@@ -83,7 +43,7 @@ export class BonusApplyCtx {
         timerRef('player', String(timerKey), 1),
       );
     } else {
-      (this.state.bonusHud as BonusHudState).register(
+      this.state.bonusHud.register(
         this.bonusId,
         this.label,
         this.iconId,

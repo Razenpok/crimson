@@ -29,6 +29,7 @@ export function drawCreatureSprite(
   if (info === undefined) return;
 
   const mirrorFlag = mirrorLong === null ? info.mirror : mirrorLong;
+  // Long-strip mirroring is handled by frame index selection, not texture flips.
   const [index] = creatureAnimSelectFrame(phase, {
     baseFrame: info.base,
     mirrorLong: mirrorFlag,
@@ -53,6 +54,10 @@ export function drawCreatureSprite(
   const rotationDeg = rotationRad * RAD_TO_DEG;
 
   if (shadow) {
+    // In the original exe this is a "darken" blend pass gated by fx_detail_0
+    // (creature_render_type). We approximate it with a black silhouette draw.
+    // The observed pass is slightly bigger than the main sprite and offset
+    // down-right by ~1px at default sizes.
     const alpha = shadowAlpha !== null
       ? shadowAlpha / 255
       : clamp(tint[3] * 0.4, 0.0, 1.0);

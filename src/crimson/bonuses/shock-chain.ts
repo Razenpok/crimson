@@ -8,14 +8,16 @@ import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { ownerRefForPlayer, projectileSpawn } from '@crimson/weapon-runtime/spawn.ts';
 import type { BonusApplyCtx } from "./apply-context.js";
 
-export function applyShockChain(
-  ctx: BonusApplyCtx,
-): void {
+export function applyShockChain(ctx: BonusApplyCtx): void {
   const creatures = ctx.creatures;
-  if (!creatures || creatures.length === 0) {
+  if (creatures.length === 0) {
     return;
   }
 
+  // Mirrors the `exclude_id == -1` behavior of `creature_find_nearest(origin, -1, 0.0)`:
+  // - requires `active != 0`
+  // - requires `lifecycle_stage == 16.0` (alive sentinel)
+  // - no HP gate
   const origin = ctx.originPos;
   let bestIdx = ctx.state.preserveBugs ? 0 : -1;
   let bestDistSq = 1e12;

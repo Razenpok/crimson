@@ -4,10 +4,6 @@ import type { FixedStepClock } from './clock.ts';
 import { FrameContext, InputStatus } from './input-providers.ts';
 import type { TickBatchResult } from './tick-runner.ts';
 
-// ---------------------------------------------------------------------------
-// TickFrameRunner (Protocol → interface)
-// ---------------------------------------------------------------------------
-
 export interface TickFrameRunner {
   beginFrame(frameCtx: FrameContext): void;
   advanceTicks(opts: {
@@ -16,10 +12,6 @@ export interface TickFrameRunner {
     tickDt: number;
   }): TickBatchResult;
 }
-
-// ---------------------------------------------------------------------------
-// TickFrameAdvance
-// ---------------------------------------------------------------------------
 
 export class TickFrameAdvance {
   readonly batch: TickBatchResult;
@@ -39,10 +31,6 @@ export class TickFrameAdvance {
     this.ticksRequested = opts.ticksRequested;
   }
 }
-
-// ---------------------------------------------------------------------------
-// advanceTickRunnerFrame
-// ---------------------------------------------------------------------------
 
 export function advanceTickRunnerFrame(opts: {
   runner: TickFrameRunner;

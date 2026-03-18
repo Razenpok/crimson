@@ -5,10 +5,10 @@ import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { bonusApply } from './apply.ts';
-import type { CreatureState } from './apply-context.ts';
 import { bonusHudUpdate } from './hud.ts';
 import { BonusId } from './ids.ts';
 import { bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
+import { CreatureState } from "@crimson/creatures/runtime.js";
 
 export interface BonusPoolLike {
   update(

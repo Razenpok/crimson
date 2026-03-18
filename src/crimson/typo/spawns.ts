@@ -1,4 +1,4 @@
-// Port of crimson/typo/spawns.py — Typ'o'Shooter spawn logic
+// Port of crimson/typo/spawns.py
 
 import { Vec2 } from '@grim/geom.ts';
 import { RGBA } from '@grim/color.ts';

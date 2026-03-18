@@ -29,12 +29,7 @@ import { SecondaryProjectilePool } from './projectiles/runtime/secondary-pool.ts
 import { ProjectileTemplateId } from './projectiles/types.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
 import type { PlayerInput } from './sim/input.ts';
-import {
-  PERK_COUNT_SIZE,
-  type BonusTimers,
-  type PlayerState,
-  type QuestLevel,
-} from './sim/state-types.ts';
+import { PERK_COUNT_SIZE, type PlayerState } from './sim/state-types.ts';
 import { ftolMsI32 } from './sim/timing.ts';
 import { WeaponId } from './weapons.ts';
 import { WEAPON_COUNT_SIZE, fireWeapon } from './weapon-runtime/fire.ts';
@@ -51,6 +46,7 @@ import {
   weaponEntry,
 } from './weapon-runtime/assign.ts';
 import { AIM_JOYSTICK_TURN_RATE, AIM_KEYBOARD_TURN_RATE } from './aim-constants';
+import { QuestLevel } from "@crimson/quests/level.js";
 
 // ---------------------------------------------------------------------------
 // GameStatus — local interface to avoid circular dependency with
@@ -85,6 +81,14 @@ const _LOW_HEALTH_BLOODSPILL_SFX: [SfxId, SfxId] = [SfxId.BLOODSPILL_01, SfxId.B
 // ---------------------------------------------------------------------------
 // GameplayState class
 // ---------------------------------------------------------------------------
+
+interface BonusTimers {
+  weaponPowerUp: number;
+  reflexBoost: number;
+  energizer: number;
+  doubleExperience: number;
+  freeze: number;
+}
 
 export class GameplayState {
   rng: CrandLike;

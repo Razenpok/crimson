@@ -1,10 +1,11 @@
 // Port of crimson/perks/availability.py
 
 import { GameMode } from '@crimson/game-modes.ts';
-import type { GameplayState, PlayerState, QuestLevel } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { perkCountGet } from './helpers.ts';
 import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
 import { PERK_COUNT_SIZE } from '@crimson/sim/state-types.ts';
+import { QuestLevel } from "@crimson/quests/level.js";
 
 const _PERK_BASE_AVAILABLE_MAX_ID = PerkId.BONUS_MAGNET as number;
 const _PERK_ALWAYS_AVAILABLE: readonly PerkId[] = [

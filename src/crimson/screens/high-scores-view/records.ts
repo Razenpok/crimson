@@ -19,10 +19,10 @@ export function resolveRequest(state: GameState): HighScoresRequest {
   if (request.gameModeId === GameMode.QUESTS && request.questLevel === null) {
     let level = state.pendingQuestLevel;
     if (level === null) {
-      level = state.config.gameplay.questLevel as unknown as QuestLevel | null;
+      level = state.config.gameplay.questLevel;
     }
     // Native screen always has a valid quest stage selected (defaults to 1.1).
-    request.questLevel = level !== null ? level : { major: 1, minor: 1 };
+    request.questLevel = level ?? { major: 1, minor: 1 };
   }
 
   return request;
@@ -54,7 +54,7 @@ function passesDateFilter(entry: HighScoreRecord, dateMode: number, now: Date): 
   }
   if (mode === 2) {
     // Week-of-year checksum stored at record byte 0x41.
-    // In the WebGL port we skip the checksum comparison for now
+    // TODO: In the WebGL port we skip the checksum comparison for now
     // since the binary high-score format is not yet implemented.
     return year === now.getFullYear();
   }
@@ -62,7 +62,7 @@ function passesDateFilter(entry: HighScoreRecord, dateMode: number, now: Date): 
 }
 
 export function loadRecords(state: GameState, _request: HighScoresRequest): HighScoreRecord[] {
-  // In the WebGL port, high-score persistence is not yet implemented.
+  // TODO: In the WebGL port, high-score persistence is not yet implemented.
   // Return an empty list; the UI will display "No scores yet."
   return [];
 }

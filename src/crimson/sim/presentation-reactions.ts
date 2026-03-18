@@ -4,27 +4,15 @@ import { SfxId } from '@grim/sfx-map.ts';
 import type { TickResult } from './hooks.ts';
 import type { QuestSpawnState } from './sessions.ts';
 
-// ---------------------------------------------------------------------------
-// QuestPresentationReaction
-// ---------------------------------------------------------------------------
-
 export interface QuestPresentationReaction {
   readonly playHitSfx: boolean;
   readonly playCompletionMusic: boolean;
 }
 
-// ---------------------------------------------------------------------------
-// PostApplyReaction
-// ---------------------------------------------------------------------------
-
 export interface PostApplyReaction {
   readonly sfx: readonly SfxId[];
   readonly quest: QuestPresentationReaction | null;
 }
-
-// ---------------------------------------------------------------------------
-// buildPostApplyReaction
-// ---------------------------------------------------------------------------
 
 export function buildPostApplyReaction(opts: {
   tickResult: TickResult;
@@ -46,35 +34,24 @@ export function buildPostApplyReaction(opts: {
   };
 }
 
-// ---------------------------------------------------------------------------
-// applyPostApplyReaction
-// ---------------------------------------------------------------------------
-
 export function applyPostApplyReaction(opts: {
   reaction: PostApplyReaction;
   playSfx: ((sfx: SfxId) => void) | null;
   playCompletionMusic?: (() => void) | null;
-  // no applyAudio param needed – caller decides whether to pass playSfx
 }): void {
   const { reaction, playSfx, playCompletionMusic } = opts;
   const quest = reaction.quest;
 
-  if (playSfx !== null && playSfx !== undefined) {
+  if (playSfx) {
     for (const sfx of reaction.sfx) {
       playSfx(sfx);
     }
-    if (quest !== null && quest !== undefined && quest.playHitSfx) {
+    if (quest?.playHitSfx) {
       playSfx(SfxId.QUESTHIT);
     }
   }
 
-  if (
-    quest !== null &&
-    quest !== undefined &&
-    quest.playCompletionMusic &&
-    playCompletionMusic !== null &&
-    playCompletionMusic !== undefined
-  ) {
-    playCompletionMusic();
+  if (quest?.playCompletionMusic) {
+    playCompletionMusic?.();
   }
 }

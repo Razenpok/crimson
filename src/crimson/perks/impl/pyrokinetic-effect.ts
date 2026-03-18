@@ -1,3 +1,5 @@
+// Port of crimson/perks/impl/pyrokinetic_effect.py
+
 import { perkActive } from "@crimson/perks/helpers.ts";
 import { PerkId } from "@crimson/perks/ids.ts";
 import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
@@ -22,9 +24,9 @@ export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
       continue;
     }
     const creature = ctx.creatures[target];
-    creature.collision_timer = creature.collision_timer - ctx.dt;
-    if (creature.collision_timer < 0.0) {
-      creature.collision_timer = 0.5;
+    creature.collisionTimer = creature.collisionTimer - ctx.dt;
+    if (creature.collisionTimer < 0.0) {
+      creature.collisionTimer = 0.5;
       const intensityCallers: [number, number][] = [
         [0.8, RngCallerStatic.PERKS_UPDATE_EFFECTS_PYROKINETIC_ANGLE_0P8],
         [0.6, RngCallerStatic.PERKS_UPDATE_EFFECTS_PYROKINETIC_ANGLE_0P6],

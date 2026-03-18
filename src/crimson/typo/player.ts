@@ -1,4 +1,4 @@
-// Port of crimson/typo/player.py — Typ'o'Shooter player frame enforcement
+// Port of crimson/typo/player.py
 
 import { Vec2 } from '@grim/geom.ts';
 import { PlayerInput } from '@crimson/sim/input.ts';

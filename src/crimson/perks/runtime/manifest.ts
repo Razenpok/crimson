@@ -28,12 +28,12 @@ import { THICK_SKINNED_HOOKS } from '@crimson/perks/impl/thick-skinned.ts';
 import type { PerkApplyHandler } from './apply-context.ts';
 import type {
   PerkHooks,
-  PerksUpdateEffectsStep,
   PlayerDeathHook,
   PlayerPerkTickStep,
   WorldDtStep,
 } from './hook-types.ts';
 import { updatePlayerBonusTimers } from './player-bonus-timers.ts';
+import { PerksUpdateEffectsStep } from "@crimson/perks/runtime/effects-context.js";
 
 // Order is parity-critical for runtime dispatch.
 export const PERK_HOOKS_IN_ORDER: readonly PerkHooks[] = [

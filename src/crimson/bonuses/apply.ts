@@ -4,7 +4,7 @@ import type { Vec2 } from '@grim/geom.ts';
 import { perkCountGet } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
-import type { BonusApplyHandler, CreatureState } from './apply-context.ts';
+import type { BonusApplyHandler } from './apply-context.ts';
 import { BonusApplyCtx } from './apply-context.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';
 import { applyPoints } from './points.ts';
@@ -21,6 +21,7 @@ import { applyShockChain } from './shock-chain.ts';
 import { applyWeapon } from './weapon.ts';
 import { applyFireblast } from './fireblast.ts';
 import { applyNuke } from './nuke.ts';
+import { CreatureState } from "@crimson/creatures/runtime.js";
 
 const _BONUS_APPLY_HANDLERS: Map<BonusId, BonusApplyHandler> = new Map([
   [BonusId.POINTS, applyPoints],

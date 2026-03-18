@@ -1,24 +1,14 @@
-import type { Vec2 } from '@grim/geom.ts';
+// Port of crimson/perks/impl/hot_tempered.py
+
 import { SfxId } from '@grim/sfx-map.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
-import type { GameplayState, PlayerState } from "@crimson/sim/state-types.ts";
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import { ProjectileSpawnFn } from "@crimson/perks/runtime/player-tick-context.js";
+import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
 
-export interface HotTemperedCtx {
-  readonly state: GameplayState;
-  readonly player: PlayerState;
-  readonly players: PlayerState[] | null;
-  readonly dt: number;
-  readonly playerPosBeforeMove: Vec2;
-  ownerRefForPlayer(playerIndex: number): OwnerRef;
-  projectileSpawn: ProjectileSpawnFn;
-}
-
-export function tickHotTempered(ctx: HotTemperedCtx): void {
+export function tickHotTempered(ctx: PlayerPerkTickCtx): void {
   if (!perkActive(ctx.player, PerkId.HOT_TEMPERED)) {
     ctx.player.hotTemperedTimer = 0.0;
     return;

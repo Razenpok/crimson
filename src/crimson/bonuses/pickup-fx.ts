@@ -13,7 +13,7 @@ function _applyDefaultPickupBurst(state: GameplayState, pickup: BonusPickupEvent
   if (pickup.bonusId === BonusId.NUKE) {
     return;
   }
-  (state.effects as EffectPool).spawnBurst(
+  state.effects.spawnBurst(
     pickup.pos,
     12,
     state.rng,
@@ -38,6 +38,7 @@ const _BONUS_PICKUP_HOOKS: Map<BonusId, BonusPickupFxHook> = new Map([
 ]);
 
 export function emitBonusPickupEffects(state: GameplayState, pickups: BonusPickupEvent[], detailPreset: number): void {
+  // Emit deterministic pickup FX for the provided pickup list.
   for (const pickup of pickups) {
     _applyDefaultPickupBurst(state, pickup, detailPreset | 0);
     const hook = _BONUS_PICKUP_HOOKS.get(pickup.bonusId);

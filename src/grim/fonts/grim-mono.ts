@@ -16,6 +16,7 @@ export interface GrimMonoFont {
 }
 
 export function createGrimMonoFont(texture: GlTexture): GrimMonoFont {
+  // TODO: rl.set_texture_filter(texture, GRIM_MONO_TEXTURE_FILTER)
   const grid = 16;
   return {
     texture,
@@ -34,11 +35,13 @@ export function drawGrimMonoText(
   scale: number,
   color: [number, number, number, number],
 ): void {
+  // TODO: review
   let xPos = pos.x;
   let yPos = pos.y;
   const advance = font.advance * scale;
   const drawSize = GRIM_MONO_DRAW_SIZE * scale;
   const lineHeight = GRIM_MONO_LINE_HEIGHT * scale;
+  const origin : [number, number] = [0, 0];
   let skipAdvance = false;
 
   for (let i = 0; i < text.length; i++) {
@@ -49,7 +52,7 @@ export function drawGrimMonoText(
       continue;
     }
     if (value === 0x0D) continue;
-    if (value === 0xA7) { // section sign — skip next advance
+    if (value === 0xA7) {
       skipAdvance = true;
       continue;
     }
@@ -68,7 +71,7 @@ export function drawGrimMonoText(
       font.texture,
       [col * font.cellWidth, row * font.cellHeight, font.cellWidth, font.cellHeight],
       [xPos, yPos + 1.0, drawSize, drawSize],
-      [0, 0],
+      origin,
       0,
       color,
     );

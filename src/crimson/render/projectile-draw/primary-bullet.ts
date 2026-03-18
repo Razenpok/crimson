@@ -18,12 +18,7 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
   const alphaByte = clamp(lifeAlpha * ctx.alpha, 0.0, 255.0) + 0.5 | 0;
   let drawn = false;
 
-  let bulletTrail;
-  try {
-    bulletTrail = getTexture(resources, TextureId.BULLET_TRAIL);
-  } catch {
-    bulletTrail = null;
-  }
+  const bulletTrail = getTexture(resources, TextureId.BULLET_TRAIL);
   if (bulletTrail !== null) {
     const origin = projOrigin(ctx.proj, ctx.pos);
     const originScreen = renderer.worldToScreen(origin);
@@ -37,12 +32,7 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
     );
   }
 
-  let bullet;
-  try {
-    bullet = getTexture(resources, TextureId.BULLET_I);
-  } catch {
-    bullet = null;
-  }
+  const bullet = getTexture(resources, TextureId.BULLET_I);
   if (bullet !== null && ctx.life >= 0.39) {
     const size = WorldRenderCtx.bulletSpriteSize(typeId, ctx.scale);
     const src: [number, number, number, number] = [0.0, 0.0, bullet.width, bullet.height];

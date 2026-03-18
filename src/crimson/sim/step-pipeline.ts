@@ -12,33 +12,16 @@ export class PresentationRngTrace {
 }
 
 export class DeterministicStepResult {
-  dtSim: number;
-  timing: FrameTiming;
-  events: WorldEvents;
-  presentation: PresentationStepCommands;
-  presentationPlanMs: number;
-  presentationRngTrace: PresentationRngTrace;
-  terrainFx: TerrainFxBatch;
-  postApplySfx: readonly SfxId[];
-
   constructor(
-    dtSim: number,
-    timing: FrameTiming,
-    events: WorldEvents,
-    presentation: PresentationStepCommands,
-    presentationPlanMs: number,
-    presentationRngTrace: PresentationRngTrace,
-    terrainFx: TerrainFxBatch = EMPTY_TERRAIN_FX_BATCH,
-    postApplySfx: readonly SfxId[] = [],
+    public dtSim: number,
+    public timing: FrameTiming,
+    public events: WorldEvents,
+    public presentation: PresentationStepCommands,
+    public presentationPlanMs: number,
+    public presentationRngTrace: PresentationRngTrace,
+    public terrainFx: TerrainFxBatch = EMPTY_TERRAIN_FX_BATCH,
+    public postApplySfx: readonly SfxId[] = [],
   ) {
-    this.dtSim = dtSim;
-    this.timing = timing;
-    this.events = events;
-    this.presentation = presentation;
-    this.presentationPlanMs = presentationPlanMs;
-    this.presentationRngTrace = presentationRngTrace;
-    this.terrainFx = terrainFx;
-    this.postApplySfx = postApplySfx;
   }
 }
 
@@ -48,6 +31,11 @@ export function timeScaleReflexBoostBonus(opts: {
   timeScaleActive: boolean;
   dt: number;
 }): number {
+  // Apply Reflex Boost time scaling, matching the classic frame loop latch semantics.
+
+  // Native stores frame delta time in float32 (`frame_dt`). Many downstream systems
+  // multiply `frame_dt` before rounding back to float32, so the *input* precision
+  // matters even when Reflex Boost is inactive.
   const dtF32 = f32(opts.dt);
   if (!(dtF32 > 0.0)) {
     return dtF32;

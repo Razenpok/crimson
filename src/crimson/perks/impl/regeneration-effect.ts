@@ -1,21 +1,11 @@
-import type { CrandLike } from '@grim/rand.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+// Port of crimson/perks/impl/regeneration_effect.py
+
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.js";
 
-export interface RegenerationStateLike {
-  preserveBugs: boolean;
-  rng: CrandLike;
-}
-
-export interface RegenerationCtx {
-  readonly state: RegenerationStateLike;
-  readonly players: PlayerState[];
-  readonly dt: number;
-}
-
-export function updateRegeneration(ctx: RegenerationCtx): void {
+export function updateRegeneration(ctx: PerksUpdateEffectsCtx): void {
   if (!ctx.players.length) {
     return;
   }
@@ -31,6 +21,8 @@ export function updateRegeneration(ctx: RegenerationCtx): void {
   }
 
   if (ctx.state.preserveBugs) {
+    // Native `perks_update_effects` applies the regen tick to player 1 only,
+    // and repeats that write loop by `config_player_count`.
     const player0 = ctx.players[0];
     for (let i = 0; i < ctx.players.length; i++) {
       if (!(0.0 < player0.health && player0.health < 100.0)) {
@@ -45,6 +37,8 @@ export function updateRegeneration(ctx: RegenerationCtx): void {
   }
 
   let healAmount = ctx.dt;
+  // Native no-ops Greater Regeneration. In default rewrite mode we apply the
+  // intended upgrade and keep the no-op behind `--preserve-bugs`.
   if (
     !ctx.state.preserveBugs &&
     perkActive(ctx.players[0], PerkId.GREATER_REGENERATION)

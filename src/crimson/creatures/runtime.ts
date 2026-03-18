@@ -273,7 +273,7 @@ export class CreatureState implements CreatureStateLike {
   reward_value = 0.0;
 
   plagueInfected = false;
-  collision_timer: number = CONTACT_DAMAGE_PERIOD;
+  collisionTimer: number = CONTACT_DAMAGE_PERIOD;
   lifecycleStage: number = CREATURE_LIFECYCLE_ALIVE;
 
   size = 50.0;
@@ -312,7 +312,7 @@ export class CreatureState implements CreatureStateLike {
     c.attack_cooldown = this.attack_cooldown;
     c.reward_value = this.reward_value;
     c.plagueInfected = this.plagueInfected;
-    c.collision_timer = this.collision_timer;
+    c.collisionTimer = this.collisionTimer;
     c.lifecycleStage = this.lifecycleStage;
     c.size = this.size;
     c.anim_phase = this.anim_phase;
@@ -1041,9 +1041,9 @@ export class CreaturePool {
       }
 
       if (creature.plagueInfected) {
-        creature.collision_timer -= dt;
-        if (creature.collision_timer < 0.0) {
-          creature.collision_timer += CONTACT_DAMAGE_PERIOD;
+        creature.collisionTimer -= dt;
+        if (creature.collisionTimer < 0.0) {
+          creature.collisionTimer += CONTACT_DAMAGE_PERIOD;
           creature.hp -= 15.0;
           let plagueKilled = false;
           if (creature.hp < 0.0) {
@@ -1217,9 +1217,9 @@ export class CreaturePool {
         const radioactivePlayer = players[0];
         const dist = creature.pos.sub(radioactivePlayer.pos).length();
         if (dist < 100.0) {
-          creature.collision_timer -= dt * 1.5;
-          if (creature.collision_timer < 0.0) {
-            creature.collision_timer = CONTACT_DAMAGE_PERIOD;
+          creature.collisionTimer -= dt * 1.5;
+          if (creature.collisionTimer < 0.0) {
+            creature.collisionTimer = CONTACT_DAMAGE_PERIOD;
             creature.hp -= (100.0 - dist) * 0.3;
             if (fxQueue !== null) {
               fxQueue.addRandom(creature.pos, rng);
@@ -1483,7 +1483,7 @@ export class CreaturePool {
     }
 
     entry.plagueInfected = false;
-    entry.collision_timer = 0.0;
+    entry.collisionTimer = 0.0;
     entry.lifecycleStage = CREATURE_LIFECYCLE_ALIVE;
     entry.hitFlashTimer = 0.0;
     entry.anim_phase = 0.0;

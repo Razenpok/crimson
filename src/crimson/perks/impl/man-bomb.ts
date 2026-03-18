@@ -1,33 +1,13 @@
+// Port of crimson/perks/impl/man_bomb.py
+
 import { SfxId } from '@grim/sfx-map.ts';
-import type { CrandLike } from '@grim/rand.ts';
-import type { OwnerRef } from '@crimson/owner-ref.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
-import type { GameplayState, PlayerState } from "@crimson/sim/state-types.ts";
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import { ProjectileSpawnFn } from "@crimson/perks/runtime/player-tick-context.js";
+import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
 
-export interface PerkIntervalsLike {
-  manBomb: number;
-}
-
-export interface ManBombStateLike {
-  perkIntervals: PerkIntervalsLike;
-  rng: CrandLike;
-  sfxQueue: SfxId[];
-}
-
-export interface ManBombCtx {
-  readonly state: GameplayState;
-  readonly player: PlayerState;
-  readonly players: PlayerState[] | null;
-  readonly dt: number;
-  ownerRefForPlayerProjectiles(state: ManBombStateLike, playerIndex: number): OwnerRef;
-  projectileSpawn: ProjectileSpawnFn;
-}
-
-export function tickManBomb(ctx: ManBombCtx): void {
+export function tickManBomb(ctx: PlayerPerkTickCtx): void {
   if (!perkActive(ctx.player, PerkId.MAN_BOMB)) {
     ctx.player.manBombTimer = 0.0;
     return;

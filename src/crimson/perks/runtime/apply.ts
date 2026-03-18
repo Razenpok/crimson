@@ -23,7 +23,7 @@ export function perkApply(
   try {
     adjustPerkCount(owner, perkId);
     const handler = PERK_APPLY_HANDLERS.get(perkId);
-    if (handler != null) {
+    if (handler !== undefined) {
       handler(
         new PerkApplyCtx(
           state,
