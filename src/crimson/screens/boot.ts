@@ -25,8 +25,6 @@ export const LOGO_REF_IN_START = 7.0;
 export const LOGO_REF_IN_END = 8.0;
 export const LOGO_REF_HOLD_END = 10.0;
 export const LOGO_REF_OUT_END = 11.0;
-export const DEBUG_LOADING_HOLD_ENV = 'CRIMSON_DEBUG_LOADING_HOLD_SECONDS';
-
 type Color = [number, number, number, number];
 
 const MOUSE_BUTTON_LEFT = 0;
@@ -35,11 +33,6 @@ const MOUSE_BUTTON_RIGHT = 2;
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function debugLoadingHoldSeconds(): number {
-  // In browser context, no env vars; always 0.
-  return 0.0;
-}
 
 function clamp01(value: number): number {
   if (value < 0.0) return 0.0;
@@ -62,12 +55,11 @@ export class BootView {
   private _logoActive: boolean = false;
   private _introStarted: boolean = false;
   private _themeStarted: boolean = false;
-  private _loadingHoldRemaining: number = 0.0;
+  private _loadingHoldRemaining: number = 0.5;
 
   constructor(ctx: WebGLContext, state: GameState) {
     this._ctx = ctx;
     this.state = state;
-    this._loadingHoldRemaining = debugLoadingHoldSeconds();
   }
 
   open(): void {
@@ -79,7 +71,7 @@ export class BootView {
     this._logoActive = false;
     this._introStarted = false;
     this._themeStarted = false;
-    this._loadingHoldRemaining = debugLoadingHoldSeconds();
+    this._loadingHoldRemaining = 1.0;
     this._loadResources();
   }
 
