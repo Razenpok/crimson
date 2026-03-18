@@ -5,7 +5,7 @@ import { App } from './grim/app.ts';
 import { InputState } from './grim/input.ts';
 import { type View } from './grim/view.ts';
 import { runGame } from './crimson/game/runtime.ts';
-import { type GameConfig } from './crimson/game/types.ts';
+import { type GameConfig, GameState } from "./crimson/game/types.ts";
 
 /**
  * Minimal boot view that loads assets asynchronously, then switches to the
@@ -19,10 +19,13 @@ class BootStrapView implements View {
   private _config: GameConfig;
   private _loading = false;
   private _gameView: View | null = null;
+  private _state: GameState | null = null;
+  private _onLoaded: (() => void) | null;
 
-  constructor(ctx: WebGLContext, config: GameConfig) {
+  constructor(ctx: WebGLContext, config: GameConfig, onLoaded?: () => void) {
     this._ctx = ctx;
     this._config = config;
+    this._onLoaded = onLoaded ?? null;
   }
 
   open(): void {
@@ -39,6 +42,7 @@ class BootStrapView implements View {
     try {
       const result = runGame(this._ctx, this._config);
       this._gameView = result.view;
+      this._state = result.state;
       this._gameView.open();
     } catch (err) {
       console.error('Failed to initialize game:', err);
@@ -48,6 +52,10 @@ class BootStrapView implements View {
   update(dt: number): void {
     if (this._gameView) {
       this._gameView.update(dt);
+    }
+    if (this._onLoaded && this._state?.resources !== null) {
+      this._onLoaded();
+      this._onLoaded = null;
     }
   }
 
@@ -149,8 +157,9 @@ function main(): void {
   const start = () => {
     overlay.removeEventListener('click', start);
     document.removeEventListener('keydown', start);
-    overlay.remove();
-    app.run(new BootStrapView(ctx, config));
+    overlay.style.cursor = 'default';
+    label.textContent = 'Downloading assets...';
+    app.run(new BootStrapView(ctx, config, () => overlay.remove()));
   };
   overlay.addEventListener('click', start);
   document.addEventListener('keydown', start);
