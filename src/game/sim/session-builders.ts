@@ -1,0 +1,234 @@
+// Port of crimson/sim/session_builders.py
+
+import { GameMode } from '../game-modes.ts';
+import type { QuestLevel } from '../quests/level.ts';
+import type { SpawnEntry } from '../quests/types.ts';
+import { weaponAssignPlayer } from '../weapon-runtime/index.ts';
+import { WeaponId } from '../weapons.ts';
+import type { PlayerInput } from './input.ts';
+import {
+  DeterministicSession,
+  type MidStepContext,
+  type PostStepContext,
+  QuestSpawnState,
+  RushSpawnState,
+  SurvivalSpawnState,
+  type WorldState,
+  questPostStep,
+  rushInputTransform,
+  rushMidStep,
+  survivalMidStep,
+} from './sessions.ts';
+
+// Tutorial and Typo runtime imports
+import { TutorialOverlayState, TutorialState, resetTutorialState } from '../tutorial/state.ts';
+import {
+  type TutorialWorldState,
+  tutorialBeforeStep,
+  tutorialInputTransform,
+  tutorialPostStep,
+} from '../tutorial/runtime.ts';
+import { resetTypoState } from '../typo/state.ts';
+import {
+  typoBeforeStep,
+  typoInputTransform,
+  typoMidStep,
+  typoPostStep,
+} from '../typo/runtime.ts';
+
+// ---------------------------------------------------------------------------
+// Rush constants
+// ---------------------------------------------------------------------------
+
+export const RUSH_WEAPON_ID = WeaponId.ASSAULT_RIFLE;
+export const RUSH_FORCED_AMMO = 30.0;
+
+// ---------------------------------------------------------------------------
+// enforceRushLoadout
+// ---------------------------------------------------------------------------
+
+export function enforceRushLoadout(world: WorldState): void {
+  for (const player of world.players) {
+    if (player.weapon.weaponId !== RUSH_WEAPON_ID) {
+      weaponAssignPlayer(player, RUSH_WEAPON_ID, world.state);
+    }
+    player.weapon.ammo = RUSH_FORCED_AMMO;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Session builders
+// ---------------------------------------------------------------------------
+
+export function buildSurvivalSession(opts: {
+  world: WorldState;
+  worldSize: number;
+  damageScaleByType: Map<number, number>;
+  detailPreset?: number;
+  violenceDisabled?: number;
+  gameTuneStarted?: boolean;
+  finalizePostRenderLifecycle?: boolean;
+  applyWorldDtSteps?: boolean;
+}): [DeterministicSession, SurvivalSpawnState] {
+  const spawnState = new SurvivalSpawnState();
+  const session = new DeterministicSession({
+    world: opts.world,
+    worldSize: opts.worldSize,
+    damageScaleByType: opts.damageScaleByType,
+    gameMode: GameMode.SURVIVAL,
+    perkProgressionEnabled: true,
+    detailPreset: opts.detailPreset,
+    violenceDisabled: opts.violenceDisabled,
+    gameTuneStarted: opts.gameTuneStarted,
+    applyWorldDtSteps: opts.applyWorldDtSteps,
+    finalizePostRenderLifecycle: opts.finalizePostRenderLifecycle,
+    midStepHook: (ctx: MidStepContext) => survivalMidStep(ctx, spawnState),
+  });
+  return [session, spawnState];
+}
+
+export function buildRushSession(opts: {
+  world: WorldState;
+  worldSize: number;
+  damageScaleByType: Map<number, number>;
+  detailPreset?: number;
+  violenceDisabled?: number;
+  gameTuneStarted?: boolean;
+  finalizePostRenderLifecycle?: boolean;
+}): [DeterministicSession, RushSpawnState] {
+  const spawnState = new RushSpawnState();
+  const session = new DeterministicSession({
+    world: opts.world,
+    worldSize: opts.worldSize,
+    damageScaleByType: opts.damageScaleByType,
+    gameMode: GameMode.RUSH,
+    perkProgressionEnabled: false,
+    detailPreset: opts.detailPreset,
+    violenceDisabled: opts.violenceDisabled,
+    gameTuneStarted: opts.gameTuneStarted,
+    finalizePostRenderLifecycle: opts.finalizePostRenderLifecycle,
+    elapsedUsesRawDt: true,
+    midStepHook: (ctx: MidStepContext) => rushMidStep(ctx, spawnState),
+    beforeStepHook: () => enforceRushLoadout(opts.world),
+    inputTransform: rushInputTransform,
+  });
+  return [session, spawnState];
+}
+
+export function buildQuestSession(opts: {
+  world: WorldState;
+  worldSize: number;
+  damageScaleByType: Map<number, number>;
+  detailPreset?: number;
+  violenceDisabled?: number;
+  gameTuneStarted?: boolean;
+  demoModeActive?: boolean;
+  applyWorldDtSteps?: boolean;
+  finalizePostRenderLifecycle?: boolean;
+  spawnEntries: SpawnEntry[];
+  questLevel: QuestLevel | null;
+  startWeaponId: WeaponId | null;
+}): [DeterministicSession, QuestSpawnState] {
+  opts.world.state.questLevel = opts.questLevel;
+
+  const weaponId =
+    opts.startWeaponId == null || opts.startWeaponId === WeaponId.NONE
+      ? WeaponId.PISTOL
+      : opts.startWeaponId;
+
+  for (const player of opts.world.players) {
+    weaponAssignPlayer(player, weaponId, opts.world.state);
+  }
+
+  opts.world.creatures.captureSpawnEventsAuthoritative = false;
+
+  const questState = new QuestSpawnState();
+  questState.spawnEntries = [...opts.spawnEntries];
+
+  const session = new DeterministicSession({
+    world: opts.world,
+    worldSize: opts.worldSize,
+    damageScaleByType: opts.damageScaleByType,
+    gameMode: GameMode.QUESTS,
+    perkProgressionEnabled: true,
+    detailPreset: opts.detailPreset,
+    violenceDisabled: opts.violenceDisabled,
+    gameTuneStarted: opts.gameTuneStarted,
+    demoModeActive: opts.demoModeActive,
+    applyWorldDtSteps: opts.applyWorldDtSteps,
+    finalizePostRenderLifecycle: opts.finalizePostRenderLifecycle,
+    postStepHook: (ctx: PostStepContext) => questPostStep(ctx, questState),
+  });
+  return [session, questState];
+}
+
+export function buildTypoSession(opts: {
+  world: WorldState;
+  worldSize: number;
+  damageScaleByType: Map<number, number>;
+  detailPreset?: number;
+  violenceDisabled?: number;
+  gameTuneStarted?: boolean;
+  dictionaryWords?: readonly string[];
+  highscoreNames?: readonly string[];
+}): DeterministicSession {
+  const dictionaryWords = opts.dictionaryWords ?? [];
+  const highscoreNames = opts.highscoreNames ?? [];
+
+  resetTypoState(
+    opts.world.state.typo,
+    opts.world.creatures.entries.length,
+    dictionaryWords,
+    highscoreNames,
+  );
+
+  const session = new DeterministicSession({
+    world: opts.world,
+    worldSize: opts.worldSize,
+    damageScaleByType: opts.damageScaleByType,
+    gameMode: GameMode.TYPO,
+    perkProgressionEnabled: false,
+    detailPreset: opts.detailPreset,
+    violenceDisabled: opts.violenceDisabled,
+    gameTuneStarted: opts.gameTuneStarted,
+    beforeStepHook: () => typoBeforeStep(opts.world),
+    midStepHook: typoMidStep,
+    postStepHook: typoPostStep,
+    inputTransform: (inputs: PlayerInput[]) =>
+      typoInputTransform(opts.world, inputs),
+  });
+  return session;
+}
+
+export function buildTutorialSession(opts: {
+  world: WorldState;
+  worldSize: number;
+  damageScaleByType: Map<number, number>;
+  detailPreset?: number;
+  violenceDisabled?: number;
+  gameTuneStarted?: boolean;
+  demoModeActive?: boolean;
+}): DeterministicSession {
+  resetTutorialState(
+    opts.world.state.tutorial,
+    opts.world.state.tutorialOverlay,
+    opts.world.state.preserveBugs,
+  );
+
+  const session = new DeterministicSession({
+    world: opts.world,
+    worldSize: opts.worldSize,
+    damageScaleByType: opts.damageScaleByType,
+    gameMode: GameMode.TUTORIAL,
+    perkProgressionEnabled: true,
+    detailPreset: opts.detailPreset,
+    violenceDisabled: opts.violenceDisabled,
+    gameTuneStarted: opts.gameTuneStarted,
+    demoModeActive: opts.demoModeActive,
+    beforeStepHook: () => tutorialBeforeStep(opts.world as unknown as TutorialWorldState),
+    postStepHook: (ctx) => tutorialPostStep({ world: ctx.world as unknown as TutorialWorldState, dtSimMs: ctx.dtSimMs, worldSize: ctx.worldSize, detailPreset: ctx.detailPreset }),
+    inputTransform: (inputs: PlayerInput[]) =>
+      tutorialInputTransform(opts.world as unknown as TutorialWorldState, inputs),
+  });
+  return session;
+}

@@ -1,0 +1,54 @@
+// Port of crimson/perks/runtime/player_tick_context.py
+
+import type { Vec2 } from '../../../engine/geom.ts';
+import type { OwnerRef } from '../../owner-ref.ts';
+import type { GameplayState, PlayerState } from '../../sim/state-types.ts';
+import { ProjectileTemplateId } from "@game/projectiles/types.js";
+
+export type ProjectileSpawnFn = (
+  state: GameplayState,
+  players: readonly PlayerState[] | null,
+  pos: Vec2,
+  angle: number,
+  typeId: ProjectileTemplateId,
+  owner: OwnerRef,
+  ownerPlayerIndex?: number | null,
+  hitsPlayers?: boolean,
+) => number;
+
+export type OwnerRefForPlayerFn = (playerIndex: number) => OwnerRef;
+export type OwnerRefForPlayerProjectilesFn = (state: GameplayState, playerIndex: number) => OwnerRef;
+
+export class PlayerPerkTickCtx {
+  state: GameplayState;
+  player: PlayerState;
+  playerPosBeforeMove: Vec2;
+  players: PlayerState[] | null;
+  dt: number;
+  stationary: boolean;
+  ownerRefForPlayer: OwnerRefForPlayerFn;
+  ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn;
+  projectileSpawn: ProjectileSpawnFn;
+
+  constructor(
+    state: GameplayState,
+    player: PlayerState,
+    playerPosBeforeMove: Vec2,
+    players: PlayerState[] | null,
+    dt: number,
+    stationary: boolean,
+    ownerRefForPlayer: OwnerRefForPlayerFn,
+    ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn,
+    projectileSpawn: ProjectileSpawnFn,
+  ) {
+    this.state = state;
+    this.player = player;
+    this.playerPosBeforeMove = playerPosBeforeMove;
+    this.players = players;
+    this.dt = dt;
+    this.stationary = stationary;
+    this.ownerRefForPlayer = ownerRefForPlayer;
+    this.ownerRefForPlayerProjectiles = ownerRefForPlayerProjectiles;
+    this.projectileSpawn = projectileSpawn;
+  }
+}

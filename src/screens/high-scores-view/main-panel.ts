@@ -1,0 +1,209 @@
+// Port of crimson/screens/high_scores_view/main_panel.py
+
+import { type WebGLContext } from '../../engine/webgl.ts';
+import { Vec2 } from '../../engine/geom.ts';
+import { type RuntimeResources, TextureId, getTexture } from '../../engine/assets.ts';
+import { type SmallFontData } from '../../engine/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '../../engine/fonts/small.ts';
+import { InputState } from '../../engine/input.ts';
+import { GameMode } from '../../game/game-modes.ts';
+import type { HighScoresRequest } from '../../game/types.ts';
+import type { QuestLevel } from '../../game/quests/level.ts';
+import { questLevelText, questLevelGlobalIndex } from '../../game/quests/level.ts';
+import { questByLevel } from '../../game/quests/index.ts';
+import { buttonDraw, buttonWidth } from '../../ui/perk-menu.ts';
+import {
+  HS_BACK_BUTTON_X,
+  HS_BACK_BUTTON_Y,
+  HS_BUTTON_STEP_Y,
+  HS_BUTTON_X,
+  HS_BUTTON_Y0,
+  HS_QUEST_ARROW_X,
+  HS_QUEST_ARROW_Y,
+  HS_SCORE_FRAME_H,
+  HS_SCORE_FRAME_W,
+  HS_SCORE_FRAME_X,
+  HS_SCORE_FRAME_Y,
+  HS_TITLE_UNDERLINE_Y,
+} from '../high-scores-layout.ts';
+import { modeLabel } from './shared.ts';
+import type { HighScoresView } from './view.ts';
+
+type Color = [number, number, number, number];
+type RectTuple = [number, number, number, number];
+
+const WHITE: Color = [1, 1, 1, 1];
+const ORIGIN: [number, number] = [0, 0];
+
+export function drawMainPanel(
+  ctx: WebGLContext,
+  view: HighScoresView,
+  opts: {
+    resources: RuntimeResources;
+    font: SmallFontData;
+    leftPanelTopLeft: Vec2;
+    scale: number;
+    modeId: GameMode;
+    questMajor: number;
+    questMinor: number;
+    request: HighScoresRequest | null;
+  },
+): number | null {
+  const { resources, font, leftPanelTopLeft, scale, modeId, questMajor, questMinor, request } = opts;
+
+  let title: string;
+  if (modeId === GameMode.QUESTS) {
+    title = 'High scores - Quests';
+  } else {
+    title = `High scores - ${modeLabel(modeId, questMajor, questMinor)}`;
+  }
+
+  let titleX = 269.0;
+  if (modeId === GameMode.SURVIVAL) {
+    titleX = 266.0;
+  }
+
+  const titleDrawPos = leftPanelTopLeft.add(new Vec2(titleX * scale, 41.0 * scale));
+  drawSmallText(ctx, font, title, titleDrawPos, [1, 1, 1, 1]);
+
+  const ulW = measureSmallTextWidth(font, title);
+  const ulH = Math.max(1, Math.round(1.0 * scale));
+  const ulPos = leftPanelTopLeft.add(new Vec2(titleX * scale, HS_TITLE_UNDERLINE_Y * scale));
+  ctx.drawRectangle(
+    Math.round(ulPos.x),
+    Math.round(ulPos.y),
+    Math.round(ulW),
+    ulH,
+    1, 1, 1, 0.7,
+  );
+
+  if (modeId === GameMode.QUESTS) {
+    const hardcore = view.state.config.gameplay.hardcore;
+    let questColor: Color;
+    if (hardcore) {
+      questColor = [250 / 255, 70 / 255, 60 / 255, 0.7];
+    } else {
+      questColor = [70 / 255, 180 / 255, 240 / 255, 0.7];
+    }
+    const questLevel: QuestLevel = { major: Math.floor(questMajor), minor: Math.floor(questMinor) };
+    const quest = questByLevel(questLevel);
+    const questLabel = `${questLevelText(questLevel)}: ${quest !== null ? quest.title : '???'}`;
+    drawSmallText(ctx, font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
+
+    const arrow = getTexture(resources, TextureId.UI_ARROW);
+    const globalIndex = questLevelGlobalIndex(questLevel);
+    const unlock = hardcore
+      ? (view.questUnlockIndexFull | 0)
+      : (view.questUnlockIndex | 0);
+    const maxIndex = Math.max(0, Math.min(49, unlock));
+
+    const dstW = arrow.width * scale;
+    const dstH = arrow.height * scale;
+    const tint: Color = [1, 1, 1, 0.51];
+
+    if (globalIndex > 0) {
+      const src: RectTuple = [0.0, 0.0, arrow.width, arrow.height];
+      const arrowPos = leftPanelTopLeft.add(new Vec2((HS_QUEST_ARROW_X - 255.0) * scale, HS_QUEST_ARROW_Y * scale));
+      const dst: RectTuple = [arrowPos.x, arrowPos.y, dstW, dstH];
+      ctx.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
+    }
+
+    if (globalIndex < maxIndex) {
+      // Flip horizontally for right arrow.
+      const src: RectTuple = [0.0, 0.0, -arrow.width, arrow.height];
+      const arrowPos = leftPanelTopLeft.add(new Vec2(HS_QUEST_ARROW_X * scale, HS_QUEST_ARROW_Y * scale));
+      const dst: RectTuple = [arrowPos.x, arrowPos.y, dstW, dstH];
+      ctx.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
+    }
+  }
+
+  // Column headers
+  const headerColor: Color = [1, 1, 1, 1];
+  drawSmallText(ctx, font, 'Rank', leftPanelTopLeft.add(new Vec2(211.0 * scale, 84.0 * scale)), headerColor);
+  drawSmallText(ctx, font, 'Score', leftPanelTopLeft.add(new Vec2(246.0 * scale, 84.0 * scale)), headerColor);
+  drawSmallText(ctx, font, 'Player', leftPanelTopLeft.add(new Vec2(302.0 * scale, 84.0 * scale)), headerColor);
+
+  // Score list viewport frame (white 1px border + black interior).
+  const frameX = leftPanelTopLeft.x + HS_SCORE_FRAME_X * scale;
+  const frameY = leftPanelTopLeft.y + HS_SCORE_FRAME_Y * scale;
+  const frameW = HS_SCORE_FRAME_W * scale;
+  const frameH = HS_SCORE_FRAME_H * scale;
+  ctx.drawRectangle(Math.round(frameX), Math.round(frameY), Math.round(frameW), Math.round(frameH), 1, 1, 1, 1);
+  ctx.drawRectangle(
+    Math.round(frameX + 1.0 * scale),
+    Math.round(frameY + 1.0 * scale),
+    Math.max(0, Math.round(frameW - 2.0 * scale)),
+    Math.max(0, Math.round(frameH - 2.0 * scale)),
+    0, 0, 0, 1,
+  );
+
+  const rowStep = 16.0 * scale;
+  const rows = 10;
+  const start = Math.max(0, Math.floor(view.scrollIndex));
+  const end = Math.min(view.records.length, start + rows);
+  let y = leftPanelTopLeft.y + 103.0 * scale;
+  let selectedRank: number | null =
+    (request !== null && request.highlightRank !== null)
+      ? Math.floor(request.highlightRank)
+      : null;
+
+  const [mx, my] = InputState.mousePosition();
+  // Hit test for row hovering
+  if (
+    frameX <= mx && mx < frameX + frameW &&
+    frameY <= my && my < frameY + frameH &&
+    y <= my && my < y + rowStep * rows
+  ) {
+    const row = Math.floor((my - y) / rowStep);
+    const hoveredIdx = start + row;
+    if (start <= hoveredIdx && hoveredIdx < end) {
+      selectedRank = hoveredIdx;
+    }
+  }
+
+  if (start >= end) {
+    drawSmallText(ctx, font, 'No scores yet.', new Vec2(leftPanelTopLeft.x + 211.0 * scale, y + 8.0 * scale), [190 / 255, 190 / 255, 200 / 255, 1]);
+  } else {
+    for (let idx = start; idx < end; idx++) {
+      const entry = view.records[idx];
+      let name = entry.name();
+      if (!name) name = '???';
+      if (name.length > 16) name = name.substring(0, 16);
+
+      let value: string;
+      if (modeId === GameMode.RUSH || modeId === GameMode.QUESTS) {
+        const elapsedMs = Math.floor(entry.survivalElapsedMs);
+        value = `${Math.floor(Math.max(0, elapsedMs) / 1000)}`;
+      } else {
+        value = `${Math.floor(entry.scoreXp)}`;
+      }
+
+      let color: Color = [1, 1, 1, 0.7];
+      if (selectedRank !== null && Math.floor(selectedRank) === idx) {
+        color = [1, 1, 1, 1];
+      }
+
+      drawSmallText(ctx, font, `${idx + 1}`, new Vec2(leftPanelTopLeft.x + 216.0 * scale, y), color);
+      drawSmallText(ctx, font, value, new Vec2(leftPanelTopLeft.x + 246.0 * scale, y), color);
+      drawSmallText(ctx, font, name, new Vec2(leftPanelTopLeft.x + 304.0 * scale, y), color);
+      y += rowStep;
+    }
+  }
+
+  // Buttons
+  const buttonBasePos = leftPanelTopLeft.add(new Vec2(HS_BUTTON_X * scale, HS_BUTTON_Y0 * scale));
+  let w = buttonWidth(resources, view.updateButton.label, { scale, forceWide: view.updateButton.forceWide });
+  buttonDraw(ctx, resources, view.updateButton, { pos: buttonBasePos, width: w, scale });
+
+  w = buttonWidth(resources, view.playButton.label, { scale, forceWide: view.playButton.forceWide });
+  buttonDraw(ctx, resources, view.playButton, { pos: buttonBasePos.offset(0.0, HS_BUTTON_STEP_Y * scale), width: w, scale });
+
+  w = buttonWidth(resources, view.backButton.label, { scale, forceWide: view.backButton.forceWide });
+  buttonDraw(ctx, resources, view.backButton, {
+    pos: leftPanelTopLeft.add(new Vec2(HS_BACK_BUTTON_X * scale, HS_BACK_BUTTON_Y * scale)),
+    width: w,
+    scale,
+  });
+
+  return selectedRank;
+}

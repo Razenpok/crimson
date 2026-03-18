@@ -1,0 +1,90 @@
+// Port of crimson/bonuses/apply.py
+
+import type { Vec2 } from '../../engine/geom.ts';
+import { perkCountGet } from '../perks/helpers.ts';
+import { PerkId } from '../perks/ids.ts';
+import type { GameplayState, PlayerState } from '../sim/state-types.ts';
+import type { BonusApplyHandler, CreatureState } from './apply-context.ts';
+import { BonusApplyCtx } from './apply-context.ts';
+import { BONUS_BY_ID, BonusId } from './ids.ts';
+import { applyPoints } from './points.ts';
+import { applyEnergizer } from './energizer.ts';
+import { applyWeaponPowerUp } from './weapon-power-up.ts';
+import { applyDoubleExperience } from './double-experience.ts';
+import { applyReflexBoost } from './reflex-boost.ts';
+import { applyFreeze } from './freeze.ts';
+import { applyShield } from './shield.ts';
+import { applyMedikit } from './medikit.ts';
+import { applySpeed } from './speed.ts';
+import { applyFireBullets } from './fire-bullets.ts';
+import { applyShockChain } from './shock-chain.ts';
+import { applyWeapon } from './weapon.ts';
+import { applyFireblast } from './fireblast.ts';
+import { applyNuke } from './nuke.ts';
+
+const _BONUS_APPLY_HANDLERS: Map<BonusId, BonusApplyHandler> = new Map([
+  [BonusId.POINTS, applyPoints],
+  [BonusId.ENERGIZER, applyEnergizer],
+  [BonusId.WEAPON_POWER_UP, applyWeaponPowerUp],
+  [BonusId.DOUBLE_EXPERIENCE, applyDoubleExperience],
+  [BonusId.REFLEX_BOOST, applyReflexBoost],
+  [BonusId.FREEZE, applyFreeze],
+  [BonusId.SHIELD, applyShield],
+  [BonusId.MEDIKIT, applyMedikit],
+  [BonusId.SPEED, applySpeed],
+  [BonusId.FIRE_BULLETS, applyFireBullets],
+  [BonusId.SHOCK_CHAIN, applyShockChain],
+  [BonusId.WEAPON, applyWeapon],
+  [BonusId.FIREBLAST, applyFireblast],
+  [BonusId.NUKE, applyNuke],
+]);
+
+export function bonusApplyRegisterHandler(bonusId: BonusId, handler: BonusApplyHandler): void {
+  _BONUS_APPLY_HANDLERS.set(bonusId, handler);
+}
+
+export function bonusApply(
+  state: GameplayState,
+  player: PlayerState,
+  bonusId: BonusId,
+  origin: Vec2,
+  creatures: readonly CreatureState[],
+  players: PlayerState[],
+  amount: number | null = null,
+  detailPreset: number = 5,
+  deferFreezeCorpseFx: boolean = false,
+  freezeCorpseIndices: Set<number> | null = null,
+): void {
+  const meta = BONUS_BY_ID.get(bonusId);
+  if (meta === undefined) {
+    return;
+  }
+  if (amount === null) {
+    amount = (meta.nativeAmount ?? 0) | 0;
+  }
+
+  const economistMultiplier = perkCountGet(player, PerkId.BONUS_ECONOMIST) !== 0 ? 1.5 : 1.0;
+  const iconId = meta.iconId !== null ? (meta.iconId | 0) : -1;
+  const label = meta.name;
+  const ctx = new BonusApplyCtx(
+    state,
+    player,
+    bonusId,
+    amount | 0,
+    origin,
+    creatures,
+    players,
+    detailPreset | 0,
+    Number(economistMultiplier),
+    String(label),
+    iconId | 0,
+    Boolean(deferFreezeCorpseFx),
+    freezeCorpseIndices,
+  );
+  const handler = _BONUS_APPLY_HANDLERS.get(bonusId);
+  if (handler !== undefined) {
+    handler(ctx);
+  }
+
+  return;
+}

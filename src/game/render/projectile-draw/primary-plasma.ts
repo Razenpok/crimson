@@ -1,0 +1,124 @@
+// Port of crimson/render/projectile_draw/primary_plasma.py
+
+import { TextureId, getTexture } from '../../../engine/assets.ts';
+import { RGBA } from '../../../engine/color.ts';
+import { Vec2 } from '../../../engine/geom.ts';
+import { clamp } from '../../../engine/math.ts';
+import { BlendMode } from '../../../engine/webgl.ts';
+import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '../../effects-atlas.ts';
+import { PLASMA_PARTICLE_TYPES } from '../../sim/world-defs.ts';
+import { plasmaProjectileRenderConfig } from '../projectile-render-registry.ts';
+import type { ProjectileDrawCtx } from './types.ts';
+
+export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
+  const renderer = ctx.renderer;
+  const renderFrame = renderer.frame;
+  const resources = renderFrame.resources;
+  const typeId = ctx.typeId;
+  if (!PLASMA_PARTICLE_TYPES.has(typeId)) {
+    return false;
+  }
+
+  let particlesTexture;
+  try {
+    particlesTexture = getTexture(resources, TextureId.PARTICLES);
+  } catch {
+    return false;
+  }
+
+  const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(EffectId.GLOW);
+  if (atlas === undefined) return false;
+  const grid = SIZE_CODE_GRID[atlas.sizeCode];
+  if (!grid) return false;
+
+  const cellW = particlesTexture.width / grid;
+  const cellH = particlesTexture.height / grid;
+  const atlasFrame = atlas.frame;
+  const col = atlasFrame % grid;
+  const row = (atlasFrame / grid) | 0;
+  const src: [number, number, number, number] = [
+    cellW * col,
+    cellH * row,
+    Math.max(0.0, cellW - 2.0),
+    Math.max(0.0, cellH - 2.0),
+  ];
+
+  const speedScale = ctx.proj.speedScale;
+  const fxDetail1 = renderFrame.config !== null
+    ? (renderFrame.config.display.fxDetail[1] ?? true)
+    : true;
+
+  const plasmaCfg = plasmaProjectileRenderConfig(typeId);
+  const rgb = plasmaCfg.rgb;
+  const spacing = plasmaCfg.spacing;
+  const segLimit = plasmaCfg.segLimit;
+  const tailSize = plasmaCfg.tailSize;
+  const headSize = plasmaCfg.headSize;
+  const headAlphaMul = plasmaCfg.headAlphaMul;
+  const auraRgb = plasmaCfg.auraRgb;
+  const auraSize = plasmaCfg.auraSize;
+  const auraAlphaMul = plasmaCfg.auraAlphaMul;
+
+  const gl = renderer.gl;
+
+  if (ctx.life >= 0.4) {
+    // Reconstruct the tail length heuristic used by the native render path.
+    let segCount = ctx.proj.travelBudget | 0;
+    if (segCount < 0) segCount = 0;
+    segCount = (segCount / 5) | 0;
+    if (segCount > segLimit) segCount = segLimit;
+
+    // The stored projectile angle is rotated by +pi/2 vs travel direction.
+    const direction = Vec2.fromHeading(ctx.angle + Math.PI).mul(speedScale);
+
+    const alpha = ctx.alpha;
+    const tailTint = new RGBA(rgb[0], rgb[1], rgb[2], alpha * 0.4).toTuple();
+    const headTint = new RGBA(rgb[0], rgb[1], rgb[2], alpha * headAlphaMul).toTuple();
+    const auraTint = new RGBA(auraRgb[0], auraRgb[1], auraRgb[2], alpha * auraAlphaMul).toTuple();
+
+    gl.setBlendMode(BlendMode.ADDITIVE);
+
+    if (segCount > 0) {
+      const size = tailSize * ctx.scale;
+      const origin: [number, number] = [size * 0.5, size * 0.5];
+      const step = direction.mul(spacing);
+      for (let idx = 0; idx < segCount; idx++) {
+        const pos = ctx.pos.add(step.mul(idx));
+        const posScreen = renderer.worldToScreen(pos);
+        const dst: [number, number, number, number] = [posScreen.x, posScreen.y, size, size];
+        gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tailTint);
+      }
+    }
+
+    {
+      const size = headSize * ctx.scale;
+      const origin: [number, number] = [size * 0.5, size * 0.5];
+      const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
+      gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, headTint);
+    }
+
+    if (fxDetail1) {
+      const size = auraSize * ctx.scale;
+      const origin: [number, number] = [size * 0.5, size * 0.5];
+      const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
+      gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, auraTint);
+    }
+
+    gl.setBlendMode(BlendMode.ALPHA);
+    return true;
+  }
+
+  const fade = clamp(ctx.life * 2.5, 0.0, 1.0);
+  const fadeAlpha = fade * ctx.alpha;
+  if (fadeAlpha > 1e-3) {
+    const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toTuple();
+    const size = 56.0 * ctx.scale;
+    const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
+    const origin: [number, number] = [size * 0.5, size * 0.5];
+    gl.setBlendMode(BlendMode.ADDITIVE);
+    gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
+    gl.setBlendMode(BlendMode.ALPHA);
+  }
+
+  return true;
+}

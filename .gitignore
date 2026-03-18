@@ -1,0 +1,24 @@
+# dependencies
+**/node_modules
+
+# testing
+**/coverage
+
+# build
+**/dist
+**/build
+
+# env
+**/.env.local
+**/.env
+
+# etc
+.DS_Store
+.idea
+vite.config.mts.timestamp-*.mjs
+.tmp
+
+# Exclude assets used in local testing
+public/assets/crimson.paq
+public/assets/music.paq
+public/assets/sfx.paq

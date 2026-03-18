@@ -1,0 +1,88 @@
+// Port of crimson/ui/overlays/quest_run.py
+
+import { type GlTexture, type WebGLContext } from '../../engine/webgl.ts';
+import { type GrimMonoFont } from '../../engine/fonts/grim-mono.ts';
+import { clamp } from '../../engine/math.ts';
+import { drawQuestTitleOverlay } from './quest-title.ts';
+
+const QUEST_TITLE_FADE_IN_MS = 500.0;
+const QUEST_TITLE_HOLD_MS = 1000.0;
+const QUEST_TITLE_FADE_OUT_MS = 500.0;
+const QUEST_TITLE_TOTAL_MS =
+  QUEST_TITLE_FADE_IN_MS + QUEST_TITLE_HOLD_MS + QUEST_TITLE_FADE_OUT_MS;
+
+const QUEST_COMPLETE_BANNER_BASE_W = 256.0;
+const QUEST_COMPLETE_BANNER_BASE_H = 32.0;
+const QUEST_COMPLETE_BANNER_SCALE_BASE = 0.95;
+const QUEST_COMPLETE_BANNER_SCALE_RATE = 0.0004 * 0.13;
+const QUEST_COMPLETE_BANNER_FADE_IN_MS = 500.0;
+const QUEST_COMPLETE_BANNER_HOLD_END_MS = 1500.0;
+const QUEST_COMPLETE_BANNER_FADE_OUT_END_MS = 2000.0;
+
+export function questTitleAlpha(timerMs: number): number {
+  if (timerMs <= 0.0 || timerMs > QUEST_TITLE_TOTAL_MS) return 0.0;
+  if (timerMs < QUEST_TITLE_FADE_IN_MS && QUEST_TITLE_FADE_IN_MS > 1e-3) {
+    return timerMs / QUEST_TITLE_FADE_IN_MS;
+  }
+  if (timerMs < QUEST_TITLE_FADE_IN_MS + QUEST_TITLE_HOLD_MS) return 1.0;
+  const t = timerMs - (QUEST_TITLE_FADE_IN_MS + QUEST_TITLE_HOLD_MS);
+  return Math.max(0.0, 1.0 - t / Math.max(1e-3, QUEST_TITLE_FADE_OUT_MS));
+}
+
+export function questCompleteBannerAlpha(timerMs: number): number {
+  const t = timerMs;
+  if (t <= 0.0) return 0.0;
+  if (t < QUEST_COMPLETE_BANNER_FADE_IN_MS) {
+    return clamp(t / QUEST_COMPLETE_BANNER_FADE_IN_MS, 0.0, 1.0);
+  }
+  if (t < QUEST_COMPLETE_BANNER_HOLD_END_MS) return 1.0;
+  if (t < QUEST_COMPLETE_BANNER_FADE_OUT_END_MS) {
+    return clamp(
+      (QUEST_COMPLETE_BANNER_FADE_OUT_END_MS - t) / QUEST_COMPLETE_BANNER_FADE_IN_MS,
+      0.0,
+      1.0,
+    );
+  }
+  return 0.0;
+}
+
+export function drawQuestTitleTimerOverlay(
+  ctx: WebGLContext,
+  screenW: number,
+  screenH: number,
+  font: GrimMonoFont,
+  title: string,
+  number: string,
+  timerMs: number,
+): void {
+  const alpha = questTitleAlpha(timerMs);
+  if (alpha <= 0.0) return;
+  drawQuestTitleOverlay(ctx, screenW, screenH, font, title, number, alpha);
+}
+
+export function drawQuestCompleteBannerOverlay(
+  ctx: WebGLContext,
+  screenW: number,
+  screenH: number,
+  texture: GlTexture,
+  timerMs: number,
+): void {
+  if (timerMs <= 0.0) return;
+  const alpha = questCompleteBannerAlpha(timerMs);
+  if (alpha <= 0.0) return;
+  const scale =
+    QUEST_COMPLETE_BANNER_SCALE_BASE + timerMs * QUEST_COMPLETE_BANNER_SCALE_RATE;
+  const width = QUEST_COMPLETE_BANNER_BASE_W * scale;
+  const height = QUEST_COMPLETE_BANNER_BASE_H * scale;
+  const centerX = screenW * 0.5;
+  const centerY = screenH * 0.5;
+  const src: [number, number, number, number] = [0, 0, texture.width, texture.height];
+  const dst: [number, number, number, number] = [
+    centerX - width * 0.5,
+    centerY - height * 0.5,
+    width,
+    height,
+  ];
+  const tint: [number, number, number, number] = [1.0, 1.0, 1.0, clamp(alpha, 0.0, 1.0)];
+  ctx.drawTexturePro(texture, src, dst, [0, 0], 0.0, tint);
+}

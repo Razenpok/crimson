@@ -1,0 +1,151 @@
+// Port of grim/input.py — DOM-based keyboard/mouse input
+
+export class ActionMap {
+  private bindings: Map<string, number[]> = new Map();
+
+  bind(action: string, ...keys: number[]): void {
+    if (keys.length === 0) throw new Error('bind requires at least one key');
+    this.bindings.set(action, keys.slice());
+  }
+
+  isDown(action: string): boolean {
+    const keys = this.bindings.get(action);
+    if (!keys) return false;
+    return keys.some(k => InputState.isKeyDown(k));
+  }
+
+  wasPressed(action: string): boolean {
+    const keys = this.bindings.get(action);
+    if (!keys) return false;
+    return keys.some(k => InputState.wasKeyPressed(k));
+  }
+}
+
+/**
+ * Global input state driven by DOM events.
+ * Call InputState.init(canvas) once at startup.
+ * Call InputState.endFrame() at the end of each frame to clear pressed/released sets.
+ */
+export class InputState {
+  private static _keysDown = new Set<number>();
+  private static _keysPressed = new Set<number>();
+  private static _keysRepeated = new Set<number>();
+  private static _mouseButtons = new Set<number>();
+  private static _mouseButtonsPressed = new Set<number>();
+  private static _mouseX = 0;
+  private static _mouseY = 0;
+  private static _charQueue: number[] = [];
+  private static _keyPressedQueue: number[] = [];
+  private static _wheelDelta = 0;
+  private static _initialized = false;
+
+  static init(canvas: HTMLCanvasElement): void {
+    if (this._initialized) return;
+    this._initialized = true;
+
+    window.addEventListener('keydown', (e) => {
+      const code = e.keyCode;
+      if (!this._keysDown.has(code)) {
+        this._keysPressed.add(code);
+        this._keyPressedQueue.push(code);
+      } else if (e.repeat) {
+        this._keysRepeated.add(code);
+      }
+      this._keysDown.add(code);
+      // Prevent default for game keys
+      if (!e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      this._keysDown.delete(e.keyCode);
+    });
+
+    window.addEventListener('keypress', (e) => {
+      if (e.charCode >= 0x20 && e.charCode <= 0xFF) {
+        this._charQueue.push(e.charCode);
+      }
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      const btn = e.button;
+      if (!this._mouseButtons.has(btn)) {
+        this._mouseButtonsPressed.add(btn);
+      }
+      this._mouseButtons.add(btn);
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+      this._mouseButtons.delete(e.button);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      this._mouseX = e.clientX - rect.left;
+      this._mouseY = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      // Accumulate wheel delta; positive = scroll up, negative = scroll down
+      // Normalise to -1/0/+1 per raylib convention (positive = up)
+      if (e.deltaY < 0) this._wheelDelta += 1;
+      else if (e.deltaY > 0) this._wheelDelta -= 1;
+      e.preventDefault();
+    }, { passive: false });
+
+    // Prevent context menu on right-click
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  static isKeyDown(key: number): boolean {
+    return this._keysDown.has(key);
+  }
+
+  static wasKeyPressed(key: number): boolean {
+    return this._keysPressed.has(key);
+  }
+
+  /** Returns true if the key was auto-repeated this frame (held down). */
+  static wasKeyPressedRepeat(key: number): boolean {
+    return this._keysRepeated.has(key);
+  }
+
+  static isMouseButtonDown(button: number): boolean {
+    return this._mouseButtons.has(button);
+  }
+
+  static wasMouseButtonPressed(button: number): boolean {
+    return this._mouseButtonsPressed.has(button);
+  }
+
+  /** Returns the first key pressed this frame (DOM keyCode), or null if none. */
+  static firstKeyPressed(): number | null {
+    if (this._keysPressed.size === 0) return null;
+    return this._keysPressed.values().next().value ?? null;
+  }
+
+  static mousePosition(): [number, number] {
+    return [this._mouseX | 0, this._mouseY | 0];
+  }
+
+  static getCharPressed(): number {
+    return this._charQueue.shift() ?? 0;
+  }
+
+  static getKeyPressed(): number {
+    return this._keyPressedQueue.shift() ?? 0;
+  }
+
+  /** Returns accumulated mouse wheel delta since last endFrame (positive = up). */
+  static mouseWheelDelta(): number {
+    return this._wheelDelta;
+  }
+
+  static endFrame(): void {
+    this._keysPressed.clear();
+    this._keysRepeated.clear();
+    this._mouseButtonsPressed.clear();
+    this._wheelDelta = 0;
+  }
+}

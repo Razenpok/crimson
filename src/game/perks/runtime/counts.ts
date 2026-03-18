@@ -1,0 +1,11 @@
+// Port of crimson/perks/runtime/counts.py
+
+import type { PlayerState } from '../../sim/state-types.ts';
+import type { PerkId } from '../ids.ts';
+
+export function adjustPerkCount(player: PlayerState, perkId: PerkId, amount: number = 1): void {
+  const idx = perkId as number;
+  if (idx >= 0 && idx < player.perkCounts.length) {
+    player.perkCounts[idx] += amount | 0;
+  }
+}
