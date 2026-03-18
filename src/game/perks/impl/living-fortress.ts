@@ -1,13 +1,10 @@
-import type { PlayerState } from '../../sim/state-types.ts';
+// Port of crimson/perks/impl/living_fortress.py
+
 import { perkActive } from '../helpers.ts';
 import { PerkId } from '../ids.ts';
+import { PlayerPerkTickCtx } from "@game/perks/runtime/player-tick-context.js";
 
-export interface LivingFortressCtx {
-  readonly player: PlayerState;
-  readonly dt: number;
-}
-
-export function tickLivingFortress(ctx: LivingFortressCtx): void {
+export function tickLivingFortress(ctx: PlayerPerkTickCtx): void {
   if (perkActive(ctx.player, PerkId.LIVING_FORTRESS)) {
     ctx.player.livingFortressTimer = Math.min(30.0, ctx.player.livingFortressTimer + ctx.dt);
   } else {

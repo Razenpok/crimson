@@ -627,10 +627,10 @@ export class ControlsMenuView extends PanelMenuView {
     return {
       pos,
       width,
-      header_h: headerH,
-      row_h: rowH,
-      rows_y0: pos.y + 17.0 * scale,
-      full_h: fullH,
+      headerH: headerH,
+      rowH: rowH,
+      rowsY0: pos.y + 17.0 * scale,
+      fullH: fullH,
       arrowPos: new Vec2(pos.x + width - arrow - 1.0 * scale, pos.y),
       arrowSize: new Vec2(arrow, arrow),
       textPos: pos.add(new Vec2(4.0 * scale, 1.0 * scale)),
@@ -663,13 +663,13 @@ export class ControlsMenuView extends PanelMenuView {
       return [isOpen, null, false];
     }
 
-    const listHovered = Rect.fromTopLeft(layout.pos, layout.width, layout.full_h).contains(new Vec2(mx, my));
+    const listHovered = Rect.fromTopLeft(layout.pos, layout.width, layout.fullH).contains(new Vec2(mx, my));
     if (click && !listHovered) {
       return [false, null, true];
     }
 
     for (let idx = 0; idx < itemCount; idx++) {
-      const itemY = layout.rows_y0 + layout.row_h * idx;
+      const itemY = layout.rowsY0 + layout.rowH * idx;
       const hovered = enabled && mouseInsideRectWithPadding(
         mouse, new Vec2(layout.pos.x, itemY), layout.width, 14.0 * scale,
       );
@@ -1022,7 +1022,7 @@ export class ControlsMenuView extends PanelMenuView {
       mouse, layout.pos, layout.width, 14.0 * scale,
     );
 
-    const widgetH = isOpen ? layout.full_h : layout.header_h;
+    const widgetH = isOpen ? layout.fullH : layout.headerH;
 
     // Outer border (white)
     ctx.drawRectangle(
@@ -1068,7 +1068,7 @@ export class ControlsMenuView extends PanelMenuView {
     if (!isOpen) return;
 
     for (let i = 0; i < items.length; i++) {
-      const itemY = layout.rows_y0 + layout.row_h * i;
+      const itemY = layout.rowsY0 + layout.rowH * i;
       const hovered = enabled && mouseInsideRectWithPadding(
         mouse, new Vec2(layout.pos.x, itemY), layout.width, 14.0 * scale,
       );

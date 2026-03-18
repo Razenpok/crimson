@@ -9,7 +9,7 @@ import type { PerksUpdateEffectsStep } from './effects-context.ts';
 export type { PerksUpdateEffectsStep } from './effects-context.ts';
 import type { PlayerPerkTickCtx } from './player-tick-context.ts';
 
-export type WorldDtStep = (opts: { dt: number; players: PlayerState[] }) => number;
+export type WorldDtStep = (dt: number, players: PlayerState[]) => number;
 
 export type { CreatureDeath };
 

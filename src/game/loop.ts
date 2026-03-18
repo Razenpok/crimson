@@ -7,7 +7,7 @@
 // all network-related paths are stubbed as no-ops.
 
 import { type WebGLContext } from '../engine/webgl.ts';
-import { type View, type ViewContext, createViewContext } from '../engine/view.ts';
+import { type View, ViewContext } from '../engine/view.ts';
 import { Vec2 } from '../engine/geom.ts';
 import { type CrandLike } from '../engine/rand.ts';
 import { type AudioState, audioStopMusic } from '../engine/audio.ts';
@@ -179,7 +179,7 @@ function getGammaRampShader(
 function modeViewContext(state: GameState): ViewContext {
   const preserveBugs = state.preserveBugs;
   // Network multiplayer would force preserveBugs=false; not applicable in WebGL.
-  return createViewContext(state.assetsUrl, preserveBugs);
+  return new ViewContext(state.assetsUrl, preserveBugs);
 }
 
 function isGameplayScreen(view: Screen | null): view is GameplayScreen {

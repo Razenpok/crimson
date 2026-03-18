@@ -256,7 +256,7 @@ export class CreatureState implements CreatureStateLike {
   target: Vec2 = new Vec2();
   target_player = 0;
   ai_mode: CreatureAiMode = CreatureAiMode.ORBIT_PLAYER;
-  flags: number = 0;
+  flags: CreatureFlags = 0 as CreatureFlags;
 
   link_index = -1;
   target_offset: Vec2 | null = null;

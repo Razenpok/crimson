@@ -23,17 +23,17 @@ export function applyPlayerPerkTicks(opts: {
   ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn;
   projectileSpawn: ProjectileSpawnFn;
 }): void {
-  const ctx = new PlayerPerkTickCtx(
-    opts.state,
-    opts.player,
-    opts.playerPosBeforeMove,
-    opts.players,
-    opts.dt,
-    opts.stationary,
-    opts.ownerRefForPlayer,
-    opts.ownerRefForPlayerProjectiles,
-    opts.projectileSpawn,
-  );
+  const ctx: PlayerPerkTickCtx = {
+    state: opts.state,
+    player: opts.player,
+    playerPosBeforeMove: opts.playerPosBeforeMove,
+    players: opts.players,
+    dt: opts.dt,
+    stationary: opts.stationary,
+    ownerRefForPlayer: opts.ownerRefForPlayer,
+    ownerRefForPlayerProjectiles: opts.ownerRefForPlayerProjectiles,
+    projectileSpawn: opts.projectileSpawn,
+  };
   for (const step of _PLAYER_PERK_TICK_STEPS) {
     step(ctx);
   }

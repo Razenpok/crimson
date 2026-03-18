@@ -1,3 +1,5 @@
+// Port of crimson/perks/impl/random_weapon.py
+
 import { WeaponId } from '../../weapons.ts';
 import { PerkId } from '../ids.ts';
 import type { PerkApplyCtx } from '../runtime/apply-context.ts';
@@ -8,7 +10,7 @@ export function applyRandomWeapon(ctx: PerkApplyCtx): void {
   const current = ctx.owner.weapon.weaponId;
   let weaponId = current;
   for (let i = 0; i < 100; i++) {
-    const candidate = weaponPickRandomAvailable(ctx.state, null);
+    const candidate = weaponPickRandomAvailable(ctx.state);
     weaponId = candidate;
     if (candidate !== WeaponId.PISTOL && candidate !== current) {
       break;

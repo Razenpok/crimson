@@ -6,18 +6,16 @@ import { resolveTerrainSlots } from '../terrain-slots.ts';
 import type { RenderResources } from './render-resources.ts';
 
 export class TerrainRuntime {
-  worldSize: number;
-  renderResources: RenderResources;
-
-  constructor(worldSize: number, renderResources: RenderResources) {
-    this.worldSize = worldSize;
-    this.renderResources = renderResources;
+  constructor(
+    public worldSize: number = 1024,
+    public renderResources: RenderResources
+  ) {
   }
 
   applyTerrainSetup(terrainSlots: TerrainSlotTriplet, seed: number): void {
     const [base, overlay, detail] = resolveTerrainSlots(
       terrainSlots,
-      (textureId: TextureId) => this.renderResources.registryTexture(textureId),
+      (textureId) => this.renderResources.registryTexture(textureId),
     );
     this.renderResources.setGroundTextures(base, overlay, detail);
     this.renderResources.scheduleGroundGeneration(seed);

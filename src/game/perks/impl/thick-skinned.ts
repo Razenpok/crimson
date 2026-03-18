@@ -1,11 +1,9 @@
-import type { PlayerState } from '../../sim/state-types.ts';
+// crimson/perks/impl/thick_skinned.py
+
 import { PerkId } from '../ids.ts';
+import type { PerkApplyCtx } from "@game/perks/runtime/apply-context.js";
 
-export interface ThickSkinnedCtx {
-  readonly players: PlayerState[];
-}
-
-export function applyThickSkinned(ctx: ThickSkinnedCtx): void {
+export function applyThickSkinned(ctx: PerkApplyCtx): void {
   for (const player of ctx.players) {
     if (player.health > 0.0) {
       player.health = Math.max(1.0, player.health * (2.0 / 3.0));

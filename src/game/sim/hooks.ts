@@ -3,10 +3,6 @@
 import type { GameCommand, ResolvedTick } from './input-providers.ts';
 import type { DeterministicSessionTick } from './sessions.ts';
 
-// ---------------------------------------------------------------------------
-// TickResult
-// ---------------------------------------------------------------------------
-
 export class TickResult {
   readonly sourceTick: ResolvedTick;
   readonly payload: DeterministicSessionTick;
@@ -26,28 +22,16 @@ export class TickResult {
   }
 }
 
-// ---------------------------------------------------------------------------
-// LanFrameSample
-// ---------------------------------------------------------------------------
-
 export interface LanFrameSample {
   readonly frameTickIndex: number;
   readonly frameInputs: readonly (readonly number[])[];
   readonly commands: readonly GameCommand[];
 }
 
-// ---------------------------------------------------------------------------
-// LanTickSync
-// ---------------------------------------------------------------------------
-
 export interface LanTickSync {
   readonly frameTickIndex: number;
   readonly frameInputs: readonly (readonly number[])[];
 }
-
-// ---------------------------------------------------------------------------
-// LanSyncCallbacks
-// ---------------------------------------------------------------------------
 
 export interface LanSyncCallbacks {
   readonly role: string;

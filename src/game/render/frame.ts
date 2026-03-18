@@ -8,6 +8,9 @@ import { GameplayState, PlayerState } from '../sim/state-types.ts';
 import { CreaturePool } from '../creatures/runtime.ts';
 import { RtxRenderMode } from './rtx/mode.ts';
 
+// Typed world snapshot consumed by render code.
+// This intentionally carries references (not deep copies) so render can be
+// deterministic per frame boundary while remaining allocation-light.
 export interface RenderFrame {
   readonly worldSize: number;
   readonly demoModeActive: boolean;

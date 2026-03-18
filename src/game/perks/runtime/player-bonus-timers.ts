@@ -3,23 +3,25 @@
 import type { PerksUpdateEffectsCtx } from './effects-context.ts';
 
 export function updatePlayerBonusTimers(ctx: PerksUpdateEffectsCtx): void {
+  // Native `perks_update_effects` decrements per-player shield/fire-bullets/speed
+  // timers before `player_update` reads them for this frame.
   for (const player of ctx.players) {
     if (player.shieldTimer <= 0.0) {
       player.shieldTimer = 0.0;
     } else {
-      player.shieldTimer = Number(player.shieldTimer) - Number(ctx.dt);
+      player.shieldTimer = player.shieldTimer - ctx.dt;
     }
 
     if (player.fireBulletsTimer <= 0.0) {
       player.fireBulletsTimer = 0.0;
     } else {
-      player.fireBulletsTimer = Number(player.fireBulletsTimer) - Number(ctx.dt);
+      player.fireBulletsTimer = player.fireBulletsTimer - ctx.dt;
     }
 
     if (player.speedBonusTimer <= 0.0) {
       player.speedBonusTimer = 0.0;
     } else {
-      player.speedBonusTimer = Number(player.speedBonusTimer) - Number(ctx.dt);
+      player.speedBonusTimer = player.speedBonusTimer - ctx.dt;
     }
   }
 }

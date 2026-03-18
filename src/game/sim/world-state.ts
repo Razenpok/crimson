@@ -199,7 +199,7 @@ export class WorldState {
     // Apply world-dt perk steps (e.g. reflex-boost time scale)
     if (applyWorldDtSteps) {
       for (const step of _WORLD_DT_STEPS) {
-        dt = Number(step({ dt, players: this.players }));
+        dt = Number(step(dt, this.players));
       }
     }
 

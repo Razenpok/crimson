@@ -4,7 +4,7 @@ import { f32 } from '../math-parity.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyWeaponPowerUp(ctx: BonusApplyCtx): void {
-  const old = ctx.state.bonuses.weaponPowerUp as number;
+  const old = ctx.state.bonuses.weaponPowerUp;
   if (old <= 0.0) {
     ctx.registerGlobal('weapon_power_up');
   }

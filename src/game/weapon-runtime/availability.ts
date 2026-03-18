@@ -91,7 +91,7 @@ function questLevelEquals(a: QuestLevel | null, major: number, minor: number): b
 
 export function weaponPickRandomAvailable(
   state: GameplayState,
-  status: WeaponAvailabilityStatus | null,
+  status: WeaponAvailabilityStatus | null = null,
 ): WeaponId {
   const weaponAvailable = state.weaponAvailable;
 

@@ -8,7 +8,7 @@ import { WeaponId } from '../weapons.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyWeapon(ctx: BonusApplyCtx): void {
-  const weaponId = ctx.amount as WeaponId;
+  const weaponId = ctx.amount;
   if (perkActive(ctx.player, PerkId.ALTERNATE_WEAPON) && ctx.player.altWeapon === null) {
     const primary = ctx.player.weapon;
     const alt = new WeaponSlot(primary.weaponId);

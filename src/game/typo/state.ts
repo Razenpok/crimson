@@ -1,4 +1,4 @@
-// Port of crimson/typo/state.py — TypoState
+// Port of crimson/typo/state.py
 
 import { Vec2 } from '../../engine/geom.ts';
 import { CreatureNameTable } from './names.ts';

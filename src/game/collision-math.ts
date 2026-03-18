@@ -3,6 +3,7 @@
 const _NATIVE_FIND_SIZE_MARGIN_SCALE = 0.14285715;
 const _NATIVE_FIND_SIZE_MARGIN_BIAS = 3.0;
 
+// Native collision threshold term used by `*FindInRadius` routines.
 export function nativeFindSizeMargin(targetSize: number): number {
   return targetSize * _NATIVE_FIND_SIZE_MARGIN_SCALE + _NATIVE_FIND_SIZE_MARGIN_BIAS;
 }

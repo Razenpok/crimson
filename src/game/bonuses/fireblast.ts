@@ -6,9 +6,7 @@ import { ProjectileTemplateId } from '../projectiles/types.ts';
 import { ownerRefForPlayer, spawnProjectileRing } from '../weapon-runtime/spawn.ts';
 import type { BonusApplyCtx } from "@game/bonuses/apply-context.js";
 
-export function applyFireblast(
-  ctx: BonusApplyCtx,
-): void {
+export function applyFireblast(ctx: BonusApplyCtx): void {
   const origin = ctx.originPos;
   const owner = ctx.state.friendlyFireEnabled
     ? ownerRefForPlayer(ctx.player.index)

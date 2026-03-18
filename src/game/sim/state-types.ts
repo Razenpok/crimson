@@ -15,7 +15,7 @@ export class WeaponSlot {
   reloadTimerMax = 0.0;
   shotCooldown = 0.0;
 
-  constructor(weaponId: WeaponId = WeaponId.PISTOL) {
+  constructor(weaponId: WeaponId) {
     this.weaponId = weaponId;
   }
 }

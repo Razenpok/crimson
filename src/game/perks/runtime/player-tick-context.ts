@@ -19,36 +19,14 @@ export type ProjectileSpawnFn = (
 export type OwnerRefForPlayerFn = (playerIndex: number) => OwnerRef;
 export type OwnerRefForPlayerProjectilesFn = (state: GameplayState, playerIndex: number) => OwnerRef;
 
-export class PlayerPerkTickCtx {
-  state: GameplayState;
-  player: PlayerState;
-  playerPosBeforeMove: Vec2;
-  players: PlayerState[] | null;
-  dt: number;
-  stationary: boolean;
-  ownerRefForPlayer: OwnerRefForPlayerFn;
-  ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn;
-  projectileSpawn: ProjectileSpawnFn;
-
-  constructor(
-    state: GameplayState,
-    player: PlayerState,
-    playerPosBeforeMove: Vec2,
-    players: PlayerState[] | null,
-    dt: number,
-    stationary: boolean,
-    ownerRefForPlayer: OwnerRefForPlayerFn,
-    ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn,
-    projectileSpawn: ProjectileSpawnFn,
-  ) {
-    this.state = state;
-    this.player = player;
-    this.playerPosBeforeMove = playerPosBeforeMove;
-    this.players = players;
-    this.dt = dt;
-    this.stationary = stationary;
-    this.ownerRefForPlayer = ownerRefForPlayer;
-    this.ownerRefForPlayerProjectiles = ownerRefForPlayerProjectiles;
-    this.projectileSpawn = projectileSpawn;
-  }
+export interface PlayerPerkTickCtx {
+    state: GameplayState;
+    player: PlayerState;
+    playerPosBeforeMove: Vec2;
+    players: PlayerState[] | null;
+    dt: number;
+    stationary: boolean;
+    ownerRefForPlayer: OwnerRefForPlayerFn;
+    ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn;
+    projectileSpawn: ProjectileSpawnFn;
 }

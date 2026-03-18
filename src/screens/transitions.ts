@@ -16,7 +16,7 @@ export function updateScreenFade(state: GameState, dt: number): void {
   else if (state.screenFadeAlpha > 1.0) state.screenFadeAlpha = 1.0;
 }
 
-export function drawScreenFade(ctx: WebGLContext, state: Pick<GameState, 'screenFadeAlpha'>, screenW: number, screenH: number): void {
+export function drawScreenFade(ctx: WebGLContext, state: GameState, screenW: number, screenH: number): void {
   const alpha = state.screenFadeAlpha;
   if (alpha <= 0.0) return;
   const shade = Math.max(0, Math.min(1, alpha));

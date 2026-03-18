@@ -3,6 +3,7 @@
 import { PerkId } from '../ids.ts';
 import type { PerkApplyCtx } from '../runtime/apply-context.ts';
 import type { PerkHooks } from '../runtime/hook-types.ts';
+import { CreatureFlags } from '@game/creatures/spawn-ids.js';
 
 function applyLifeline5050(ctx: PerkApplyCtx): void {
   const creatures = ctx.creatures;
@@ -12,7 +13,7 @@ function applyLifeline5050(ctx: PerkApplyCtx): void {
 
   let killToggle = false;
   for (const creature of creatures) {
-    if (killToggle && creature.active && creature.hp <= 500.0 && (creature.flags & 0x04) === 0) {
+    if (killToggle && creature.active && creature.hp <= 500.0 && (creature.flags & CreatureFlags.ANIM_PING_PONG) === 0) {
       creature.active = false;
       ctx.state.effects.spawnBurst(
         creature.pos,

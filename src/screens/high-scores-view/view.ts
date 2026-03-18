@@ -359,10 +359,10 @@ export class HighScoresView {
     return {
       pos,
       width,
-      header_h: headerH,
-      row_h: rowH,
-      rows_y0: pos.y + 17.0 * scale,
-      full_h: fullH,
+      headerH: headerH,
+      rowH: rowH,
+      rowsY0: pos.y + 17.0 * scale,
+      fullH: fullH,
     };
   }
 
@@ -386,14 +386,14 @@ export class HighScoresView {
       return [isOpen, null, false];
     }
 
-    const listRect = Rect.fromTopLeft(layout.pos, layout.width, layout.full_h);
+    const listRect = Rect.fromTopLeft(layout.pos, layout.width, layout.fullH);
     const listHovered = listRect.contains(mouse);
     if (click && !listHovered) {
       return [false, null, true];
     }
 
     for (let idx = 0; idx < itemCount; idx++) {
-      const itemY = layout.rows_y0 + layout.row_h * idx;
+      const itemY = layout.rowsY0 + layout.rowH * idx;
       const hovered = enabled && mouseInsideRectWithPadding(
         mouse, new Vec2(layout.pos.x, itemY), layout.width, 14.0 * scale,
       );

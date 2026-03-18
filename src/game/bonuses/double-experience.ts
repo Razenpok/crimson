@@ -5,7 +5,7 @@ import type { BonusApplyCtx } from './apply-context.ts';
 import { bonusApplySeconds } from './apply-context.ts';
 
 export function applyDoubleExperience(ctx: BonusApplyCtx): void {
-  const old = ctx.state.bonuses.doubleExperience as number;
+  const old = ctx.state.bonuses.doubleExperience;
   if (old <= 0.0) {
     ctx.registerGlobal('double_experience');
   }

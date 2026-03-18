@@ -1,10 +1,11 @@
+// Port of crimson/sim/input_frame.py
+
 import { PlayerInput } from './input.ts';
 
 export class InputFrame {
-  readonly players: readonly PlayerInput[];
-
-  constructor(players: readonly PlayerInput[]) {
-    this.players = players;
+  constructor(
+    public readonly players: readonly PlayerInput[]
+  ) {
   }
 
   asList(): PlayerInput[] {
@@ -16,6 +17,7 @@ export function normalizeInputFrame(
   inputs: readonly PlayerInput[] | null,
   playerCount: number,
 ): InputFrame {
+  // Return a fixed-size, player-index-ordered input frame.
   const count = Math.max(0, Math.trunc(playerCount));
   const frame: PlayerInput[] = [];
   for (let i = 0; i < count; i++) {

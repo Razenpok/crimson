@@ -65,18 +65,18 @@ export const PERK_HOOKS_IN_ORDER: readonly PerkHooks[] = [
 
 export const PERK_APPLY_HANDLERS: Map<PerkId, PerkApplyHandler> = new Map(
   PERK_HOOKS_IN_ORDER
-    .filter((hook): hook is PerkHooks & { applyHandler: PerkApplyHandler } => hook.applyHandler != null)
+    .filter((hook): hook is PerkHooks & { applyHandler: PerkApplyHandler } => hook.applyHandler !== undefined)
     .map((hook) => [hook.perkId, hook.applyHandler]),
 );
 
 export const WORLD_DT_STEPS: readonly WorldDtStep[] =
   PERK_HOOKS_IN_ORDER
-    .filter((hook): hook is PerkHooks & { worldDtStep: WorldDtStep } => hook.worldDtStep != null)
+    .filter((hook): hook is PerkHooks & { worldDtStep: WorldDtStep } => hook.worldDtStep !== undefined)
     .map((hook) => hook.worldDtStep);
 
 export const PLAYER_DEATH_HOOKS: readonly PlayerDeathHook[] =
   PERK_HOOKS_IN_ORDER
-    .filter((hook): hook is PerkHooks & { playerDeathHook: PlayerDeathHook } => hook.playerDeathHook != null)
+    .filter((hook): hook is PerkHooks & { playerDeathHook: PlayerDeathHook } => hook.playerDeathHook !== undefined)
     .map((hook) => hook.playerDeathHook);
 
 export const PLAYER_PERK_TICK_STEPS: readonly PlayerPerkTickStep[] =

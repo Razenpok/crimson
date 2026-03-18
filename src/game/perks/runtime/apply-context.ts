@@ -6,34 +6,19 @@ import type { PerkId } from '../ids.ts';
 import type { PerkSelectionState } from '../state.ts';
 
 export class PerkApplyCtx {
-  state: GameplayState;
-  players: PlayerState[];
-  owner: PlayerState;
-  perkId: PerkId;
-  perkState: PerkSelectionState | null;
-  dt: number | null;
-  creatures: readonly CreatureState[] | null;
-
   constructor(
-    state: GameplayState,
-    players: PlayerState[],
-    owner: PlayerState,
-    perkId: PerkId,
-    perkState: PerkSelectionState | null,
-    dt: number | null,
-    creatures: readonly CreatureState[] | null,
+    public state: GameplayState,
+    public players: PlayerState[],
+    public owner: PlayerState,
+    public perkId: PerkId,
+    public perkState: PerkSelectionState | null,
+    public dt: number | null,
+    public creatures: readonly CreatureState[] | null,
   ) {
-    this.state = state;
-    this.players = players;
-    this.owner = owner;
-    this.perkId = perkId;
-    this.perkState = perkState;
-    this.dt = dt;
-    this.creatures = creatures;
   }
 
   frameDt(): number {
-    return this.dt !== null ? Number(this.dt) : 0.0;
+    return this.dt ?? 0.0;
   }
 }
 

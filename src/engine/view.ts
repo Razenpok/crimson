@@ -1,12 +1,11 @@
 // Port of grim/view.py
 
-export interface ViewContext {
-  readonly assetsUrl: string;
-  readonly preserveBugs: boolean;
-}
-
-export function createViewContext(assetsUrl: string = 'assets', preserveBugs: boolean = false): ViewContext {
-  return { assetsUrl, preserveBugs };
+export class ViewContext {
+  constructor(
+    public readonly assetsUrl: string = 'assets',
+    public readonly preserveBugs: boolean = false
+  ) {
+  }
 }
 
 export interface View {

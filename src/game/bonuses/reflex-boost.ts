@@ -6,7 +6,7 @@ import type { BonusPickupEvent, GameplayState } from '../sim/state-types.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyReflexBoost(ctx: BonusApplyCtx): void {
-  const old = ctx.state.bonuses.reflexBoost as number;
+  const old = ctx.state.bonuses.reflexBoost;
   if (old <= 0.0) {
     ctx.registerGlobal('reflex_boost');
   }

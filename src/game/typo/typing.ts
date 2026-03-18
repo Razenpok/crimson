@@ -1,6 +1,6 @@
-// Port of crimson/typo/typing.py — TypingBuffer
+// Port of crimson/typo/typing.py
 
-export const TYPING_MAX_CHARS = 17;
+const TYPING_MAX_CHARS = 17;
 
 export class TypingBuffer {
   text = '';

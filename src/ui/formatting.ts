@@ -1,3 +1,5 @@
+// Port of crimson/ui/formatting.py
+
 export function formatOrdinal(value1Based: number): string {
   const value = Math.floor(value1Based);
   let suffix: string;

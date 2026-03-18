@@ -3,11 +3,8 @@
 import type { CreatureState } from '../../creatures/runtime.ts';
 import type { FxQueue } from '../../effects.ts';
 import type { GameplayState, PlayerState } from '../../sim/state-types.ts';
-import { creatureFindInRadius, PerksUpdateEffectsCtx } from './effects-context.ts';
+import { PerksUpdateEffectsCtx } from './effects-context.ts';
 import { PERKS_UPDATE_EFFECT_STEPS } from './manifest.ts';
-
-// Backward-compatible re-export used by HUD target hover wiring.
-export { creatureFindInRadius as _creatureFindInRadius };
 
 const _PERKS_UPDATE_EFFECT_STEPS = PERKS_UPDATE_EFFECT_STEPS;
 
@@ -18,7 +15,8 @@ export function perksUpdateEffects(
   creatures: readonly CreatureState[] | null = null,
   fxQueue: FxQueue | null = null,
 ): void {
-  dt = Number(dt);
+  // Apply frame-based perk effect updates.
+  // Port subset of `perks_update_effects` (0x00406b40).
   if (dt <= 0.0) {
     return;
   }

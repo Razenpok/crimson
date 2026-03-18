@@ -1,3 +1,5 @@
+// Port of crimson/sim/clock.py
+
 export class FixedStepClock {
   tickRate: number;
   accum: number;
@@ -20,7 +22,6 @@ export class FixedStepClock {
   }
 
   advance(dt: number, maxDt: number = 0.1): number {
-    dt = Number(dt);
     if (dt <= 0.0) return 0;
     if (dt > maxDt) dt = maxDt;
     this.accum += dt;

@@ -5,7 +5,7 @@ import type { BonusApplyCtx } from './apply-context.ts';
 import { bonusApplySeconds } from './apply-context.ts';
 
 export function applyEnergizer(ctx: BonusApplyCtx): void {
-  const old = ctx.state.bonuses.energizer as number;
+  const old = ctx.state.bonuses.energizer;
   if (old <= 0.0) {
     ctx.registerGlobal('energizer');
   }
