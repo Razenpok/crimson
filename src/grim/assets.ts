@@ -270,7 +270,9 @@ async function loadImageFromPaqEntry(relPath: string, data: Uint8Array): Promise
   const mime = mimeMap[ext] ?? 'application/octet-stream';
   const blob = new Blob([data as BlobPart], { type: mime });
   try {
-    return await createImageBitmap(blob);
+    // DX8 content uses straight alpha — prevent the browser from premultiplying,
+    // which would cause double-darkening under SRC_ALPHA blending (see cheatsheet §3B).
+    return await createImageBitmap(blob, { premultiplyAlpha: 'none' });
   } catch {
     // TGA fallback: parse manually
     if (ext === '.tga') {
@@ -294,10 +296,8 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
   const headerSize = 18 + idLength;
   const pixelData = data.subarray(headerSize);
 
-  const canvas = new OffscreenCanvas(width, height);
-  const ctx = canvas.getContext('2d')!;
-  const imageData = ctx.createImageData(width, height);
-  const pixels = imageData.data;
+  const pixels = new Uint8ClampedArray(width * height * 4);
+  const imageData = new ImageData(pixels, width, height);
 
   if (imageType === 2) { // Uncompressed true-color
     const bytesPerPixel = bpp / 8;
@@ -356,8 +356,10 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
     }
   }
 
-  ctx.putImageData(imageData, 0, 0);
-  return createImageBitmap(canvas);
+  // Bypass OffscreenCanvas 2D context — its putImageData + readback path
+  // premultiplies alpha, which is lossy for straight-alpha DX8 content.
+  // Construct an ImageData directly and let createImageBitmap keep it straight.
+  return createImageBitmap(imageData, { premultiplyAlpha: 'none' });
 }
 
 export async function loadRuntimeResources(

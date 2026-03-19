@@ -187,7 +187,6 @@ export class GroundRenderer {
     const srcH = (v1 - v0) * target.height;
 
     // WebGL render targets are NOT flipped (unlike raylib), so we sample directly
-    const prevBlend = BlendMode.NONE;
     this._ctx.setBlendMode(BlendMode.NONE);
     this._ctx.drawTexturePro(
       target.texture,

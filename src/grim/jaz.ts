@@ -107,7 +107,7 @@ export async function decodeJazBytes(data: Uint8Array): Promise<JazImage> {
 export async function decodeJazToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
   const jaz = await decodeJazBytes(data);
 
-  // Decode JPEG to canvas to get RGB pixels
+  // Decode JPEG to canvas to extract RGB pixels
   const jpegBlob = new Blob([jaz.jpegData as BlobPart], { type: 'image/jpeg' });
   const jpegBitmap = await createImageBitmap(jpegBlob);
 
@@ -124,6 +124,10 @@ export async function decodeJazToImageBitmap(data: Uint8Array): Promise<ImageBit
     pixels[i * 4 + 3] = jaz.alphaData[i];
   }
 
-  ctx.putImageData(imageData, 0, 0);
-  return createImageBitmap(canvas);
+  // Build the bitmap directly from ImageData — do NOT round-trip through the
+  // OffscreenCanvas 2D context (putImageData → createImageBitmap(canvas)),
+  // because the canvas backing store premultiplies alpha, which is lossy for
+  // straight-alpha DX8 content and causes dark halos / double-darkening under
+  // SRC_ALPHA blending (see docs/cheatsheets/directx8.md §3B).
+  return createImageBitmap(imageData, { premultiplyAlpha: 'none' });
 }
