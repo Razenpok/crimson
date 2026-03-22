@@ -3,6 +3,7 @@
 import { type GlTexture, type WebGLContext } from './webgl.ts';
 import { paqToMap } from './paq.ts';
 import { decodeJazToImageBitmap } from './jaz.ts';
+import { SmallFontData } from "@grim/fonts/small.js";
 
 export const PAQ_NAME = 'crimson.paq';
 
@@ -184,13 +185,6 @@ export const TEXTURE_SPECS: ReadonlyMap<TextureId, TextureSpec> = new Map([
   [TextureId.UI_TEXT_PICK_A_PERK, spec('ui/ui_textPickAPerk.jaz', true)],
   [TextureId.UI_TEXT_LEVEL_UP, spec('ui/ui_textLevelUp.jaz', true)],
 ]);
-
-export interface SmallFontData {
-  widths: number[];
-  texture: GlTexture;
-  cellSize: number;
-  grid: number;
-}
 
 export interface RuntimeResources {
   assetsUrl: string;

@@ -3,8 +3,7 @@
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { type SmallFontData } from '@grim/assets.ts';
-import { measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';

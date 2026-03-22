@@ -1,10 +1,10 @@
 // Port of crimson/ui/hud.py — HUD overlay rendering
 
 import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
-import { type RuntimeResources, type SmallFontData, TextureId, getTexture } from '@grim/assets.ts';
+import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
-import { drawSmallText } from '@grim/fonts/small.ts';
+import { drawSmallText, SmallFontData } from '@grim/fonts/small.ts';
 import { type BonusHudState } from '@crimson/bonuses/hud.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { survivalLevelThreshold } from '@crimson/gameplay.ts';

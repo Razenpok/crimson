@@ -3,8 +3,7 @@
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { type SmallFontData } from '@grim/assets.ts';
-import { measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
 import { clamp } from '@grim/math.ts';
 import { InputState } from '@grim/input.ts';
 import { SfxId } from '@grim/sfx-map.ts';

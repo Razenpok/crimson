@@ -1,5 +1,5 @@
 // Port of crimson/atlas.py
-//
+
 // Atlas slicing used by the Crimsonland renderer.
 //
 // Findings from decompiled code:
@@ -12,7 +12,7 @@
 // This module replicates the atlas cutting: given a grid size and frame index,
 // compute UVs or pixel rects.
 
-export const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
+const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
   0x80: 2,
   0x40: 4,
   0x20: 8,
@@ -20,7 +20,7 @@ export const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
 };
 
 // DAT_004755f0 table (index -> [cell_code, group_id]) extracted from crimsonland.exe
-export const SPRITE_TABLE: readonly (readonly [number, number])[] = [
+const SPRITE_TABLE: readonly (readonly [number, number])[] = [
   [0x80, 0x2],
   [0x80, 0x3],
   [0x20, 0x0],
@@ -40,7 +40,7 @@ export const SPRITE_TABLE: readonly (readonly [number, number])[] = [
   [0x40, 0x6],
 ];
 
-export function gridSizeFromCode(code: number): number {
+export function gridSizeFromCode(code: number) {
   const size = GRID_SIZE_BY_CODE[code];
   if (size === undefined) {
     throw new Error(`Unknown atlas code: 0x${code.toString(16)}`);
@@ -48,16 +48,15 @@ export function gridSizeFromCode(code: number): number {
   return size;
 }
 
-export function gridSizeForIndex(index: number): number {
+export function gridSizeForIndex(index: number) {
   const [code] = SPRITE_TABLE[index];
   return gridSizeFromCode(code);
 }
 
 /**
  * Compute UV coordinates for a frame within an NxN atlas grid.
- * Returns [u0, v0, u1, v1].
  */
-export function uvForIndex(grid: number, index: number): [number, number, number, number] {
+export function uvForIndex(grid: number, index: number): [u0: number, v0: number, u1: number, v1: number] {
   const row = (index / grid) | 0;
   const col = index % grid;
   const step = 1.0 / grid;
@@ -77,7 +76,7 @@ export function rectForIndex(
   height: number,
   grid: number,
   index: number,
-): [number, number, number, number] {
+): [x0: number, y0: number, x1: number, y1: number] {
   const row = (index / grid) | 0;
   const col = index % grid;
   const cellW = (width / grid) | 0;

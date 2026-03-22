@@ -12,7 +12,7 @@ export function tickLivingFortress(ctx: PlayerPerkTickCtx): void {
   }
 }
 
-export const LIVING_FORTRESS_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.LIVING_FORTRESS as const,
   playerTickSteps: [tickLivingFortress] as const,
 };

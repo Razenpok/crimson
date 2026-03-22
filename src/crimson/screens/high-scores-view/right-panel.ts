@@ -3,8 +3,7 @@
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { type SmallFontData } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';

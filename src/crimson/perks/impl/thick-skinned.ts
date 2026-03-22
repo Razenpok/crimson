@@ -11,7 +11,7 @@ export function applyThickSkinned(ctx: PerkApplyCtx): void {
   }
 }
 
-export const THICK_SKINNED_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.THICK_SKINNED as const,
   applyHandler: applyThickSkinned,
 };

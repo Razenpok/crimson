@@ -46,7 +46,7 @@ export function tickHotTempered(ctx: PlayerPerkTickCtx): void {
   ctx.state.perkIntervals.hotTempered = (intervalRoll % 8) + 2.0;
 }
 
-export const HOT_TEMPERED_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.HOT_TEMPERED as const,
   playerTickSteps: [tickHotTempered] as const,
 };

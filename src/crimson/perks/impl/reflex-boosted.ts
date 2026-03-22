@@ -18,7 +18,7 @@ export function applyReflexBoostedDt(dt: number, players: PlayerState[]): number
   return dt * 0.9;
 }
 
-export const REFLEX_BOOSTED_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.REFLEX_BOOSTED as const,
   worldDtStep: applyReflexBoostedDt,
 };

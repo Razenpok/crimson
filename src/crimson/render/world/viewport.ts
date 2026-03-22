@@ -19,6 +19,8 @@ export function cameraScreenSize(
   let screenH: number;
 
   if (runtimeW > 0.0 && runtimeH > 0.0) {
+    // Prefer live framebuffer dimensions. Config values can lag behind
+    // the actual game window resolution during launcher/state handoff.
     screenW = runtimeW;
     screenH = runtimeH;
   } else if (config !== null) {

@@ -5,6 +5,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { GameplayState } from '@crimson/sim/state-types.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
 import { QuestLevel } from "@crimson/quests/level.js";
+import { allQuests } from "@crimson/quests/registry.js";
 
 export const WEAPON_DROP_ID_COUNT = 0x21; // weapon ids 1..33
 export const WEAPON_AVAILABLE_COUNT = Math.max(...WEAPON_TABLE.map((e) => e.weaponId as number)) + 1;
@@ -15,15 +16,10 @@ export interface WeaponAvailabilityStatus {
   weaponUsageCountSlot(slot: number): number;
 }
 
-export interface WeaponAvailabilityQuest {
-  readonly unlockWeaponId: WeaponId | null;
-}
-
 export function buildWeaponAvailability(
   status: WeaponAvailabilityStatus | null,
   gameMode: GameMode,
   demoModeActive: boolean,
-  allQuests: readonly WeaponAvailabilityQuest[],
 ): boolean[] {
   const available: boolean[] = new Array(WEAPON_AVAILABLE_COUNT).fill(false);
   let unlockIndex = 0;
@@ -39,7 +35,7 @@ export function buildWeaponAvailability(
   }
 
   if (unlockIndex > 0) {
-    const quests = allQuests;
+    const quests = allQuests();
     for (let i = 0; i < Math.min(unlockIndex, quests.length); i++) {
       const quest = quests[i];
       const weaponId = quest.unlockWeaponId;
@@ -68,17 +64,8 @@ export function buildWeaponAvailability(
   return available;
 }
 
-export function prepareWeaponAvailability(
-  state: GameplayState,
-  status: WeaponAvailabilityStatus | null,
-  allQuests: readonly WeaponAvailabilityQuest[],
-): void {
-  const built = buildWeaponAvailability(
-    status,
-    state.gameMode,
-    state.demoModeActive,
-    allQuests,
-  );
+export function prepareWeaponAvailability(state: GameplayState, status: WeaponAvailabilityStatus | null): void {
+  const built = buildWeaponAvailability(status, state.gameMode, state.demoModeActive);
   const weaponAvailable = state.weaponAvailable;
   for (let i = 0; i < built.length && i < weaponAvailable.length; i++) {
     weaponAvailable[i] = built[i];

@@ -30,7 +30,6 @@ import { FrameTiming } from './timing.ts';
 import { survivalUpdateWeaponHandouts } from '@crimson/gameplay.ts';
 import { preparePerkAvailability } from '@crimson/perks/availability.ts';
 import { prepareWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
-import { allQuests } from '@crimson/quests/index.ts';
 import { applyTypoCommand } from '@crimson/typo/runtime.ts';
 import type { WorldState } from './world-state.ts';
 export type { WorldState };
@@ -328,11 +327,10 @@ export class DeterministicSession {
     const state = this.world.state;
     state.gameMode = this.gameMode;
     state.demoModeActive = this.demoModeActive;
-    const quests = allQuests();
     // state.status is typed `unknown` (TODO: Phase X — GameStatus); cast to
     // the narrower union each callee expects.  Currently always null at runtime.
-    prepareWeaponAvailability(state, state.status as Parameters<typeof prepareWeaponAvailability>[1], quests);
-    preparePerkAvailability(state, state.status as Parameters<typeof preparePerkAvailability>[1], quests);
+    prepareWeaponAvailability(state, state.status as Parameters<typeof prepareWeaponAvailability>[1]);
+    preparePerkAvailability(state);
   }
 
   timingForDt(dt: number): FrameTiming {

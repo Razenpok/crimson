@@ -1,15 +1,20 @@
+// Port of crimson/quests/runtime.py
+
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
 import { SpawnId } from '@crimson/creatures/spawn-ids.ts';
 import type { QuestContext, QuestDefinition, SpawnEntry } from './types.ts';
 
-export const QUEST_COMPLETION_HIT_SFX_START_MS = 800.0;
-export const QUEST_COMPLETION_HIT_SFX_END_MS = 0x353;
-export const QUEST_COMPLETION_MUSIC_START_MS = 2000.0;
-export const QUEST_COMPLETION_MUSIC_END_MS = 0x803;
-export const QUEST_COMPLETION_TRANSITION_MS = 0x9C4;
+const QUEST_COMPLETION_HIT_SFX_START_MS = 800.0;
+const QUEST_COMPLETION_HIT_SFX_END_MS = 0x353;
+const QUEST_COMPLETION_MUSIC_START_MS = 2000.0;
+const QUEST_COMPLETION_MUSIC_END_MS = 0x803;
+const QUEST_COMPLETION_TRANSITION_MS = 0x9C4;
 
 export function applyHardcoreSpawnTableAdjustment(entries: SpawnEntry[]): SpawnEntry[] {
+  // Apply quest hardcore spawn-table count adjustment.
+  // Modeled after the quest start logic in the classic game, which bumps `SpawnEntry.count`
+  // for most multi-spawn entries in hardcore mode.
   const adjusted: SpawnEntry[] = [];
   for (const entry of entries) {
     const spawnId = entry.spawnId;
@@ -57,17 +62,25 @@ export function tickQuestCompletionTransition(
   playHitSfx: boolean;
   playCompletionMusic: boolean;
 } {
+  // Advance quest completion transition timer.
+  // The quest-mode update loop waits for a short delay after the quest is "idle complete"
+  // (no active creatures + no remaining spawn table entries) before transitioning to the
+  // results screen.
+
   const dtMs = frameDtMs;
   let timerMs = completionTransitionMs;
 
   if (opts.creaturesNoneActive && opts.spawnTableEmpty) {
     if (timerMs < 0.0) {
+      // Native quest_mode_update seeds the timer with the frame delta.
       return { completionTransitionMs: dtMs, completed: false, playHitSfx: false, playCompletionMusic: false };
     }
     if (QUEST_COMPLETION_HIT_SFX_START_MS < timerMs && timerMs < QUEST_COMPLETION_HIT_SFX_END_MS) {
+      // Match the native snap-forward after the quest-hit stinger.
       return { completionTransitionMs: QUEST_COMPLETION_HIT_SFX_END_MS + dtMs, completed: false, playHitSfx: true, playCompletionMusic: false };
     }
     if (QUEST_COMPLETION_MUSIC_START_MS < timerMs && timerMs < QUEST_COMPLETION_MUSIC_END_MS) {
+      // Match the native snap-forward before the completion music fade-in.
       return { completionTransitionMs: QUEST_COMPLETION_MUSIC_END_MS + dtMs, completed: false, playHitSfx: false, playCompletionMusic: true };
     }
     const completed = timerMs > QUEST_COMPLETION_TRANSITION_MS;

@@ -105,4 +105,14 @@ crimson/sim/state-types.ts
 crimson/projectiles/runtime/secondary-rules.ts
 crimson/screens/high-scores-view/records.ts
 grim/fonts/grim-mono.ts
+grim/fonts/small.ts
+crimson/perks/runtime/effects-context.ts
+crimson/math-parity.ts
+crimson/perks/runtime/manifest.ts
+crimson/perks/availability.ts
+crimson/render/world/renderer.ts
+crimson/render/world/viewport.ts
+crimson/owner-ref.ts
+crimson/quests/runtime.ts
+crimson/atlas.ts
 

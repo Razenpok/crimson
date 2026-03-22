@@ -1,4 +1,4 @@
-// Port of crimson/math_parity.py — Float/trig helpers for native movement math parity
+// Port of crimson/math_parity.py
 
 import { Vec2 } from '@grim/geom.ts';
 
@@ -43,6 +43,10 @@ export function atan2F32(y: number, x: number): number {
 
 export function headingFromDeltaF32(dx: number, dy: number): number {
   const heading = f32(Math.atan2(dy, dx) + NATIVE_HALF_PI);
+  // `fpatan` boundary case: native can encode left-axis headings as `-pi/2`
+  // (instead of `3pi/2`) and that representation feeds branchy angle_approach
+  // decisions. Treat near-axis, near-horizontal vectors as the negative branch
+  // to match native tie-break behavior around signed-zero boundaries.
   if (
     dx < 0.0 &&
     Math.abs(heading - _NATIVE_LEFT_AXIS_HEADING_POS) <= _NATIVE_LEFT_AXIS_HEADING_EPS &&

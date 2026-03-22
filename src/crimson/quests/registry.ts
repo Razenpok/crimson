@@ -37,14 +37,20 @@ export function registerQuest(opts: {
       );
     }
     _QUESTS.set(key, quest);
+    allQuestsCached = undefined;
     return builder;
   };
 }
 
-export function allQuests(): QuestDefinition[] {
-  return Array.from(_QUESTS.values()).sort(
-    (a, b) => questLevelGlobalIndex(a.level) - questLevelGlobalIndex(b.level),
-  );
+let allQuestsCached: QuestDefinition[] | undefined;
+
+export function allQuests() {
+  if (allQuestsCached === undefined) {
+    allQuestsCached = Array.from(_QUESTS.values()).sort(
+      (a, b) => questLevelGlobalIndex(a.level) - questLevelGlobalIndex(b.level),
+    );
+  }
+  return allQuestsCached;
 }
 
 export function questByLevel(level: QuestLevel): QuestDefinition | null {

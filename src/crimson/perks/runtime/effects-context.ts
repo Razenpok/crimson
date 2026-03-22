@@ -19,18 +19,14 @@ export function creatureFindInRadius(
     return -1;
   }
 
-  radius = Number(radius);
-
   for (let idx = startIndex; idx < maxIndex; idx++) {
     const creature = creatures[idx];
     if (!creature.active) {
       continue;
     }
 
-    const dx = creature.pos.x - pos.x;
-    const dy = creature.pos.y - pos.y;
-    const dist = Math.sqrt(dx * dx + dy * dy) - radius;
-    const threshold = nativeFindSizeMargin(Number(creature.size));
+    const dist = creature.pos.sub(pos).length() - radius;
+    const threshold = nativeFindSizeMargin(creature.size);
     if (threshold < dist) {
       continue;
     }
@@ -43,25 +39,15 @@ export function creatureFindInRadius(
 }
 
 export class PerksUpdateEffectsCtx {
-  state: GameplayState;
-  players: PlayerState[];
-  dt: number;
-  creatures: readonly CreatureState[] | null;
-  fxQueue: FxQueue | null;
   private _aimTargetByPlayerIndex: Map<number, number> = new Map();
 
   constructor(
-    state: GameplayState,
-    players: PlayerState[],
-    dt: number,
-    creatures: readonly CreatureState[] | null,
-    fxQueue: FxQueue | null,
+    public state: GameplayState,
+    public players: PlayerState[],
+    public dt: number,
+    public creatures: readonly CreatureState[] | null,
+    public fxQueue: FxQueue | null,
   ) {
-    this.state = state;
-    this.players = players;
-    this.dt = dt;
-    this.creatures = creatures;
-    this.fxQueue = fxQueue;
   }
 
   aimTargetForPlayer(playerIndex: number): number {
@@ -88,7 +74,7 @@ export class PerksUpdateEffectsCtx {
     }
 
     const player = this.players[playerIndex];
-    if (!this.state.preserveBugs && Number(player.health) <= 0.0) {
+    if (!this.state.preserveBugs && player.health <= 0.0) {
       this._aimTargetByPlayerIndex.set(playerIndex, target);
       return target;
     }
@@ -103,5 +89,3 @@ export class PerksUpdateEffectsCtx {
     return target;
   }
 }
-
-export type PerksUpdateEffectsStep = (ctx: PerksUpdateEffectsCtx) => void;

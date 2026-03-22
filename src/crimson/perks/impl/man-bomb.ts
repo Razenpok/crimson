@@ -44,7 +44,7 @@ export function tickManBomb(ctx: PlayerPerkTickCtx): void {
   }
 }
 
-export const MAN_BOMB_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.MAN_BOMB as const,
   playerTickSteps: [tickManBomb] as const,
 };

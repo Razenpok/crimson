@@ -2,8 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
-import { type SmallFontData } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
@@ -15,7 +14,6 @@ import {
   perkDisplayDescription,
 } from '@crimson/perks/ids.ts';
 import { buildPerkAvailability, type GameStatus } from '@crimson/perks/availability.ts';
-import { allQuests } from '@crimson/quests/index.ts';
 import { perksDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
@@ -399,7 +397,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
 
   private _buildPerkDatabaseIds(): PerkId[] {
     const status = (this.state as unknown as { status?: GameStatus | null }).status ?? null;
-    const available = buildPerkAvailability(status, allQuests());
+    const available = buildPerkAvailability(status);
     const perkIds: PerkId[] = [];
     for (let idx = 1; idx < available.length; idx++) {
       if (available[idx]) {

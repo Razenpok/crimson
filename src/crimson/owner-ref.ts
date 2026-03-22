@@ -9,14 +9,11 @@ export enum OwnerKind {
 }
 
 export class OwnerRef {
-  readonly kind: OwnerKind;
-  readonly index: number;
-  readonly localHost: boolean;
-
-  constructor(kind: OwnerKind, index: number = 0, localHost: boolean = false) {
-    this.kind = kind;
-    this.index = index;
-    this.localHost = localHost;
+  constructor(
+    public kind: OwnerKind,
+    public index: number = 0,
+    public localHost: boolean = false
+  ) {
   }
 
   static none(): OwnerRef {

@@ -62,7 +62,7 @@ export function tickFireCough(ctx: PlayerPerkTickCtx): void {
   ctx.state.perkIntervals.fireCough = (intervalRoll % 4) + 2.0;
 }
 
-export const FIRE_COUGH_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.FIRE_CAUGH as const,
   playerTickSteps: [tickFireCough] as const,
 };

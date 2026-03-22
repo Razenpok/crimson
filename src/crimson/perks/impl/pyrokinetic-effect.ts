@@ -45,7 +45,7 @@ export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const PYROKINETIC_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.PYROKINETIC as const,
   effectsSteps: [updatePyrokinetic] as const,
 };

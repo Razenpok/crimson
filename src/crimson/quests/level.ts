@@ -55,7 +55,8 @@ export function questLevelTitle(
   return String(quest.title);
 }
 
-export function questLevelEqual(a: QuestLevel, b: QuestLevel): boolean {
+export function questLevelEqual(a: QuestLevel | null, b: QuestLevel): boolean {
+  if (a === null) return false;
   return a.major === b.major && a.minor === b.minor;
 }
 

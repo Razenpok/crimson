@@ -102,7 +102,7 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
   state.sfxQueue.push(SfxId.SHOCKWAVE);
 }
 
-export const FINAL_REVENGE_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.FINAL_REVENGE as const,
   playerDeathHook: applyFinalRevengeOnPlayerDeath,
 };

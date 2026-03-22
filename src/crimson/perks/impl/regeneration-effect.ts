@@ -57,7 +57,7 @@ export function updateRegeneration(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const REGENERATION_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.REGENERATION as const,
   effectsSteps: [updateRegeneration] as const,
 };

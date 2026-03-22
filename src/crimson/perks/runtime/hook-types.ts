@@ -5,10 +5,11 @@ import type { FxQueue } from '@crimson/effects.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyHandler } from './apply-context.ts';
-import type { PerksUpdateEffectsStep } from './effects-context.ts';
+import type { PerksUpdateEffectsCtx } from "./effects-context.ts";
 import type { PlayerPerkTickCtx } from './player-tick-context.ts';
 
 export type WorldDtStep = (dt: number, players: PlayerState[]) => number;
+export type PerksUpdateEffectsStep = (ctx: PerksUpdateEffectsCtx) => void;
 
 export type PlayerDeathHook = (opts: {
   state: GameplayState;

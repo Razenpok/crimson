@@ -5,7 +5,8 @@ import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { perkCountGet } from './helpers.ts';
 import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
 import { PERK_COUNT_SIZE } from '@crimson/sim/state-types.ts';
-import { QuestLevel } from "@crimson/quests/level.js";
+import { questLevelEqual } from "@crimson/quests/level.js";
+import { allQuests } from "@crimson/quests/registry.js";
 
 const _PERK_BASE_AVAILABLE_MAX_ID = PerkId.BONUS_MAGNET as number;
 const _PERK_ALWAYS_AVAILABLE: readonly PerkId[] = [
@@ -19,11 +20,7 @@ export interface GameStatus {
   readonly questUnlockIndex: number;
 }
 
-export interface QuestDefinition {
-  readonly unlockPerkId: PerkId | null;
-}
-
-export function buildPerkAvailability(status: GameStatus | null, allQuests: readonly QuestDefinition[]): boolean[] {
+export function buildPerkAvailability(status: GameStatus | null): boolean[] {
   const available: boolean[] = new Array(PERK_COUNT_SIZE).fill(false);
   let unlockIndex = 0;
   if (status !== null) {
@@ -37,41 +34,32 @@ export function buildPerkAvailability(status: GameStatus | null, allQuests: read
   }
 
   for (const perkId of _PERK_ALWAYS_AVAILABLE) {
-    const idx = perkId as number;
+    const idx = perkId;
     if (idx >= 0 && idx < available.length) {
       available[idx] = true;
     }
   }
 
   if (unlockIndex > 0) {
-    const quests = allQuests;
+    const quests = allQuests();
     for (let i = 0; i < Math.min(unlockIndex, quests.length); i++) {
       const quest = quests[i];
       const perkId = quest.unlockPerkId;
-      if (perkId !== null && (perkId as number) > 0 && (perkId as number) < available.length) {
-        available[perkId as number] = true;
+      if (perkId !== null && perkId > 0 && perkId < available.length) {
+        available[perkId] = true;
       }
     }
   }
 
-  available[PerkId.ANTIPERK as number] = false;
+  available[PerkId.ANTIPERK] = false;
   return available;
 }
 
-export function preparePerkAvailability(
-  state: GameplayState,
-  status: GameStatus | null,
-  allQuests: readonly QuestDefinition[],
-): void {
-  const built = buildPerkAvailability(status, allQuests);
+export function preparePerkAvailability(state: GameplayState): void {
+  const built = buildPerkAvailability(state.status);
   for (let i = 0; i < built.length && i < state.perkAvailable.length; i++) {
     state.perkAvailable[i] = built[i];
   }
-}
-
-function questLevelEquals(a: QuestLevel | null, major: number, minor: number): boolean {
-  if (a === null) return false;
-  return a.major === major && a.minor === minor;
 }
 
 export function perkCanOffer(
@@ -85,10 +73,11 @@ export function perkCanOffer(
     return false;
   }
 
+  // Hardcore quest 2-10 blocks poison-related perks.
   if (
     gameMode === GameMode.QUESTS &&
     state.hardcore &&
-    questLevelEquals(state.questLevel, 2, 10) &&
+    questLevelEqual(state.questLevel, { major: 2, minor: 10 }) &&
     (perkId === PerkId.POISON_BULLETS || perkId === PerkId.VEINS_OF_POISON || perkId === PerkId.PLAGUEBEARER)
   ) {
     return false;
@@ -100,6 +89,12 @@ export function perkCanOffer(
   }
 
   const flags = meta.flags;
+  // Native `perk_can_offer` treats these metadata bits as allow-lists for
+  //   # specific runtime modes, not "only in this mode":
+  // - in quest mode, offered perks must have bit 0x1 set
+  // - in multiplayer, offered perks must have bit 0x2 set
+  // The original game only had 1p/2p, but the port extends this gate to all
+  // multiplayer counts for consistent 3p/4p behavior.
   if (gameMode === GameMode.QUESTS && (flags & PerkFlags.QUEST_MODE_ALLOWED) === 0) {
     return false;
   }

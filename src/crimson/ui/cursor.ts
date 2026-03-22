@@ -1,3 +1,5 @@
+// Port of crimson/ui/cursor.py
+
 import { WebGLContext, GlTexture, BlendMode } from "@grim/webgl.ts";
 import { Vec2 } from "@grim/geom.ts";
 import { effectSrcRect, EffectId } from "@crimson/effects-atlas.ts";

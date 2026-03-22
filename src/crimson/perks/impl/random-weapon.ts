@@ -19,7 +19,7 @@ export function applyRandomWeapon(ctx: PerkApplyCtx): void {
   weaponAssignPlayer(ctx.owner, weaponId, ctx.state);
 }
 
-export const RANDOM_WEAPON_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.RANDOM_WEAPON as const,
   applyHandler: applyRandomWeapon,
 };

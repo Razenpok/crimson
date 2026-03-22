@@ -126,7 +126,7 @@ export function updateJinxed(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const JINXED_HOOKS = {
+export const HOOKS = {
   perkId: PerkId.JINXED as const,
   effectsSteps: [updateJinxedTimer, updateJinxed] as const,
 };
