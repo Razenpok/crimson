@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       '@grim': resolve(__dirname, 'src/grim'),
       '@crimson': resolve(__dirname, 'src/crimson'),
+      '@wgl': resolve(__dirname, 'src/grim/wgl'),
     },
   },
 });

@@ -1,5 +1,6 @@
 // Port of grim/color.py
 
+import * as wgl from '@wgl';
 import { clamp } from './math.ts';
 
 export class RGBA {
@@ -15,7 +16,7 @@ export class RGBA {
     this.a = a;
   }
 
-  static fromRgba(value: RGBA | [number, number, number, number]): RGBA {
+  static fromRgba(value: RGBA | wgl.Color): RGBA {
     if (value instanceof RGBA) return value;
     return new RGBA(value[0], value[1], value[2], value[3]);
   }
@@ -34,8 +35,8 @@ export class RGBA {
     );
   }
 
-  toTuple(): [number, number, number, number] {
-    return [this.r, this.g, this.b, this.a];
+  toTuple(): wgl.Color {
+    return wgl.makeColor(this.r, this.g, this.b, this.a);
   }
 
   clamped(): RGBA {

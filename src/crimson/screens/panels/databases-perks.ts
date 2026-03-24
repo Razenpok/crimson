@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/databases_perks.py — Unlocked Perks Database view
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
@@ -16,8 +17,6 @@ import {
 import { buildPerkAvailability, type GameStatus } from '@crimson/perks/availability.ts';
 import { perksDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
-
-type Color = [number, number, number, number];
 
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;
@@ -88,15 +87,15 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   ): void {
     const left = leftTopLeft;
     const right = rightTopLeft;
-    const textColor: Color = [1, 1, 1, 1];
-    const dimColor: Color = [1, 1, 1, 0.7];
+    const textColor = wgl.makeColor(1, 1, 1, 1);
+    const dimColor = wgl.makeColor(1, 1, 1, 0.7);
     const violenceDisabled = this._violenceDisabled();
     const detailShiftX = perksDbRightDetailXShift(this.state.config.display.width);
 
     // state_16 title at (163,244) => relative to left panel (-98,194): (261,50)
     const titlePos = left.add(new Vec2(261.0 * scale, 50.0 * scale));
     const titleText = 'Unlocked Perks Database';
-    drawSmallText(ctx, font, titleText, titlePos, [1, 1, 1, 1]);
+    drawSmallText(ctx, font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
     const titleW = measureSmallTextWidth(font, titleText);
     // 1px outline strip under the title with alpha 0.5
     ctx.drawRectangle(
@@ -159,7 +158,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         ctx, font,
         this._perkName(perkId, violenceDisabled, preserveBugs),
         listTopLeft.offset(0.0, row * rowStep),
-        [1, 1, 1, rowAlpha],
+        wgl.makeColor(1, 1, 1, rowAlpha),
       );
     }
 
@@ -197,7 +196,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const perkName = this._perkName(perkId, violenceDisabled, preserveBugs);
     const detailAnchor = right.add(new Vec2((34.0 + detailShiftX) * scale, 72.0 * scale));
     const perkNoLabel = preserveBugs ? 'perkno' : 'perk';
-    drawSmallText(ctx, font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), [1, 1, 1, 0.4]);
+    drawSmallText(ctx, font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
     const nameW = measureSmallTextWidth(font, perkName);
     const perkNamePos = new Vec2(detailAnchor.x + 128.0 * scale - nameW * 0.5, detailAnchor.y - 22.0 * scale);
     drawSmallText(ctx, font, perkName, perkNamePos, textColor);
@@ -212,7 +211,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     let descPos = detailAnchor.add(new Vec2(16.0 * scale, 0.0));
     const prereqName = this._perkPrereqName(perkId, violenceDisabled, preserveBugs);
     if (prereqName) {
-      drawSmallText(ctx, font, `Requires: ${prereqName}`, descPos, [1, 204 / 255, 204 / 255, 0.8]);
+      drawSmallText(ctx, font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, 0.8));
       descPos = descPos.offset(0.0, 18.0 * scale);
     }
 

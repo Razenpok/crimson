@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/options.py — Options menu panel
 
+import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -42,8 +43,7 @@ const MOUSE_BUTTON_LEFT = 0;
 // Color helpers
 // ---------------------------------------------------------------------------
 
-type Color = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // SliderState
@@ -357,20 +357,20 @@ export class OptionsMenuView extends PanelMenuView {
     const scale = layout.scale;
 
     const font = resources.smallFont;
-    const textColor: Color = [1, 1, 1, 0.8];
+    const textColor = wgl.makeColor(1, 1, 1, 0.8);
 
     const titleW = 128.0;
-    const src: [number, number, number, number] = [
+    const src = wgl.makeRectangle(
       0.0,
       MENU_LABEL_ROW_OPTIONS * MENU_LABEL_ROW_HEIGHT,
       titleW,
       MENU_LABEL_ROW_HEIGHT,
-    ];
-    const dst: [number, number, number, number] = [
+    );
+    const dst = wgl.makeRectangle(
       basePos.x, basePos.y,
       titleW * scale, MENU_LABEL_ROW_HEIGHT * scale,
-    ];
-    ctx.drawTexturePro(labelsTex, src, dst, [0.0, 0.0], 0.0, WHITE);
+    );
+    ctx.drawTexturePro(labelsTex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, WHITE);
 
     const yOffsets = [47.0, 67.0, 87.0, 107.0];
     for (let i = 0; i < OptionsMenuView._LABELS.length; i++) {
@@ -399,9 +399,9 @@ export class OptionsMenuView extends PanelMenuView {
     const checkPos = labelPos.offset(0.0, 135.0 * scale);
     ctx.drawTexturePro(
       checkTex,
-      [0.0, 0.0, checkTex.width, checkTex.height],
-      [checkPos.x, checkPos.y, checkW, checkH],
-      [0.0, 0.0], 0.0, WHITE,
+      wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
+      wgl.makeRectangle(checkPos.x, checkPos.y, checkW, checkH),
+      wgl.makeVector2(0.0, 0.0), 0.0, WHITE,
     );
     drawSmallText(
       ctx, font, 'UI Info texts',
@@ -430,13 +430,13 @@ export class OptionsMenuView extends PanelMenuView {
   ): void {
     for (let idx = 0; idx < slider.maxValue; idx++) {
       const tex = idx < slider.value ? rectOn : rectOff;
-      const dst: [number, number, number, number] = [pos.x + idx * rectW, pos.y, rectW, rectH];
-      const tint: Color = idx < slider.value ? WHITE : [1, 1, 1, 0.5];
+      const dst = wgl.makeRectangle(pos.x + idx * rectW, pos.y, rectW, rectH);
+      const tint = idx < slider.value ? WHITE : wgl.makeColor(1, 1, 1, 0.5);
       ctx.drawTexturePro(
         tex,
-        [0.0, 0.0, tex.width, tex.height],
+        wgl.makeRectangle(0.0, 0.0, tex.width, tex.height),
         dst,
-        [0.0, 0.0], 0.0, tint,
+        wgl.makeVector2(0.0, 0.0), 0.0, tint,
       );
     }
   }

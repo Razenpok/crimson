@@ -1,5 +1,6 @@
 // Port of crimson/screens/boot.py — Boot/splash screen with company logos
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '@grim/assets.ts';
 import { audioPlayMusic, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
@@ -25,8 +26,6 @@ export const LOGO_REF_IN_START = 7.0;
 export const LOGO_REF_IN_END = 8.0;
 export const LOGO_REF_HOLD_END = 10.0;
 export const LOGO_REF_OUT_END = 11.0;
-type Color = [number, number, number, number];
-
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
 
@@ -256,12 +255,12 @@ export class BootView {
     const texH = tex.height;
     const x = (ctx.screenWidth - texW) * 0.5;
     const y = (ctx.screenHeight - texH) * 0.5;
-    const tint: Color = [1, 1, 1, alpha];
+    const tint = wgl.makeColor(1, 1, 1, alpha);
     ctx.drawTexturePro(
       tex,
-      [0, 0, texW, texH],
-      [x, y, texW, texH],
-      [0, 0],
+      wgl.makeRectangle(0, 0, texW, texH),
+      wgl.makeRectangle(x, y, texW, texH),
+      wgl.makeVector2(0, 0),
       0.0,
       tint,
     );
@@ -322,7 +321,7 @@ export class BootView {
       lr, lg, lb, lineAlpha,
     );
 
-    const tint: Color = [1, 1, 1, alpha];
+    const tint = wgl.makeColor(1, 1, 1, alpha);
 
     const logoW = logo.width;
     const logoHf = logo.height;
@@ -330,9 +329,9 @@ export class BootView {
     const logoY = (screenH - logoHf) * 0.5;
     ctx.drawTexturePro(
       logo,
-      [0, 0, logoW, logoHf],
-      [logoX, logoY, logoW, logoHf],
-      [0, 0],
+      wgl.makeRectangle(0, 0, logoW, logoHf),
+      wgl.makeRectangle(logoX, logoY, logoW, logoHf),
+      wgl.makeVector2(0, 0),
       0.0,
       tint,
     );
@@ -342,9 +341,9 @@ export class BootView {
     const loadingY = screenH * 0.5 + 16.0;
     ctx.drawTexturePro(
       loading,
-      [0, 0, loading.width, loading.height],
-      [loadingX, loadingY, loading.width, loading.height],
-      [0, 0],
+      wgl.makeRectangle(0, 0, loading.width, loading.height),
+      wgl.makeRectangle(loadingX, loadingY, loading.width, loading.height),
+      wgl.makeVector2(0, 0),
       0.0,
       tint,
     );
@@ -356,9 +355,9 @@ export class BootView {
     const esrbY = screenH - esrbH - 1.0;
     ctx.drawTexturePro(
       esrb,
-      [0, 0, esrbW, esrbH],
-      [esrbX, esrbY, esrbW, esrbH],
-      [0, 0],
+      wgl.makeRectangle(0, 0, esrbW, esrbH),
+      wgl.makeRectangle(esrbX, esrbY, esrbW, esrbH),
+      wgl.makeVector2(0, 0),
       0.0,
       tint,
     );

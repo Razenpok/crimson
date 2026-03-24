@@ -1,5 +1,6 @@
 // Port of crimson/ui/overlays/quest_run.py
 
+import * as wgl from '@wgl';
 import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
 import { type GrimMonoFont } from '@grim/fonts/grim-mono.ts';
 import { clamp } from '@grim/math.ts';
@@ -75,13 +76,13 @@ export function drawQuestCompleteBannerOverlay(
   const height = QUEST_COMPLETE_BANNER_BASE_H * scale;
   const centerX = screenW * 0.5;
   const centerY = screenH * 0.5;
-  const src: [number, number, number, number] = [0, 0, texture.width, texture.height];
-  const dst: [number, number, number, number] = [
+  const src = wgl.makeRectangle(0, 0, texture.width, texture.height);
+  const dst = wgl.makeRectangle(
     centerX - width * 0.5,
     centerY - height * 0.5,
     width,
     height,
-  ];
-  const tint: [number, number, number, number] = [1.0, 1.0, 1.0, clamp(alpha, 0.0, 1.0)];
-  ctx.drawTexturePro(texture, src, dst, [0, 0], 0.0, tint);
+  );
+  const tint = wgl.makeColor(1.0, 1.0, 1.0, clamp(alpha, 0.0, 1.0));
+  ctx.drawTexturePro(texture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 }

@@ -1,5 +1,6 @@
 // Port of crimson/screens/high_scores_view/main_panel.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -28,11 +29,8 @@ import {
 import { modeLabel } from './shared.ts';
 import type { HighScoresView } from './view.ts';
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 export function drawMainPanel(
   ctx: WebGLContext,
@@ -63,7 +61,7 @@ export function drawMainPanel(
   }
 
   const titleDrawPos = leftPanelTopLeft.add(new Vec2(titleX * scale, 41.0 * scale));
-  drawSmallText(ctx, font, title, titleDrawPos, [1, 1, 1, 1]);
+  drawSmallText(ctx, font, title, titleDrawPos, wgl.makeColor(1, 1, 1, 1));
 
   const ulW = measureSmallTextWidth(font, title);
   const ulH = Math.max(1, Math.round(1.0 * scale));
@@ -78,11 +76,11 @@ export function drawMainPanel(
 
   if (modeId === GameMode.QUESTS) {
     const hardcore = view.state.config.gameplay.hardcore;
-    let questColor: Color;
+    let questColor: wgl.Color;
     if (hardcore) {
-      questColor = [250 / 255, 70 / 255, 60 / 255, 0.7];
+      questColor = wgl.makeColor(250 / 255, 70 / 255, 60 / 255, 0.7);
     } else {
-      questColor = [70 / 255, 180 / 255, 240 / 255, 0.7];
+      questColor = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 0.7);
     }
     const questLevel: QuestLevel = { major: Math.floor(questMajor), minor: Math.floor(questMinor) };
     const quest = questByLevel(questLevel);
@@ -98,26 +96,26 @@ export function drawMainPanel(
 
     const dstW = arrow.width * scale;
     const dstH = arrow.height * scale;
-    const tint: Color = [1, 1, 1, 0.51];
+    const tint = wgl.makeColor(1, 1, 1, 0.51);
 
     if (globalIndex > 0) {
-      const src: RectTuple = [0.0, 0.0, arrow.width, arrow.height];
+      const src = wgl.makeRectangle(0.0, 0.0, arrow.width, arrow.height);
       const arrowPos = leftPanelTopLeft.add(new Vec2((HS_QUEST_ARROW_X - 255.0) * scale, HS_QUEST_ARROW_Y * scale));
-      const dst: RectTuple = [arrowPos.x, arrowPos.y, dstW, dstH];
+      const dst = wgl.makeRectangle(arrowPos.x, arrowPos.y, dstW, dstH);
       ctx.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
     }
 
     if (globalIndex < maxIndex) {
       // Flip horizontally for right arrow.
-      const src: RectTuple = [0.0, 0.0, -arrow.width, arrow.height];
+      const src = wgl.makeRectangle(0.0, 0.0, -arrow.width, arrow.height);
       const arrowPos = leftPanelTopLeft.add(new Vec2(HS_QUEST_ARROW_X * scale, HS_QUEST_ARROW_Y * scale));
-      const dst: RectTuple = [arrowPos.x, arrowPos.y, dstW, dstH];
+      const dst = wgl.makeRectangle(arrowPos.x, arrowPos.y, dstW, dstH);
       ctx.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
     }
   }
 
   // Column headers
-  const headerColor: Color = [1, 1, 1, 1];
+  const headerColor = wgl.makeColor(1, 1, 1, 1);
   drawSmallText(ctx, font, 'Rank', leftPanelTopLeft.add(new Vec2(211.0 * scale, 84.0 * scale)), headerColor);
   drawSmallText(ctx, font, 'Score', leftPanelTopLeft.add(new Vec2(246.0 * scale, 84.0 * scale)), headerColor);
   drawSmallText(ctx, font, 'Player', leftPanelTopLeft.add(new Vec2(302.0 * scale, 84.0 * scale)), headerColor);
@@ -161,7 +159,7 @@ export function drawMainPanel(
   }
 
   if (start >= end) {
-    drawSmallText(ctx, font, 'No scores yet.', new Vec2(leftPanelTopLeft.x + 211.0 * scale, y + 8.0 * scale), [190 / 255, 190 / 255, 200 / 255, 1]);
+    drawSmallText(ctx, font, 'No scores yet.', new Vec2(leftPanelTopLeft.x + 211.0 * scale, y + 8.0 * scale), wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1));
   } else {
     for (let idx = start; idx < end; idx++) {
       const entry = view.records[idx];
@@ -177,9 +175,9 @@ export function drawMainPanel(
         value = `${Math.floor(entry.scoreXp)}`;
       }
 
-      let color: Color = [1, 1, 1, 0.7];
+      let color = wgl.makeColor(1, 1, 1, 0.7);
       if (selectedRank !== null && Math.floor(selectedRank) === idx) {
-        color = [1, 1, 1, 1];
+        color = wgl.makeColor(1, 1, 1, 1);
       }
 
       drawSmallText(ctx, font, `${idx + 1}`, new Vec2(leftPanelTopLeft.x + 216.0 * scale, y), color);

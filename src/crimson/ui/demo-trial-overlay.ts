@@ -1,5 +1,6 @@
 // Port of demo_trial_overlay.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
@@ -182,18 +183,18 @@ export class DemoTrialOverlayUi {
 
     // Logo
     const logo = getTexture(this._resources, TextureId.CL_LOGO);
-    const logoSrc: [number, number, number, number] = [0, 0, logo.width, logo.height];
-    const logoDst: [number, number, number, number] = [
+    const logoSrc = wgl.makeRectangle(0, 0, logo.width, logo.height);
+    const logoDst = wgl.makeRectangle(
       panelPos.x + 72.0,
       panelPos.y + 22.0,
       371.2,
       46.4,
-    ];
-    ctx.drawTexturePro(logo, logoSrc, logoDst, [0, 0], 0, [1, 1, 1, 1]);
+    );
+    ctx.drawTexturePro(logo, logoSrc, logoDst, wgl.makeVector2(0, 0), 0, wgl.makeColor(1, 1, 1, 1));
 
     // Header text
     const font = this._resources.smallFont;
-    const headerColor: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, 1.0];
+    const headerColor = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
     drawSmallText(
       ctx,
       font,
@@ -203,7 +204,7 @@ export class DemoTrialOverlayUi {
     );
 
     // Body lines
-    const bodyColor: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, 1.0];
+    const bodyColor = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
     const bodyX = panelPos.x + 26.0;
     const bodyLines = _overlayBodyLines(info);
     for (const [yOffset, line] of bodyLines) {

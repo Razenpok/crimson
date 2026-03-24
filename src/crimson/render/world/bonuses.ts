@@ -1,5 +1,6 @@
 // Port of crimson/render/world/bonuses.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
@@ -11,23 +12,23 @@ import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
-function bonusIconSrc(texture: GlTexture, iconId: number): [number, number, number, number] {
+function bonusIconSrc(texture: GlTexture, iconId: number): wgl.Rectangle {
   const grid = 4;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const col = (iconId | 0) % grid;
   const row = ((iconId | 0) / grid) | 0;
-  return [col * cellW, row * cellH, cellW, cellH];
+  return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
-function weaponIconSrc(texture: GlTexture, iconIndex: number): [number, number, number, number] {
+function weaponIconSrc(texture: GlTexture, iconIndex: number): wgl.Rectangle {
   const grid = 8;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const frame = (iconIndex | 0) * 2;
   const col = frame % grid;
   const row = (frame / grid) | 0;
-  return [col * cellW, row * cellH, cellW * 2, cellH];
+  return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
 function bonusFade(timeLeft: number, timeMax: number): number {
@@ -65,9 +66,9 @@ export function drawBonusPickups(
     const bubbleAlpha = clamp(fade * 0.9, 0.0, 1.0) * alpha;
 
     const screen = WorldRenderCtx.worldToScreenWith(bonus.pos, camera, viewScale);
-    const bubbleDst: [number, number, number, number] = [screen.x, screen.y, bubbleSize, bubbleSize];
-    const bubbleOrigin: [number, number] = [bubbleSize * 0.5, bubbleSize * 0.5];
-    const tint: [number, number, number, number] = [1, 1, 1, bubbleAlpha];
+    const bubbleDst = wgl.makeRectangle(screen.x, screen.y, bubbleSize, bubbleSize);
+    const bubbleOrigin = wgl.makeVector2(bubbleSize * 0.5, bubbleSize * 0.5);
+    const tint = wgl.makeColor(1, 1, 1, bubbleAlpha);
     renderCtx.gl.drawTexturePro(bonusesTexture, bubbleSrc, bubbleDst, bubbleOrigin, 0.0, tint);
 
     const bonusId = bonus.bonusId;
@@ -86,8 +87,8 @@ export function drawBonusPickups(
       const src = weaponIconSrc(wiconsTexture, iconIndex);
       const w = 60.0 * iconScale * scale;
       const h = 30.0 * iconScale * scale;
-      const dst: [number, number, number, number] = [screen.x, screen.y, w, h];
-      const origin: [number, number] = [w * 0.5, h * 0.5];
+      const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
+      const origin = wgl.makeVector2(w * 0.5, h * 0.5);
       renderCtx.gl.drawTexturePro(wiconsTexture, src, dst, origin, 0.0, tint);
       continue;
     }
@@ -106,8 +107,8 @@ export function drawBonusPickups(
     const src = bonusIconSrc(bonusesTexture, iconId);
     const size = 32.0 * iconScale * scale;
     const rotationRad = Math.sin(idx - frame.elapsedMs * 0.003) * 0.2;
-    const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-    const origin: [number, number] = [size * 0.5, size * 0.5];
+    const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+    const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     renderCtx.gl.drawTexturePro(bonusesTexture, src, dst, origin, rotationRad * RAD_TO_DEG, tint);
   }
 }
@@ -126,8 +127,8 @@ export function drawBonusHoverLabels(
   if (font === null || font === undefined) return;
   const screenW = renderCtx.gl.screenWidth;
 
-  const shadow: [number, number, number, number] = [0, 0, 0, (180 / 255) * alpha];
-  const color: [number, number, number, number] = [230 / 255, 230 / 255, 230 / 255, alpha];
+  const shadow = wgl.makeColor(0, 0, 0, (180 / 255) * alpha);
+  const color = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alpha);
 
   const bonusPool = frame.state.bonusPool;
   for (const player of frame.players) {

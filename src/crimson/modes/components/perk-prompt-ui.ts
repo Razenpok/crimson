@@ -1,5 +1,6 @@
 // Port of crimson/modes/components/perk_prompt_ui.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -77,7 +78,7 @@ export class PerkPromptUi {
       timerMs: number;
       pulse: number;
       uiTextWidth: UiTextWidthFn;
-      textColor: [number, number, number, number];
+      textColor: wgl.Color;
       scale: number;
     },
   ): void {
@@ -91,13 +92,13 @@ export class PerkPromptUi {
     const hinge = PerkPromptUi.hinge(screenW);
     // Prompt swings counter-clockwise; WebGL Y-down makes positive rotation clockwise.
     const rotDeg = -(1.0 - alpha) * 90.0;
-    const tint: [number, number, number, number] = [1, 1, 1, alpha];
+    const tint = wgl.makeColor(1, 1, 1, alpha);
 
     const textScale = scale;
     const textW = uiTextWidth(label, textScale);
     const x = screenW - PERK_PROMPT_TEXT_MARGIN_X - textW;
     const y = hinge.y + PERK_PROMPT_TEXT_OFFSET_Y;
-    const color: [number, number, number, number] = [textColor[0], textColor[1], textColor[2], alpha];
+    const color = wgl.makeColor(textColor[0], textColor[1], textColor[2], alpha);
     drawUiText(ctx, resources, label, new Vec2(x, y), { scale: textScale, color });
 
     // Bar texture (mirrored via negative src width)
@@ -106,9 +107,9 @@ export class PerkPromptUi {
     const barH = barTex.height * PERK_PROMPT_BAR_SCALE;
     const barLocalX = (PERK_PROMPT_BAR_BASE_OFFSET_X + PERK_PROMPT_BAR_SHIFT_X) * PERK_PROMPT_BAR_SCALE;
     const barLocalY = PERK_PROMPT_BAR_BASE_OFFSET_Y * PERK_PROMPT_BAR_SCALE;
-    const barSrc: [number, number, number, number] = [0, 0, -barTex.width, barTex.height];
-    const barDst: [number, number, number, number] = [hinge.x, hinge.y, barW, barH];
-    const barOrigin: [number, number] = [-barLocalX, -barLocalY];
+    const barSrc = wgl.makeRectangle(0, 0, -barTex.width, barTex.height);
+    const barDst = wgl.makeRectangle(hinge.x, hinge.y, barW, barH);
+    const barOrigin = wgl.makeVector2(-barLocalX, -barLocalY);
     ctx.drawTexturePro(barTex, barSrc, barDst, barOrigin, rotDeg, tint);
 
     // Level-up label texture
@@ -119,10 +120,10 @@ export class PerkPromptUi {
     const luH = PERK_PROMPT_LEVEL_UP_BASE_H * PERK_PROMPT_LEVEL_UP_SCALE;
     const pulseAlpha = Math.max(0.0, Math.min(1.0, (100.0 + Math.floor(pulse * 155.0 / 1000.0)) / 255.0));
     const labelAlpha = Math.max(0.0, Math.min(1.0, alpha * pulseAlpha));
-    const pulseTint: [number, number, number, number] = [1, 1, 1, labelAlpha];
-    const luSrc: [number, number, number, number] = [0, 0, luTex.width, luTex.height];
-    const luDst: [number, number, number, number] = [hinge.x, hinge.y, luW, luH];
-    const luOrigin: [number, number] = [-luLocalX, -luLocalY];
+    const pulseTint = wgl.makeColor(1, 1, 1, labelAlpha);
+    const luSrc = wgl.makeRectangle(0, 0, luTex.width, luTex.height);
+    const luDst = wgl.makeRectangle(hinge.x, hinge.y, luW, luH);
+    const luOrigin = wgl.makeVector2(-luLocalX, -luLocalY);
     ctx.drawTexturePro(luTex, luSrc, luDst, luOrigin, rotDeg, pulseTint);
     if (labelAlpha > 0.0) {
       ctx.setBlendMode(BlendMode.ADDITIVE);

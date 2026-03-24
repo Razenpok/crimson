@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/stats.py — Statistics hub panel
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -72,9 +73,7 @@ const MENU_LABEL_ROW_STATISTICS = 3;
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -344,7 +343,7 @@ export class StatisticsMenuView {
       panelW, 0,
     );
     const panelTopLeft = this._panelTopLeft(scale).offset(slideX, 0);
-    const dst: RectTuple = [panelTopLeft.x, panelTopLeft.y, panelW, STATISTICS_PANEL_HEIGHT * scale];
+    const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, STATISTICS_PANEL_HEIGHT * scale);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
@@ -352,16 +351,16 @@ export class StatisticsMenuView {
     // Title: full-size row from UI_ITEM_TEXTS (128x32).
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const rowH = MENU_LABEL_ROW_HEIGHT;
-    const src: RectTuple = [0.0, MENU_LABEL_ROW_STATISTICS * rowH, labelTex.width, rowH];
+    const src = wgl.makeRectangle(0.0, MENU_LABEL_ROW_STATISTICS * rowH, labelTex.width, rowH);
     ctx.drawTexturePro(
       labelTex, src,
-      [
+      wgl.makeRectangle(
         panelTopLeft.x + _TITLE_X * scale,
         panelTopLeft.y + _TITLE_Y * scale,
         _TITLE_W * scale,
         _TITLE_H * scale,
-      ],
-      [0, 0], 0.0, WHITE,
+      ),
+      wgl.makeVector2(0, 0), 0.0, WHITE,
     );
 
     // "played for # hours # minutes"
@@ -369,14 +368,14 @@ export class StatisticsMenuView {
     const playtimeMs = (this.state as unknown as { status?: { gameSequenceId?: number } }).status?.gameSequenceId ?? 0;
     const playtimeText = formatPlaytimeText(playtimeMs, this.state.preserveBugs);
     const playtimePos = panelTopLeft.add(new Vec2(_PLAYTIME_X * scale, _PLAYTIME_Y * scale));
-    drawSmallText(ctx, font, playtimeText, playtimePos, [1, 1, 1, 0.8]);
+    drawSmallText(ctx, font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));
 
     // Easter egg: Orbes Volantes Exstare
     const today = new Date();
     if (isOrbesVolantesDay(today) && this.state.statsMenuEasterEggRoll === _STATS_EASTER_TRIGGER_ROLL) {
       this.state.statsMenuEasterEggRoll = _STATS_EASTER_ROLL_UNSET;
       const easterX = this.state.rng.rand(RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X) % 64 + 16;
-      drawSmallText(ctx, font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), [0.2, 1.0, 0.6, 0.5]);
+      drawSmallText(ctx, font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 0.5));
     }
 
     // Buttons
@@ -409,19 +408,19 @@ export class StatisticsMenuView {
     const offsetY = MENU_SIGN_OFFSET_Y * signScale;
     const rotationDeg = 0.0;
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }

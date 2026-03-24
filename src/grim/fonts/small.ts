@@ -1,5 +1,6 @@
 // Port of grim/fonts/small.py
 
+import * as wgl from '@wgl';
 import { type GlTexture, type WebGLContext } from "@grim/webgl.ts";
 import { Vec2 } from '@grim/geom.ts';
 
@@ -15,13 +16,13 @@ export function drawSmallText(
   font: SmallFontData,
   text: string,
   pos: Vec2,
-  color: [number, number, number, number],
+  color: wgl.Color,
 ): void {
   let xPos = Math.floor(pos.x);
   let yPos = Math.floor(pos.y);
   const baseX = xPos;
   const lineHeight = font.cellSize;
-  const origin : [number, number] = [0, 0];
+  const origin = wgl.makeVector2(0, 0);
 
   for (let i = 0; i < text.length; i++) {
     const value = text.charCodeAt(i);
@@ -46,8 +47,8 @@ export function drawSmallText(
     // the full glyph rect here.
     ctx.drawTexturePro(
       font.texture,
-      [srcX, srcY, width, font.cellSize],
-      [xPos, yPos, width, font.cellSize],
+      wgl.makeRectangle(srcX, srcY, width, font.cellSize),
+      wgl.makeRectangle(xPos, yPos, width, font.cellSize),
       origin,
       0,
       color,

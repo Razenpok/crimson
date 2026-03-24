@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/credits.py — Credits scrolling panel
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -81,9 +82,7 @@ const _CREDITS_SECRET_LINES: readonly string[] = [
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // CreditsLine
@@ -259,7 +258,7 @@ function creditsUnlockSecretLines(lines: CreditsLine[], baseIndex: number): void
 // Line color helper
 // ---------------------------------------------------------------------------
 
-function lineColor(flags: number, alpha: number): Color {
+function lineColor(flags: number, alpha: number): wgl.Color {
   let r: number, g: number, b: number;
   if ((flags & _FLAG_CLICKED) === 0) {
     if ((flags & _FLAG_HEADING) === 0) {
@@ -275,7 +274,7 @@ function lineColor(flags: number, alpha: number): Color {
     }
   }
   const a = Math.max(0.0, Math.min(1.0, alpha));
-  return [r, g, b, a];
+  return wgl.makeColor(r, g, b, a);
 }
 
 // ---------------------------------------------------------------------------
@@ -595,14 +594,14 @@ export class CreditsView {
 
     const panelW = MENU_PANEL_WIDTH * scale;
     const panelH = CREDITS_PANEL_HEIGHT * scale;
-    const dst: RectTuple = [panelTopLeft.x, panelTopLeft.y, panelW, panelH];
+    const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
 
     const font = resources.smallFont;
     const titlePos = panelTopLeft.add(new Vec2(_TITLE_X * scale, _TITLE_Y * scale));
-    drawSmallText(ctx, font, 'credits', titlePos, [1, 1, 1, 1]);
+    drawSmallText(ctx, font, 'credits', titlePos, wgl.makeColor(1, 1, 1, 1));
 
     const visibleCount = this._scrollLineEndIndex - this._scrollLineStartIndex;
     if (visibleCount > 0) {
@@ -648,19 +647,19 @@ export class CreditsView {
     const offsetY = MENU_SIGN_OFFSET_Y * signScale;
     const rotationDeg = 0.0;
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }

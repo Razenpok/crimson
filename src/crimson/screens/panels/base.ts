@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/base.py — Base panel class for all menu panels
 
+import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -72,11 +73,8 @@ const KEY_ESCAPE = 27;
 const KEY_ENTER = 13;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 // ---------------------------------------------------------------------------
 // MenuEntry — one interactive menu button slot
@@ -367,10 +365,10 @@ export class PanelMenuView {
     const font = resources.smallFont;
     const x = 32;
     let y = 140;
-    const titleColor: Color = [235 / 255, 235 / 255, 235 / 255, 1];
+    const titleColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1);
     drawSmallText(ctx, font, this._title, new Vec2(x, y), titleColor);
     y += 34;
-    const bodyColor: Color = [190 / 255, 190 / 255, 200 / 255, 1];
+    const bodyColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1);
     for (const line of this._bodyLines) {
       drawSmallText(ctx, font, line, new Vec2(x, y), bodyColor);
       y += 22;
@@ -441,7 +439,7 @@ export class PanelMenuView {
       this._panelPos.x + slideX,
       this._panelPos.y + this._widescreenYShift,
     ).add(this._panelOffset.mul(itemScale));
-    const dst: RectTuple = [panelTopLeft.x, panelTopLeft.y, panelW, panelH];
+    const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
     const fxDetail = this.state.config.display.fxDetail[0];
     drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
   }
@@ -462,50 +460,50 @@ export class PanelMenuView {
     const [itemScale, localYShift] = this._menuItemScale(entry.slot);
     const offsetX = MENU_ITEM_OFFSET_X * itemScale;
     const offsetY = MENU_ITEM_OFFSET_Y * itemScale - localYShift;
-    const dst: RectTuple = [pos.x, pos.y, itemW * itemScale, itemH * itemScale];
-    const origin: [number, number] = [-offsetX, -offsetY];
+    const dst = wgl.makeRectangle(pos.x, pos.y, itemW * itemScale, itemH * itemScale);
+    const origin = wgl.makeVector2(-offsetX, -offsetY);
     const fxDetail = this.state.config.display.fxDetail[0];
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, item,
-        [0.0, 0.0, itemW, itemH],
-        [dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]],
+        wgl.makeRectangle(0.0, 0.0, itemW, itemH),
+        wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
         origin, 0.0,
       );
     }
     ctx.drawTexturePro(
       item,
-      [0.0, 0.0, itemW, itemH],
+      wgl.makeRectangle(0.0, 0.0, itemW, itemH),
       dst,
       origin, 0.0, WHITE,
     );
 
     const alpha = labelAlpha(entry.hoverAmount);
     const alphaNorm = alpha / 255;
-    const tint: Color = [1, 1, 1, alphaNorm];
-    const src: RectTuple = [
+    const tint = wgl.makeColor(1, 1, 1, alphaNorm);
+    const src = wgl.makeRectangle(
       0.0,
       entry.row * MENU_LABEL_ROW_HEIGHT,
       MENU_LABEL_WIDTH,
       MENU_LABEL_ROW_HEIGHT,
-    ];
+    );
     const labelOffsetX = MENU_LABEL_OFFSET_X * itemScale;
     const labelOffsetY = MENU_LABEL_OFFSET_Y * itemScale - localYShift;
-    const labelDst: RectTuple = [
+    const labelDst = wgl.makeRectangle(
       pos.x,
       pos.y,
       MENU_LABEL_WIDTH * itemScale,
       MENU_LABEL_HEIGHT * itemScale,
-    ];
-    const labelOrigin: [number, number] = [-labelOffsetX, -labelOffsetY];
+    );
+    const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
     ctx.drawTexturePro(labelTex, src, labelDst, labelOrigin, 0.0, tint);
 
     if (this._entryEnabled(entry)) {
       ctx.setBlendMode(BlendMode.ADDITIVE);
       ctx.drawTexturePro(
         labelTex, src, labelDst, labelOrigin, 0.0,
-        [1, 1, 1, alphaNorm],
+        wgl.makeColor(1, 1, 1, alphaNorm),
       );
       ctx.setBlendMode(BlendMode.ALPHA);
     }
@@ -528,19 +526,19 @@ export class PanelMenuView {
 
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = this.state.config.display.fxDetail[0];
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-signOffsetX, -signOffsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-signOffsetX, -signOffsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }

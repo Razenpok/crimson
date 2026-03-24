@@ -1,5 +1,6 @@
 // Port of crimson/render/projectile_draw/secondary_rocket.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
@@ -62,12 +63,12 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
   const row = (frame / grid) | 0;
   const particleCellW = particlesTexture.width / grid;
   const particleCellH = particlesTexture.height / grid;
-  const src: [number, number, number, number] = [
+  const src = wgl.makeRectangle(
     particleCellW * col,
     particleCellH * row,
     Math.max(0.0, particleCellW - 2.0),
     Math.max(0.0, particleCellH - 2.0),
-  ];
+  );
 
   const direction = Vec2.fromHeading(ctx.angle);
   const scale = ctx.scale;
@@ -80,8 +81,8 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
     const tint = rgba.toTuple();
     const fxPos = ctx.screenPos.sub(direction.mul(offset * scale));
     const dstSize = size * scale;
-    const dst: [number, number, number, number] = [fxPos.x, fxPos.y, dstSize, dstSize];
-    const origin: [number, number] = [dstSize * 0.5, dstSize * 0.5];
+    const dst = wgl.makeRectangle(fxPos.x, fxPos.y, dstSize, dstSize);
+    const origin = wgl.makeVector2(dstSize * 0.5, dstSize * 0.5);
     gl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
   };
 
@@ -128,7 +129,7 @@ export function drawSecondaryType4Fallback(ctx: SecondaryProjectileDrawCtx): boo
   const radius = Math.max(1.0, 12.0 * scale);
   const size = radius * 2.0;
   const sp = ctx.screenPos;
-  const tint: [number, number, number, number] = [200 / 255, 120 / 255, 1.0, ctx.alpha];
-  gl.drawTexturePro(gl.whiteTexture, [0, 0, 1, 1], [sp.x, sp.y, size, size], [size * 0.5, size * 0.5], 0, tint);
+  const tint = wgl.makeColor(200 / 255, 120 / 255, 1.0, ctx.alpha);
+  gl.drawTexturePro(gl.whiteTexture, wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
   return true;
 }

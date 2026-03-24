@@ -1,5 +1,6 @@
 // Port of crimson/render/world/effects.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
@@ -14,7 +15,7 @@ function srcRectForEffect(
   effectId: number,
   texWidth: number,
   texHeight: number,
-): [number, number, number, number] | null {
+): wgl.Rectangle | null {
   const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(effectId);
   if (atlas === undefined) return null;
   const grid = SIZE_CODE_GRID[atlas.sizeCode];
@@ -24,7 +25,7 @@ function srcRectForEffect(
   const row = (frame / grid) | 0;
   const cellW = texWidth / grid;
   const cellH = texHeight / grid;
-  return [cellW * col, cellH * row, Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0)];
+  return wgl.makeRectangle(cellW * col, cellH * row, Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0));
 }
 
 export function drawParticlePool(
@@ -56,7 +57,7 @@ export function drawParticlePool(
 
   if (fxDetail1 && srcLarge !== null) {
     const alphaByte = clamp(alpha * 0.065, 0.0, 1.0);
-    const tint: [number, number, number, number] = [1, 1, 1, alphaByte];
+    const tint = wgl.makeColor(1, 1, 1, alphaByte);
     for (let idx = 0; idx < particles.length; idx++) {
       const entry = particles[idx];
       if (!entry.active || (idx % 2) || entry.styleId === ParticleStyleId.BUBBLEGUN) continue;
@@ -65,8 +66,8 @@ export function drawParticlePool(
       const size = Math.max(0.0, radius * 2.0 * scale);
       if (size <= 0.0) continue;
       const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
-      const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-      const origin: [number, number] = [size * 0.5, size * 0.5];
+      const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
       ctx.drawTexturePro(texture, srcLarge, dst, origin, 0.0, tint);
     }
   }
@@ -79,12 +80,12 @@ export function drawParticlePool(
     const size = Math.max(0.0, radius * 2.0 * scale);
     if (size <= 0.0) continue;
     const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
-    const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-    const origin: [number, number] = [size * 0.5, size * 0.5];
+    const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+    const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = entry.spin * RAD_TO_DEG;
-    const tint: [number, number, number, number] = [
+    const tint = wgl.makeColor(
       entry.scaleX, entry.scaleY, entry.scaleZ, entry.age * alpha,
-    ];
+    );
     ctx.drawTexturePro(texture, srcNormal, dst, origin, rotationDeg, tint);
   }
 
@@ -98,9 +99,9 @@ export function drawParticlePool(
     const h = Math.max(0.0, halfH * 2.0 * scale);
     if (w <= 0.0 || h <= 0.0) continue;
     const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
-    const dst: [number, number, number, number] = [screen.x, screen.y, w, h];
-    const origin: [number, number] = [w * 0.5, h * 0.5];
-    const tint: [number, number, number, number] = [1, 1, 1, entry.age * alphaClamped];
+    const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
+    const origin = wgl.makeVector2(w * 0.5, h * 0.5);
+    const tint = wgl.makeColor(1, 1, 1, entry.age * alphaClamped);
     ctx.drawTexturePro(texture, srcStyle8, dst, origin, 0.0, tint);
   }
 
@@ -133,7 +134,7 @@ export function drawSpriteEffectPool(
   const row = (atlasFrame / grid) | 0;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
-  const src: [number, number, number, number] = [cellW * col, cellH * row, cellW, cellH];
+  const src = wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
   const scale = WorldRenderCtx.viewScaleAvg(viewScale);
 
   const ctx = renderCtx.gl;
@@ -143,11 +144,11 @@ export function drawSpriteEffectPool(
     const size = entry.scale * scale;
     if (size <= 0.0) continue;
     const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
-    const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-    const origin: [number, number] = [size * 0.5, size * 0.5];
+    const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+    const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = entry.rotation * RAD_TO_DEG;
     const c = entry.color.scaledAlpha(alpha);
-    const tint: [number, number, number, number] = [c.r, c.g, c.b, c.a];
+    const tint = wgl.makeColor(c.r, c.g, c.b, c.a);
     ctx.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
   }
   ctx.setBlendMode(BlendMode.ALPHA);
@@ -169,9 +170,9 @@ export function drawEffectPool(
 
   const scale = WorldRenderCtx.viewScaleAvg(viewScale);
 
-  const srcCache = new Map<number, [number, number, number, number]>();
+  const srcCache = new Map<number, wgl.Rectangle>();
 
-  function srcRect(effectId: number): [number, number, number, number] | null {
+  function srcRect(effectId: number): wgl.Rectangle | null {
     const cached = srcCache.get(effectId);
     if (cached !== undefined) return cached;
 
@@ -184,10 +185,10 @@ export function drawEffectPool(
     const row = (f / grid) | 0;
     const cellW = texture.width / grid;
     const cellH = texture.height / grid;
-    const src: [number, number, number, number] = [
+    const src = wgl.makeRectangle(
       cellW * col, cellH * row,
       Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0),
-    ];
+    );
     srcCache.set(effectId, src);
     return src;
   }
@@ -207,10 +208,10 @@ export function drawEffectPool(
 
     const rotationDeg = entry.rotation * RAD_TO_DEG;
     const c = entry.color.scaledAlpha(alpha);
-    const tint: [number, number, number, number] = [c.r, c.g, c.b, c.a];
+    const tint = wgl.makeColor(c.r, c.g, c.b, c.a);
 
-    const dst: [number, number, number, number] = [screen.x, screen.y, w, h];
-    const origin: [number, number] = [w * 0.5, h * 0.5];
+    const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
+    const origin = wgl.makeVector2(w * 0.5, h * 0.5);
     renderCtx.gl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
   }
 

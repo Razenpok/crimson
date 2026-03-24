@@ -1,5 +1,6 @@
 // Port of crimson/screens/quest_views/quest_results.py
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
@@ -290,8 +291,8 @@ export class QuestResultsView {
     }
 
     // Fallback when no UI is available
-    const textColor: [number, number, number, number] = [235 / 255, 235 / 255, 235 / 255, 1.0];
-    const subColor: [number, number, number, number] = [190 / 255, 190 / 255, 200 / 255, 1.0];
+    const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
+    const subColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1.0);
     // Simple fallback text (the real QuestResultsUi handles full rendering)
     ctx.drawRectangle(32, 140, 400, 28, textColor[0], textColor[1], textColor[2], 0);
     ctx.drawRectangle(32, 180, 400, 18, subColor[0], subColor[1], subColor[2], 0);

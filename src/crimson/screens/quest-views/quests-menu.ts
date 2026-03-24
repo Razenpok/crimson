@@ -1,5 +1,6 @@
 // Port of crimson/screens/quest_views/quests_menu.py — Quest selection menu
 
+import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -91,9 +92,8 @@ const KEY_8 = 56;
 const KEY_9 = 57;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 const FADE_TO_GAME_ACTIONS = new Set([
   'start_survival',
@@ -509,15 +509,15 @@ export class QuestsMenuView {
     return quest.title;
   }
 
-  private _questRowColors(hardcore: boolean): [Color, Color] {
+  private _questRowColors(hardcore: boolean): [wgl.Color, wgl.Color] {
     let r: number, g: number, b: number;
     if (hardcore) {
       r = 250; g = 70; b = 60;
     } else {
       r = 70; g = 180; b = 240;
     }
-    const baseColor: Color = [r / 255, g / 255, b / 255, 153 / 255];
-    const hoverColor: Color = [r / 255, g / 255, b / 255, 1.0];
+    const baseColor = wgl.makeColor(r / 255, g / 255, b / 255, 153 / 255);
+    const hoverColor = wgl.makeColor(r / 255, g / 255, b / 255, 1.0);
     return [baseColor, hoverColor];
   }
 
@@ -584,18 +584,18 @@ export class QuestsMenuView {
 
     // Title texture tinted (0.7, 0.7, 0.7, 0.7).
     const titleTex = getTexture(resources, TextureId.UI_TEXT_QUEST);
-    const titleTint: Color = [179 / 255, 179 / 255, 179 / 255, 179 / 255];
+    const titleTint = wgl.makeColor(179 / 255, 179 / 255, 179 / 255, 179 / 255);
     ctx.drawTexturePro(
       titleTex,
-      [0.0, 0.0, titleTex.width, titleTex.height],
-      [titlePos.x, titlePos.y, QUEST_TITLE_W, QUEST_TITLE_H],
+      wgl.makeRectangle(0.0, 0.0, titleTex.width, titleTex.height),
+      wgl.makeRectangle(titlePos.x, titlePos.y, QUEST_TITLE_W, QUEST_TITLE_H),
       ORIGIN, 0.0, titleTint,
     );
 
     // Stage icons (1..5).
-    const hoverTint: Color = [1.0, 1.0, 1.0, 204 / 255];
-    const baseTint: Color = [179 / 255, 179 / 255, 179 / 255, 179 / 255];
-    const selectedTint: Color = WHITE;
+    const hoverTint = wgl.makeColor(1.0, 1.0, 1.0, 204 / 255);
+    const baseTint = wgl.makeColor(179 / 255, 179 / 255, 179 / 255, 179 / 255);
+    const selectedTint = WHITE;
     const stageIconIds: TextureId[] = [
       TextureId.UI_NUM1, TextureId.UI_NUM2, TextureId.UI_NUM3, TextureId.UI_NUM4, TextureId.UI_NUM5,
     ];
@@ -604,13 +604,13 @@ export class QuestsMenuView {
       const x = iconsStartPos.x + (idx - 1) * QUEST_STAGE_ICON_STEP;
       const localScale = idx === stage ? 1.0 : QUEST_STAGE_ICON_SCALE_UNSELECTED;
       const size = QUEST_STAGE_ICON_SIZE * localScale;
-      let tint: Color = baseTint;
+      let tint = baseTint;
       if (hoveredStage === idx) tint = hoverTint;
       if (idx === stage) tint = selectedTint;
       ctx.drawTexturePro(
         icon,
-        [0.0, 0.0, icon.width, icon.height],
-        [x, iconsStartPos.y, size, size],
+        wgl.makeRectangle(0.0, 0.0, icon.width, icon.height),
+        wgl.makeRectangle(x, iconsStartPos.y, size, size),
         ORIGIN, 0.0, tint,
       );
     }
@@ -634,8 +634,8 @@ export class QuestsMenuView {
       );
       ctx.drawTexturePro(
         checkTex,
-        [0.0, 0.0, checkTex.width, checkTex.height],
-        [checkPos.x, checkPos.y, checkTex.width, checkTex.height],
+        wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
+        wgl.makeRectangle(checkPos.x, checkPos.y, checkTex.width, checkTex.height),
         ORIGIN, 0.0, WHITE,
       );
       drawSmallText(
@@ -649,7 +649,7 @@ export class QuestsMenuView {
     for (let row = 0; row < 10; row++) {
       const y = y0 + row * QUEST_LIST_ROW_STEP;
       const unlocked = this._questUnlocked(stage, row);
-      const color: Color = hoveredRow === row ? hoverColor : baseColor;
+      const color = hoveredRow === row ? hoverColor : baseColor;
 
       drawSmallText(ctx, font, `${stage}.${row + 1}`, new Vec2(listPos.x, y), color);
 
@@ -717,19 +717,19 @@ export class QuestsMenuView {
 
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = this.state.config.display.fxDetail[0];
-    const signSrc: [number, number, number, number] = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
@@ -747,12 +747,12 @@ export class QuestsMenuView {
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       ctx, panelTex,
-      [
+      wgl.makeRectangle(
         QUEST_MENU_BASE_X + slideX + QUEST_MENU_PANEL_OFFSET_X,
         QUEST_MENU_BASE_Y + MENU_PANEL_OFFSET_Y + this._widescreenYShift,
         MENU_PANEL_WIDTH,
         QUEST_PANEL_HEIGHT,
-      ],
+      ),
       WHITE, fxDetail,
     );
   }

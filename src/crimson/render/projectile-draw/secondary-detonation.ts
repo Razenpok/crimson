@@ -1,5 +1,6 @@
 // Port of crimson/render/projectile_draw/secondary_detonation.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { clamp } from '@grim/math.ts';
@@ -27,8 +28,8 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
     const size = radius * 2.0;
     const whTex = gl.whiteTexture;
     const sp = ctx.screenPos;
-    const tint: [number, number, number, number] = [1.0, 180 / 255, 100 / 255, fade * (180.0 / 255.0)];
-    gl.drawTexturePro(whTex, [0, 0, 1, 1], [sp.x, sp.y, size, size], [size * 0.5, size * 0.5], 0, tint);
+    const tint = wgl.makeColor(1.0, 180 / 255, 100 / 255, fade * (180.0 / 255.0));
+    gl.drawTexturePro(whTex, wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
     return true;
   }
 
@@ -41,12 +42,12 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
   const row = (frame / grid) | 0;
   const cellW = particlesTexture.width / grid;
   const cellH = particlesTexture.height / grid;
-  const src: [number, number, number, number] = [
+  const src = wgl.makeRectangle(
     cellW * col,
     cellH * row,
     Math.max(0.0, cellW - 2.0),
     Math.max(0.0, cellH - 2.0),
-  ];
+  );
 
   const drawDetonationQuad = (size: number, alphaMul: number): void => {
     const a = fade * alphaMul;
@@ -54,8 +55,8 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
     const dstSize = size * scale;
     if (dstSize <= 1e-3) return;
     const tint = new RGBA(1.0, 0.6, 0.1, a).toTuple();
-    const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, dstSize, dstSize];
-    const origin: [number, number] = [dstSize * 0.5, dstSize * 0.5];
+    const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, dstSize, dstSize);
+    const origin = wgl.makeVector2(dstSize * 0.5, dstSize * 0.5);
     gl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
   };
 

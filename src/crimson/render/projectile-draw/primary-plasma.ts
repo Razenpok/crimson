@@ -1,5 +1,6 @@
 // Port of crimson/render/projectile_draw/primary_plasma.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
@@ -36,12 +37,12 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
   const atlasFrame = atlas.frame;
   const col = atlasFrame % grid;
   const row = (atlasFrame / grid) | 0;
-  const src: [number, number, number, number] = [
+  const src = wgl.makeRectangle(
     cellW * col,
     cellH * row,
     Math.max(0.0, cellW - 2.0),
     Math.max(0.0, cellH - 2.0),
-  ];
+  );
 
   const speedScale = ctx.proj.speedScale;
   const fxDetail1 = renderFrame.config !== null
@@ -80,27 +81,27 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
 
     if (segCount > 0) {
       const size = tailSize * ctx.scale;
-      const origin: [number, number] = [size * 0.5, size * 0.5];
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
       const step = direction.mul(spacing);
       for (let idx = 0; idx < segCount; idx++) {
         const pos = ctx.pos.add(step.mul(idx));
         const posScreen = renderer.worldToScreen(pos);
-        const dst: [number, number, number, number] = [posScreen.x, posScreen.y, size, size];
+        const dst = wgl.makeRectangle(posScreen.x, posScreen.y, size, size);
         gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tailTint);
       }
     }
 
     {
       const size = headSize * ctx.scale;
-      const origin: [number, number] = [size * 0.5, size * 0.5];
-      const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+      const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
       gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, headTint);
     }
 
     if (fxDetail1) {
       const size = auraSize * ctx.scale;
-      const origin: [number, number] = [size * 0.5, size * 0.5];
-      const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+      const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
       gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, auraTint);
     }
 
@@ -113,8 +114,8 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
   if (fadeAlpha > 1e-3) {
     const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toTuple();
     const size = 56.0 * ctx.scale;
-    const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
-    const origin: [number, number] = [size * 0.5, size * 0.5];
+    const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
+    const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     gl.setBlendMode(BlendMode.ADDITIVE);
     gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
     gl.setBlendMode(BlendMode.ALPHA);

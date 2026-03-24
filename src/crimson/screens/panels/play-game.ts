@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/play_game.py — Play Game mode select panel
 
+import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -43,8 +44,7 @@ const MOUSE_BUTTON_LEFT = 0;
 // Color helpers
 // ---------------------------------------------------------------------------
 
-type Color = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // PlayGameModeEntry
@@ -536,24 +536,24 @@ export class PlayGameMenuView extends PanelMenuView {
     const basePos = layout.basePos;
     const scale = layout.scale;
     const textScale = 1.0 * scale;
-    const textColor: Color = [1, 1, 1, 0.8];
+    const textColor = wgl.makeColor(1, 1, 1, 0.8);
 
     // `sub_44ed80`: title label at (xy - 64, var_1c - 8), size 128x32.
     const titleW = 128.0;
     const titleH = MENU_LABEL_ROW_HEIGHT;
     const titlePos = basePos.add(new Vec2(-64.0 * scale, -8.0 * scale));
 
-    const src: [number, number, number, number] = [
+    const src = wgl.makeRectangle(
       0.0,
       MENU_LABEL_ROW_PLAY_GAME * MENU_LABEL_ROW_HEIGHT,
       titleW,
       titleH,
-    ];
-    const dst: [number, number, number, number] = [
+    );
+    const dst = wgl.makeRectangle(
       titlePos.x, titlePos.y,
       titleW * scale, titleH * scale,
-    ];
-    ctx.drawTexturePro(labelsTex, src, dst, [0.0, 0.0], 0.0, WHITE);
+    );
+    ctx.drawTexturePro(labelsTex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, WHITE);
 
     const [entries, yStep, yStart, yEnd] = this._modeEntries();
     let y = basePos.y + yStart * scale;
@@ -629,9 +629,9 @@ export class PlayGameMenuView extends PanelMenuView {
     }
     ctx.drawTexturePro(
       arrowTex,
-      [0.0, 0.0, arrowTex.width, arrowTex.height],
-      [layout.arrowPos.x, layout.arrowPos.y, layout.arrowSize.x, layout.arrowSize.y],
-      [0.0, 0.0], 0.0, WHITE,
+      wgl.makeRectangle(0.0, 0.0, arrowTex.width, arrowTex.height),
+      wgl.makeRectangle(layout.arrowPos.x, layout.arrowPos.y, layout.arrowSize.x, layout.arrowSize.y),
+      wgl.makeVector2(0.0, 0.0), 0.0, WHITE,
     );
 
     let playerCount = this._pgState.config.gameplay.playerCount;
@@ -641,7 +641,7 @@ export class PlayGameMenuView extends PanelMenuView {
     }
     const label = PlayGameMenuView._PLAYER_COUNT_LABELS[playerCount - 1];
     const headerAlpha = hoveredHeader ? (242 / 255) : (191 / 255); // 0x3f733333 / 0x3f400000
-    drawSmallText(ctx, font, label, layout.textPos, [1, 1, 1, headerAlpha]);
+    drawSmallText(ctx, font, label, layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));
 
     if (!this._playerListOpen) return;
 
@@ -658,7 +658,7 @@ export class PlayGameMenuView extends PanelMenuView {
       if (idx === (playerCount - 1)) {
         alpha = Math.max(alpha, 245); // 0x3f75c28f
       }
-      drawSmallText(ctx, font, item, new Vec2(layout.textPos.x, itemY), [1, 1, 1, alpha / 255]);
+      drawSmallText(ctx, font, item, new Vec2(layout.textPos.x, itemY), wgl.makeColor(1, 1, 1, alpha / 255));
     }
   }
 
@@ -680,7 +680,7 @@ export class PlayGameMenuView extends PanelMenuView {
     key: string,
     pos: Vec2,
     _scale: number,
-    color: Color,
+    color: wgl.Color,
     font: SmallFontData,
   ): void {
     const status = this._pgState.status;
@@ -729,7 +729,7 @@ export class PlayGameMenuView extends PanelMenuView {
       let y = tooltipY + offY * scale;
       const lines = mode.tooltip.split('\n');
       for (const line of lines) {
-        drawSmallText(ctx, font, line, new Vec2(x, y), [1, 1, 1, alpha / 255]);
+        drawSmallText(ctx, font, line, new Vec2(x, y), wgl.makeColor(1, 1, 1, alpha / 255));
         y += font.cellSize * 1.0 * scale;
       }
     }

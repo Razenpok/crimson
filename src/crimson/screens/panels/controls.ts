@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/controls.py — Controls menu panel (979 lines)
 
+import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -46,14 +47,12 @@ const CONTROLS_BACK_POS_X = -155.0;
 const CONTROLS_BACK_POS_Y = 420.0;
 
 // `ui_menu_item_update`: idle rebind value tint (rgb 70,180,240 @ alpha 0.6).
-type Color = [number, number, number, number];
+const CONTROLS_REBIND_VALUE_COLOR = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 153 / 255);
+const CONTROLS_REBIND_HOVER_COLOR = wgl.makeColor(200 / 255, 230 / 255, 250 / 255, 230 / 255);
+const CONTROLS_REBIND_ACTIVE_COLOR = wgl.makeColor(255 / 255, 228 / 255, 170 / 255, 1.0);
 
-const CONTROLS_REBIND_VALUE_COLOR: Color = [70 / 255, 180 / 255, 240 / 255, 153 / 255];
-const CONTROLS_REBIND_HOVER_COLOR: Color = [200 / 255, 230 / 255, 250 / 255, 230 / 255];
-const CONTROLS_REBIND_ACTIVE_COLOR: Color = [255 / 255, 228 / 255, 170 / 255, 1.0];
-
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 const KEY_ESCAPE = 27;
 const KEY_BACKSPACE = 8;
@@ -769,7 +768,7 @@ export class ControlsMenuView extends PanelMenuView {
     const leftH = MENU_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(
       ctx, panel,
-      [leftTopLeft.x, leftTopLeft.y, panelW, leftH],
+      wgl.makeRectangle(leftTopLeft.x, leftTopLeft.y, panelW, leftH),
       WHITE, fxDetail,
     );
 
@@ -778,7 +777,7 @@ export class ControlsMenuView extends PanelMenuView {
     const rightH = CONTROLS_RIGHT_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(
       ctx, panel,
-      [rightTopLeft.x, rightTopLeft.y, panelW, rightH],
+      wgl.makeRectangle(rightTopLeft.x, rightTopLeft.y, panelW, rightH),
       WHITE, fxDetail, true, // flipX
     );
   }
@@ -793,8 +792,8 @@ export class ControlsMenuView extends PanelMenuView {
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
     const font = resources.smallFont;
 
-    const textColorFull: Color = [1, 1, 1, 1];
-    const textColorSoft: Color = [1, 1, 1, 204 / 255];
+    const textColorFull = wgl.makeColor(1, 1, 1, 1);
+    const textColorSoft = wgl.makeColor(1, 1, 1, 204 / 255);
 
     const config = this.state.config;
     const playerIdx = this._currentPlayerIndex();
@@ -830,13 +829,13 @@ export class ControlsMenuView extends PanelMenuView {
     const textControls = getTexture(resources, TextureId.UI_TEXT_CONTROLS);
     ctx.drawTexturePro(
       textControls,
-      [0.0, 0.0, textControls.width, textControls.height],
-      [
+      wgl.makeRectangle(0.0, 0.0, textControls.width, textControls.height),
+      wgl.makeRectangle(
         leftTopLeft.x + 206.0 * panelScale,
         leftTopLeft.y + 44.0 * panelScale,
         128.0 * panelScale,
         32.0 * panelScale,
-      ],
+      ),
       ORIGIN, 0.0, WHITE,
     );
 
@@ -864,13 +863,13 @@ export class ControlsMenuView extends PanelMenuView {
       : getTexture(resources, TextureId.UI_CHECK_OFF);
     ctx.drawTexturePro(
       checkTex,
-      [0.0, 0.0, checkTex.width, checkTex.height],
-      [
+      wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
+      wgl.makeRectangle(
         leftTopLeft.x + 213.0 * panelScale,
         leftTopLeft.y + 174.0 * panelScale,
         16.0 * panelScale,
         16.0 * panelScale,
-      ],
+      ),
       ORIGIN, 0.0, WHITE,
     );
     const checkboxHovered = this._checkboxHovered(
@@ -880,7 +879,7 @@ export class ControlsMenuView extends PanelMenuView {
     drawSmallText(
       ctx, font, 'Show direction arrow',
       new Vec2(leftTopLeft.x + 235.0 * panelScale, leftTopLeft.y + 175.0 * panelScale),
-      [1, 1, 1, checkboxAlpha],
+      wgl.makeColor(1, 1, 1, checkboxAlpha),
     );
 
     // Dropdowns — closed ones first, then open (so open lists draw on top)
@@ -965,10 +964,10 @@ export class ControlsMenuView extends PanelMenuView {
         drawSmallText(
           ctx, font, rowLayout.row.label,
           new Vec2(rightTopLeft.x + 52.0 * panelScale, rowY),
-          [1, 1, 1, 178 / 255],
+          wgl.makeColor(1, 1, 1, 178 / 255),
         );
 
-        let valueColor: Color = CONTROLS_REBIND_VALUE_COLOR;
+        let valueColor = CONTROLS_REBIND_VALUE_COLOR;
         if (hoveredRow) valueColor = CONTROLS_REBIND_HOVER_COLOR;
         if (activeRow) valueColor = CONTROLS_REBIND_ACTIVE_COLOR;
         drawSmallText(ctx, font, valueText, valuePos, valueColor);
@@ -995,7 +994,7 @@ export class ControlsMenuView extends PanelMenuView {
       drawSmallText(
         ctx, font, 'Esc/Right: cancel  Backspace: default  Delete: unbind',
         hintPos,
-        [1, 226 / 255, 188 / 255, 220 / 255],
+        wgl.makeColor(1, 226 / 255, 188 / 255, 220 / 255),
       );
     }
   }
@@ -1053,15 +1052,15 @@ export class ControlsMenuView extends PanelMenuView {
       : getTexture(resources, TextureId.UI_DROP_OFF);
     ctx.drawTexturePro(
       arrowTex,
-      [0.0, 0.0, arrowTex.width, arrowTex.height],
-      [layout.arrowPos.x, layout.arrowPos.y, layout.arrowSize.x, layout.arrowSize.y],
+      wgl.makeRectangle(0.0, 0.0, arrowTex.width, arrowTex.height),
+      wgl.makeRectangle(layout.arrowPos.x, layout.arrowPos.y, layout.arrowSize.x, layout.arrowSize.y),
       ORIGIN, 0.0, WHITE,
     );
 
     const idx = items.length > 0 ? Math.max(0, Math.min(items.length - 1, selectedIndex | 0)) : 0;
     const headerAlpha = ((isOpen || hoveredHeader) && enabled) ? 242 / 255 : 191 / 255;
     if (items.length > 0) {
-      drawSmallText(ctx, font, items[idx], layout.textPos, [1, 1, 1, headerAlpha]);
+      drawSmallText(ctx, font, items[idx], layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));
     }
 
     if (!isOpen) return;
@@ -1074,7 +1073,7 @@ export class ControlsMenuView extends PanelMenuView {
       let alpha = 153 / 255;
       if (hovered) alpha = 242 / 255;
       if (i === selectedIndex) alpha = Math.max(alpha, 245 / 255);
-      drawSmallText(ctx, font, items[i], new Vec2(layout.textPos.x, itemY), [1, 1, 1, alpha]);
+      drawSmallText(ctx, font, items[i], new Vec2(layout.textPos.x, itemY), wgl.makeColor(1, 1, 1, alpha));
     }
   }
 }

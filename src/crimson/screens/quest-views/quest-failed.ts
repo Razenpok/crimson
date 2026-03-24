@@ -1,5 +1,6 @@
 // Port of crimson/screens/quest_views/quest_failed.py
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -51,9 +52,8 @@ const KEY_ENTER = 13;
 const KEY_Q = 81;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -248,7 +248,7 @@ export class QuestFailedView {
     const fxDetail = this.state.config.display.fxDetail[0];
     drawClassicMenuPanel(
       ctx, panelTex,
-      [panelTopLeft.x, panelTopLeft.y, QUEST_FAILED_PANEL_W, QUEST_FAILED_PANEL_H],
+      wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, QUEST_FAILED_PANEL_W, QUEST_FAILED_PANEL_H),
       WHITE, fxDetail,
     );
 
@@ -257,14 +257,14 @@ export class QuestFailedView {
     const bannerPos = panelTopLeft.add(new Vec2(QUEST_FAILED_BANNER_X_OFFSET, QUEST_FAILED_BANNER_Y_OFFSET));
     ctx.drawTexturePro(
       reaperTex,
-      [0.0, 0.0, reaperTex.width, reaperTex.height],
-      [bannerPos.x, bannerPos.y, QUEST_FAILED_BANNER_W, QUEST_FAILED_BANNER_H],
+      wgl.makeRectangle(0.0, 0.0, reaperTex.width, reaperTex.height),
+      wgl.makeRectangle(bannerPos.x, bannerPos.y, QUEST_FAILED_BANNER_W, QUEST_FAILED_BANNER_H),
       ORIGIN, 0.0, WHITE,
     );
 
     // Failure message
     const font = resources.smallFont;
-    const textColor: Color = [235 / 255, 235 / 255, 235 / 255, 1.0];
+    const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
     const msgPos = panelTopLeft.add(new Vec2(QUEST_FAILED_MESSAGE_X_OFFSET, QUEST_FAILED_MESSAGE_Y_OFFSET));
     drawSmallText(ctx, font, this._failureMessage(), msgPos, textColor);
 
@@ -419,9 +419,9 @@ export class QuestFailedView {
 
     const scorePos = panelTopLeft.add(new Vec2(QUEST_FAILED_SCORE_X_OFFSET, QUEST_FAILED_SCORE_Y_OFFSET));
 
-    const labelColor: Color = [230 / 255, 230 / 255, 230 / 255, 0.8];
-    const valueColor: Color = [230 / 255, 230 / 255, 255 / 255, 1.0];
-    const separatorColor: Color = [149 / 255, 175 / 255, 198 / 255, 0.7];
+    const labelColor = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 0.8);
+    const valueColor = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
+    const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 0.7);
 
     const scoreLabel = 'Score';
     const scoreLabelW = this._textWidth(scoreLabel);

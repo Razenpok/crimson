@@ -1,5 +1,6 @@
 // Port of crimson/render/world/trooper.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
@@ -57,24 +58,24 @@ export function drawLanPlayerRing(
   // A proper ring shader would be better, but this is a reasonable approximation.
   const whTex = ctx.whiteTexture;
   const ringSize = outer * 2.0;
-  const src: [number, number, number, number] = [0, 0, 1, 1];
-  const dst: [number, number, number, number] = [
+  const src = wgl.makeRectangle(0, 0, 1, 1);
+  const dst = wgl.makeRectangle(
     screenPos.x - outer, screenPos.y - outer, ringSize, ringSize,
-  ];
-  const origin: [number, number] = [0, 0];
-  const coreTint: [number, number, number, number] = [
+  );
+  const origin = wgl.makeVector2(0, 0);
+  const coreTint = wgl.makeColor(
     red / 255, green / 255, blue / 255, coreAlpha * 0.3,
-  ];
+  );
   ctx.drawTexturePro(whTex, src, dst, origin, 0, coreTint);
 
   // Glow ring
   const glowSize = glowOuter * 2.0;
-  const glowDst: [number, number, number, number] = [
+  const glowDst = wgl.makeRectangle(
     screenPos.x - glowOuter, screenPos.y - glowOuter, glowSize, glowSize,
-  ];
-  const glowTint: [number, number, number, number] = [
+  );
+  const glowTint = wgl.makeColor(
     red / 255, green / 255, blue / 255, glowAlpha * 0.2,
-  ];
+  );
   ctx.drawTexturePro(whTex, src, glowDst, origin, 0, glowTint);
 
   ctx.setBlendMode(BlendMode.ALPHA);
@@ -117,19 +118,19 @@ export function drawPlayerTrooperSprite(
         const row = (atlasFrame / auraGrid) | 0;
         const cellW = particlesTexture.width / auraGrid;
         const cellH = particlesTexture.height / auraGrid;
-        const src: [number, number, number, number] = [
+        const src = wgl.makeRectangle(
           cellW * col, cellH * row,
           Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0),
-        ];
+        );
         const t = renderFrame.elapsedMs * 0.001;
         const auraAlpha = ((Math.sin(t) + 1.0) * 0.1875 + 0.25) * alpha;
         if (auraAlpha > 1e-3) {
           const size = 100.0 * scale;
-          const dst: [number, number, number, number] = [screenPos.x, screenPos.y, size, size];
-          const origin: [number, number] = [size * 0.5, size * 0.5];
-          const tint: [number, number, number, number] = [
+          const dst = wgl.makeRectangle(screenPos.x, screenPos.y, size, size);
+          const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+          const tint = wgl.makeColor(
             77 / 255, 153 / 255, 77 / 255, clamp(auraAlpha, 0.0, 1.0),
-          ];
+          );
           renderCtx.gl.setBlendMode(BlendMode.ADDITIVE);
           renderCtx.gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
           renderCtx.gl.setBlendMode(BlendMode.ALPHA);
@@ -138,19 +139,19 @@ export function drawPlayerTrooperSprite(
     }
   }
 
-  const tint: [number, number, number, number] = [240 / 255, 240 / 255, 255 / 255, alpha];
-  const shadowTint: [number, number, number, number] = [0, 0, 0, (90 / 255) * alpha];
-  let overlayTint: [number, number, number, number] = tint;
+  const tint = wgl.makeColor(240 / 255, 240 / 255, 255 / 255, alpha);
+  const shadowTint = wgl.makeColor(0, 0, 0, (90 / 255) * alpha);
+  let overlayTint = tint;
   if (renderFrame.players.length > 1) {
     const index = player.index;
     if (index === 0) {
-      overlayTint = [77 / 255, 77 / 255, 255 / 255, tint[3]];
+      overlayTint = wgl.makeColor(77 / 255, 77 / 255, 255 / 255, tint[3]);
     } else {
-      overlayTint = [255 / 255, 140 / 255, 89 / 255, tint[3]];
+      overlayTint = wgl.makeColor(255 / 255, 140 / 255, 89 / 255, tint[3]);
     }
   }
 
-  function draw(frameIdx: number, pos: Vec2, scaleMul: number, rotation: number, color: [number, number, number, number]): void {
+  function draw(frameIdx: number, pos: Vec2, scaleMul: number, rotation: number, color: wgl.Color): void {
     renderCtx.drawAtlasSprite(
       texture,
       spriteGrid,
@@ -204,10 +205,10 @@ export function drawPlayerTrooperSprite(
           const row = (atlasFrame / shieldGrid) | 0;
           const cellW = particlesTexture.width / shieldGrid;
           const cellH = particlesTexture.height / shieldGrid;
-          const src: [number, number, number, number] = [
+          const src = wgl.makeRectangle(
             cellW * col, cellH * row,
             Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0),
-          ];
+          );
           const t = renderFrame.elapsedMs * 0.001;
           const timer = player.shieldTimer;
           let strength = (Math.sin(t) + 1.0) * 0.25 + timer;
@@ -220,17 +221,17 @@ export function drawPlayerTrooperSprite(
             let halfVal = Math.sin(t * 3.0) + 17.5;
             const size = halfVal * 2.0 * scale;
             const a = clamp(strength * 0.4, 0.0, 1.0);
-            const shieldTint: [number, number, number, number] = [91 / 255, 180 / 255, 255 / 255, a];
-            const dst: [number, number, number, number] = [center.x, center.y, size, size];
-            const origin: [number, number] = [size * 0.5, size * 0.5];
+            const shieldTint = wgl.makeColor(91 / 255, 180 / 255, 255 / 255, a);
+            const dst = wgl.makeRectangle(center.x, center.y, size, size);
+            const origin = wgl.makeVector2(size * 0.5, size * 0.5);
             const rotationDeg = (t + t) * RAD_TO_DEG;
 
             halfVal = Math.sin(t * 3.0) * 4.0 + 24.0;
             const size2 = halfVal * 2.0 * scale;
             const a2 = clamp(strength * 0.3, 0.0, 1.0);
-            const shieldTint2: [number, number, number, number] = [91 / 255, 180 / 255, 255 / 255, a2];
-            const dst2: [number, number, number, number] = [center.x, center.y, size2, size2];
-            const origin2: [number, number] = [size2 * 0.5, size2 * 0.5];
+            const shieldTint2 = wgl.makeColor(91 / 255, 180 / 255, 255 / 255, a2);
+            const dst2 = wgl.makeRectangle(center.x, center.y, size2, size2);
+            const origin2 = wgl.makeVector2(size2 * 0.5, size2 * 0.5);
             const rotation2Deg = (t * -2.0) * RAD_TO_DEG;
 
             renderCtx.gl.setBlendMode(BlendMode.ADDITIVE);
@@ -254,12 +255,12 @@ export function drawPlayerTrooperSprite(
             const heading = player.aimHeading + Math.PI / 2.0;
             const offset = (player.muzzleFlashAlpha * 12.0 - 21.0) * scale;
             const flashPos = screenPos.add(Vec2.fromAngle(heading).mul(offset));
-            const src: [number, number, number, number] = [
+            const src = wgl.makeRectangle(
               0.0, 0.0, muzzleFlashTexture.width, muzzleFlashTexture.height,
-            ];
-            const dst: [number, number, number, number] = [flashPos.x, flashPos.y, size, size];
-            const origin: [number, number] = [size * 0.5, size * 0.5];
-            const tintFlash: [number, number, number, number] = [1, 1, 1, flashAlpha];
+            );
+            const dst = wgl.makeRectangle(flashPos.x, flashPos.y, size, size);
+            const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+            const tintFlash = wgl.makeColor(1, 1, 1, flashAlpha);
             renderCtx.gl.setBlendMode(BlendMode.ADDITIVE);
             renderCtx.gl.drawTexturePro(
               muzzleFlashTexture, src, dst, origin,

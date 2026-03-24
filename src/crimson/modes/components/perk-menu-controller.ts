@@ -1,5 +1,6 @@
 // Port of crimson/modes/components/perk_menu_controller.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -28,8 +29,8 @@ import {
 export type PlaySfxFn = (sfxId: SfxId) => void;
 export type OnCloseFn = () => void;
 
-const UI_TEXT_COLOR: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, 1.0];
-const UI_SPONSOR_COLOR: [number, number, number, number] = [1.0, 1.0, 1.0, 0.5];
+const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
+const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
 
 export interface PerkMenuUiContext {
   player: PlayerState;
@@ -323,24 +324,24 @@ export class PerkMenuController {
 
     // Draw panel background
     const panelTex = getTexture(ctx.resources, TextureId.UI_MENU_PANEL);
-    const panelDst: [number, number, number, number] = [
+    const panelDst = wgl.makeRectangle(
       computed.panel.x,
       computed.panel.y,
       computed.panel.w,
       computed.panel.h,
-    ];
+    );
     drawClassicMenuPanel(glCtx, panelTex, panelDst, undefined, ctx.fxDetail ?? false);
 
     // Draw title texture
     const titleTex = getTexture(ctx.resources, TextureId.UI_TEXT_PICK_A_PERK);
-    const titleSrc: [number, number, number, number] = [0.0, 0.0, titleTex.width, titleTex.height];
-    const titleDst: [number, number, number, number] = [
+    const titleSrc = wgl.makeRectangle(0.0, 0.0, titleTex.width, titleTex.height);
+    const titleDst = wgl.makeRectangle(
       computed.title.x,
       computed.title.y,
       computed.title.w,
       computed.title.h,
-    ];
-    glCtx.drawTexturePro(titleTex, titleSrc, titleDst, [0.0, 0.0], 0.0, [1, 1, 1, 1]);
+    );
+    glCtx.drawTexturePro(titleTex, titleSrc, titleDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
 
     // Sponsor text
     let sponsor: string | null = null;

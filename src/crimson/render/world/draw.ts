@@ -1,5 +1,6 @@
 // Port of crimson/render/world/draw.py — main draw orchestrator
 
+import * as wgl from '@wgl';
 import { RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
@@ -51,8 +52,8 @@ export interface WorldDrawContext {
   readonly trooperTexture: GlTexture | null;
   readonly particlesTexture: GlTexture | null;
   readonly monsterVision: boolean;
-  readonly monsterVisionSrc: [number, number, number, number] | null;
-  readonly poisonSrc: [number, number, number, number] | null;
+  readonly monsterVisionSrc: wgl.Rectangle | null;
+  readonly poisonSrc: wgl.Rectangle | null;
 }
 
 export function drawWorld(
@@ -138,8 +139,8 @@ function drawBackground(
 function effectSrcRectFromTexture(
   texture: GlTexture,
   effectId: EffectId,
-): [number, number, number, number] | null {
-  return effectSrcRect(effectId, texture.width, texture.height);
+): wgl.Rectangle | null {
+  return effectSrcRect(effectId, texture.width, texture.height) as wgl.Rectangle | null;
 }
 
 function buildDrawContext(
@@ -156,7 +157,7 @@ function buildDrawContext(
   const particlesTexture = getTexture(resources, TextureId.PARTICLES);
 
   const monsterVision = frame.players.length > 0 && perkActive(frame.players[0], PerkId.MONSTER_VISION);
-  let monsterVisionSrc: [number, number, number, number] | null = null;
+  let monsterVisionSrc: wgl.Rectangle | null = null;
   if (monsterVision) {
     monsterVisionSrc = effectSrcRectFromTexture(particlesTexture, EffectId.AURA);
   }
@@ -199,11 +200,11 @@ function drawPlayer(
   const size = r * 2;
   const glCtx = renderCtx.gl;
   const whTex = glCtx.whiteTexture;
-  const tint: [number, number, number, number] = [90 / 255, 190 / 255, 120 / 255, ctx.entityAlpha];
+  const tint = wgl.makeColor(90 / 255, 190 / 255, 120 / 255, ctx.entityAlpha);
   glCtx.drawTexturePro(
-    whTex, [0, 0, 1, 1],
-    [screen.x, screen.y, size, size],
-    [size * 0.5, size * 0.5],
+    whTex, wgl.makeRectangle(0, 0, 1, 1),
+    wgl.makeRectangle(screen.x, screen.y, size, size),
+    wgl.makeVector2(size * 0.5, size * 0.5),
     0, tint,
   );
 }
@@ -249,9 +250,9 @@ function drawCreatureOverlays(
     const mvAlpha = fade * ctx.entityAlpha;
     if (mvAlpha > 1e-3) {
       const size = 90.0 * ctx.scale;
-      const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-      const origin: [number, number] = [size * 0.5, size * 0.5];
-      const tint: [number, number, number, number] = [1, 1, 0, clamp(mvAlpha, 0.0, 1.0)];
+      const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+      const tint = wgl.makeColor(1, 1, 0, clamp(mvAlpha, 0.0, 1.0));
       renderCtx.gl.drawTexturePro(ctx.particlesTexture, ctx.monsterVisionSrc, dst, origin, 0.0, tint);
     }
   }
@@ -260,9 +261,9 @@ function drawCreatureOverlays(
     const plagueAlpha = fade * ctx.entityAlpha;
     if (plagueAlpha > 1e-3) {
       const size = 80.0 * ctx.scale;
-      const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-      const origin: [number, number] = [size * 0.5, size * 0.5];
-      const tint: [number, number, number, number] = [0, 0, 0, clamp(plagueAlpha, 0.0, 1.0)];
+      const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+      const tint = wgl.makeColor(0, 0, 0, clamp(plagueAlpha, 0.0, 1.0));
       renderCtx.gl.drawTexturePro(ctx.particlesTexture, ctx.poisonSrc, dst, origin, 0.0, tint);
     }
   }
@@ -275,9 +276,9 @@ function drawCreatureOverlays(
     const poisonAlpha = fade * ctx.entityAlpha;
     if (poisonAlpha > 1e-3) {
       const size = 60.0 * ctx.scale;
-      const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-      const origin: [number, number] = [size * 0.5, size * 0.5];
-      const tint: [number, number, number, number] = [1, 0, 0, clamp(poisonAlpha, 0.0, 1.0)];
+      const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+      const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+      const tint = wgl.makeColor(1, 0, 0, clamp(poisonAlpha, 0.0, 1.0));
       renderCtx.gl.drawTexturePro(ctx.particlesTexture, ctx.poisonSrc, dst, origin, 0.0, tint);
     }
   }
@@ -306,12 +307,14 @@ function drawCreatures(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): void {
       // Fallback circle
       const r = Math.max(1.0, creature.size * 0.5 * ctx.scale);
       const size = r * 2;
-      const tint: [number, number, number, number] = [220 / 255, 90 / 255, 90 / 255, ctx.entityAlpha];
+      const tint = wgl.makeColor(220 / 255, 90 / 255, 90 / 255, ctx.entityAlpha);
       renderCtx.gl.drawTexturePro(
-        renderCtx.gl.whiteTexture, [0, 0, 1, 1],
-        [screen.x, screen.y, size, size],
-        [size * 0.5, size * 0.5],
-        0, tint,
+        renderCtx.gl.whiteTexture,
+        wgl.makeRectangle(0, 0, 1, 1),
+        wgl.makeRectangle(screen.x, screen.y, size, size),
+        wgl.makeVector2(size * 0.5, size * 0.5),
+        0,
+        tint,
       );
       continue;
     }
@@ -335,7 +338,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): void {
     }
 
     const scaledTint = tintRgba.scaledAlpha(ctx.entityAlpha).clamped();
-    const tint: [number, number, number, number] = [scaledTint.r, scaledTint.g, scaledTint.b, scaledTint.a];
+    const tint = wgl.makeColor(scaledTint.r, scaledTint.g, scaledTint.b, scaledTint.a);
 
     const sizeScale = clamp(creature.size / 64.0, 0.25, 2.0);
     const config = frame.config;
@@ -396,7 +399,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): vo
   const freezeAlpha = clamp(fade * ctx.entityAlpha * 0.7, 0.0, 1.0);
   if (freezeAlpha <= 1e-3) return;
 
-  const tint: [number, number, number, number] = [1, 1, 1, freezeAlpha];
+  const tint = wgl.makeColor(1, 1, 1, freezeAlpha);
   renderCtx.gl.setBlendMode(BlendMode.ALPHA);
   const creatures = renderCtx.frame.creatures.entries as CreatureState[];
   for (let idx = 0; idx < creatures.length; idx++) {
@@ -405,8 +408,8 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): vo
     const size = creature.size * ctx.scale;
     if (size <= 1e-3) continue;
     const creatureScreen = WorldRenderCtx.worldToScreenWith(creature.pos, ctx.camera, ctx.viewScale);
-    const dst: [number, number, number, number] = [creatureScreen.x, creatureScreen.y, size, size];
-    const origin: [number, number] = [size * 0.5, size * 0.5];
+    const dst = wgl.makeRectangle(creatureScreen.x, creatureScreen.y, size, size);
+    const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = (idx * 0.01 + creature.heading) * RAD_TO_DEG;
     renderCtx.gl.drawTexturePro(ctx.particlesTexture!, src, dst, origin, rotationDeg, tint);
   }

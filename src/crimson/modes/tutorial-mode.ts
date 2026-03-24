@@ -1,5 +1,6 @@
 // Port of crimson/modes/tutorial_mode.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
@@ -51,7 +52,7 @@ import type { TutorialState } from '@crimson/tutorial/state.ts';
 
 const WORLD_SIZE = 1024.0;
 
-const UI_HINT_COLOR: [number, number, number, number] = [140 / 255, 140 / 255, 140 / 255, 1.0];
+const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
 
 // The panel position used for computing button placement.
 // Must match the constant in tutorial-run.ts.
@@ -468,7 +469,7 @@ export class TutorialMode extends BaseGameplayMode {
       screenW,
       overlay,
       1.0,
-      (text: string, pos: Vec2, color: [number, number, number, number], scale: number) =>
+      (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
         this._drawUiText(ctx, text, pos, color, scale),
       (text: string, scale: number) => this._uiTextWidth(text, scale),
       (scale: number) => this._uiLineHeight(scale),

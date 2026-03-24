@@ -1,5 +1,6 @@
 // Port of grim/console.py — simplified for WebGL (no file I/O, no script exec)
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from './webgl.ts';
 import { Vec2 } from './geom.ts';
 import { clamp } from './math.ts';
@@ -219,7 +220,7 @@ export class ConsoleState {
     // Version text (top-right, faint)
     const versionX = screenW - CONSOLE_VERSION_OFFSET_X;
     const versionY = offsetY + height - CONSOLE_VERSION_OFFSET_Y;
-    const versionColor: [number, number, number, number] = [1.0, 1.0, 1.0, ratio * 0.3];
+    const versionColor = wgl.makeColor(1.0, 1.0, 1.0, ratio * 0.3);
     if (smallFont) {
       drawSmallText(ctx, smallFont, CONSOLE_VERSION_TEXT, new Vec2(versionX, versionY), versionColor);
     } else if (monoFont) {
@@ -232,7 +233,7 @@ export class ConsoleState {
 
     // Input prompt line
     const inputY = offsetY + (visibleCount + 1) * CONSOLE_LINE_HEIGHT;
-    const textColor: [number, number, number, number] = [1.0, 1.0, 1.0, ratio];
+    const textColor = wgl.makeColor(1.0, 1.0, 1.0, ratio);
     if (useMono && monoFont) {
       const advance = monoFont.advance * CONSOLE_MONO_SCALE;
       drawGrimMonoText(ctx, monoFont, CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X - advance, inputY), CONSOLE_MONO_SCALE, textColor);
@@ -243,7 +244,7 @@ export class ConsoleState {
     }
 
     // Log lines
-    const logColor: [number, number, number, number] = [0.6, 0.6, 0.7, ratio];
+    const logColor = wgl.makeColor(0.6, 0.6, 0.7, ratio);
     let y = offsetY + CONSOLE_LINE_HEIGHT;
     for (const line of visible) {
       if (useMono && monoFont) {
@@ -257,7 +258,7 @@ export class ConsoleState {
 
     // Blinking caret
     const caretAlpha = ratio * this._caretBlinkAlpha();
-    const caretColor: [number, number, number, number] = [1.0, 1.0, 1.0, caretAlpha];
+    const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
     const caretY = inputY + 2.0;
     if (useMono && monoFont) {
       const advance = monoFont.advance * CONSOLE_MONO_SCALE;

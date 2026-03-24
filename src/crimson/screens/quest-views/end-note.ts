@@ -1,5 +1,6 @@
 // Port of crimson/screens/quest_views/end_note.py — End-note ("victory") screen
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -47,9 +48,7 @@ import {
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -228,7 +227,7 @@ export class EndNoteView {
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       ctx, panelTex,
-      [panelTopLeft.x, panelTopLeft.y, END_NOTE_PANEL_W * scale, END_NOTE_PANEL_H * scale],
+      wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, END_NOTE_PANEL_W * scale, END_NOTE_PANEL_H * scale),
       WHITE, fxDetail,
     );
 
@@ -262,8 +261,8 @@ export class EndNoteView {
       END_NOTE_HEADER_X_OFFSET * scale,
       END_NOTE_HEADER_Y_OFFSET * scale,
     ));
-    const headerColor: Color = [1.0, 1.0, 1.0, 0.8];
-    const bodyColor: Color = [1.0, 1.0, 1.0, 0.5];
+    const headerColor = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
+    const bodyColor = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
 
     drawSmallText(ctx, font, header, headerPos, headerColor);
 

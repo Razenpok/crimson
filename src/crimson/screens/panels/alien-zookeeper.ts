@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/alien_zookeeper.py — AlienZooKeeper mini-game panel
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -68,9 +69,7 @@ const _BACK_LABEL = 'Back';
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // AzkLayout
@@ -447,12 +446,12 @@ export class AlienZooKeeperView {
     const layout = this._layout(scale);
 
     // Draw panel background
-    const dst: RectTuple = [
+    const dst = wgl.makeRectangle(
       layout.panelX,
       layout.panelY,
       MENU_PANEL_WIDTH * scale,
       378.0 * scale,
-    ];
+    );
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
@@ -464,7 +463,7 @@ export class AlienZooKeeperView {
 
     // Score
     const scoreText = `score: ${this._score | 0}`;
-    drawSmallText(ctx, font, scoreText, new Vec2(layout.scoreX, layout.scoreY), [1.0, 1.0, 1.0, 0.7]);
+    drawSmallText(ctx, font, scoreText, new Vec2(layout.scoreX, layout.scoreY), wgl.makeColor(1.0, 1.0, 1.0, 0.7));
 
     // Board background
     ctx.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, layout.boardSize, 0.0, 0.0, 0.0, 0.6);
@@ -515,28 +514,28 @@ export class AlienZooKeeperView {
       const animFrame = (((this._animTimeMs / 50) | 0) + (tile * 2)) % 32;
       const srcCol = animFrame % 8;
       const srcRow = (animFrame / 8) | 0;
-      const src: RectTuple = [srcCol * frameW, srcRow * frameH, frameW, frameH];
-      const tileDst: RectTuple = [
+      const src = wgl.makeRectangle(srcCol * frameW, srcRow * frameH, frameW, frameH);
+      const tileDst = wgl.makeRectangle(
         layout.boardX + col * layout.tileSize,
         layout.boardY + row * layout.tileSize,
         layout.tileSize,
         layout.tileSize,
-      ];
-      let tint: Color;
+      );
+      let tint: wgl.Color;
       if (tile === 0) {
-        tint = [1.0, 0.5, 0.5, 1.0];
+        tint = wgl.makeColor(1.0, 0.5, 0.5, 1.0);
       } else if (tile === 1) {
-        tint = [0.5, 0.5, 1.0, 1.0];
+        tint = wgl.makeColor(0.5, 0.5, 1.0, 1.0);
       } else if (tile === 2) {
-        tint = [1.0, 0.5, 1.0, 1.0];
+        tint = wgl.makeColor(1.0, 0.5, 1.0, 1.0);
       } else if (tile === 3) {
-        tint = [0.5, 1.0, 1.0, 1.0];
+        tint = wgl.makeColor(0.5, 1.0, 1.0, 1.0);
       } else if (tile === 4) {
-        tint = [1.0, 1.0, 0.5, 1.0];
+        tint = wgl.makeColor(1.0, 1.0, 0.5, 1.0);
       } else {
         tint = WHITE;
       }
-      ctx.drawTexturePro(alien, src, tileDst, [0.0, 0.0], 0.0, tint);
+      ctx.drawTexturePro(alien, src, tileDst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
     }
 
     // Game over text (blinks)
@@ -568,19 +567,19 @@ export class AlienZooKeeperView {
     const offsetY = MENU_SIGN_OFFSET_Y * signScale;
     const rotationDeg = 0.0;
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }

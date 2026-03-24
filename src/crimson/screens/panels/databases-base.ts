@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/databases_base.py — Base class for database views
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -52,10 +53,7 @@ export const LEFT_PANEL_HEIGHT = 378.0;
 export const RIGHT_PANEL_POS_Y = 200.0;
 export const RIGHT_PANEL_HEIGHT = 254.0;
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
@@ -165,19 +163,19 @@ export abstract class DatabaseBaseView {
     const rotationDeg = 0.0;
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
 
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
@@ -296,13 +294,13 @@ export abstract class DatabaseBaseView {
 
     drawClassicMenuPanel(
       ctx, panelTex,
-      [leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, LEFT_PANEL_HEIGHT * scale],
+      wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, LEFT_PANEL_HEIGHT * scale),
       WHITE,
       fxDetail,
     );
     drawClassicMenuPanel(
       ctx, panelTex,
-      [rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, RIGHT_PANEL_HEIGHT * scale],
+      wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, RIGHT_PANEL_HEIGHT * scale),
       WHITE,
       fxDetail,
       true,

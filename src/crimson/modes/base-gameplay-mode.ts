@@ -4,6 +4,7 @@
 // to the WebGL single-player port.  All LAN-related state is stubbed as no-ops
 // so that subclass call-sites compile without change.
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -704,7 +705,7 @@ export class BaseGameplayMode {
     ctx: WebGLContext,
     text: string,
     pos: Vec2,
-    color: [number, number, number, number],
+    color: wgl.Color,
     _scale: number = 1.0,
   ): void {
     const font = this._small;
@@ -1125,7 +1126,7 @@ export class BaseGameplayMode {
     pendingCount: number;
     anyAlive: boolean;
     menuActive: boolean;
-    textColor: [number, number, number, number];
+    textColor: wgl.Color;
     promptScale: number;
   }): void {}
 

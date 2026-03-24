@@ -1,5 +1,6 @@
 // Port of crimson/screens/results/quest_results.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -63,13 +64,11 @@ const INPUT_BOX_H = 18.0;
 const PANEL_SLIDE_START_MS = 400.0;
 const PANEL_SLIDE_END_MS = 100.0;
 
-type Color4 = [number, number, number, number];
-
-const COLOR_TEXT: Color4 = [1.0, 1.0, 1.0, 1.0];
-const COLOR_TEXT_MUTED: Color4 = [1.0, 1.0, 1.0, 0.8];
-const COLOR_TEXT_SUBTLE: Color4 = [1.0, 1.0, 1.0, 0.7];
-const COLOR_GREEN: Color4 = [25 / 255, 200 / 255, 25 / 255, 1.0];
-const COLOR_UI_ACCENT: Color4 = [149 / 255, 175 / 255, 198 / 255, 1.0];
+const COLOR_TEXT = wgl.makeColor(1.0, 1.0, 1.0, 1.0);
+const COLOR_TEXT_MUTED = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
+const COLOR_TEXT_SUBTLE = wgl.makeColor(1.0, 1.0, 1.0, 0.7);
+const COLOR_GREEN = wgl.makeColor(25 / 255, 200 / 255, 25 / 255, 1.0);
+const COLOR_UI_ACCENT = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 1.0);
 
 // DOM key codes
 const KEY_ENTER = 13;
@@ -86,7 +85,7 @@ const MOUSE_BUTTON_LEFT = 0;
 function weaponIconSrc(
   texture: GlTexture,
   weaponIdNative: number,
-): [number, number, number, number] | null {
+): wgl.Rectangle | null {
   const weaponId = weaponIdNative as WeaponId;
   const entry = WEAPON_BY_ID.get(weaponId);
   if (!entry) return null;
@@ -98,7 +97,7 @@ function weaponIconSrc(
   const frame = iconIndex * 2;
   const col = frame % grid;
   const row = Math.floor(frame / grid);
-  return [col * cellW, row * cellH, cellW * 2, cellH];
+  return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
 interface QuestResultsPanelLayout {
@@ -115,7 +114,7 @@ function drawSmall(
   font: SmallFontData,
   text: string,
   pos: Vec2,
-  color: Color4,
+  color: wgl.Color,
 ): void {
   drawSmallText(ctx, font, text, pos, color);
 }
@@ -291,14 +290,14 @@ export class QuestResultsUi {
     const xpValue = `${Math.floor(record.scoreXp)}`;
 
     const alphaF = Math.max(0.0, Math.min(1.0, opts.alpha));
-    const colLabel: Color4 = [230 / 255, 230 / 255, 230 / 255, alphaF * 0.8];
-    const colScoreValue: Color4 = [230 / 255, 230 / 255, 255 / 255, alphaF];
-    const colRow: Color4 = [230 / 255, 230 / 255, 230 / 255, alphaF * 0.7];
-    const colLine: Color4 = [
+    const colLabel = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alphaF * 0.8);
+    const colScoreValue = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, alphaF);
+    const colRow = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alphaF * 0.7);
+    const colLine = wgl.makeColor(
       COLOR_UI_ACCENT[0], COLOR_UI_ACCENT[1], COLOR_UI_ACCENT[2],
       alphaF * 0.7,
-    ];
-    const iconTint: Color4 = [1.0, 1.0, 1.0, alphaF];
+    );
+    const iconTint = wgl.makeColor(1.0, 1.0, 1.0, alphaF);
 
     const leftCenterX = x + 36.0 * scale;
     const rightLabelX = x + 100.0 * scale;
@@ -350,8 +349,8 @@ export class QuestResultsUi {
     const wicons = getTexture(resources, TextureId.UI_WICONS);
     const src = weaponIconSrc(wicons, record.mostUsedWeaponId);
     if (src !== null) {
-      const dst: Color4 = [x + 4.0 * scale, rowY, 64.0 * scale, 32.0 * scale];
-      ctx.drawTexturePro(wicons, src, dst, [0.0, 0.0], 0.0, iconTint);
+      const dst = wgl.makeRectangle(x + 4.0 * scale, rowY, 64.0 * scale, 32.0 * scale);
+      ctx.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, iconTint);
     }
 
     const weaponId = record.mostUsedWeaponId as WeaponId;
@@ -619,17 +618,17 @@ export class QuestResultsUi {
     drawClassicMenuPanel(
       ctx,
       getTexture(resources, TextureId.UI_MENU_PANEL),
-      [panel.x, panel.y, panel.w, panel.h],
-      [1, 1, 1, 1],
+      wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h),
+      wgl.makeColor(1, 1, 1, 1),
       fxDetail,
     );
 
     const contentPos = panelLayout.topLeft.offset(QUEST_RESULTS_CONTENT_X * scale);
     const bannerPos = contentPos.add(new Vec2(QUEST_RESULTS_BANNER_X_FROM_CONTENT * scale, 36.0 * scale));
     const textWellDone = getTexture(resources, TextureId.UI_TEXT_WELL_DONE);
-    const bannerSrc: Color4 = [0.0, 0.0, textWellDone.width, textWellDone.height];
-    const bannerDst: Color4 = [bannerPos.x, bannerPos.y, TEXTURE_TOP_BANNER_W * scale, TEXTURE_TOP_BANNER_H * scale];
-    ctx.drawTexturePro(textWellDone, bannerSrc, bannerDst, [0.0, 0.0], 0.0, [1, 1, 1, 1]);
+    const bannerSrc = wgl.makeRectangle(0.0, 0.0, textWellDone.width, textWellDone.height);
+    const bannerDst = wgl.makeRectangle(bannerPos.x, bannerPos.y, TEXTURE_TOP_BANNER_W * scale, TEXTURE_TOP_BANNER_H * scale);
+    ctx.drawTexturePro(textWellDone, bannerSrc, bannerDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
 
     const qualifies = this.rank < TABLE_MAX;
 
@@ -653,7 +652,7 @@ export class QuestResultsUi {
         finalTimeMs = anim.finalTimeMs;
       }
 
-      const rowColor = (idx: number, final = false): Color4 => {
+      const rowColor = (idx: number, final = false): wgl.Color => {
         if (anim === null || anim.done) return COLOR_TEXT;
         let a = 0.2;
         if (idx < step) {
@@ -666,7 +665,7 @@ export class QuestResultsUi {
         if (idx === step) {
           rgb = [COLOR_GREEN[0], COLOR_GREEN[1], COLOR_GREEN[2]];
         }
-        return [rgb[0], rgb[1], rgb[2], Math.max(0.0, Math.min(1.0, a))];
+        return wgl.makeColor(rgb[0], rgb[1], rgb[2], Math.max(0.0, Math.min(1.0, a)));
       };
 
       let y = panelLayout.topLeft.y + 156.0 * scale;
@@ -747,7 +746,7 @@ export class QuestResultsUi {
       if (Math.sin(performance.now() * 0.004) > 0.0) {
         caretAlpha = 0.4;
       }
-      const caretColor: Color4 = [1.0, 1.0, 1.0, caretAlpha];
+      const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
       ctx.drawRectangle(
         Math.floor(caretX), Math.floor(inputPos.y + 2.0 * scale),
@@ -779,7 +778,7 @@ export class QuestResultsUi {
           ctx, font,
           'Score too low for top100.',
           new Vec2(scoreCardPos.x + 8.0 * scale, panelLayout.topLeft.y + 102.0 * scale),
-          [200 / 255, 200 / 255, 200 / 255, 1.0],
+          wgl.makeColor(200 / 255, 200 / 255, 200 / 255, 1.0),
         );
       }
 

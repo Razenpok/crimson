@@ -1,5 +1,6 @@
 // Port of crimson/modes/survival_mode.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
@@ -46,10 +47,10 @@ import { PerkPromptState } from './components/perk-prompt-controller.ts';
 const WORLD_SIZE = 1024.0;
 
 const UI_TEXT_SCALE = 1.0;
-const UI_TEXT_COLOR: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, 1.0];
-const UI_HINT_COLOR: [number, number, number, number] = [140 / 255, 140 / 255, 140 / 255, 1.0];
-const UI_SPONSOR_COLOR: [number, number, number, number] = [1.0, 1.0, 1.0, 0.5];
-const UI_ERROR_COLOR: [number, number, number, number] = [240 / 255, 80 / 255, 80 / 255, 1.0];
+const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
+const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
+const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
+const UI_ERROR_COLOR = wgl.makeColor(240 / 255, 80 / 255, 80 / 255, 1.0);
 
 const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
   const ids: WeaponId[] = [];
@@ -248,7 +249,7 @@ export class SurvivalMode extends BaseGameplayMode {
     pendingCount: number;
     anyAlive: boolean;
     menuActive: boolean;
-    textColor: [number, number, number, number];
+    textColor: wgl.Color;
     promptScale: number;
   }): void {
     this._perkPrompt.draw(ctx, {

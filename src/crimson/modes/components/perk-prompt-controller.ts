@@ -1,5 +1,6 @@
 // Port of crimson/modes/components/perk_prompt_controller.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources } from '@grim/assets.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -101,7 +102,7 @@ export class PerkPromptState {
       menuActive: boolean;
       config: CrimsonConfig;
       uiTextWidth: UiTextWidthFn;
-      textColor: [number, number, number, number];
+      textColor: wgl.Color;
       promptScale?: number;
     },
   ): void {

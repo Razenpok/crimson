@@ -1,5 +1,6 @@
 // Port of crimson/ui/hud.py — HUD overlay rendering
 
+import * as wgl from '@wgl';
 import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
@@ -15,9 +16,9 @@ import { WEAPON_BY_ID, WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
 // Color constants (0..1 float tuples)
 // ---------------------------------------------------------------------------
 
-const HUD_TEXT_COLOR: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, 1.0];
-const HUD_HINT_COLOR: [number, number, number, number] = [170 / 255, 170 / 255, 180 / 255, 1.0];
-const HUD_ACCENT_COLOR: [number, number, number, number] = [240 / 255, 200 / 255, 80 / 255, 1.0];
+const HUD_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
+const HUD_HINT_COLOR = wgl.makeColor(170 / 255, 170 / 255, 180 / 255, 1.0);
+const HUD_ACCENT_COLOR = wgl.makeColor(240 / 255, 200 / 255, 80 / 255, 1.0);
 
 // ---------------------------------------------------------------------------
 // Layout constants
@@ -212,7 +213,7 @@ function _drawText(
   text: string,
   pos: Vec2,
   _scale: number,
-  color: [number, number, number, number],
+  color: wgl.Color,
 ): void {
   if (font !== null) {
     drawSmallText(ctx, font, text, pos, color);
@@ -221,11 +222,11 @@ function _drawText(
 }
 
 function _withAlpha(
-  color: [number, number, number, number],
+  color: wgl.Color,
   alpha: number,
-): [number, number, number, number] {
+): wgl.Color {
   alpha = Math.max(0.0, Math.min(1.0, alpha));
-  return [color[0], color[1], color[2], color[3] * alpha];
+  return wgl.makeColor(color[0], color[1], color[2], color[3] * alpha);
 }
 
 function _questPanelSlideX(timeMs: number): number {
@@ -317,26 +318,26 @@ function _weaponAmmoClass(weaponId: number): number {
 function _weaponIconSrc(
   texture: GlTexture,
   iconIndex: number,
-): [number, number, number, number] {
+): wgl.Rectangle {
   const grid = 8;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const frame = (iconIndex | 0) * 2;
   const col = frame % grid;
   const row = (frame / grid) | 0;
-  return [col * cellW, row * cellH, cellW * 2, cellH];
+  return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
 function _bonusIconSrc(
   texture: GlTexture,
   iconId: number,
-): [number, number, number, number] {
+): wgl.Rectangle {
   const grid = 4;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const col = (iconId | 0) % grid;
   const row = ((iconId | 0) / grid) | 0;
-  return [col * cellW, row * cellH, cellW, cellH];
+  return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
 // ---------------------------------------------------------------------------
@@ -416,21 +417,21 @@ export function drawHudOverlay(
   // Top bar background.
   // -----------------------------------------------------------------------
   {
-    const src: [number, number, number, number] = [0.0, 0.0, gameTop.width, gameTop.height];
-    const dst: [number, number, number, number] = [
+    const src = wgl.makeRectangle(0.0, 0.0, gameTop.width, gameTop.height);
+    const dst = wgl.makeRectangle(
       ui(HUD_TOP_BAR_POS[0]),
       ui(HUD_TOP_BAR_POS[1]),
       ui(HUD_TOP_BAR_SIZE[0]),
       ui(HUD_TOP_BAR_SIZE[1]),
-    ];
+    );
     const topAlpha = alpha * HUD_TOP_BAR_ALPHA;
     ctx.drawTexturePro(
       gameTop,
       src,
       dst,
-      [0, 0],
+      wgl.makeVector2(0, 0),
       0.0,
-      [1.0, 1.0, 1.0, topAlpha],
+      wgl.makeColor(1.0, 1.0, 1.0, topAlpha),
     );
     maxY = Math.max(maxY, dst[1] + dst[3]);
   }
@@ -440,7 +441,7 @@ export function drawHudOverlay(
   // -----------------------------------------------------------------------
   if (showHealth) {
     const t = Math.max(0.0, elapsedMs) / 1000.0;
-    const src: [number, number, number, number] = [0.0, 0.0, lifeHeart.width, lifeHeart.height];
+    const src = wgl.makeRectangle(0.0, 0.0, lifeHeart.width, lifeHeart.height);
     let heartCenterBase: Vec2;
     let heartStep: Vec2;
     let heartScale: number;
@@ -467,19 +468,19 @@ export function drawHudOverlay(
       const pulse = (Math.pow(Math.sin(t * pulseSpeed + phase), 4) * 4.0 + 14.0) * heartScale;
       const size = pulse * 2.0;
       const center = heartCenterBase.add(heartStep.mul(idx));
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(center.x - pulse),
         ui(center.y - pulse),
         ui(size),
         ui(size),
-      ];
+      );
       ctx.drawTexturePro(
         lifeHeart,
         src,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA],
+        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }
@@ -491,7 +492,7 @@ export function drawHudOverlay(
   if (showHealth) {
     let barBasePos = new Vec2(HUD_HEALTH_BAR_POS[0], HUD_HEALTH_BAR_POS[1]);
     const barSize = new Vec2(HUD_HEALTH_BAR_SIZE[0], HUD_HEALTH_BAR_SIZE[1]);
-    const bgSrc: [number, number, number, number] = [0.0, 0.0, indLife.width, indLife.height];
+    const bgSrc = wgl.makeRectangle(0.0, 0.0, indLife.width, indLife.height);
     if (playerCount > 1) {
       barBasePos = new Vec2(barBasePos.x, 6.0);
     }
@@ -499,42 +500,42 @@ export function drawHudOverlay(
     for (let idx = 0; idx < hudPlayers.length; idx++) {
       const hudPlayer = hudPlayers[idx];
       const barPos = barBasePos.offset(0.0, playerCount > 1 ? idx * 16.0 : 0.0);
-      const bgDst: [number, number, number, number] = [
+      const bgDst = wgl.makeRectangle(
         ui(barPos.x),
         ui(barPos.y),
         ui(barSize.x),
         ui(barSize.y),
-      ];
+      );
       ctx.drawTexturePro(
         indLife,
         bgSrc,
         bgDst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, alpha * HUD_HEALTH_BG_ALPHA],
+        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_HEALTH_BG_ALPHA),
       );
       const healthRatio = Math.max(0.0, Math.min(1.0, hudPlayer.health / 100.0));
       if (healthRatio > 0.0) {
         const fillW = barSize.x * healthRatio;
-        const fillDst: [number, number, number, number] = [
+        const fillDst = wgl.makeRectangle(
           ui(barPos.x),
           ui(barPos.y),
           ui(fillW),
           ui(barSize.y),
-        ];
-        const fillSrc: [number, number, number, number] = [
+        );
+        const fillSrc = wgl.makeRectangle(
           0.0,
           0.0,
           indLife.width * healthRatio,
           indLife.height,
-        ];
+        );
         ctx.drawTexturePro(
           indLife,
           fillSrc,
           fillDst,
-          [0, 0],
+          wgl.makeVector2(0, 0),
           0.0,
-          [1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA],
+          wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
         );
       }
       maxY = Math.max(maxY, bgDst[1] + bgDst[3]);
@@ -564,19 +565,19 @@ export function drawHudOverlay(
       if (iconIndex === null) continue;
       const src = _weaponIconSrc(wicons, iconIndex);
       const iconPos = iconBasePos.add(iconStep.mul(idx));
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(iconPos.x),
         ui(iconPos.y),
         ui(iconSize.x),
         ui(iconSize.y),
-      ];
+      );
       ctx.drawTexturePro(
         wicons,
         src,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA],
+        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }
@@ -620,20 +621,20 @@ export function drawHudOverlay(
       for (let barIdx = 0; barIdx < bars; barIdx++) {
         const barAlpha = barIdx < ammoCount ? baseAlpha : baseAlpha * HUD_AMMO_DIM_ALPHA;
         const barPos = playerAmmoBase.offset(barIdx * HUD_AMMO_BAR_STEP, 0.0);
-        const dst: [number, number, number, number] = [
+        const dst = wgl.makeRectangle(
           ui(barPos.x),
           ui(barPos.y),
           ui(HUD_AMMO_BAR_SIZE[0]),
           ui(HUD_AMMO_BAR_SIZE[1]),
-        ];
-        const src: [number, number, number, number] = [0.0, 0.0, ammoTex.width, ammoTex.height];
+        );
+        const src = wgl.makeRectangle(0.0, 0.0, ammoTex.width, ammoTex.height);
         ctx.drawTexturePro(
           ammoTex,
           src,
           dst,
-          [0, 0],
+          wgl.makeVector2(0, 0),
           0.0,
-          [1.0, 1.0, 1.0, barAlpha],
+          wgl.makeColor(1.0, 1.0, 1.0, barAlpha),
         );
         maxY = Math.max(maxY, dst[1] + dst[3]);
       }
@@ -667,25 +668,25 @@ export function drawHudOverlay(
     const questPanelAlpha = alpha * 0.7;
     const questTextColor = _withAlpha(HUD_TEXT_COLOR, questPanelAlpha);
 
-    const panelSrc: [number, number, number, number] = [0.0, 0.0, indPanel.width, indPanel.height];
+    const panelSrc = wgl.makeRectangle(0.0, 0.0, indPanel.width, indPanel.height);
 
     // Sliding top panel (first second).
     const slidePanelPos = new Vec2(slideX - 90.0, 67.0);
     const slidePanelSize = new Vec2(182.0, 53.0);
     {
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(slidePanelPos.x),
         ui(slidePanelPos.y),
         ui(slidePanelSize.x),
         ui(slidePanelSize.y),
-      ];
+      );
       ctx.drawTexturePro(
         indPanel,
         panelSrc,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, questPanelAlpha],
+        wgl.makeColor(1.0, 1.0, 1.0, questPanelAlpha),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }
@@ -694,19 +695,19 @@ export function drawHudOverlay(
     {
       const progressPanelPos = new Vec2(-80.0, 107.0);
       const progressPanelSize = new Vec2(182.0, 53.0);
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(progressPanelPos.x),
         ui(progressPanelPos.y),
         ui(progressPanelSize.x),
         ui(progressPanelSize.y),
-      ];
+      );
       ctx.drawTexturePro(
         indPanel,
         panelSrc,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, questPanelAlpha],
+        wgl.makeColor(1.0, 1.0, 1.0, questPanelAlpha),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }
@@ -716,41 +717,41 @@ export function drawHudOverlay(
       const clockAlpha = alpha * HUD_CLOCK_ALPHA;
       const clockTablePos = new Vec2(slideX + 2.0, 78.0);
       const clockSz = new Vec2(32.0, 32.0);
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(clockTablePos.x),
         ui(clockTablePos.y),
         ui(clockSz.x),
         ui(clockSz.y),
-      ];
-      const src: [number, number, number, number] = [0.0, 0.0, clockTable.width, clockTable.height];
+      );
+      const src = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
       ctx.drawTexturePro(
         clockTable,
         src,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, clockAlpha],
+        wgl.makeColor(1.0, 1.0, 1.0, clockAlpha),
       );
 
       // NOTE: Raylib's draw_texture_pro uses dst.x/y as the rotation origin position;
       // offset by half-size so the 32x32 quad stays aligned with the table.
       const clockPointerPos = new Vec2(slideX + 18.0, 94.0);
-      const dst2: [number, number, number, number] = [
+      const dst2 = wgl.makeRectangle(
         ui(clockPointerPos.x),
         ui(clockPointerPos.y),
         ui(clockSz.x),
         ui(clockSz.y),
-      ];
-      const src2: [number, number, number, number] = [0.0, 0.0, clockPointer.width, clockPointer.height];
+      );
+      const src2 = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
       const rotation = timeMs / 1000.0 * 6.0;
-      const origin: [number, number] = [ui(16.0), ui(16.0)];
+      const origin = wgl.makeVector2(ui(16.0), ui(16.0));
       ctx.drawTexturePro(
         clockPointer,
         src2,
         dst2,
         origin,
         rotation,
-        [1.0, 1.0, 1.0, clockAlpha],
+        wgl.makeColor(1.0, 1.0, 1.0, clockAlpha),
       );
     }
 
@@ -805,20 +806,20 @@ export function drawHudOverlay(
   if (showXp) {
     const panelPos = new Vec2(HUD_SURV_PANEL_POS[0], HUD_SURV_PANEL_POS[1] + hudYShift);
     const panelSize = new Vec2(HUD_SURV_PANEL_SIZE[0], HUD_SURV_PANEL_SIZE[1]);
-    const dst: [number, number, number, number] = [
+    const dst = wgl.makeRectangle(
       ui(panelPos.x),
       ui(panelPos.y),
       ui(panelSize.x),
       ui(panelSize.y),
-    ];
-    const src: [number, number, number, number] = [0.0, 0.0, indPanel.width, indPanel.height];
+    );
+    const src = wgl.makeRectangle(0.0, 0.0, indPanel.width, indPanel.height);
     ctx.drawTexturePro(
       indPanel,
       src,
       dst,
-      [0, 0],
+      wgl.makeVector2(0, 0),
       0.0,
-      [1.0, 1.0, 1.0, alpha * HUD_PANEL_ALPHA],
+      wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_PANEL_ALPHA),
     );
     maxY = Math.max(maxY, dst[1] + dst[3]);
   }
@@ -874,20 +875,20 @@ export function drawHudOverlay(
     const clockPos = new Vec2(HUD_CLOCK_POS[0], HUD_CLOCK_POS[1]);
     const clockSz = new Vec2(HUD_CLOCK_SIZE[0], HUD_CLOCK_SIZE[1]);
     {
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(clockPos.x),
         ui(clockPos.y),
         ui(clockSz.x),
         ui(clockSz.y),
-      ];
-      const src: [number, number, number, number] = [0.0, 0.0, clockTable.width, clockTable.height];
+      );
+      const src = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
       ctx.drawTexturePro(
         clockTable,
         src,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA],
+        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }
@@ -895,22 +896,22 @@ export function drawHudOverlay(
       // NOTE: Raylib's draw_texture_pro uses dst.x/y as the rotation origin position;
       // offset by half-size so the 32x32 quad stays aligned with the table.
       const clockCenter = clockPos.add(clockSz.mul(0.5));
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(clockCenter.x),
         ui(clockCenter.y),
         ui(clockSz.x),
         ui(clockSz.y),
-      ];
-      const src: [number, number, number, number] = [0.0, 0.0, clockPointer.width, clockPointer.height];
+      );
+      const src = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
       const rotation = timeMs / 1000.0 * 6.0;
-      const origin: [number, number] = [ui(clockSz.x * 0.5), ui(clockSz.y * 0.5)];
+      const origin = wgl.makeVector2(ui(clockSz.x * 0.5), ui(clockSz.y * 0.5));
       ctx.drawTexturePro(
         clockPointer,
         src,
         dst,
         origin,
         rotation,
-        [1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA],
+        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA),
       );
     }
     {
@@ -960,20 +961,20 @@ export function drawHudOverlay(
       }
 
       {
-        const src: [number, number, number, number] = [0.0, 0.0, indPanel.width, indPanel.height];
-        const dst: [number, number, number, number] = [
+        const src = wgl.makeRectangle(0.0, 0.0, indPanel.width, indPanel.height);
+        const dst = wgl.makeRectangle(
           ui(panelPos.x),
           ui(panelPos.y),
           ui(panelSize.x),
           ui(panelSize.y),
-        ];
+        );
         ctx.drawTexturePro(
           indPanel,
           src,
           dst,
-          [0, 0],
+          wgl.makeVector2(0, 0),
           0.0,
-          [1.0, 1.0, 1.0, bonusPanelAlpha],
+          wgl.makeColor(1.0, 1.0, 1.0, bonusPanelAlpha),
         );
         maxY = Math.max(maxY, dst[1] + dst[3]);
       }
@@ -982,19 +983,19 @@ export function drawHudOverlay(
       if (slot.iconId >= 0) {
         const src = _bonusIconSrc(bonusesTexture, slot.iconId);
         const iconPos = slotPos.offset(-1.0, 0.0);
-        const dst: [number, number, number, number] = [
+        const dst = wgl.makeRectangle(
           ui(iconPos.x),
           ui(iconPos.y),
           ui(HUD_BONUS_ICON_SIZE),
           ui(HUD_BONUS_ICON_SIZE),
-        ];
+        );
         ctx.drawTexturePro(
           bonusesTexture,
           src,
           dst,
-          [0, 0],
+          wgl.makeVector2(0, 0),
           0.0,
-          [1.0, 1.0, 1.0, alpha],
+          wgl.makeColor(1.0, 1.0, 1.0, alpha),
         );
         maxY = Math.max(maxY, dst[1] + dst[3]);
       }
@@ -1115,20 +1116,20 @@ export function drawHudOverlay(
     const panelSize = new Vec2(182.0, 53.0);
 
     {
-      const src: [number, number, number, number] = [0.0, 0.0, indPanel.width, indPanel.height];
-      const dst: [number, number, number, number] = [
+      const src = wgl.makeRectangle(0.0, 0.0, indPanel.width, indPanel.height);
+      const dst = wgl.makeRectangle(
         ui(panelPos.x),
         ui(panelPos.y),
         ui(panelSize.x),
         ui(panelSize.y),
-      ];
+      );
       ctx.drawTexturePro(
         indPanel,
         src,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, panelAlphaVal],
+        wgl.makeColor(1.0, 1.0, 1.0, panelAlphaVal),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }
@@ -1137,19 +1138,19 @@ export function drawHudOverlay(
     if (iconIndex !== null) {
       const src = _weaponIconSrc(wicons, iconIndex);
       const iconPos = auxIconBasePos.add(auxStep.mul(idx));
-      const dst: [number, number, number, number] = [
+      const dst = wgl.makeRectangle(
         ui(iconPos.x),
         ui(iconPos.y),
         ui(60.0),
         ui(30.0),
-      ];
+      );
       ctx.drawTexturePro(
         wicons,
         src,
         dst,
-        [0, 0],
+        wgl.makeVector2(0, 0),
         0.0,
-        [1.0, 1.0, 1.0, panelAlphaVal],
+        wgl.makeColor(1.0, 1.0, 1.0, panelAlphaVal),
       );
       maxY = Math.max(maxY, dst[1] + dst[3]);
     }

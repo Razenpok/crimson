@@ -1,15 +1,13 @@
 // Port of crimson/ui/cursor.py
 
+import * as wgl from '@wgl';
 import { WebGLContext, GlTexture, BlendMode } from "@grim/webgl.ts";
 import { Vec2 } from "@grim/geom.ts";
 import { effectSrcRect, EffectId } from "@crimson/effects-atlas.ts";
 
-type Color = [number, number, number, number];
-type Rect = [number, number, number, number];
-
 const CURSOR_EFFECT_ID: number = EffectId.GLOW;
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 function clamp01(value: number): number {
   if (value < 0.0) return 0.0;
@@ -33,17 +31,17 @@ export function drawCursorGlow(
   );
   if (src === null) return;
 
-  const srcRect: Rect = [src[0], src[1], src[2], src[3]];
+  const srcRect = wgl.makeRectangle(src[0], src[1], src[2], src[3]);
 
   ctx.setBlendMode(BlendMode.ADDITIVE);
 
   if (pulseTime === null) {
-    const dst: Rect = [pos.x - 32.0, pos.y - 32.0, 64.0, 64.0];
+    const dst = wgl.makeRectangle(pos.x - 32.0, pos.y - 32.0, 64.0, 64.0);
     ctx.drawTexturePro(particles, srcRect, dst, ORIGIN, 0.0, WHITE);
   } else {
     let alpha = (Math.pow(2.0, Math.sin(pulseTime)) + 2.0) * 0.32;
     alpha = clamp01(alpha);
-    const tint: Color = [1, 1, 1, alpha];
+    const tint = wgl.makeColor(1, 1, 1, alpha);
 
     const offsets: [number, number, number][] = [
       [-28.0, -28.0, 64.0],
@@ -53,7 +51,7 @@ export function drawCursorGlow(
     ];
 
     for (const [dx, dy, size] of offsets) {
-      const dst: Rect = [pos.x + dx, pos.y + dy, size, size];
+      const dst = wgl.makeRectangle(pos.x + dx, pos.y + dy, size, size);
       ctx.drawTexturePro(particles, srcRect, dst, ORIGIN, 0.0, tint);
     }
   }
@@ -87,8 +85,8 @@ export function drawAimCursor(
     return;
   }
 
-  const src: Rect = [0, 0, aim.width, aim.height];
-  const dst: Rect = [pos.x - 10.0, pos.y - 10.0, 20.0, 20.0];
+  const src = wgl.makeRectangle(0, 0, aim.width, aim.height);
+  const dst = wgl.makeRectangle(pos.x - 10.0, pos.y - 10.0, 20.0, 20.0);
   ctx.drawTexturePro(aim, src, dst, ORIGIN, 0.0, WHITE);
 }
 
@@ -103,7 +101,7 @@ export function drawMenuCursor(
 
   if (cursor === null) return;
 
-  const src: Rect = [0, 0, cursor.width, cursor.height];
-  const dst: Rect = [pos.x - 2.0, pos.y - 2.0, 32.0, 32.0];
+  const src = wgl.makeRectangle(0, 0, cursor.width, cursor.height);
+  const dst = wgl.makeRectangle(pos.x - 2.0, pos.y - 2.0, 32.0, 32.0);
   ctx.drawTexturePro(cursor, src, dst, ORIGIN, 0.0, WHITE);
 }

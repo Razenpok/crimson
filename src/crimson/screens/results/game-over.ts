@@ -1,5 +1,6 @@
 // Port of crimson/screens/results/game_over.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -74,12 +75,10 @@ const INPUT_BOX_H = 18.0;
 
 const PANEL_SLIDE_DURATION_MS = 250.0;
 
-type Color4 = [number, number, number, number];
-
-const COLOR_TEXT: Color4 = [1.0, 1.0, 1.0, 1.0];
-const COLOR_TEXT_MUTED: Color4 = [1.0, 1.0, 1.0, 0.8];
-const COLOR_SCORE_LABEL: Color4 = [230 / 255, 230 / 255, 230 / 255, 1.0];
-const COLOR_SCORE_VALUE: Color4 = [230 / 255, 230 / 255, 255 / 255, 1.0];
+const COLOR_TEXT = wgl.makeColor(1.0, 1.0, 1.0, 1.0);
+const COLOR_TEXT_MUTED = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
+const COLOR_SCORE_LABEL = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 1.0);
+const COLOR_SCORE_VALUE = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
 
 // DOM key codes
 const KEY_ENTER = 13;
@@ -95,7 +94,7 @@ const MOUSE_BUTTON_LEFT = 0;
 function weaponIconSrc(
   texture: GlTexture,
   weaponIdNative: number,
-): [number, number, number, number] | null {
+): wgl.Rectangle | null {
   const weaponId = weaponIdNative as WeaponId;
   const entry = WEAPON_BY_ID.get(weaponId);
   if (!entry) return null;
@@ -107,7 +106,7 @@ function weaponIconSrc(
   const frame = iconIndex * 2;
   const col = frame % grid;
   const row = Math.floor(frame / grid);
-  return [col * cellW, row * cellH, cellW * 2, cellH];
+  return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
 interface GameOverPanelLayout {
@@ -123,11 +122,11 @@ function drawTextureCentered(
   h: number,
   alpha: number,
 ): void {
-  const src: Color4 = [0.0, 0.0, tex.width, tex.height];
-  const dst: Color4 = [pos.x, pos.y, w, h];
+  const src = wgl.makeRectangle(0.0, 0.0, tex.width, tex.height);
+  const dst = wgl.makeRectangle(pos.x, pos.y, w, h);
   const a = Math.max(0.0, Math.min(1.0, alpha));
-  const tint: Color4 = [1.0, 1.0, 1.0, a];
-  ctx.drawTexturePro(tex, src, dst, [0.0, 0.0], 0.0, tint);
+  const tint = wgl.makeColor(1.0, 1.0, 1.0, a);
+  ctx.drawTexturePro(tex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
 }
 
 function easeOutCubic(t: number): number {
@@ -144,7 +143,7 @@ function drawSmall(
   font: SmallFontData,
   text: string,
   pos: Vec2,
-  color: Color4,
+  color: wgl.Color,
 ): void {
   drawSmallText(ctx, font, text, pos, color);
 }
@@ -428,18 +427,18 @@ export class GameOverUi {
   ): void {
     const { pos, record, resources, font, alpha, showWeaponRow, scale, mouse } = opts;
     const dtHover = this._dt * 2.0;
-    const labelColor: Color4 = [
+    const labelColor = wgl.makeColor(
       COLOR_SCORE_LABEL[0], COLOR_SCORE_LABEL[1], COLOR_SCORE_LABEL[2],
       alpha * 0.8,
-    ];
-    const valueColor: Color4 = [
+    );
+    const valueColor = wgl.makeColor(
       COLOR_SCORE_VALUE[0], COLOR_SCORE_VALUE[1], COLOR_SCORE_VALUE[2],
       alpha,
-    ];
-    const hintColor: Color4 = [
+    );
+    const hintColor = wgl.makeColor(
       COLOR_SCORE_LABEL[0], COLOR_SCORE_LABEL[1], COLOR_SCORE_LABEL[2],
       alpha * 0.7,
-    ];
+    );
 
     const cardOrigin = pos.offset(4.0 * scale);
     const modeRaw = record.gameModeId;
@@ -513,19 +512,19 @@ export class GameOverUi {
 
       const elapsedMs = Math.floor(record.survivalElapsedMs);
       const clockTable = getTexture(resources, TextureId.UI_CLOCK_TABLE);
-      const clockTableSrc: Color4 = [0.0, 0.0, clockTable.width, clockTable.height];
+      const clockTableSrc = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
       const clockTablePos = col2Pos.add(new Vec2(8.0 * scale, 14.0 * scale));
-      const clockTableDst: Color4 = [clockTablePos.x, clockTablePos.y, 32.0 * scale, 32.0 * scale];
-      const texTint: Color4 = [1.0, 1.0, 1.0, alpha];
-      ctx.drawTexturePro(clockTable, clockTableSrc, clockTableDst, [0.0, 0.0], 0.0, texTint);
+      const clockTableDst = wgl.makeRectangle(clockTablePos.x, clockTablePos.y, 32.0 * scale, 32.0 * scale);
+      const texTint = wgl.makeColor(1.0, 1.0, 1.0, alpha);
+      ctx.drawTexturePro(clockTable, clockTableSrc, clockTableDst, wgl.makeVector2(0.0, 0.0), 0.0, texTint);
 
       const clockPointer = getTexture(resources, TextureId.UI_CLOCK_POINTER);
-      const clockPointerSrc: Color4 = [0.0, 0.0, clockPointer.width, clockPointer.height];
+      const clockPointerSrc = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
       const clockPointerPos = col2Pos.add(new Vec2(24.0 * scale, 30.0 * scale));
-      const clockPointerDst: Color4 = [clockPointerPos.x, clockPointerPos.y, 32.0 * scale, 32.0 * scale];
+      const clockPointerDst = wgl.makeRectangle(clockPointerPos.x, clockPointerPos.y, 32.0 * scale, 32.0 * scale);
       const seconds = Math.max(0, Math.floor(elapsedMs / 1000));
       const rotation = seconds * 6.0;
-      const origin: [number, number] = [16.0 * scale, 16.0 * scale];
+      const origin = wgl.makeVector2(16.0 * scale, 16.0 * scale);
       ctx.drawTexturePro(clockPointer, clockPointerSrc, clockPointerDst, origin, rotation, texTint);
 
       const timeText = formatTimeMmSs(elapsedMs);
@@ -546,9 +545,9 @@ export class GameOverUi {
       const wicons = getTexture(resources, TextureId.UI_WICONS);
       const src = weaponIconSrc(wicons, record.mostUsedWeaponId);
       if (src !== null) {
-        const dst: Color4 = [weaponPos.x, weaponPos.y, 64.0 * scale, 32.0 * scale];
-        const tint: Color4 = [1.0, 1.0, 1.0, alpha];
-        ctx.drawTexturePro(wicons, src, dst, [0.0, 0.0], 0.0, tint);
+        const dst = wgl.makeRectangle(weaponPos.x, weaponPos.y, 64.0 * scale, 32.0 * scale);
+        const tint = wgl.makeColor(1.0, 1.0, 1.0, alpha);
+        ctx.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
       }
 
       const weaponId = record.mostUsedWeaponId as WeaponId;
@@ -587,7 +586,7 @@ export class GameOverUi {
 
     if (this._hoverWeapon > 0.5) {
       const t = (this._hoverWeapon - 0.5) * 2.0;
-      const col: Color4 = [labelColor[0], labelColor[1], labelColor[2], alpha * t];
+      const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
       drawSmall(
         ctx, font,
         'Most used weapon during the game',
@@ -597,7 +596,7 @@ export class GameOverUi {
     }
     if (this._hoverTime > 0.5) {
       const t = (this._hoverTime - 0.5) * 2.0;
-      const col: Color4 = [labelColor[0], labelColor[1], labelColor[2], alpha * t];
+      const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
       drawSmall(
         ctx, font,
         'The time the game lasted',
@@ -607,7 +606,7 @@ export class GameOverUi {
     }
     if (this._hoverHitRatio > 0.5) {
       const t = (this._hoverHitRatio - 0.5) * 2.0;
-      const col: Color4 = [labelColor[0], labelColor[1], labelColor[2], alpha * t];
+      const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
       const hitRatioTooltip = this.preserveBugs
         ? 'The % of shot bullets hit the target'
         : 'The % of bullets that hit the target';
@@ -648,8 +647,8 @@ export class GameOverUi {
     drawClassicMenuPanel(
       ctx,
       getTexture(resources, TextureId.UI_MENU_PANEL),
-      [panel.x, panel.y, panel.w, panel.h],
-      [1, 1, 1, 1],
+      wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h),
+      wgl.makeColor(1, 1, 1, 1),
       fxDetail,
     );
 
@@ -721,7 +720,7 @@ export class GameOverUi {
       if (Math.sin(performance.now() * 0.004) > 0.0) {
         caretAlpha = 0.4;
       }
-      const caretColor: Color4 = [1.0, 1.0, 1.0, caretAlpha];
+      const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
       ctx.drawRectangle(
         Math.floor(caretX),
@@ -756,7 +755,7 @@ export class GameOverUi {
           ctx, font,
           'Score too low for top100.',
           bannerPos.add(new Vec2(38.0 * scale, 62.0 * scale)),
-          [200 / 255, 200 / 255, 200 / 255, 1.0],
+          wgl.makeColor(200 / 255, 200 / 255, 200 / 255, 1.0),
         );
       }
 

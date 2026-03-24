@@ -1,5 +1,6 @@
 // Port of crimson/screens/high_scores_view/right_panel.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -81,11 +82,8 @@ import {
 } from '@crimson/screens/high-scores-layout.ts';
 import type { HighScoresView } from './view.ts';
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 function savedScoreNames(view: HighScoresView): string[] {
   const config = view.state.config.profile;
@@ -151,8 +149,8 @@ function drawDropdown(
   const arrowH = arrowTex.height * scale;
   ctx.drawTexturePro(
     arrowTex,
-    [0.0, 0.0, arrowTex.width, arrowTex.height],
-    [arrowPos.x, arrowPos.y, arrowW, arrowH],
+    wgl.makeRectangle(0.0, 0.0, arrowTex.width, arrowTex.height),
+    wgl.makeRectangle(arrowPos.x, arrowPos.y, arrowW, arrowH),
     ORIGIN,
     0.0,
     WHITE,
@@ -162,7 +160,7 @@ function drawDropdown(
 
   selectedIndex = Math.max(0, Math.min(itemCount - 1, Math.floor(selectedIndex)));
   const headerAlpha = ((isOpen || hoveredHeader) && enabled) ? 242 / 255 : 191 / 255;
-  drawSmallText(ctx, font, items[selectedIndex], valuePos, [1, 1, 1, headerAlpha]);
+  drawSmallText(ctx, font, items[selectedIndex], valuePos, wgl.makeColor(1, 1, 1, headerAlpha));
 
   if (!isOpen) return;
 
@@ -175,7 +173,7 @@ function drawDropdown(
     let alpha = 153 / 255;
     if (hovered) alpha = 242 / 255;
     if (idx === selectedIndex) alpha = Math.max(alpha, 245 / 255);
-    drawSmallText(ctx, font, label, new Vec2(valuePos.x, itemY), [1, 1, 1, alpha]);
+    drawSmallText(ctx, font, label, new Vec2(valuePos.x, itemY), wgl.makeColor(1, 1, 1, alpha));
   }
 }
 
@@ -216,7 +214,7 @@ function drawRightPanelQuestOptions(
   const { resources, font, rightTopLeft, scale } = opts;
   const optionsShiftX = hsRightOptionsXShift(view.state.config.display.width);
   const optionsTopLeft = rightTopLeft.add(new Vec2(optionsShiftX * scale, 0.0));
-  const textColor: Color = [1, 1, 1, 0.8];
+  const textColor = wgl.makeColor(1, 1, 1, 0.8);
 
   // Checkbox: "Show internet scores"
   const checkTex = view.state.config.profile.showInternetScores
@@ -226,13 +224,13 @@ function drawRightPanelQuestOptions(
   const checkH = checkTex.height * scale;
   ctx.drawTexturePro(
     checkTex,
-    [0.0, 0.0, checkTex.width, checkTex.height],
-    [
+    wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
+    wgl.makeRectangle(
       optionsTopLeft.x + HS_RIGHT_CHECK_X * scale,
       optionsTopLeft.y + HS_RIGHT_CHECK_Y * scale,
       checkW,
       checkH,
-    ],
+    ),
     ORIGIN,
     0.0,
     WHITE,
@@ -367,11 +365,11 @@ function drawRightPanelLocalScore(
   if (idx >= view.records.length) idx = view.records.length - 1;
   const entry = view.records[idx];
 
-  const textColor: Color = [0.9, 0.9, 0.9, 0.8];
-  const valueColor: Color = [0.9, 0.9, 1, 1];
-  const gameTimeColor: Color = [1, 1, 1, 0.8];
-  const lowerSectionColor: Color = [0.9, 0.9, 0.9, 0.7];
-  const separatorColor: Color = [149 / 255, 175 / 255, 198 / 255, 0.7];
+  const textColor = wgl.makeColor(0.9, 0.9, 0.9, 0.8);
+  const valueColor = wgl.makeColor(0.9, 0.9, 1, 1);
+  const gameTimeColor = wgl.makeColor(1, 1, 1, 0.8);
+  const lowerSectionColor = wgl.makeColor(0.9, 0.9, 0.9, 0.7);
+  const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 0.7);
 
   let name = entry.name();
   if (!name) name = '???';
@@ -514,9 +512,9 @@ function drawClockGauge(
   const pointerTex = getTexture(resources, TextureId.UI_CLOCK_POINTER);
   const drawW = 32.0 * scale;
   const drawH = 32.0 * scale;
-  const dst: RectTuple = [pos.x, pos.y, drawW, drawH];
-  const srcTable: RectTuple = [0.0, 0.0, tableTex.width, tableTex.height];
-  const srcPointer: RectTuple = [0.0, 0.0, pointerTex.width, pointerTex.height];
+  const dst = wgl.makeRectangle(pos.x, pos.y, drawW, drawH);
+  const srcTable = wgl.makeRectangle(0.0, 0.0, tableTex.width, tableTex.height);
+  const srcPointer = wgl.makeRectangle(0.0, 0.0, pointerTex.width, pointerTex.height);
   ctx.drawTexturePro(tableTex, srcTable, dst, ORIGIN, 0.0, WHITE);
 
   const seconds = Math.max(0, Math.floor(elapsedMs) / 1000) | 0;
@@ -526,8 +524,8 @@ function drawClockGauge(
   ctx.drawTexturePro(
     pointerTex,
     srcPointer,
-    [centerX, centerY, drawW, drawH],
-    [drawW * 0.5, drawH * 0.5],
+    wgl.makeRectangle(centerX, centerY, drawW, drawH),
+    wgl.makeVector2(drawW * 0.5, drawH * 0.5),
     rotationDeg,
     WHITE,
   );
@@ -556,8 +554,8 @@ function drawWicon(
   const iconH = cellH;
   ctx.drawTexturePro(
     tex,
-    [srcX, srcY, iconW, iconH],
-    [pos.x, pos.y, iconW * scale, iconH * scale],
+    wgl.makeRectangle(srcX, srcY, iconW, iconH),
+    wgl.makeRectangle(pos.x, pos.y, iconW * scale, iconH * scale),
     ORIGIN,
     0.0,
     WHITE,

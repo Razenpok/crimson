@@ -1,5 +1,6 @@
 // Port of crimson/ui/overlays/typo_run.py
 
+import * as wgl from '@wgl';
 import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
@@ -14,7 +15,7 @@ const TYPING_PROMPT = '>';
 const TYPING_CURSOR = '_';
 const TYPING_CURSOR_X_OFFSET = 14.0;
 
-export type DrawUiText = (text: string, pos: Vec2, color: [number, number, number, number], scale: number) => void;
+export type DrawUiText = (text: string, pos: Vec2, color: wgl.Color, scale: number) => void;
 export type MeasureUiTextWidth = (text: string, scale: number) => number;
 export type WorldToScreen = (worldPos: Vec2) => Vec2;
 
@@ -48,7 +49,7 @@ export function drawTypoNameLabels(
     const bgAlpha = labelAlpha * NAME_LABEL_BG_ALPHA;
 
     ctx.drawRectangle(x - 4, y, textW + 8, textH, 0, 0, 0, bgAlpha);
-    drawText(text, new Vec2(x, y), [1, 1, 1, labelAlpha], NAME_LABEL_SCALE);
+    drawText(text, new Vec2(x, y), wgl.makeColor(1, 1, 1, labelAlpha), NAME_LABEL_SCALE);
   }
 }
 
@@ -65,16 +66,16 @@ export function drawTypingBox(
   const panelY = screenH - 144.0;
   const textY = screenH - 127.0;
 
-  const src: [number, number, number, number] = [0, 0, panelTexture.width, panelTexture.height];
-  const dst: [number, number, number, number] = [panelX, panelY, TYPING_PANEL_WIDTH, TYPING_PANEL_HEIGHT];
-  const tint: [number, number, number, number] = [1, 1, 1, TYPING_PANEL_ALPHA];
-  ctx.drawTexturePro(panelTexture, src, dst, [0, 0], 0.0, tint);
+  const src = wgl.makeRectangle(0, 0, panelTexture.width, panelTexture.height);
+  const dst = wgl.makeRectangle(panelX, panelY, TYPING_PANEL_WIDTH, TYPING_PANEL_HEIGHT);
+  const tint = wgl.makeColor(1, 1, 1, TYPING_PANEL_ALPHA);
+  ctx.drawTexturePro(panelTexture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 
-  drawText(TYPING_PROMPT + text, new Vec2(TYPING_TEXT_X, textY), [1, 1, 1, 1], 1.0);
+  drawText(TYPING_PROMPT + text, new Vec2(TYPING_TEXT_X, textY), wgl.makeColor(1, 1, 1, 1), 1.0);
 
   const cursorDim = Math.sin(cursorPulseTime * 4.0) > 0.0;
   const cursorAlpha = cursorDim ? 0.4 : 1.0;
-  const cursorColor: [number, number, number, number] = [1, 1, 1, cursorAlpha];
+  const cursorColor = wgl.makeColor(1, 1, 1, cursorAlpha);
   const textW = measureTextWidth(text, 1.0);
   const cursorX = textW + TYPING_CURSOR_X_OFFSET;
   drawText(TYPING_CURSOR, new Vec2(cursorX, textY), cursorColor, 1.0);

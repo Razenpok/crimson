@@ -1,5 +1,6 @@
 // Port of crimson/render/projectile_draw/primary_bullet.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { clamp } from '@grim/math.ts';
 import { WorldRenderCtx } from '@crimson/render/world/context.ts';
@@ -35,10 +36,10 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
   const bullet = getTexture(resources, TextureId.BULLET_I);
   if (bullet !== null && ctx.life >= 0.39) {
     const size = WorldRenderCtx.bulletSpriteSize(typeId, ctx.scale);
-    const src: [number, number, number, number] = [0.0, 0.0, bullet.width, bullet.height];
-    const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
-    const origin: [number, number] = [size * 0.5, size * 0.5];
-    const tint: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, alphaByte / 255];
+    const src = wgl.makeRectangle(0.0, 0.0, bullet.width, bullet.height);
+    const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
+    const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+    const tint = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, alphaByte / 255);
     renderer.gl.drawTexturePro(bullet, src, dst, origin, ctx.angle * RAD_TO_DEG, tint);
     drawn = true;
   }

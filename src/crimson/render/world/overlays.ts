@@ -1,5 +1,6 @@
 // Port of crimson/render/world/overlays.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
@@ -97,17 +98,17 @@ export function drawClockGauge(
   if (size <= 1e-3) return;
 
   const tintA = clamp(alpha, 0.0, 1.0);
-  const tint: [number, number, number, number] = [1, 1, 1, tintA];
+  const tint = wgl.makeColor(1, 1, 1, tintA);
   const half = size * 0.5;
 
-  const tableSrc: [number, number, number, number] = [0, 0, table.width, table.height];
-  const tableDst: [number, number, number, number] = [pos.x, pos.y, size, size];
-  renderCtx.gl.drawTexturePro(table, tableSrc, tableDst, [0, 0], 0.0, tint);
+  const tableSrc = wgl.makeRectangle(0, 0, table.width, table.height);
+  const tableDst = wgl.makeRectangle(pos.x, pos.y, size, size);
+  renderCtx.gl.drawTexturePro(table, tableSrc, tableDst, wgl.makeVector2(0, 0), 0.0, tint);
 
   const seconds = (ms / 1000) | 0;
-  const pointerSrc: [number, number, number, number] = [0, 0, pointer.width, pointer.height];
-  const pointerDst: [number, number, number, number] = [pos.x + half, pos.y + half, size, size];
-  const origin: [number, number] = [half, half];
+  const pointerSrc = wgl.makeRectangle(0, 0, pointer.width, pointer.height);
+  const pointerDst = wgl.makeRectangle(pos.x + half, pos.y + half, size, size);
+  const origin = wgl.makeVector2(half, half);
   const rotationDeg = seconds * 6.0;
   renderCtx.gl.drawTexturePro(pointer, pointerSrc, pointerDst, origin, rotationDeg, tint);
 }
@@ -122,15 +123,15 @@ export function directionArrowTint(
   renderCtx: WorldRenderCtx,
   playerIndex: number,
   alpha: number,
-): [number, number, number, number] {
+): wgl.Color {
   alpha = clamp(alpha, 0.0, 1.0);
   if (renderCtx.frame.players.length === 2) {
     if (playerIndex === 0) {
-      return [204 / 255, 230 / 255, 255 / 255, (153 / 255) * alpha];
+      return wgl.makeColor(204 / 255, 230 / 255, 255 / 255, (153 / 255) * alpha);
     }
-    return [255 / 255, 230 / 255, 204 / 255, (153 / 255) * alpha];
+    return wgl.makeColor(255 / 255, 230 / 255, 204 / 255, (153 / 255) * alpha);
   }
-  return [1, 1, 1, (77 / 255) * alpha];
+  return wgl.makeColor(1, 1, 1, (77 / 255) * alpha);
 }
 
 export function drawDirectionArrows(
@@ -144,10 +145,10 @@ export function drawDirectionArrows(
   if (alpha <= 1e-3) return;
 
   const arrow = getTexture(renderCtx.frame.resources, TextureId.ARROW);
-  const src: [number, number, number, number] = [0, 0, arrow.width, arrow.height];
+  const src = wgl.makeRectangle(0, 0, arrow.width, arrow.height);
   const width = Math.max(1.0, arrow.width * scale);
   const height = Math.max(1.0, arrow.height * scale);
-  const origin: [number, number] = [width * 0.5, height * 0.5];
+  const origin = wgl.makeVector2(width * 0.5, height * 0.5);
 
   for (const player of renderCtx.frame.players) {
     if (player.health <= 0.0) continue;
@@ -157,7 +158,7 @@ export function drawDirectionArrows(
     const heading = player.heading;
     const markerPos = player.pos.add(Vec2.fromHeading(heading).mul(60.0));
     const screen = WorldRenderCtx.worldToScreenWith(markerPos, camera, viewScale);
-    const dst: [number, number, number, number] = [screen.x, screen.y, width, height];
+    const dst = wgl.makeRectangle(screen.x, screen.y, width, height);
     const tint = directionArrowTint(renderCtx, index, alpha);
     renderCtx.gl.drawTexturePro(arrow, src, dst, origin, heading * RAD_TO_DEG, tint);
   }

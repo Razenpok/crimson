@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/databases_weapons.py — Unlocked Weapons Database view
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { TextureId, getTexture } from '@grim/assets.ts';
@@ -11,10 +12,8 @@ import { buildWeaponAvailability, type WeaponAvailabilityStatus } from '@crimson
 import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
-type Color = [number, number, number, number];
-
-const WHITE: Color = [1, 1, 1, 1];
-const DIM_COLOR: Color = [1, 1, 1, 0.7];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const DIM_COLOR = wgl.makeColor(1, 1, 1, 0.7);
 const MOUSE_BUTTON_LEFT = 0;
 
 // Inline helper — mirrors weapon_usage_slot_for_weapon_id from weapon_usage.py
@@ -70,13 +69,13 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const right = rightTopLeft;
     const detailShiftX = weaponsDbRightDetailXShift(this.state.config.display.width);
     const detailTopLeft = right.add(new Vec2(detailShiftX * scale, 0.0));
-    const dimColor: Color = [1, 1, 1, 0.7];
-    const textColor: Color = [1, 1, 1, 1];
+    const dimColor = wgl.makeColor(1, 1, 1, 0.7);
+    const textColor = wgl.makeColor(1, 1, 1, 1);
 
     // state_15 title at (153,244) => relative to left panel (-98,194): (251,50)
     const titlePos = left.add(new Vec2(251.0 * scale, 50.0 * scale));
     const titleText = 'Unlocked Weapons Database';
-    drawSmallText(ctx, font, titleText, titlePos, [1, 1, 1, 1]);
+    drawSmallText(ctx, font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
     const titleW = measureSmallTextWidth(font, titleText);
     // 1px outline strip under the title with alpha 0.5
     ctx.drawRectangle(
@@ -122,7 +121,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     for (let row = 0; row < visibleWeaponIds.length; row++) {
       const weaponId = visibleWeaponIds[row];
       const [name, _icon] = this._weaponLabelAndIcon(weaponId);
-      const rowColor: Color =
+      const rowColor =
         this._selectedWeaponId !== null && weaponId === this._selectedWeaponId
           ? textColor
           : dimColor;
@@ -136,7 +135,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const weapon = this._weaponEntry(weaponId);
     const preserveBugs = this.state.preserveBugs;
     const weaponNoLabel = preserveBugs ? 'wepno' : 'weapon';
-    drawSmallText(ctx, font, `${weaponNoLabel} #${weaponId}`, detailTopLeft.add(new Vec2(240.0 * scale, 32.0 * scale)), [1, 1, 1, 0.4]);
+    drawSmallText(ctx, font, `${weaponNoLabel} #${weaponId}`, detailTopLeft.add(new Vec2(240.0 * scale, 32.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
     drawSmallText(ctx, font, name, detailTopLeft.add(new Vec2(50.0 * scale, 50.0 * scale)), textColor);
     if (iconIndex !== null) {
       this._drawWicon(ctx, iconIndex, detailTopLeft.add(new Vec2(82.0 * scale, 82.0 * scale)), scale);
@@ -257,9 +256,9 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const iconH = cellH;
     ctx.drawTexturePro(
       tex,
-      [srcX, srcY, iconW, iconH],
-      [pos.x, pos.y, iconW * scale, iconH * scale],
-      [0.0, 0.0],
+      wgl.makeRectangle(srcX, srcY, iconW, iconH),
+      wgl.makeRectangle(pos.x, pos.y, iconW * scale, iconH * scale),
+      wgl.makeVector2(0.0, 0.0),
       0.0,
       WHITE,
     );

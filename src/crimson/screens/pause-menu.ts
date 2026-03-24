@@ -1,5 +1,6 @@
 // Port of crimson/screens/pause_menu.py — Pause menu screen (standalone, not a panel subclass)
 
+import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -57,9 +58,7 @@ const KEY_TAB = 9;
 const KEY_LEFT_SHIFT = 16;
 const MOUSE_BUTTON_LEFT = 0;
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-const WHITE: Color = [1, 1, 1, 1];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 // ---------------------------------------------------------------------------
 // Helpers — mirror MenuView static methods from Python menu.py
@@ -396,26 +395,26 @@ export class PauseMenuView {
       const [itemScale, localYShift] = this._menuItemScale(entry.slot);
       const offsetX = MENU_ITEM_OFFSET_X * itemScale;
       const offsetY = MENU_ITEM_OFFSET_Y * itemScale - localYShift;
-      const dst: RectTuple = [
+      const dst = wgl.makeRectangle(
         pos.x,
         pos.y,
         itemW * itemScale,
         itemH * itemScale,
-      ];
-      const origin: [number, number] = [-offsetX, -offsetY];
+      );
+      const origin = wgl.makeVector2(-offsetX, -offsetY);
       const rotationDeg = angleRad * (180.0 / Math.PI);
 
       if (fxDetail) {
         drawUiQuadShadow(
           ctx, item,
-          [0.0, 0.0, itemW, itemH],
-          [dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]],
+          wgl.makeRectangle(0.0, 0.0, itemW, itemH),
+          wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
           origin, rotationDeg,
         );
       }
       ctx.drawTexturePro(
         item,
-        [0.0, 0.0, itemW, itemH],
+        wgl.makeRectangle(0.0, 0.0, itemW, itemH),
         dst,
         origin, rotationDeg, WHITE,
       );
@@ -427,22 +426,22 @@ export class PauseMenuView {
       }
       const alpha = labelAlpha(counterValue);
       const alphaNorm = alpha / 255;
-      const tint: Color = [1, 1, 1, alphaNorm];
-      const src: RectTuple = [
+      const tint = wgl.makeColor(1, 1, 1, alphaNorm);
+      const src = wgl.makeRectangle(
         0.0,
         entry.row * MENU_LABEL_ROW_HEIGHT,
         MENU_LABEL_WIDTH,
         MENU_LABEL_ROW_HEIGHT,
-      ];
+      );
       const labelOffsetX = MENU_LABEL_OFFSET_X * itemScale;
       const labelOffsetY = MENU_LABEL_OFFSET_Y * itemScale - localYShift;
-      const labelDst: RectTuple = [
+      const labelDst = wgl.makeRectangle(
         pos.x,
         pos.y,
         MENU_LABEL_WIDTH * itemScale,
         MENU_LABEL_HEIGHT * itemScale,
-      ];
-      const labelOrigin: [number, number] = [-labelOffsetX, -labelOffsetY];
+      );
+      const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
       ctx.drawTexturePro(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
 
       // Glow pass for enabled entries
@@ -455,7 +454,7 @@ export class PauseMenuView {
         ctx.setBlendMode(BlendMode.ADDITIVE);
         ctx.drawTexturePro(
           labelTex, src, labelDst, labelOrigin, rotationDeg,
-          [1, 1, 1, glowAlphaNorm],
+          wgl.makeColor(1, 1, 1, glowAlphaNorm),
         );
         ctx.setBlendMode(BlendMode.ALPHA);
       }
@@ -483,19 +482,19 @@ export class PauseMenuView {
     }
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }

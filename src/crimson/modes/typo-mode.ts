@@ -1,5 +1,6 @@
 // Port of crimson/modes/typo_mode.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
@@ -384,7 +385,7 @@ export class TypoShooterMode extends BaseGameplayMode {
       this.creatures.entries,
       typo.names.names ?? [],
       (worldPos: Vec2) => this.worldToScreen(worldPos),
-      (text: string, pos: Vec2, color: [number, number, number, number], scale: number) =>
+      (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
         this._drawUiText(ctx, text, pos, color, scale),
       (text: string, scale: number) => this._uiTextWidth(text, scale),
     );
@@ -402,7 +403,7 @@ export class TypoShooterMode extends BaseGameplayMode {
       panelTexture,
       typo.typing.text ?? '',
       this._cursorPulseTime,
-      (text: string, pos: Vec2, color: [number, number, number, number], scale: number) =>
+      (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
         this._drawUiText(ctx, text, pos, color, scale),
       (text: string, scale: number) => this._uiTextWidth(text, scale),
     );

@@ -1,5 +1,6 @@
 // Port of crimson/screens/high_scores_view/view.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
@@ -73,11 +74,8 @@ import { drawMainPanel } from './main-panel.ts';
 import { drawRightPanel } from './right-panel.ts';
 import { resolveRequest, loadRecords } from './records.ts';
 
-type Color = [number, number, number, number];
-type RectTuple = [number, number, number, number];
-
-const WHITE: Color = [1, 1, 1, 1];
-const ORIGIN: [number, number] = [0, 0];
+const WHITE = wgl.makeColor(1, 1, 1, 1);
+const ORIGIN = wgl.makeVector2(0, 0);
 
 const FADE_TO_GAME_ACTIONS = new Set([
   'start_survival',
@@ -655,12 +653,12 @@ export class HighScoresView {
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       ctx, panelTex,
-      [leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, HS_LEFT_PANEL_HEIGHT * scale],
+      wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, HS_LEFT_PANEL_HEIGHT * scale),
       WHITE, fxDetail,
     );
     drawClassicMenuPanel(
       ctx, panelTex,
-      [rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, HS_RIGHT_PANEL_HEIGHT * scale],
+      wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, HS_RIGHT_PANEL_HEIGHT * scale),
       WHITE, fxDetail, true,
     );
 
@@ -701,19 +699,19 @@ export class HighScoresView {
     const offsetY = MENU_SIGN_OFFSET_Y * signScale;
     const rotationDeg = 0.0;
     const fxDetail = this.state.config.display.fxDetail[0] ?? false;
-    const signSrc: RectTuple = [0.0, 0.0, sign.width, sign.height];
-    const signOrigin: [number, number] = [-offsetX, -offsetY];
+    const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
+    const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
       drawUiQuadShadow(
         ctx, sign, signSrc,
-        [signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH],
+        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
     ctx.drawTexturePro(
       sign, signSrc,
-      [signPos.x, signPos.y, signW, signH],
+      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }

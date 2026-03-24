@@ -1,5 +1,6 @@
 // Port of crimson/screens/panels/mods.py — Mods panel
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources } from '@grim/assets.ts';
@@ -17,8 +18,6 @@ import {
 
 const PANEL_TIMELINE_START_MS = 300;
 const PANEL_TIMELINE_END_MS = 0;
-
-type Color = [number, number, number, number];
 
 // ---------------------------------------------------------------------------
 // Content layout
@@ -83,8 +82,8 @@ export class ModsMenuView extends PanelMenuView {
     const scale = layout.scale;
 
     const font = resources.smallFont;
-    const titleColor: Color = [1, 1, 1, 1];
-    const textColor: Color = [1, 1, 1, 0.8];
+    const titleColor = wgl.makeColor(1, 1, 1, 1);
+    const textColor = wgl.makeColor(1, 1, 1, 0.8);
 
     drawSmallText(ctx, font, 'MODS', basePos, titleColor);
     let linePos = labelPos.offset(0, 44.0 * scale);

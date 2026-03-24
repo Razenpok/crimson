@@ -18,6 +18,7 @@
     "paths": {
       "@grim/*": ["src/grim/*"],
       "@crimson/*": ["src/crimson/*"],
+      "@wgl": ["src/grim/wgl"],
     }
   },
   "include": ["src"]

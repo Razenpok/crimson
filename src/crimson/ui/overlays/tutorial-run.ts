@@ -1,5 +1,6 @@
 // Port of crimson/ui/overlays/tutorial_run.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 
@@ -13,12 +14,12 @@ export interface TutorialOverlayState {
 const TUTORIAL_PANEL_POS = new Vec2(0.0, 64.0);
 const TUTORIAL_PANEL_PADDING = new Vec2(20.0, 8.0);
 
-export type DrawUiText = (text: string, pos: Vec2, color: [number, number, number, number], scale: number) => void;
+export type DrawUiText = (text: string, pos: Vec2, color: wgl.Color, scale: number) => void;
 export type MeasureUiTextWidth = (text: string, scale: number) => number;
 export type MeasureUiLineHeight = (scale: number) => number;
 
 export interface TutorialPanelRectResult {
-  rect: [number, number, number, number];
+  rect: wgl.Rectangle;
   lines: string[];
   lineH: number;
 }
@@ -42,7 +43,7 @@ export function tutorialPromptPanelRect(
   const width = maxW + padX * 2.0;
   const height = lines.length * lineH + padY * 2.0;
   const x = (screenW - width) * 0.5;
-  const rect: [number, number, number, number] = [x, pos.y, width, height];
+  const rect = wgl.makeRectangle(x, pos.y, width, height);
   return { rect, lines, lineH };
 }
 
@@ -97,7 +98,7 @@ export function drawTutorialPromptPanel(
 
   // Draw text lines
   const textAlpha = Math.min(1.0, Math.max(0.0, alpha * 0.9));
-  const color: [number, number, number, number] = [1, 1, 1, textAlpha];
+  const color = wgl.makeColor(1, 1, 1, textAlpha);
   const padX = TUTORIAL_PANEL_PADDING.x * scale;
   const padY = TUTORIAL_PANEL_PADDING.y * scale;
   for (let i = 0; i < lines.length; i++) {

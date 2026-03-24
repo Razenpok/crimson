@@ -1,5 +1,6 @@
 // Port of crimson/modes/rush_mode.py
 
+import * as wgl from '@wgl';
 import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
@@ -36,9 +37,9 @@ import {
 const WORLD_SIZE = 1024.0;
 
 const UI_TEXT_SCALE = 1.0;
-const UI_TEXT_COLOR: [number, number, number, number] = [220 / 255, 220 / 255, 220 / 255, 1.0];
-const UI_HINT_COLOR: [number, number, number, number] = [140 / 255, 140 / 255, 140 / 255, 1.0];
-const UI_ERROR_COLOR: [number, number, number, number] = [240 / 255, 80 / 255, 80 / 255, 1.0];
+const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
+const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
+const UI_ERROR_COLOR = wgl.makeColor(240 / 255, 80 / 255, 80 / 255, 1.0);
 
 // ---------------------------------------------------------------------------
 // RushMode
