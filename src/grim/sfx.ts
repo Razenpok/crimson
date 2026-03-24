@@ -7,6 +7,14 @@ const SFX_PAQ_NAME = 'sfx.paq';
 const DEFAULT_VOICE_COUNT = 4;
 const SFX_RATE_BASE_HZ = 44100;
 const SFX_RATE_MIN_HZ = 22050;
+
+/** Minimum seconds between triggers of the same sample; retriggers within this window are skipped. */
+const SFX_DEDUP_WINDOW = 0.02;
+/** Seconds over which stacked sounds ramp back to full volume. */
+const SFX_STACK_RAMP = 0.08;
+/** Minimum gain multiplier for a stacked sound. */
+const SFX_STACK_MIN_GAIN = 0.45;
+
 const _f32buf = new Float32Array(1);
 
 function f32(v: number): number {
@@ -42,6 +50,7 @@ interface SfxSample {
   buffer: AudioBuffer;
   voices: SfxVoice[];
   nextVoice: number;
+  lastPlayTime: number;
 }
 
 export interface SfxState {
@@ -100,7 +109,7 @@ export async function loadSfxIndex(state: SfxState, audioCtx: AudioContext, asse
       const buffer = await audioCtx.decodeAudioData(
         data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer
       );
-      sample = { entryName: spec.entryName, buffer, voices: [], nextVoice: 0 };
+      sample = { entryName: spec.entryName, buffer, voices: [], nextVoice: 0, lastPlayTime: 0 };
       loadedByEntryName.set(spec.entryName, sample);
     }
     state.samples.set(sfxId, sample);
@@ -121,6 +130,12 @@ export function playSfx(
   state.rateScaleHz = nextRateScaleHz(state.rateScaleHz, reflexBoostTimer);
   const pitch = pitchScaleFromRateHz(state.rateScaleHz);
 
+  const now = audioCtx.currentTime;
+  const elapsed = now - sample.lastPlayTime;
+
+  // Hard dedup: skip if the exact same sample just played
+  if (elapsed < SFX_DEDUP_WINDOW) return;
+
   // Polyphony limiting: find a non-playing voice slot, or round-robin
   const voiceCount = state.voiceCount;
   sample.voices = sample.voices.filter(v => v.playing);
@@ -133,12 +148,20 @@ export function playSfx(
     sample.voices.splice(idx, 1);
   }
 
+  // Attenuate stacked sounds: ramp from SFX_STACK_MIN_GAIN back to 1.0
+  let stackGain = 1.0;
+  if (elapsed < SFX_STACK_RAMP) {
+    stackGain = SFX_STACK_MIN_GAIN + (1.0 - SFX_STACK_MIN_GAIN) * (elapsed / SFX_STACK_RAMP);
+  }
+
+  sample.lastPlayTime = now;
+
   const source = audioCtx.createBufferSource();
   source.buffer = sample.buffer;
   source.playbackRate.value = pitch;
 
   const gain = audioCtx.createGain();
-  gain.gain.value = state.volume;
+  gain.gain.value = state.volume * stackGain;
   source.connect(gain);
   gain.connect(audioCtx.destination);
 
