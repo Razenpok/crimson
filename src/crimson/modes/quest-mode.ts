@@ -420,7 +420,7 @@ export class QuestMode extends BaseGameplayMode {
   protected _applyTickPostApplyReaction(reaction: PostApplyReaction, _opts: { dtSeconds: number }): void {
     applyPostApplyReaction({
       reaction,
-      playSfx: this.audioBridge.router.playSfx,
+      playSfx: (sfx) => this.audioBridge.router.playSfx(sfx),
       playCompletionMusic: () => this._playQuestCompletionMusic(),
     });
   }

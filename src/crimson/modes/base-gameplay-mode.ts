@@ -716,10 +716,6 @@ export class BaseGameplayMode {
   // Perk menu helpers
   // -----------------------------------------------------------------------
 
-  protected _perkMenuPlaySfx(): ((sfx: SfxId) => void) | null {
-    return this.audioBridge.router.playSfx;
-  }
-
   protected _perkMenuUiContext(): FullPerkMenuUiContext {
     const players = this._worldRuntime.simWorld.players;
     return {
@@ -758,7 +754,7 @@ export class BaseGameplayMode {
       throw new Error('perk menu open requires prepared perk choices');
     }
 
-    opts.menu.openMenu?.({ playSfx: this._perkMenuPlaySfx() });
+    opts.menu.openMenu?.({ playSfx: (sfx) => this.audioBridge.router.playSfx(sfx) });
     this.enqueueInputCommand(new PerkMenuOpenCommand(0));
   }
 
