@@ -52,8 +52,8 @@ export class InputState {
         this._keysRepeated.add(code);
       }
       this._keysDown.add(code);
-      // Prevent default for game keys
-      if (!e.metaKey && !e.ctrlKey) {
+      // Prevent default for game keys (allow browser dev tools)
+      if (!e.metaKey && !e.ctrlKey && e.keyCode !== 123 /* F12 */) {
         e.preventDefault();
       }
     });
