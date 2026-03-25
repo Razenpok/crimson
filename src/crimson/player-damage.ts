@@ -1,4 +1,4 @@
-// Port of crimson/player_damage.py — player damage intake helpers
+// Port of crimson/player_damage.py
 
 import { SfxId } from '@grim/sfx-map.ts';
 import { f32 } from './math-parity.ts';

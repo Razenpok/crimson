@@ -1,4 +1,4 @@
-// Port of crimson/effects.py — particle, sprite effect, and effect pools + FX queues
+// Port of crimson/effects.py
 
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';

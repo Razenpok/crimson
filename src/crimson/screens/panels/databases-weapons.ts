@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/databases_weapons.py — Unlocked Weapons Database view
+// Port of crimson/screens/panels/databases_weapons.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

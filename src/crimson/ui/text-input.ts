@@ -1,4 +1,4 @@
-// Port of crimson/text_input.py
+// Port of crimson/ui/text_input.py
 
 import { InputState } from '@grim/input.ts';
 import { CrimsonConfig } from '@grim/config.ts';

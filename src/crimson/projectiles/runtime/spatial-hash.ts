@@ -1,3 +1,5 @@
+// Port of crimson/projectiles/runtime/spatial_hash.py
+
 import { Vec2 } from '@grim/geom.ts';
 import { CreatureStateLike } from '@crimson/effects.ts';
 

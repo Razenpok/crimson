@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/base.py — Base panel class for all menu panels
+// Port of crimson/screens/panels/base.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

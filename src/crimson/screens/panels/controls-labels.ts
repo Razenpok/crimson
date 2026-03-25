@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/controls_labels.py — rebind row specs and label helpers
+// Port of crimson/screens/panels/controls_labels.py
 
 import { AimScheme, MovementControlType } from '@grim/config.ts';
 

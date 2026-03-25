@@ -1,4 +1,4 @@
-// Port of crimson/creatures/runtime.py — creature runtime pool
+// Port of crimson/creatures/runtime.py
 
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';

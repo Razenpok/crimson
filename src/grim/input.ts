@@ -1,4 +1,4 @@
-// Port of grim/input.py — DOM-based keyboard/mouse input
+// Port of grim/input.py
 
 export class ActionMap {
   private bindings: Map<string, number[]> = new Map();

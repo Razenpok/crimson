@@ -1,4 +1,4 @@
-// Port of crimson/typo/runtime.py — Typ'o'Shooter runtime hooks
+// Port of crimson/typo/runtime.py
 
 import { Vec2 } from '@grim/geom.ts';
 import { SfxId } from '@grim/sfx-map.ts';

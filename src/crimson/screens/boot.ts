@@ -1,4 +1,4 @@
-// Port of crimson/screens/boot.py — Boot/splash screen with company logos
+// Port of crimson/screens/boot.py
 
 import * as wgl from '@wgl';
 import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '@grim/assets.ts';

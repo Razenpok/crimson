@@ -1,4 +1,4 @@
-// Port of grim/sfx.py — Web Audio API SFX playback
+// Port of grim/sfx.py
 
 import { SFX_SPECS, SFX_NATIVE_ORDER, type SfxId } from './sfx-map.ts';
 import { fetchPaq } from './paq.ts';

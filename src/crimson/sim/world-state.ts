@@ -1,4 +1,4 @@
-// Port of crimson/sim/world_state.py — WorldState class with step() method
+// Port of crimson/sim/world_state.py
 
 import { Vec2 } from '@grim/geom.ts';
 import type { SfxId } from '@grim/sfx-map.ts';

@@ -1,4 +1,4 @@
-// Port of crimson/screens/quest_views/end_note.py — End-note ("victory") screen
+// Port of crimson/screens/quest_views/end_note.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

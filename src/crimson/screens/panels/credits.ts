@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/credits.py — Credits scrolling panel
+// Port of crimson/screens/panels/credits.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

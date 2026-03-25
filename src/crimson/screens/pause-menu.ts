@@ -1,4 +1,4 @@
-// Port of crimson/screens/pause_menu.py — Pause menu screen (standalone, not a panel subclass)
+// Port of crimson/screens/pause_menu.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

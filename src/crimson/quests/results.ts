@@ -1,3 +1,5 @@
+// Port of crimson/quests/results.py
+
 export interface QuestFinalTime {
   readonly baseTimeMs: number;
   readonly lifeBonusMs: number;

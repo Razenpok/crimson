@@ -1,4 +1,4 @@
-// Port of grim/console.py — simplified for WebGL (no file I/O, no script exec)
+// Port of grim/console.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from './geom.ts';

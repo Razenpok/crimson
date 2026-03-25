@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/databases_perks.py — Unlocked Perks Database view
+// Port of crimson/screens/panels/databases_perks.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/play_game.py — Play Game mode select panel
+// Port of crimson/screens/panels/play_game.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

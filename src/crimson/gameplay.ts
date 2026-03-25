@@ -1,4 +1,4 @@
-// Port of crimson/gameplay.py — central gameplay hub
+// Port of crimson/gameplay.py
 //
 // Every function from the Python source is ported line-by-line, preserving
 // float32 determinism via f32(), identical control flow, and native-parity

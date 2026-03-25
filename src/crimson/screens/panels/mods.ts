@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/mods.py — Mods panel
+// Port of crimson/screens/panels/mods.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

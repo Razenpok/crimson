@@ -1,4 +1,4 @@
-// Port of crimson/typo/names.py — creature name generation and table
+// Port of crimson/typo/names.py
 
 import type { CrandLike } from '@grim/rand.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';

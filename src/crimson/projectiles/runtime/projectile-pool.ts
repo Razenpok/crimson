@@ -1,3 +1,5 @@
+// Port of crimson/projectiles/runtime/projectile_pool.py
+
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import type { SfxId } from '@grim/sfx-map.ts';

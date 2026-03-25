@@ -1,4 +1,4 @@
-// crimson/perks/impl/reflex_boosted.py
+// Port of crimson/perks/impl/reflex_boosted.py
 
 import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';

@@ -1,4 +1,4 @@
-// Port of grim/music.py — Web Audio API music playback
+// Port of grim/music.py
 
 import { type CrandLike } from './rand.ts';
 import { fetchPaq } from './paq.ts';

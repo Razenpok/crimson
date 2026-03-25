@@ -1,4 +1,4 @@
-// Port of grim/config.py — simplified for WebGL (no binary cfg file I/O)
+// Port of grim/config.py
 
 import { QuestLevel } from "@crimson/quests/level.js";
 

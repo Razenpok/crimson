@@ -1,4 +1,4 @@
-// Port of perk_menu.py
+// Port of crimson/ui/perk_menu.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

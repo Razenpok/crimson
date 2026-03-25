@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/databases_base.py — Base class for database views
+// Port of crimson/screens/panels/databases_base.py
 
 import * as wgl from "@wgl";
 import { Vec2 } from "@grim/geom.ts";

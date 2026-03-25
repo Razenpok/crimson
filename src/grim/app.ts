@@ -1,4 +1,4 @@
-// Port of grim/app.py — main loop using requestAnimationFrame
+// Port of grim/app.py
 
 import * as wgl from '@wgl';
 import { type View } from './view.ts';

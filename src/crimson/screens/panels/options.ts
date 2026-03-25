@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/options.py — Options menu panel
+// Port of crimson/screens/panels/options.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

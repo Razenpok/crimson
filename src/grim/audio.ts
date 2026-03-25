@@ -1,4 +1,4 @@
-// Port of grim/audio.py — Web Audio API wrapper
+// Port of grim/audio.py
 
 import { type CrimsonConfig } from './config.ts';
 import { type CrandLike } from './rand.ts';

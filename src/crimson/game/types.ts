@@ -1,4 +1,4 @@
-// Port of crimson/game/types.py — excluding networking (net, rollback, lockstep)
+// Port of crimson/game/types.py
 
 import type { Vec2 } from '@grim/geom.ts';
 import type { Crand } from '@grim/rand.ts';

@@ -1,4 +1,4 @@
-// Port of crimson/modes/base_gameplay_mode.py — base gameplay mode (1965 lines)
+// Port of crimson/modes/base_gameplay_mode.py
 //
 // Excludes networking (LAN lockstep, rollback, resync) which is not applicable
 // to the WebGL single-player port.  All LAN-related state is stubbed as no-ops

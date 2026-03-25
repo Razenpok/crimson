@@ -1,4 +1,4 @@
-// Port of crimson/demo.py — Attract-mode demo scaffold
+// Port of crimson/demo.py
 //
 // The original DemoView class contains heavy rendering/UI logic (raylib drawing,
 // texture rendering, purchase screen, etc.) that is not applicable to the WebGL

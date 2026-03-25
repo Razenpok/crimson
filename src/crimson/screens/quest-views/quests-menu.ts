@@ -1,4 +1,4 @@
-// Port of crimson/screens/quest_views/quests_menu.py — Quest selection menu
+// Port of crimson/screens/quest_views/quests_menu.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

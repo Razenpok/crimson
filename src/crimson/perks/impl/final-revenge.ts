@@ -1,3 +1,5 @@
+// Port of crimson/perks/impl/final_revenge.py
+
 import { Vec2 } from '@grim/geom.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';

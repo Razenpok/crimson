@@ -1,3 +1,5 @@
+// Port of crimson/ui/menu_panel.py
+
 import * as wgl from '@wgl';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from './shadow.ts';
 

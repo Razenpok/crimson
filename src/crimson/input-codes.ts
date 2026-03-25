@@ -1,4 +1,4 @@
-// Port of crimson/input_codes.py — simplified for WebGL (DOM KeyboardEvent.keyCode)
+// Port of crimson/input_codes.py
 
 import { InputState } from '@grim/input.ts';
 

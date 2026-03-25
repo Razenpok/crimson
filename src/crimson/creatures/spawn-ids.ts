@@ -1,3 +1,5 @@
+// Port of crimson/creatures/spawn_ids.py
+
 export type Tint = [number | null, number | null, number | null, number | null];
 export type TintRGBA = [number, number, number, number];
 

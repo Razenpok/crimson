@@ -1,3 +1,5 @@
+// Port of crimson/sim/input_providers.py
+
 import { PlayerInput } from './input.ts';
 
 // ---------------------------------------------------------------------------

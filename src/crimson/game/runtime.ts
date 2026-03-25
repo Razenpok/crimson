@@ -1,4 +1,4 @@
-// Port of crimson/game/runtime.py — game bootstrap and console command registration
+// Port of crimson/game/runtime.py
 //
 // WebGL adaptation: no faulthandler, no file-based crash log, no PAQ download,
 // no webbrowser.open (stubbed), no raylib config flags.  The `runGame` function

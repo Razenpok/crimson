@@ -1,4 +1,4 @@
-// Port of 	crimson/quests/status.py
+// Port of crimson/quests/status.py
 
 import type { QuestLevel } from './level.ts';
 import { questLevelGlobalIndex } from './level.ts';

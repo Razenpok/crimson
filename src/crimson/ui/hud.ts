@@ -1,4 +1,4 @@
-// Port of crimson/ui/hud.py — HUD overlay rendering
+// Port of crimson/ui/hud.py
 
 import * as wgl from '@wgl';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';

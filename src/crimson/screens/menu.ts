@@ -1,4 +1,4 @@
-// Port of crimson/screens/menu.py — Main menu screen
+// Port of crimson/screens/menu.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

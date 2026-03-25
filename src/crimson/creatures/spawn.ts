@@ -1,3 +1,5 @@
+// Port of crimson/creatures/spawn.py
+
 import { Vec2 } from '@grim/geom.ts';
 import { CrandLike } from '@grim/rand.ts';
 import { BonusId } from '@crimson/bonuses/ids.ts';

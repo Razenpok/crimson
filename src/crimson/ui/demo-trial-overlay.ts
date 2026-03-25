@@ -1,4 +1,4 @@
-// Port of demo_trial_overlay.py
+// Port of crimson/ui/demo_trial_overlay.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

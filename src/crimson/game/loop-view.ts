@@ -1,4 +1,4 @@
-// Port of crimson/game/loop_view.py (1092 lines) — main game loop controller
+// Port of crimson/game/loop_view.py
 //
 // Manages screen transitions, demo mode, console overlay, gamma ramp shader,
 // demo trial overlay, and the overall game flow.

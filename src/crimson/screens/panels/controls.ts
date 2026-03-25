@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/controls.py — Controls menu panel (979 lines)
+// Port of crimson/screens/panels/controls.py
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';

@@ -1,4 +1,4 @@
-// Port of crimson/render/world/draw.py — main draw orchestrator
+// Port of crimson/render/world/draw.py
 
 import * as wgl from '@wgl';
 import { RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';

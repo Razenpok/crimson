@@ -1,3 +1,5 @@
+// Port of crimson/perks/impl/jinxed_effect.py
+
 import { SfxId } from "@grim/sfx-map.ts";
 import type { PlayerState } from "@crimson/sim/state-types.ts";
 import { f32 } from "@crimson/math-parity.ts";

@@ -1,3 +1,5 @@
+// Port of crimson/quests/tier3.py
+
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { SpawnId } from '@crimson/creatures/spawn-ids.ts';

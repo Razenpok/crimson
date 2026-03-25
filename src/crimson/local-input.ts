@@ -1,4 +1,4 @@
-// Port of crimson/local_input.py — local input interpretation for players
+// Port of crimson/local_input.py
 
 import { Vec2 } from '@grim/geom.ts';
 import {

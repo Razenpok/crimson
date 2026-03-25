@@ -1,4 +1,4 @@
-// crimson/perks/impl/thick_skinned.py
+// Port of crimson/perks/impl/thick_skinned.py
 
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from "@crimson/perks/runtime/apply-context.js";

@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/stats.py — Statistics hub panel
+// Port of crimson/screens/panels/stats.py
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';

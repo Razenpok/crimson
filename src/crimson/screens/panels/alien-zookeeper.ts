@@ -1,4 +1,4 @@
-// Port of crimson/screens/panels/alien_zookeeper.py — AlienZooKeeper mini-game panel
+// Port of crimson/screens/panels/alien_zookeeper.py
 
 import * as wgl from "@wgl";
 import { Vec2 } from "@grim/geom.ts";
