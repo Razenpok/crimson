@@ -231,7 +231,7 @@ export class QuestFailedView {
     }
   }
 
-  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+  draw(): void {
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
@@ -240,7 +240,7 @@ export class QuestFailedView {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
 
     const panelTopLeft = this._panelTopLeft();
     const resources = this._requireResources();

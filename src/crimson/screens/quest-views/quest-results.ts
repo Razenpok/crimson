@@ -270,7 +270,7 @@ export class QuestResultsView {
     }
   }
 
-  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+  draw(): void {
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const ui = this._ui;
     let bgAlpha = 1.0;
@@ -284,7 +284,7 @@ export class QuestResultsView {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
     if (ui !== null) {
       ui.draw();
       return;

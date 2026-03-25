@@ -223,9 +223,7 @@ export class PauseMenuView {
       pauseBackground.drawPauseBackground(this._pauseBackgroundEntityAlpha());
     }
 
-    const screenW = this.state.config.display.width;
-    const screenH = this.state.config.display.height;
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
 
     const resources = requireRuntimeResources(this.state);
     this._drawMenuItems(resources);

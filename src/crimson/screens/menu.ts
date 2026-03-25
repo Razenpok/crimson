@@ -416,9 +416,7 @@ export class MenuView {
     if (this._ground !== null) {
       this._ground.draw(menuGroundCamera(this.state));
     }
-    const screenW = this.state.config.display.width;
-    const screenH = this.state.config.display.height;
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
     const resources = requireRuntimeResources(this.state);
     this._drawMenuItems(resources);
     this._drawMenuSign(resources);

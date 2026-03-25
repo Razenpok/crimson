@@ -251,7 +251,7 @@ export abstract class DatabaseBaseView {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(this.state, this.state.config.display.width, this.state.config.display.height);
+    drawScreenFade(this.state);
 
     const screenWidth = this.state.config.display.width;
     const scale = 1.0;

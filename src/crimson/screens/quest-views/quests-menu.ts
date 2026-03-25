@@ -326,7 +326,7 @@ export class QuestsMenuView {
     }
   }
 
-  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+  draw(): void {
     this._assertOpen();
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
@@ -338,7 +338,7 @@ export class QuestsMenuView {
       this.state.menuGround.draw(camera);
     }
 
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
 
     this._drawPanel();
     this._drawSign();

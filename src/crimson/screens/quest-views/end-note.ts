@@ -202,7 +202,7 @@ export class EndNoteView {
     }
   }
 
-  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+  draw(): void {
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
@@ -211,8 +211,9 @@ export class EndNoteView {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
 
+    const screenW = wgl.getScreenWidth();
     const resources = this._requireResources();
     const scale = 1.0;
     const layoutW = scale ? screenW / scale : screenW;

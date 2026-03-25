@@ -435,9 +435,7 @@ export class AlienZooKeeperView {
       this._ground.draw(camera);
     }
 
-    const screenW = this.state.config.display.width;
-    const screenH = this.state.config.display.height;
-    drawScreenFade(this.state, screenW, screenH);
+    drawScreenFade(this.state);
 
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
