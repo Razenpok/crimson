@@ -30,8 +30,8 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string): 
     return {
       ready: false,
       audioContext: null,
-      music: initMusicState(false, false, musicVolume),
-      sfx: initSfxState(false, false, sfxVolume),
+      music: initMusicState({ ready: false, enabled: false, volume: musicVolume }),
+      sfx: initSfxState({ ready: false, enabled: false, volume: sfxVolume }),
     };
   }
 
@@ -42,16 +42,16 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string): 
     return {
       ready: false,
       audioContext: null,
-      music: initMusicState(false, false, musicVolume),
-      sfx: initSfxState(false, false, sfxVolume),
+      music: initMusicState({ ready: false, enabled: false, volume: musicVolume }),
+      sfx: initSfxState({ ready: false, enabled: false, volume: sfxVolume }),
     };
   }
 
   const state: AudioState = {
     ready: true,
     audioContext,
-    music: initMusicState(true, musicEnabled, musicVolume),
-    sfx: initSfxState(true, sfxEnabled, sfxVolume),
+    music: initMusicState({ ready: true, enabled: musicEnabled, volume: musicVolume }),
+    sfx: initSfxState({ ready: true, enabled: sfxEnabled, volume: sfxVolume }),
   };
 
   await loadSfxIndex(state.sfx, audioContext, assetsUrl);
@@ -69,13 +69,14 @@ export function audioStopMusic(state: AudioState | null): void {
   stopMusic(state.music);
 }
 
-export function audioTriggerGameTune(state: AudioState, rng: CrandLike): string | null {
-  return triggerGameTune(state.music, state.audioContext, rng);
+export function audioTriggerGameTune(state: AudioState, opts: { rng: CrandLike }): string | null {
+  return triggerGameTune(state.music, state.audioContext, { rng: opts.rng });
 }
 
-export function audioPlaySfx(state: AudioState | null, sfxId: SfxId, reflexBoostTimer: number = 0.0): void {
+export function audioPlaySfx(state: AudioState | null, sfxId: SfxId, opts: { reflexBoostTimer?: number } = {}): void {
+  const reflexBoostTimer = opts.reflexBoostTimer ?? 0.0;
   if (!state) return;
-  playSfx(state.sfx, state.audioContext, sfxId, reflexBoostTimer);
+  playSfx(state.sfx, state.audioContext, sfxId, { reflexBoostTimer });
 }
 
 export function audioSetSfxVolume(state: AudioState | null, volume: number): void {

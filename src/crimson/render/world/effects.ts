@@ -29,10 +29,11 @@ function srcRectForEffect(
 
 export function drawParticlePool(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; alpha?: number },
 ): void {
+  const camera = opts.camera;
+  const viewScale = opts.viewScale;
+  let alpha = opts.alpha ?? 1.0;
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
@@ -108,10 +109,11 @@ export function drawParticlePool(
 
 export function drawSpriteEffectPool(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; alpha?: number },
 ): void {
+  const camera = opts.camera;
+  const viewScale = opts.viewScale;
+  let alpha = opts.alpha ?? 1.0;
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
@@ -153,10 +155,11 @@ export function drawSpriteEffectPool(
 
 export function drawEffectPool(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; alpha?: number },
 ): void {
+  const camera = opts.camera;
+  const viewScale = opts.viewScale;
+  let alpha = opts.alpha ?? 1.0;
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 

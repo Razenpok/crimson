@@ -68,9 +68,14 @@ export enum EffectId {
 
 export function effectSrcRect(
   effectId: number,
-  textureWidth: number,
-  textureHeight: number,
+  opts: {
+    textureWidth: number;
+    textureHeight: number;
+  },
 ): wgl.Rectangle | null {
+  const textureWidth = opts.textureWidth;
+  const textureHeight = opts.textureHeight;
+
   const e = EFFECT_ID_ATLAS_TABLE_BY_ID.get(effectId);
   if (e === undefined) return null;
 

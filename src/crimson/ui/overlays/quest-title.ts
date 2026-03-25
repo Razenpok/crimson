@@ -34,21 +34,23 @@ export function questNumberScale(titleScale: number): number {
 }
 
 export function layoutQuestTitleOverlay(
-  screenWidth: number,
-  screenHeight: number,
-  title: string,
-  number: string,
-  fontAdvance: number,
+  opts: {
+    screenWidth: number;
+    screenHeight: number;
+    title: string;
+    number: string;
+    fontAdvance: number;
+  },
 ): QuestTitleOverlayLayout {
-  const titleScale = questTitleBaseScale(Math.floor(screenWidth));
+  const titleScale = questTitleBaseScale(Math.floor(opts.screenWidth));
   const numberSc = questNumberScale(titleScale);
-  const titleWidth = title.length * fontAdvance * titleScale;
-  const centerX = (Math.floor(screenWidth) >> 1);
-  const centerY = (Math.floor(screenHeight) >> 1);
+  const titleWidth = opts.title.length * opts.fontAdvance * titleScale;
+  const centerX = (Math.floor(opts.screenWidth) >> 1);
+  const centerY = (Math.floor(opts.screenHeight) >> 1);
   const titlePos = new Vec2(centerX - titleWidth / 2.0, centerY - QUEST_TITLE_Y_OFFSET);
   const numberX =
     titlePos.x -
-    number.length * numberSc * QUEST_NUMBER_HALF_ADVANCE -
+    opts.number.length * numberSc * QUEST_NUMBER_HALF_ADVANCE -
     numberSc * QUEST_NUMBER_BASE_GAP -
     QUEST_NUMBER_FIXED_OFFSET;
   const numberY = titlePos.y + numberSc * QUEST_NUMBER_Y_MULTIPLIER;
@@ -66,16 +68,16 @@ export function drawQuestTitleOverlay(
   font: GrimMonoFont,
   title: string,
   number: string,
-  alpha: number = 1.0,
+  opts: { alpha?: number } = {},
 ): void {
-  alpha = Math.max(0.0, Math.min(1.0, alpha));
-  const layout = layoutQuestTitleOverlay(
-    screenW,
-    screenH,
+  const alpha = Math.max(0.0, Math.min(1.0, opts.alpha ?? 1.0));
+  const layout = layoutQuestTitleOverlay({
+    screenWidth: screenW,
+    screenHeight: screenH,
     title,
     number,
-    font.advance,
-  );
+    fontAdvance: font.advance,
+  });
   const titleColor = wgl.makeColor(
     1.0,
     1.0,

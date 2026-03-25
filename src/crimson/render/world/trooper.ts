@@ -26,12 +26,13 @@ export function lanPlayerRingRgb(playerIndex: number): [number, number, number] 
 
 export function drawLanPlayerRing(
   renderCtx: WorldRenderCtx,
-  player: PlayerState,
-  screenPos: Vec2,
-  baseSize: number,
-  scale: number,
-  alpha: number,
+  opts: { player: PlayerState; screenPos: Vec2; baseSize: number; scale: number; alpha: number },
 ): void {
+  const player = opts.player;
+  const screenPos = opts.screenPos;
+  const baseSize = opts.baseSize;
+  const scale = opts.scale;
+  let alpha = opts.alpha;
   const frame = renderCtx.frame;
   if (!frame.lanPlayerRingsEnabled) return;
   if (frame.players.length <= 1) return;
@@ -83,11 +84,12 @@ export function drawPlayerTrooperSprite(
   renderCtx: WorldRenderCtx,
   texture: wgl.Texture,
   player: PlayerState,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; scale: number; alpha?: number },
 ): void {
+  const camera = opts.camera;
+  const viewScale = opts.viewScale;
+  const scale = opts.scale;
+  let alpha = opts.alpha ?? 1.0;
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
@@ -103,7 +105,7 @@ export function drawPlayerTrooperSprite(
   const baseSize = player.size * scale;
   const baseScale = baseSize / cell;
 
-  drawLanPlayerRing(renderCtx, player, screenPos, baseSize, scale, alpha);
+  drawLanPlayerRing(renderCtx, { player, screenPos, baseSize, scale, alpha });
 
   // Radioactive aura
   if (perkActive(player, PerkId.RADIOACTIVE) && alpha > 1e-3) {
@@ -149,15 +151,15 @@ export function drawPlayerTrooperSprite(
     }
   }
 
-  function draw(frameIdx: number, pos: Vec2, scaleMul: number, rotation: number, color: wgl.Color): void {
+  function draw(frameIdx: number, opts: { pos: Vec2; scaleMul: number; rotation: number; color: wgl.Color }): void {
     renderCtx.drawAtlasSprite(
       texture,
       spriteGrid,
       Math.max(0, Math.min(63, frameIdx | 0)),
-      pos,
-      baseScale * scaleMul,
-      rotation,
-      color,
+      opts.pos,
+      baseScale * opts.scaleMul,
+      opts.rotation,
+      opts.color,
     );
   }
 
@@ -176,21 +178,21 @@ export function drawPlayerTrooperSprite(
 
     draw(
       legFrame,
-      screenPos.offset(legShadowOff, legShadowOff),
-      legShadowScale,
-      player.heading,
-      shadowTint,
+      { pos: screenPos.offset({ dx: legShadowOff, dy: legShadowOff }),
+      scaleMul: legShadowScale,
+      rotation: player.heading,
+      color: shadowTint },
     );
     draw(
       torsoFrame,
-      screenPos.offset(recoilOffset.x + torsoShadowOff, recoilOffset.y + torsoShadowOff),
-      torsoShadowScale,
-      player.aimHeading,
-      shadowTint,
+      { pos: screenPos.offset({ dx: recoilOffset.x + torsoShadowOff, dy: recoilOffset.y + torsoShadowOff }),
+      scaleMul: torsoShadowScale,
+      rotation: player.aimHeading,
+      color: shadowTint },
     );
 
-    draw(legFrame, screenPos, 1.0, player.heading, tint);
-    draw(torsoFrame, screenPos.add(recoilOffset), 1.0, player.aimHeading, overlayTint);
+    draw(legFrame, { pos: screenPos, scaleMul: 1.0, rotation: player.heading, color: tint });
+    draw(torsoFrame, { pos: screenPos.add(recoilOffset), scaleMul: 1.0, rotation: player.aimHeading, color: overlayTint });
 
     // Shield ring
     if (player.shieldTimer > 1e-3 && alpha > 1e-3) {
@@ -286,10 +288,10 @@ export function drawPlayerTrooperSprite(
   const deadShadowOff = 1.0 * scale + baseSize * (deadShadowScale - 1.0) * 0.5;
   draw(
     deadFrame,
-    screenPos.offset(deadShadowOff, deadShadowOff),
-    deadShadowScale,
-    player.aimHeading,
-    shadowTint,
+    { pos: screenPos.offset({ dx: deadShadowOff, dy: deadShadowOff }),
+    scaleMul: deadShadowScale,
+    rotation: player.aimHeading,
+    color: shadowTint },
   );
-  draw(deadFrame, screenPos, 1.0, player.aimHeading, overlayTint);
+  draw(deadFrame, { pos: screenPos, scaleMul: 1.0, rotation: player.aimHeading, color: overlayTint });
 }

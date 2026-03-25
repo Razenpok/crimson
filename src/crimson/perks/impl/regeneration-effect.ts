@@ -14,7 +14,7 @@ export function updateRegeneration(ctx: PerksUpdateEffectsCtx): void {
   }
   if (
     (ctx.state.rng.rand(
-      RngCallerStatic.PERKS_UPDATE_EFFECTS_REGENERATION_GATE,
+      { caller: RngCallerStatic.PERKS_UPDATE_EFFECTS_REGENERATION_GATE },
     ) & 1) === 0
   ) {
     return;

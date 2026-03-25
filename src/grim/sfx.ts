@@ -62,11 +62,12 @@ export interface SfxState {
   rateScaleHz: number;
 }
 
-export function initSfxState(ready: boolean, enabled: boolean, volume: number, voiceCount: number = DEFAULT_VOICE_COUNT): SfxState {
+export function initSfxState(opts: { ready: boolean; enabled: boolean; volume: number; voiceCount?: number }): SfxState {
+  const voiceCount = opts.voiceCount ?? DEFAULT_VOICE_COUNT;
   return {
-    ready,
-    enabled,
-    volume,
+    ready: opts.ready,
+    enabled: opts.enabled,
+    volume: opts.volume,
     voiceCount: Math.max(1, voiceCount),
     samples: new Map(),
     rateScaleHz: SFX_RATE_BASE_HZ,
@@ -120,8 +121,9 @@ export function playSfx(
   state: SfxState | null,
   audioCtx: AudioContext | null,
   sfxId: SfxId,
-  reflexBoostTimer: number = 0.0,
+  opts: { reflexBoostTimer?: number } = {},
 ): void {
+  const reflexBoostTimer = opts.reflexBoostTimer ?? 0.0;
   if (!state || !audioCtx || !state.ready || !state.enabled) return;
 
   const sample = state.samples.get(sfxId);

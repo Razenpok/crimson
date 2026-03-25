@@ -79,11 +79,11 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 // Helpers
 // ---------------------------------------------------------------------------
 
-function statsMenuEasterRoll(currentRoll: number, rng: { rand(caller: number): number }): number {
+function statsMenuEasterRoll(currentRoll: number, rng: { rand(opts?: { caller?: number }): number }): number {
   if (currentRoll !== _STATS_EASTER_ROLL_UNSET) {
     return currentRoll;
   }
-  return rng.rand(RngCallerStatic.REWRITE_STATS_MENU_EASTER_ROLL) % 32;
+  return rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_ROLL }) % 32;
 }
 
 function isOrbesVolantesDay(date: Date): boolean {
@@ -273,7 +273,7 @@ export class StatisticsMenuView {
       PANEL_TIMELINE_END_MS,
       panelW, 0,
     );
-    const panelTopLeft = this._panelTopLeft(scale).offset(slideX, 0);
+    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX, dy: 0 });
     const resources = requireRuntimeResources(this.state);
 
     const [mx, my] = InputState.mousePosition();
@@ -287,22 +287,22 @@ export class StatisticsMenuView {
     }
 
     const buttonBase = panelTopLeft.add(new Vec2(_BUTTON_X * scale, _BUTTON_Y0 * scale));
-    if (updateButton(this._btnHighScores, buttonBase.offset(0, _BUTTON_STEP_Y * 0.0 * scale))) {
+    if (updateButton(this._btnHighScores, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 0.0 * scale }))) {
       audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_high_scores');
       return;
     }
-    if (updateButton(this._btnWeapons, buttonBase.offset(0, _BUTTON_STEP_Y * 1.0 * scale))) {
+    if (updateButton(this._btnWeapons, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 1.0 * scale }))) {
       audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_weapon_database');
       return;
     }
-    if (updateButton(this._btnPerks, buttonBase.offset(0, _BUTTON_STEP_Y * 2.0 * scale))) {
+    if (updateButton(this._btnPerks, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 2.0 * scale }))) {
       audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_perk_database');
       return;
     }
-    if (updateButton(this._btnCredits, buttonBase.offset(0, _BUTTON_STEP_Y * 3.0 * scale))) {
+    if (updateButton(this._btnCredits, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 3.0 * scale }))) {
       audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_credits');
       return;
@@ -342,11 +342,11 @@ export class StatisticsMenuView {
       PANEL_TIMELINE_END_MS,
       panelW, 0,
     );
-    const panelTopLeft = this._panelTopLeft(scale).offset(slideX, 0);
+    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX, dy: 0 });
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, STATISTICS_PANEL_HEIGHT * scale);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
 
     // Title: full-size row from UI_ITEM_TEXTS (128x32).
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
@@ -374,7 +374,7 @@ export class StatisticsMenuView {
     const today = new Date();
     if (isOrbesVolantesDay(today) && this.state.statsMenuEasterEggRoll === _STATS_EASTER_TRIGGER_ROLL) {
       this.state.statsMenuEasterEggRoll = _STATS_EASTER_ROLL_UNSET;
-      const easterX = this.state.rng.rand(RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X) % 64 + 16;
+      const easterX = this.state.rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X }) % 64 + 16;
       drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 0.5));
     }
 
@@ -384,7 +384,7 @@ export class StatisticsMenuView {
     for (let i = 0; i < buttons.length; i++) {
       const btn = buttons[i];
       const w = buttonWidth(resources, btn.label, { scale, forceWide: btn.forceWide });
-      const btnPos = buttonBase.offset(0, _BUTTON_STEP_Y * i * scale);
+      const btnPos = buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * i * scale });
       buttonDraw(resources, btn, { pos: btnPos, width: w, scale });
     }
 
@@ -412,11 +412,13 @@ export class StatisticsMenuView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin,
+        rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -429,6 +431,6 @@ export class StatisticsMenuView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 }

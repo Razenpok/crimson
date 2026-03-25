@@ -50,12 +50,7 @@ export function applyShockChain(ctx: BonusApplyCtx): void {
   ctx.state.shockChainLinksLeft = 0x20;
   ctx.state.shockChainProjectileId = projectileSpawn(
     ctx.state,
-    ctx.players,
-    origin,
-    angle,
-    ProjectileTemplateId.ION_RIFLE,
-    owner,
-    ctx.player.index,
+    { players: ctx.players, pos: origin, angle, typeId: ProjectileTemplateId.ION_RIFLE, owner, ownerPlayerIndex: ctx.player.index },
   );
   ctx.state.bonusSpawnGuard = false;
   ctx.state.sfxQueue.push(SfxId.SHOCK_HIT_01);

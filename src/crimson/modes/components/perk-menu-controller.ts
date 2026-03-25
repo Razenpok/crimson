@@ -112,7 +112,7 @@ export class PerkMenuController {
     if (cached !== undefined) {
       return cached;
     }
-    const desc = perkDisplayDescription(perkId, opts.violenceDisabled, opts.preserveBugs);
+    const desc = perkDisplayDescription(perkId, { violenceDisabled: opts.violenceDisabled, preserveBugs: opts.preserveBugs });
     const wrapped = PerkMenuController._wrapSmallTextNative(
       font,
       desc,
@@ -242,8 +242,8 @@ export class PerkMenuController {
     const preserveBugs = ctx.preserveBugs;
     for (let idx = 0; idx < choices.length; idx++) {
       const perkId = choices[idx];
-      const label = perkDisplayName(perkId, ctx.violenceDisabled, preserveBugs);
-      const itemPos = computed.listPos.offset(0.0, idx * computed.listStepY);
+      const label = perkDisplayName(perkId, { violenceDisabled: ctx.violenceDisabled, preserveBugs });
+      const itemPos = computed.listPos.offset({ dx: 0.0, dy: idx * computed.listStepY });
       const rect = menuItemHitRect(ctx.resources, label, { pos: itemPos, scale });
       if (rect.contains(ctx.mouse)) {
         this._selectedIndex = idx;
@@ -329,7 +329,7 @@ export class PerkMenuController {
       computed.panel.w,
       computed.panel.h,
     );
-    drawClassicMenuPanel(panelTex, panelDst, undefined, ctx.fxDetail ?? false);
+    drawClassicMenuPanel(panelTex, { dst: panelDst, shadow: ctx.fxDetail ?? false });
 
     // Draw title texture
     const titleTex = getTexture(ctx.resources, TextureId.UI_TEXT_PICK_A_PERK);
@@ -360,8 +360,8 @@ export class PerkMenuController {
     const preserveBugs = ctx.preserveBugs;
     for (let idx = 0; idx < choices.length; idx++) {
       const perkId = choices[idx];
-      const label = perkDisplayName(perkId, ctx.violenceDisabled, preserveBugs);
-      const itemPos = computed.listPos.offset(0.0, idx * computed.listStepY);
+      const label = perkDisplayName(perkId, { violenceDisabled: ctx.violenceDisabled, preserveBugs });
+      const itemPos = computed.listPos.offset({ dx: 0.0, dy: idx * computed.listStepY });
       const rect = menuItemHitRect(ctx.resources, label, { pos: itemPos, scale });
       const hovered = rect.contains(ctx.mouse) || idx === this._selectedIndex;
       drawMenuItem(ctx.resources, label, { pos: itemPos, scale, hovered });

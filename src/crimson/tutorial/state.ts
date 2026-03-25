@@ -27,7 +27,7 @@ export class TutorialOverlayState {
 export function resetTutorialState(
   tutorial: TutorialState,
   overlay: TutorialOverlayState,
-  preserveBugs: boolean,
+  opts: { preserveBugs: boolean },
 ): void {
   tutorial.stageIndex = -1;
   tutorial.stageTimerMs = 0;
@@ -37,7 +37,7 @@ export function resetTutorialState(
   tutorial.hintFadeIn = false;
   tutorial.repeatSpawnCount = 0;
   tutorial.hintBonusCreatureRef = null;
-  tutorial.preserveBugs = preserveBugs;
+  tutorial.preserveBugs = opts.preserveBugs;
   tutorial.moveActiveThisTick = false;
   tutorial.fireActiveThisTick = false;
   tutorial.hintBonusAliveBeforeTick = false;

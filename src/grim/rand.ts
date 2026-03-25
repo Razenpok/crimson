@@ -20,7 +20,7 @@ export class MissingRngCallerError extends Error {
 export interface CrandLike {
   readonly state: number;
   srand(seed: number): void;
-  rand(caller?: CallerStatic): number;
+  rand(opts?: { caller?: CallerStatic }): number;
   advance(draws: number): void;
 }
 
@@ -67,12 +67,13 @@ export class CrtRand implements CrandLike {
     return this._traceRequireCaller;
   }
 
-  setTraceSink(sink: RngTraceSink | null, requireCaller: boolean = false): void {
+  setTraceSink(sink: RngTraceSink | null, opts?: { requireCaller?: boolean }): void {
     this._traceSink = sink;
-    this._traceRequireCaller = requireCaller;
+    this._traceRequireCaller = opts?.requireCaller ?? false;
   }
 
-  rand(caller: CallerStatic = null): number {
+  rand(opts?: { caller?: CallerStatic }): number {
+    const caller = opts?.caller ?? null;
     const stateBefore = this._state;
     this._state = (Math.imul(this._state, CRT_RAND_MULT) + CRT_RAND_INC) >>> 0;
     const value = (this._state >>> 16) & 0x7FFF;
@@ -124,7 +125,8 @@ export class RecordingCrand implements CrandLike {
     this._shared.records.length = 0;
   }
 
-  rand(caller: CallerStatic = null): number {
+  rand(opts?: { caller?: CallerStatic }): number {
+    const caller = opts?.caller ?? null;
     const stateBefore = this._shared.base.state;
     const value = this._shared.base.rand();
     const stateAfter = this._shared.base.state;

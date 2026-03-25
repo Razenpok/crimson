@@ -4,18 +4,16 @@ import { type SupportsXY } from '@grim/geom.ts';
 
 export function mouseInsideRectWithPadding(
   mouse: SupportsXY,
-  pos: SupportsXY,
-  width: number,
-  height: number,
-  leftPad: number = 10.0,
-  topPad: number = 2.0,
+  opts: { pos: SupportsXY; width: number; height: number; leftPad?: number; topPad?: number },
 ): boolean {
-  const x = pos.x;
-  const y = pos.y;
+  const leftPad = opts.leftPad ?? 10.0;
+  const topPad = opts.topPad ?? 2.0;
+  const x = opts.pos.x;
+  const y = opts.pos.y;
   return (
     x - leftPad <= mouse.x &&
-    mouse.x <= x + width &&
+    mouse.x <= x + opts.width &&
     y - topPad <= mouse.y &&
-    mouse.y <= y + height
+    mouse.y <= y + opts.height
   );
 }

@@ -136,11 +136,11 @@ export class QuestResultsView {
 
     // Resolve unlock weapon name
     if (quest !== null && quest.unlockWeaponId !== undefined && quest.unlockWeaponId !== null) {
-      this._unlockWeaponName = weaponDisplayName(quest.unlockWeaponId, this.state.preserveBugs);
+      this._unlockWeaponName = weaponDisplayName(quest.unlockWeaponId, { preserveBugs: this.state.preserveBugs });
     }
     // Resolve unlock perk name
     if (quest !== null && quest.unlockPerkId !== undefined && quest.unlockPerkId !== null) {
-      this._unlockPerkName = perkDisplayName(quest.unlockPerkId, this.state.config.display.violenceDisabled, this.state.preserveBugs);
+      this._unlockPerkName = perkDisplayName(quest.unlockPerkId, { violenceDisabled: this.state.config.display.violenceDisabled, preserveBugs: this.state.preserveBugs });
     }
 
     const globalIndex = questLevelGlobalIndex(level);

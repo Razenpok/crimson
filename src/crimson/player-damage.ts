@@ -19,10 +19,11 @@ export function playerTakeDamage(
   state: GameplayState,
   player: PlayerState,
   damage: number,
-  dt: number | null = null,
-  players: readonly PlayerState[] | null = null,
-  onLethal: (() => void) | null = null,
+  opts: { dt?: number | null; players?: readonly PlayerState[] | null; onLethal?: (() => void) | null } = {},
 ): number {
+  const dt = opts.dt ?? null;
+  const players = opts.players ?? null;
+  const onLethal = opts.onLethal ?? null;
   const rawDamage = damage;
   if (rawDamage <= 0.0) return 0.0;
   if (state.debugGodMode) return 0.0;
@@ -51,15 +52,15 @@ export function playerTakeDamage(
 
   let dodged = false;
   if (perkActive(player, PerkId.NINJA)) {
-    dodged = (state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_NINJA) % 3) === 0;
+    dodged = (state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_NINJA }) % 3) === 0;
   } else if (perkActive(player, PerkId.DODGER)) {
-    dodged = (state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_DODGER) % 5) === 0;
+    dodged = (state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_DODGER }) % 5) === 0;
   }
 
   const healthBefore = player.health;
   if (!dodged) {
     if (perkActive(player, PerkId.HIGHLANDER)) {
-      if ((state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_HIGHLANDER) % 10) === 0) {
+      if ((state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_HIGHLANDER }) % 10) === 0) {
         player.health = 0.0;
       }
     } else {
@@ -77,7 +78,7 @@ export function playerTakeDamage(
 
   if (!lethalHit) {
     state.sfxQueue.push(
-      _PLAYER_PAIN_SFX[state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_PAIN_SFX) % _PLAYER_PAIN_SFX.length],
+      _PLAYER_PAIN_SFX[state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_PAIN_SFX }) % _PLAYER_PAIN_SFX.length],
     );
     if (!wasAlive) {
       return Math.max(0.0, healthBefore - player.health);
@@ -87,7 +88,7 @@ export function playerTakeDamage(
       return Math.max(0.0, healthBefore - player.health);
     }
     if (!perkActive(player, PerkId.FINAL_REVENGE)) {
-      state.sfxQueue.push(_PLAYER_DEATH_SFX[state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_DEATH_SFX) & 1]);
+      state.sfxQueue.push(_PLAYER_DEATH_SFX[state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_DEATH_SFX }) & 1]);
     } else if (onLethal !== null) {
       onLethal();
       state.playerDeathHookSkipIndices.add(player.index);
@@ -96,11 +97,11 @@ export function playerTakeDamage(
 
   if (!dodged) {
     if (!perkActive(player, PerkId.UNSTOPPABLE)) {
-      player.heading += ((state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_HEADING) % 100) - 50) * 0.04;
+      player.heading += ((state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_HEADING }) % 100) - 50) * 0.04;
       player.spreadHeat = Math.min(0.48, player.spreadHeat + spreadHeatDamage * 0.01);
     }
 
-    if (player.health <= 20.0 && (state.rng.rand(RngCallerStatic.PLAYER_TAKE_DAMAGE_LOW_HEALTH) & 7) === 3) {
+    if (player.health <= 20.0 && (state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_LOW_HEALTH }) & 7) === 3) {
       player.lowHealthTimer = 0.0;
     }
   }

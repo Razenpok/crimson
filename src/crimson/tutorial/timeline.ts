@@ -117,10 +117,10 @@ function tickStageTransition(
 }
 
 
-function promptAlpha(stageIndex: number, stageTimerMs: number, transitionTimerMs: number): number {
-  stageIndex = stageIndex | 0;
-  stageTimerMs = stageTimerMs | 0;
-  transitionTimerMs = transitionTimerMs | 0;
+function promptAlpha(opts: { stageIndex: number; stageTimerMs: number; transitionTimerMs: number }): number {
+  let stageIndex = opts.stageIndex | 0;
+  let stageTimerMs = opts.stageTimerMs | 0;
+  let transitionTimerMs = opts.transitionTimerMs | 0;
 
   if (stageIndex < 0) return 0.0;
 
@@ -199,14 +199,15 @@ function cloneState(s: TutorialState): TutorialState {
 
 export function tickTutorialTimeline(
   stateIn: TutorialState,
-  frameDtMs: number,
-  anyMoveActive: boolean,
-  anyFireActive: boolean,
-  creaturesNoneActive: boolean,
-  bonusPoolEmpty: boolean,
-  perkPendingCount: number,
-  hintBonusDied = false,
+  opts: { frameDtMs: number; anyMoveActive: boolean; anyFireActive: boolean; creaturesNoneActive: boolean; bonusPoolEmpty: boolean; perkPendingCount: number; hintBonusDied?: boolean },
 ): [TutorialState, TutorialFrameActions] {
+  const frameDtMs = opts.frameDtMs;
+  const anyMoveActive = opts.anyMoveActive;
+  const anyFireActive = opts.anyFireActive;
+  const creaturesNoneActive = opts.creaturesNoneActive;
+  const bonusPoolEmpty = opts.bonusPoolEmpty;
+  const perkPendingCount = opts.perkPendingCount;
+  const hintBonusDied = opts.hintBonusDied ?? false;
   const dtMs = frameDtMs | 0;
   const state = cloneState(stateIn);
   state.stageTimerMs = (state.stageTimerMs | 0) + dtMs;
@@ -222,7 +223,7 @@ export function tickTutorialTimeline(
   let basePromptText = (stageIndex >= 0 && stageIndex < TUTORIAL_STAGE_TEXT.length)
     ? TUTORIAL_STAGE_TEXT[stageIndex]
     : '';
-  let basePromptAlpha = promptAlpha(stageIndex, state.stageTimerMs, transitionTimerMs);
+  let basePromptAlpha = promptAlpha({ stageIndex, stageTimerMs: state.stageTimerMs, transitionTimerMs });
   if (stageIndex === 6 && (perkPendingCount | 0) < 1) {
     basePromptText = '';
     basePromptAlpha = 0.0;

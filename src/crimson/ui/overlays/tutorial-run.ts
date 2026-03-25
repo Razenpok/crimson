@@ -26,23 +26,25 @@ export interface TutorialPanelRectResult {
 export function tutorialPromptPanelRect(
   text: string,
   screenW: number,
-  measureTextWidth: MeasureUiTextWidth,
-  measureLineHeight: MeasureUiLineHeight,
-  pos: Vec2,
-  scale: number,
+  opts: {
+    measureTextWidth: MeasureUiTextWidth;
+    measureLineHeight: MeasureUiLineHeight;
+    pos: Vec2;
+    scale: number;
+  },
 ): TutorialPanelRectResult {
   const lines = text ? text.split('\n') : [''];
-  const lineH = measureLineHeight(scale);
+  const lineH = opts.measureLineHeight(opts.scale);
   let maxW = 0.0;
   for (const line of lines) {
-    maxW = Math.max(maxW, measureTextWidth(line, scale));
+    maxW = Math.max(maxW, opts.measureTextWidth(line, opts.scale));
   }
-  const padX = TUTORIAL_PANEL_PADDING.x * scale;
-  const padY = TUTORIAL_PANEL_PADDING.y * scale;
+  const padX = TUTORIAL_PANEL_PADDING.x * opts.scale;
+  const padY = TUTORIAL_PANEL_PADDING.y * opts.scale;
   const width = maxW + padX * 2.0;
   const height = lines.length * lineH + padY * 2.0;
   const x = (screenW - width) * 0.5;
-  const rect = wgl.makeRectangle(x, pos.y, width, height);
+  const rect = wgl.makeRectangle(x, opts.pos.y, width, height);
   return { rect, lines, lineH };
 }
 
@@ -70,38 +72,42 @@ function drawRectOutline(
 export function drawTutorialPromptPanel(
   screenW: number,
   text: string,
-  alpha: number,
-  pos: Vec2,
   scale: number,
-  drawText: DrawUiText,
-  measureTextWidth: MeasureUiTextWidth,
-  measureLineHeight: MeasureUiLineHeight,
+  opts: {
+    alpha: number;
+    pos: Vec2;
+    drawText: DrawUiText;
+    measureTextWidth: MeasureUiTextWidth;
+    measureLineHeight: MeasureUiLineHeight;
+  },
 ): void {
-  if (alpha <= 1e-3) return;
+  if (opts.alpha <= 1e-3) return;
   const { rect, lines, lineH } = tutorialPromptPanelRect(
     text,
     screenW,
-    measureTextWidth,
-    measureLineHeight,
-    pos,
-    scale,
+    {
+      measureTextWidth: opts.measureTextWidth,
+      measureLineHeight: opts.measureLineHeight,
+      pos: opts.pos,
+      scale,
+    },
   );
   const [rx, ry, rw, rh] = rect;
 
   // Background fill
-  wgl.drawRectangle(rx, ry, rw, rh, wgl.makeColor(0, 0, 0, alpha * 0.8));
+  wgl.drawRectangle(rx, ry, rw, rh, wgl.makeColor(0, 0, 0, opts.alpha * 0.8));
 
   // Border outline
-  drawRectOutline(rx, ry, rw, rh, 1, 1, 1, alpha);
+  drawRectOutline(rx, ry, rw, rh, 1, 1, 1, opts.alpha);
 
   // Draw text lines
-  const textAlpha = Math.min(1.0, Math.max(0.0, alpha * 0.9));
+  const textAlpha = Math.min(1.0, Math.max(0.0, opts.alpha * 0.9));
   const color = wgl.makeColor(1, 1, 1, textAlpha);
   const padX = TUTORIAL_PANEL_PADDING.x * scale;
   const padY = TUTORIAL_PANEL_PADDING.y * scale;
   for (let i = 0; i < lines.length; i++) {
     const linePos = new Vec2(rx + padX, ry + padY + i * lineH);
-    drawText(lines[i], linePos, color, scale);
+    opts.drawText(lines[i], linePos, color, scale);
   }
 }
 
@@ -109,32 +115,38 @@ export function drawTutorialOverlayPanels(
   screenW: number,
   overlay: TutorialOverlayState,
   scale: number,
-  drawText: DrawUiText,
-  measureTextWidth: MeasureUiTextWidth,
-  measureLineHeight: MeasureUiLineHeight,
+  opts: {
+    drawText: DrawUiText;
+    measureTextWidth: MeasureUiTextWidth;
+    measureLineHeight: MeasureUiLineHeight;
+  },
 ): void {
   if (overlay.promptText && overlay.promptAlpha > 1e-3) {
     drawTutorialPromptPanel(
       screenW,
       overlay.promptText,
-      overlay.promptAlpha,
-      TUTORIAL_PANEL_POS,
       scale,
-      drawText,
-      measureTextWidth,
-      measureLineHeight,
+      {
+        alpha: overlay.promptAlpha,
+        pos: TUTORIAL_PANEL_POS,
+        drawText: opts.drawText,
+        measureTextWidth: opts.measureTextWidth,
+        measureLineHeight: opts.measureLineHeight,
+      },
     );
   }
   if (overlay.hintText && overlay.hintAlpha > 1e-3) {
     drawTutorialPromptPanel(
       screenW,
       overlay.hintText,
-      overlay.hintAlpha,
-      TUTORIAL_PANEL_POS.offset(0.0, 84.0),
       scale,
-      drawText,
-      measureTextWidth,
-      measureLineHeight,
+      {
+        alpha: overlay.hintAlpha,
+        pos: TUTORIAL_PANEL_POS.offset({ dy: 84.0 }),
+        drawText: opts.drawText,
+        measureTextWidth: opts.measureTextWidth,
+        measureLineHeight: opts.measureLineHeight,
+      },
     );
   }
 }

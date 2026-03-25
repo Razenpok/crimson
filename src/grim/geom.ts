@@ -59,7 +59,8 @@ export class Vec2 {
     return new Vec2(this.x * invMagnitude, this.y * invMagnitude);
   }
 
-  normalizedWithLength(epsilon: number = 1e-6): [Vec2, number] {
+  normalizedWithLength(opts: { epsilon?: number } = {}): [Vec2, number] {
+    const epsilon = opts.epsilon ?? 1e-6;
     const magnitude = this.length();
     if (magnitude <= epsilon) return [new Vec2(), 0.0];
     return [this.div(magnitude), magnitude];
@@ -69,8 +70,8 @@ export class Vec2 {
     return other.sub(this).length();
   }
 
-  directionTo(other: Vec2, epsilon: number = 1e-6): Vec2 {
-    const [direction] = other.sub(this).normalizedWithLength(epsilon);
+  directionTo(other: Vec2, opts: { epsilon?: number } = {}): Vec2 {
+    const [direction] = other.sub(this).normalizedWithLength({ epsilon: opts.epsilon ?? 1e-6 });
     return direction;
   }
 
@@ -102,7 +103,9 @@ export class Vec2 {
     return [this.toAngle(), this.length()];
   }
 
-  offset(dx: number = 0.0, dy: number = 0.0): Vec2 {
+  offset(opts: { dx?: number; dy?: number } = {}): Vec2 {
+    const dx = opts.dx ?? 0.0;
+    const dy = opts.dy ?? 0.0;
     return new Vec2(this.x + dx, this.y + dy);
   }
 
@@ -114,7 +117,8 @@ export class Vec2 {
     return new Vec2(this.y, -this.x);
   }
 
-  toDict(ndigits?: number): { x: number; y: number } {
+  toDict(opts: { ndigits?: number } = {}): { x: number; y: number } {
+    const ndigits = opts.ndigits;
     if (ndigits === undefined) {
       return { x: this.x, y: this.y };
     }
@@ -208,11 +212,15 @@ export class Rect {
     );
   }
 
-  offset(dx: number = 0.0, dy: number = 0.0): Rect {
+  offset(opts: { dx?: number; dy?: number } = {}): Rect {
+    const dx = opts.dx ?? 0.0;
+    const dy = opts.dy ?? 0.0;
     return new Rect(this.x + dx, this.y + dy, this.w, this.h);
   }
 
-  inset(dx: number = 0.0, dy: number = 0.0): Rect {
+  inset(opts: { dx?: number; dy?: number } = {}): Rect {
+    const dx = opts.dx ?? 0.0;
+    const dy = opts.dy ?? 0.0;
     return new Rect(
       this.x + dx,
       this.y + dy,

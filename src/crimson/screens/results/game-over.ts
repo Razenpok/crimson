@@ -225,21 +225,21 @@ export class GameOverUi {
     return alpha;
   }
 
-  private _panelLayout(screenW: number, scale: number): GameOverPanelLayout {
+  private _panelLayout(opts: { screenW: number; scale: number }): GameOverPanelLayout {
     const t = PANEL_SLIDE_DURATION_MS > 1e-6 ? this._introMs / PANEL_SLIDE_DURATION_MS : 1.0;
     const eased = easeOutCubic(t);
     const panelSlideX = -GAME_OVER_PANEL_W * (1.0 - eased);
 
-    const panelPosX = (GAME_OVER_PANEL_X + panelSlideX) * scale;
-    const layoutW = scale ? screenW / scale : screenW;
+    const panelPosX = (GAME_OVER_PANEL_X + panelSlideX) * opts.scale;
+    const layoutW = opts.scale ? opts.screenW / opts.scale : opts.screenW;
     const widescreenShiftY = menuWidescreenYShift(layoutW);
-    const panelPosY = (GAME_OVER_PANEL_Y + widescreenShiftY) * scale;
-    const panelOriginX = -(GAME_OVER_PANEL_OFFSET_X * scale);
-    const panelOriginY = -(GAME_OVER_PANEL_OFFSET_Y * scale);
+    const panelPosY = (GAME_OVER_PANEL_Y + widescreenShiftY) * opts.scale;
+    const panelOriginX = -(GAME_OVER_PANEL_OFFSET_X * opts.scale);
+    const panelOriginY = -(GAME_OVER_PANEL_OFFSET_Y * opts.scale);
     const topLeftX = panelPosX - panelOriginX;
     const topLeftY = panelPosY - panelOriginY;
     const topLeft = new Vec2(topLeftX, topLeftY);
-    const panel = Rect.fromTopLeft(topLeft, GAME_OVER_PANEL_W * scale, GAME_OVER_PANEL_H * scale);
+    const panel = Rect.fromTopLeft(topLeft, GAME_OVER_PANEL_W * opts.scale, GAME_OVER_PANEL_H * opts.scale);
     return { panel, topLeft };
   }
 
@@ -333,14 +333,12 @@ export class GameOverUi {
       const [newText, newCaret] = updateNameEntryText(
         this.inputText,
         this.inputCaret,
-        NAME_MAX_EDIT,
-        rng,
-        playSfx,
+        { maxLen: NAME_MAX_EDIT, rng, playSfx },
       );
       this.inputText = newText;
       this.inputCaret = newCaret;
 
-      const panelLayout = this._panelLayout(screenW, scale);
+      const panelLayout = this._panelLayout({ screenW, scale });
       const bannerPos = panelLayout.topLeft.add(new Vec2(GAME_OVER_BANNER_X_OFFSET * scale, 40.0 * scale));
       const formPos = bannerPos.add(new Vec2(8.0 * scale, 84.0 * scale));
       const okPos = formPos.add(new Vec2(170.0 * scale, 32.0 * scale));
@@ -366,7 +364,7 @@ export class GameOverUi {
     } else {
       // Buttons phase
       const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
-      const panelLayout = this._panelLayout(screenW, scale);
+      const panelLayout = this._panelLayout({ screenW, scale });
       const bannerPos = panelLayout.topLeft.add(new Vec2(GAME_OVER_BANNER_X_OFFSET * scale, 40.0 * scale));
       let btnPos = bannerPos.add(new Vec2(
         52.0 * scale,
@@ -382,7 +380,7 @@ export class GameOverUi {
         this._beginCloseTransition('play_again');
         return null;
       }
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const highScoresW = buttonWidth(resources, this._highScoresButton.label, {
         scale,
@@ -393,7 +391,7 @@ export class GameOverUi {
         this._beginCloseTransition('high_scores');
         return null;
       }
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, {
         scale,
@@ -435,7 +433,7 @@ export class GameOverUi {
       alpha * 0.7,
     );
 
-    const cardOrigin = pos.offset(4.0 * scale);
+    const cardOrigin = pos.offset({ dx: 4.0 * scale });
     const modeRaw = record.gameModeId;
     let modeId: number;
     try {
@@ -449,7 +447,7 @@ export class GameOverUi {
     const scoreLabelW = textWidth(font, scoreLabel);
     drawSmall(
       font, scoreLabel,
-      cardOrigin.offset(32.0 * scale - scoreLabelW * 0.5),
+      cardOrigin.offset({ dx: 32.0 * scale - scoreLabelW * 0.5 }),
       labelColor,
     );
 
@@ -487,7 +485,7 @@ export class GameOverUi {
     );
 
     // Right column: Game time + gauge, or Experience in quest mode.
-    const col2Pos = cardOrigin.offset(96.0 * scale);
+    const col2Pos = cardOrigin.offset({ dx: 96.0 * scale });
     if (modeId === GameMode.QUESTS) {
       drawSmall(font, 'Experience', col2Pos, labelColor);
       const xpValue = `${Math.floor(record.scoreXp)}`;
@@ -499,7 +497,7 @@ export class GameOverUi {
       );
       this._hoverTime = Math.max(0.0, this._hoverTime - dtHover);
     } else {
-      drawSmall(font, 'Game time', col2Pos.offset(6.0 * scale), labelColor);
+      drawSmall(font, 'Game time', col2Pos.offset({ dx: 6.0 * scale }), labelColor);
       const timeRectPos = col2Pos.add(new Vec2(8.0 * scale, 16.0 * scale));
       const timeRect = Rect.fromTopLeft(timeRectPos, 64.0 * scale, 29.0 * scale);
       const hoveringTime = timeRect.contains(mouse);
@@ -527,7 +525,7 @@ export class GameOverUi {
     }
 
     // Second row: weapon icon + frags + hit ratio
-    const rowPos = cardOrigin.offset(0.0, 52.0 * scale);
+    const rowPos = cardOrigin.offset({ dy: 52.0 * scale });
     this._hoverWeapon = Math.max(0.0, Math.min(1.0, this._hoverWeapon));
     this._hoverHitRatio = Math.max(0.0, Math.min(1.0, this._hoverHitRatio));
     let tooltipPos: Vec2;
@@ -546,7 +544,7 @@ export class GameOverUi {
       }
 
       const weaponId = record.mostUsedWeaponId as WeaponId;
-      const weaponName = weaponDisplayName(weaponId, this.preserveBugs);
+      const weaponName = weaponDisplayName(weaponId, { preserveBugs: this.preserveBugs });
       const nameW = textWidth(font, weaponName);
       const namePos = new Vec2(
         cardOrigin.x + Math.max(0.0, 32.0 * scale - nameW * 0.5),
@@ -555,20 +553,20 @@ export class GameOverUi {
       drawSmall(font, weaponName, namePos, hintColor);
 
       const fragsText = `Frags: ${Math.floor(record.creatureKillCount)}`;
-      const statsPos = rowPos.offset(110.0 * scale);
-      drawSmall(font, fragsText, statsPos.offset(0.0, 1.0 * scale), labelColor);
+      const statsPos = rowPos.offset({ dx: 110.0 * scale });
+      drawSmall(font, fragsText, statsPos.offset({ dy: 1.0 * scale }), labelColor);
 
       const fired = Math.max(0, Math.floor(record.shotsFired));
       const hit = Math.max(0, Math.floor(record.shotsHit));
       const ratio = fired > 0 ? Math.floor((hit * 100) / fired) : 0;
       const hitText = `Hit %: ${ratio}%`;
-      drawSmall(font, hitText, statsPos.offset(0.0, 15.0 * scale), labelColor);
+      drawSmall(font, hitText, statsPos.offset({ dy: 15.0 * scale }), labelColor);
 
-      const hitRectPos = statsPos.offset(0.0, 15.0 * scale);
+      const hitRectPos = statsPos.offset({ dy: 15.0 * scale });
       const hitRect = Rect.fromTopLeft(hitRectPos, 64.0 * scale, 17.0 * scale);
       const hoveringHit = hitRect.contains(mouse);
       this._hoverHitRatio = Math.max(0.0, Math.min(1.0, this._hoverHitRatio + (hoveringHit ? dtHover : -dtHover)));
-      tooltipPos = rowPos.offset(0.0, 48.0 * scale);
+      tooltipPos = rowPos.offset({ dy: 48.0 * scale });
     } else {
       this._hoverWeapon = Math.max(0.0, this._hoverWeapon - dtHover);
       this._hoverHitRatio = 0.0;
@@ -585,7 +583,7 @@ export class GameOverUi {
       drawSmall(
         font,
         'Most used weapon during the game',
-        tooltipPos.offset(-20.0 * scale),
+        tooltipPos.offset({ dx: -20.0 * scale }),
         col,
       );
     }
@@ -595,7 +593,7 @@ export class GameOverUi {
       drawSmall(
         font,
         'The time the game lasted',
-        tooltipPos.offset(12.0 * scale),
+        tooltipPos.offset({ dx: 12.0 * scale }),
         col,
       );
     }
@@ -608,7 +606,7 @@ export class GameOverUi {
       drawSmall(
         font,
         hitRatioTooltip,
-        tooltipPos.offset(-22.0 * scale),
+        tooltipPos.offset({ dx: -22.0 * scale }),
         col,
       );
     }
@@ -632,7 +630,7 @@ export class GameOverUi {
     const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
 
-    const panelLayout = this._panelLayout(screenW, scale);
+    const panelLayout = this._panelLayout({ screenW, scale });
     const panel = panelLayout.panel;
     const panelTopLeft = panelLayout.topLeft;
 
@@ -640,9 +638,7 @@ export class GameOverUi {
     const fxDetail = this.config.display.fxDetail[0] ?? false;
     drawClassicMenuPanel(
       getTexture(resources, TextureId.UI_MENU_PANEL),
-      wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h),
-      wgl.makeColor(1, 1, 1, 1),
-      fxDetail,
+      { dst: wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h), tint: wgl.makeColor(1, 1, 1, 1), shadow: fxDetail },
     );
 
     // Banner (Reaper / Well done)
@@ -661,11 +657,11 @@ export class GameOverUi {
       const formPos = bannerPos.add(new Vec2(8.0 * scale, 84.0 * scale));
       drawSmall(
         font, 'State your name, trooper!',
-        formPos.offset(42.0 * scale),
+        formPos.offset({ dx: 42.0 * scale }),
         COLOR_TEXT,
       );
 
-      const inputPos = formPos.offset(0.0, 40.0 * scale);
+      const inputPos = formPos.offset({ dy: 40.0 * scale });
       // Input box outline
       wgl.drawRectangle(
         Math.floor(inputPos.x),
@@ -775,14 +771,14 @@ export class GameOverUi {
         forceWide: this._playAgainButton.forceWide,
       });
       buttonDraw(resources, this._playAgainButton, { pos: btnPos, width: playAgainW, scale });
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const highScoresW = buttonWidth(resources, this._highScoresButton.label, {
         scale,
         forceWide: this._highScoresButton.forceWide,
       });
       buttonDraw(resources, this._highScoresButton, { pos: btnPos, width: highScoresW, scale });
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, {
         scale,
@@ -794,8 +790,7 @@ export class GameOverUi {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      new Vec2(mouse.x, mouse.y),
-      this._cursorPulseTime,
+      { pos: new Vec2(mouse.x, mouse.y), pulseTime: this._cursorPulseTime },
     );
   }
 }

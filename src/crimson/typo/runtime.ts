@@ -22,7 +22,7 @@ function _requireSinglePlayerTypo(command: { playerIndex: number }): void {
 }
 
 function _typeclickSfx(world: WorldState, caller: RngCallerStatic): SfxId {
-  if ((world.state.rng.rand(caller) & 1) === 0) {
+  if ((world.state.rng.rand({ caller }) & 1) === 0) {
     return SfxId.UI_TYPECLICK_01;
   }
   return SfxId.UI_TYPECLICK_02;
@@ -53,8 +53,8 @@ export function applyTypoCommand(
     world.state.sfxQueue.push(SfxId.UI_TYPEENTER);
 
     const activeMask = world.creatures.entries.map((entry) => entry.active);
-    const targetIdx = typo.names.findByName(typing.text, activeMask);
-    const entered = typing.submit(targetIdx !== null);
+    const targetIdx = typo.names.findByName(typing.text, { activeMask });
+    const entered = typing.submit({ matched: targetIdx !== null });
 
     typo.pendingFireTarget = null;
     typo.pendingReload = false;
@@ -82,28 +82,28 @@ export function applyTypoCommand(
 
 export function typoBeforeStep(world: WorldState): void {
   for (const player of world.players) {
-    enforceTypoPlayerFrame(player, world.state);
+    enforceTypoPlayerFrame(player, { state: world.state });
   }
 }
 
 export function typoMidStep(ctx: MidStepContext): void {
   const typo = ctx.world.state.typo;
 
-  const [cooldown, spawns] = tickTypoSpawns(
-    ctx.elapsedBeforeMs | 0,
-    typo.spawnCooldownMs | 0,
-    ctx.dtSimMs | 0,
-    ctx.world.players.length,
-    ctx.worldSize,
-    ctx.worldSize,
-  );
+  const [cooldown, spawns] = tickTypoSpawns({
+    elapsedMs: ctx.elapsedBeforeMs | 0,
+    spawnCooldownMs: typo.spawnCooldownMs | 0,
+    frameDtMs: ctx.dtSimMs | 0,
+    playerCount: ctx.world.players.length,
+    worldWidth: ctx.worldSize,
+    worldHeight: ctx.worldSize,
+  });
   typo.spawnCooldownMs = cooldown | 0;
 
   for (const call of spawns) {
     const heading =
-      (ctx.world.state.rng.rand(RngCallerStatic.CREATURE_SPAWN_TINTED_HEADING) % 314) * 0.01;
+      (ctx.world.state.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TINTED_HEADING }) % 314) * 0.01;
     let size =
-      (ctx.world.state.rng.rand(RngCallerStatic.CREATURE_SPAWN_TINTED_SIZE) % 20) + 47;
+      (ctx.world.state.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TINTED_SIZE }) % 20) + 47;
     let flags = 0;
     let moveSpeed = 1.7;
 
@@ -146,10 +146,12 @@ export function typoMidStep(ctx: MidStepContext): void {
     typo.names.assignRandom(
       creatureIdx | 0,
       ctx.world.state.rng,
-      ctx.world.players.length > 0 ? ctx.world.players[0].experience | 0 : 0,
-      activeMask,
-      typo.dictionaryWords.length > 0 ? typo.dictionaryWords : null,
-      typo.highscoreNames,
+      {
+        scoreXp: ctx.world.players.length > 0 ? ctx.world.players[0].experience | 0 : 0,
+        activeMask,
+        dictionaryWords: typo.dictionaryWords.length > 0 ? typo.dictionaryWords : null,
+        highscoreNames: typo.highscoreNames,
+      },
     );
   }
 }

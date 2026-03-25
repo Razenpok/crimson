@@ -539,7 +539,7 @@ export class CreditsView {
 
     const scale = this.state.config.display.width < 641 ? 0.9 : 1.0;
     const slideX = this._panelSlideX(scale);
-    const panelTopLeft = this._panelTopLeft(scale).offset(slideX, 0);
+    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX });
     const resources = requireRuntimeResources(this.state);
     const [mx, my] = InputState.mousePosition();
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -589,14 +589,14 @@ export class CreditsView {
 
     const scale = screenW < 641 ? 0.9 : 1.0;
     const slideX = this._panelSlideX(scale);
-    const panelTopLeft = this._panelTopLeft(scale).offset(slideX, 0);
+    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX });
 
     const panelW = MENU_PANEL_WIDTH * scale;
     const panelH = CREDITS_PANEL_HEIGHT * scale;
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
 
     const font = resources.smallFont;
     const titlePos = panelTopLeft.add(new Vec2(_TITLE_X * scale, _TITLE_Y * scale));
@@ -650,11 +650,13 @@ export class CreditsView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin,
+        rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -667,6 +669,6 @@ export class CreditsView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 }

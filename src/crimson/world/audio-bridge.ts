@@ -37,16 +37,17 @@ export class AudioBridge {
     });
   }
 
-  sync(audio: AudioState | null, audioRng: CrandLike, demoModeActive: boolean): void {
-    this.audio = audio;
-    this.audioRng = audioRng;
-    this.demoModeActive = Boolean(demoModeActive);
-    this.router.audio = audio;
-    this.router.audioRng = audioRng;
-    this.router.demoModeActive = Boolean(demoModeActive);
+  sync(opts: { audio: AudioState | null; audioRng: CrandLike; demoModeActive: boolean }): void {
+    this.audio = opts.audio;
+    this.audioRng = opts.audioRng;
+    this.demoModeActive = Boolean(opts.demoModeActive);
+    this.router.audio = opts.audio;
+    this.router.audioRng = opts.audioRng;
+    this.router.demoModeActive = Boolean(opts.demoModeActive);
   }
 
-  applyPlan(plan: PresentationStepCommands, applyAudio = true): void {
-    applyPresentationPlan(plan, this.router, Boolean(applyAudio));
+  applyPlan(opts: { plan: PresentationStepCommands; applyAudio?: boolean }): void {
+    const applyAudio = opts.applyAudio ?? true;
+    applyPresentationPlan({ plan: opts.plan, audioSink: this.router, applyAudio: Boolean(applyAudio) });
   }
 }

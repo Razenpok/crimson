@@ -59,7 +59,7 @@ export class ModsMenuView extends PanelMenuView {
       this._panelPos.y + this._widescreenYShift,
     ).add(this._panelOffset.mul(panelScale));
     const basePos = panelTopLeft.add(new Vec2(212.0 * panelScale, 32.0 * panelScale));
-    const labelPos = basePos.offset(8.0 * panelScale, 0);
+    const labelPos = basePos.offset({ dx: 8.0 * panelScale });
     return { scale: panelScale, basePos, labelPos };
   }
 
@@ -85,11 +85,11 @@ export class ModsMenuView extends PanelMenuView {
     const textColor = wgl.makeColor(1, 1, 1, 0.8);
 
     drawSmallText(font, 'MODS', basePos, titleColor);
-    let linePos = labelPos.offset(0, 44.0 * scale);
+    let linePos = labelPos.offset({ dy: 44.0 * scale });
     const lineStep = (font.cellSize + 4.0) * scale;
     for (const line of this._lines) {
       drawSmallText(font, line, linePos, textColor);
-      linePos = linePos.offset(0, lineStep);
+      linePos = linePos.offset({ dy: lineStep });
     }
   }
 }

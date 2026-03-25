@@ -17,10 +17,11 @@ function circleSegmentsOutline(radius: number): number {
 
 export function drawAimCircle(
   renderCtx: WorldRenderCtx,
-  center: Vec2,
-  radius: number,
-  alpha: number = 1.0,
+  opts: { center: Vec2; radius: number; alpha?: number },
 ): void {
+  const center = opts.center;
+  const radius = opts.radius;
+  let alpha = opts.alpha ?? 1.0;
   if (radius <= 1e-3) return;
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
@@ -84,11 +85,12 @@ export function drawAimCircle(
 
 export function drawClockGauge(
   renderCtx: WorldRenderCtx,
-  pos: Vec2,
-  ms: number,
-  scale: number,
-  alpha: number = 1.0,
+  opts: { pos: Vec2; ms: number; scale: number; alpha?: number },
 ): void {
+  const pos = opts.pos;
+  const ms = opts.ms;
+  const scale = opts.scale;
+  const alpha = opts.alpha ?? 1.0;
   const resources = renderCtx.frame.resources;
   const table = getTexture(resources, TextureId.UI_CLOCK_TABLE);
   const pointer = getTexture(resources, TextureId.UI_CLOCK_POINTER);
@@ -120,8 +122,9 @@ export function directionArrowEnabled(renderCtx: WorldRenderCtx, playerIndex: nu
 export function directionArrowTint(
   renderCtx: WorldRenderCtx,
   playerIndex: number,
-  alpha: number,
+  opts: { alpha: number },
 ): wgl.Color {
+  let alpha = opts.alpha;
   alpha = clamp(alpha, 0.0, 1.0);
   if (renderCtx.frame.players.length === 2) {
     if (playerIndex === 0) {
@@ -134,11 +137,12 @@ export function directionArrowTint(
 
 export function drawDirectionArrows(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; scale: number; alpha?: number },
 ): void {
+  const camera = opts.camera;
+  const viewScale = opts.viewScale;
+  const scale = opts.scale;
+  let alpha = opts.alpha ?? 1.0;
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
@@ -157,7 +161,7 @@ export function drawDirectionArrows(
     const markerPos = player.pos.add(Vec2.fromHeading(heading).mul(60.0));
     const screen = WorldRenderCtx.worldToScreenWith(markerPos, camera, viewScale);
     const dst = wgl.makeRectangle(screen.x, screen.y, width, height);
-    const tint = directionArrowTint(renderCtx, index, alpha);
+    const tint = directionArrowTint(renderCtx, index, { alpha });
     wgl.drawTexturePro(arrow, src, dst, origin, heading * RAD_TO_DEG, tint);
   }
 }

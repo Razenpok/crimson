@@ -15,9 +15,9 @@ export const TYPO_WEAPON_ID = WeaponId.SAWED_OFF_SHOTGUN;
  * Typ-o resets timers and tops up ammo each frame, so typing speed (not weapon
  * cooldown) controls rate of fire.
  */
-export function enforceTypoPlayerFrame(player: PlayerState, state: GameplayState): void {
+export function enforceTypoPlayerFrame(player: PlayerState, opts: { state: GameplayState }): void {
   if (player.weapon.weaponId !== TYPO_WEAPON_ID) {
-    weaponAssignPlayer(player, TYPO_WEAPON_ID, state);
+    weaponAssignPlayer(player, TYPO_WEAPON_ID, { state: opts.state });
   }
 
   player.weapon.shotCooldown = 0.0;
@@ -30,15 +30,13 @@ export function enforceTypoPlayerFrame(player: PlayerState, state: GameplayState
 }
 
 export function buildTypoPlayerInput(
-  aim: Vec2,
-  fireRequested: boolean,
-  reloadRequested: boolean,
+  opts: { aim: Vec2; fireRequested: boolean; reloadRequested: boolean },
 ): PlayerInput {
   return new PlayerInput({
     move: new Vec2(),
-    aim,
-    fireDown: fireRequested,
-    firePressed: fireRequested,
-    reloadPressed: reloadRequested,
+    aim: opts.aim,
+    fireDown: opts.fireRequested,
+    firePressed: opts.fireRequested,
+    reloadPressed: opts.reloadRequested,
   });
 }

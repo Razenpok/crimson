@@ -542,14 +542,16 @@ export interface SpawnPlan {
 
 function addSpawnSlot(
   spawnSlots: SpawnSlotInit[],
-  ownerCreature: number,
-  timer: number,
-  limit: number,
-  interval: number,
-  childTemplateId: SpawnId,
+  opts: {
+    ownerCreature: number;
+    timer: number;
+    limit: number;
+    interval: number;
+    childTemplateId: SpawnId;
+  },
 ): number {
   const slotIdx = spawnSlots.length;
-  spawnSlots.push(new SpawnSlotInit(ownerCreature, timer, 0, limit, interval, childTemplateId));
+  spawnSlots.push(new SpawnSlotInit(opts.ownerCreature, opts.timer, 0, opts.limit, opts.interval, opts.childTemplateId));
   return slotIdx;
 }
 
@@ -622,19 +624,22 @@ function applyChildSpec(child: CreatureInit, spec: FormationChildSpec): void {
 function applySizeHealthReward(
   c: CreatureInit,
   size: number,
-  healthScale: number,
-  healthAdd: number,
-  rewardAdd: number = 50.0,
+  opts: {
+    healthScale: number;
+    healthAdd: number;
+    rewardAdd?: number;
+  },
 ): void {
+  const rewardAdd = opts.rewardAdd ?? 50.0;
   c.size = size;
-  c.health = size * healthScale + healthAdd;
+  c.health = size * opts.healthScale + opts.healthAdd;
   c.rewardValue = size + size + rewardAdd;
 }
 
 
-function applySizeHealth(c: CreatureInit, size: number, healthScale: number, healthAdd: number): void {
+function applySizeHealth(c: CreatureInit, size: number, opts: { healthScale: number; healthAdd: number }): void {
   c.size = size;
-  c.health = size * healthScale + healthAdd;
+  c.health = size * opts.healthScale + opts.healthAdd;
 }
 
 
@@ -648,29 +653,34 @@ function spawnRingChildren(
   templateId: SpawnId,
   pos: Vec2,
   rng: CrandLike,
-  count: number,
-  angleStep: number,
-  radius: number,
-  aiMode: number,
-  spec: FormationChildSpec,
-  linkParent: number = 0,
-  setPosition: boolean = false,
-  headingOverride: number | null = null,
+  opts: {
+    count: number;
+    angleStep: number;
+    radius: number;
+    aiMode: number;
+    childSpec: FormationChildSpec;
+    linkParent?: number;
+    setPosition?: boolean;
+    headingOverride?: number | null;
+  },
 ): number {
+  const linkParent = opts.linkParent ?? 0;
+  const setPosition = opts.setPosition ?? false;
+  const headingOverride = opts.headingOverride ?? null;
   let lastIdx = -1;
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < opts.count; i++) {
     const child = allocCreature(templateId, pos, rng);
-    child.aiMode = aiMode;
+    child.aiMode = opts.aiMode;
     child.aiLinkParent = linkParent;
-    const angle = i * angleStep;
-    child.targetOffset = Vec2.fromAngle(angle).mul(radius);
+    const angle = i * opts.angleStep;
+    child.targetOffset = Vec2.fromAngle(angle).mul(opts.radius);
     if (setPosition) {
       child.pos = pos.add(child.targetOffset ?? new Vec2());
     }
     if (headingOverride !== null) {
       child.heading = headingOverride;
     }
-    applyChildSpec(child, spec);
+    applyChildSpec(child, opts.childSpec);
     creatures.push(child);
     lastIdx = creatures.length - 1;
   }
@@ -683,21 +693,24 @@ function spawnGridChildren(
   templateId: SpawnId,
   pos: Vec2,
   rng: CrandLike,
-  xRange: readonly number[],
-  yRange: readonly number[],
-  aiMode: number,
-  spec: FormationChildSpec,
-  linkParent: number = 0,
+  opts: {
+    xRange: readonly number[];
+    yRange: readonly number[];
+    aiMode: number;
+    childSpec: FormationChildSpec;
+    linkParent?: number;
+  },
 ): number {
+  const linkParent = opts.linkParent ?? 0;
   let lastIdx = -1;
-  for (const xOffset of xRange) {
-    for (const yOffset of yRange) {
+  for (const xOffset of opts.xRange) {
+    for (const yOffset of opts.yRange) {
       const child = allocCreature(templateId, pos, rng);
-      child.aiMode = aiMode;
+      child.aiMode = opts.aiMode;
       child.aiLinkParent = linkParent;
       child.targetOffset = new Vec2(xOffset, yOffset);
       child.pos = new Vec2(pos.x + xOffset, pos.y + yOffset);
-      applyChildSpec(child, spec);
+      applyChildSpec(child, opts.childSpec);
       creatures.push(child);
       lastIdx = creatures.length - 1;
     }
@@ -711,19 +724,22 @@ function spawnChainChildren(
   templateId: SpawnId,
   pos: Vec2,
   rng: CrandLike,
-  count: number,
-  aiMode: number,
-  spec: FormationChildSpec,
-  setupChild: (child: CreatureInit, idx: number) => void,
-  linkParentStart: number = 0,
+  opts: {
+    count: number;
+    aiMode: number;
+    childSpec: FormationChildSpec;
+    setupChild: (child: CreatureInit, idx: number) => void;
+    linkParentStart?: number;
+  },
 ): number {
+  const linkParentStart = opts.linkParentStart ?? 0;
   let chainPrev = linkParentStart;
-  for (let idx = 0; idx < count; idx++) {
+  for (let idx = 0; idx < opts.count; idx++) {
     const child = allocCreature(templateId, pos, rng);
-    child.aiMode = aiMode;
+    child.aiMode = opts.aiMode;
     child.aiLinkParent = chainPrev;
-    setupChild(child, idx);
-    applyChildSpec(child, spec);
+    opts.setupChild(child, idx);
+    applyChildSpec(child, opts.childSpec);
     creatures.push(child);
     chainPrev = creatures.length - 1;
   }
@@ -774,10 +790,10 @@ class PlanBuilder {
 
     let finalHeading = heading;
     if (finalHeading === RANDOM_HEADING_SENTINEL) {
-      finalHeading = (rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_RANDOM_HEADING) % 628) * 0.01;
+      finalHeading = (rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_RANDOM_HEADING }) % 628) * 0.01;
     }
 
-    creatures[0].heading = (rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_BASE_HEADING) % 314) * 0.01;
+    creatures[0].heading = (rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_BASE_HEADING }) % 314) * 0.01;
 
     return [
       new PlanBuilder(templateId, pos, rng, env, creatures, spawnSlots, effects, 0),
@@ -789,8 +805,8 @@ class PlanBuilder {
     return this.creatures[0];
   }
 
-  addSlot(owner: number, timer: number, limit: number, interval: number, child: SpawnId): number {
-    return addSpawnSlot(this.spawnSlots, owner, timer, limit, interval, child);
+  addSlot(opts: { owner: number; timer: number; limit: number; interval: number; child: SpawnId }): number {
+    return addSpawnSlot(this.spawnSlots, { ownerCreature: opts.owner, timer: opts.timer, limit: opts.limit, interval: opts.interval, childTemplateId: opts.child });
   }
 
   ringChildren(
@@ -805,7 +821,7 @@ class PlanBuilder {
   ): number {
     return spawnRingChildren(
       this.creatures, this.templateId, this.pos, this.rng,
-      count, angleStep, radius, aiMode, spec, linkParent, setPosition, headingOverride,
+      { count, angleStep, radius, aiMode, childSpec: spec, linkParent, setPosition, headingOverride },
     );
   }
 
@@ -818,7 +834,7 @@ class PlanBuilder {
   ): number {
     return spawnGridChildren(
       this.creatures, this.templateId, this.pos, this.rng,
-      xRange, yRange, aiMode, spec, linkParent,
+      { xRange, yRange, aiMode, childSpec: spec, linkParent },
     );
   }
 
@@ -831,7 +847,7 @@ class PlanBuilder {
   ): number {
     return spawnChainChildren(
       this.creatures, this.templateId, this.pos, this.rng,
-      count, aiMode, spec, setupChild, linkParentStart,
+      { count, aiMode, childSpec: spec, setupChild, linkParentStart },
     );
   }
 
@@ -887,7 +903,7 @@ function allocCreature(
   pos: Vec2,
   rng: CrandLike,
 ): CreatureInit {
-  const phaseSeed = rng.rand(RngCallerStatic.CREATURE_ALLOC_SLOT_PHASE_SEED) & 0x17F;
+  const phaseSeed = rng.rand({ caller: RngCallerStatic.CREATURE_ALLOC_SLOT_PHASE_SEED }) & 0x17F;
   return new CreatureInit(templateId, pos, null, phaseSeed);
 }
 
@@ -925,13 +941,13 @@ export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS: SurvivalSpawnPosCallers = {
 };
 
 
-export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExperience: number): CreatureInit {
-  const xp = playerExperience | 0;
+export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { playerExperience: number }): CreatureInit {
+  const xp = opts.playerExperience | 0;
 
   const c = allocCreature(-1, pos, rng);
   c.aiMode = CreatureAiMode.ORBIT_PLAYER;
 
-  const r10 = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_TYPE_ROLL) % 10;
+  const r10 = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_TYPE_ROLL }) % 10;
 
   let typeId: number;
   if (xp < 12000) {
@@ -945,7 +961,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
     if (r10 < 5) {
       typeId = 2;
     } else {
-      typeId = (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_PARITY_PICK) & 1) + 3;
+      typeId = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_PARITY_PICK }) & 1) + 3;
     }
   } else if (xp < 50000) {
     typeId = 2;
@@ -965,15 +981,15 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
     }
   }
 
-  if ((rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_OVERRIDE) & 0x1F) === 2) {
+  if ((rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_OVERRIDE }) & 0x1F) === 2) {
     typeId = 3;
   }
 
   c.typeId = typeId as CreatureTypeId;
 
-  c.size = (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_SIZE) % 20 + 44);
+  c.size = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_SIZE }) % 20 + 44);
 
-  c.heading = f32(f32(rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HEADING) % 314) * f32(0.01));
+  c.heading = f32(f32(rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HEADING }) % 314) * f32(0.01));
 
   let moveSpeed = f32(f32(f32((xp / 4000) | 0) * f32(0.045)) + f32(0.9));
   if (c.typeId === CreatureTypeId.SPIDER_SP1) {
@@ -981,7 +997,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
     moveSpeed = f32(f32(moveSpeed) * f32(1.3));
   }
 
-  const rHealth = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HEALTH);
+  const rHealth = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HEALTH });
   const healthScaled = f32(f32(xp) * f32(0.00125));
   const healthRand = f32(rHealth & 0xF);
   let health = f32(f32(healthScaled + healthRand) + f32(52.0));
@@ -1009,32 +1025,32 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
   if (xp < 50_000) {
     tintR = 1.0 - 1.0 / (((xp / 1000) | 0) + 10.0);
     tintG = (
-      (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_LOW_TINT_G) % 10) * 0.01
+      (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_LOW_TINT_G }) % 10) * 0.01
       + 0.9
       - 1.0 / (((xp / 10000) | 0) + 10.0)
     );
-    tintB = (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_LOW_TINT_B) % 10) * 0.01 + 0.7;
+    tintB = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_LOW_TINT_B }) % 10) * 0.01 + 0.7;
   } else if (xp < 100_000) {
     tintR = 0.9 - 1.0 / (((xp / 1000) | 0) + 10.0);
     tintG = (
-      (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_MID_TINT_G) % 10) * 0.01
+      (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_MID_TINT_G }) % 10) * 0.01
       + 0.8
       - 1.0 / (((xp / 10000) | 0) + 10.0)
     );
     tintB = (
       (xp - 50_000) * 6e-06
-      + (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_MID_TINT_B) % 10) * 0.01
+      + (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_MID_TINT_B }) % 10) * 0.01
       + 0.7
     );
   } else {
     tintR = 1.0 - 1.0 / (((xp / 1000) | 0) + 10.0);
     tintG = (
-      (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HIGH_TINT_G) % 10) * 0.01
+      (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HIGH_TINT_G }) % 10) * 0.01
       + 0.9
       - 1.0 / (((xp / 10000) | 0) + 10.0)
     );
     tintB = (
-      (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HIGH_TINT_B) % 10) * 0.01
+      (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HIGH_TINT_B }) % 10) * 0.01
       + 1.0
       - (xp - 100_000) * 3e-06
     );
@@ -1051,22 +1067,22 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
     (c.health ?? 0.0) * 0.4
     + (c.contactDamage ?? 0.0) * 0.8
     + moveSpeed * 5.0
-    + (rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_REWARD_BONUS) % 10 + 10)
+    + (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_REWARD_BONUS }) % 10 + 10)
   );
 
-  let r = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_RED);
+  let r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_RED });
   if (r % 180 < 2) {
     applyTint(c, [0.9, 0.4, 0.4, 1.0]);
     c.health = 65.0;
     c.rewardValue = 320.0;
   } else {
-    r = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_GREEN);
+    r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_GREEN });
     if (r % 240 < 2) {
       applyTint(c, [0.4, 0.9, 0.4, 1.0]);
       c.health = 85.0;
       c.rewardValue = 420.0;
     } else {
-      r = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_BLUE);
+      r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_BLUE });
       if (r % 360 < 2) {
         applyTint(c, [0.4, 0.4, 0.9, 1.0]);
         c.health = 125.0;
@@ -1075,14 +1091,14 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
     }
   }
 
-  r = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_PURPLE);
+  r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_PURPLE });
   if (r % 1320 < 4) {
     applyTint(c, [0.84, 0.24, 0.89, 1.0]);
     c.size = 80.0;
     c.rewardValue = 600.0;
     c.health = (c.health ?? 0.0) + 230.0;
   } else {
-    r = rng.rand(RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_YELLOW);
+    r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_YELLOW });
     if (r % 1620 < 4) {
       applyTint(c, [0.94, 0.84, 0.29, 1.0]);
       c.size = 85.0;
@@ -1114,19 +1130,21 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, playerExpe
 
 export function randSurvivalSpawnPos(
   rng: CrandLike,
-  terrainWidth: number,
-  terrainHeight: number,
-  callers: SurvivalSpawnPosCallers,
+  opts: {
+    terrainWidth: number;
+    terrainHeight: number;
+    callers: SurvivalSpawnPosCallers;
+  },
 ): Vec2 {
-  switch (rng.rand(callers.edge) & 3) {
+  switch (rng.rand({ caller: opts.callers.edge }) & 3) {
     case 0:
-      return new Vec2(rng.rand(callers.topX) % terrainWidth, -40.0);
+      return new Vec2(rng.rand({ caller: opts.callers.topX }) % opts.terrainWidth, -40.0);
     case 1:
-      return new Vec2(rng.rand(callers.bottomX) % terrainWidth, terrainHeight + 40.0);
+      return new Vec2(rng.rand({ caller: opts.callers.bottomX }) % opts.terrainWidth, opts.terrainHeight + 40.0);
     case 2:
-      return new Vec2(-40.0, rng.rand(callers.leftY) % terrainHeight);
+      return new Vec2(-40.0, rng.rand({ caller: opts.callers.leftY }) % opts.terrainHeight);
     default:
-      return new Vec2(terrainWidth + 40.0, rng.rand(callers.rightY) % terrainHeight);
+      return new Vec2(opts.terrainWidth + 40.0, rng.rand({ caller: opts.callers.rightY }) % opts.terrainHeight);
   }
 }
 
@@ -1135,29 +1153,30 @@ export function tickSurvivalWaveSpawns(
   spawnCooldown: number,
   frameDtMs: number,
   rng: CrandLike,
-  playerCount: number,
-  survivalElapsedMs: number,
-  playerExperience: number,
-  terrainWidth: number,
-  terrainHeight: number,
+  opts: {
+    playerCount: number;
+    survivalElapsedMs: number;
+    playerExperience: number;
+    terrainWidth: number;
+    terrainHeight: number;
+  },
 ): [number, CreatureInit[]] {
-  let cooldown = f32(f32(spawnCooldown) - f32(f32(playerCount) * f32(frameDtMs)));
+  let cooldown = f32(f32(spawnCooldown) - f32(f32(opts.playerCount) * f32(frameDtMs)));
   if (cooldown >= 0.0) {
     return [cooldown, []];
   }
 
   const spawns: CreatureInit[] = [];
   while (cooldown < 0.0) {
-    let intervalMs = 500 - ((f32(survivalElapsedMs) | 0) / 1800 | 0);
+    let intervalMs = 500 - ((f32(opts.survivalElapsedMs) | 0) / 1800 | 0);
     if (intervalMs < 0) {
       const extra = (1 - intervalMs) >> 1;
       intervalMs += (extra | 0) * 2;
       for (let i = 0; i < (extra | 0); i++) {
         const pos = randSurvivalSpawnPos(
-          rng, terrainWidth, terrainHeight,
-          SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS,
+          rng, { terrainWidth: opts.terrainWidth, terrainHeight: opts.terrainHeight, callers: SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS },
         );
-        spawns.push(buildSurvivalSpawnCreature(pos, rng, playerExperience));
+        spawns.push(buildSurvivalSpawnCreature(pos, rng, { playerExperience: opts.playerExperience }));
       }
     }
 
@@ -1167,10 +1186,9 @@ export function tickSurvivalWaveSpawns(
     cooldown = f32(cooldown + f32(intervalMs));
 
     const pos = randSurvivalSpawnPos(
-      rng, terrainWidth, terrainHeight,
-      SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS,
+      rng, { terrainWidth: opts.terrainWidth, terrainHeight: opts.terrainHeight, callers: SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS },
     );
-    spawns.push(buildSurvivalSpawnCreature(pos, rng, playerExperience));
+    spawns.push(buildSurvivalSpawnCreature(pos, rng, { playerExperience: opts.playerExperience }));
   }
 
   return [cooldown, spawns];
@@ -1184,9 +1202,9 @@ export interface SpawnTemplateCall {
 }
 
 
-export function advanceSurvivalSpawnStage(stage: number, playerLevel: number): [number, SpawnTemplateCall[]] {
+export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: number }): [number, SpawnTemplateCall[]] {
   stage = stage | 0;
-  const level = playerLevel | 0;
+  const level = opts.playerLevel | 0;
 
   const spawns: SpawnTemplateCall[] = [];
   const heading = Math.PI;
@@ -1329,10 +1347,13 @@ export function buildRushModeSpawnCreature(
   pos: Vec2,
   tintRgba: TintRGBA,
   rng: CrandLike,
-  typeId: number,
-  survivalElapsedMs: number,
+  opts: {
+    typeId: number;
+    survivalElapsedMs: number;
+  },
 ): CreatureInit {
-  const elapsedMs = survivalElapsedMs | 0;
+  const elapsedMs = opts.survivalElapsedMs | 0;
+  const typeId = opts.typeId;
 
   const c = allocCreature(-1, pos, rng);
   c.typeId = typeId as CreatureTypeId;
@@ -1340,9 +1361,9 @@ export function buildRushModeSpawnCreature(
 
   const elapsedF32 = f32(elapsedMs);
   c.health = f32(elapsedF32 * f32(1e-4) + 10.0);
-  c.heading = f32(f32(rng.rand(RngCallerStatic.CREATURE_SPAWN_HEADING) % 314) * f32(0.01));
+  c.heading = f32(f32(rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_HEADING }) % 314) * f32(0.01));
   c.moveSpeed = f32(elapsedF32 * f32(1e-5) + 2.5);
-  c.rewardValue = rng.rand(RngCallerStatic.CREATURE_SPAWN_REWARD) % 30 + 140;
+  c.rewardValue = rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_REWARD }) % 30 + 140;
 
   c.tint = tintRgba;
   c.contactDamage = 4.0;
@@ -1360,28 +1381,30 @@ export function tickRushModeSpawns(
   spawnCooldown: number,
   frameDtMs: number,
   rng: CrandLike,
-  playerCount: number,
-  survivalElapsedMs: number,
-  terrainWidth: number,
-  terrainHeight: number,
+  opts: {
+    playerCount: number;
+    survivalElapsedMs: number;
+    terrainWidth: number;
+    terrainHeight: number;
+  },
 ): [number, CreatureInit[]] {
-  let cooldown = f32(f32(spawnCooldown) - f32(f32(playerCount) * f32(frameDtMs)));
+  let cooldown = f32(f32(spawnCooldown) - f32(f32(opts.playerCount) * f32(frameDtMs)));
 
   const spawns: CreatureInit[] = [];
   while (cooldown < 0.0) {
     cooldown = f32(cooldown + 250.0);
 
-    const t = f32((survivalElapsedMs + 1.0) | 0);
+    const t = f32((opts.survivalElapsedMs + 1.0) | 0);
     const tintR = clamp01(f32(t * f32(1.0 / 120000.0) + 0.3));
     const tintG = clamp01(f32(t * 10000.0 + 0.3));
     const tintB = clamp01(f32(Math.sin(f32(t * f32(1e-4))) + 0.3));
     const tintA = 1.0;
     const tint: TintRGBA = [tintR, tintG, tintB, tintA];
 
-    const elapsedMs = survivalElapsedMs | 0;
+    const elapsedMs = opts.survivalElapsedMs | 0;
     const theta = f32(f32(elapsedMs) * f32(0.001));
-    const terrainWidthF = f32(terrainWidth);
-    const terrainHeightF = f32(terrainHeight);
+    const terrainWidthF = f32(opts.terrainWidth);
+    const terrainHeightF = f32(opts.terrainHeight);
     const spawnRight = new Vec2(
       f32(terrainWidthF + 64.0),
       f32(terrainHeightF * 0.5 + Math.cos(theta) * 256.0),
@@ -1391,11 +1414,11 @@ export function tickRushModeSpawns(
       f32(terrainHeightF * 0.5 + Math.sin(theta) * 256.0),
     );
 
-    let c = buildRushModeSpawnCreature(spawnRight, tint, rng, 2, elapsedMs);
+    let c = buildRushModeSpawnCreature(spawnRight, tint, rng, { typeId: 2, survivalElapsedMs: elapsedMs });
     c.aiMode = CreatureAiMode.ORBIT_PLAYER_WIDE;
     spawns.push(c);
 
-    c = buildRushModeSpawnCreature(spawnLeft, tint, rng, 3, elapsedMs);
+    c = buildRushModeSpawnCreature(spawnLeft, tint, rng, { typeId: 3, survivalElapsedMs: elapsedMs });
     c.aiMode = CreatureAiMode.ORBIT_PLAYER_WIDE;
     c.flags = (c.flags | CreatureFlags.AI7_LINK_TIMER) as CreatureFlags;
     if (c.moveSpeed !== null) {
@@ -1585,7 +1608,7 @@ function applyAlienSpawner(ctx: PlanBuilder, spec: AlienSpawnerSpec): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
   c.flags = CreatureFlags.ANIM_PING_PONG;
-  c.spawnSlot = ctx.addSlot(0, spec.timer, spec.limit, spec.interval, spec.childTemplateId);
+  c.spawnSlot = ctx.addSlot({ owner: 0, timer: spec.timer, limit: spec.limit, interval: spec.interval, child: spec.childTemplateId });
   c.size = spec.size;
   c.health = spec.health;
   c.moveSpeed = spec.moveSpeed;
@@ -1646,7 +1669,7 @@ registerTemplate([SpawnId.ZOMBIE_BOSS_SPAWNER_00], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ZOMBIE;
   c.flags = (CreatureFlags.ANIM_PING_PONG | CreatureFlags.ANIM_LONG_STRIP) as CreatureFlags;
-  c.spawnSlot = ctx.addSlot(0, 1.0, 812, 0.7, SpawnId.ZOMBIE_RANDOM_41);
+  c.spawnSlot = ctx.addSlot({ owner: 0, timer: 1.0, limit: 812, interval: 0.7, child: SpawnId.ZOMBIE_RANDOM_41 });
   c.size = 64.0;
   c.health = 8500.0;
   c.moveSpeed = 1.3;
@@ -1692,12 +1715,12 @@ registerTemplate(
   (ctx: PlanBuilder): void => {
     const c = ctx.base;
     c.typeId = BASIC_RANDOM_TYPE_IDS.get(ctx.templateId)!;
-    const size = (ctx.rng.rand(BASIC_RANDOM_SIZE_CALLERS.get(ctx.templateId)!) % 15) + 38.0;
-    applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
-    c.moveSpeed = (ctx.rng.rand(BASIC_RANDOM_MOVE_SPEED_CALLERS.get(ctx.templateId)!) % 18) * 0.1 + 1.1;
-    const tintB = (ctx.rng.rand(BASIC_RANDOM_TINT_B_CALLERS.get(ctx.templateId)!) % 25) * 0.01 + 0.8;
+    const size = (ctx.rng.rand({ caller: BASIC_RANDOM_SIZE_CALLERS.get(ctx.templateId)! }) % 15) + 38.0;
+    applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
+    c.moveSpeed = (ctx.rng.rand({ caller: BASIC_RANDOM_MOVE_SPEED_CALLERS.get(ctx.templateId)! }) % 18) * 0.1 + 1.1;
+    const tintB = (ctx.rng.rand({ caller: BASIC_RANDOM_TINT_B_CALLERS.get(ctx.templateId)! }) % 25) * 0.01 + 0.8;
     applyTint(c, [0.6, 0.6, clamp01(tintB), 1.0]);
-    c.contactDamage = (ctx.rng.rand(BASIC_RANDOM_CONTACT_DAMAGE_CALLERS.get(ctx.templateId)!) % 10) + 4.0;
+    c.contactDamage = (ctx.rng.rand({ caller: BASIC_RANDOM_CONTACT_DAMAGE_CALLERS.get(ctx.templateId)! }) % 10) + 4.0;
   },
 );
 
@@ -1705,16 +1728,16 @@ registerTemplate(
 registerTemplate([SpawnId.LIZARD_RANDOM_04], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.LIZARD;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_SIZE) % 15) + 38.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_SIZE }) % 15) + 38.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
   applyTint(c, [0.67, 0.67, 1.0, 1.0]);
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_MOVE_SPEED) % 18)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_MOVE_SPEED }) % 18)
     * 0.1
     + 1.1
   );
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });
@@ -1724,7 +1747,7 @@ registerTemplate([SpawnId.ALIEN_SPAWNER_RING_24_0E], (ctx: PlanBuilder): void =>
   const parent = ctx.base;
   parent.typeId = CreatureTypeId.ALIEN;
   parent.flags = CreatureFlags.ANIM_PING_PONG;
-  parent.spawnSlot = ctx.addSlot(0, 1.5, 64, 1.05, SpawnId.AI1_LIZARD_BLUE_TINT_1C);
+  parent.spawnSlot = ctx.addSlot({ owner: 0, timer: 1.5, limit: 64, interval: 1.05, child: SpawnId.AI1_LIZARD_BLUE_TINT_1C });
   parent.size = 32.0;
   parent.health = 50.0;
   parent.moveSpeed = 2.8;
@@ -1782,7 +1805,7 @@ registerTemplate([SpawnId.FORMATION_CHAIN_ALIEN_10_13], (ctx: PlanBuilder): void
   const parent = ctx.base;
   parent.typeId = CreatureTypeId.ALIEN;
   parent.aiMode = CreatureAiMode.ORBIT_LINK;
-  parent.pos = ctx.pos.offset(256.0);
+  parent.pos = ctx.pos.offset({ dx: 256.0 });
   applyTint(parent, [0.6, 0.8, 0.91, 1.0]);
   parent.health = 200.0;
   parent.maxHealth = 200.0;
@@ -1837,7 +1860,7 @@ registerTemplate(
     c.typeId = tid;
     c.health = hp;
 
-    const tint = (ctx.rng.rand(AI1_BLUE_TINT_CALLERS.get(ctx.templateId)!) % 40) * 0.01 + 0.5;
+    const tint = (ctx.rng.rand({ caller: AI1_BLUE_TINT_CALLERS.get(ctx.templateId)! }) % 40) * 0.01 + 0.5;
     applyTint(c, [tint, tint, 1.0, 1.0]);
     c.contactDamage = 5.0;
   },
@@ -1847,70 +1870,70 @@ registerTemplate(
 registerTemplate([SpawnId.ALIEN_RANDOM_1D], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_SIZE) % 20) + 35.0;
-  applySizeHealth(c, size, 8.0 / 7.0, 10.0);
-  c.moveSpeed = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_MOVE_SPEED) % 15) * 0.1 + 1.1;
-  c.rewardValue = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_REWARD) % 100) + 50.0;
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_SIZE }) % 20) + 35.0;
+  applySizeHealth(c, size, { healthScale: 8.0 / 7.0, healthAdd: 10.0 });
+  c.moveSpeed = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_MOVE_SPEED }) % 15) * 0.1 + 1.1;
+  c.rewardValue = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_REWARD }) % 100) + 50.0;
   applyTint(c, [
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_TINT_R) % 50) * 0.001 + 0.6,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_TINT_G) % 50) * 0.01 + 0.5,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_TINT_B) % 50) * 0.001 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_TINT_R }) % 50) * 0.001 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_TINT_G }) % 50) * 0.01 + 0.5,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_TINT_B }) % 50) * 0.001 + 0.6,
     1.0,
   ]);
-  c.contactDamage = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_CONTACT_DAMAGE) % 10) + 4.0;
+  c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_CONTACT_DAMAGE }) % 10) + 4.0;
 });
 
 
 registerTemplate([SpawnId.ALIEN_RANDOM_1E], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_SIZE) % 30) + 35.0;
-  applySizeHealth(c, size, 16.0 / 7.0, 10.0);
-  c.moveSpeed = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_MOVE_SPEED) % 17) * 0.1 + 1.5;
-  c.rewardValue = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_REWARD) % 200) + 50.0;
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_SIZE }) % 30) + 35.0;
+  applySizeHealth(c, size, { healthScale: 16.0 / 7.0, healthAdd: 10.0 });
+  c.moveSpeed = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_MOVE_SPEED }) % 17) * 0.1 + 1.5;
+  c.rewardValue = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_REWARD }) % 200) + 50.0;
   applyTint(c, [
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_TINT_R) % 50) * 0.001 + 0.6,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_TINT_G) % 50) * 0.001 + 0.6,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_TINT_B) % 50) * 0.01 + 0.5,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_TINT_R }) % 50) * 0.001 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_TINT_G }) % 50) * 0.001 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_TINT_B }) % 50) * 0.01 + 0.5,
     1.0,
   ]);
-  c.contactDamage = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_CONTACT_DAMAGE) % 30) + 4.0;
+  c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_CONTACT_DAMAGE }) % 30) + 4.0;
 });
 
 
 registerTemplate([SpawnId.ALIEN_RANDOM_1F], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_SIZE) % 30) + 45.0;
-  applySizeHealth(c, size, 26.0 / 7.0, 30.0);
-  c.moveSpeed = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_MOVE_SPEED) % 21) * 0.1 + 1.6;
-  c.rewardValue = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_REWARD) % 200) + 80.0;
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_SIZE }) % 30) + 45.0;
+  applySizeHealth(c, size, { healthScale: 26.0 / 7.0, healthAdd: 30.0 });
+  c.moveSpeed = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_MOVE_SPEED }) % 21) * 0.1 + 1.6;
+  c.rewardValue = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_REWARD }) % 200) + 80.0;
   applyTint(c, [
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_TINT_R) % 50) * 0.01 + 0.5,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_TINT_G) % 50) * 0.001 + 0.6,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_TINT_B) % 50) * 0.001 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_TINT_R }) % 50) * 0.01 + 0.5,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_TINT_G }) % 50) * 0.001 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_TINT_B }) % 50) * 0.001 + 0.6,
     1.0,
   ]);
-  c.contactDamage = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_CONTACT_DAMAGE) % 35) + 8.0;
+  c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_CONTACT_DAMAGE }) % 35) + 8.0;
 });
 
 
 registerTemplate([SpawnId.ALIEN_RANDOM_GREEN_20], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_SIZE) % 30) + 40.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_SIZE }) % 30) + 40.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_MOVE_SPEED) % 18)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_MOVE_SPEED }) % 18)
     * 0.1 + 1.1
   );
   const tintG = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_TINT_G) % 40) * 0.01
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_TINT_G }) % 40) * 0.01
     + 0.6
   );
   applyTint(c, [0.3, tintG, 0.3, 1.0]);
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });
@@ -1919,21 +1942,21 @@ registerTemplate([SpawnId.ALIEN_RANDOM_GREEN_20], (ctx: PlanBuilder): void => {
 registerTemplate([SpawnId.LIZARD_RANDOM_2E], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.LIZARD;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_SIZE) % 30) + 40.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_SIZE }) % 30) + 40.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_MOVE_SPEED) % 18)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_MOVE_SPEED }) % 18)
     * 0.1
     + 1.1
   );
   applyTint(c, [
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_TINT_R) % 40) * 0.01 + 0.6,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_TINT_G) % 40) * 0.01 + 0.6,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_TINT_B) % 40) * 0.01 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_TINT_R }) % 40) * 0.01 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_TINT_G }) % 40) * 0.01 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_TINT_B }) % 40) * 0.01 + 0.6,
     1.0,
   ]);
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });
@@ -1942,10 +1965,10 @@ registerTemplate([SpawnId.LIZARD_RANDOM_2E], (ctx: PlanBuilder): void => {
 registerTemplate([SpawnId.LIZARD_RANDOM_31], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.LIZARD;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_SIZE) % 30) + 40.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 10.0);
-  c.moveSpeed = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_MOVE_SPEED) % 18) * 0.1 + 1.1;
-  const tint = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_TINT) % 30) * 0.01 + 0.6;
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_SIZE }) % 30) + 40.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 10.0 });
+  c.moveSpeed = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_MOVE_SPEED }) % 18) * 0.1 + 1.1;
+  const tint = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_TINT }) % 30) * 0.01 + 0.6;
   applyTint(c, [tint, tint, 0.38, 1.0]);
   c.contactDamage = size * 0.14 + 4.0;
 });
@@ -1954,13 +1977,13 @@ registerTemplate([SpawnId.LIZARD_RANDOM_31], (ctx: PlanBuilder): void => {
 registerTemplate([SpawnId.SPIDER_SP1_RANDOM_32], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_SIZE) % 25) + 40.0;
-  applySizeHealthReward(c, size, 1.0, 10.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_SIZE }) % 25) + 40.0;
+  applySizeHealthReward(c, size, { healthScale: 1.0, healthAdd: 10.0 });
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_MOVE_SPEED) % 17)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_MOVE_SPEED }) % 17)
     * 0.1 + 1.1
   );
-  const tint = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_TINT) % 40) * 0.01 + 0.6;
+  const tint = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_TINT }) % 40) * 0.01 + 0.6;
   applyTint(c, [tint, tint, tint, 1.0]);
   c.contactDamage = size * 0.14 + 4.0;
 });
@@ -1969,20 +1992,20 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_32], (ctx: PlanBuilder): void => {
 registerTemplate([SpawnId.SPIDER_SP1_RANDOM_RED_33], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_SIZE) % 15) + 45.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_SIZE }) % 15) + 45.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_MOVE_SPEED) % 18)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_MOVE_SPEED }) % 18)
     * 0.1 + 1.1
   );
   applyTint(c, [
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_TINT_R) % 40) * 0.01 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_TINT_R }) % 40) * 0.01 + 0.6,
     0.5,
     0.5,
     1.0,
   ]);
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });
@@ -1991,20 +2014,20 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_RED_33], (ctx: PlanBuilder): void =>
 registerTemplate([SpawnId.SPIDER_SP1_RANDOM_GREEN_34], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_SIZE) % 20) + 40.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_SIZE }) % 20) + 40.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_MOVE_SPEED) % 18)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_MOVE_SPEED }) % 18)
     * 0.1 + 1.1
   );
   applyTint(c, [
     0.5,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_TINT_G) % 40) * 0.01 + 0.6,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_TINT_G }) % 40) * 0.01 + 0.6,
     0.5,
     1.0,
   ]);
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });
@@ -2013,20 +2036,20 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_GREEN_34], (ctx: PlanBuilder): void 
 registerTemplate([SpawnId.SPIDER_SP2_RANDOM_35], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP2;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_SIZE) % 10) + 30.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 20.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_SIZE }) % 10) + 30.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
   c.moveSpeed = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_MOVE_SPEED) % 18)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_MOVE_SPEED }) % 18)
     * 0.1 + 1.1
   );
   applyTint(c, [
     0.8,
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_TINT_G) % 20) * 0.01 + 0.8,
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_TINT_G }) % 20) * 0.01 + 0.8,
     0.8,
     1.0,
   ]);
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });
@@ -2041,7 +2064,7 @@ registerTemplate([SpawnId.ALIEN_AI7_ORBITER_36], (ctx: PlanBuilder): void => {
   c.health = 10.0;
   c.moveSpeed = 1.8;
   c.rewardValue = 150.0;
-  const tintG = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_AI7_ORBITER_TINT_G) % 5) * 0.01 + 0.65;
+  const tintG = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_AI7_ORBITER_TINT_G }) % 5) * 0.01 + 0.65;
   applyTint(c, [0.65, tintG, 0.95, 1.0]);
   c.contactDamage = 40.0;
 });
@@ -2055,7 +2078,7 @@ registerTemplate([SpawnId.SPIDER_SP2_RANGED_VARIANT_37], (ctx: PlanBuilder): voi
   c.moveSpeed = 3.2;
   c.rewardValue = 433.0;
   applyTint(c, [1.0, 0.75, 0.1, 1.0]);
-  c.size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANGED_VARIANT_37_SIZE) & 3) + 41;
+  c.size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANGED_VARIANT_37_SIZE }) & 3) + 41;
   c.contactDamage = 10.0;
 });
 
@@ -2069,7 +2092,7 @@ registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_38], (ctx: PlanBuilder): void => 
   c.moveSpeed = 4.8;
   c.rewardValue = 433.0;
   applyTint(c, [1.0, 0.75, 0.1, 1.0]);
-  c.size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_AI7_TIMER_38_SIZE) & 3) + 41;
+  c.size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_AI7_TIMER_38_SIZE }) & 3) + 41;
   c.contactDamage = 10.0;
 });
 
@@ -2083,7 +2106,7 @@ registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_WEAK_39], (ctx: PlanBuilder): voi
   c.moveSpeed = 4.8;
   c.rewardValue = 50.0;
   applyTint(c, [0.8, 0.65, 0.1, 1.0]);
-  c.size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_AI7_TIMER_WEAK_39_SIZE) % 4) + 26;
+  c.size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_AI7_TIMER_WEAK_39_SIZE }) % 4) + 26;
   c.contactDamage = 10.0;
 });
 
@@ -2094,9 +2117,9 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_3D], (ctx: PlanBuilder): void => {
   c.health = 70.0;
   c.moveSpeed = 2.6;
   c.rewardValue = 120.0;
-  const tint = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_3D_TINT) % 20) * 0.01 + 0.8;
+  const tint = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_3D_TINT }) % 20) * 0.01 + 0.8;
   applyTint(c, [tint, tint, tint, 1.0]);
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_3D_SIZE) % 7) + 45;
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_3D_SIZE }) % 7) + 45;
   c.size = size;
   c.contactDamage = size * 0.22;
 });
@@ -2105,13 +2128,13 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_3D], (ctx: PlanBuilder): void => {
 registerTemplate([SpawnId.ZOMBIE_RANDOM_41], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ZOMBIE;
-  const size = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_SIZE) % 30) + 40.0;
-  applySizeHealthReward(c, size, 8.0 / 7.0, 10.0);
+  const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_SIZE }) % 30) + 40.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 10.0 });
   applySizeMoveSpeed(c, size, 0.0025, 0.9);
-  const tint = (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_TINT) % 40) * 0.01 + 0.6;
+  const tint = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_TINT }) % 40) * 0.01 + 0.6;
   applyTint(c, [tint, tint, tint, 1.0]);
   c.contactDamage = (
-    (ctx.rng.rand(RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_CONTACT_DAMAGE) % 10)
+    (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
 });

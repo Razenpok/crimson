@@ -178,7 +178,7 @@ export class EndNoteView {
       return;
     }
 
-    buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: END_NOTE_BUTTON_STEP_Y * scale });
     const rushW = buttonWidth(resources, this._rushButton.label, { scale, forceWide: this._rushButton.forceWide });
     if (buttonUpdate(this._rushButton, { pos: buttonPos, width: rushW, dtMs, mouse, click })) {
       this.state.config.gameplay.mode = GameMode.RUSH;
@@ -186,7 +186,7 @@ export class EndNoteView {
       return;
     }
 
-    buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: END_NOTE_BUTTON_STEP_Y * scale });
     const typoW = buttonWidth(resources, this._typoButton.label, { scale, forceWide: this._typoButton.forceWide });
     if (buttonUpdate(this._typoButton, { pos: buttonPos, width: typoW, dtMs, mouse, click })) {
       this.state.config.gameplay.mode = GameMode.TYPO;
@@ -194,7 +194,7 @@ export class EndNoteView {
       return;
     }
 
-    buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: END_NOTE_BUTTON_STEP_Y * scale });
     const mainW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     if (buttonUpdate(this._mainMenuButton, { pos: buttonPos, width: mainW, dtMs, mouse, click })) {
       this._beginCloseTransition('back_to_menu');
@@ -227,8 +227,8 @@ export class EndNoteView {
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, END_NOTE_PANEL_W * scale, END_NOTE_PANEL_H * scale),
-      WHITE, fxDetail,
+      { dst: wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, END_NOTE_PANEL_W * scale, END_NOTE_PANEL_H * scale),
+      tint: WHITE, shadow: fxDetail },
     );
 
     const font = resources.smallFont;
@@ -273,10 +273,10 @@ export class EndNoteView {
     for (let idx = 0; idx < bodyLines.length; idx++) {
       drawSmallText(font, bodyLines[idx], bodyPos, bodyColor);
       if (idx !== bodyLines.length - 1) {
-        bodyPos = bodyPos.offset(0.0, END_NOTE_LINE_STEP_Y * scale);
+        bodyPos = bodyPos.offset({ dy: END_NOTE_LINE_STEP_Y * scale });
       }
     }
-    bodyPos = bodyPos.offset(0.0, END_NOTE_AFTER_BODY_Y_GAP * scale);
+    bodyPos = bodyPos.offset({ dy: END_NOTE_AFTER_BODY_Y_GAP * scale });
     drawSmallText(font, 'Good luck with your battles, trooper!', bodyPos, bodyColor);
 
     // Buttons
@@ -286,13 +286,13 @@ export class EndNoteView {
     ));
     const survivalW = buttonWidth(resources, this._survivalButton.label, { scale, forceWide: this._survivalButton.forceWide });
     buttonDraw(resources, this._survivalButton, { pos: buttonPos, width: survivalW, scale });
-    buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: END_NOTE_BUTTON_STEP_Y * scale });
     const rushW = buttonWidth(resources, this._rushButton.label, { scale, forceWide: this._rushButton.forceWide });
     buttonDraw(resources, this._rushButton, { pos: buttonPos, width: rushW, scale });
-    buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: END_NOTE_BUTTON_STEP_Y * scale });
     const typoW = buttonWidth(resources, this._typoButton.label, { scale, forceWide: this._typoButton.forceWide });
     buttonDraw(resources, this._typoButton, { pos: buttonPos, width: typoW, scale });
-    buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: END_NOTE_BUTTON_STEP_Y * scale });
     const mainW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainW, scale });
 
@@ -300,7 +300,7 @@ export class EndNoteView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 
   takeAction(): string | null {

@@ -63,7 +63,9 @@ const MOUSE_BUTTON_RIGHT = 2;
 // Binding helpers
 // ---------------------------------------------------------------------------
 
-function rowBindingCode(row: RebindRowSpec, playerIndex: number, controls: CrimsonControlsConfig): number {
+function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; controls: CrimsonControlsConfig }): number {
+  const playerIndex = opts.playerIndex;
+  const controls = opts.controls;
   const pc = controls.players[playerIndex];
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES:
@@ -129,9 +131,9 @@ function setRowBindingCode(
   }
 }
 
-function defaultRowBindingCode(playerIndex: number, row: RebindRowSpec): number {
+function defaultRowBindingCode(opts: { playerIndex: number; row: RebindRowSpec }): number {
   const controls = defaultCrimsonConfig().controls;
-  return rowBindingCode(row, playerIndex, controls);
+  return rowBindingCode(opts.row, { playerIndex: opts.playerIndex, controls });
 }
 
 // ---------------------------------------------------------------------------
@@ -354,11 +356,11 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _bindingDefaultCode(playerIndex: number, row: RebindRowSpec): number {
-    return defaultRowBindingCode(playerIndex, row);
+    return defaultRowBindingCode({ playerIndex, row });
   }
 
   private _bindingCode(playerIndex: number, row: RebindRowSpec): number {
-    return rowBindingCode(row, playerIndex, this.state.config.controls);
+    return rowBindingCode(row, { playerIndex, controls: this.state.config.controls });
   }
 
   private _setBindingCode(playerIndex: number, row: RebindRowSpec, code: number): void {
@@ -462,7 +464,7 @@ export class ControlsMenuView extends PanelMenuView {
     aimScheme: AimScheme,
     moveMode: MovementControlType,
   ): [string, RebindRowSpec[]][] {
-    const [aimRows, moveRows, miscRows] = controlsRebindPlan(aimScheme, moveMode, playerIndex);
+    const [aimRows, moveRows, miscRows] = controlsRebindPlan({ aimScheme, moveMode, playerIndex });
     const sections: [string, RebindRowSpec[]][] = [['Aiming', aimRows], ['Moving', moveRows]];
     if (miscRows.length > 0) {
       sections.push(['Misc', miscRows]);
@@ -606,11 +608,12 @@ export class ControlsMenuView extends PanelMenuView {
   // -----------------------------------------------------------------------
 
   private _dropdownLayout(
-    pos: Vec2,
-    items: string[],
-    scale: number,
-    font: SmallFontData,
+    opts: { pos: Vec2; items: string[]; scale: number; font: SmallFontData },
   ): ControlsDropdownLayout {
+    const pos = opts.pos;
+    const items = opts.items;
+    const scale = opts.scale;
+    const font = opts.font;
     const textScale = 1.0 * scale;
     let maxLabelW = 0.0;
     for (const label of items) {
@@ -651,7 +654,7 @@ export class ControlsMenuView extends PanelMenuView {
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     const hoveredHeader = enabled && mouseInsideRectWithPadding(
-      mouse, layout.pos, layout.width, 14.0 * scale,
+      mouse, { pos: layout.pos, width: layout.width, height: 14.0 * scale },
     );
     if (hoveredHeader && click) {
       return [!isOpen, null, true];
@@ -668,7 +671,7 @@ export class ControlsMenuView extends PanelMenuView {
     for (let idx = 0; idx < itemCount; idx++) {
       const itemY = layout.rowsY0 + layout.rowH * idx;
       const hovered = enabled && mouseInsideRectWithPadding(
-        mouse, new Vec2(layout.pos.x, itemY), layout.width, 14.0 * scale,
+        mouse, { pos: new Vec2(layout.pos.x, itemY), width: layout.width, height: 14.0 * scale },
       );
       if (hovered && click) {
         return [false, idx, true];
@@ -694,18 +697,18 @@ export class ControlsMenuView extends PanelMenuView {
     const aimItems = aimItemIds.map(a => inputConfigureForLabel(a));
     const playerItems = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
 
-    const moveLayout = this._dropdownLayout(
-      new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 144.0 * panelScale),
-      moveItems, panelScale, font,
-    );
-    const aimLayout = this._dropdownLayout(
-      new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 102.0 * panelScale),
-      aimItems, panelScale, font,
-    );
-    const playerLayout = this._dropdownLayout(
-      new Vec2(leftTopLeft.x + 340.0 * panelScale, leftTopLeft.y + 56.0 * panelScale),
-      playerItems, panelScale, font,
-    );
+    const moveLayout = this._dropdownLayout({
+      pos: new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 144.0 * panelScale),
+      items: moveItems, scale: panelScale, font,
+    });
+    const aimLayout = this._dropdownLayout({
+      pos: new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 102.0 * panelScale),
+      items: aimItems, scale: panelScale, font,
+    });
+    const playerLayout = this._dropdownLayout({
+      pos: new Vec2(leftTopLeft.x + 340.0 * panelScale, leftTopLeft.y + 56.0 * panelScale),
+      items: playerItems, scale: panelScale, font,
+    });
 
     const rebindActive = this._rebindActive();
     const moveEnabled = !(this._aimMethodOpen || this._playerProfileOpen || rebindActive);
@@ -765,20 +768,18 @@ export class ControlsMenuView extends PanelMenuView {
     // Left (controls options) panel: standard 254px height
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const leftH = MENU_PANEL_HEIGHT * panelScale;
-    drawClassicMenuPanel(
-      panel,
-      wgl.makeRectangle(leftTopLeft.x, leftTopLeft.y, panelW, leftH),
-      WHITE, fxDetail,
-    );
+    drawClassicMenuPanel(panel, {
+      dst: wgl.makeRectangle(leftTopLeft.x, leftTopLeft.y, panelW, leftH),
+      tint: WHITE, shadow: !!fxDetail,
+    });
 
     // Right (configured bindings) panel: tall 378px panel rendered as 3 vertical slices
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
     const rightH = CONTROLS_RIGHT_PANEL_HEIGHT * panelScale;
-    drawClassicMenuPanel(
-      panel,
-      wgl.makeRectangle(rightTopLeft.x, rightTopLeft.y, panelW, rightH),
-      WHITE, fxDetail, true, // flipX
-    );
+    drawClassicMenuPanel(panel, {
+      dst: wgl.makeRectangle(rightTopLeft.x, rightTopLeft.y, panelW, rightH),
+      tint: WHITE, shadow: !!fxDetail, flipX: true,
+    });
   }
 
   // -----------------------------------------------------------------------
@@ -811,18 +812,18 @@ export class ControlsMenuView extends PanelMenuView {
     if (aimSelected < 0) aimSelected = 0;
     const playerSelected = Math.max(0, Math.min(playerItems.length - 1, playerIdx));
 
-    const moveLayout = this._dropdownLayout(
-      new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 144.0 * panelScale),
-      moveItems, panelScale, font,
-    );
-    const aimLayout = this._dropdownLayout(
-      new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 102.0 * panelScale),
-      aimItems, panelScale, font,
-    );
-    const playerLayout = this._dropdownLayout(
-      new Vec2(leftTopLeft.x + 340.0 * panelScale, leftTopLeft.y + 56.0 * panelScale),
-      playerItems, panelScale, font,
-    );
+    const moveLayout = this._dropdownLayout({
+      pos: new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 144.0 * panelScale),
+      items: moveItems, scale: panelScale, font,
+    });
+    const aimLayout = this._dropdownLayout({
+      pos: new Vec2(leftTopLeft.x + 214.0 * panelScale, leftTopLeft.y + 102.0 * panelScale),
+      items: aimItems, scale: panelScale, font,
+    });
+    const playerLayout = this._dropdownLayout({
+      pos: new Vec2(leftTopLeft.x + 340.0 * panelScale, leftTopLeft.y + 56.0 * panelScale),
+      items: playerItems, scale: panelScale, font,
+    });
 
     // --- Left panel: "Configure for" + method selectors ---
     const textControls = getTexture(resources, TextureId.UI_TEXT_CONTROLS);
@@ -1015,7 +1016,7 @@ export class ControlsMenuView extends PanelMenuView {
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const hoveredHeader = enabled && mouseInsideRectWithPadding(
-      mouse, layout.pos, layout.width, 14.0 * scale,
+      mouse, { pos: layout.pos, width: layout.width, height: 14.0 * scale },
     );
 
     const widgetH = isOpen ? layout.fullH : layout.headerH;
@@ -1066,7 +1067,7 @@ export class ControlsMenuView extends PanelMenuView {
     for (let i = 0; i < items.length; i++) {
       const itemY = layout.rowsY0 + layout.rowH * i;
       const hovered = enabled && mouseInsideRectWithPadding(
-        mouse, new Vec2(layout.pos.x, itemY), layout.width, 14.0 * scale,
+        mouse, { pos: new Vec2(layout.pos.x, itemY), width: layout.width, height: 14.0 * scale },
       );
       let alpha = 153 / 255;
       if (hovered) alpha = 242 / 255;

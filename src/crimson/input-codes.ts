@@ -125,18 +125,18 @@ class PressedState {
     this.wheelDown = wheelDelta < 0;
   }
 
-  markDown(playerIndex: number, keyCode: number, isDown: boolean): boolean {
-    this.down.set(this._key(playerIndex, keyCode), isDown);
-    return isDown;
+  markDown(opts: { playerIndex: number; keyCode: number; isDown: boolean }): boolean {
+    this.down.set(this._key(opts.playerIndex, opts.keyCode), opts.isDown);
+    return opts.isDown;
   }
 
-  isPressed(playerIndex: number, keyCode: number, isDown: boolean): boolean {
-    const key = this._key(playerIndex, keyCode);
+  isPressed(opts: { playerIndex: number; keyCode: number; isDown: boolean }): boolean {
+    const key = this._key(opts.playerIndex, opts.keyCode);
     const cached = this.pressedCache.get(key);
     if (cached !== undefined) return cached;
     const prev = this.prevDown.get(key) ?? false;
-    const pressed = isDown && !prev;
-    this.down.set(key, isDown);
+    const pressed = opts.isDown && !prev;
+    this.down.set(key, opts.isDown);
     this.pressedCache.set(key, pressed);
     return pressed;
   }
@@ -168,12 +168,14 @@ function _digitalDownForPlayer(keyCode: number, playerIndex: number): boolean {
   return false;
 }
 
-export function inputCodeIsDown(keyCode: number, playerIndex: number = 0): boolean {
+export function inputCodeIsDown(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
+  const playerIndex = opts.playerIndex ?? 0;
   const down = _digitalDownForPlayer(keyCode, playerIndex);
-  return _pressedState.markDown(playerIndex, keyCode, down);
+  return _pressedState.markDown({ playerIndex, keyCode, isDown: down });
 }
 
-export function inputCodeIsPressed(keyCode: number, playerIndex: number = 0): boolean {
+export function inputCodeIsPressed(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
+  const playerIndex = opts.playerIndex ?? 0;
   if (keyCode === INPUT_CODE_UNBOUND) return false;
 
   // Wheel codes
@@ -181,19 +183,19 @@ export function inputCodeIsPressed(keyCode: number, playerIndex: number = 0): bo
   if (keyCode === 0x10A) return _pressedState.wheelDown;
 
   const down = _digitalDownForPlayer(keyCode, playerIndex);
-  return _pressedState.isPressed(playerIndex, keyCode, down);
+  return _pressedState.isPressed({ playerIndex, keyCode, isDown: down });
 }
 
-export function inputAxisValue(keyCode: number, _playerIndex: number = 0): number {
+export function inputAxisValue(keyCode: number, opts: { playerIndex?: number } = {}): number {
   // Gamepad axes not supported in simplified web port
   return 0.0;
 }
 
 export function captureFirstPressedInputCode(
-  playerIndex: number,
-  includeKeyboard = true,
-  includeMouse = true,
+  opts: { playerIndex: number; includeKeyboard?: boolean; includeMouse?: boolean; includeGamepad?: boolean; includeAxes?: boolean; axisThreshold?: number },
 ): number | null {
+  const includeKeyboard = opts.includeKeyboard ?? true;
+  const includeMouse = opts.includeMouse ?? true;
   if (includeKeyboard) {
     let key: number;
     while ((key = InputState.getKeyPressed()) > 0) {
@@ -299,21 +301,21 @@ export function inputCodeName(keyCode: number): string {
 // --- Primary input helpers ---
 
 function _inputPrimaryAnyDown(fireCodes: number[], playerCount: number): boolean {
-  if (inputCodeIsDown(0x100, 0)) return true;
+  if (inputCodeIsDown(0x100, { playerIndex: 0 })) return true;
   const count = Math.max(1, Math.min(4, playerCount));
   for (let i = 0; i < count; i++) {
-    if (inputCodeIsDown(fireCodes[i], i)) return true;
+    if (inputCodeIsDown(fireCodes[i], { playerIndex: i })) return true;
   }
   return false;
 }
 
-export function inputPrimaryIsDown(fireCodes: number[], playerCount: number): boolean {
-  const down = _inputPrimaryAnyDown(fireCodes, playerCount);
-  _pressedState.markDown(PRIMARY_EDGE_SENTINEL_PLAYER, PRIMARY_EDGE_SENTINEL_KEY, down);
+export function inputPrimaryIsDown(opts: { fireCodes: number[]; playerCount: number }): boolean {
+  const down = _inputPrimaryAnyDown(opts.fireCodes, opts.playerCount);
+  _pressedState.markDown({ playerIndex: PRIMARY_EDGE_SENTINEL_PLAYER, keyCode: PRIMARY_EDGE_SENTINEL_KEY, isDown: down });
   return down;
 }
 
-export function inputPrimaryJustPressed(fireCodes: number[], playerCount: number): boolean {
-  const down = _inputPrimaryAnyDown(fireCodes, playerCount);
-  return _pressedState.isPressed(PRIMARY_EDGE_SENTINEL_PLAYER, PRIMARY_EDGE_SENTINEL_KEY, down);
+export function inputPrimaryJustPressed(opts: { fireCodes: number[]; playerCount: number }): boolean {
+  const down = _inputPrimaryAnyDown(opts.fireCodes, opts.playerCount);
+  return _pressedState.isPressed({ playerIndex: PRIMARY_EDGE_SENTINEL_PLAYER, keyCode: PRIMARY_EDGE_SENTINEL_KEY, isDown: down });
 }

@@ -48,14 +48,24 @@ export function bonusApply(
   state: GameplayState,
   player: PlayerState,
   bonusId: BonusId,
-  origin: Vec2,
-  creatures: readonly CreatureState[],
-  players: PlayerState[],
-  amount: number | null = null,
-  detailPreset: number = 5,
-  deferFreezeCorpseFx: boolean = false,
-  freezeCorpseIndices: Set<number> | null = null,
+  opts: {
+    amount?: number | null;
+    origin: Vec2;
+    creatures: readonly CreatureState[];
+    players: PlayerState[];
+    detailPreset?: number;
+    deferFreezeCorpseFx?: boolean;
+    freezeCorpseIndices?: Set<number> | null;
+  },
 ): void {
+  const origin = opts.origin;
+  const creatures = opts.creatures;
+  const players = opts.players;
+  let amount = opts.amount ?? null;
+  const detailPreset = opts.detailPreset ?? 5;
+  const deferFreezeCorpseFx = opts.deferFreezeCorpseFx ?? false;
+  const freezeCorpseIndices = opts.freezeCorpseIndices ?? null;
+
   const meta = BONUS_BY_ID.get(bonusId);
   if (meta === undefined) {
     return;

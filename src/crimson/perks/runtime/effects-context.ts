@@ -9,11 +9,9 @@ import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 
 export function creatureFindInRadius(
   creatures: readonly CreatureState[],
-  pos: Vec2,
-  radius: number,
-  startIndex: number,
+  opts: { pos: Vec2; radius: number; startIndex: number },
 ): number {
-  startIndex = Math.max(0, startIndex | 0);
+  let startIndex = Math.max(0, opts.startIndex | 0);
   const maxIndex = Math.min(creatures.length, 0x180);
   if (startIndex >= maxIndex) {
     return -1;
@@ -25,7 +23,7 @@ export function creatureFindInRadius(
       continue;
     }
 
-    const dist = creature.pos.sub(pos).length() - radius;
+    const dist = creature.pos.sub(opts.pos).length() - opts.radius;
     const threshold = nativeFindSizeMargin(creature.size);
     if (threshold < dist) {
       continue;
@@ -81,9 +79,7 @@ export class PerksUpdateEffectsCtx {
 
     target = creatureFindInRadius(
       this.creatures,
-      player.aim,
-      12.0,
-      0,
+      { pos: player.aim, radius: 12.0, startIndex: 0 },
     );
     this._aimTargetByPlayerIndex.set(playerIndex, target);
     return target;

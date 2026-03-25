@@ -494,7 +494,7 @@ export function drawHudOverlay(
 
     for (let idx = 0; idx < hudPlayers.length; idx++) {
       const hudPlayer = hudPlayers[idx];
-      const barPos = barBasePos.offset(0.0, playerCount > 1 ? idx * 16.0 : 0.0);
+      const barPos = barBasePos.offset({ dy: playerCount > 1 ? idx * 16.0 : 0.0 });
       const bgDst = wgl.makeRectangle(
         ui(barPos.x),
         ui(barPos.y),
@@ -615,7 +615,7 @@ export function drawHudOverlay(
       const ammoCount = Math.max(0, hudPlayer.weapon.ammo | 0);
       for (let barIdx = 0; barIdx < bars; barIdx++) {
         const barAlpha = barIdx < ammoCount ? baseAlpha : baseAlpha * HUD_AMMO_DIM_ALPHA;
-        const barPos = playerAmmoBase.offset(barIdx * HUD_AMMO_BAR_STEP, 0.0);
+        const barPos = playerAmmoBase.offset({ dx: barIdx * HUD_AMMO_BAR_STEP });
         const dst = wgl.makeRectangle(
           ui(barPos.x),
           ui(barPos.y),
@@ -940,7 +940,7 @@ export function drawHudOverlay(
       let panelPos: Vec2;
       let panelSize: Vec2;
       if (!smallIndicators) {
-        panelPos = slotPos.offset(0.0, HUD_BONUS_PANEL_OFFSET_Y);
+        panelPos = slotPos.offset({ dy: HUD_BONUS_PANEL_OFFSET_Y });
         panelSize = new Vec2(182.0, 53.0);
       } else {
         panelPos = slotPos.add(new Vec2(-96.0, 5.0));
@@ -969,7 +969,7 @@ export function drawHudOverlay(
       // Slot icon.
       if (slot.iconId >= 0) {
         const src = _bonusIconSrc(bonusesTexture, slot.iconId);
-        const iconPos = slotPos.offset(-1.0, 0.0);
+        const iconPos = slotPos.offset({ dx: -1.0 });
         const dst = wgl.makeRectangle(
           ui(iconPos.x),
           ui(iconPos.y),
@@ -1136,7 +1136,7 @@ export function drawHudOverlay(
 
     const weaponName = weaponDisplayName(
       hudPlayer.weapon.weaponId,
-      state.preserveBugs,
+      { preserveBugs: state.preserveBugs },
     );
     const weaponColor = _withAlpha(HUD_TEXT_COLOR, textAlphaVal);
     const textPos = auxTextBasePos.add(auxStep.mul(idx));

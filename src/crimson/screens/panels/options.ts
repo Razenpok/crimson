@@ -153,25 +153,25 @@ export class OptionsMenuView extends PanelMenuView {
     const rectOn = getTexture(resources, TextureId.UI_RECT_ON);
     const rectOff = getTexture(resources, TextureId.UI_RECT_OFF);
 
-    if (this._updateSlider('sfx', this._sliderSfx, sliderPos.offset(0.0, 47.0 * scale), rectOn, rectOff, scale)) {
+    if (this._updateSlider('sfx', this._sliderSfx, sliderPos.offset({ dy: 47.0 * scale }), rectOn, rectOff, scale)) {
       config.audio.sfxVolume = this._sliderSfx.value * 0.1;
       audioSetSfxVolume(this._optState.audio, config.audio.sfxVolume);
       this._dirty = true;
     }
 
-    if (this._updateSlider('music', this._sliderMusic, sliderPos.offset(0.0, 67.0 * scale), rectOn, rectOff, scale)) {
+    if (this._updateSlider('music', this._sliderMusic, sliderPos.offset({ dy: 67.0 * scale }), rectOn, rectOff, scale)) {
       config.audio.musicVolume = this._sliderMusic.value * 0.1;
       audioSetMusicVolume(this._optState.audio, config.audio.musicVolume);
       this._dirty = true;
     }
 
-    if (this._updateSlider('detail', this._sliderDetail, sliderPos.offset(0.0, 87.0 * scale), rectOn, rectOff, scale)) {
+    if (this._updateSlider('detail', this._sliderDetail, sliderPos.offset({ dy: 87.0 * scale }), rectOn, rectOff, scale)) {
       const preset = applyDetailPreset(config as unknown as CrimsonConfig, this._sliderDetail.value);
       this._sliderDetail.value = preset;
       this._dirty = true;
     }
 
-    if (this._updateSlider('mouse', this._sliderMouse, sliderPos.offset(0.0, 107.0 * scale), rectOn, rectOff, scale)) {
+    if (this._updateSlider('mouse', this._sliderMouse, sliderPos.offset({ dy: 107.0 * scale }), rectOn, rectOff, scale)) {
       let sensitivity = this._sliderMouse.value * 0.1;
       if (sensitivity < 0.1) sensitivity = 0.1;
       if (sensitivity > 1.0) sensitivity = 1.0;
@@ -179,13 +179,13 @@ export class OptionsMenuView extends PanelMenuView {
       this._dirty = true;
     }
 
-    if (this._updateCheckbox(labelPos.offset(0.0, 135.0 * scale), scale, resources)) {
+    if (this._updateCheckbox(labelPos.offset({ dy: 135.0 * scale }), scale, resources)) {
       config.gameplay.showInfoTexts = this._uiInfoTexts;
       this._dirty = true;
     }
 
     // `sub_4475d0`: controls button is aligned with the panel content base.
-    const controlsPos = basePos.offset(0.0, 155.0 * scale);
+    const controlsPos = basePos.offset({ dy: 155.0 * scale });
     const dtMs = Math.min(dt, 0.1) * 1000.0;
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
@@ -270,8 +270,8 @@ export class OptionsMenuView extends PanelMenuView {
 
     const basePos = panelTopLeft.add(new Vec2(212.0 * panelScale, 40.0 * panelScale));
     // `sub_4475d0`: title label is anchored at panel_top + 40.
-    const labelPos = basePos.offset(8.0 * panelScale);
-    const sliderPos = labelPos.offset(130.0 * panelScale);
+    const labelPos = basePos.offset({ dx: 8.0 * panelScale });
+    const sliderPos = labelPos.offset({ dx: 130.0 * panelScale });
     return { basePos, labelPos, sliderPos, scale: panelScale };
   }
 
@@ -290,7 +290,7 @@ export class OptionsMenuView extends PanelMenuView {
     const [mx, my] = InputState.mousePosition();
     const mousePos = { x: mx, y: my };
     const hovered = mouseInsideRectWithPadding(
-      mousePos, pos, barW, 18.0 * scale, 3.0 * scale, 1.0 * scale,
+      mousePos, { pos, width: barW, height: 18.0 * scale, leftPad: 3.0 * scale, topPad: 1.0 * scale },
     );
 
     let changed = false;
@@ -376,7 +376,7 @@ export class OptionsMenuView extends PanelMenuView {
     for (let i = 0; i < OptionsMenuView._LABELS.length; i++) {
       drawSmallText(
         font, OptionsMenuView._LABELS[i],
-        labelPos.offset(0.0, yOffsets[i] * scale),
+        labelPos.offset({ dy: yOffsets[i] * scale }),
         textColor,
       );
     }
@@ -386,17 +386,17 @@ export class OptionsMenuView extends PanelMenuView {
     const rectW = rectOn.width * scale;
     const rectH = rectOn.height * scale;
 
-    this._drawSlider(this._sliderSfx, sliderPos.offset(0.0, 47.0 * scale), rectOn, rectOff, rectW, rectH);
-    this._drawSlider(this._sliderMusic, sliderPos.offset(0.0, 67.0 * scale), rectOn, rectOff, rectW, rectH);
-    this._drawSlider(this._sliderDetail, sliderPos.offset(0.0, 87.0 * scale), rectOn, rectOff, rectW, rectH);
-    this._drawSlider(this._sliderMouse, sliderPos.offset(0.0, 107.0 * scale), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderSfx, sliderPos.offset({ dy: 47.0 * scale }), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderMusic, sliderPos.offset({ dy: 67.0 * scale }), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderDetail, sliderPos.offset({ dy: 87.0 * scale }), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderMouse, sliderPos.offset({ dy: 107.0 * scale }), rectOn, rectOff, rectW, rectH);
 
     const checkTex = this._uiInfoTexts
       ? getTexture(resources, TextureId.UI_CHECK_ON)
       : getTexture(resources, TextureId.UI_CHECK_OFF);
     const checkW = checkTex.width * scale;
     const checkH = checkTex.height * scale;
-    const checkPos = labelPos.offset(0.0, 135.0 * scale);
+    const checkPos = labelPos.offset({ dy: 135.0 * scale });
     wgl.drawTexturePro(
       checkTex,
       wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
@@ -409,7 +409,7 @@ export class OptionsMenuView extends PanelMenuView {
       textColor,
     );
 
-    const buttonPos = basePos.offset(0.0, 155.0 * scale);
+    const buttonPos = basePos.offset({ dy: 155.0 * scale });
     const buttonW = buttonWidth(
       resources, this._controlsButton.label,
       { scale, forceWide: this._controlsButton.forceWide },

@@ -155,7 +155,10 @@ export class WorldState {
     state.hardcore = opts.hardcore;
     state.preserveBugs = opts.preserveBugs ?? false;
     const players: PlayerState[] = [];
-    const creatures = new CreaturePool(undefined, spawnEnv, state.effects, {
+    const creatures = new CreaturePool({
+      env: spawnEnv,
+      effects: state.effects,
+    }, {
       buildSpawnPlan,
       resolveTint,
       tickSpawnSlot,
@@ -199,12 +202,12 @@ export class WorldState {
     // Apply world-dt perk steps (e.g. reflex-boost time scale)
     if (applyWorldDtSteps) {
       for (const step of _WORLD_DT_STEPS) {
-        dt = Number(step(dt, this.players));
+        dt = Number(step({ dt, players: this.players }));
       }
     }
 
     // Normalize input frame to match player count
-    const normalizedInputs = normalizeInputFrame(inputs, this.players.length).asList();
+    const normalizedInputs = normalizeInputFrame(inputs, { playerCount: this.players.length }).asList();
 
     // Snapshot previous positions & health
     const prevPositions: [number, number][] = this.players.map(
@@ -224,10 +227,10 @@ export class WorldState {
     }
 
     // Perks update effects
-    perksUpdateEffects(this.state, this.players, dt, creatureEntries, fxQueue);
+    perksUpdateEffects(this.state, this.players, dt, { creatures: creatureEntries, fxQueue });
 
     // effects_update runs early in the native frame loop, before creature/projectile updates
-    this.state.effects.update(dt, fxQueue);
+    this.state.effects.update(dt, { fxQueue });
 
     // --- Creature update ---
 
@@ -237,7 +240,7 @@ export class WorldState {
       playerTakeProjectileDamage(this.state, this.players[idx], Number(damage));
     };
 
-    const creatureResult = this.creatures.update(dt, {
+    const creatureResult = this.creatures.update(dt, { options: {
       state: this.state,
       players: this.players,
       rng: this.state.rng,
@@ -248,7 +251,7 @@ export class WorldState {
       fxQueueRotated,
       detailPreset: detailPreset | 0,
       violenceDisabled: violenceDisabled | 0,
-    });
+    } });
 
     const deaths: CreatureDeath[] = [...creatureResult.deaths];
     const sfx: SfxId[] = [...creatureResult.sfx];
@@ -272,27 +275,29 @@ export class WorldState {
 
       creatureApplyDamageWithLethalFollowup(
         creature,
-        Number(damage),
-        damageType | 0,
-        impulse,
-        owner,
-        Number(dt),
-        this.players,
-        this.state.rng,
-        Boolean(this.state.preserveBugs),
-        this.state.effects,
-        detailPreset | 0,
-        (deathSfx: SfxId[]) => {
-          this._recordCreatureDeath({
-            creatureIndex: idx,
-            dt: Number(dt),
-            detailPreset: detailPreset | 0,
-            worldSize: Number(worldSize),
-            fxQueue,
-            deaths,
-            sfx,
-            deathSfx,
-          });
+        {
+          damageAmount: Number(damage),
+          damageType: damageType | 0,
+          impulse,
+          owner,
+          dt: Number(dt),
+          players: this.players,
+          rng: this.state.rng,
+          preserveBugs: Boolean(this.state.preserveBugs),
+          effects: this.state.effects,
+          detailPreset: detailPreset | 0,
+          onLethal: (deathSfx: SfxId[]) => {
+            this._recordCreatureDeath({
+              creatureIndex: idx,
+              dt: Number(dt),
+              detailPreset: detailPreset | 0,
+              worldSize: Number(worldSize),
+              fxQueue,
+              deaths,
+              sfx,
+              deathSfx,
+            });
+          },
         },
       );
     };
@@ -336,10 +341,12 @@ export class WorldState {
       });
       const [hitTrigger, keys] = planHitSfx(
         [_hit],
-        gameMode,
-        this.state.demoModeActive,
-        hitAudioGameTuneStarted,
-        this.state.rng,
+        {
+          gameMode,
+          demoModeActive: this.state.demoModeActive,
+          gameTuneStarted: hitAudioGameTuneStarted,
+          rng: this.state.rng,
+        },
       );
       if (hitTrigger) {
         triggerGameTune = true;
@@ -413,14 +420,12 @@ export class WorldState {
 
     // --- Particle & sprite effect updates ---
 
-    this.state.particles.update(
-      dt,
-      creatureEntries,
-      null,
-      _killCreatureNoCorpse,
+    this.state.particles.update(dt, {
+      creatures: creatureEntries,
+      killCreature: _killCreatureNoCorpse,
       fxQueue,
-      this.state.spriteEffects,
-    );
+      spriteEffects: this.state.spriteEffects,
+    });
 
     this.state.spriteEffects.update(dt);
 
@@ -508,15 +513,17 @@ export class WorldState {
       this.state,
       this.players,
       dt,
-      creatureEntries,
-      true, // updateHud
-      detailPreset | 0,
-      Boolean(deferFreezeCorpseFx),
-      freezeCorpseIndicesAtTickStart,
+      {
+        creatures: creatureEntries,
+        updateHud: true,
+        detailPreset: detailPreset | 0,
+        deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+        freezeCorpseIndices: freezeCorpseIndicesAtTickStart,
+      },
     );
 
     if (pickups.length > 0) {
-      emitBonusPickupEffects(this.state, pickups, detailPreset | 0);
+      emitBonusPickupEffects({ state: this.state, pickups, detailPreset: detailPreset | 0 });
     }
 
     survivalEnforceRewardWeaponGuard(this.state, this.players);
@@ -669,18 +676,17 @@ export class WorldState {
     keepCorpse?: boolean;
     deathSfx?: SfxId[];
   }): void {
-    const death = this.creatures.handleDeath(
-      opts.creatureIndex | 0,
-      this.state,
-      this.players,
-      this.state.rng,
-      Number(opts.dt),
-      opts.detailPreset | 0,
-      Number(opts.worldSize),
-      Number(opts.worldSize),
-      opts.fxQueue,
-      opts.keepCorpse ?? true,
-    );
+    const death = this.creatures.handleDeath(opts.creatureIndex | 0, {
+      state: this.state,
+      players: this.players,
+      rng: this.state.rng,
+      dt: Number(opts.dt),
+      detailPreset: opts.detailPreset | 0,
+      worldWidth: Number(opts.worldSize),
+      worldHeight: Number(opts.worldSize),
+      fxQueue: opts.fxQueue,
+      keepCorpse: opts.keepCorpse ?? true,
+    });
     opts.deaths.push(death);
     if (opts.deathSfx !== undefined && opts.deathSfx.length > 0 && opts.sfx !== undefined) {
       opts.sfx.push(...opts.deathSfx);
@@ -699,15 +705,15 @@ export class WorldState {
       violenceDisabled: number;
     },
   ): ProjectileDecalPostCtx {
-    return queueProjectileDecalsPreHit(
-      this.state,
-      this.players,
-      opts.fxQueue,
+    return queueProjectileDecalsPreHit({
+      state: this.state,
+      players: this.players,
+      fxQueue: opts.fxQueue,
       hit,
-      this.state.rng,
-      opts.detailPreset | 0,
-      opts.violenceDisabled | 0,
-    );
+      rng: this.state.rng,
+      detailPreset: opts.detailPreset | 0,
+      violenceDisabled: opts.violenceDisabled | 0,
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -718,11 +724,11 @@ export class WorldState {
     postCtx: ProjectileDecalPostCtx;
     fxQueue: FxQueue;
   }): void {
-    queueProjectileDecalsPostHit(
-      opts.fxQueue,
-      opts.postCtx,
-      this.state.rng,
-    );
+    queueProjectileDecalsPostHit({
+      fxQueue: opts.fxQueue,
+      postCtx: opts.postCtx,
+      rng: this.state.rng,
+    });
   }
 
   // -------------------------------------------------------------------------

@@ -33,28 +33,27 @@ export interface CreatureAIUpdate {
 
 export function creatureAi7TickLinkTimer(
   creature: CreatureAIStateLike,
-  dt_ms: number,
-  rng: CrandLike,
+  opts: { dtMs: number; rng: CrandLike },
 ): void {
   if (((creature.flags as number) & _FLAG_AI7_LINK_TIMER) === 0) {
     return;
   }
 
   if (creature.link_index < 0) {
-    creature.link_index += dt_ms;
+    creature.link_index += opts.dtMs;
     if (creature.link_index >= 0) {
       creature.ai_mode = CreatureAiMode.HOLD_TIMER;
       creature.link_index =
-        (rng.rand(RngCallerStatic.CREATURE_UPDATE_ALL_AI7_LINK_TIMER_HOLD) & 0x1FF) + 500;
+        (opts.rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_AI7_LINK_TIMER_HOLD }) & 0x1FF) + 500;
     }
     return;
   }
 
-  creature.link_index -= dt_ms;
+  creature.link_index -= opts.dtMs;
   if (creature.link_index < 1) {
     creature.link_index =
       -700 -
-      (rng.rand(RngCallerStatic.CREATURE_UPDATE_ALL_AI7_LINK_TIMER_RESET) & 0x3FF);
+      (opts.rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_AI7_LINK_TIMER_RESET }) & 0x3FF);
   }
 }
 
@@ -102,11 +101,9 @@ function _linkTargetF32(link_pos: Vec2, offset: Vec2): Vec2 {
 
 export function creatureAiUpdateTarget(
   creature: CreatureAIStateLike,
-  player_pos: Vec2,
-  creatures: readonly CreatureAIStateLike[],
-  dt: number,
+  opts: { playerPos: Vec2; creatures: readonly CreatureAIStateLike[]; dt: number },
 ): CreatureAIUpdate {
-  const dist_to_player = _distanceF32(creature.pos, player_pos);
+  const dist_to_player = _distanceF32(creature.pos, opts.playerPos);
   const orbit_phase = f32(f32((creature.phase_seed | 0) * f32(3.7)) * NATIVE_PI);
   let move_scale: number = 1.0;
   let self_damage: number | null = null;
@@ -116,27 +113,27 @@ export function creatureAiUpdateTarget(
   let ai_mode = creature.ai_mode;
   if (ai_mode === CreatureAiMode.ORBIT_PLAYER) {
     if (dist_to_player > 800.0) {
-      creature.target = f32Vec2(player_pos);
+      creature.target = f32Vec2(opts.playerPos);
     } else {
-      creature.target = _orbitTargetF32(player_pos, orbit_phase, dist_to_player, 0.85);
+      creature.target = _orbitTargetF32(opts.playerPos, orbit_phase, dist_to_player, 0.85);
     }
   } else if (ai_mode === CreatureAiMode.ORBIT_PLAYER_WIDE) {
-    creature.target = _orbitTargetF32(player_pos, orbit_phase, dist_to_player, 0.9);
+    creature.target = _orbitTargetF32(opts.playerPos, orbit_phase, dist_to_player, 0.9);
   } else if (ai_mode === CreatureAiMode.ORBIT_PLAYER_TIGHT) {
     if (dist_to_player > 800.0) {
-      creature.target = f32Vec2(player_pos);
+      creature.target = f32Vec2(opts.playerPos);
     } else {
-      creature.target = _orbitTargetF32(player_pos, orbit_phase, dist_to_player, 0.55);
+      creature.target = _orbitTargetF32(opts.playerPos, orbit_phase, dist_to_player, 0.55);
     }
   } else if (ai_mode === CreatureAiMode.FOLLOW_LINK) {
-    const link = resolveLiveLink(creatures, creature.link_index);
+    const link = resolveLiveLink(opts.creatures, creature.link_index);
     if (link !== null) {
       creature.target = _linkTargetF32(link.pos, creature.target_offset ?? new Vec2());
     } else {
       creature.ai_mode = CreatureAiMode.ORBIT_PLAYER;
     }
   } else if (ai_mode === CreatureAiMode.FOLLOW_LINK_TETHERED) {
-    const link = resolveLiveLink(creatures, creature.link_index);
+    const link = resolveLiveLink(opts.creatures, creature.link_index);
     if (link !== null) {
       creature.target = _linkTargetF32(link.pos, creature.target_offset ?? new Vec2());
       const dist_to_target = _distanceF32(creature.pos, creature.target);
@@ -151,26 +148,26 @@ export function creatureAiUpdateTarget(
 
   ai_mode = creature.ai_mode;
   if (ai_mode === CreatureAiMode.LINK_GUARD) {
-    const link = resolveLiveLink(creatures, creature.link_index);
+    const link = resolveLiveLink(opts.creatures, creature.link_index);
     if (link === null) {
       creature.ai_mode = CreatureAiMode.ORBIT_PLAYER;
       self_damage = 1000.0;
     } else if (dist_to_player > 800.0) {
-      creature.target = f32Vec2(player_pos);
+      creature.target = f32Vec2(opts.playerPos);
     } else {
-      creature.target = _orbitTargetF32(player_pos, orbit_phase, dist_to_player, 0.85);
+      creature.target = _orbitTargetF32(opts.playerPos, orbit_phase, dist_to_player, 0.85);
     }
   } else if (ai_mode === CreatureAiMode.HOLD_TIMER) {
     if ((creature.flags & CreatureFlags.AI7_LINK_TIMER) && creature.link_index > 0) {
       creature.target = f32Vec2(creature.pos);
     } else if (!(creature.flags & CreatureFlags.AI7_LINK_TIMER) && creature.orbit_radius > 0.0) {
       creature.target = f32Vec2(creature.pos);
-      creature.orbit_radius = f32(creature.orbit_radius - dt);
+      creature.orbit_radius = f32(creature.orbit_radius - opts.dt);
     } else {
       creature.ai_mode = CreatureAiMode.ORBIT_PLAYER;
     }
   } else if (ai_mode === CreatureAiMode.ORBIT_LINK) {
-    const link = resolveLiveLink(creatures, creature.link_index);
+    const link = resolveLiveLink(opts.creatures, creature.link_index);
     if (link === null) {
       creature.ai_mode = CreatureAiMode.ORBIT_PLAYER;
     } else {
@@ -189,11 +186,11 @@ export function creatureAiUpdateTarget(
   }
 
   if (creature.force_target || creature.ai_mode === CreatureAiMode.CHASE_PLAYER) {
-    creature.target = f32Vec2(player_pos);
+    creature.target = f32Vec2(opts.playerPos);
   }
 
   const dx = f32(creature.target.x - creature.pos.x);
   const dy = f32(creature.target.y - creature.pos.y);
-  creature.target_heading = headingFromDeltaF32(dx, dy);
+  creature.target_heading = headingFromDeltaF32({ dx, dy });
   return { move_scale: f32(move_scale), self_damage };
 }

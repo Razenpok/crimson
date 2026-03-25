@@ -121,9 +121,9 @@ function keyDownWithSinglePlayerAlt(
   config: CrimsonConfig,
   playerIndex: number,
 ): boolean {
-  if (inputCodeIsDown(primaryKey, playerIndex)) return true;
+  if (inputCodeIsDown(primaryKey, { playerIndex })) return true;
   if (singlePlayerAltKeysEnabled(config, playerIndex)) {
-    return inputCodeIsDown(altKey, playerIndex);
+    return inputCodeIsDown(altKey, { playerIndex });
   }
   return false;
 }
@@ -134,7 +134,7 @@ function aimPovLeftActive(
 ): boolean {
   // Native input_aim_pov_left_active always reads joystick POV index 0.
   const povIndex = preserveBugs ? 0 : playerIndex;
-  return inputCodeIsDown(_AIM_POV_LEFT_CODE, povIndex);
+  return inputCodeIsDown(_AIM_POV_LEFT_CODE, { playerIndex: povIndex });
 }
 
 function aimPovRightActive(
@@ -143,7 +143,7 @@ function aimPovRightActive(
 ): boolean {
   // Native input_aim_pov_right_active always reads joystick POV index 0.
   const povIndex = preserveBugs ? 0 : playerIndex;
-  return inputCodeIsDown(_AIM_POV_RIGHT_CODE, povIndex);
+  return inputCodeIsDown(_AIM_POV_RIGHT_CODE, { playerIndex: povIndex });
 }
 
 // ---------------------------------------------------------------------------
@@ -197,7 +197,8 @@ export class LocalInputInterpreter {
     return Math.max(0, Math.min(3, slot));
   }
 
-  reset(players?: readonly PlayerState[] | null): void {
+  reset(opts: { players?: readonly PlayerState[] | null } = {}): void {
+    const players = opts.players ?? null;
     for (let idx = 0; idx < 4; idx++) {
       const state = this._states[idx];
       state.moveTarget = new Vec2(-1.0, -1.0);
@@ -399,11 +400,11 @@ export class LocalInputInterpreter {
         (moveBackwardPressed ? 1.0 : 0.0) - (moveForwardPressed ? 1.0 : 0.0),
       );
     } else if (moveModeType === MovementControlType.DUAL_ACTION_PAD) {
-      const axisY = -inputAxisValue(moveAxisY, idx);
-      const axisX = -inputAxisValue(moveAxisX, idx);
+      const axisY = -inputAxisValue(moveAxisY, { playerIndex: idx });
+      const axisX = -inputAxisValue(moveAxisX, { playerIndex: idx });
       moveVec = new Vec2(clampUnit(axisX), clampUnit(axisY));
     } else if (moveModeType === MovementControlType.MOUSE_POINT_CLICK) {
-      moveToCursorPressed = inputCodeIsDown(reloadKey, idx);
+      moveToCursorPressed = inputCodeIsDown(reloadKey, { playerIndex: idx });
       if (moveToCursorPressed) {
         state.moveTarget = mouseWorld;
       }
@@ -452,10 +453,10 @@ export class LocalInputInterpreter {
     } else {
       // Default / unknown movement type
       moveVec = new Vec2(
-        (inputCodeIsDown(turnRightKey, idx) ? 1.0 : 0.0) -
-          (inputCodeIsDown(turnLeftKey, idx) ? 1.0 : 0.0),
-        (inputCodeIsDown(moveBackwardKey, idx) ? 1.0 : 0.0) -
-          (inputCodeIsDown(moveForwardKey, idx) ? 1.0 : 0.0),
+        (inputCodeIsDown(turnRightKey, { playerIndex: idx }) ? 1.0 : 0.0) -
+          (inputCodeIsDown(turnLeftKey, { playerIndex: idx }) ? 1.0 : 0.0),
+        (inputCodeIsDown(moveBackwardKey, { playerIndex: idx }) ? 1.0 : 0.0) -
+          (inputCodeIsDown(moveForwardKey, { playerIndex: idx }) ? 1.0 : 0.0),
       );
     }
 
@@ -480,10 +481,10 @@ export class LocalInputInterpreter {
         moveModeType === MovementControlType.RELATIVE ||
         moveModeType === MovementControlType.STATIC
       ) {
-        if (inputCodeIsDown(aimRightKey, idx)) {
+        if (inputCodeIsDown(aimRightKey, { playerIndex: idx })) {
           heading = heading + dt * AIM_KEYBOARD_TURN_RATE;
         }
-        if (inputCodeIsDown(aimLeftKey, idx)) {
+        if (inputCodeIsDown(aimLeftKey, { playerIndex: idx })) {
           heading = heading - dt * AIM_KEYBOARD_TURN_RATE;
         }
         aim = aimPointFromHeading(player.pos, heading);
@@ -495,8 +496,8 @@ export class LocalInputInterpreter {
         aim = aimPointFromHeading(player.pos, heading);
       }
     } else if (aimScheme === AimScheme.DUAL_ACTION_PAD) {
-      const axisY = inputAxisValue(aimAxisY, idx);
-      const axisX = inputAxisValue(aimAxisX, idx);
+      const axisY = inputAxisValue(aimAxisY, { playerIndex: idx });
+      const axisX = inputAxisValue(aimAxisX, { playerIndex: idx });
       const axisVec = new Vec2(axisX, axisY);
       const magSq = axisVec.lengthSq();
       if (magSq > 1e-9) {
@@ -564,13 +565,13 @@ export class LocalInputInterpreter {
     // -----------------------------------------------------------------------
     // Fire / reload
     // -----------------------------------------------------------------------
-    let fireDown = inputCodeIsDown(fireKey, idx);
-    const firePressed = inputCodeIsPressed(fireKey, idx);
+    let fireDown = inputCodeIsDown(fireKey, { playerIndex: idx });
+    const firePressed = inputCodeIsPressed(fireKey, { playerIndex: idx });
     if (aimScheme === AimScheme.COMPUTER && computerAutoFire) {
       fireDown = true;
     }
-    const reloadPressed = inputCodeIsPressed(reloadKey, idx);
-    const _reloadDown = inputCodeIsDown(reloadKey, idx);
+    const reloadPressed = inputCodeIsPressed(reloadKey, { playerIndex: idx });
+    const _reloadDown = inputCodeIsDown(reloadKey, { playerIndex: idx });
 
     return new PlayerInput({
       move: moveVec,

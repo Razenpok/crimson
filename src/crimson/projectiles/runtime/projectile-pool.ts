@@ -103,13 +103,18 @@ export class ProjectilePool {
   }
 
   spawn(
-    pos: Vec2,
-    angle: number,
-    typeId: ProjectileTemplateId,
-    owner: OwnerRef,
-    travelBudget: number = 0.0,
-    hitsPlayers: boolean = false,
+    opts: {
+      pos: Vec2;
+      angle: number;
+      typeId: ProjectileTemplateId;
+      owner: OwnerRef;
+      travelBudget?: number;
+      hitsPlayers?: boolean;
+    },
   ): number {
+    const { pos, angle, typeId, owner } = opts;
+    const travelBudget = opts.travelBudget ?? 0.0;
+    const hitsPlayers = opts.hitsPlayers ?? false;
     let index: number | null = null;
     for (let i = 0; i < this._entries.length; i++) {
       if (!this._entries[i].active) {
@@ -332,7 +337,7 @@ export class ProjectilePool {
 
           let hitIdx: number | null = null;
           const ownerCreatureIdx = proj.owner.creatureIndexInBounds(creatures.length);
-          for (const idx of creatureSpatial.candidateIndices(proj.pos, proj.hitRadius)) {
+          for (const idx of creatureSpatial.candidateIndices({ pos: proj.pos, radius: proj.hitRadius })) {
             const creature = creatures[idx];
             if (!_creatureIsCollidable(creature)) {
               continue;
@@ -434,7 +439,7 @@ export class ProjectilePool {
 
           if (proj.lifeTimer !== 0.25 && rule.stopOnHit) {
             proj.lifeTimer = 0.25;
-            const jitter = rng.rand(RngCallerStatic.PROJECTILE_UPDATE_STOP_ON_HIT_JITTER) & 3;
+            const jitter = rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_STOP_ON_HIT_JITTER }) & 3;
             const jitterDx = f32(dirX * jitter);
             const jitterDy = f32(dirY * jitter);
             proj.pos = new Vec2(
@@ -501,13 +506,13 @@ export class ProjectilePool {
           ) {
             let shardAngle = proj.angle - NATIVE_HALF_PI;
             shardAngle +=
-              (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_DEFAULT_FREEZE_SHARD_ANGLE) % 100) * 0.01;
-            effects.spawnFreezeShard(
-              proj.pos,
-              shardAngle,
+              (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_DEFAULT_FREEZE_SHARD_ANGLE }) % 100) * 0.01;
+            effects.spawnFreezeShard({
+              pos: proj.pos,
+              angle: shardAngle,
               rng,
               detailPreset,
-            );
+            });
           }
 
           if (proj.damagePool === 1.0) {
@@ -547,10 +552,9 @@ export class ProjectilePool {
   updateDemo(
     dt: number,
     creatures: readonly CreatureStateLike[],
-    worldSize: number,
-    speedByType: Map<number, number>,
-    damageByType: Map<number, number>,
+    opts: { worldSize: number; speedByType: Map<number, number>; damageByType: Map<number, number> },
   ): ProjectileHit[] {
+    const { worldSize, speedByType, damageByType } = opts;
     if (dt <= 0.0) {
       return [];
     }

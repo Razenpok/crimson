@@ -146,9 +146,7 @@ export class TypoShooterMode extends BaseGameplayMode {
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      questUnlockIndex,
-      this.worldSize | 0,
-      this.worldSize | 0,
+      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
     this.simWorld.state.rng.srand(this.state.rng.state | 0);
@@ -243,7 +241,7 @@ export class TypoShooterMode extends BaseGameplayMode {
 
   protected _buildLocalInputs(_opts: { dt: number }): PlayerInput[] {
     const aim = this.screenToWorld(this._uiMouse);
-    return [buildTypoPlayerInput(aim, false, false)];
+    return [buildTypoPlayerInput({ aim, fireRequested: false, reloadRequested: false })];
   }
 
   // ---------------------------------------------------------------------------
@@ -368,22 +366,21 @@ export class TypoShooterMode extends BaseGameplayMode {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      mousePos,
-      this._cursorPulseTime,
+      { pos: mousePos, pulseTime: this._cursorPulseTime },
     );
   }
 
   private _drawNameLabels(): void {
     const typo = this.state.typo;
     if (typo == null || typo.names == null) return;
-    drawTypoNameLabels(
-      this.creatures.entries,
-      typo.names.names ?? [],
-      (worldPos: Vec2) => this.worldToScreen(worldPos),
-      (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
+    drawTypoNameLabels({
+      creatures: this.creatures.entries,
+      names: typo.names.names ?? [],
+      worldToScreen: (worldPos: Vec2) => this.worldToScreen(worldPos),
+      drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
         this._drawUiText(text, pos, color, scale),
-      (text: string, scale: number) => this._uiTextWidth(text, scale),
-    );
+      measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
+    });
   }
 
   private _drawTypingBox(): void {
@@ -395,11 +392,13 @@ export class TypoShooterMode extends BaseGameplayMode {
     drawTypingBox(
       screenH,
       panelTexture,
-      typo.typing.text ?? '',
-      this._cursorPulseTime,
-      (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
-        this._drawUiText(text, pos, color, scale),
-      (text: string, scale: number) => this._uiTextWidth(text, scale),
+      {
+        text: typo.typing.text ?? '',
+        cursorPulseTime: this._cursorPulseTime,
+        drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
+          this._drawUiText(text, pos, color, scale),
+        measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
+      },
     );
   }
 }

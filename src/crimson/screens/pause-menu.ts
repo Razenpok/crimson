@@ -233,8 +233,7 @@ export class PauseMenuView {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      new Vec2(...InputState.mousePosition()),
-      this._cursorPulseTime,
+      { pos: new Vec2(...InputState.mousePosition()), pulseTime: this._cursorPulseTime },
     );
   }
 
@@ -403,12 +402,12 @@ export class PauseMenuView {
       const rotationDeg = angleRad * (180.0 / Math.PI);
 
       if (fxDetail) {
-        drawUiQuadShadow(
-          item,
-          wgl.makeRectangle(0.0, 0.0, itemW, itemH),
-          wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
+        drawUiQuadShadow({
+          texture: item,
+          src: wgl.makeRectangle(0.0, 0.0, itemW, itemH),
+          dst: wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
           origin, rotationDeg,
-        );
+        });
       }
       wgl.drawTexturePro(
         item,
@@ -484,11 +483,12 @@ export class PauseMenuView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin, rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,

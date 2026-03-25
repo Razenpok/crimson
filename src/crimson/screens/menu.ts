@@ -89,8 +89,9 @@ export function menuGroundCamera(state: GameState): Vec2 {
 
 export function ensureMenuGround(
   state: GameState,
-  regenerate: boolean = false,
+  opts: { regenerate?: boolean } = {},
 ): GroundRenderer {
+  const regenerate = opts.regenerate ?? false;
   const resources = requireRuntimeResources(state);
   let ground = state.menuGround;
   const generatedNewTerrain = ground === null || regenerate;
@@ -111,9 +112,7 @@ export function ensureMenuGround(
   if (generatedNewTerrain) {
     const terrain = advanceUnlockTerrain(
       state.rng,
-      0, // unlockIndex — quest_unlock_index not tracked on GameState yet
-      1024,
-      1024,
+      { unlockIndex: 0, width: 1024, height: 1024 }, // unlockIndex — quest_unlock_index not tracked on GameState yet
     );
     // resolveTerrainSlots: map slot indices to texture IDs and look them up.
     base = getTexture(resources, slotToTextureId[terrain.terrainSlots[0]]);
@@ -153,7 +152,7 @@ function drawMenuCursorHelper(
   const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
   const [mx, my] = InputState.mousePosition();
   const pos = new Vec2(mx, my);
-  drawMenuCursor(particles, cursorTex, pos, pulseTime);
+  drawMenuCursor(particles, cursorTex, { pos, pulseTime });
 }
 
 // ---------------------------------------------------------------------------
@@ -561,13 +560,13 @@ export class MenuView {
       const origin = wgl.makeVector2(-offsetX, -offsetY);
       const rotationDeg = angleRad * (180.0 / Math.PI);
       if (fxDetail) {
-        drawUiQuadShadow(
-          item,
-          wgl.makeRectangle(0.0, 0.0, itemW, itemH),
-          wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
+        drawUiQuadShadow({
+          texture: item,
+          src: wgl.makeRectangle(0.0, 0.0, itemW, itemH),
+          dst: wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
           origin,
           rotationDeg,
-        );
+        });
       }
       wgl.drawTexturePro(
         item,
@@ -760,12 +759,13 @@ export class MenuView {
     const signOrigin = wgl.makeVector2(-signOffsetX, -signOffsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin,
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin,
         rotationDeg,
-      );
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,

@@ -61,7 +61,8 @@ export class RenderResources {
     this.ground.textureScale = this.config.display.textureScale;
   }
 
-  setGroundTextures(base: wgl.Texture, overlay: wgl.Texture, detail: wgl.Texture): void {
+  setGroundTextures(opts: { base: wgl.Texture; overlay: wgl.Texture; detail: wgl.Texture }): void {
+    const { base, overlay, detail } = opts;
     this.clearPendingTerrainFx();
     if (this.ground === null) {
       this.ground = new GroundRenderer(
@@ -80,7 +81,8 @@ export class RenderResources {
     this.syncGroundSettings();
   }
 
-  scheduleGroundGeneration(seed: number): void {
+  scheduleGroundGeneration(opts: { seed: number }): void {
+    const { seed } = opts;
     if (this.ground === null) return;
     this.ground.scheduleGenerate(seed);
   }
@@ -102,14 +104,15 @@ export class RenderResources {
     }
   }
 
-  open(terrainSeed: number): void {
+  open(opts: { terrainSeed: number }): void {
+    const { terrainSeed } = opts;
     this.close();
     const resources = this.resources;
 
     const base = getTexture(resources, TId.TER_Q1_BASE);
     const overlay = getTexture(resources, TId.TER_Q1_OVERLAY);
-    this.setGroundTextures(base, overlay, base);
-    this.scheduleGroundGeneration(terrainSeed);
+    this.setGroundTextures({ base, overlay, detail: base });
+    this.scheduleGroundGeneration({ seed: terrainSeed });
     this.fxTextures = {
       particles: getTexture(resources, TId.PARTICLES),
       bodyset: getTexture(resources, TId.BODYSET),
@@ -137,13 +140,14 @@ export class RenderResources {
   ): void {
     if (this.ground === null || this.fxTextures === null) return;
     if (terrainFxBatchIsEmpty(batch)) return;
-    bakeTerrainFxBatch(this.ground, batch, this.fxTextures, corpseFrameForType);
+    bakeTerrainFxBatch(this.ground, { batch, textures: this.fxTextures, corpseFrameForType });
   }
 
   consumeTerrainFxBatch(
     batch: TerrainFxBatch,
-    corpseFrameForType: (creatureTypeId: number) => number = creatureCorpseFrameForType,
+    opts: { corpseFrameForType?: (creatureTypeId: number) => number },
   ): void {
+    const corpseFrameForType = opts.corpseFrameForType ?? creatureCorpseFrameForType;
     if (terrainFxBatchIsEmpty(batch)) return;
     const ground = this.ground;
     if (ground === null || ground.textureFailed || this.fxTextures === null) return;

@@ -73,12 +73,12 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
   const scale = ctx.scale;
   const alpha = ctx.alpha;
 
-  const drawRocketFx = (size: number, offset: number, rgba: RGBA): void => {
-    const fxAlpha = rgba.a;
+  const drawRocketFx = (opts: { size: number; offset: number; rgba: RGBA }): void => {
+    const fxAlpha = opts.rgba.a;
     if (fxAlpha <= 1e-3) return;
-    const tint = rgba.toWgl();
-    const fxPos = ctx.screenPos.sub(direction.mul(offset * scale));
-    const dstSize = size * scale;
+    const tint = opts.rgba.toWgl();
+    const fxPos = ctx.screenPos.sub(direction.mul(opts.offset * scale));
+    const dstSize = opts.size * scale;
     const dst = wgl.makeRectangle(fxPos.x, fxPos.y, dstSize, dstSize);
     const origin = wgl.makeVector2(dstSize * 0.5, dstSize * 0.5);
     wgl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
@@ -86,10 +86,10 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   // Large bloom around the rocket.
-  drawRocketFx(140.0, 5.0, new RGBA(1.0, 1.0, 1.0, alpha * 0.48));
+  drawRocketFx({ size: 140.0, offset: 5.0, rgba: new RGBA(1.0, 1.0, 1.0, alpha * 0.48) });
 
   const [glowR, glowG, glowB] = style.glowRgb;
-  drawRocketFx(style.glowSize, 9.0, new RGBA(glowR, glowG, glowB, alpha * style.glowAlphaMul));
+  drawRocketFx({ size: style.glowSize, offset: 9.0, rgba: new RGBA(glowR, glowG, glowB, alpha * style.glowAlphaMul) });
   wgl.endBlendMode();
 }
 

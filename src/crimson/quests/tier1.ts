@@ -82,8 +82,8 @@ registerQuest({
   let trigger = 2000;
   let step = 2000;
   while (true) {
-    const angle = (rng.rand(RngCallerStatic.QUEST_BUILD_TARGET_PRACTICE_ANGLE) % 612) * 0.01;
-    const radius = ((rng.rand(RngCallerStatic.QUEST_BUILD_TARGET_PRACTICE_RADIUS) % 8) + 2) * 32;
+    const angle = (rng.rand({ caller: RngCallerStatic.QUEST_BUILD_TARGET_PRACTICE_ANGLE }) % 612) * 0.01;
+    const radius = ((rng.rand({ caller: RngCallerStatic.QUEST_BUILD_TARGET_PRACTICE_RADIUS }) % 8) + 2) * 32;
     const point = center.add(Vec2.fromAngle(angle).mul(radius));
     const heading = headingFromCenter(point, center);
     entries.push(
@@ -180,7 +180,7 @@ registerQuest({
     entries.push(
       spawnAt(edges.left, { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: trigger + 200, count: 6 }),
     );
-    if ((rng.rand(RngCallerStatic.QUEST_BUILD_THE_RANDOM_FACTOR_BRUTE_GATE) % 5) === 3) {
+    if ((rng.rand({ caller: RngCallerStatic.QUEST_BUILD_THE_RANDOM_FACTOR_BRUTE_GATE }) % 5) === 3) {
       entries.push(
         spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_GREY_BRUTE_29, triggerMs: trigger, count: ctx.playerCount }),
       );

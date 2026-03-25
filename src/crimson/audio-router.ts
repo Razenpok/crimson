@@ -47,20 +47,19 @@ export class AudioRouter implements PresentationAudioSink {
 
   playSfx(sfx: SfxId): void {
     if (this.audio === null || !this.sfxEnabled) return;
-    audioPlaySfx(this.audio, sfx, this._reflexBoostTimer());
+    audioPlaySfx(this.audio, sfx, { reflexBoostTimer: this._reflexBoostTimer() });
   }
 
   triggerGameTune(): string | null {
     if (this.audio === null) return null;
-    return audioTriggerGameTune(this.audio, this.audioRng);
+    return audioTriggerGameTune(this.audio, { rng: this.audioRng });
   }
 
   handlePlayerAudio(
     player: PlayerState,
-    prevShotSeq: number,
-    prevReloadActive: boolean,
-    prevReloadTimer: number,
+    opts: { prevShotSeq: number; prevReloadActive: boolean; prevReloadTimer: number },
   ): void {
+    const { prevShotSeq, prevReloadActive, prevReloadTimer } = opts;
     if (this.audio === null) return;
     const weapon = WEAPON_BY_ID.get(player.weapon.weaponId);
     if (weapon === undefined) return;
@@ -88,22 +87,21 @@ export class AudioRouter implements PresentationAudioSink {
     const entry = weaponEntryForProjectileTypeId(typeId as ProjectileTemplateId);
     const ammoClass = entry.ammoClass;
     if (ammoClass === 4) return SfxId.SHOCK_HIT_01;
-    return _BULLET_HIT_SFX[rng.rand(RngCallerStatic.PROJECTILE_UPDATE_HIT_SFX) % _BULLET_HIT_SFX.length];
+    return _BULLET_HIT_SFX[rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_HIT_SFX }) % _BULLET_HIT_SFX.length];
   }
 
   playHitSfx(
     hits: ProjectileHit[],
-    gameMode: GameMode,
-    rng: CrandLike,
-    beamTypes: ReadonlySet<number>,
+    opts: { gameMode: GameMode; rng: CrandLike; beamTypes: ReadonlySet<number> },
   ): void {
+    const { gameMode, rng, beamTypes } = opts;
     if (this.audio === null || hits.length === 0) return;
 
     const end = Math.min(hits.length, _MAX_HIT_SFX_PER_FRAME);
     let gameTuneStarted = Boolean(this.audio.music.gameTuneStarted);
     for (let idx = 0; idx < end; idx++) {
       if (!this.demoModeActive && gameMode !== GameMode.RUSH && !gameTuneStarted) {
-        audioTriggerGameTune(this.audio, rng);
+        audioTriggerGameTune(this.audio, { rng });
         gameTuneStarted = true;
         continue;
       }

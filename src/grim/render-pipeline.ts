@@ -55,10 +55,10 @@ export class RenderPipeline {
     }
   }
 
-  open(width: number, height: number): void {
+  open(opts: { width: number; height: number }): void {
     if (this._opened) return;
-    const w = Math.max(0, width | 0);
-    const h = Math.max(0, height | 0);
+    const w = Math.max(0, opts.width | 0);
+    const h = Math.max(0, opts.height | 0);
     try {
       if (this._onResize) this._onResize(w, h);
       this._sink.open();
@@ -75,7 +75,7 @@ export class RenderPipeline {
   }
 
   private _ensureOpen(width: number, height: number): void {
-    if (!this._opened) this.open(width, height);
+    if (!this._opened) this.open({ width, height });
   }
 
   private _resizeIfNeeded(width: number, height: number): void {
@@ -87,19 +87,19 @@ export class RenderPipeline {
     this._height = h;
   }
 
-  draw(drawFrame: RenderDraw, width: number, height: number): void {
-    this._ensureOpen(width, height);
-    this._resizeIfNeeded(width, height);
+  draw(opts: { drawFrame: RenderDraw; width: number; height: number }): void {
+    this._ensureOpen(opts.width, opts.height);
+    this._resizeIfNeeded(opts.width, opts.height);
     if (this._beginEndDrawing) {
       this._beginDraw!();
       try {
-        drawFrame();
+        opts.drawFrame();
       } finally {
         this._endDraw!();
       }
       return;
     }
-    drawFrame();
+    opts.drawFrame();
   }
 
   present(): void {
@@ -107,8 +107,8 @@ export class RenderPipeline {
     this._sink.present();
   }
 
-  render(drawFrame: RenderDraw, width: number, height: number): void {
-    this.draw(drawFrame, width, height);
+  render(opts: { drawFrame: RenderDraw; width: number; height: number }): void {
+    this.draw({ drawFrame: opts.drawFrame, width: opts.width, height: opts.height });
     this.present();
   }
 

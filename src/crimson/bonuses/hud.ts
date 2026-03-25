@@ -39,11 +39,12 @@ export class BonusHudState {
 
   register(
     bonusId: BonusId,
-    label: string,
-    iconId: number,
-    timerRefValue: TimerRef,
-    timerRefAlt: TimerRef | null = null,
+    opts: { label: string; iconId: number; timerRef: TimerRef; timerRefAlt?: TimerRef | null },
   ): void {
+    const label = opts.label;
+    const iconId = opts.iconId;
+    const timerRefValue = opts.timerRef;
+    const timerRefAlt = opts.timerRefAlt ?? null;
     let existing: BonusHudSlot | null = null;
     let free: BonusHudSlot | null = null;
     for (const slot of this.slots) {
@@ -71,7 +72,8 @@ export class BonusHudState {
   }
 }
 
-export function bonusHudUpdate(state: GameplayState, players: PlayerState[], dt: number = 0.0): void {
+export function bonusHudUpdate(state: GameplayState, players: PlayerState[], opts: { dt?: number } = {}): void {
+  const dt = Math.max(0.0, Number(opts.dt ?? 0.0));
   const globalTimers: Record<string, number> = {
     'weapon_power_up': Number(state.bonuses.weaponPowerUp),
     'reflex_boost': Number(state.bonuses.reflexBoost),
@@ -119,7 +121,6 @@ export function bonusHudUpdate(state: GameplayState, players: PlayerState[], dt:
   };
 
   const playerCount = players.length;
-  dt = Math.max(0.0, Number(dt));
 
   const bonusHud = state.bonusHud as BonusHudState;
 

@@ -124,13 +124,15 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
 
   const [updatedTutorial, actions] = tickTutorialTimeline(
     tutorial,
-    ctx.dtSimMs,
-    tutorial.moveActiveThisTick,
-    tutorial.fireActiveThisTick,
-    !ctx.world.creatures.iterActive().length,
-    !state.bonusPool.iterActive().length,
-    state.perkSelection.pendingCount | 0,
-    hintBonusDied,
+    {
+      frameDtMs: ctx.dtSimMs,
+      anyMoveActive: tutorial.moveActiveThisTick,
+      anyFireActive: tutorial.fireActiveThisTick,
+      creaturesNoneActive: !ctx.world.creatures.iterActive().length,
+      bonusPoolEmpty: !state.bonusPool.iterActive().length,
+      perkPendingCount: state.perkSelection.pendingCount | 0,
+      hintBonusDied,
+    },
   );
   updatedTutorial.moveActiveThisTick = false;
   updatedTutorial.fireActiveThisTick = false;

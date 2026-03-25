@@ -21,7 +21,8 @@ export class FixedStepClock {
     this.accum = 0.0;
   }
 
-  advance(dt: number, maxDt: number = 0.1): number {
+  advance(dt: number, opts: { maxDt?: number } = {}): number {
+    const maxDt = opts.maxDt ?? 0.1;
     if (dt <= 0.0) return 0;
     if (dt > maxDt) dt = maxDt;
     this.accum += dt;

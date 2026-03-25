@@ -238,7 +238,8 @@ export class AlienZooKeeperView {
     return slideX;
   }
 
-  private _layout(scale: number): AzkLayout {
+  private _layout(opts: { scale: number }): AzkLayout {
+    const scale = opts.scale;
     const layoutOffsetX = this.state.config.display.width < 641.0 ? _LAYOUT_OFFSET_X_SMALL : _LAYOUT_OFFSET_X;
     const slideX = this._panelSlideX(scale);
     const anchorX = _LAYOUT_POS_X + layoutOffsetX + _BOARD_X_OFFSET + slideX;
@@ -275,7 +276,7 @@ export class AlienZooKeeperView {
   private _fillEmptyCells(): void {
     for (let i = 0; i < this._board.length; i++) {
       if (this._board[i] === -1) {
-        this._board[i] = this.state.rng.rand(RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_FILL_EMPTY) % 5;
+        this._board[i] = this.state.rng.rand({ caller: RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_FILL_EMPTY }) % 5;
       }
     }
   }
@@ -283,7 +284,7 @@ export class AlienZooKeeperView {
   private _rerollBoardNoInitialMatch(): void {
     while (true) {
       for (let i = 0; i < _BOARD_CELLS; i++) {
-        this._board[i] = this.state.rng.rand(RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_REROLL_FILL) % 5;
+        this._board[i] = this.state.rng.rand({ caller: RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_REROLL_FILL }) % 5;
       }
       const [hasMatch] = creditsSecretMatch3Find(this._board);
       if (!hasMatch) return;
@@ -398,7 +399,7 @@ export class AlienZooKeeperView {
     if (!interactive) return;
 
     const scale = this.state.config.display.width < 641.0 ? 0.9 : 1.0;
-    const layout = this._layout(scale);
+    const layout = this._layout({ scale });
     const [mx, my] = InputState.mousePosition();
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
     if (click) {
@@ -441,7 +442,7 @@ export class AlienZooKeeperView {
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
     const scale = this.state.config.display.width < 641.0 ? 0.9 : 1.0;
-    const layout = this._layout(scale);
+    const layout = this._layout({ scale });
 
     // Draw panel background
     const dst = wgl.makeRectangle(
@@ -452,7 +453,7 @@ export class AlienZooKeeperView {
     );
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
 
     // Title and subtitles
     drawSmallText(font, _TITLE, new Vec2(layout.titleX, layout.titleY), WHITE);
@@ -569,11 +570,13 @@ export class AlienZooKeeperView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin,
+        rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -586,6 +589,6 @@ export class AlienZooKeeperView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 }

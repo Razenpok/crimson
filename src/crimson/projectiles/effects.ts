@@ -24,47 +24,47 @@ export function _spawnShrinkifierHitEffects(
 
   const detail = detailPreset | 0;
 
-  effects.spawn(
-    EffectId.RING,
+  effects.spawn({
+    effectId: EffectId.RING,
     pos,
-    new Vec2(),
-    0.0,
-    1.0,
-    36.0,
-    36.0,
-    0.0,
-    0.3,
-    0x19,
-    new RGBA(0.3, 0.6, 0.9, 1.0),
-    0.0,
-    -4.0,
-    detail,
-  );
+    vel: new Vec2(),
+    rotation: 0.0,
+    scale: 1.0,
+    halfWidth: 36.0,
+    halfHeight: 36.0,
+    age: 0.0,
+    lifetime: 0.3,
+    flags: 0x19,
+    color: new RGBA(0.3, 0.6, 0.9, 1.0),
+    rotationStep: 0.0,
+    scaleStep: -4.0,
+    detailPreset: detail,
+  });
 
   const count = detail < 3 ? 2 : 4;
   for (let i = 0; i < count; i++) {
-    const rotation = (rng.rand(RngCallerStatic.SHRINKIFIER_HIT_ROTATION) & 0x7F) * 0.049087387;
+    const rotation = (rng.rand({ caller: RngCallerStatic.SHRINKIFIER_HIT_ROTATION }) & 0x7F) * 0.049087387;
     const velocity = new Vec2(
-      ((rng.rand(RngCallerStatic.SHRINKIFIER_HIT_VEL_X) & 0x7F) - 0x40) * 1.4,
-      ((rng.rand(RngCallerStatic.SHRINKIFIER_HIT_VEL_Y) & 0x7F) - 0x40) * 1.4,
+      ((rng.rand({ caller: RngCallerStatic.SHRINKIFIER_HIT_VEL_X }) & 0x7F) - 0x40) * 1.4,
+      ((rng.rand({ caller: RngCallerStatic.SHRINKIFIER_HIT_VEL_Y }) & 0x7F) - 0x40) * 1.4,
     );
-    const scaleStep = (rng.rand(RngCallerStatic.SHRINKIFIER_HIT_SCALE_STEP) % 100) * 0.01 + 0.1;
-    effects.spawn(
-      EffectId.BURST,
+    const scaleStep = (rng.rand({ caller: RngCallerStatic.SHRINKIFIER_HIT_SCALE_STEP }) % 100) * 0.01 + 0.1;
+    effects.spawn({
+      effectId: EffectId.BURST,
       pos,
-      velocity,
+      vel: velocity,
       rotation,
-      1.0,
-      32.0,
-      32.0,
-      0.0,
-      0.3,
-      0x1D,
-      new RGBA(0.4, 0.5, 1.0, 0.5),
-      0.0,
+      scale: 1.0,
+      halfWidth: 32.0,
+      halfHeight: 32.0,
+      age: 0.0,
+      lifetime: 0.3,
+      flags: 0x1D,
+      color: new RGBA(0.4, 0.5, 1.0, 0.5),
+      rotationStep: 0.0,
       scaleStep,
-      detail,
-    );
+      detailPreset: detail,
+    });
   }
 }
 
@@ -106,22 +106,22 @@ export function _spawnIonHitEffects(
 
   const detail = detailPreset | 0;
 
-  effects.spawn(
-    EffectId.RING,
+  effects.spawn({
+    effectId: EffectId.RING,
     pos,
-    new Vec2(),
-    0.0,
-    1.0,
-    4.0,
-    4.0,
-    0.0,
-    ringStrength * 0.8,
-    0x19,
-    new RGBA(0.6, 0.6, 0.9, 1.0),
-    0.0,
-    ringScale * 45.0,
-    detail,
-  );
+    vel: new Vec2(),
+    rotation: 0.0,
+    scale: 1.0,
+    halfWidth: 4.0,
+    halfHeight: 4.0,
+    age: 0.0,
+    lifetime: ringStrength * 0.8,
+    flags: 0x19,
+    color: new RGBA(0.6, 0.6, 0.9, 1.0),
+    rotationStep: 0.0,
+    scaleStep: ringScale * 45.0,
+    detailPreset: detail,
+  });
 
   const burst = burstScale * 0.8;
   const lifetime = Math.min(burst * 0.7, 1.1);
@@ -132,28 +132,28 @@ export function _spawnIonHitEffects(
   }
 
   for (let i = 0; i < Math.max(0, count); i++) {
-    const rotation = (rng.rand(RngCallerStatic.ION_HIT_SPARK_ROTATION) & 0x7F) * 0.049087387;
+    const rotation = (rng.rand({ caller: RngCallerStatic.ION_HIT_SPARK_ROTATION }) & 0x7F) * 0.049087387;
     const velocity = new Vec2(
-      ((rng.rand(RngCallerStatic.ION_HIT_SPARK_VEL_X) & 0x7F) - 0x40) * burst * 1.4,
-      ((rng.rand(RngCallerStatic.ION_HIT_SPARK_VEL_Y) & 0x7F) - 0x40) * burst * 1.4,
+      ((rng.rand({ caller: RngCallerStatic.ION_HIT_SPARK_VEL_X }) & 0x7F) - 0x40) * burst * 1.4,
+      ((rng.rand({ caller: RngCallerStatic.ION_HIT_SPARK_VEL_Y }) & 0x7F) - 0x40) * burst * 1.4,
     );
-    const scaleStep = ((rng.rand(RngCallerStatic.ION_HIT_SPARK_SCALE_STEP) % 100) * 0.01 + 0.1) * burst;
-    effects.spawn(
-      EffectId.BURST,
+    const scaleStep = ((rng.rand({ caller: RngCallerStatic.ION_HIT_SPARK_SCALE_STEP }) % 100) * 0.01 + 0.1) * burst;
+    effects.spawn({
+      effectId: EffectId.BURST,
       pos,
-      velocity,
+      vel: velocity,
       rotation,
-      1.0,
-      half,
-      half,
-      0.0,
+      scale: 1.0,
+      halfWidth: half,
+      halfHeight: half,
+      age: 0.0,
       lifetime,
-      0x1D,
-      new RGBA(0.4, 0.5, 1.0, 0.5),
-      0.0,
+      flags: 0x1D,
+      color: new RGBA(0.4, 0.5, 1.0, 0.5),
+      rotationStep: 0.0,
       scaleStep,
-      detail,
-    );
+      detailPreset: detail,
+    });
   }
 }
 
@@ -173,22 +173,22 @@ export function _spawnPlasmaCannonHitEffects(
   const detail = detailPreset | 0;
 
   const _spawnRing = (scale: number): void => {
-    effects.spawn(
-      EffectId.RING,
+    effects.spawn({
+      effectId: EffectId.RING,
       pos,
-      new Vec2(),
-      0.0,
-      1.0,
-      4.0,
-      4.0,
-      0.1,
-      1.0,
-      0x19,
-      new RGBA(0.9, 0.6, 0.3, 1.0),
-      0.0,
-      scale * 45.0,
-      detail,
-    );
+      vel: new Vec2(),
+      rotation: 0.0,
+      scale: 1.0,
+      halfWidth: 4.0,
+      halfHeight: 4.0,
+      age: 0.1,
+      lifetime: 1.0,
+      flags: 0x19,
+      color: new RGBA(0.9, 0.6, 0.3, 1.0),
+      rotationStep: 0.0,
+      scaleStep: scale * 45.0,
+      detailPreset: detail,
+    });
   };
 
   _spawnRing(1.5);
@@ -205,27 +205,27 @@ export function _spawnSplitterHitEffects(
 
   const detail = detailPreset | 0;
   for (let i = 0; i < 3; i++) {
-    const angle = (rng.rand(RngCallerStatic.SPLITTER_HIT_ANGLE) & 0x1FF) * (Math.PI * 2.0 / 512.0);
-    const radius = rng.rand(RngCallerStatic.SPLITTER_HIT_RADIUS) % 26;
-    const jitterAge = -(rng.rand(RngCallerStatic.SPLITTER_HIT_AGE) & 0xFF) * 0.0012;
+    const angle = (rng.rand({ caller: RngCallerStatic.SPLITTER_HIT_ANGLE }) & 0x1FF) * (Math.PI * 2.0 / 512.0);
+    const radius = rng.rand({ caller: RngCallerStatic.SPLITTER_HIT_RADIUS }) % 26;
+    const jitterAge = -(rng.rand({ caller: RngCallerStatic.SPLITTER_HIT_AGE }) & 0xFF) * 0.0012;
     const lifetime = 0.1 - jitterAge;
 
     const offset = Vec2.fromAngle(angle).mul(radius);
-    effects.spawn(
-      EffectId.BURST,
-      pos.add(offset),
-      new Vec2(),
-      0.0,
-      1.0,
-      4.0,
-      4.0,
-      jitterAge,
+    effects.spawn({
+      effectId: EffectId.BURST,
+      pos: pos.add(offset),
+      vel: new Vec2(),
+      rotation: 0.0,
+      scale: 1.0,
+      halfWidth: 4.0,
+      halfHeight: 4.0,
+      age: jitterAge,
       lifetime,
-      0x19,
-      new RGBA(1.0, 0.9, 0.1, 1.0),
-      0.0,
-      55.0,
-      detail,
-    );
+      flags: 0x19,
+      color: new RGBA(1.0, 0.9, 0.1, 1.0),
+      rotationStep: 0.0,
+      scaleStep: 55.0,
+      detailPreset: detail,
+    });
   }
 }

@@ -20,11 +20,11 @@ export interface GameStatus {
   readonly questUnlockIndex: number;
 }
 
-export function buildPerkAvailability(status: GameStatus | null): boolean[] {
+export function buildPerkAvailability(opts: { status: GameStatus | null }): boolean[] {
   const available: boolean[] = new Array(PERK_COUNT_SIZE).fill(false);
   let unlockIndex = 0;
-  if (status !== null) {
-    unlockIndex = status.questUnlockIndex;
+  if (opts.status !== null) {
+    unlockIndex = opts.status.questUnlockIndex;
   }
 
   for (let perkId = 1; perkId <= _PERK_BASE_AVAILABLE_MAX_ID; perkId++) {
@@ -56,7 +56,7 @@ export function buildPerkAvailability(status: GameStatus | null): boolean[] {
 }
 
 export function preparePerkAvailability(state: GameplayState): void {
-  const built = buildPerkAvailability(state.status);
+  const built = buildPerkAvailability({ status: state.status });
   for (let i = 0; i < built.length && i < state.perkAvailable.length; i++) {
     state.perkAvailable[i] = built[i];
   }
@@ -66,8 +66,7 @@ export function perkCanOffer(
   state: GameplayState,
   player: PlayerState,
   perkId: PerkId,
-  gameMode: GameMode,
-  playerCount: number,
+  opts: { gameMode: GameMode; playerCount: number },
 ): boolean {
   if (perkId === PerkId.ANTIPERK) {
     return false;
@@ -75,7 +74,7 @@ export function perkCanOffer(
 
   // Hardcore quest 2-10 blocks poison-related perks.
   if (
-    gameMode === GameMode.QUESTS &&
+    opts.gameMode === GameMode.QUESTS &&
     state.hardcore &&
     questLevelEqual(state.questLevel, { major: 2, minor: 10 }) &&
     (perkId === PerkId.POISON_BULLETS || perkId === PerkId.VEINS_OF_POISON || perkId === PerkId.PLAGUEBEARER)
@@ -95,10 +94,10 @@ export function perkCanOffer(
   // - in multiplayer, offered perks must have bit 0x2 set
   // The original game only had 1p/2p, but the port extends this gate to all
   // multiplayer counts for consistent 3p/4p behavior.
-  if (gameMode === GameMode.QUESTS && (flags & PerkFlags.QUEST_MODE_ALLOWED) === 0) {
+  if (opts.gameMode === GameMode.QUESTS && (flags & PerkFlags.QUEST_MODE_ALLOWED) === 0) {
     return false;
   }
-  if (playerCount > 1 && (flags & PerkFlags.MULTIPLAYER_ALLOWED) === 0) {
+  if (opts.playerCount > 1 && (flags & PerkFlags.MULTIPLAYER_ALLOWED) === 0) {
     return false;
   }
 

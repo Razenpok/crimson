@@ -123,7 +123,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
         this._selectedWeaponId !== null && weaponId === this._selectedWeaponId
           ? textColor
           : dimColor;
-      drawSmallText(font, name, listTopLeft.offset(0.0, row * rowStep), rowColor);
+      drawSmallText(font, name, listTopLeft.offset({ dy: row * rowStep }), rowColor);
     }
 
     if (this._selectedWeaponId === null) return;
@@ -201,11 +201,11 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
 
   private _buildWeaponDatabaseIds(): number[] {
     const status = (this.state as unknown as { status?: WeaponAvailabilityStatus | null }).status ?? null;
-    const available = buildWeaponAvailability(
+    const available = buildWeaponAvailability({
       status,
-      this.state.config.gameplay.mode,
-      this.state.demoEnabled,
-    );
+      gameMode: this.state.config.gameplay.mode,
+      demoModeActive: this.state.demoEnabled,
+    });
     const used: number[] = [];
     for (const weapon of WEAPON_TABLE) {
       const weaponId = weapon.weaponId as number;
@@ -265,7 +265,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   private _weaponLabelAndIcon(weaponId: number): [string, number | null] {
     const weapon = WEAPON_BY_ID.get(weaponId as WeaponId);
     if (!weapon) return [`weapon_${weaponId}`, null];
-    const name = weaponDisplayName(weapon.weaponId, this.state.preserveBugs);
+    const name = weaponDisplayName(weapon.weaponId, { preserveBugs: this.state.preserveBugs });
     return [name, weapon.iconIndex];
   }
 }

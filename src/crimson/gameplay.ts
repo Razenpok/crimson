@@ -284,12 +284,12 @@ export function survivalProgressionUpdate(
 
 const _SURVIVAL_RECENT_DEATH_CENTROID_SCALE = 0.33333334;
 
-export function survivalRecordRecentDeath(state: GameplayState, pos: Vec2): void {
+export function survivalRecordRecentDeath(state: GameplayState, opts: { pos: Vec2 }): void {
   let recentCount = state.survivalRecentDeathCount | 0;
   if (recentCount >= 6) return;
 
   if (recentCount < 3) {
-    state.survivalRecentDeathPos[recentCount] = new Vec2(f32(pos.x), f32(pos.y));
+    state.survivalRecentDeathPos[recentCount] = new Vec2(f32(opts.pos.x), f32(opts.pos.y));
   }
 
   recentCount += 1;
@@ -303,7 +303,7 @@ export function survivalRecordRecentDeath(state: GameplayState, pos: Vec2): void
 export function survivalUpdateWeaponHandouts(
   state: GameplayState,
   players: PlayerState[],
-  survivalElapsedMs: number,
+  opts: { survivalElapsedMs: number },
 ): void {
   if (players.length !== 1) return;
   const player = players[0];
@@ -311,11 +311,11 @@ export function survivalUpdateWeaponHandouts(
   if (
     !state.survivalRewardDamageSeen &&
     !state.survivalRewardFireSeen &&
-    (survivalElapsedMs | 0) > 64000 &&
+    (opts.survivalElapsedMs | 0) > 64000 &&
     state.survivalRewardHandoutEnabled
   ) {
     if (player.weapon.weaponId === WeaponId.PISTOL) {
-      weaponAssignPlayer(player, WeaponId.SHRINKIFIER_5K, state);
+      weaponAssignPlayer(player, WeaponId.SHRINKIFIER_5K, { state });
       state.survivalRewardWeaponGuardId = WeaponId.SHRINKIFIER_5K;
     }
     state.survivalRewardHandoutEnabled = false;
@@ -339,7 +339,7 @@ export function survivalUpdateWeaponHandouts(
     const dx = player.pos.x - centroidX;
     const dy = player.pos.y - centroidY;
     if (Math.sqrt(dx * dx + dy * dy) < 16.0 && player.health < 15.0) {
-      weaponAssignPlayer(player, WeaponId.BLADE_GUN, state);
+      weaponAssignPlayer(player, WeaponId.BLADE_GUN, { state });
       state.survivalRewardWeaponGuardId = WeaponId.BLADE_GUN;
       state.survivalRewardFireSeen = true;
       state.survivalRewardHandoutEnabled = false;
@@ -355,10 +355,10 @@ export function survivalEnforceRewardWeaponGuard(
   for (const player of players) {
     const weaponId = player.weapon.weaponId;
     if (weaponId === WeaponId.BLADE_GUN && guardId !== WeaponId.BLADE_GUN) {
-      weaponAssignPlayer(player, WeaponId.PISTOL, state);
+      weaponAssignPlayer(player, WeaponId.PISTOL, { state });
     }
     if (weaponId === WeaponId.SHRINKIFIER_5K && guardId !== WeaponId.SHRINKIFIER_5K) {
-      weaponAssignPlayer(player, WeaponId.PISTOL, state);
+      weaponAssignPlayer(player, WeaponId.PISTOL, { state });
     }
   }
 }
@@ -681,18 +681,18 @@ export function playerUpdate(
       );
       const aimHeading = player.aimHeading;
       for (let i = 0; i < 3; i++) {
-        state.effects.spawnBloodSplatter(
-          bleedPos,
-          aimHeading,
-          0.0,
-          state.rng,
-          detailPreset | 0,
-          0,
-        );
+        state.effects.spawnBloodSplatter({
+          pos: bleedPos,
+          angle: aimHeading,
+          age: 0.0,
+          rng: state.rng,
+          detailPreset: detailPreset | 0,
+          violenceDisabled: 0,
+        });
       }
       const bloodspillSfx =
         _LOW_HEALTH_BLOODSPILL_SFX[
-          state.rng.rand(RngCallerStatic.PLAYER_UPDATE_LOW_HEALTH_BLOODSPILL) & 1
+          state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_LOW_HEALTH_BLOODSPILL }) & 1
         ];
       state.sfxQueue.push(bloodspillSfx);
       player.lowHealthTimer = 1.0;
@@ -1005,12 +1005,14 @@ export function playerUpdate(
         spawnProjectileRing(
           state,
           player.pos,
-          count,
-          0.1,
-          ProjectileTemplateId.PLASMA_MINIGUN,
-          ownerRefForPlayerProjectiles(state, player.index),
-          player.index,
-          players,
+          {
+            count,
+            angleOffset: 0.1,
+            typeId: ProjectileTemplateId.PLASMA_MINIGUN,
+            owner: ownerRefForPlayerProjectiles(state, player.index),
+            ownerPlayerIndex: player.index,
+            players,
+          },
         );
         state.bonusSpawnGuard = false;
         state.sfxQueue.push(SfxId.EXPLOSION_SMALL);

@@ -215,14 +215,14 @@ export class QuestFailedView {
       this._activateRetry();
       return;
     }
-    buttonPos = buttonPos.offset(0.0, QUEST_FAILED_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: QUEST_FAILED_BUTTON_STEP_Y * scale });
 
     const playAnotherW = buttonWidth(resources, this._questListButton.label, { scale, forceWide: this._questListButton.forceWide });
     if (buttonUpdate(this._questListButton, { pos: buttonPos, width: playAnotherW, dtMs, mouse, click })) {
       this._activatePlayAnother();
       return;
     }
-    buttonPos = buttonPos.offset(0.0, QUEST_FAILED_BUTTON_STEP_Y * scale);
+    buttonPos = buttonPos.offset({ dy: QUEST_FAILED_BUTTON_STEP_Y * scale });
 
     const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     if (buttonUpdate(this._mainMenuButton, { pos: buttonPos, width: mainMenuW, dtMs, mouse, click })) {
@@ -248,8 +248,8 @@ export class QuestFailedView {
     const fxDetail = this.state.config.display.fxDetail[0];
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, QUEST_FAILED_PANEL_W, QUEST_FAILED_PANEL_H),
-      WHITE, fxDetail,
+      { dst: wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, QUEST_FAILED_PANEL_W, QUEST_FAILED_PANEL_H),
+        tint: WHITE, shadow: fxDetail },
     );
 
     // Reaper banner
@@ -277,11 +277,11 @@ export class QuestFailedView {
 
     const retryW = buttonWidth(resources, this._retryButton.label, { scale, forceWide: this._retryButton.forceWide });
     buttonDraw(resources, this._retryButton, { pos: buttonPos, width: retryW, scale });
-    buttonPos = buttonPos.offset(0.0, QUEST_FAILED_BUTTON_STEP_Y);
+    buttonPos = buttonPos.offset({ dy: QUEST_FAILED_BUTTON_STEP_Y });
 
     const playAnotherW = buttonWidth(resources, this._questListButton.label, { scale, forceWide: this._questListButton.forceWide });
     buttonDraw(resources, this._questListButton, { pos: buttonPos, width: playAnotherW, scale });
-    buttonPos = buttonPos.offset(0.0, QUEST_FAILED_BUTTON_STEP_Y);
+    buttonPos = buttonPos.offset({ dy: QUEST_FAILED_BUTTON_STEP_Y });
 
     const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainMenuW, scale });
@@ -290,7 +290,7 @@ export class QuestFailedView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 
   takeAction(): string | null {
@@ -338,7 +338,7 @@ export class QuestFailedView {
   }
 
   private _panelTopLeft(): Vec2 {
-    return this._panelOrigin().offset(this._panelSlideX(), 0.0);
+    return this._panelOrigin().offset({ dx: this._panelSlideX() });
   }
 
   private _failureMessage(): string {
@@ -425,14 +425,14 @@ export class QuestFailedView {
 
     const scoreLabel = 'Score';
     const scoreLabelW = this._textWidth(scoreLabel);
-    drawSmallText(font, scoreLabel, scorePos.offset(32.0 - scoreLabelW * 0.5, 0.0), labelColor);
+    drawSmallText(font, scoreLabel, scorePos.offset({ dx: 32.0 - scoreLabelW * 0.5 }), labelColor);
 
     const scoreValue = `${(record.survivalElapsedMs * 0.001).toFixed(2)} secs`;
     const scoreValueW = this._textWidth(scoreValue);
     drawSmallText(font, scoreValue, scorePos.add(new Vec2(32.0 - scoreValueW * 0.5, 15.0)), valueColor);
 
     // Vertical separator
-    const sepPos = scorePos.offset(80.0, 0.0);
+    const sepPos = scorePos.offset({ dx: 80.0 });
     wgl.drawRectangle(
       Math.floor(sepPos.x), Math.floor(sepPos.y),
       1, 48,
@@ -440,7 +440,7 @@ export class QuestFailedView {
     );
 
     // Experience column
-    const col2Pos = scorePos.offset(96.0, 0.0);
+    const col2Pos = scorePos.offset({ dx: 96.0 });
     drawSmallText(font, 'Experience', col2Pos, valueColor);
     const xpValue = `${record.scoreXp}`;
     const xpW = this._textWidth(xpValue);

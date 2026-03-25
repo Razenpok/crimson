@@ -240,7 +240,9 @@ export class QuestResultsUi {
     return alpha;
   }
 
-  private _panelLayout(screenW: number, scale: number): QuestResultsPanelLayout {
+  private _panelLayout(opts: { screenW: number; scale: number }): QuestResultsPanelLayout {
+    const screenW = opts.screenW;
+    const scale = opts.scale;
     const tMs = this._introMs;
     let panelSlideX: number;
     if (tMs < PANEL_SLIDE_END_MS) {
@@ -351,7 +353,7 @@ export class QuestResultsUi {
     }
 
     const weaponId = record.mostUsedWeaponId as WeaponId;
-    const weaponName = weaponDisplayName(weaponId, this.preserveBugs);
+    const weaponName = weaponDisplayName(weaponId, { preserveBugs: this.preserveBugs });
     const nameW = textWidth(font, weaponName);
     const nameX = Math.max(x + 4.0 * scale, leftCenterX - nameW * 0.5);
     drawSmall(font, weaponName, new Vec2(nameX, rowY + 32.0 * scale), colRow);
@@ -475,9 +477,7 @@ export class QuestResultsUi {
       const [newText, newCaret] = updateNameEntryText(
         this.inputText,
         this.inputCaret,
-        NAME_MAX_EDIT,
-        rng,
-        playSfx,
+        { maxLen: NAME_MAX_EDIT, rng, playSfx },
       );
       this.inputText = newText;
       this.inputCaret = newCaret;
@@ -485,9 +485,9 @@ export class QuestResultsUi {
       const screenW = wgl.getScreenWidth();
       const screenH = wgl.getScreenHeight();
       const scale = uiScale(screenW, screenH);
-      const panelLayout = this._panelLayout(screenW, scale);
-      const contentPos = panelLayout.topLeft.offset(QUEST_RESULTS_CONTENT_X * scale);
-      const inputPos = contentPos.offset(0.0, 150.0 * scale);
+      const panelLayout = this._panelLayout({ screenW, scale });
+      const contentPos = panelLayout.topLeft.offset({ dx: QUEST_RESULTS_CONTENT_X * scale });
+      const inputPos = contentPos.offset({ dy: 150.0 * scale });
       const okPos = inputPos.add(new Vec2(170.0 * scale, -8.0 * scale));
       const okW = buttonWidth(resources, this._okButton.label, { scale, forceWide: this._okButton.forceWide });
       const okClicked = buttonUpdate(this._okButton, { pos: okPos, width: okW, dtMs, mouse, click });
@@ -528,9 +528,9 @@ export class QuestResultsUi {
       const screenW = wgl.getScreenWidth();
       const screenH = wgl.getScreenHeight();
       const scale = uiScale(screenW, screenH);
-      const panelLayout = this._panelLayout(screenW, scale);
-      const contentPos = panelLayout.topLeft.offset(QUEST_RESULTS_CONTENT_X * scale);
-      const scoreCardPos = contentPos.offset(QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT * scale);
+      const panelLayout = this._panelLayout({ screenW, scale });
+      const contentPos = panelLayout.topLeft.offset({ dx: QUEST_RESULTS_CONTENT_X * scale });
+      const scoreCardPos = contentPos.offset({ dx: QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT * scale });
 
       let varC12 = panelLayout.topLeft.y + (qualifies ? 96.0 : 108.0) * scale;
       let varC14 = varC12 + 84.0 * scale;
@@ -552,7 +552,7 @@ export class QuestResultsUi {
         this._beginCloseTransition('play_next');
         return null;
       }
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const playAgainW = buttonWidth(resources, this._playAgainButton.label, {
         scale,
@@ -563,7 +563,7 @@ export class QuestResultsUi {
         this._beginCloseTransition('play_again');
         return null;
       }
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const highScoresW = buttonWidth(resources, this._highScoresButton.label, {
         scale,
@@ -574,7 +574,7 @@ export class QuestResultsUi {
         this._beginCloseTransition('high_scores');
         return null;
       }
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, {
         scale,
@@ -606,18 +606,16 @@ export class QuestResultsUi {
     const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
 
-    const panelLayout = this._panelLayout(screenW, scale);
+    const panelLayout = this._panelLayout({ screenW, scale });
     const panel = panelLayout.panel;
 
     const fxDetail = this.config.display.fxDetail[0] ?? false;
     drawClassicMenuPanel(
       getTexture(resources, TextureId.UI_MENU_PANEL),
-      wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h),
-      wgl.makeColor(1, 1, 1, 1),
-      fxDetail,
+      { dst: wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h), tint: wgl.makeColor(1, 1, 1, 1), shadow: fxDetail },
     );
 
-    const contentPos = panelLayout.topLeft.offset(QUEST_RESULTS_CONTENT_X * scale);
+    const contentPos = panelLayout.topLeft.offset({ dx: QUEST_RESULTS_CONTENT_X * scale });
     const bannerPos = contentPos.add(new Vec2(QUEST_RESULTS_BANNER_X_FROM_CONTENT * scale, 36.0 * scale));
     const textWellDone = getTexture(resources, TextureId.UI_TEXT_WELL_DONE);
     const bannerSrc = wgl.makeRectangle(0.0, 0.0, textWellDone.width, textWellDone.height);
@@ -702,7 +700,7 @@ export class QuestResultsUi {
         COLOR_UI_ACCENT,
       );
 
-      const inputPos = contentPos.offset(0.0, 150.0 * scale);
+      const inputPos = contentPos.offset({ dy: 150.0 * scale });
       // Input box outline
       wgl.drawRectangle(
         Math.floor(inputPos.x), Math.floor(inputPos.y),
@@ -765,7 +763,7 @@ export class QuestResultsUi {
 
     } else {
       // Phase 2: results/buttons
-      const scoreCardPos = contentPos.offset(QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT * scale);
+      const scoreCardPos = contentPos.offset({ dx: QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT * scale });
       let varC12 = panelLayout.topLeft.y + (qualifies ? 96.0 : 108.0) * scale;
       if (!qualifies) {
         drawSmall(
@@ -826,21 +824,21 @@ export class QuestResultsUi {
         forceWide: this._playNextButton.forceWide,
       });
       buttonDraw(resources, this._playNextButton, { pos: btnPos, width: playNextW, scale });
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const playAgainW = buttonWidth(resources, this._playAgainButton.label, {
         scale,
         forceWide: this._playAgainButton.forceWide,
       });
       buttonDraw(resources, this._playAgainButton, { pos: btnPos, width: playAgainW, scale });
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const highScoresW = buttonWidth(resources, this._highScoresButton.label, {
         scale,
         forceWide: this._highScoresButton.forceWide,
       });
       buttonDraw(resources, this._highScoresButton, { pos: btnPos, width: highScoresW, scale });
-      btnPos = btnPos.offset(0.0, 32.0 * scale);
+      btnPos = btnPos.offset({ dy: 32.0 * scale });
 
       const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, {
         scale,
@@ -852,8 +850,7 @@ export class QuestResultsUi {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      new Vec2(mouse.x, mouse.y),
-      this._cursorPulseTime,
+      { pos: new Vec2(mouse.x, mouse.y), pulseTime: this._cursorPulseTime },
     );
   }
 }

@@ -440,7 +440,7 @@ export class PanelMenuView {
     ).add(this._panelOffset.mul(itemScale));
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
     const fxDetail = this.state.config.display.fxDetail[0];
-    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
   }
 
   private _drawEntry(resources: RuntimeResources, entry: MenuEntry): void {
@@ -464,12 +464,12 @@ export class PanelMenuView {
     const fxDetail = this.state.config.display.fxDetail[0];
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        item,
-        wgl.makeRectangle(0.0, 0.0, itemW, itemH),
-        wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
-        origin, 0.0,
-      );
+      drawUiQuadShadow({
+        texture: item,
+        src: wgl.makeRectangle(0.0, 0.0, itemW, itemH),
+        dst: wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
+        origin, rotationDeg: 0.0,
+      });
     }
     wgl.drawTexturePro(
       item,
@@ -529,11 +529,12 @@ export class PanelMenuView {
     const signOrigin = wgl.makeVector2(-signOffsetX, -signOffsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin, rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -547,7 +548,7 @@ export class PanelMenuView {
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
     const pos = new Vec2(mx, my);
-    drawMenuCursor(particles, cursorTex, pos, this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos, pulseTime: this._cursorPulseTime });
   }
 
   protected _entryEnabled(_entry: MenuEntry): boolean {

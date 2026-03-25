@@ -16,46 +16,48 @@ export class WorldRenderer {
   ) {
   }
 
-  syncViewport(worldSize: number, config: CrimsonConfig | null, camera: Vec2): void {
-    this.worldSize = worldSize;
-    this.config = config;
-    this.camera = camera;
+  syncViewport(opts: { worldSize: number; config: CrimsonConfig | null; camera: Vec2 }): void {
+    this.worldSize = opts.worldSize;
+    this.config = opts.config;
+    this.camera = opts.camera;
   }
 
-  draw(renderFrame: RenderFrame, drawAimIndicators: boolean = true, entityAlpha: number = 1.0): void {
-    this.syncViewport(renderFrame.worldSize, renderFrame.config, renderFrame.camera);
-    const renderCtx = buildWorldRenderCtx(this, renderFrame);
-    drawWorld(renderCtx, drawAimIndicators, entityAlpha);
+  draw(opts: { renderFrame: RenderFrame; drawAimIndicators?: boolean; entityAlpha?: number }): void {
+    const drawAimIndicators = opts.drawAimIndicators ?? true;
+    const entityAlpha = opts.entityAlpha ?? 1.0;
+    this.syncViewport({ worldSize: opts.renderFrame.worldSize, config: opts.renderFrame.config, camera: opts.renderFrame.camera });
+    const renderCtx = buildWorldRenderCtx(this, { renderFrame: opts.renderFrame });
+    drawWorld(renderCtx, { drawAimIndicators, entityAlpha });
   }
 
   cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
     const outW = runtimeW ?? wgl.getScreenWidth();
     const outH = runtimeH ?? wgl.getScreenHeight();
-    return viewport.cameraScreenSize(this.worldSize, this.config, outW, outH);
+    return viewport.cameraScreenSize({ worldSize: this.worldSize, config: this.config, runtimeW: outW, runtimeH: outH });
   }
 
   clampCamera(camera: Vec2, screenSize: Vec2): Vec2 {
-    return viewport.clampCamera(this.worldSize, camera, screenSize);
+    return viewport.clampCamera({ worldSize: this.worldSize, camera, screenSize });
   }
 
   worldParams(): [Vec2, Vec2] {
     const outSize = new Vec2(wgl.getScreenWidth(), wgl.getScreenHeight());
-    const [camera, viewScale] = viewport.viewTransform(
-      this.worldSize,
-      this.config,
-      this.camera,
+    const [camera, viewScale] = viewport.viewTransform({
+      worldSize: this.worldSize,
+      config: this.config,
+      camera: this.camera,
       outSize,
-    );
+    });
     return [camera, viewScale];
   }
 
   worldToScreen(pos: Vec2): Vec2 {
     const [camera, viewScale] = this.worldParams();
-    return viewport.worldToScreenWith(pos, camera, viewScale);
+    return viewport.worldToScreenWith(pos, { camera, viewScale });
   }
 
   screenToWorld(pos: Vec2): Vec2 {
     const [camera, viewScale] = this.worldParams();
-    return viewport.screenToWorldWith(pos, camera, viewScale);
+    return viewport.screenToWorldWith(pos, { camera, viewScale });
   }
 }

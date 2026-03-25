@@ -158,15 +158,13 @@ export class TutorialMode extends BaseGameplayMode {
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      questUnlockIndex,
-      this.worldSize | 0,
-      this.worldSize | 0,
+      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
     this.simWorld.state.rng.srand(this.state.rng.state | 0);
 
     this.player.pos = new Vec2(this.worldSize * 0.5, this.worldSize * 0.5);
-    weaponAssignPlayer(this.player, WeaponId.PISTOL, this.state);
+    weaponAssignPlayer(this.player, WeaponId.PISTOL, { state: this.state });
     this._simSession = this._newSimSession();
     this._replayRecorder = null; // WebGL: no file-based replay recording
   }
@@ -284,10 +282,12 @@ export class TutorialMode extends BaseGameplayMode {
       const { rect } = tutorialPromptPanelRect(
         promptText,
         screenW,
-        (text: string, scale: number) => this._uiTextWidth(text, scale),
-        (scale: number) => this._uiLineHeight(scale),
-        TUTORIAL_PANEL_POS,
-        1.0,
+        {
+          measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
+          measureLineHeight: (scale: number) => this._uiLineHeight(scale),
+          pos: TUTORIAL_PANEL_POS,
+          scale: 1.0,
+        },
       );
       const gap = 18.0;
       const buttonBasePos = new Vec2(rect[0] + 10.0, rect[1] + rect[3] + 10.0);
@@ -300,7 +300,7 @@ export class TutorialMode extends BaseGameplayMode {
       }
       if (buttonUpdate(
         this._repeatButton,
-        { pos: buttonBasePos.offset(playW + gap, 0.0), width: repeatW, dtMs, mouse, click },
+        { pos: buttonBasePos.offset({ dx: playW + gap, dy: 0.0 }), width: repeatW, dtMs, mouse, click },
       )) {
         this._finishTutorialRun(true);
         return;
@@ -464,10 +464,12 @@ export class TutorialMode extends BaseGameplayMode {
       screenW,
       overlay,
       1.0,
-      (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
-        this._drawUiText(text, pos, color, scale),
-      (text: string, scale: number) => this._uiTextWidth(text, scale),
-      (scale: number) => this._uiLineHeight(scale),
+      {
+        drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
+          this._drawUiText(text, pos, color, scale),
+        measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
+        measureLineHeight: (scale: number) => this._uiLineHeight(scale),
+      },
     );
 
     const resources = this.renderResources.resources as RuntimeResources;
@@ -478,10 +480,12 @@ export class TutorialMode extends BaseGameplayMode {
       const { rect } = tutorialPromptPanelRect(
         overlay.promptText,
         screenW,
-        (text: string, scale: number) => this._uiTextWidth(text, scale),
-        (scale: number) => this._uiLineHeight(scale),
-        TUTORIAL_PANEL_POS,
-        1.0,
+        {
+          measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
+          measureLineHeight: (scale: number) => this._uiLineHeight(scale),
+          pos: TUTORIAL_PANEL_POS,
+          scale: 1.0,
+        },
       );
       const gap = 18.0;
       const buttonBasePos = new Vec2(rect[0] + 10.0, rect[1] + rect[3] + 10.0);
@@ -492,7 +496,7 @@ export class TutorialMode extends BaseGameplayMode {
       buttonDraw(
         resources,
         this._repeatButton,
-        { pos: buttonBasePos.offset(playW + gap, 0.0), width: repeatW, scale: 1.0 },
+        { pos: buttonBasePos.offset({ dx: playW + gap, dy: 0.0 }), width: repeatW, scale: 1.0 },
       );
       return;
     }
@@ -517,8 +521,7 @@ export class TutorialMode extends BaseGameplayMode {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      mousePos,
-      this._cursorPulseTime,
+      { pos: mousePos, pulseTime: this._cursorPulseTime },
     );
   }
 }

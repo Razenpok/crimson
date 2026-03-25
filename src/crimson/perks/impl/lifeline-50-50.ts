@@ -15,12 +15,12 @@ function applyLifeline5050(ctx: PerkApplyCtx): void {
   for (const creature of creatures) {
     if (killToggle && creature.active && creature.hp <= 500.0 && (creature.flags & CreatureFlags.ANIM_PING_PONG) === 0) {
       creature.active = false;
-      ctx.state.effects.spawnBurst(
-        creature.pos,
-        4,
-        ctx.state.rng,
-        5,
-      );
+      ctx.state.effects.spawnBurst({
+        pos: creature.pos,
+        count: 4,
+        rng: ctx.state.rng,
+        detailPreset: 5,
+      });
     }
     killToggle = !killToggle;
   }

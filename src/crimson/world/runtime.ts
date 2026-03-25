@@ -101,7 +101,7 @@ export class WorldRuntime {
     this.simWorld.worldSize = worldSize;
     this.renderResources.worldSize = worldSize;
     this.terrainRuntime.worldSize = worldSize;
-    this.renderer.syncViewport(worldSize, this.config, this.camera);
+    this.renderer.syncViewport({ worldSize, config: this.config, camera: this.camera });
     const ground = this.renderResources.ground;
     if (ground !== null) {
       const side = Math.max(0, Math.floor(worldSize));
@@ -110,25 +110,28 @@ export class WorldRuntime {
     }
   }
 
-  reset(seed: number = 0xBEEF, playerCount: number = 1, spawnPos: Vec2 | null = null): void {
+  reset(opts: { seed?: number; playerCount?: number; spawnPos?: Vec2 | null } = {}): void {
+    const seed = opts.seed ?? 0xBEEF;
+    const playerCount = opts.playerCount ?? 1;
+    const spawnPos = opts.spawnPos ?? null;
     this._syncWorldSizeOwnership();
     this.simWorld.demoModeActive = Boolean(this.demoModeActive);
     this.simWorld.hardcore = Boolean(this.hardcore);
     this.simWorld.questFailRetryCount = this.questFailRetryCount | 0;
     this.simWorld.preserveBugs = Boolean(this.preserveBugs);
-    this.simWorld.reset(seed | 0, playerCount | 0, spawnPos);
+    this.simWorld.reset({ seed: seed | 0, playerCount: playerCount | 0, spawnPos });
     this.renderResources.clearPendingTerrainFx();
     this.camera = new Vec2(-1.0, -1.0);
-    this.renderer.syncViewport(this.worldSize, this.config, this.camera);
+    this.renderer.syncViewport({ worldSize: this.worldSize, config: this.config, camera: this.camera });
     if (this.renderResources.ground !== null) {
       const terrainSeed = this.simWorld.state.rng.state;
-      this.terrainRuntime.scheduleFromRngSeed(terrainSeed);
+      this.terrainRuntime.scheduleFromRngSeed({ seed: terrainSeed });
     }
   }
 
   openRuntime(): void {
     this.renderResources.config = this.config;
-    this.renderResources.open(this.simWorld.state.rng.state);
+    this.renderResources.open({ terrainSeed: this.simWorld.state.rng.state });
   }
 
   closeRuntime(): void {
@@ -137,22 +140,22 @@ export class WorldRuntime {
   }
 
   syncAudioBridgeState(): void {
-    this.audioBridge.sync(
-      this.audio,
-      this.audioRng,
-      Boolean(this.demoModeActive),
-    );
+    this.audioBridge.sync({
+      audio: this.audio,
+      audioRng: this.audioRng,
+      demoModeActive: Boolean(this.demoModeActive),
+    });
   }
 
   updateCamera(_dt: number): void {
     if (this.simWorld.players.length === 0) return;
 
-    const screenSize = viewport.cameraScreenSize(
-      this.worldSize,
-      this.config,
-      wgl.getScreenWidth(),
-      wgl.getScreenHeight(),
-    );
+    const screenSize = viewport.cameraScreenSize({
+      worldSize: this.worldSize,
+      config: this.config,
+      runtimeW: wgl.getScreenWidth(),
+      runtimeH: wgl.getScreenHeight(),
+    });
     const alive = this.simWorld.players.filter((player) => player.health > 0.0);
     let camera: Vec2;
     if (alive.length > 0) {
@@ -167,16 +170,18 @@ export class WorldRuntime {
     }
 
     camera = camera.add(this.simWorld.state.cameraShakeOffset);
-    this.camera = viewport.clampCamera(this.worldSize, camera, screenSize);
-    this.renderer.syncViewport(this.worldSize, this.config, this.camera);
+    this.camera = viewport.clampCamera({ worldSize: this.worldSize, camera, screenSize });
+    this.renderer.syncViewport({ worldSize: this.worldSize, config: this.config, camera: this.camera });
   }
 
-  draw(drawAimIndicators = true, entityAlpha = 1.0): void {
-    this.renderer.draw(
-      this.buildRenderFrame(),
+  draw(opts: { drawAimIndicators?: boolean; entityAlpha?: number } = {}): void {
+    const drawAimIndicators = opts.drawAimIndicators ?? true;
+    const entityAlpha = opts.entityAlpha ?? 1.0;
+    this.renderer.draw({
+      renderFrame: this.buildRenderFrame(),
       drawAimIndicators,
       entityAlpha,
-    );
+    });
   }
 
   buildRenderFrame(): RenderFrame {

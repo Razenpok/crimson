@@ -49,21 +49,21 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
         );
       } else if (allowShatterFx) {
         for (let j = 0; j < 8; j++) {
-          const angle = (ctx.state.rng.rand(RngCallerStatic.BONUS_APPLY_FREEZE_SHARD_ANGLE) % 612) * 0.01;
-          ctx.state.effects.spawnFreezeShard(
+          const angle = (ctx.state.rng.rand({ caller: RngCallerStatic.BONUS_APPLY_FREEZE_SHARD_ANGLE }) % 612) * 0.01;
+          ctx.state.effects.spawnFreezeShard({
             pos,
             angle,
-            ctx.state.rng,
-            ctx.detailPreset | 0,
-          );
+            rng: ctx.state.rng,
+            detailPreset: ctx.detailPreset | 0,
+          });
         }
-        const angle = (ctx.state.rng.rand(RngCallerStatic.BONUS_APPLY_FREEZE_SHATTER_ANGLE) % 612) * 0.01;
-        ctx.state.effects.spawnFreezeShatter(
+        const angle = (ctx.state.rng.rand({ caller: RngCallerStatic.BONUS_APPLY_FREEZE_SHATTER_ANGLE }) % 612) * 0.01;
+        ctx.state.effects.spawnFreezeShatter({
           pos,
           angle,
-          ctx.state.rng,
-          ctx.detailPreset | 0,
-        );
+          rng: ctx.state.rng,
+          detailPreset: ctx.detailPreset | 0,
+        });
       }
       creature.active = false;
     }
@@ -83,33 +83,33 @@ export function flushDeferredFreezeCorpseFx(state: GameplayState): void {
     const pos = queued.pos;
     const detail = queued.detailPreset | 0;
     for (let j = 0; j < 8; j++) {
-      const angle = (state.rng.rand(RngCallerStatic.BONUS_APPLY_FREEZE_SHARD_ANGLE) % 612) * 0.01;
-      state.effects.spawnFreezeShard(
+      const angle = (state.rng.rand({ caller: RngCallerStatic.BONUS_APPLY_FREEZE_SHARD_ANGLE }) % 612) * 0.01;
+      state.effects.spawnFreezeShard({
         pos,
         angle,
-        state.rng,
-        detail,
-      );
+        rng: state.rng,
+        detailPreset: detail,
+      });
     }
-    const angle = (state.rng.rand(RngCallerStatic.BONUS_APPLY_FREEZE_SHATTER_ANGLE) % 612) * 0.01;
-    state.effects.spawnFreezeShatter(
+    const angle = (state.rng.rand({ caller: RngCallerStatic.BONUS_APPLY_FREEZE_SHATTER_ANGLE }) % 612) * 0.01;
+    state.effects.spawnFreezeShatter({
       pos,
       angle,
-      state.rng,
-      detail,
-    );
+      rng: state.rng,
+      detailPreset: detail,
+    });
   }
   pending.length = 0;
 }
 
-export function freezeBonusActive(state: GameplayState): boolean {
-  return (state.bonuses as { freeze: number }).freeze > 0.0;
+export function freezeBonusActive(opts: { state: GameplayState }): boolean {
+  return (opts.state.bonuses as { freeze: number }).freeze > 0.0;
 }
 
-export function applyFreezePickupFx(state: GameplayState, pickup: BonusPickupEvent, detailPreset: number): void {
-  state.effects.spawnRing(
-    pickup.pos,
-    detailPreset | 0,
-    new RGBA(0.3, 0.5, 0.8, 1.0),
-  );
+export function applyFreezePickupFx(opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number }): void {
+  opts.state.effects.spawnRing({
+    pos: opts.pickup.pos,
+    detailPreset: opts.detailPreset | 0,
+    color: new RGBA(0.3, 0.5, 0.8, 1.0),
+  });
 }

@@ -20,7 +20,7 @@ const _NAME_PARTS: readonly string[] = [
 ];
 
 function _draw(rng: CrandLike, caller?: number): number {
-  return rng.rand(caller);
+  return rng.rand(caller !== undefined ? { caller } : undefined);
 }
 
 function _pickHighscoreName(rng: CrandLike, highscoreNames: readonly string[]): string {
@@ -30,7 +30,8 @@ function _pickHighscoreName(rng: CrandLike, highscoreNames: readonly string[]): 
   ];
 }
 
-export function typoNamePart(rng: CrandLike, allowThe: boolean): string {
+export function typoNamePart(rng: CrandLike, opts: { allowThe: boolean }): string {
+  const allowThe = opts.allowThe;
   const mod = allowThe ? 52 : 51;
   const idx = _draw(rng, RngCallerStatic.TYPO_WORD_PICK_FRAGMENT) % mod;
   if (idx === 39) return 'nerd';
@@ -39,10 +40,11 @@ export function typoNamePart(rng: CrandLike, allowThe: boolean): string {
 
 export function typoBuildName(
   rng: CrandLike,
-  scoreXp: number,
-  dictionaryWords: readonly string[] | null = null,
-  highscoreNames: readonly string[] = [],
+  opts: { scoreXp: number; dictionaryWords?: readonly string[] | null; highscoreNames?: readonly string[] },
 ): string {
+  const dictionaryWords = opts.dictionaryWords ?? null;
+  const highscoreNames = opts.highscoreNames ?? [];
+  let scoreXp = opts.scoreXp;
   scoreXp = scoreXp | 0;
 
   if (dictionaryWords && dictionaryWords.length > 0) {
@@ -55,10 +57,10 @@ export function typoBuildName(
     }
     if (_draw(rng, RngCallerStatic.TYPO_TARGET_NAME_ASSIGN_RANDOM_FOUR_WORD_GATE) % 100 < 80) {
       return (
-        typoNamePart(rng, true) +
-        typoNamePart(rng, false) +
-        typoNamePart(rng, false) +
-        typoNamePart(rng, false)
+        typoNamePart(rng, { allowThe: true }) +
+        typoNamePart(rng, { allowThe: false }) +
+        typoNamePart(rng, { allowThe: false }) +
+        typoNamePart(rng, { allowThe: false })
       );
     }
   }
@@ -70,9 +72,9 @@ export function typoBuildName(
       _draw(rng, RngCallerStatic.TYPO_TARGET_NAME_ASSIGN_RANDOM_THREE_WORD_GATE_GT60) % 100 < 40)
   ) {
     return (
-      typoNamePart(rng, true) +
-      typoNamePart(rng, false) +
-      typoNamePart(rng, false)
+      typoNamePart(rng, { allowThe: true }) +
+      typoNamePart(rng, { allowThe: false }) +
+      typoNamePart(rng, { allowThe: false })
     );
   }
 
@@ -83,12 +85,12 @@ export function typoBuildName(
       _draw(rng, RngCallerStatic.TYPO_TARGET_NAME_ASSIGN_RANDOM_TWO_WORD_GATE_GT20) % 100 < 40)
   ) {
     return (
-      typoNamePart(rng, true) +
-      typoNamePart(rng, false)
+      typoNamePart(rng, { allowThe: true }) +
+      typoNamePart(rng, { allowThe: false })
     );
   }
 
-  return typoNamePart(rng, false);
+  return typoNamePart(rng, { allowThe: false });
 }
 
 function _pickWord(rng: CrandLike, words: readonly string[]): string {
@@ -194,7 +196,8 @@ export class CreatureNameTable {
   }
 
   // Unused in WebGL port: replay checkpoints excluded
-  activeEntries(activeMask: readonly boolean[]): Array<[number, string]> {
+  activeEntries(opts: { activeMask: readonly boolean[] }): Array<[number, string]> {
+    const activeMask = opts.activeMask;
     const entries: Array<[number, string]> = [];
     for (let idx = 0; idx < this.names.length; idx++) {
       const name = this.names[idx];
@@ -205,7 +208,8 @@ export class CreatureNameTable {
     return entries;
   }
 
-  findByName(name: string, activeMask: readonly boolean[]): number | null {
+  findByName(name: string, opts: { activeMask: readonly boolean[] }): number | null {
+    const activeMask = opts.activeMask;
     for (let idx = 0; idx < this.names.length; idx++) {
       if (!(idx >= 0 && idx < activeMask.length && activeMask[idx])) continue;
       if (this.names[idx] === name) return idx;
@@ -213,7 +217,9 @@ export class CreatureNameTable {
     return null;
   }
 
-  isUnique(name: string, excludeIdx: number, activeMask: readonly boolean[]): boolean {
+  isUnique(name: string, opts: { excludeIdx: number; activeMask: readonly boolean[] }): boolean {
+    const excludeIdx = opts.excludeIdx;
+    const activeMask = opts.activeMask;
     for (let idx = 0; idx < this.names.length; idx++) {
       if (idx === excludeIdx) continue;
       if (!(idx >= 0 && idx < activeMask.length && activeMask[idx])) continue;
@@ -225,11 +231,12 @@ export class CreatureNameTable {
   assignRandom(
     creatureIdx: number,
     rng: CrandLike,
-    scoreXp: number,
-    activeMask: readonly boolean[],
-    dictionaryWords: readonly string[] | null = null,
-    highscoreNames: readonly string[] = [],
+    opts: { scoreXp: number; activeMask: readonly boolean[]; dictionaryWords?: readonly string[] | null; highscoreNames?: readonly string[] },
   ): string {
+    const scoreXp = opts.scoreXp;
+    const activeMask = opts.activeMask;
+    const dictionaryWords = opts.dictionaryWords ?? null;
+    const highscoreNames = opts.highscoreNames ?? [];
     const idx = creatureIdx | 0;
     if (idx < 0 || idx >= this.names.length) {
       throw new RangeError(`creature_idx out of range: ${idx}`);
@@ -238,9 +245,9 @@ export class CreatureNameTable {
     let tooLongAttempts = 0;
     let attempts = 0;
     for (;;) {
-      const name = typoBuildName(rng, scoreXp, dictionaryWords, highscoreNames);
+      const name = typoBuildName(rng, { scoreXp, dictionaryWords, highscoreNames });
 
-      if (!this.isUnique(name, idx, activeMask)) {
+      if (!this.isUnique(name, { excludeIdx: idx, activeMask })) {
         attempts += 1;
         if (attempts < 200) continue;
       }

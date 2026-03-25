@@ -57,43 +57,44 @@ export interface WorldDrawContext {
 
 export function drawWorld(
   renderCtx: WorldRenderCtx,
-  drawAimIndicatorsEnabled: boolean = true,
-  entityAlpha: number = 1.0,
+  opts: { drawAimIndicators?: boolean; entityAlpha?: number } = {},
 ): void {
+  const drawAimIndicatorsEnabled = opts.drawAimIndicators ?? true;
+  let entityAlpha = opts.entityAlpha ?? 1.0;
   entityAlpha = clamp(entityAlpha, 0.0, 1.0);
   const [camera, viewScale, scale, screenSize, outSize] = computeViewTransform(renderCtx);
 
   const endBg = beginPass('background');
-  drawBackground(renderCtx, camera, screenSize, outSize);
+  drawBackground(renderCtx, { camera, screenSize, outSize });
   endPass('background');
 
   if (entityAlpha <= 1e-3) return;
 
   wgl.setAlphaTest(true);
-  const drawCtx = buildDrawContext(renderCtx, camera, viewScale, scale, entityAlpha);
+  const drawCtx = buildDrawContext(renderCtx, { camera, viewScale, scale, entityAlpha });
 
   const endPlayersDead = beginPass('players_dead');
-  drawPlayers(renderCtx, drawCtx, false);
+  drawPlayers(renderCtx, { ctx: drawCtx, alive: false });
   endPass('players_dead');
 
   const endCreatures = beginPass('creatures');
-  drawCreatures(renderCtx, drawCtx);
+  drawCreatures(renderCtx, { ctx: drawCtx });
   endPass('creatures');
 
   const endFreeze = beginPass('freeze_overlay');
-  drawFreezeOverlay(renderCtx, drawCtx);
+  drawFreezeOverlay(renderCtx, { ctx: drawCtx });
   endPass('freeze_overlay');
 
   const endPlayersAlive = beginPass('players_alive');
-  drawPlayers(renderCtx, drawCtx, true);
+  drawPlayers(renderCtx, { ctx: drawCtx, alive: true });
   endPass('players_alive');
 
   const endProjEffects = beginPass('projectiles_effects');
-  drawProjectilesAndEffects(renderCtx, drawCtx);
+  drawProjectilesAndEffects(renderCtx, { ctx: drawCtx });
   endPass('projectiles_effects');
 
   const endBonusUi = beginPass('bonus_ui');
-  drawBonusAndUi(renderCtx, drawCtx, drawAimIndicatorsEnabled);
+  drawBonusAndUi(renderCtx, { ctx: drawCtx, drawAimIndicatorsEnabled });
   endPass('bonus_ui');
 
   wgl.setAlphaTest(false);
@@ -107,10 +108,7 @@ export function computeViewTransform(
   const outH = wgl.getScreenHeight();
   const outSize = new Vec2(outW, outH);
   const [camera, viewScale, screenSize] = viewport.viewTransform(
-    frame.worldSize,
-    frame.config,
-    frame.camera,
-    outSize,
+    { worldSize: frame.worldSize, config: frame.config, camera: frame.camera, outSize },
   );
   const scale = viewport.viewScaleAvg(viewScale);
   return [camera, viewScale, scale, screenSize, outSize];
@@ -118,19 +116,15 @@ export function computeViewTransform(
 
 function drawBackground(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  screenSize: Vec2,
-  outSize: Vec2,
+  opts: { camera: Vec2; screenSize: Vec2; outSize: Vec2 },
 ): void {
+  const { camera, screenSize, outSize } = opts;
   wgl.clearBackground(wgl.makeColor(10 / 255, 10 / 255, 12 / 255, 1));
   const ground = renderCtx.frame.ground;
   if (ground !== null) {
     ground.drawView(
       camera,
-      screenSize.x,
-      screenSize.y,
-      outSize.x,
-      outSize.y,
+      { screenW: screenSize.x, screenH: screenSize.y, outW: outSize.x, outH: outSize.y },
     );
   }
 }
@@ -139,16 +133,14 @@ function effectSrcRectFromTexture(
   texture: wgl.Texture,
   effectId: EffectId,
 ): wgl.Rectangle | null {
-  return effectSrcRect(effectId, texture.width, texture.height) as wgl.Rectangle | null;
+  return effectSrcRect(effectId, { textureWidth: texture.width, textureHeight: texture.height }) as wgl.Rectangle | null;
 }
 
 function buildDrawContext(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  entityAlpha: number,
+  opts: { camera: Vec2; viewScale: Vec2; scale: number; entityAlpha: number },
 ): WorldDrawContext {
+  const { camera, viewScale, scale, entityAlpha } = opts;
   const frame = renderCtx.frame;
   const resources = frame.resources;
   const trooperAsset = CREATURE_ASSET.get(CreatureTypeId.TROOPER) ?? null;
@@ -178,17 +170,15 @@ function buildDrawContext(
 function drawPlayer(
   renderCtx: WorldRenderCtx,
   player: PlayerState,
-  ctx: WorldDrawContext,
+  opts: { ctx: WorldDrawContext },
 ): void {
+  const ctx = opts.ctx;
   if (ctx.trooperTexture !== null) {
     drawPlayerTrooperSprite(
       renderCtx,
       ctx.trooperTexture,
       player,
-      ctx.camera,
-      ctx.viewScale,
-      ctx.scale,
-      ctx.entityAlpha,
+      { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
     );
     return;
   }
@@ -209,13 +199,13 @@ function drawPlayer(
 
 function drawPlayers(
   renderCtx: WorldRenderCtx,
-  ctx: WorldDrawContext,
-  alive: boolean,
+  opts: { ctx: WorldDrawContext; alive: boolean },
 ): void {
+  const { ctx, alive } = opts;
   for (const player of renderCtx.frame.players) {
     if (alive && player.health <= 0.0) continue;
     if (!alive && player.health > 0.0) continue;
-    drawPlayer(renderCtx, player, ctx);
+    drawPlayer(renderCtx, player, { ctx });
   }
 }
 
@@ -238,10 +228,9 @@ function iterNativeCreatureSpritePass(creatures: CreatureState[]): CreatureState
 function drawCreatureOverlays(
   renderCtx: WorldRenderCtx,
   creature: CreatureState,
-  screen: Vec2,
-  lifecycleStage: number,
-  ctx: WorldDrawContext,
+  opts: { screen: Vec2; lifecycleStage: number; ctx: WorldDrawContext },
 ): void {
+  const { screen, lifecycleStage, ctx } = opts;
   const fade = monsterVisionFadeAlpha(lifecycleStage);
 
   if (ctx.monsterVision && ctx.particlesTexture !== null && ctx.monsterVisionSrc !== null) {
@@ -282,14 +271,15 @@ function drawCreatureOverlays(
   }
 }
 
-function drawCreatures(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): void {
+function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext }): void {
+  const ctx = opts.ctx;
   const frame = renderCtx.frame;
   const creatureEntries = frame.creatures.entries as CreatureState[];
 
   for (const creature of iterActiveCreatureOverlayPass(creatureEntries)) {
     const screen = WorldRenderCtx.worldToScreenWith(creature.pos, ctx.camera, ctx.viewScale);
     const lifecycleStage = creature.lifecycleStage;
-    drawCreatureOverlays(renderCtx, creature, screen, lifecycleStage, ctx);
+    drawCreatureOverlays(renderCtx, creature, { screen, lifecycleStage, ctx });
   }
 
   const resources = frame.resources;
@@ -368,23 +358,26 @@ function drawCreatures(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): void {
     drawCreatureSprite(
       renderCtx,
       texture,
-      typeId || CreatureTypeId.ZOMBIE,
-      creature.flags as CreatureFlags,
-      phase,
-      info.mirror && lifecycleStage >= 16.0,
-      shadowAlpha,
-      creature.pos,
-      screen,
-      creature.heading - Math.PI / 2.0,
-      ctx.scale,
-      sizeScale,
-      tint,
-      shadow,
+      {
+        typeId: typeId || CreatureTypeId.ZOMBIE,
+        flags: creature.flags as CreatureFlags,
+        phase,
+        mirrorLong: info.mirror && lifecycleStage >= 16.0,
+        shadowAlpha,
+        pos: creature.pos,
+        screenPos: screen,
+        rotationRad: creature.heading - Math.PI / 2.0,
+        scale: ctx.scale,
+        sizeScale,
+        tint,
+        shadow,
+      },
     );
   }
 }
 
-function drawFreezeOverlay(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): void {
+function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext }): void {
+  const ctx = opts.ctx;
   if (ctx.particlesTexture === null) return;
 
   const freezeTimer = renderCtx.frame.state.bonuses.freeze;
@@ -414,11 +407,12 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): vo
   wgl.endBlendMode();
 }
 
-function drawProjectilesAndEffects(renderCtx: WorldRenderCtx, ctx: WorldDrawContext): void {
+function drawProjectilesAndEffects(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext }): void {
+  const ctx = opts.ctx;
   const frame = renderCtx.frame;
 
   beginPass('laser_sight');
-  drawSharpshooterLaserSight(renderCtx, ctx.camera, ctx.viewScale, ctx.scale, ctx.entityAlpha);
+  drawSharpshooterLaserSight(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
   endPass('laser_sight');
 
   beginPass('primary_projectiles');
@@ -427,14 +421,14 @@ function drawProjectilesAndEffects(renderCtx: WorldRenderCtx, ctx: WorldDrawCont
     const proj = projectiles[projIndex];
     if (!proj.active) continue;
     drawProjectile(
-      renderCtx, proj, projIndex,
-      ctx.camera, ctx.viewScale, ctx.scale, ctx.entityAlpha,
+      renderCtx, proj,
+      { projIndex, camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
     );
   }
   endPass('primary_projectiles');
 
   beginPass('particle_pool');
-  drawParticlePool(renderCtx, ctx.camera, ctx.viewScale, ctx.entityAlpha);
+  drawParticlePool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
   endPass('particle_pool');
 
   beginPass('secondary_projectiles');
@@ -443,17 +437,17 @@ function drawProjectilesAndEffects(renderCtx: WorldRenderCtx, ctx: WorldDrawCont
     if (!proj.active) continue;
     drawSecondaryProjectile(
       renderCtx, proj,
-      ctx.camera, ctx.viewScale, ctx.scale, ctx.entityAlpha,
+      { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
     );
   }
   endPass('secondary_projectiles');
 
   beginPass('sprite_effect_pool');
-  drawSpriteEffectPool(renderCtx, ctx.camera, ctx.viewScale, ctx.entityAlpha);
+  drawSpriteEffectPool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
   endPass('sprite_effect_pool');
 
   beginPass('effect_pool');
-  drawEffectPool(renderCtx, ctx.camera, ctx.viewScale, ctx.entityAlpha);
+  drawEffectPool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
   endPass('effect_pool');
 }
 
@@ -467,19 +461,22 @@ function iterVisibleAimPlayers(renderCtx: WorldRenderCtx): PlayerState[] {
 
 export function drawAimIndicators(
   renderCtx: WorldRenderCtx,
-  ctx: WorldDrawContext,
-  worldToScreenWith?: ((pos: Vec2, camera: Vec2, viewScale: Vec2) => Vec2) | null,
-  drawAimCircleFn?: ((center: Vec2, radius: number, alpha: number) => void) | null,
-  drawClockGaugeFn?: ((pos: Vec2, ms: number, scale: number, alpha: number) => void) | null,
+  opts: {
+    ctx: WorldDrawContext;
+    worldToScreenWith?: ((pos: Vec2, camera: Vec2, viewScale: Vec2) => Vec2) | null;
+    drawAimCircleFn?: ((center: Vec2, radius: number, alpha: number) => void) | null;
+    drawClockGaugeFn?: ((pos: Vec2, ms: number, scale: number, alpha: number) => void) | null;
+  },
 ): void {
-  const transform = worldToScreenWith ?? ((pos: Vec2, camera: Vec2, viewScale: Vec2) =>
+  const ctx = opts.ctx;
+  const transform = opts.worldToScreenWith ?? ((pos: Vec2, camera: Vec2, viewScale: Vec2) =>
     WorldRenderCtx.worldToScreenWith(pos, camera, viewScale));
 
-  const drawCircle = drawAimCircleFn ?? ((center: Vec2, radius: number, alpha: number) =>
-    drawAimCircle(renderCtx, center, radius, alpha));
+  const drawCircle = opts.drawAimCircleFn ?? ((center: Vec2, radius: number, alpha: number) =>
+    drawAimCircle(renderCtx, { center, radius, alpha }));
 
-  const drawGauge = drawClockGaugeFn ?? ((pos: Vec2, ms: number, scale: number, alpha: number) =>
-    drawClockGauge(renderCtx, pos, ms, scale, alpha));
+  const drawGauge = opts.drawClockGaugeFn ?? ((pos: Vec2, ms: number, scale: number, alpha: number) =>
+    drawClockGauge(renderCtx, { pos, ms, scale, alpha }));
 
   for (const player of iterVisibleAimPlayers(renderCtx)) {
     if (player.health <= 0.0) continue;
@@ -508,10 +505,13 @@ export function drawAimIndicators(
 
 export function drawAimEnhancements(
   renderCtx: WorldRenderCtx,
-  ctx: WorldDrawContext,
-  worldToScreenWith?: ((pos: Vec2, camera: Vec2, viewScale: Vec2) => Vec2) | null,
+  opts: {
+    ctx: WorldDrawContext;
+    worldToScreenWith?: ((pos: Vec2, camera: Vec2, viewScale: Vec2) => Vec2) | null;
+  },
 ): void {
-  const transform = worldToScreenWith ?? ((pos: Vec2, camera: Vec2, viewScale: Vec2) =>
+  const ctx = opts.ctx;
+  const transform = opts.worldToScreenWith ?? ((pos: Vec2, camera: Vec2, viewScale: Vec2) =>
     WorldRenderCtx.worldToScreenWith(pos, camera, viewScale));
 
   for (const player of iterVisibleAimPlayers(renderCtx)) {
@@ -520,7 +520,7 @@ export function drawAimEnhancements(
     drawAimCursor(
       ctx.particlesTexture,
       getTexture(renderCtx.frame.resources, TextureId.UI_AIM),
-      aimScreen,
+      { pos: aimScreen },
     );
   }
 }
@@ -534,31 +534,31 @@ function creatureTexture(resources: RuntimeResources, assetName: string | null):
 
 function drawBonusAndUi(
   renderCtx: WorldRenderCtx,
-  ctx: WorldDrawContext,
-  drawAimIndicatorsEnabled: boolean,
+  opts: { ctx: WorldDrawContext; drawAimIndicatorsEnabled: boolean },
 ): void {
+  const { ctx, drawAimIndicatorsEnabled } = opts;
   beginPass('bonus_pickups');
-  drawBonusPickups(renderCtx, ctx.camera, ctx.viewScale, ctx.scale, ctx.entityAlpha);
+  drawBonusPickups(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
   endPass('bonus_pickups');
 
   beginPass('bonus_labels');
-  drawBonusHoverLabels(renderCtx, ctx.camera, ctx.viewScale, ctx.entityAlpha);
+  drawBonusHoverLabels(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
   endPass('bonus_labels');
 
   const drawWorldAim = drawAimIndicatorsEnabled && !renderCtx.frame.demoModeActive;
   if (drawWorldAim) {
     beginPass('aim_indicators');
-    drawAimIndicators(renderCtx, ctx);
+    drawAimIndicators(renderCtx, { ctx });
     endPass('aim_indicators');
   }
 
   beginPass('direction_arrows');
-  drawDirectionArrows(renderCtx, ctx.camera, ctx.viewScale, ctx.scale, ctx.entityAlpha);
+  drawDirectionArrows(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
   endPass('direction_arrows');
 
   if (drawWorldAim) {
     beginPass('aim_enhancements');
-    drawAimEnhancements(renderCtx, ctx);
+    drawAimEnhancements(renderCtx, { ctx });
     endPass('aim_enhancements');
   }
 }

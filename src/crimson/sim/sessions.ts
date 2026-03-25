@@ -136,10 +136,10 @@ export class QuestSpawnState {
 export function survivalMidStep(ctx: MidStepContext, spawn: SurvivalSpawnState): void {
   const state = ctx.world.state;
 
-  survivalUpdateWeaponHandouts(state, ctx.world.players, ctx.elapsedBeforeMs);
+  survivalUpdateWeaponHandouts(state, ctx.world.players, { survivalElapsedMs: ctx.elapsedBeforeMs });
 
   const playerLevel = ctx.world.players.length > 0 ? ctx.world.players[0].level : 1;
-  const [stage, milestoneCalls] = advanceSurvivalSpawnStage(spawn.stage, playerLevel | 0);
+  const [stage, milestoneCalls] = advanceSurvivalSpawnStage(spawn.stage, { playerLevel: playerLevel | 0 });
   spawn.stage = stage;
 
   for (const call of milestoneCalls) {
@@ -151,11 +151,13 @@ export function survivalMidStep(ctx: MidStepContext, spawn: SurvivalSpawnState):
     spawn.spawnCooldownMs,
     ctx.dtSimMs,
     state.rng,
-    ctx.world.players.length,
-    ctx.elapsedBeforeMs,
-    playerXp | 0,
-    ctx.worldSize | 0,
-    ctx.worldSize | 0,
+    {
+      playerCount: ctx.world.players.length,
+      survivalElapsedMs: ctx.elapsedBeforeMs,
+      playerExperience: playerXp | 0,
+      terrainWidth: ctx.worldSize | 0,
+      terrainHeight: ctx.worldSize | 0,
+    },
   );
   spawn.spawnCooldownMs = cooldown;
   ctx.world.creatures.spawnInits(waveSpawns);
@@ -167,10 +169,12 @@ export function rushMidStep(ctx: MidStepContext, spawn: RushSpawnState): void {
     spawn.spawnCooldownMs,
     ctx.dtRawMs,
     state.rng,
-    ctx.world.players.length,
-    ctx.elapsedBeforeMs | 0,
-    ctx.worldSize,
-    ctx.worldSize,
+    {
+      playerCount: ctx.world.players.length,
+      survivalElapsedMs: ctx.elapsedBeforeMs | 0,
+      terrainWidth: ctx.worldSize,
+      terrainHeight: ctx.worldSize,
+    },
   );
   spawn.spawnCooldownMs = cooldown;
   ctx.world.creatures.spawnInits(spawns);
@@ -365,11 +369,13 @@ export class DeterministicSession {
               this.world.players,
               this.world.state.perkSelection,
               ci,
-              this.gameMode,
-              this.world.players.length,
-              timing.dtSim,
-              this.world.creatures.entries,
-              true, // refreshChoices
+              {
+                gameMode: this.gameMode,
+                playerCount: this.world.players.length,
+                dt: timing.dtSim,
+                creatures: this.world.creatures.entries,
+                refreshChoices: true,
+              },
             );
             if (picked !== null) {
               postApplySfx.push(SfxId.UI_BONUS);
@@ -381,8 +387,7 @@ export class DeterministicSession {
               this.world.state,
               this.world.players,
               this.world.state.perkSelection,
-              this.gameMode,
-              this.world.players.length,
+              { gameMode: this.gameMode, playerCount: this.world.players.length },
             );
             break;
           }
@@ -443,7 +448,7 @@ export class DeterministicSession {
     // Normalize inputs
     const normalizedInputs = normalizeInputFrame(
       tickInputs,
-      this.world.players.length,
+      { playerCount: this.world.players.length },
     ).asList();
 
     // Set state fields

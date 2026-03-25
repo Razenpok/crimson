@@ -55,11 +55,10 @@ export function perkChoiceCount(player: PlayerState): number {
 export function perkSelectRandom(
   state: GameplayState,
   player: PlayerState,
-  gameMode: GameMode,
-  playerCount: number,
+  opts: { gameMode: GameMode; playerCount: number },
 ): PerkId {
   for (let i = 0; i < 1000; i++) {
-    const perkIdNum = state.rng.rand(RngCallerStatic.PERK_SELECT_RANDOM) % PERK_ID_MAX + 1;
+    const perkIdNum = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
     const perkId = perkIdNum as PerkId;
     if (!(perkIdNum >= 0 && perkIdNum < state.perkAvailable.length)) {
       continue;
@@ -67,7 +66,7 @@ export function perkSelectRandom(
     if (!state.perkAvailable[perkIdNum]) {
       continue;
     }
-    if (perkCanOffer(state, player, perkId, gameMode, playerCount)) {
+    if (perkCanOffer(state, player, perkId, { gameMode: opts.gameMode, playerCount: opts.playerCount })) {
       return perkId;
     }
   }
@@ -88,7 +87,7 @@ function perkOfferableMask(
       continue;
     }
     const perkId = perkIndex as PerkId;
-    if (perkCanOffer(state, player, perkId, gameMode, playerCount)) {
+    if (perkCanOffer(state, player, perkId, { gameMode, playerCount })) {
       offerable[perkIndex] = true;
     }
   }
@@ -98,11 +97,12 @@ function perkOfferableMask(
 export function perkGenerateChoices(
   state: GameplayState,
   player: PlayerState,
-  players: PlayerState[] | null,
-  gameMode: GameMode,
-  playerCount: number,
-  count: number | null = null,
+  opts: { players?: PlayerState[] | null; gameMode: GameMode; playerCount: number; count?: number | null },
 ): PerkId[] {
+  const players = opts.players ?? null;
+  const gameMode = opts.gameMode;
+  const playerCount = opts.playerCount;
+  let count = opts.count ?? null;
   if (count === null) {
     count = perkChoiceCount(player);
   }
@@ -130,7 +130,7 @@ export function perkGenerateChoices(
 
   function selectRandomOffer(): PerkId {
     for (let i = 0; i < 1000; i++) {
-      const perkIndex = state.rng.rand(RngCallerStatic.PERK_SELECT_RANDOM) % PERK_ID_MAX + 1;
+      const perkIndex = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
       if (offerableMask[perkIndex]) {
         return perkIndex as PerkId;
       }
@@ -168,7 +168,7 @@ export function perkGenerateChoices(
 
       if (
         _PERK_RARITY_GATE.has(perkId) &&
-        (state.rng.rand(RngCallerStatic.PERKS_GENERATE_CHOICES_RARITY_GATE) & 3) === 1
+        (state.rng.rand({ caller: RngCallerStatic.PERKS_GENERATE_CHOICES_RARITY_GATE }) & 3) === 1
       ) {
         continue;
       }
@@ -233,10 +233,7 @@ function perkSelectionPrepareIfNeeded(
     perkState.choices = perkGenerateChoices(
       state,
       players[0],
-      players,
-      gameMode,
-      playerCount,
-      7,
+      { players, gameMode, playerCount, count: 7 },
     );
     perkState.choicesDirty = false;
   }
@@ -261,14 +258,14 @@ export function perkSelectionOpenChoices(
   state: GameplayState,
   players: PlayerState[],
   perkState: PerkSelectionState,
-  gameMode: GameMode,
-  playerCount: number | null = null,
+  opts: { gameMode: GameMode; playerCount?: number | null },
 ): PerkId[] {
+  const playerCount = opts.playerCount ?? null;
   perkSelectionPrepareIfNeeded(
     state,
     players,
     perkState,
-    gameMode,
+    opts.gameMode,
     playerCount,
   );
   return perkSelectionPreparedChoices(players, perkState);
@@ -279,12 +276,13 @@ export function perkSelectionPick(
   players: PlayerState[],
   perkState: PerkSelectionState,
   choiceIndex: number,
-  gameMode: GameMode,
-  playerCount: number | null = null,
-  dt: number | null = null,
-  creatures: readonly CreatureState[] | null = null,
-  refreshChoices = false,
+  opts: { gameMode: GameMode; playerCount?: number | null; dt?: number | null; creatures?: readonly CreatureState[] | null; refreshChoices?: boolean },
 ): PerkId | null {
+  const gameMode = opts.gameMode;
+  const playerCount = opts.playerCount ?? null;
+  const dt = opts.dt ?? null;
+  const creatures = opts.creatures ?? null;
+  const refreshChoices = opts.refreshChoices ?? false;
   if (perkState.pendingCount <= 0) {
     return null;
   }
@@ -304,7 +302,7 @@ export function perkSelectionPick(
     return null;
   }
   const perkId = choices[idx];
-  perkApply(state, players, perkId, perkState, dt, creatures);
+  perkApply(state, players, perkId, { perkState, dt, creatures });
   console.assert((perkState.pendingCount | 0) > 0, 'pendingCount must be > 0 after perkApply');
   perkState.pendingCount -= 1;
   perkState.choicesDirty = true;

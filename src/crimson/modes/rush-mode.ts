@@ -102,9 +102,7 @@ export class RushMode extends BaseGameplayMode {
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      questUnlockIndex,
-      this.worldSize | 0,
-      this.worldSize | 0,
+      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
     this.simWorld.state.rng.srand(this.state.rng.state | 0);
@@ -312,8 +310,7 @@ export class RushMode extends BaseGameplayMode {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      mousePos,
-      this._cursorPulseTime,
+      { pos: mousePos, pulseTime: this._cursorPulseTime },
     );
   }
 

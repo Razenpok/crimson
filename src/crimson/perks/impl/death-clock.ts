@@ -11,12 +11,12 @@ function applyDeathClock(ctx: PerkApplyCtx): void {
   adjustPerkCount(
     ctx.owner,
     PerkId.REGENERATION,
-    -perkCountGet(ctx.owner, PerkId.REGENERATION),
+    { amount: -perkCountGet(ctx.owner, PerkId.REGENERATION) },
   );
   adjustPerkCount(
     ctx.owner,
     PerkId.GREATER_REGENERATION,
-    -perkCountGet(ctx.owner, PerkId.GREATER_REGENERATION),
+    { amount: -perkCountGet(ctx.owner, PerkId.GREATER_REGENERATION) },
   );
   for (const player of ctx.players) {
     if (player.health > 0.0) {

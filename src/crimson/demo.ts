@@ -201,8 +201,8 @@ class StandaloneTickHarness {
       outputs,
       syncAudioBridgeState: () => runtime.syncAudioBridgeState(),
       applyAudioPlan: (plan, shouldApplyAudio) =>
-        runtime.audioBridge.applyPlan(plan, shouldApplyAudio),
-      applyTerrainFx: (batch) => runtime.renderResources.consumeTerrainFxBatch(batch),
+        runtime.audioBridge.applyPlan({ plan, applyAudio: shouldApplyAudio }),
+      applyTerrainFx: (batch) => runtime.renderResources.consumeTerrainFxBatch(batch, {}),
       updateCamera: (dtSim) => runtime.updateCamera(dtSim),
       onOutputApplied: (output) => {
         const reaction = reactions.get(output.tickIndex | 0);
@@ -251,7 +251,7 @@ class StandaloneTickHarness {
 // ---------------------------------------------------------------------------
 
 function weaponName(weaponId: WeaponId, preserveBugs = false): string {
-  return weaponDisplayName(weaponId, preserveBugs);
+  return weaponDisplayName(weaponId, { preserveBugs });
 }
 
 // ---------------------------------------------------------------------------
@@ -314,11 +314,9 @@ export class DemoView {
   private _applyTerrainSetup(terrainSlots: TerrainSlotTriplet): void {
     const terrain = advanceExplicitTerrain(
       this._runtime.simWorld.state.rng,
-      terrainSlots,
-      WORLD_SIZE | 0,
-      WORLD_SIZE | 0,
+      { terrainSlots, width: WORLD_SIZE | 0, height: WORLD_SIZE | 0 },
     );
-    this._runtime.terrainRuntime.applyTerrainSetup(terrain.terrainSlots, terrain.terrainSeed);
+    this._runtime.terrainRuntime.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
     this._syncAudioRngFromRuntime();
   }
 
@@ -504,7 +502,7 @@ export class DemoView {
     this._purchaseActive = false;
 
     const playerCount = (index === 0 || index === 1 || index === 4) ? 2 : 1;
-    this._runtime.reset(this._nextDemoResetSeed(), playerCount);
+    this._runtime.reset({ seed: this._nextDemoResetSeed(), playerCount });
     this._tickHarness.reset();
     this._syncAudioRngFromRuntime();
     this._runtime.simWorld.state.bonuses.weaponPowerUp = 0.0;
@@ -544,12 +542,13 @@ export class DemoView {
       player.pos = pos;
       // Keep aim anchored to the spawn position so demo aim starts stable.
       player.aim = pos;
-      weaponAssignPlayer(player, weaponId as WeaponId, this._runtime.simWorld.state);
+      weaponAssignPlayer(player, weaponId as WeaponId, { state: this._runtime.simWorld.state });
     }
     this._demoTargets = new Array(this._runtime.simWorld.players.length).fill(null);
   }
 
-  private _spawn(spawnId: SpawnId, pos: Vec2, heading: number = 0.0): void {
+  private _spawn(spawnId: SpawnId, pos: Vec2, opts: { heading?: number } = {}): void {
+    const heading = opts.heading ?? 0.0;
     const rng = this._runtime.simWorld.state.rng;
     this._runtime.simWorld.creatures.spawnTemplate(spawnId, pos, heading, rng);
   }
@@ -570,8 +569,8 @@ export class DemoView {
     let i = 0;
     while (y < 1696) {
       const col = i % 2;
-      this._spawn(SpawnId.SPIDER_SP1_AI7_TIMER_38, new Vec2((col + 2) * 64, y), RANDOM_HEADING_SENTINEL);
-      this._spawn(SpawnId.SPIDER_SP1_AI7_TIMER_38, new Vec2(col * 64 + 798, y), RANDOM_HEADING_SENTINEL);
+      this._spawn(SpawnId.SPIDER_SP1_AI7_TIMER_38, new Vec2((col + 2) * 64, y), { heading: RANDOM_HEADING_SENTINEL });
+      this._spawn(SpawnId.SPIDER_SP1_AI7_TIMER_38, new Vec2(col * 64 + 798, y), { heading: RANDOM_HEADING_SENTINEL });
       y += 80;
       i += 1;
     }
@@ -591,16 +590,16 @@ export class DemoView {
     this._runtime.simWorld.state.bonuses.weaponPowerUp = 15.0;
     for (let idx = 0; idx < 20; idx++) {
       const x =
-        ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_X) % 200) | 0) + 32;
+        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_X }) % 200) | 0) + 32;
       const y =
-        ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_Y) % 899) | 0) + 64;
-      this._spawn(SpawnId.SPIDER_SP1_RANDOM_GREEN_34, new Vec2(x, y), RANDOM_HEADING_SENTINEL);
+        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_Y }) % 899) | 0) + 64;
+      this._spawn(SpawnId.SPIDER_SP1_RANDOM_GREEN_34, new Vec2(x, y), { heading: RANDOM_HEADING_SENTINEL });
       if (idx % 3 !== 0) {
         const sx =
-          ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_X) % 30) | 0) + 32;
+          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_X }) % 30) | 0) + 32;
         const sy =
-          ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_Y) % 899) | 0) + 64;
-        this._spawn(SpawnId.SPIDER_SP2_RANDOM_35, new Vec2(sx, sy), RANDOM_HEADING_SENTINEL);
+          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_Y }) % 899) | 0) + 64;
+        this._spawn(SpawnId.SPIDER_SP2_RANDOM_35, new Vec2(sx, sy), { heading: RANDOM_HEADING_SENTINEL });
       }
     }
   }
@@ -614,10 +613,10 @@ export class DemoView {
     let i = 0;
     while (y < 848) {
       const col = i % 2;
-      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2(col * 64 + 32, y), RANDOM_HEADING_SENTINEL);
-      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2((col + 2) * 64, y), RANDOM_HEADING_SENTINEL);
-      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2(col * 64 - 64, y), RANDOM_HEADING_SENTINEL);
-      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2((col + 12) * 64, y), RANDOM_HEADING_SENTINEL);
+      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2(col * 64 + 32, y), { heading: RANDOM_HEADING_SENTINEL });
+      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2((col + 2) * 64, y), { heading: RANDOM_HEADING_SENTINEL });
+      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2(col * 64 - 64, y), { heading: RANDOM_HEADING_SENTINEL });
+      this._spawn(SpawnId.ZOMBIE_RANDOM_41, new Vec2((col + 12) * 64, y), { heading: RANDOM_HEADING_SENTINEL });
       y += 60;
       i += 1;
     }
@@ -637,16 +636,16 @@ export class DemoView {
     }
     for (let idx = 0; idx < 20; idx++) {
       const x =
-        ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_X) % 200) | 0) + 32;
+        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_X }) % 200) | 0) + 32;
       const y =
-        ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_Y) % 899) | 0) + 64;
-      this._spawn(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(x, y), 0.0);
+        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_Y }) % 899) | 0) + 64;
+      this._spawn(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(x, y), { heading: 0.0 });
       if (idx % 3 !== 0) {
         const sx =
-          ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_X) % 30) | 0) + 32;
+          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_X }) % 30) | 0) + 32;
         const sy =
-          ((rng.rand(RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_Y) % 899) | 0) + 64;
-        this._spawn(SpawnId.ALIEN_CONST_GREEN_SMALL_25, new Vec2(sx, sy), 0.0);
+          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_Y }) % 899) | 0) + 64;
+        this._spawn(SpawnId.ALIEN_CONST_GREEN_SMALL_25, new Vec2(sx, sy), { heading: 0.0 });
       }
     }
   }
@@ -656,7 +655,7 @@ export class DemoView {
   // -----------------------------------------------------------------------
 
   private _drawWorld(): void {
-    this._runtime.draw(true, 1.0);
+    this._runtime.draw({ drawAimIndicators: true, entityAlpha: 1.0 });
   }
 
   private _drawOverlay(): void {

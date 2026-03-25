@@ -16,7 +16,7 @@ function applyAmmoManiac(ctx: PerkApplyCtx): void {
     }
   }
   for (const player of ctx.players) {
-    weaponAssignPlayer(player, player.weapon.weaponId as WeaponId, ctx.state);
+    weaponAssignPlayer(player, player.weapon.weaponId as WeaponId, { state: ctx.state });
   }
 }
 

@@ -27,9 +27,11 @@ export class BonusApplyCtx {
   registerGlobal(timerKey: string): void {
     this.state.bonusHud.register(
       this.bonusId,
-      this.label,
-      this.iconId,
-      timerRef('global', String(timerKey)),
+      {
+        label: this.label,
+        iconId: this.iconId,
+        timerRef: timerRef('global', String(timerKey)),
+      },
     );
   }
 
@@ -37,17 +39,21 @@ export class BonusApplyCtx {
     if (this.players.length > 1) {
       this.state.bonusHud.register(
         this.bonusId,
-        this.label,
-        this.iconId,
-        timerRef('player', String(timerKey), 0),
-        timerRef('player', String(timerKey), 1),
+        {
+          label: this.label,
+          iconId: this.iconId,
+          timerRef: timerRef('player', String(timerKey), 0),
+          timerRefAlt: timerRef('player', String(timerKey), 1),
+        },
       );
     } else {
       this.state.bonusHud.register(
         this.bonusId,
-        this.label,
-        this.iconId,
-        timerRef('player', String(timerKey), this.player.index | 0),
+        {
+          label: this.label,
+          iconId: this.iconId,
+          timerRef: timerRef('player', String(timerKey), this.player.index | 0),
+        },
       );
     }
   }

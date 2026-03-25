@@ -116,7 +116,7 @@ function drawDropdown(
   const [mx, my] = InputState.mousePosition();
   const mouse = { x: mx, y: my };
   const hoveredHeader = enabled && mouseInsideRectWithPadding(
-    mouse, widgetPos, widgetW, 14.0 * scale,
+    mouse, { pos: widgetPos, width: widgetW, height: 14.0 * scale },
   );
 
   const widgetH = isOpen ? fullH : headerH;
@@ -166,7 +166,7 @@ function drawDropdown(
     const label = items[idx];
     const itemY = rowsY0 + rowH * idx;
     const hovered = enabled && mouseInsideRectWithPadding(
-      mouse, new Vec2(widgetPos.x, itemY), widgetW, 14.0 * scale,
+      mouse, { pos: new Vec2(widgetPos.x, itemY), width: widgetW, height: 14.0 * scale },
     );
     let alpha = 153 / 255;
     if (hovered) alpha = 242 / 255;
@@ -560,6 +560,6 @@ function weaponLabelAndIcon(view: HighScoresView, weaponId: number): [string, nu
   if (weapon === undefined) {
     return ['Unknown', null];
   }
-  const name = weaponDisplayName(weapon.weaponId, view.state.preserveBugs);
+  const name = weaponDisplayName(weapon.weaponId, { preserveBugs: view.state.preserveBugs });
   return [name, weapon.iconIndex];
 }

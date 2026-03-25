@@ -34,12 +34,14 @@ export interface ProjectilePoolLike {
     owner: OwnerRef,
   ) => void) | null;
   spawn(
-    pos: Vec2,
-    angle: number,
-    typeId: ProjectileTemplateId,
-    owner: OwnerRef,
-    travelBudget: number,
-    hitsPlayers?: boolean,
+    opts: {
+      pos: Vec2;
+      angle: number;
+      typeId: ProjectileTemplateId;
+      owner: OwnerRef;
+      travelBudget?: number;
+      hitsPlayers?: boolean;
+    },
   ): number;
 }
 
@@ -135,7 +137,7 @@ const CREATURE_FLAGS_SELF_DAMAGE_TICK = CreatureFlags.SELF_DAMAGE_TICK as number
 export function projectileHitPerkPoisonBullets(ctx: ProjectileHitPerkCtx): void {
   if (
     ctx.ownerPerkActive(ctx.proj.owner, ctx.poisonIdx) &&
-    (ctx.rng.rand(RngCallerStatic.PROJECTILE_UPDATE_POISON_BULLETS_GATE) & 7) === 1
+    (ctx.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_POISON_BULLETS_GATE }) & 7) === 1
   ) {
     ctx.creature.flags |= CREATURE_FLAGS_SELF_DAMAGE_TICK;
   }
@@ -212,22 +214,22 @@ export function preHitSplitter(ctx: ProjectileUpdateCtx, proj: Projectile, hitId
     ctx.detailPreset,
   );
   const splitHitsPlayers = true;
-  ctx.pool.spawn(
-    proj.pos,
-    proj.angle - 1.0471976,
-    ProjectileTemplateId.SPLITTER_GUN,
-    OwnerRef.fromCreature(hitIdx | 0),
-    proj.travelBudget,
-    splitHitsPlayers,
-  );
-  ctx.pool.spawn(
-    proj.pos,
-    proj.angle + 1.0471976,
-    ProjectileTemplateId.SPLITTER_GUN,
-    OwnerRef.fromCreature(hitIdx | 0),
-    proj.travelBudget,
-    splitHitsPlayers,
-  );
+  ctx.pool.spawn({
+    pos: proj.pos,
+    angle: proj.angle - 1.0471976,
+    typeId: ProjectileTemplateId.SPLITTER_GUN,
+    owner: OwnerRef.fromCreature(hitIdx | 0),
+    travelBudget: proj.travelBudget,
+    hitsPlayers: splitHitsPlayers,
+  });
+  ctx.pool.spawn({
+    pos: proj.pos,
+    angle: proj.angle + 1.0471976,
+    typeId: ProjectileTemplateId.SPLITTER_GUN,
+    owner: OwnerRef.fromCreature(hitIdx | 0),
+    travelBudget: proj.travelBudget,
+    hitsPlayers: splitHitsPlayers,
+  });
 }
 
 export function postHitIonCommon(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo): void {
@@ -290,13 +292,13 @@ export function postHitIonRifle(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo
       runtimeState.bonusSpawnGuard = true;
       let projId: number;
       try {
-        projId = ctx.pool.spawn(
-          originPos,
+        projId = ctx.pool.spawn({
+          pos: originPos,
           angle,
-          hit.proj.typeId as ProjectileTemplateId,
-          OwnerRef.fromCreature(hitCreature),
-          hit.proj.travelBudget,
-        );
+          typeId: hit.proj.typeId as ProjectileTemplateId,
+          owner: OwnerRef.fromCreature(hitCreature),
+          travelBudget: hit.proj.travelBudget,
+        });
       } finally {
         runtimeState.bonusSpawnGuard = prevGuard;
       }
@@ -324,13 +326,13 @@ export function postHitPlasmaCannon(ctx: ProjectileUpdateCtx, hit: ProjectileHit
     for (let ringIdx = 0; ringIdx < 12; ringIdx++) {
       const ringAngle = ringIdx * (Math.PI / 6.0);
       const ringOffset = Vec2.fromAngle(ringAngle).mul(ringRadius);
-      ctx.pool.spawn(
-        hit.proj.pos.add(ringOffset),
-        ringAngle,
-        ProjectileTemplateId.PLASMA_RIFLE,
-        OwnerRef.fromLocalPlayer(0),
-        plasmaMeta,
-      );
+      ctx.pool.spawn({
+        pos: hit.proj.pos.add(ringOffset),
+        angle: ringAngle,
+        typeId: ProjectileTemplateId.PLASMA_RIFLE,
+        owner: OwnerRef.fromLocalPlayer(0),
+        travelBudget: plasmaMeta,
+      });
     }
   } finally {
     if (runtimeState !== null) {

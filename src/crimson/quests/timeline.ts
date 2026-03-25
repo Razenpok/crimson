@@ -63,9 +63,9 @@ export function tickQuestSpawnTimeline(
       const offset = (spawnIdx & 1) === 0 ? magnitude : -magnitude;
       let pos: Vec2;
       if (offscreenX) {
-        pos = basePos.offset(0.0, offset);
+        pos = basePos.offset({ dy: offset });
       } else {
-        pos = basePos.offset(offset, 0.0);
+        pos = basePos.offset({ dx: offset });
       }
       spawns.push({ templateId: entry.spawnId, pos, heading: f32(entry.heading) });
     }

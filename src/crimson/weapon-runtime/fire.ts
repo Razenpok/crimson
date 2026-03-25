@@ -112,12 +112,12 @@ function spawnNativeFireMuzzleSprites(
   }
 
   for (const [speed, scale, alpha] of specs) {
-    state.spriteEffects.spawn(
-      muzzle,
-      Vec2.fromHeading(aimHeading).mul(speed),
+    state.spriteEffects.spawn({
+      pos: muzzle,
+      vel: Vec2.fromHeading(aimHeading).mul(speed),
       scale,
-      new RGBA(0.5, 0.5, 0.5, alpha),
-    );
+      color: new RGBA(0.5, 0.5, 0.5, alpha),
+    });
   }
 }
 
@@ -134,11 +134,11 @@ function nativeShotAngleWithJitter(
   const maxOffset = f32(f32(dist * spreadHeat) * 0.5);
 
   const dirAngle = f32(
-    (rng.rand(RngCallerStatic.PLAYER_UPDATE_SHOT_JITTER_DIR) & 0x1FF) *
+    (rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_SHOT_JITTER_DIR }) & 0x1FF) *
       (NATIVE_TAU / 512.0),
   );
   const mag = f32(
-    (rng.rand(RngCallerStatic.PLAYER_UPDATE_SHOT_JITTER_MAG) & 0x1FF) *
+    (rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_SHOT_JITTER_MAG }) & 0x1FF) *
       (1.0 / 512.0),
   );
   const offset = f32(maxOffset * mag);
@@ -150,7 +150,7 @@ function nativeShotAngleWithJitter(
 
   const shotDx = f32(aimJitterX - playerPos.x);
   const shotDy = f32(aimJitterY - playerPos.y);
-  return headingFromDeltaF32(shotDx, shotDy);
+  return headingFromDeltaF32({ dx: shotDx, dy: shotDy });
 }
 
 function applyPelletJitter(
@@ -163,9 +163,9 @@ function applyPelletJitter(
     case 'NoJitter':
       return shotAngle;
     case 'ModuloCenteredJitter':
-      return shotAngle + (rng.rand(caller) % (jitterRule.modulo | 0) - (jitterRule.center | 0)) * jitterRule.step;
+      return shotAngle + (rng.rand(caller !== null ? { caller } : undefined) % (jitterRule.modulo | 0) - (jitterRule.center | 0)) * jitterRule.step;
     case 'MaskCenteredJitter':
-      return shotAngle + ((rng.rand(caller) & (jitterRule.mask | 0)) - (jitterRule.center | 0)) * jitterRule.step;
+      return shotAngle + ((rng.rand(caller !== null ? { caller } : undefined) & (jitterRule.mask | 0)) - (jitterRule.center | 0)) * jitterRule.step;
   }
 }
 
@@ -180,7 +180,7 @@ function applySpeedScaleRule(
       return;
     case 'ModuloSpeedScale':
       state.projectiles.entries[projId | 0].speedScale =
-        speedRule.base + (state.rng.rand(caller) % (speedRule.modulo | 0)) * speedRule.step;
+        speedRule.base + (state.rng.rand(caller !== null ? { caller } : undefined) % (speedRule.modulo | 0)) * speedRule.step;
       return;
   }
 }
@@ -228,9 +228,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         state,
         player,
         cost,
-        dt,
-        players,
-        onPlayerLethal !== null ? (() => onPlayerLethal(player)) : null,
+        { dt, players, onLethal: onPlayerLethal !== null ? (() => onPlayerLethal(player)) : null },
       );
     } else {
       return { fired: false, shotCount: 0, ammoCost: 0.0 };
@@ -261,23 +259,23 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
 
   const aim = inputState.aim;
   const aimDelta = aim.sub(player.pos);
-  const aimHeading = headingFromDeltaF32(aimDelta.x, aimDelta.y);
+  const aimHeading = headingFromDeltaF32({ dx: aimDelta.x, dy: aimDelta.y });
 
   const muzzle = player.pos.add(Vec2.fromHeading(aimHeading).rotated(-0.150915).mul(16.0));
   const weaponFlags = (weapon.flags ?? 0) | 0;
   if (weaponFlags & 0x1) {
     const shellCasingDraws: [number, number, number, number] = [
-      state.rng.rand(RngCallerStatic.PLAYER_UPDATE_CASING_ANGLE),
-      state.rng.rand(RngCallerStatic.PLAYER_UPDATE_CASING_SPEED),
-      state.rng.rand(RngCallerStatic.PLAYER_UPDATE_CASING_ROTATION),
-      state.rng.rand(RngCallerStatic.PLAYER_UPDATE_CASING_ROTATION_STEP),
+      state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_ANGLE }),
+      state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_SPEED }),
+      state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_ROTATION }),
+      state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_ROTATION_STEP }),
     ];
-    state.effects.spawnShellCasing(
-      muzzle,
+    state.effects.spawnShellCasing({
+      pos: muzzle,
       aimHeading,
-      shellCasingDraws,
-      (ctx.detailPreset ?? 5) | 0,
-    );
+      draws: shellCasingDraws,
+      detailPreset: (ctx.detailPreset ?? 5) | 0,
+    });
   }
 
   const shotAngle = nativeShotAngleWithJitter(
@@ -294,7 +292,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   // Native gameplay fire consumes one exact `player_update` RNG draw for shot
   // SFX variant selection on every non-Fire-Bullets shot.
   if (!isFireBullets) {
-    state.rng.rand(RngCallerStatic.PLAYER_UPDATE_SHOT_SFX);
+    state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_SHOT_SFX });
   }
 
   const owner = ownerRefForPlayer(player.index);
@@ -313,8 +311,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
 
   const recipe = resolveFireRecipe(
     weaponId,
-    pelletCount,
-    isFireBullets,
+    { pelletCount, fireBulletsActive: isFireBullets },
   );
   ammoCost = recipe.ammoCost;
 
@@ -337,13 +334,13 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
           mode.jitter,
           pelletJitterCaller,
         );
-        const projId = state.projectiles.spawn(
-          muzzle,
+        const projId = state.projectiles.spawn({
+          pos: muzzle,
           angle,
           typeId,
-          projectileOwner,
-          meta,
-        );
+          owner: projectileOwner,
+          travelBudget: meta,
+        });
         applySpeedScaleRule(
           state,
           projId | 0,
@@ -373,18 +370,18 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
     }
     case 'ParticleStreamMode': {
       if (mode.slow) {
-        state.particles.spawnParticleSlow(
-          muzzle,
-          Vec2.fromHeading(shotAngle).toAngle(),
+        state.particles.spawnParticleSlow({
+          pos: muzzle,
+          angle: Vec2.fromHeading(shotAngle).toAngle(),
           owner,
-        );
+        });
       } else {
-        const particleId = state.particles.spawnParticle(
-          muzzle,
-          particleAngle,
-          1.0,
+        const particleId = state.particles.spawnParticle({
+          pos: muzzle,
+          angle: particleAngle,
+          intensity: 1.0,
           owner,
-        );
+        });
         if (mode.style !== null) {
           state.particles.entries[particleId].styleId = mode.style;
         }
@@ -404,13 +401,13 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         [spreadSmall, ProjectileTemplateId.PLASMA_RIFLE],
       ];
       for (const [angleOffset, typeId] of patterns) {
-        state.projectiles.spawn(
-          muzzle,
-          shotAngle + angleOffset,
+        state.projectiles.spawn({
+          pos: muzzle,
+          angle: shotAngle + angleOffset,
           typeId,
-          projectileOwner,
-          travelBudgetForTypeId(typeId),
-        );
+          owner: projectileOwner,
+          travelBudget: travelBudgetForTypeId(typeId),
+        });
       }
       break;
     }

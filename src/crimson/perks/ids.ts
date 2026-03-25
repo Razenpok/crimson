@@ -170,9 +170,10 @@ const _PERK_FIXED_DESCRIPTIONS: Map<PerkId, string> = new Map([
 
 export function perkDisplayName(
   perkId: PerkId,
-  violenceDisabled = 0,
-  preserveBugs = false,
+  opts: { violenceDisabled?: number; preserveBugs?: boolean } = {},
 ): string {
+  const violenceDisabled = opts.violenceDisabled ?? 0;
+  const preserveBugs = opts.preserveBugs ?? false;
   if (perkId === PerkId.BLOODY_MESS_QUICK_LEARNER && violenceDisabled !== 0) {
     return QUICK_LEARNER_NAME;
   }
@@ -187,9 +188,10 @@ export function perkDisplayName(
 
 export function perkDisplayDescription(
   perkId: PerkId,
-  violenceDisabled = 0,
-  preserveBugs = false,
+  opts: { violenceDisabled?: number; preserveBugs?: boolean } = {},
 ): string {
+  const violenceDisabled = opts.violenceDisabled ?? 0;
+  const preserveBugs = opts.preserveBugs ?? false;
   if (perkId === PerkId.BLOODY_MESS_QUICK_LEARNER && violenceDisabled !== 0) {
     return QUICK_LEARNER_DESCRIPTION;
   }
@@ -204,8 +206,9 @@ export function perkDisplayDescription(
 
 export function perkLabel(
   perkId: PerkId,
-  violenceDisabled = 0,
-  preserveBugs = false,
+  opts: { violenceDisabled?: number; preserveBugs?: boolean } = {},
 ): string {
-  return perkDisplayName(perkId, violenceDisabled, preserveBugs);
+  const violenceDisabled = opts.violenceDisabled ?? 0;
+  const preserveBugs = opts.preserveBugs ?? false;
+  return perkDisplayName(perkId, { violenceDisabled, preserveBugs });
 }

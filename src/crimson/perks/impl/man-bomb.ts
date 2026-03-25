@@ -24,17 +24,12 @@ export function tickManBomb(ctx: PlayerPerkTickCtx): void {
         ? RngCallerStatic.PLAYER_UPDATE_MAN_BOMB_ION_MINIGUN_ANGLE
         : RngCallerStatic.PLAYER_UPDATE_MAN_BOMB_ION_RIFLE_ANGLE;
       const angle =
-        (ctx.state.rng.rand(caller) % 50) * 0.01
+        (ctx.state.rng.rand({ caller }) % 50) * 0.01
         + idx * (Math.PI / 4.0)
         - 0.25;
       ctx.projectileSpawn(
         ctx.state,
-        ctx.players,
-        ctx.player.pos,
-        angle,
-        typeId,
-        owner,
-        ctx.player.index,
+        { players: ctx.players, pos: ctx.player.pos, angle, typeId, owner, ownerPlayerIndex: ctx.player.index },
       );
     }
     ctx.state.sfxQueue.push(SfxId.EXPLOSION_SMALL);

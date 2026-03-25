@@ -13,11 +13,12 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 export function drawClassicMenuPanel(
   texture: wgl.Texture,
-  dst: wgl.Rectangle,
-  tint: wgl.Color = WHITE,
-  shadow: boolean = false,
-  flipX: boolean = false,
+  opts: { dst: wgl.Rectangle; tint?: wgl.Color; shadow?: boolean; flipX?: boolean },
 ): void {
+  const dst = opts.dst;
+  const tint = opts.tint ?? WHITE;
+  const shadow = opts.shadow ?? false;
+  const flipX = opts.flipX ?? false;
   const texW = texture.width;
   const texH = texture.height;
   if (texW <= 0.0 || texH <= 0.0) return;
@@ -45,11 +46,11 @@ export function drawClassicMenuPanel(
   if (midH <= 0.0) {
     const src = flipSrc(wgl.makeRectangle(srcX, srcY, srcW, srcH));
     if (shadow) {
-      drawUiQuadShadow(
+      drawUiQuadShadow({
         texture, src,
-        wgl.makeRectangle(dstX + UI_SHADOW_OFFSET, dstY + UI_SHADOW_OFFSET, dstW, dstH),
-        origin, 0.0,
-      );
+        dst: wgl.makeRectangle(dstX + UI_SHADOW_OFFSET, dstY + UI_SHADOW_OFFSET, dstW, dstH),
+        origin, rotationDeg: 0.0,
+      });
     }
     wgl.drawTexturePro(texture, src, dst, origin, 0.0, tint);
     return;
@@ -66,11 +67,11 @@ export function drawClassicMenuPanel(
   if (shadow) {
     const slices: [typeof srcTop, typeof dstTop][] = [[srcTop, dstTop], [srcMid, dstMid], [srcBot, dstBot]];
     for (const [s, d] of slices) {
-      drawUiQuadShadow(
-        texture, s,
-        wgl.makeRectangle(d[0] + UI_SHADOW_OFFSET, d[1] + UI_SHADOW_OFFSET, d[2], d[3]),
-        origin, 0.0,
-      );
+      drawUiQuadShadow({
+        texture, src: s,
+        dst: wgl.makeRectangle(d[0] + UI_SHADOW_OFFSET, d[1] + UI_SHADOW_OFFSET, d[2], d[3]),
+        origin, rotationDeg: 0.0,
+      });
     }
   }
 

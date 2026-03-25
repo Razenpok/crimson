@@ -35,11 +35,11 @@ export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
         [0.2, RngCallerStatic.PERKS_UPDATE_EFFECTS_PYROKINETIC_ANGLE_0P2],
       ];
       for (const [intensity, caller] of intensityCallers) {
-        const angle = (ctx.state.rng.rand(caller) % 628) * 0.01;
-        ctx.state.particles.spawnParticle(creature.pos, angle, intensity);
+        const angle = (ctx.state.rng.rand({ caller }) % 628) * 0.01;
+        ctx.state.particles.spawnParticle({ pos: creature.pos, angle, intensity });
       }
       if (ctx.fxQueue !== null) {
-        ctx.fxQueue.addRandom(creature.pos, ctx.state.rng);
+        ctx.fxQueue.addRandom({ pos: creature.pos, rng: ctx.state.rng });
       }
     }
   }

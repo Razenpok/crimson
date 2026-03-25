@@ -127,10 +127,10 @@ export abstract class DatabaseBaseView {
     }
   }
 
-  protected _panelTopLeft(pos: Vec2, scale: number): Vec2 {
+  protected _panelTopLeft(opts: { pos: Vec2; scale: number }): Vec2 {
     return new Vec2(
-      pos.x + MENU_PANEL_OFFSET_X * scale,
-      pos.y + this._widescreenYShift + MENU_PANEL_OFFSET_Y * scale,
+      opts.pos.x + MENU_PANEL_OFFSET_X * opts.scale,
+      opts.pos.y + this._widescreenYShift + MENU_PANEL_OFFSET_Y * opts.scale,
     );
   }
 
@@ -159,11 +159,13 @@ export abstract class DatabaseBaseView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin,
+        rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -213,7 +215,7 @@ export abstract class DatabaseBaseView {
     const screenWidth = this.state.config.display.width;
     const scale = 1.0;
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
-    const leftTopLeft = this._panelTopLeft(new Vec2(leftPanelPosX, LEFT_PANEL_POS_Y), scale);
+    const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, LEFT_PANEL_POS_Y), scale });
     const resources = this.state.resources!;
 
     const [mx, my] = InputState.mousePosition();
@@ -274,27 +276,22 @@ export abstract class DatabaseBaseView {
     );
 
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
-    const leftTopLeft = this._panelTopLeft(new Vec2(leftPanelPosX, LEFT_PANEL_POS_Y), scale);
+    const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, LEFT_PANEL_POS_Y), scale });
     const rightPanelPosX = hsRightPanelPosX(screenWidth);
-    const rightTopLeft = this._panelTopLeft(new Vec2(rightPanelPosX, RIGHT_PANEL_POS_Y), scale);
-    const leftPanelTopLeft = leftTopLeft.offset(leftSlideX);
-    const rightPanelTopLeft = rightTopLeft.offset(rightSlideX);
+    const rightTopLeft = this._panelTopLeft({ pos: new Vec2(rightPanelPosX, RIGHT_PANEL_POS_Y), scale });
+    const leftPanelTopLeft = leftTopLeft.offset({ dx: leftSlideX });
+    const rightPanelTopLeft = rightTopLeft.offset({ dx: rightSlideX });
 
     const resources = this.state.resources!;
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
 
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, LEFT_PANEL_HEIGHT * scale),
-      WHITE,
-      fxDetail,
+      { dst: wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, LEFT_PANEL_HEIGHT * scale), tint: WHITE, shadow: fxDetail },
     );
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, RIGHT_PANEL_HEIGHT * scale),
-      WHITE,
-      fxDetail,
-      true,
+      { dst: wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, RIGHT_PANEL_HEIGHT * scale), tint: WHITE, shadow: fxDetail, flipX: true },
     );
 
     const font = resources.smallFont;
@@ -313,7 +310,7 @@ export abstract class DatabaseBaseView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 
   // ---------------------------------------------------------------------------

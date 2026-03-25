@@ -67,8 +67,9 @@ export interface WeaponAssignStatus {
 export function weaponAssignPlayer(
   player: PlayerState,
   weaponId: WeaponId,
-  state: GameplayState,
+  opts: { state: GameplayState },
 ): void {
+  const state = opts.state;
   const status = state.status as WeaponAssignStatus | null;
   if (status !== null && !state.demoModeActive) {
     const usageSlot = weaponUsageSlotForWeaponId(weaponId as number);
@@ -99,10 +100,9 @@ export function weaponAssignPlayer(
 
 export function mostUsedWeaponIdForPlayer(
   state: GameplayState,
-  playerIndex: number,
-  fallbackWeaponId: WeaponId,
+  opts: { playerIndex: number; fallbackWeaponId: WeaponId },
 ): WeaponId {
-  const idx = playerIndex | 0;
+  const idx = opts.playerIndex | 0;
   const weaponShotsFired = state.weaponShotsFired;
   if (idx >= 0 && idx < weaponShotsFired.length) {
     const counts = weaponShotsFired[idx];
@@ -119,7 +119,7 @@ export function mostUsedWeaponIdForPlayer(
       }
     }
   }
-  return fallbackWeaponId;
+  return opts.fallbackWeaponId;
 }
 
 export function playerSwapAltWeapon(player: PlayerState): boolean {

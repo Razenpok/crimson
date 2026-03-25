@@ -12,16 +12,17 @@ export function perkApply(
   state: GameplayState,
   players: PlayerState[],
   perkId: PerkId,
-  perkState: PerkSelectionState | null = null,
-  dt: number | null = null,
-  creatures: readonly CreatureState[] | null = null,
+  opts: { perkState?: PerkSelectionState | null; dt?: number | null; creatures?: readonly CreatureState[] | null } = {},
 ): void {
+  const perkState = opts.perkState ?? null;
+  const dt = opts.dt ?? null;
+  const creatures = opts.creatures ?? null;
   if (players.length === 0) {
     return;
   }
   const owner = players[0];
   try {
-    adjustPerkCount(owner, perkId);
+    adjustPerkCount(owner, perkId, {});
     const handler = PERK_APPLY_HANDLERS.get(perkId);
     if (handler !== undefined) {
       handler(

@@ -148,7 +148,7 @@ export class SurvivalMode extends BaseGameplayMode {
 
   private _resetPerkPrompt(): void {
     this._perkPromptPendingCount = this.state.perkSelection.pendingCount;
-    this._perkPrompt.resetIfPending(this._perkPromptPendingCount);
+    this._perkPrompt.resetIfPending({ pendingCount: this._perkPromptPendingCount });
   }
 
   private _updatePerkUi(dtUiMs: number, allowInput = true, allowPulse = true): void {
@@ -315,9 +315,7 @@ export class SurvivalMode extends BaseGameplayMode {
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      questUnlockIndex,
-      this.worldSize | 0,
-      this.worldSize | 0,
+      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
     this.simWorld.state.rng.srand(this.state.rng.state | 0);
@@ -393,7 +391,7 @@ export class SurvivalMode extends BaseGameplayMode {
     let idx = weaponIds.indexOf(current);
     if (idx < 0) idx = 0;
     const weaponId = weaponIds[((idx + delta) % weaponIds.length + weaponIds.length) % weaponIds.length];
-    weaponAssignPlayer(this.player, weaponId, this.state);
+    weaponAssignPlayer(this.player, weaponId, { state: this.state });
   }
 
   // ---------------------------------------------------------------------------
@@ -600,8 +598,7 @@ export class SurvivalMode extends BaseGameplayMode {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      mousePos,
-      this._cursorPulseTime,
+      { pos: mousePos, pulseTime: this._cursorPulseTime },
     );
   }
 

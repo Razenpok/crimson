@@ -32,11 +32,12 @@ function _weaponDamageScaleMap(): Map<number, number> {
 
 export function resetWorldPlayers(
   players: PlayerState[],
-  state: GameplayState,
-  worldSize: number,
-  playerCount: number,
-  spawnPos: Vec2 | null = null,
+  opts: { state: GameplayState; worldSize: number; playerCount: number; spawnPos?: Vec2 | null },
 ): void {
+  const state = opts.state;
+  const worldSize = opts.worldSize;
+  const playerCount = opts.playerCount;
+  const spawnPos = opts.spawnPos ?? null;
   players.length = 0;
 
   const base = spawnPos ?? new Vec2(worldSize * 0.5, worldSize * 0.5);
@@ -56,7 +57,7 @@ export function resetWorldPlayers(
   for (let idx = 0; idx < count; idx++) {
     const pos = base.add(offsets[idx]).clampRect(0.0, 0.0, worldSize, worldSize);
     const player = new PlayerState(idx, pos);
-    weaponAssignPlayer(player, WeaponId.PISTOL, state);
+    weaponAssignPlayer(player, WeaponId.PISTOL, { state });
     initDefaultAltWeapon(player);
     players.push(player);
   }
@@ -115,10 +116,13 @@ export class SimWorldState {
     this.damageScaleByType = _weaponDamageScaleMap();
     this.lastEvents = _emptyWorldEvents();
     this.lastPresentation = new PresentationStepCommands();
-    this.reset(0xBEEF, 1);
+    this.reset({ seed: 0xBEEF, playerCount: 1 });
   }
 
-  reset(seed: number = 0xBEEF, playerCount: number = 1, spawnPos: Vec2 | null = null): void {
+  reset(opts?: { seed?: number; playerCount?: number; spawnPos?: Vec2 | null }): void {
+    const seed = opts?.seed ?? 0xBEEF;
+    const playerCount = opts?.playerCount ?? 1;
+    const spawnPos = opts?.spawnPos ?? null;
     this.worldState = WorldState.build({
       worldSize: this.worldSize,
       demoModeActive: Boolean(this.demoModeActive),
@@ -141,10 +145,7 @@ export class SimWorldState {
 
     resetWorldPlayers(
       this.players,
-      this.state,
-      this.worldSize,
-      playerCount | 0,
-      spawnPos,
+      { state: this.state, worldSize: this.worldSize, playerCount: playerCount | 0, spawnPos },
     );
   }
 

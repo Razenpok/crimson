@@ -46,29 +46,29 @@ export function questCompleteBannerAlpha(timerMs: number): number {
 }
 
 export function drawQuestTitleTimerOverlay(
-  screenW: number,
-  screenH: number,
   font: GrimMonoFont,
   title: string,
   number: string,
-  timerMs: number,
+  opts: { timerMs: number },
 ): void {
-  const alpha = questTitleAlpha(timerMs);
+  const screenW = wgl.getScreenWidth();
+  const screenH = wgl.getScreenHeight();
+  const alpha = questTitleAlpha(opts.timerMs);
   if (alpha <= 0.0) return;
-  drawQuestTitleOverlay(screenW, screenH, font, title, number, alpha);
+  drawQuestTitleOverlay(screenW, screenH, font, title, number, { alpha });
 }
 
 export function drawQuestCompleteBannerOverlay(
-  screenW: number,
-  screenH: number,
   texture: wgl.Texture,
-  timerMs: number,
+  opts: { timerMs: number },
 ): void {
-  if (timerMs <= 0.0) return;
-  const alpha = questCompleteBannerAlpha(timerMs);
+  if (opts.timerMs <= 0.0) return;
+  const alpha = questCompleteBannerAlpha(opts.timerMs);
   if (alpha <= 0.0) return;
+  const screenW = wgl.getScreenWidth();
+  const screenH = wgl.getScreenHeight();
   const scale =
-    QUEST_COMPLETE_BANNER_SCALE_BASE + timerMs * QUEST_COMPLETE_BANNER_SCALE_RATE;
+    QUEST_COMPLETE_BANNER_SCALE_BASE + opts.timerMs * QUEST_COMPLETE_BANNER_SCALE_RATE;
   const width = QUEST_COMPLETE_BANNER_BASE_W * scale;
   const height = QUEST_COMPLETE_BANNER_BASE_H * scale;
   const centerX = screenW * 0.5;

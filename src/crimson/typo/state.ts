@@ -16,12 +16,12 @@ export class TypoState {
 
 export function resetTypoState(
   typo: TypoState,
-  creatureCapacity: number,
-  dictionaryWords: readonly string[] = [],
-  highscoreNames: readonly string[] = [],
+  opts: { creatureCapacity: number; dictionaryWords?: readonly string[]; highscoreNames?: readonly string[] },
 ): void {
+  const dictionaryWords = opts.dictionaryWords ?? [];
+  const highscoreNames = opts.highscoreNames ?? [];
   typo.typing = new TypingBuffer();
-  typo.names = CreatureNameTable.sized(creatureCapacity | 0);
+  typo.names = CreatureNameTable.sized(opts.creatureCapacity | 0);
   typo.spawnCooldownMs = 0;
   typo.dictionaryWords = Array.from(dictionaryWords);
   typo.highscoreNames = Array.from(highscoreNames);

@@ -133,7 +133,7 @@ registerQuest({
   let trigger = 2000;
   let step = 2000;
   while (step > 720) {
-    const angle = (rng.rand(RngCallerStatic.QUEST_BUILD_SWEEP_STAKES_ANGLE) % 612) * 0.01;
+    const angle = (rng.rand({ caller: RngCallerStatic.QUEST_BUILD_SWEEP_STAKES_ANGLE }) % 612) * 0.01;
     for (const pos of radialPoints(center, angle, 0x54, 0xFC, 0x2A)) {
       const heading = headingFromCenter(pos, center);
       entries.push(spawnEntry(pos, { heading, spawnId: SpawnId.ALIEN_AI7_ORBITER_36, triggerMs: trigger, count: 1 }));

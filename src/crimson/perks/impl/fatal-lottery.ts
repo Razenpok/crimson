@@ -6,7 +6,7 @@ import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
 import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyFatalLottery(ctx: PerkApplyCtx): void {
-  if (ctx.state.rng.rand(RngCallerStatic.PERK_APPLY_FATAL_LOTTERY) & 1) {
+  if (ctx.state.rng.rand({ caller: RngCallerStatic.PERK_APPLY_FATAL_LOTTERY }) & 1) {
     ctx.owner.health = -1.0;
   } else {
     ctx.owner.experience += 10000;

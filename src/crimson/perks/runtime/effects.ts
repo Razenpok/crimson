@@ -12,14 +12,15 @@ export function perksUpdateEffects(
   state: GameplayState,
   players: PlayerState[],
   dt: number,
-  creatures: readonly CreatureState[] | null = null,
-  fxQueue: FxQueue | null = null,
+  opts: { creatures?: readonly CreatureState[] | null; fxQueue?: FxQueue | null } = {},
 ): void {
   // Apply frame-based perk effect updates.
   // Port subset of `perks_update_effects` (0x00406b40).
   if (dt <= 0.0) {
     return;
   }
+  const creatures = opts.creatures ?? null;
+  const fxQueue = opts.fxQueue ?? null;
   const ctx = new PerksUpdateEffectsCtx(
     state,
     players,

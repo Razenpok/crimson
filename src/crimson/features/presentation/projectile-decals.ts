@@ -8,22 +8,19 @@ import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { queueLargeHitDecalStreak } from '@crimson/bonuses/fire-bullets.ts';
 
 export function queueProjectileLargeStreakDecal(
-  hit: ProjectileHit,
-  baseAngle: number,
-  fxQueue: FxQueue,
-  rng: CrandLike,
-  freezeOrigin: Vec2 | null = null,
-  spawnFreezeShard: ((pos: Vec2, angle: number) => void) | null = null,
+  opts: { hit: ProjectileHit; baseAngle: number; fxQueue: FxQueue; rng: CrandLike; freezeOrigin?: Vec2 | null; spawnFreezeShard?: ((pos: Vec2, angle: number) => void) | null },
 ): boolean {
-  const typeId = hit.typeId;
+  const freezeOrigin = opts.freezeOrigin ?? null;
+  const spawnFreezeShard = opts.spawnFreezeShard ?? null;
+  const typeId = opts.hit.typeId;
   if (typeId !== ProjectileTemplateId.GAUSS_GUN && typeId !== ProjectileTemplateId.FIRE_BULLETS) {
     return false;
   }
   queueLargeHitDecalStreak({
-    hit,
-    baseAngle,
-    fxQueue,
-    rng,
+    hit: opts.hit,
+    baseAngle: opts.baseAngle,
+    fxQueue: opts.fxQueue,
+    rng: opts.rng,
     freezeOrigin,
     spawnFreezeShard,
   });

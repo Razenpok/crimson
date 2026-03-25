@@ -78,7 +78,7 @@ registerQuest({
   while (trigger < 0xA988) {
     const angle = stepIndex * 0.33333334;
     const radius = 512.0 - stepIndex * 3.8;
-    const pos = Vec2.fromPolar(angle, radius).offset(512.0, 512.0);
+    const pos = Vec2.fromPolar(angle, radius).offset({ dx: 512.0, dy: 512.0 });
     entries.push(spawnEntry(pos, { heading: angle, spawnId: SpawnId.ZOMBIE_RANDOM_41, triggerMs: trigger, count: 1 }));
     trigger += 300;
     stepIndex += 1;

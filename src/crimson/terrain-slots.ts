@@ -63,9 +63,11 @@ export function resolveTerrainSlots<T>(
   return [lookup(baseId), lookup(overlayId), lookup(detailId)];
 }
 
-export function chooseUnlockTerrainSlots(unlockIndex: number, rng: CrandLike): TerrainSlotTriplet {
+export function chooseUnlockTerrainSlots(opts: { unlockIndex: number; rng: CrandLike }): TerrainSlotTriplet {
+  const unlockIndex = opts.unlockIndex;
+  const rng = opts.rng;
   for (const [threshold, slots, caller] of UNLOCK_TERRAIN_SLOTS) {
-    if (unlockIndex >= threshold && (rng.rand(caller) & 7) === 3) {
+    if (unlockIndex >= threshold && (rng.rand({ caller }) & 7) === 3) {
       return slots;
     }
   }

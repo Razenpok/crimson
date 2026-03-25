@@ -16,16 +16,21 @@ function clamp01(value: number): number {
 
 export function drawCursorGlow(
   particles: wgl.Texture | null,
-  pos: Vec2,
-  pulseTime: number | null = null,
-  effectId: number = CURSOR_EFFECT_ID,
+  opts: {
+    pos: Vec2;
+    pulseTime?: number | null;
+    effectId?: number;
+  },
 ): void {
   if (particles === null) return;
 
+  const pos = opts.pos;
+  const pulseTime = opts.pulseTime ?? null;
+  const effectId = opts.effectId ?? CURSOR_EFFECT_ID;
+
   const src = effectSrcRect(
     effectId,
-    particles.width,
-    particles.height,
+    { textureWidth: particles.width, textureHeight: particles.height },
   );
   if (src === null) return;
 
@@ -60,9 +65,12 @@ export function drawCursorGlow(
 export function drawAimCursor(
   particles: wgl.Texture | null,
   aim: wgl.Texture | null,
-  pos: Vec2,
+  opts: {
+    pos: Vec2;
+  },
 ): void {
-  drawCursorGlow(particles, pos);
+  const pos = opts.pos;
+  drawCursorGlow(particles, { pos });
 
   if (aim === null) {
     // Fallback crosshair using thin rectangles (no circle)
@@ -90,10 +98,14 @@ export function drawAimCursor(
 export function drawMenuCursor(
   particles: wgl.Texture | null,
   cursor: wgl.Texture | null,
-  pos: Vec2,
-  pulseTime: number,
+  opts: {
+    pos: Vec2;
+    pulseTime: number;
+  },
 ): void {
-  drawCursorGlow(particles, pos, pulseTime);
+  const pos = opts.pos;
+  const pulseTime = opts.pulseTime;
+  drawCursorGlow(particles, { pos, pulseTime });
 
   if (cursor === null) return;
 

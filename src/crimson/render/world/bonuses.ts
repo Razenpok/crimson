@@ -40,12 +40,10 @@ function bonusFade(timeLeft: number, timeMax: number): number {
 
 export function drawBonusPickups(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; scale: number; alpha?: number },
 ): void {
-  alpha = clamp(alpha, 0.0, 1.0);
+  const { camera, viewScale, scale } = opts;
+  let alpha = clamp(opts.alpha ?? 1.0, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
   const frame = renderCtx.frame;
@@ -114,11 +112,10 @@ export function drawBonusPickups(
 
 export function drawBonusHoverLabels(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; alpha?: number },
 ): void {
-  alpha = clamp(alpha, 0.0, 1.0);
+  const { camera, viewScale } = opts;
+  let alpha = clamp(opts.alpha ?? 1.0, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
   const frame = renderCtx.frame;
@@ -135,7 +132,7 @@ export function drawBonusHoverLabels(
     const hovered = bonusFindAimHoverEntry(player, bonusPool);
     if (hovered === null) continue;
     const [_idx, entry] = hovered;
-    const label = bonusLabelForEntry(entry, frame.state.preserveBugs);
+    const label = bonusLabelForEntry(entry, { preserveBugs: frame.state.preserveBugs });
     if (!label) continue;
 
     const aim = player.aim;

@@ -8,15 +8,15 @@ import { GameplayState } from "@crimson/gameplay.js";
 // This module currently models the `camera_update` screen shake logic, which is
 // global state in the original game.
 
-export function cameraShakeStart(state: GameplayState, pulses: number, timer: number): void {
+export function cameraShakeStart(state: GameplayState, opts: { pulses: number; timer: number }): void {
   // Start a camera shake sequence.
   //
   // Mirrors the nuke path in `bonus_apply`, which sets:
   //   - `camera_shake_pulses = 0x14`
   //   - `camera_shake_timer = 0.2`
 
-  state.cameraShakePulses = pulses;
-  state.cameraShakeTimer = timer;
+  state.cameraShakePulses = opts.pulses;
+  state.cameraShakeTimer = opts.timer;
 }
 
 export function cameraShakeUpdate(state: GameplayState, dt: number): void {
@@ -59,14 +59,14 @@ export function cameraShakeUpdate(state: GameplayState, dt: number): void {
   }
 
   let magX =
-    state.rng.rand(RngCallerStatic.CAMERA_UPDATE_OFFSET_X_BASE) % maxAmp +
-    state.rng.rand(RngCallerStatic.CAMERA_UPDATE_OFFSET_X_SPREAD) % 10;
-  if ((state.rng.rand(RngCallerStatic.CAMERA_UPDATE_OFFSET_X_SIGN) & 1) === 0) magX = -magX;
+    state.rng.rand({ caller: RngCallerStatic.CAMERA_UPDATE_OFFSET_X_BASE }) % maxAmp +
+    state.rng.rand({ caller: RngCallerStatic.CAMERA_UPDATE_OFFSET_X_SPREAD }) % 10;
+  if ((state.rng.rand({ caller: RngCallerStatic.CAMERA_UPDATE_OFFSET_X_SIGN }) & 1) === 0) magX = -magX;
 
   let magY =
-    state.rng.rand(RngCallerStatic.CAMERA_UPDATE_OFFSET_Y_BASE) % maxAmp +
-    state.rng.rand(RngCallerStatic.CAMERA_UPDATE_OFFSET_Y_SPREAD) % 10;
-  if ((state.rng.rand(RngCallerStatic.CAMERA_UPDATE_OFFSET_Y_SIGN) & 1) === 0) magY = -magY;
+    state.rng.rand({ caller: RngCallerStatic.CAMERA_UPDATE_OFFSET_Y_BASE }) % maxAmp +
+    state.rng.rand({ caller: RngCallerStatic.CAMERA_UPDATE_OFFSET_Y_SPREAD }) % 10;
+  if ((state.rng.rand({ caller: RngCallerStatic.CAMERA_UPDATE_OFFSET_Y_SIGN }) & 1) === 0) magY = -magY;
 
   state.cameraShakeOffset = new Vec2(magX, magY);
 }

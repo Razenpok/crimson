@@ -155,7 +155,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
       drawSmallText(
         font,
         this._perkName(perkId, violenceDisabled, preserveBugs),
-        listTopLeft.offset(0.0, row * rowStep),
+        listTopLeft.offset({ dx: 0.0, dy: row * rowStep }),
         wgl.makeColor(1, 1, 1, rowAlpha),
       );
     }
@@ -210,7 +210,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const prereqName = this._perkPrereqName(perkId, violenceDisabled, preserveBugs);
     if (prereqName) {
       drawSmallText(font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, 0.8));
-      descPos = descPos.offset(0.0, 18.0 * scale);
+      descPos = descPos.offset({ dx: 0.0, dy: 18.0 * scale });
     }
 
     const wrappedDesc = this._prewrappedPerkDesc(perkId, font, violenceDisabled);
@@ -394,7 +394,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
 
   private _buildPerkDatabaseIds(): PerkId[] {
     const status = (this.state as unknown as { status?: GameStatus | null }).status ?? null;
-    const available = buildPerkAvailability(status);
+    const available = buildPerkAvailability({ status });
     const perkIds: PerkId[] = [];
     for (let idx = 1; idx < available.length; idx++) {
       if (available[idx]) {
@@ -406,11 +406,13 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   }
 
   private _perkName(perkId: PerkId, violenceDisabled: number, preserveBugs: boolean): string {
-    return perkDisplayName(perkId, violenceDisabled, preserveBugs);
+    return perkDisplayName(perkId, { violenceDisabled, preserveBugs });
   }
 
-  private _perkDesc(perkId: PerkId, violenceDisabled: number, preserveBugs: boolean): string {
-    return perkDisplayDescription(perkId, violenceDisabled, preserveBugs);
+  private _perkDesc(perkId: PerkId, opts: { violenceDisabled?: number; preserveBugs?: boolean } = {}): string {
+    const violenceDisabled = opts.violenceDisabled ?? 0;
+    const preserveBugs = opts.preserveBugs ?? false;
+    return perkDisplayDescription(perkId, { violenceDisabled, preserveBugs });
   }
 
   private _perkPrereqName(perkId: PerkId, violenceDisabled: number, preserveBugs: boolean): string | null {
@@ -418,7 +420,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     if (!meta) return null;
     const prereq = meta.prereq;
     if (!prereq || prereq.length === 0) return null;
-    return perkDisplayName(prereq[0], violenceDisabled, preserveBugs);
+    return perkDisplayName(prereq[0], { violenceDisabled, preserveBugs });
   }
 
   private _preserveBugs(): boolean {
@@ -433,7 +435,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const key = `${perkId as number}:${violenceDisabled}:${this._preserveBugs() ? 1 : 0}`;
     const cached = this._wrappedDescCache.get(key);
     if (cached !== undefined) return cached;
-    const desc = this._perkDesc(perkId, violenceDisabled, this._preserveBugs());
+    const desc = this._perkDesc(perkId, { violenceDisabled, preserveBugs: this._preserveBugs() });
     const wrapped = UnlockedPerksDatabaseView._wrapSmallTextNative(
       font, desc, UnlockedPerksDatabaseView._DESC_WRAP_WIDTH_PX, 1.0,
     );

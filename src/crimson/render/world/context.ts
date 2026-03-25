@@ -23,31 +23,31 @@ export class WorldRenderCtx {
   cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
     const outW = runtimeW ?? wgl.getScreenWidth();
     const outH = runtimeH ?? wgl.getScreenHeight();
-    return viewport.cameraScreenSize(
-      this.frame.worldSize,
-      this.frame.config,
-      outW,
-      outH,
-    );
+    return viewport.cameraScreenSize({
+      worldSize: this.frame.worldSize,
+      config: this.frame.config,
+      runtimeW: outW,
+      runtimeH: outH,
+    });
   }
 
   clampCamera(camera: Vec2, screenSize: Vec2): Vec2 {
-    return viewport.clampCamera(this.frame.worldSize, camera, screenSize);
+    return viewport.clampCamera({ worldSize: this.frame.worldSize, camera, screenSize });
   }
 
   worldParams(): [Vec2, Vec2] {
     const outSize = new Vec2(wgl.getScreenWidth(), wgl.getScreenHeight());
-    const [camera, viewScale] = viewport.viewTransform(
-      this.frame.worldSize,
-      this.frame.config,
-      this.frame.camera,
+    const [camera, viewScale] = viewport.viewTransform({
+      worldSize: this.frame.worldSize,
+      config: this.frame.config,
+      camera: this.frame.camera,
       outSize,
-    );
+    });
     return [camera, viewScale];
   }
 
   static worldToScreenWith(pos: Vec2, camera: Vec2, viewScale: Vec2): Vec2 {
-    return viewport.worldToScreenWith(pos, camera, viewScale);
+    return viewport.worldToScreenWith(pos, { camera, viewScale });
   }
 
   static viewScaleAvg(viewScale: Vec2): number {
@@ -77,10 +77,10 @@ export class WorldRenderCtx {
     wgl.drawTexturePro(texture, src, dst, origin, rotationRad * RAD_TO_DEG, tint as wgl.Color);
   }
 
-  withProjection(camera: Vec2, viewScale: Vec2): WorldRenderCtx {
+  withProjection(opts: { camera: Vec2; viewScale: Vec2 }): WorldRenderCtx {
     const ctx = new WorldRenderCtx(this.renderer, this.frame);
-    ctx.projectionCamera = camera;
-    ctx.projectionViewScale = viewScale;
+    ctx.projectionCamera = opts.camera;
+    ctx.projectionViewScale = opts.viewScale;
     return ctx;
   }
 
@@ -118,15 +118,15 @@ export class WorldRenderCtx {
     if (camera === null || viewScale === null) {
       [camera, viewScale] = this.worldParams();
     }
-    return viewport.screenToWorldWith(pos, camera, viewScale);
+    return viewport.screenToWorldWith(pos, { camera, viewScale });
   }
 }
 
 export function buildWorldRenderCtx(
   renderer: WorldRenderer,
-  renderFrame: RenderFrame,
+  opts: { renderFrame: RenderFrame },
 ): WorldRenderCtx {
-  return new WorldRenderCtx(renderer, renderFrame);
+  return new WorldRenderCtx(renderer, opts.renderFrame);
 }
 
 export function isBulletTrailType(typeId: number): boolean {

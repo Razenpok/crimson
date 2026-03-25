@@ -69,7 +69,7 @@ export function perkMenuComputeLayout(
     panel.y + MENU_PANEL_ANCHOR_Y * scale,
   );
   const title = Rect.fromTopLeft(
-    anchorPos.offset(MENU_TITLE_X * scale, MENU_TITLE_Y * scale),
+    anchorPos.offset({ dx: MENU_TITLE_X * scale, dy: MENU_TITLE_Y * scale }),
     MENU_TITLE_W * scale,
     MENU_TITLE_H * scale,
   );
@@ -87,10 +87,10 @@ export function perkMenuComputeLayout(
     listPos.y + choiceCount * listStepY * scale + MENU_DESC_Y_AFTER_LIST * scale,
   );
   if (choiceCount > 5) {
-    descPos = descPos.offset(0.0, -MENU_DESC_Y_EXTRA_TIGHTEN * scale);
+    descPos = descPos.offset({ dy: -MENU_DESC_Y_EXTRA_TIGHTEN * scale });
   }
   const descRight = panel.x + MENU_DESC_RIGHT_X * scale;
-  const cancelPos = anchorPos.offset(MENU_BUTTON_X * scale, MENU_BUTTON_Y * scale);
+  const cancelPos = anchorPos.offset({ dx: MENU_BUTTON_X * scale, dy: MENU_BUTTON_Y * scale });
   const descSize = new Vec2(
     Math.max(0.0, descRight - descPos.x),
     Math.max(0.0, cancelPos.y - 12.0 * scale - descPos.y),
@@ -201,7 +201,7 @@ export function drawWrappedUiTextInRect(
   for (const line of lines) {
     if (pos.y + lineH > maxY) break;
     drawUiText(resources, line, pos, { scale: opts.scale, color: opts.color });
-    pos = pos.offset(0.0, lineH);
+    pos = pos.offset({ dy: lineH });
   }
 }
 
@@ -293,7 +293,7 @@ export function buttonWidth(
 }
 
 export function buttonHitRect(opts: { pos: Vec2; width: number }): Rect {
-  return Rect.fromTopLeft(opts.pos.offset(0.0, 2.0), opts.width, 28.0);
+  return Rect.fromTopLeft(opts.pos.offset({ dy: 2.0 }), opts.width, 28.0);
 }
 
 export function buttonUpdate(

@@ -726,7 +726,7 @@ export class GameLoopView implements View {
         this.state.quitRequested = true;
         return;
       }
-      ensureMenuGround(this.state, true);
+      ensureMenuGround(this.state, { regenerate: true });
       this._menu.open();
       this._active = this._menu;
       this._menuActive = true;
@@ -793,7 +793,7 @@ export class GameLoopView implements View {
   }
 
   private _regenerateTerrainForConsole(): void {
-    ensureMenuGround(this.state, true);
+    ensureMenuGround(this.state, { regenerate: true });
     const views: Screen[] = [];
     if (this._frontActive !== null) views.push(this._frontActive);
     if (this._frontStack.length > 0) {
@@ -980,7 +980,7 @@ export class GameLoopView implements View {
     const level = this.state.pendingQuestLevel;
     if (level === null) return;
     if (typeof gameplay.startRun === 'function') {
-      gameplay.startRun(level, this._status);
+      gameplay.startRun(level, { status: this._status });
     }
   }
 

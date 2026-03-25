@@ -91,8 +91,8 @@ function theKillingRandomSpawner(
   yCaller: number,
   xCaller: number,
 ): SpawnEntryType {
-  const y = (rng.rand(yCaller) % 768) + 128.0;
-  const x = (rng.rand(xCaller) % 768) + 128.0;
+  const y = (rng.rand({ caller: yCaller }) % 768) + 128.0;
+  const x = (rng.rand({ caller: xCaller }) % 768) + 128.0;
   return spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs, count: 3 });
 }
 
@@ -107,7 +107,7 @@ registerQuest({
   const entries: SpawnEntryType[] = [];
   let trigger = 2000;
   for (let _wave = 0; _wave < 10; _wave++) {
-    const spawnCycle = rng.rand(RngCallerStatic.QUEST_BUILD_THE_KILLING_TEMPLATE_PICK) % 3;
+    const spawnCycle = rng.rand({ caller: RngCallerStatic.QUEST_BUILD_THE_KILLING_TEMPLATE_PICK }) % 3;
     let sid: SpawnId;
     if (spawnCycle === 0) {
       sid = SpawnId.AI1_ALIEN_BLUE_TINT_1A;
@@ -117,7 +117,7 @@ registerQuest({
       sid = SpawnId.AI1_LIZARD_BLUE_TINT_1C;
     }
 
-    const edge = rng.rand(RngCallerStatic.QUEST_BUILD_THE_KILLING_LAYOUT_PICK) % 5;
+    const edge = rng.rand({ caller: RngCallerStatic.QUEST_BUILD_THE_KILLING_LAYOUT_PICK }) % 5;
     if (edge === 0) {
       entries.push(spawnAt(edges.right, { heading: 0.0, spawnId: sid, triggerMs: trigger, count: 12 }));
     } else if (edge === 1) {
@@ -262,7 +262,7 @@ registerQuest({
   let trigger = 2000;
   let step = 2000;
   while (step > 560) {
-    const angle = (rng.rand(RngCallerStatic.QUEST_BUILD_DEJA_VU_ANGLE) % 612) * 0.01;
+    const angle = (rng.rand({ caller: RngCallerStatic.QUEST_BUILD_DEJA_VU_ANGLE }) % 612) * 0.01;
     for (const pos of radialPoints(center, angle, 0x54, 0xFC, 0x2A)) {
       entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
     }

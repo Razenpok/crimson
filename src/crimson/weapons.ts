@@ -155,7 +155,8 @@ const _WEAPON_FIXED_NAMES: Map<WeaponId, string> = new Map([
   [WeaponId.FIRE_BULLETS, 'Fire Bullets'],
 ]);
 
-export function weaponDisplayName(weaponId: WeaponId, preserveBugs = false): string {
+export function weaponDisplayName(weaponId: WeaponId, opts: { preserveBugs?: boolean } = {}): string {
+  const preserveBugs = opts.preserveBugs ?? false;
   const entry = WEAPON_BY_ID.get(weaponId);
   if (!entry) return `weapon_${weaponId}`;
   if (preserveBugs) return entry.name;

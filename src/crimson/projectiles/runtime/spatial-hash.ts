@@ -103,13 +103,13 @@ export class CreatureSpatialHash {
     }
   }
 
-  candidateIndices(pos: Vec2, radius: number): number[] {
+  candidateIndices(opts: { pos: Vec2; radius: number }): number[] {
     if (this._cells.size === 0) {
       return [];
     }
-    const projCellX = Math.floor(pos.x / this._bucketSize);
-    const projCellY = Math.floor(pos.y / this._bucketSize);
-    const maxAxisDelta = radius + this._maxFindMargin + _NATIVE_FIND_RADIUS_MARGIN_EPS;
+    const projCellX = Math.floor(opts.pos.x / this._bucketSize);
+    const projCellY = Math.floor(opts.pos.y / this._bucketSize);
+    const maxAxisDelta = opts.radius + this._maxFindMargin + _NATIVE_FIND_RADIUS_MARGIN_EPS;
     const cellSpan = Math.ceil(maxAxisDelta / this._bucketSize) | 0;
 
     const candidates: number[] = [];

@@ -16,7 +16,7 @@ export function applyRandomWeapon(ctx: PerkApplyCtx): void {
       break;
     }
   }
-  weaponAssignPlayer(ctx.owner, weaponId, ctx.state);
+  weaponAssignPlayer(ctx.owner, weaponId, { state: ctx.state });
 }
 
 export const HOOKS = {

@@ -42,7 +42,10 @@ export interface MusicState {
   paqEntries: Map<string, Uint8Array> | null;
 }
 
-export function initMusicState(ready: boolean, enabled: boolean, volume: number): MusicState {
+export function initMusicState(opts: { ready: boolean; enabled: boolean; volume: number }): MusicState {
+  const ready = opts.ready;
+  const enabled = opts.enabled;
+  const volume = opts.volume;
   return {
     ready,
     enabled,
@@ -150,6 +153,7 @@ export async function loadMusicTrack(
   audioCtx: AudioContext,
   assetsUrl: string,
   relPath: string,
+  opts?: { console?: unknown },
 ): Promise<[string, number] | null> {
   const normalized = relPath.replace(/\\/g, '/');
   if (!state.ready || !state.enabled) return null;
@@ -195,7 +199,8 @@ export function stopMusic(state: MusicState): void {
   state.gameTuneTrack = null;
 }
 
-export function triggerGameTune(state: MusicState, audioCtx: AudioContext | null, rng: CrandLike): string | null {
+export function triggerGameTune(state: MusicState, audioCtx: AudioContext | null, opts: { rng: CrandLike }): string | null {
+  const rng = opts.rng;
   if (!state.ready || !state.enabled || !audioCtx) return null;
   if (state.gameTuneStarted) return null;
   if (state.queue.length === 0) return null;

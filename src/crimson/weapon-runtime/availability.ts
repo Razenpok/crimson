@@ -17,16 +17,18 @@ export interface WeaponAvailabilityStatus {
 }
 
 export function buildWeaponAvailability(
-  status: WeaponAvailabilityStatus | null,
-  gameMode: GameMode,
-  demoModeActive: boolean,
+  opts: {
+    status: WeaponAvailabilityStatus | null;
+    gameMode: GameMode;
+    demoModeActive: boolean;
+  },
 ): boolean[] {
   const available: boolean[] = new Array(WEAPON_AVAILABLE_COUNT).fill(false);
   let unlockIndex = 0;
   let unlockIndexFull = 0;
-  if (status !== null) {
-    unlockIndex = status.questUnlockIndex;
-    unlockIndexFull = status.questUnlockIndexFull;
+  if (opts.status !== null) {
+    unlockIndex = opts.status.questUnlockIndex;
+    unlockIndexFull = opts.status.questUnlockIndexFull;
   }
 
   const pistolId = WeaponId.PISTOL as number;
@@ -45,7 +47,7 @@ export function buildWeaponAvailability(
     }
   }
 
-  if (gameMode === GameMode.SURVIVAL) {
+  if (opts.gameMode === GameMode.SURVIVAL) {
     for (const weaponId of [WeaponId.ASSAULT_RIFLE, WeaponId.SHOTGUN, WeaponId.SUBMACHINE_GUN]) {
       const id = weaponId as number;
       if (id >= 0 && id < available.length) {
@@ -54,7 +56,7 @@ export function buildWeaponAvailability(
     }
   }
 
-  if (!demoModeActive && unlockIndexFull >= 0x28) {
+  if (!opts.demoModeActive && unlockIndexFull >= 0x28) {
     const splitterId = WeaponId.SPLITTER_GUN as number;
     if (splitterId >= 0 && splitterId < available.length) {
       available[splitterId] = true;
@@ -65,7 +67,7 @@ export function buildWeaponAvailability(
 }
 
 export function prepareWeaponAvailability(state: GameplayState, status: WeaponAvailabilityStatus | null): void {
-  const built = buildWeaponAvailability(status, state.gameMode, state.demoModeActive);
+  const built = buildWeaponAvailability({ status, gameMode: state.gameMode, demoModeActive: state.demoModeActive });
   const weaponAvailable = state.weaponAvailable;
   for (let i = 0; i < built.length && i < weaponAvailable.length; i++) {
     weaponAvailable[i] = built[i];
@@ -84,7 +86,7 @@ export function weaponPickRandomAvailable(
   const weaponAvailable = state.weaponAvailable;
 
   for (let attempt = 0; attempt < 1000; attempt++) {
-    const baseRand = state.rng.rand(RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_PICK);
+    const baseRand = state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_PICK });
     let weaponId: WeaponId = (baseRand % WEAPON_DROP_ID_COUNT + 1) as WeaponId;
 
     // Bias: used weapons have a 50% chance to reroll once.
@@ -92,9 +94,9 @@ export function weaponPickRandomAvailable(
       const usageSlot = weaponUsageSlotForWeaponId(weaponId as number);
       if (usageSlot !== null && status.weaponUsageCountSlot(usageSlot) !== 0) {
         if (
-          (state.rng.rand(RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_GATE) & 1) === 0
+          (state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_GATE }) & 1) === 0
         ) {
-          const rerollRand = state.rng.rand(RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_PICK);
+          const rerollRand = state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_PICK });
           weaponId = (rerollRand % WEAPON_DROP_ID_COUNT + 1) as WeaponId;
         }
       }

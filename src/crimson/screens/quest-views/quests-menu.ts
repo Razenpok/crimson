@@ -348,7 +348,7 @@ export class QuestsMenuView {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
   }
 
   takeAction(): string | null {
@@ -721,11 +721,12 @@ export class QuestsMenuView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign,
+        src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin, rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -747,13 +748,15 @@ export class QuestsMenuView {
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(
-        QUEST_MENU_BASE_X + slideX + QUEST_MENU_PANEL_OFFSET_X,
-        QUEST_MENU_BASE_Y + MENU_PANEL_OFFSET_Y + this._widescreenYShift,
-        MENU_PANEL_WIDTH,
-        QUEST_PANEL_HEIGHT,
-      ),
-      WHITE, fxDetail,
+      {
+        dst: wgl.makeRectangle(
+          QUEST_MENU_BASE_X + slideX + QUEST_MENU_PANEL_OFFSET_X,
+          QUEST_MENU_BASE_Y + MENU_PANEL_OFFSET_Y + this._widescreenYShift,
+          MENU_PANEL_WIDTH,
+          QUEST_PANEL_HEIGHT,
+        ),
+        tint: WHITE, shadow: fxDetail,
+      },
     );
   }
 

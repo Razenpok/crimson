@@ -19,17 +19,19 @@ export type MeasureUiTextWidth = (text: string, scale: number) => number;
 export type WorldToScreen = (worldPos: Vec2) => Vec2;
 
 export function drawTypoNameLabels(
-  creatures: readonly CreatureState[],
-  names: readonly string[],
-  worldToScreen: WorldToScreen,
-  drawText: DrawUiText,
-  measureTextWidth: MeasureUiTextWidth,
+  opts: {
+    creatures: readonly CreatureState[];
+    names: readonly string[];
+    worldToScreen: WorldToScreen;
+    drawText: DrawUiText;
+    measureTextWidth: MeasureUiTextWidth;
+  },
 ): void {
-  for (let idx = 0; idx < creatures.length; idx++) {
-    const creature = creatures[idx];
+  for (let idx = 0; idx < opts.creatures.length; idx++) {
+    const creature = opts.creatures[idx];
     if (!creature.active) continue;
-    if (idx < 0 || idx >= names.length) continue;
-    const text = names[idx];
+    if (idx < 0 || idx >= opts.names.length) continue;
+    const text = opts.names[idx];
     if (!text) continue;
 
     let labelAlpha = 1.0;
@@ -39,25 +41,27 @@ export function drawTypoNameLabels(
     }
     if (labelAlpha <= 1e-3) continue;
 
-    const screenPos = worldToScreen(creature.pos);
+    const screenPos = opts.worldToScreen(creature.pos);
     const y = screenPos.y - 50.0;
-    const textW = measureTextWidth(text, NAME_LABEL_SCALE);
+    const textW = opts.measureTextWidth(text, NAME_LABEL_SCALE);
     const textH = 15.0;
     const x = screenPos.x - textW * 0.5;
     const bgAlpha = labelAlpha * NAME_LABEL_BG_ALPHA;
 
     wgl.drawRectangle(x - 4, y, textW + 8, textH, wgl.makeColor(0, 0, 0, bgAlpha));
-    drawText(text, new Vec2(x, y), wgl.makeColor(1, 1, 1, labelAlpha), NAME_LABEL_SCALE);
+    opts.drawText(text, new Vec2(x, y), wgl.makeColor(1, 1, 1, labelAlpha), NAME_LABEL_SCALE);
   }
 }
 
 export function drawTypingBox(
   screenH: number,
   panelTexture: wgl.Texture,
-  text: string,
-  cursorPulseTime: number,
-  drawText: DrawUiText,
-  measureTextWidth: MeasureUiTextWidth,
+  opts: {
+    text: string;
+    cursorPulseTime: number;
+    drawText: DrawUiText;
+    measureTextWidth: MeasureUiTextWidth;
+  },
 ): void {
   const panelX = -1.0;
   const panelY = screenH - 144.0;
@@ -68,12 +72,12 @@ export function drawTypingBox(
   const tint = wgl.makeColor(1, 1, 1, TYPING_PANEL_ALPHA);
   wgl.drawTexturePro(panelTexture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 
-  drawText(TYPING_PROMPT + text, new Vec2(TYPING_TEXT_X, textY), wgl.makeColor(1, 1, 1, 1), 1.0);
+  opts.drawText(TYPING_PROMPT + opts.text, new Vec2(TYPING_TEXT_X, textY), wgl.makeColor(1, 1, 1, 1), 1.0);
 
-  const cursorDim = Math.sin(cursorPulseTime * 4.0) > 0.0;
+  const cursorDim = Math.sin(opts.cursorPulseTime * 4.0) > 0.0;
   const cursorAlpha = cursorDim ? 0.4 : 1.0;
   const cursorColor = wgl.makeColor(1, 1, 1, cursorAlpha);
-  const textW = measureTextWidth(text, 1.0);
+  const textW = opts.measureTextWidth(opts.text, 1.0);
   const cursorX = textW + TYPING_CURSOR_X_OFFSET;
-  drawText(TYPING_CURSOR, new Vec2(cursorX, textY), cursorColor, 1.0);
+  opts.drawText(TYPING_CURSOR, new Vec2(cursorX, textY), cursorColor, 1.0);
 }

@@ -18,16 +18,14 @@ import { WorldRenderCtx } from './context.ts';
 export function drawProjectile(
   renderCtx: WorldRenderCtx,
   proj: Projectile,
-  projIndex: number,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  alpha: number = 1.0,
+  opts: { projIndex?: number; camera: Vec2; viewScale: Vec2; scale: number; alpha?: number },
 ): void {
-  alpha = clamp(alpha, 0.0, 1.0);
+  const { camera, viewScale, scale } = opts;
+  const projIndex = opts.projIndex ?? 0;
+  let alpha = clamp(opts.alpha ?? 1.0, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
-  const projectileRenderCtx = renderCtx.withProjection(camera, viewScale);
+  const projectileRenderCtx = renderCtx.withProjection({ camera, viewScale });
   const texture = getTexture(projectileRenderCtx.frame.resources, TextureId.PROJS);
   const typeId = proj.typeId;
   const projPos = proj.pos;
@@ -63,30 +61,25 @@ export function isBulletTrailType(typeId: number): boolean {
   return WorldRenderCtx.isBulletTrailType(typeId);
 }
 
-export function bulletSpriteSize(typeId: number, scale: number): number {
-  return WorldRenderCtx.bulletSpriteSize(typeId, scale);
+export function bulletSpriteSize(typeId: number, opts: { scale: number }): number {
+  return WorldRenderCtx.bulletSpriteSize(typeId, opts.scale);
 }
 
 export function drawBulletTrail(
   renderCtx: WorldRenderCtx,
   start: Vec2,
   end: Vec2,
-  typeId: number,
-  alpha: number,
-  scale: number,
-  angle: number,
+  opts: { typeId: number; alpha: number; scale: number; angle: number },
 ): boolean {
-  return renderCtx.drawBulletTrail(start, end, typeId, alpha, scale, angle);
+  return renderCtx.drawBulletTrail(start, end, opts.typeId, opts.alpha, opts.scale, opts.angle);
 }
 
 export function drawSharpshooterLaserSight(
   renderCtx: WorldRenderCtx,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  alpha: number,
+  opts: { camera: Vec2; viewScale: Vec2; scale: number; alpha: number },
 ): void {
-  alpha = clamp(alpha, 0.0, 1.0);
+  const { camera, viewScale, scale } = opts;
+  let alpha = clamp(opts.alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
   const bulletTrailTexture = getTexture(renderCtx.frame.resources, TextureId.BULLET_TRAIL);
@@ -147,15 +140,13 @@ export function drawSharpshooterLaserSight(
 export function drawSecondaryProjectile(
   renderCtx: WorldRenderCtx,
   proj: SecondaryProjectile,
-  camera: Vec2,
-  viewScale: Vec2,
-  scale: number,
-  alpha: number = 1.0,
+  opts: { camera: Vec2; viewScale: Vec2; scale: number; alpha?: number },
 ): void {
-  alpha = clamp(alpha, 0.0, 1.0);
+  const { camera, viewScale, scale } = opts;
+  let alpha = clamp(opts.alpha ?? 1.0, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
-  const projectileRenderCtx = renderCtx.withProjection(camera, viewScale);
+  const projectileRenderCtx = renderCtx.withProjection({ camera, viewScale });
   const projPos = proj.pos;
   const screen = projectileRenderCtx.worldToScreen(projPos);
   const projType = proj.typeId;

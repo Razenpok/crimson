@@ -116,7 +116,9 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
   if (life >= 0.4) {
     const tint = new RGBA(1.0, 1.0, 1.0, alpha).toWgl();
 
-    const drawPlagueQuad = (pos: Vec2, size: number): void => {
+    const drawPlagueQuad = (opts: { pos: Vec2; size: number }): void => {
+      const pos = opts.pos;
+      const size = opts.size;
       if (size <= 1e-3) return;
       const desiredSize = size * ctx.scale;
       const spriteScale = cellW > 1e-6 ? desiredSize / cellW : 0.0;
@@ -127,31 +129,31 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
 
     beginDarkenSrcZeroBlend();
     try {
-      drawPlagueQuad(ctx.pos, 60.0);
+      drawPlagueQuad({ pos: ctx.pos, size: 60.0 });
 
       const offset = Vec2.fromHeading(ctx.angle + Math.PI).mul(15.0);
-      drawPlagueQuad(ctx.pos.add(offset), 60.0);
+      drawPlagueQuad({ pos: ctx.pos.add(offset), size: 60.0 });
 
       const phase = ctx.projIndex + renderer.frame.elapsedMs * 0.01;
       const cosPhase = Math.cos(phase);
       const sinPhase = Math.sin(phase);
-      drawPlagueQuad(
-        ctx.pos.offset(cosPhase * cosPhase - 5.0, sinPhase * 11.0 - 5.0),
-        52.0,
-      );
+      drawPlagueQuad({
+        pos: ctx.pos.offset({ dx: cosPhase * cosPhase - 5.0, dy: sinPhase * 11.0 - 5.0 }),
+        size: 52.0,
+      });
 
       const phase120 = phase + 2.0943952;
       const sinPhase120 = Math.sin(phase120);
-      drawPlagueQuad(
-        ctx.pos.add(Vec2.fromPolar(phase120, 10.0)),
-        62.0,
-      );
+      drawPlagueQuad({
+        pos: ctx.pos.add(Vec2.fromPolar(phase120, 10.0)),
+        size: 62.0,
+      });
 
       const phase240 = phase + 4.1887903;
-      drawPlagueQuad(
-        ctx.pos.add(new Vec2(Math.cos(phase240) * 10.0, Math.sin(phase240) * sinPhase120)),
-        62.0,
-      );
+      drawPlagueQuad({
+        pos: ctx.pos.add(new Vec2(Math.cos(phase240) * 10.0, Math.sin(phase240) * sinPhase120)),
+        size: 62.0,
+      });
     } finally {
       wgl.endBlendMode();
     }

@@ -203,7 +203,7 @@ export class QuestMode extends BaseGameplayMode {
 
   private _resetPerkPrompt(): void {
     this._perkPromptPendingCount = this.state.perkSelection.pendingCount;
-    this._perkPrompt.resetIfPending(this._perkPromptPendingCount);
+    this._perkPrompt.resetIfPending({ pendingCount: this._perkPromptPendingCount });
   }
 
   private _updatePerkUi(dtUiMs: number): void {
@@ -472,7 +472,7 @@ export class QuestMode extends BaseGameplayMode {
   // Start run
   // ---------------------------------------------------------------------------
 
-  startRun(level: QuestLevel, status: GameStatus | null): void {
+  startRun(level: QuestLevel, opts: { status: GameStatus | null }): void {
     const quest = questByLevel(level);
     if (quest === null) {
       this._questDef = null;
@@ -491,29 +491,25 @@ export class QuestMode extends BaseGameplayMode {
 
     const playerCount = this.config.gameplay.playerCount;
     this._syncWorldRuntimeConfig();
-    this.worldRuntime.reset(seed, Math.max(1, Math.min(4, playerCount)));
+    this.worldRuntime.reset({ seed, playerCount: Math.max(1, Math.min(4, playerCount)) });
     this._bindWorld();
-    this._localInput.reset(this.simWorld.players);
-    this.bindStatus(status);
+    this._localInput.reset({ players: this.simWorld.players });
+    this.bindStatus(opts.status);
 
     const boundStatus = this.state.status as GameStatus | null;
     const genericUnlockIndex = boundStatus != null ? (boundStatus.questUnlockIndex ?? 0) : 0;
 
     advanceUnlockTerrain(
       this.state.rng,
-      genericUnlockIndex,
-      this.worldSize | 0,
-      this.worldSize | 0,
+      { unlockIndex: genericUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
     );
 
     // Native burns one crt_rand for highscore_record_random_tag
-    this.state.rng.rand(RngCallerStatic.QUEST_START_SELECTED_HIGHSCORE_RANDOM_TAG);
+    this.state.rng.rand({ caller: RngCallerStatic.QUEST_START_SELECTED_HIGHSCORE_RANDOM_TAG });
 
     const questTerrain = advanceExplicitTerrain(
       this.state.rng,
-      quest.terrainSlots,
-      this.worldSize | 0,
-      this.worldSize | 0,
+      { terrainSlots: quest.terrainSlots, width: this.worldSize | 0, height: this.worldSize | 0 },
     );
     this.applyTerrainSetup({ terrainSlots: questTerrain.terrainSlots, seed: questTerrain.terrainSeed });
 
@@ -535,10 +531,10 @@ export class QuestMode extends BaseGameplayMode {
     this._resetGameplayFrameClock();
     this._simSession = this._newSimSession(entries);
 
-    if (status !== null) {
+    if (opts.status !== null) {
       const idx = trackedQuestGamesCounterIndex(quest.level);
       if (idx !== null) {
-        status.incrementQuestPlayCount?.(idx);
+        opts.status.incrementQuestPlayCount?.(idx);
       }
     }
   }
@@ -589,7 +585,7 @@ export class QuestMode extends BaseGameplayMode {
     let idx = weaponIds.indexOf(current);
     if (idx < 0) idx = 0;
     const weaponId = weaponIds[((idx + delta) % weaponIds.length + weaponIds.length) % weaponIds.length];
-    weaponAssignPlayer(this.player, weaponId, this.state);
+    weaponAssignPlayer(this.player, weaponId, { state: this.state });
   }
 
   // ---------------------------------------------------------------------------
@@ -627,8 +623,7 @@ export class QuestMode extends BaseGameplayMode {
     const [fired, hit] = this._shotsFromState(this.player.index);
     const mostUsed = mostUsedWeaponIdForPlayer(
       this.state,
-      this.player.index,
-      this.player.weapon.weaponId,
+      { playerIndex: this.player.index, fallbackWeaponId: this.player.weapon.weaponId },
     );
     const healthValues = this.simWorld.players.map((p) => p.health);
     const player2Health = healthValues.length >= 2 ? healthValues[1] : null;
@@ -657,8 +652,7 @@ export class QuestMode extends BaseGameplayMode {
       const [fired, hit] = this._shotsFromState(this.player.index);
       const mostUsed = mostUsedWeaponIdForPlayer(
         this.state,
-        this.player.index,
-        this.player.weapon.weaponId,
+        { playerIndex: this.player.index, fallbackWeaponId: this.player.weapon.weaponId },
       );
       const healthValues = this.simWorld.players.map((p) => p.health);
       const player2Health = healthValues.length >= 2 ? healthValues[1] : null;
@@ -845,8 +839,7 @@ export class QuestMode extends BaseGameplayMode {
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
-      mousePos,
-      this._cursorPulseTime,
+      { pos: mousePos, pulseTime: this._cursorPulseTime },
     );
   }
 
@@ -854,26 +847,20 @@ export class QuestMode extends BaseGameplayMode {
     const font = this._grimMono;
     const quest = this._questDef;
     if (font === null || quest === null) return;
-    const [screenW, screenH] = this._screenSize();
     drawQuestTitleTimerOverlay(
-      screenW,
-      screenH,
       font,
       quest.title,
       questLevelText(quest.level),
-      this._questSpawnState.spawnTimelineMs,
+      { timerMs: this._questSpawnState.spawnTimelineMs },
     );
   }
 
   private _drawQuestCompleteBanner(): void {
     const tex = getTexture(this.renderResources.resources as RuntimeResources, TextureId.UI_TEXT_LEVEL_COMPLETE);
     if (tex === null) return;
-    const [screenW, screenH] = this._screenSize();
     drawQuestCompleteBannerOverlay(
-      screenW,
-      screenH,
       tex,
-      this._questSpawnState.completionTransitionMs,
+      { timerMs: this._questSpawnState.completionTransitionMs },
     );
   }
 }

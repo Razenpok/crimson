@@ -9,13 +9,13 @@ export const UI_SHADOW_TINT: wgl.Color = wgl.makeColor(
   0x44 / 255, 0x44 / 255, 0x44 / 255, 0x44 / 255,
 );
 
-export function drawUiQuadShadow(
-  texture: wgl.Texture,
-  src: wgl.Rectangle,
-  dst: wgl.Rectangle,
-  origin: wgl.Vector2,
-  rotationDeg: number,
-): void {
+export function drawUiQuadShadow(opts: {
+  texture: wgl.Texture;
+  src: wgl.Rectangle;
+  dst: wgl.Rectangle;
+  origin: wgl.Vector2;
+  rotationDeg: number;
+}): void {
   // From original Python code (might not be true for WebGL):
   // NOTE: raylib/rlgl tracks custom blend factors as state; some backends
   // only apply them when switching the blend mode.
@@ -36,6 +36,6 @@ export function drawUiQuadShadow(
     1 /* gl.ONE */,
     0x8006 /* gl.FUNC_ADD */,
   );
-  wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, UI_SHADOW_TINT);
+  wgl.drawTexturePro(opts.texture, opts.src, opts.dst, opts.origin, opts.rotationDeg, UI_SHADOW_TINT);
   wgl.endBlendMode();
 }

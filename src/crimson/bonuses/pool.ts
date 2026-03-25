@@ -128,12 +128,12 @@ export class BonusPool {
   spawnAt(
     pos: Vec2,
     bonusId: BonusId,
-    durationOverride: number = -1,
-    state: GameplayState,
-    worldWidth: number = 1024.0,
-    worldHeight: number = 1024.0,
+    durationOverride: number,
+    opts: { state: GameplayState; worldWidth?: number; worldHeight?: number },
   ): BonusEntry | null {
-    if (state.gameMode === GameMode.RUSH) return null;
+    const worldWidth = opts.worldWidth ?? 1024.0;
+    const worldHeight = opts.worldHeight ?? 1024.0;
+    if (opts.state.gameMode === GameMode.RUSH) return null;
     if (bonusId === BonusId.UNUSED) return null;
     const entry = this.allocSlot();
     if (entry === null) return null;
@@ -160,12 +160,11 @@ export class BonusPool {
 
   spawnAtPos(
     pos: Vec2,
-    state: GameplayState,
-    players: PlayerState[],
-    worldWidth: number = 1024.0,
-    worldHeight: number = 1024.0,
+    opts: { state: GameplayState; players: PlayerState[]; worldWidth?: number; worldHeight?: number },
   ): BonusEntry {
-    if (state.gameMode === GameMode.RUSH) return this._sentinel;
+    const worldWidth = opts.worldWidth ?? 1024.0;
+    const worldHeight = opts.worldHeight ?? 1024.0;
+    if (opts.state.gameMode === GameMode.RUSH) return this._sentinel;
     if (
       pos.x < BONUS_SPAWN_MARGIN ||
       pos.y < BONUS_SPAWN_MARGIN ||
@@ -177,7 +176,7 @@ export class BonusPool {
 
     let entry = this.allocSlotOrSentinel();
 
-    const bonusId = bonusPickRandomType(this, state, players);
+    const bonusId = bonusPickRandomType(this, opts.state, opts.players);
     const minDistSq = BONUS_SPAWN_MIN_DISTANCE * BONUS_SPAWN_MIN_DISTANCE;
     for (const activeEntry of this._entries) {
       if (activeEntry.bonusId === BonusId.UNUSED) continue;
@@ -193,11 +192,11 @@ export class BonusPool {
     entry.timeLeft = BONUS_TIME_MAX;
     entry.timeMax = BONUS_TIME_MAX;
 
-    const rng = state.rng;
+    const rng = opts.state.rng;
     if (entry.bonusId === BonusId.WEAPON) {
-      entry.amount = weaponPickRandomAvailable(state, null) | 0;
+      entry.amount = weaponPickRandomAvailable(opts.state, null) | 0;
     } else if (entry.bonusId === BonusId.POINTS) {
-      entry.amount = (rng.rand(RngCallerStatic.BONUS_SPAWN_AT_POS_POINTS_AMOUNT) & 7) < 3 ? 1000 : 500;
+      entry.amount = (rng.rand({ caller: RngCallerStatic.BONUS_SPAWN_AT_POS_POINTS_AMOUNT }) & 7) < 3 ? 1000 : 500;
     } else {
       const meta = BONUS_BY_ID.get(entry.bonusId);
       entry.amount = meta !== undefined ? ((meta.nativeAmount ?? 0) | 0) : 0;
@@ -207,12 +206,13 @@ export class BonusPool {
 
   trySpawnOnKill(
     pos: Vec2,
-    state: GameplayState,
-    players: PlayerState[],
-    detailPreset: number = 5,
-    worldWidth: number = 1024.0,
-    worldHeight: number = 1024.0,
+    opts: { state: GameplayState; players: PlayerState[]; detailPreset?: number; worldWidth?: number; worldHeight?: number },
   ): BonusEntry | null {
+    const state = opts.state;
+    const players = opts.players;
+    const detailPreset = opts.detailPreset ?? 5;
+    const worldWidth = opts.worldWidth ?? 1024.0;
+    const worldHeight = opts.worldHeight ?? 1024.0;
     const gameMode = state.gameMode;
     if (gameMode === GameMode.TYPO) return null;
     if (state.demoModeActive) return null;
@@ -222,8 +222,8 @@ export class BonusPool {
 
     const rng = state.rng;
     if (players.length > 0 && players.some((player) => player.weapon.weaponId === WeaponId.PISTOL)) {
-      if ((rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_PISTOL_FORCE_WEAPON) & 3) < 3) {
-        const entry = this.spawnAtPos(pos, state, players, worldWidth, worldHeight);
+      if ((rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_PISTOL_FORCE_WEAPON }) & 3) < 3) {
+        const entry = this.spawnAtPos(pos, { state, players, worldWidth, worldHeight });
 
         entry.bonusId = BonusId.WEAPON;
         let weaponId = weaponPickRandomAvailable(state, null);
@@ -255,7 +255,7 @@ export class BonusPool {
       }
     }
 
-    const baseRoll = rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BASE_GATE);
+    const baseRoll = rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BASE_GATE });
     if (baseRoll % 9 !== 1) {
       let allowWithoutMagnet = false;
       if (players.length > 0) {
@@ -267,7 +267,7 @@ export class BonusPool {
         }
         if (hasPistol) {
           allowWithoutMagnet =
-            rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_PISTOL_ALLOW_WITHOUT_MAGNET) % 5 === 1;
+            rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_PISTOL_ALLOW_WITHOUT_MAGNET }) % 5 === 1;
         }
       }
 
@@ -281,11 +281,11 @@ export class BonusPool {
           }
         }
         if (!hasBonusMagnet) return null;
-        if (rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BONUS_MAGNET) % 10 !== 2) return null;
+        if (rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BONUS_MAGNET }) % 10 !== 2) return null;
       }
     }
 
-    const entry = this.spawnAtPos(pos, state, players, worldWidth, worldHeight);
+    const entry = this.spawnAtPos(pos, { state, players, worldWidth, worldHeight });
 
     if (entry.bonusId === BonusId.WEAPON) {
       const nearSq = BONUS_WEAPON_NEAR_RADIUS * BONUS_WEAPON_NEAR_RADIUS;
@@ -341,26 +341,29 @@ export class BonusPool {
     const rng = state.rng;
     const effects = state.effects;
     for (let i = 0; i < 16; i++) {
-      effects.spawnBurstParticle(
-        entry.pos,
-        rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_ROTATION),
-        rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_VEL_X),
-        rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_VEL_Y),
-        rng.rand(RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_SCALE_STEP),
-        null, 0.5, undefined, detailPreset,
-      );
+      effects.spawnBurstParticle({
+        pos: entry.pos,
+        rotationDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_ROTATION }),
+        velXDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_VEL_X }),
+        velYDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_VEL_Y }),
+        scaleStepDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_SCALE_STEP }),
+        scaleStep: null,
+        lifetime: 0.5,
+        detailPreset,
+      });
     }
   }
 
   update(
     dt: number,
-    state: GameplayState,
-    players: PlayerState[],
-    creatures: readonly CreatureState[],
-    detailPreset: number = 5,
-    deferFreezeCorpseFx = false,
-    freezeCorpseIndices: Set<number> | null = null,
+    opts: { state: GameplayState; players: PlayerState[]; creatures: readonly CreatureState[]; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
   ): BonusPickupEvent[] {
+    const state = opts.state;
+    const players = opts.players;
+    const creatures = opts.creatures;
+    const detailPreset = opts.detailPreset ?? 5;
+    const deferFreezeCorpseFx = opts.deferFreezeCorpseFx ?? false;
+    const freezeCorpseIndices = opts.freezeCorpseIndices ?? null;
     if (dt <= 0.0) return [];
 
     const pickups: BonusPickupEvent[] = [];
@@ -391,13 +394,15 @@ export class BonusPool {
             state,
             player,
             entry.bonusId,
-            entry.pos,
-            creatures,
-            players,
-            entry.amount,
-            detailPreset | 0,
-            deferFreezeCorpseFx,
-            freezeCorpseIndices,
+            {
+              origin: entry.pos,
+              creatures,
+              players,
+              amount: entry.amount,
+              detailPreset: detailPreset | 0,
+              deferFreezeCorpseFx,
+              freezeCorpseIndices,
+            },
           );
           entry.picked = true;
           entry.timeLeft = BONUS_PICKUP_LINGER;
@@ -438,21 +443,22 @@ export function bonusFindAimHoverEntry(
   return null;
 }
 
-export function bonusLabelForEntry(entry: BonusEntry, preserveBugs = false): string {
+export function bonusLabelForEntry(entry: BonusEntry, opts: { preserveBugs?: boolean } = {}): string {
+  const preserveBugs = opts.preserveBugs ?? false;
   const bonusId = entry.bonusId;
   if (bonusId === BonusId.WEAPON) {
     const weaponId = weaponIdFromWeaponEntry(entry);
     if (weaponId === null) return 'Weapon';
-    return weaponDisplayName(weaponId, preserveBugs);
+    return weaponDisplayName(weaponId, { preserveBugs });
   }
   if (bonusId === BonusId.POINTS) {
     const points = entry.amount | 0;
-    const pointsLabel = bonusDisplayName(BonusId.POINTS, preserveBugs);
+    const pointsLabel = bonusDisplayName(BonusId.POINTS, { preserveBugs });
     return `${pointsLabel}: ${points}`;
   }
   const meta = BONUS_BY_ID.get(bonusId);
   if (meta !== undefined) {
-    return bonusDisplayName(meta.bonusId, preserveBugs);
+    return bonusDisplayName(meta.bonusId, { preserveBugs });
   }
   return 'Bonus';
 }

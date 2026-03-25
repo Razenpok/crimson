@@ -41,12 +41,12 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
   }
 
   const playerPos = player.pos;
-  state.effects.spawnExplosionBurst(
-    playerPos,
-    1.8,
-    state.rng,
-    detailPreset | 0,
-  );
+  state.effects.spawnExplosionBurst({
+    pos: playerPos,
+    scale: 1.8,
+    rng: state.rng,
+    detailPreset: detailPreset | 0,
+  });
 
   const prevGuard = state.bonusSpawnGuard;
   state.bonusSpawnGuard = true;
@@ -70,31 +70,35 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
     const deathCreatureIdx = creatureIdx | 0;
     creatureApplyDamageWithLethalFollowup(
       creature,
-      damage,
-      CreatureDamageType.EXPLOSION,
-      new Vec2(),
-      OwnerRef.fromPlayer(player.index | 0),
-      dt,
-      players,
-      state.rng,
-      state.preserveBugs,
-      state.effects,
-      detailPreset | 0,
-      (deathSfx: SfxId[]) => {
-        deaths.push(
-          creatures.handleDeath(
-            deathCreatureIdx,
-            state,
-            players,
-            state.rng,
-            dt,
-            detailPreset | 0,
-            worldSize,
-            worldSize,
-            fxQueue,
-          ),
-        );
-        state.sfxQueue.push(...deathSfx);
+      {
+        damageAmount: damage,
+        damageType: CreatureDamageType.EXPLOSION,
+        impulse: new Vec2(),
+        owner: OwnerRef.fromPlayer(player.index | 0),
+        dt,
+        players,
+        rng: state.rng,
+        preserveBugs: state.preserveBugs,
+        effects: state.effects,
+        detailPreset: detailPreset | 0,
+        onLethal: (deathSfx: SfxId[]) => {
+          deaths.push(
+            creatures.handleDeath(
+              deathCreatureIdx,
+              {
+                state,
+                players,
+                rng: state.rng,
+                dt,
+                detailPreset: detailPreset | 0,
+                worldWidth: worldSize,
+                worldHeight: worldSize,
+                fxQueue,
+              },
+            ),
+          );
+          state.sfxQueue.push(...deathSfx);
+        },
       },
     );
   }

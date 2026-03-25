@@ -46,12 +46,12 @@ export function bonusPickRandomType(pool: BonusPool, state: GameplayState, playe
   );
 
   for (let i = 0; i < 101; i++) {
-    const roll = state.rng.rand(RngCallerStatic.BONUS_PICK_RANDOM_TYPE_ROLL) % 162 + 1;
+    const roll = state.rng.rand({ caller: RngCallerStatic.BONUS_PICK_RANDOM_TYPE_ROLL }) % 162 + 1;
     let bonusId: BonusId;
     if (roll <= 13) {
       bonusId = BonusId.POINTS;
     } else if (roll === 14) {
-      if ((state.rng.rand(RngCallerStatic.BONUS_PICK_RANDOM_TYPE_ENERGIZER) & 0x3F) === 0) {
+      if ((state.rng.rand({ caller: RngCallerStatic.BONUS_PICK_RANDOM_TYPE_ENERGIZER }) & 0x3F) === 0) {
         bonusId = BonusId.ENERGIZER;
       } else {
         bonusId = BonusId.WEAPON;

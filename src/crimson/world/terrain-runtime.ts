@@ -12,17 +12,17 @@ export class TerrainRuntime {
   ) {
   }
 
-  applyTerrainSetup(terrainSlots: TerrainSlotTriplet, seed: number): void {
+  applyTerrainSetup(opts: { terrainSlots: TerrainSlotTriplet; seed: number }): void {
     const [base, overlay, detail] = resolveTerrainSlots(
-      terrainSlots,
+      opts.terrainSlots,
       (textureId) => this.renderResources.registryTexture(textureId),
     );
-    this.renderResources.setGroundTextures(base, overlay, detail);
-    this.renderResources.scheduleGroundGeneration(seed);
+    this.renderResources.setGroundTextures({ base, overlay, detail });
+    this.renderResources.scheduleGroundGeneration({ seed: opts.seed });
   }
 
-  scheduleFromRngSeed(seed: number): void {
-    this.renderResources.scheduleGroundGeneration(seed);
+  scheduleFromRngSeed(opts: { seed: number }): void {
+    this.renderResources.scheduleGroundGeneration({ seed: opts.seed });
   }
 
   processPending(): void {

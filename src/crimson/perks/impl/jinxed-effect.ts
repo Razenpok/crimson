@@ -51,7 +51,7 @@ function selectJinxedAccidentTarget(ctx: PerksUpdateEffectsCtx): PlayerState {
   }
 
   const pick =
-    ctx.state.rng.rand(RngCallerStatic.REWRITE_JINXED_ACCIDENT_TARGET_PICK) %
+    ctx.state.rng.rand({ caller: RngCallerStatic.REWRITE_JINXED_ACCIDENT_TARGET_PICK }) %
     alivePlayers.length;
   return alivePlayers[pick];
 }
@@ -74,24 +74,24 @@ export function updateJinxed(ctx: PerksUpdateEffectsCtx): void {
   }
 
   if (
-    ctx.state.rng.rand(
-      RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_ACCIDENT_GATE,
-    ) %
+    ctx.state.rng.rand({
+      caller: RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_ACCIDENT_GATE,
+    }) %
       10 ===
     3
   ) {
     const player = selectJinxedAccidentTarget(ctx);
     player.health = player.health - 5.0;
     if (ctx.fxQueue !== null) {
-      ctx.fxQueue.addRandom(player.pos, ctx.state.rng);
-      ctx.fxQueue.addRandom(player.pos, ctx.state.rng);
+      ctx.fxQueue.addRandom({ pos: player.pos, rng: ctx.state.rng });
+      ctx.fxQueue.addRandom({ pos: player.pos, rng: ctx.state.rng });
     }
   }
 
   ctx.state.jinxedTimer =
-    (ctx.state.rng.rand(
-      RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_TIMER_RESET,
-    ) %
+    (ctx.state.rng.rand({
+      caller: RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_TIMER_RESET,
+    }) %
       20) *
       0.1 +
     ctx.state.jinxedTimer +
@@ -105,15 +105,15 @@ export function updateJinxed(ctx: PerksUpdateEffectsCtx): void {
     }
 
     let idx =
-      ctx.state.rng.rand(
-        RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_CREATURE_PICK,
-      ) % poolMod;
+      ctx.state.rng.rand({
+        caller: RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_CREATURE_PICK,
+      }) % poolMod;
     let attempts = 0;
     while (attempts < 10 && !ctx.creatures[idx].active) {
       idx =
-        ctx.state.rng.rand(
-          RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_CREATURE_RETRY,
-        ) % poolMod;
+        ctx.state.rng.rand({
+          caller: RngCallerStatic.PERKS_UPDATE_EFFECTS_JINXED_CREATURE_RETRY,
+        }) % poolMod;
       attempts += 1;
     }
     if (!ctx.creatures[idx].active) {

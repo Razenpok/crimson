@@ -372,7 +372,7 @@ export class BaseGameplayMode {
     this._syncWorldRuntimeConfig();
 
     const playerCount = this._runtimePlayerCount();
-    this._worldRuntime.reset(0xBEEF, Math.max(1, Math.min(4, playerCount)));
+    this._worldRuntime.reset({ seed: 0xBEEF, playerCount: Math.max(1, Math.min(4, playerCount)) });
     this._bindWorld();
 
     this._gameOverActive = false;
@@ -463,7 +463,7 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   applyTerrainSetup(opts: { terrainSlots: TerrainSlotTriplet; seed: number }): void {
-    this.terrainRuntime.applyTerrainSetup(opts.terrainSlots, opts.seed);
+    this.terrainRuntime.applyTerrainSetup({ terrainSlots: opts.terrainSlots, seed: opts.seed });
   }
 
   // -----------------------------------------------------------------------
@@ -471,10 +471,10 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   protected _drawWorld(opts?: { drawAimIndicators?: boolean; entityAlpha?: number }): void {
-    this._worldRuntime.draw(
-      opts?.drawAimIndicators ?? true,
-      opts?.entityAlpha ?? 1.0,
-    );
+    this._worldRuntime.draw({
+      drawAimIndicators: opts?.drawAimIndicators ?? true,
+      entityAlpha: opts?.entityAlpha ?? 1.0,
+    });
   }
 
   // -----------------------------------------------------------------------
@@ -578,9 +578,7 @@ export class BaseGameplayMode {
       if (perkCountGet(targetPlayer, PerkId.DOCTOR) <= 0) continue;
       const targetIdx = creatureFindInRadius(
         creatures,
-        targetPlayer.aim,
-        12.0,
-        0,
+        { pos: targetPlayer.aim, radius: 12.0, startIndex: 0 },
       );
       if (targetIdx === -1) continue;
       if (targetIndices.indexOf(targetIdx) !== -1) continue;
@@ -741,8 +739,7 @@ export class BaseGameplayMode {
       this.state,
       opts.players,
       this.state.perkSelection,
-      opts.gameMode,
-      opts.playerCount,
+      { gameMode: opts.gameMode, playerCount: opts.playerCount },
     );
     if (!choices || (Array.isArray(choices) && choices.length === 0)) {
       throw new Error('perk menu open requires prepared perk choices');
@@ -873,7 +870,7 @@ export class BaseGameplayMode {
   }
 
   protected _replayClaimedShots(): [number, number] {
-    return shotsFromState(this.state, this.player.index);
+    return shotsFromState(this.state, { playerIndex: this.player.index });
   }
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
@@ -1062,7 +1059,7 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   protected _shotsFromState(playerIndex: number): [number, number] {
-    return shotsFromState(this.state, playerIndex);
+    return shotsFromState(this.state, { playerIndex });
   }
 
   // -----------------------------------------------------------------------
@@ -1157,11 +1154,11 @@ export class BaseGameplayMode {
     this._refreshEffectiveStatus({ resetLanStatus: true });
 
     this._syncWorldRuntimeConfig();
-    this._worldRuntime.reset(seed, Math.max(1, Math.min(4, playerCount)));
+    this._worldRuntime.reset({ seed, playerCount: Math.max(1, Math.min(4, playerCount)) });
     this._worldRuntime.openRuntime();
     this._bindWorld();
 
-    this._localInput.reset(this.simWorld.players);
+    this._localInput.reset({ players: this.simWorld.players });
     this._networkInputProvider = new LanRuntimeInputProvider({
       playerCount: Math.max(0, this.simWorld.players.length),
       tickRate: this._deterministicTickRate(),
@@ -1631,8 +1628,8 @@ export class BaseGameplayMode {
       outputs: opts.outputs,
       syncAudioBridgeState: () => this._worldRuntime.syncAudioBridgeState(),
       applyAudioPlan: (plan: PresentationStepCommands, applyAudio: boolean) =>
-        this.audioBridge.applyPlan(plan, applyAudio),
-      applyTerrainFx: (batch: TerrainFxBatch) => this.renderResources.consumeTerrainFxBatch(batch),
+        this.audioBridge.applyPlan({ plan, applyAudio }),
+      applyTerrainFx: (batch: TerrainFxBatch) => this.renderResources.consumeTerrainFxBatch(batch, {}),
       updateCamera: opts.updateCamera
         ? (dtSim: number) => this._worldRuntime.updateCamera(dtSim)
         : null,

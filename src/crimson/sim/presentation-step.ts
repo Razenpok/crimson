@@ -43,14 +43,12 @@ export interface PresentationAudioSink {
 
 export function planPlayerAudioSfx(
   player: PlayerState,
-  prevShotSeq: number,
-  prevReloadActive: boolean,
-  prevReloadTimer: number,
+  opts: { prevShotSeq: number; prevReloadActive: boolean; prevReloadTimer: number },
 ): SfxId[] {
   const sfx: SfxId[] = [];
   const weapon = WEAPON_BY_ID.get(player.weapon.weaponId)!;
 
-  if ((player.shotSeq | 0) > (prevShotSeq | 0)) {
+  if ((player.shotSeq | 0) > (opts.prevShotSeq | 0)) {
     if (player.fireBulletsTimer > 0.0) {
       const fireBullets = WEAPON_BY_ID.get(WeaponId.FIRE_BULLETS)!;
       const plasmaMinigun = WEAPON_BY_ID.get(WeaponId.PLASMA_MINIGUN)!;
@@ -64,8 +62,8 @@ export function planPlayerAudioSfx(
   const reloadActive = player.weapon.reloadActive;
   const reloadTimer = player.weapon.reloadTimer;
   const reloadStarted =
-    (!prevReloadActive && reloadActive) ||
-    (reloadTimer > prevReloadTimer + 1e-6);
+    (!opts.prevReloadActive && reloadActive) ||
+    (reloadTimer > opts.prevReloadTimer + 1e-6);
   if (reloadStarted) {
     sfx.push(weapon.reloadSound);
   }
@@ -84,35 +82,32 @@ function _hitSfxForType(
   if (ammoClass === 4) {
     return SfxId.SHOCK_HIT_01;
   }
-  return _BULLET_HIT_SFX[rng.rand(RngCallerStatic.PROJECTILE_UPDATE_HIT_SFX) % _BULLET_HIT_SFX.length];
+  return _BULLET_HIT_SFX[rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_HIT_SFX }) % _BULLET_HIT_SFX.length];
 }
 
 // --- plan_hit_sfx ---
 
 export function planHitSfx(
   hits: ProjectileHit[],
-  gameMode: GameMode,
-  demoModeActive: boolean,
-  gameTuneStarted: boolean,
-  rng: CrandLike,
-  beamTypes: ReadonlySet<number> = BEAM_TYPES,
+  opts: { gameMode: GameMode; demoModeActive: boolean; gameTuneStarted: boolean; rng: CrandLike; beamTypes?: ReadonlySet<number> },
 ): [boolean, SfxId[]] {
+  const beamTypes = opts.beamTypes ?? BEAM_TYPES;
   if (hits.length === 0) return [false, []];
 
   let triggerGameTune = false;
-  let localGameTuneStarted = gameTuneStarted;
+  let localGameTuneStarted = opts.gameTuneStarted;
   const end = Math.min(hits.length, _MAX_HIT_SFX_PER_FRAME);
   const sfx: SfxId[] = [];
 
   for (let idx = 0; idx < end; idx++) {
-    if (!demoModeActive && gameMode !== GameMode.RUSH && !localGameTuneStarted) {
+    if (!opts.demoModeActive && opts.gameMode !== GameMode.RUSH && !localGameTuneStarted) {
       triggerGameTune = true;
       localGameTuneStarted = true;
-      rng.rand(RngCallerStatic.SFX_PLAY_EXCLUSIVE_PLAYLIST_PICK);
+      opts.rng.rand({ caller: RngCallerStatic.SFX_PLAY_EXCLUSIVE_PLAYLIST_PICK });
       continue;
     }
     const typeId = hits[idx].typeId as number;
-    sfx.push(_hitSfxForType(typeId, beamTypes, rng));
+    sfx.push(_hitSfxForType(typeId, beamTypes, opts.rng));
   }
 
   return [triggerGameTune, sfx];
@@ -131,66 +126,54 @@ export interface ProjectileDecalPostCtx {
 // --- queue_projectile_decals ---
 
 export function queueProjectileDecals(
-  state: PresentationGameplayState,
-  players: readonly PlayerState[],
-  fxQueue: FxQueue,
-  hits: ProjectileHit[],
-  rng: CrandLike,
-  detailPreset: number,
-  violenceDisabled: number,
+  opts: { state: PresentationGameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hits: ProjectileHit[]; rng: CrandLike; detailPreset: number; violenceDisabled: number },
 ): void {
-  for (const hit of hits) {
-    const postCtx = queueProjectileDecalsPreHit(
-      state, players, fxQueue, hit, rng, detailPreset, violenceDisabled,
-    );
-    queueProjectileDecalsPostHit(fxQueue, postCtx, rng);
+  for (const hit of opts.hits) {
+    const postCtx = queueProjectileDecalsPreHit({
+      state: opts.state, players: opts.players, fxQueue: opts.fxQueue, hit, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
+    });
+    queueProjectileDecalsPostHit({ fxQueue: opts.fxQueue, postCtx, rng: opts.rng });
   }
 }
 
 // --- queue_projectile_decals_pre_hit ---
 
 export function queueProjectileDecalsPreHit(
-  state: PresentationGameplayState,
-  players: readonly PlayerState[],
-  _fxQueue: FxQueue,
-  hit: ProjectileHit,
-  rng: CrandLike,
-  detailPreset: number,
-  violenceDisabled: number,
+  opts: { state: PresentationGameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hit: ProjectileHit; rng: CrandLike; detailPreset: number; violenceDisabled: number },
 ): ProjectileDecalPostCtx {
-  const freezeActive = freezeBonusActive(state);
-  const bloody = players.length > 0 && perkActive(players[0], PerkId.BLOODY_MESS_QUICK_LEARNER);
+  const freezeActive = freezeBonusActive({ state: opts.state });
+  const bloody = opts.players.length > 0 && perkActive(opts.players[0], PerkId.BLOODY_MESS_QUICK_LEARNER);
 
   let freezeShardSpawn: ((pos: Vec2, angle: number) => void) | null = null;
   if (freezeActive) {
     freezeShardSpawn = (pos: Vec2, angle: number): void => {
-      state.effects.spawnFreezeShard(pos, angle, rng, detailPreset | 0);
+      opts.state.effects.spawnFreezeShard({ pos, angle, rng: opts.rng, detailPreset: opts.detailPreset | 0 });
     };
   }
 
-  const typeId = hit.typeId;
-  const baseAngle = hit.hit.sub(hit.origin).toAngle();
+  const typeId = opts.hit.typeId;
+  const baseAngle = opts.hit.hit.sub(opts.hit.origin).toAngle();
 
   if (typeId === ProjectileTemplateId.BLADE_GUN) {
     for (let i = 0; i < 8; i++) {
-      state.effects.spawnBloodSplatter(
-        hit.hit,
-        (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_BLADE_GUN_SPLATTER_ANGLE) & 0xFF) * 0.024543693,
-        0.0, rng, detailPreset, violenceDisabled,
-      );
+      opts.state.effects.spawnBloodSplatter({
+        pos: opts.hit.hit,
+        angle: (opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_BLADE_GUN_SPLATTER_ANGLE }) & 0xFF) * 0.024543693,
+        age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
+      });
     }
   }
 
   if (bloody) {
     for (let i = 0; i < 8; i++) {
-      const spread = ((rng.rand(RngCallerStatic.PROJECTILE_UPDATE_BLOODY_MESS_SPREAD) & 0x1F) - 16.0) * 0.0625;
-      state.effects.spawnBloodSplatter(
-        hit.hit, baseAngle + spread, 0.0, rng, detailPreset, violenceDisabled,
-      );
+      const spread = ((opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_BLOODY_MESS_SPREAD }) & 0x1F) - 16.0) * 0.0625;
+      opts.state.effects.spawnBloodSplatter({
+        pos: opts.hit.hit, angle: baseAngle + spread, age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
+      });
     }
-    state.effects.spawnBloodSplatter(
-      hit.hit, baseAngle + Math.PI, 0.0, rng, detailPreset, violenceDisabled,
-    );
+    opts.state.effects.spawnBloodSplatter({
+      pos: opts.hit.hit, angle: baseAngle + Math.PI, age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
+    });
 
     let lo = -30;
     let hi = 30;
@@ -201,28 +184,28 @@ export function queueProjectileDecalsPreHit(
         [RngCallerStatic.PROJECTILE_UPDATE_BLOODY_MESS_DECAL_DX_2, RngCallerStatic.PROJECTILE_UPDATE_BLOODY_MESS_DECAL_DY_2],
       ];
       for (const [dxCaller, dyCaller] of callerPairs) {
-        const dx = rng.rand(dxCaller) % span + lo;
-        const dy = rng.rand(dyCaller) % span + lo;
-        _fxQueue.addRandom(hit.target.add(new Vec2(dx, dy)), rng);
+        const dx = opts.rng.rand({ caller: dxCaller }) % span + lo;
+        const dy = opts.rng.rand({ caller: dyCaller }) % span + lo;
+        opts.fxQueue.addRandom({ pos: opts.hit.target.add(new Vec2(dx, dy)), rng: opts.rng });
       }
       lo -= 10;
       hi += 10;
     }
   } else if (!freezeActive) {
     for (let i = 0; i < 2; i++) {
-      state.effects.spawnBloodSplatter(
-        hit.hit, baseAngle, 0.0, rng, detailPreset, violenceDisabled,
-      );
-      if ((rng.rand(RngCallerStatic.PROJECTILE_UPDATE_DEFAULT_REVERSE_SPLATTER_GATE) & 7) === 2) {
-        state.effects.spawnBloodSplatter(
-          hit.hit, baseAngle + Math.PI, 0.0, rng, detailPreset, violenceDisabled,
-        );
+      opts.state.effects.spawnBloodSplatter({
+        pos: opts.hit.hit, angle: baseAngle, age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
+      });
+      if ((opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_DEFAULT_REVERSE_SPLATTER_GATE }) & 7) === 2) {
+        opts.state.effects.spawnBloodSplatter({
+          pos: opts.hit.hit, angle: baseAngle + Math.PI, age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
+        });
       }
     }
   }
 
   return {
-    hit,
+    hit: opts.hit,
     baseAngle,
     typeId: typeId as number,
     freezeActive,
@@ -233,31 +216,29 @@ export function queueProjectileDecalsPreHit(
 // --- queue_projectile_decals_post_hit ---
 
 export function queueProjectileDecalsPostHit(
-  fxQueue: FxQueue,
-  postCtx: ProjectileDecalPostCtx,
-  rng: CrandLike,
+  opts: { fxQueue: FxQueue; postCtx: ProjectileDecalPostCtx; rng: CrandLike },
 ): void {
-  const hit = postCtx.hit;
-  const baseAngle = postCtx.baseAngle;
+  const hit = opts.postCtx.hit;
+  const baseAngle = opts.postCtx.baseAngle;
 
-  rng.rand(RngCallerStatic.PROJECTILE_UPDATE_POST_HIT_DECAL_BURN);
+  opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_POST_HIT_DECAL_BURN });
 
-  const hookHandled = queueProjectileLargeStreakDecal(
-    hit, baseAngle, fxQueue, rng,
-    postCtx.freezeActive ? hit.hit : null,
-    postCtx.freezeShardSpawn,
-  );
+  const hookHandled = queueProjectileLargeStreakDecal({
+    hit, baseAngle, fxQueue: opts.fxQueue, rng: opts.rng,
+    freezeOrigin: opts.postCtx.freezeActive ? hit.hit : null,
+    spawnFreezeShard: opts.postCtx.freezeShardSpawn,
+  });
 
-  if (hookHandled || postCtx.freezeActive) return;
+  if (hookHandled || opts.postCtx.freezeActive) return;
 
   for (let i = 0; i < 3; i++) {
-    const spread = (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_DECAL_SPREAD) % 20 - 10) * 0.1;
+    const spread = (opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_DECAL_SPREAD }) % 20 - 10) * 0.1;
     const angle = baseAngle + spread;
     const direction = Vec2.fromAngle(angle).mul(20.0);
-    fxQueue.addRandom(hit.target, rng);
-    fxQueue.addRandom(hit.target.add(direction.mul(1.5)), rng);
-    fxQueue.addRandom(hit.target.add(direction.mul(2.0)), rng);
-    fxQueue.addRandom(hit.target.add(direction.mul(2.5)), rng);
+    opts.fxQueue.addRandom({ pos: hit.target, rng: opts.rng });
+    opts.fxQueue.addRandom({ pos: hit.target.add(direction.mul(1.5)), rng: opts.rng });
+    opts.fxQueue.addRandom({ pos: hit.target.add(direction.mul(2.0)), rng: opts.rng });
+    opts.fxQueue.addRandom({ pos: hit.target.add(direction.mul(2.5)), rng: opts.rng });
   }
 }
 
@@ -299,17 +280,17 @@ export function planWorldPresentationStep(opts: {
 
   if (triggerGameTuneOpt === null && hitSfxOpt === null) {
     if (hits.length > 0) {
-      queueProjectileDecals(
+      queueProjectileDecals({
         state, players, fxQueue, hits, rng,
-        detailPreset | 0, violenceDisabled | 0,
-      );
-      if (freezeBonusActive(state)) {
+        detailPreset: detailPreset | 0, violenceDisabled: violenceDisabled | 0,
+      });
+      if (freezeBonusActive({ state })) {
         if (!demoModeActive && gameMode !== GameMode.RUSH && !gameTuneStarted) {
           commands.triggerGameTune = true;
         }
       } else {
         const [trig, plannedHitSfx] = planHitSfx(
-          hits, gameMode, demoModeActive, gameTuneStarted, rng,
+          hits, { gameMode, demoModeActive, gameTuneStarted, rng },
         );
         commands.triggerGameTune = trig;
         commands.sfx.push(...plannedHitSfx);
@@ -330,9 +311,7 @@ export function planWorldPresentationStep(opts: {
     commands.sfx.push(
       ...planPlayerAudioSfx(
         players[idx],
-        prevShotSeq | 0,
-        prevReloadActive,
-        prevReloadTimer,
+        { prevShotSeq: prevShotSeq | 0, prevReloadActive, prevReloadTimer },
       ),
     );
   }
@@ -351,11 +330,10 @@ export function planWorldPresentationStep(opts: {
 // --- apply_presentation_plan ---
 
 export function applyPresentationPlan(
-  plan: PresentationStepCommands,
-  audioSink: PresentationAudioSink | null,
-  applyAudio = true,
+  opts: { plan: PresentationStepCommands; audioSink: PresentationAudioSink | null; applyAudio?: boolean },
 ): void {
-  if (!applyAudio || audioSink === null) return;
-  if (plan.triggerGameTune) audioSink.triggerGameTune();
-  for (const sfx of plan.sfx) audioSink.playSfx(sfx);
+  const applyAudio = opts.applyAudio ?? true;
+  if (!applyAudio || opts.audioSink === null) return;
+  if (opts.plan.triggerGameTune) opts.audioSink.triggerGameTune();
+  for (const sfx of opts.plan.sfx) opts.audioSink.playSfx(sfx);
 }

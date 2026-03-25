@@ -195,10 +195,10 @@ export class HighScoresView {
     this._closeAction = null;
   }
 
-  private _panelTopLeft(pos: Vec2, scale: number): Vec2 {
+  private _panelTopLeft(opts: { pos: Vec2; scale: number }): Vec2 {
     return new Vec2(
-      pos.x + MENU_PANEL_OFFSET_X * scale,
-      pos.y + this._widescreenYShift + MENU_PANEL_OFFSET_Y * scale,
+      opts.pos.x + MENU_PANEL_OFFSET_X * opts.scale,
+      opts.pos.y + this._widescreenYShift + MENU_PANEL_OFFSET_Y * opts.scale,
     );
   }
 
@@ -248,11 +248,11 @@ export class HighScoresView {
       this, 2, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 1,
     );
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
-    const leftTopLeft = this._panelTopLeft(new Vec2(leftPanelPosX, HS_LEFT_PANEL_POS_Y), scale);
+    const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, HS_LEFT_PANEL_POS_Y), scale });
     const rightPanelPosX = hsRightPanelPosX(screenWidth);
-    const rightTopLeft = this._panelTopLeft(new Vec2(rightPanelPosX, HS_RIGHT_PANEL_POS_Y), scale);
-    const leftPanelTopLeft = leftTopLeft.offset(leftSlideX);
-    const rightPanelTopLeft = rightTopLeft.offset(rightSlideX);
+    const rightTopLeft = this._panelTopLeft({ pos: new Vec2(rightPanelPosX, HS_RIGHT_PANEL_POS_Y), scale });
+    const leftPanelTopLeft = leftTopLeft.offset({ dx: leftSlideX });
+    const rightPanelTopLeft = rightTopLeft.offset({ dx: rightSlideX });
 
     if (enabled) {
       if (this._updateRightPanelWidgets(rightPanelTopLeft, scale, resources, font)) {
@@ -280,7 +280,7 @@ export class HighScoresView {
       }
 
       w = buttonWidth(resources, this.playButton.label, { scale, forceWide: this.playButton.forceWide });
-      if (buttonUpdate(this.playButton, { pos: buttonBasePos.offset(0.0, HS_BUTTON_STEP_Y * scale), width: w, dtMs, mouse, click })) {
+      if (buttonUpdate(this.playButton, { pos: buttonBasePos.offset({ dx: 0.0, dy: HS_BUTTON_STEP_Y * scale }), width: w, dtMs, mouse, click })) {
         this._beginCloseTransition('open_play_game');
         return;
       }
@@ -348,16 +348,16 @@ export class HighScoresView {
     this._closeAction = action;
   }
 
-  private _dropdownLayout(pos: Vec2, width: number, itemCount: number, scale: number): DropdownLayoutBase {
-    const headerH = 16.0 * scale;
-    const rowH = 16.0 * scale;
-    const fullH = (itemCount * 16.0 + 24.0) * scale;
+  private _dropdownLayout(opts: { pos: Vec2; width: number; itemCount: number; scale: number }): DropdownLayoutBase {
+    const headerH = 16.0 * opts.scale;
+    const rowH = 16.0 * opts.scale;
+    const fullH = (opts.itemCount * 16.0 + 24.0) * opts.scale;
     return {
-      pos,
-      width,
+      pos: opts.pos,
+      width: opts.width,
       headerH: headerH,
       rowH: rowH,
-      rowsY0: pos.y + 17.0 * scale,
+      rowsY0: opts.pos.y + 17.0 * opts.scale,
       fullH: fullH,
     };
   }
@@ -373,7 +373,7 @@ export class HighScoresView {
     const mouse = { x: mx, y: my };
     const click = enabled && InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
     const hoveredHeader = enabled && mouseInsideRectWithPadding(
-      mouse, layout.pos, layout.width, 14.0 * scale,
+      mouse, { pos: layout.pos, width: layout.width, height: 14.0 * scale },
     );
     if (hoveredHeader && click) {
       return [!isOpen, null, true];
@@ -391,7 +391,7 @@ export class HighScoresView {
     for (let idx = 0; idx < itemCount; idx++) {
       const itemY = layout.rowsY0 + layout.rowH * idx;
       const hovered = enabled && mouseInsideRectWithPadding(
-        mouse, new Vec2(layout.pos.x, itemY), layout.width, 14.0 * scale,
+        mouse, { pos: new Vec2(layout.pos.x, itemY), width: layout.width, height: 14.0 * scale },
       );
       if (hovered && click) {
         return [false, idx, true];
@@ -450,7 +450,7 @@ export class HighScoresView {
     // Dropdown: show scores date filter
     const showScoresItems = ['Best of all time', 'Best of month', 'Best of week', 'Best of day'];
     const showScoresPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_SHOW_SCORES_WIDGET_X * scale, HS_RIGHT_SHOW_SCORES_WIDGET_Y * scale));
-    const showScoresLayout = this._dropdownLayout(showScoresPos, HS_RIGHT_SHOW_SCORES_WIDGET_W * scale, showScoresItems.length, scale);
+    const showScoresLayout = this._dropdownLayout({ pos: showScoresPos, width: HS_RIGHT_SHOW_SCORES_WIDGET_W * scale, itemCount: showScoresItems.length, scale });
     const showScoresEnabled = !(this.playerCountOpen || this.gameModeOpen || this.scoreListOpen);
     let consumed: boolean;
     let selected: number | null;
@@ -474,7 +474,7 @@ export class HighScoresView {
     // Dropdown: player count
     const playerItems = ['1 player', '2 players', '3 players', '4 players'];
     const playerPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_PLAYER_COUNT_WIDGET_X * scale, HS_RIGHT_PLAYER_COUNT_WIDGET_Y * scale));
-    const playerLayout = this._dropdownLayout(playerPos, HS_RIGHT_PLAYER_COUNT_WIDGET_W * scale, playerItems.length, scale);
+    const playerLayout = this._dropdownLayout({ pos: playerPos, width: HS_RIGHT_PLAYER_COUNT_WIDGET_W * scale, itemCount: playerItems.length, scale });
     const playerEnabled = !(this.gameModeOpen || this.showScoresOpen || this.scoreListOpen);
     [this.playerCountOpen, selected, consumed] = this._updateDropdown(
       playerLayout, playerItems.length, this.playerCountOpen, playerEnabled, scale,
@@ -506,7 +506,7 @@ export class HighScoresView {
       modeItems.push(["Typ'o'Shooter", GameMode.TYPO]);
     }
     const gameModePos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_GAME_MODE_WIDGET_X * scale, HS_RIGHT_GAME_MODE_WIDGET_Y * scale));
-    const gameModeLayout = this._dropdownLayout(gameModePos, HS_RIGHT_GAME_MODE_WIDGET_W * scale, modeItems.length, scale);
+    const gameModeLayout = this._dropdownLayout({ pos: gameModePos, width: HS_RIGHT_GAME_MODE_WIDGET_W * scale, itemCount: modeItems.length, scale });
     const gameModeEnabled = !(this.playerCountOpen || this.showScoresOpen || this.scoreListOpen);
     [this.gameModeOpen, selected, consumed] = this._updateDropdown(
       gameModeLayout, modeItems.length, this.gameModeOpen, gameModeEnabled, scale,
@@ -538,7 +538,7 @@ export class HighScoresView {
     const scoreListEnabled = !(this.playerCountOpen || this.gameModeOpen || this.showScoresOpen);
     const names = this.state.config.profile.savedNames.slice(0, Math.max(1, this.state.config.profile.savedNameCount));
     const scoreListPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_SCORE_LIST_WIDGET_X * scale, HS_RIGHT_SCORE_LIST_WIDGET_Y * scale));
-    const scoreListLayout = this._dropdownLayout(scoreListPos, HS_RIGHT_SCORE_LIST_WIDGET_W * scale, names.length, scale);
+    const scoreListLayout = this._dropdownLayout({ pos: scoreListPos, width: HS_RIGHT_SCORE_LIST_WIDGET_W * scale, itemCount: names.length, scale });
     [this.scoreListOpen, selected, consumed] = this._updateDropdown(
       scoreListLayout, names.length, this.scoreListOpen, scoreListEnabled, scale,
     );
@@ -643,22 +643,22 @@ export class HighScoresView {
     const [, rightSlideX] = uiElementAnim(this, 2, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 1);
 
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
-    const leftTopLeft = this._panelTopLeft(new Vec2(leftPanelPosX, HS_LEFT_PANEL_POS_Y), scale);
+    const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, HS_LEFT_PANEL_POS_Y), scale });
     const rightPanelPosXVal = hsRightPanelPosX(screenWidth);
-    const rightTopLeft = this._panelTopLeft(new Vec2(rightPanelPosXVal, HS_RIGHT_PANEL_POS_Y), scale);
-    const leftPanelTopLeft = leftTopLeft.offset(leftSlideX);
-    const rightPanelTopLeft = rightTopLeft.offset(rightSlideX);
+    const rightTopLeft = this._panelTopLeft({ pos: new Vec2(rightPanelPosXVal, HS_RIGHT_PANEL_POS_Y), scale });
+    const leftPanelTopLeft = leftTopLeft.offset({ dx: leftSlideX });
+    const rightPanelTopLeft = rightTopLeft.offset({ dx: rightSlideX });
 
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, HS_LEFT_PANEL_HEIGHT * scale),
-      WHITE, fxDetail,
+      { dst: wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, HS_LEFT_PANEL_HEIGHT * scale),
+        tint: WHITE, shadow: fxDetail },
     );
     drawClassicMenuPanel(
       panelTex,
-      wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, HS_RIGHT_PANEL_HEIGHT * scale),
-      WHITE, fxDetail, true,
+      { dst: wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, HS_RIGHT_PANEL_HEIGHT * scale),
+        tint: WHITE, shadow: fxDetail, flipX: true },
     );
 
     const selectedRank = drawMainPanel(this, {
@@ -702,11 +702,11 @@ export class HighScoresView {
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow(
-        sign, signSrc,
-        wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
-        signOrigin, rotationDeg,
-      );
+      drawUiQuadShadow({
+        texture: sign, src: signSrc,
+        dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
+        origin: signOrigin, rotationDeg,
+      });
     }
     wgl.drawTexturePro(
       sign, signSrc,
@@ -720,7 +720,7 @@ export class HighScoresView {
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
     const pos = new Vec2(mx, my);
-    drawMenuCursor(particles, cursorTex, pos, this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, { pos, pulseTime: this._cursorPulseTime });
   }
 
   private _worldEntityAlpha(): number {

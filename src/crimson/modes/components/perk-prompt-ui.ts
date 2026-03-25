@@ -33,11 +33,11 @@ const PERK_PROMPT_TEXT_OFFSET_Y = 8.0;
 export type UiTextWidthFn = (text: string, scale: number) => number;
 
 export class PerkPromptUi {
-  static label(config: CrimsonConfig, pendingCount: number): string {
+  static label(config: CrimsonConfig, opts: { pendingCount: number }): string {
     if (!config.gameplay.showInfoTexts) {
       return '';
     }
-    const pending = Math.floor(pendingCount);
+    const pending = Math.floor(opts.pendingCount);
     if (pending <= 0) {
       return '';
     }
@@ -45,25 +45,25 @@ export class PerkPromptUi {
     return `Press Mouse2 to pick a perk${suffix}`;
   }
 
-  static hinge(screenW: number): Vec2 {
+  static hinge(opts: { screenW?: number } = {}): Vec2 {
+    const screenW = opts.screenW ?? wgl.getScreenWidth();
     const hingeX = screenW + PERK_PROMPT_OUTSET_X;
     const hingeY = Math.floor(screenW) === 640 ? 80.0 : 40.0;
     return new Vec2(hingeX, hingeY);
   }
 
   static rect(
-    resources: RuntimeResources,
-    screenW: number,
-    _scale: number = 1.0,
+    opts: { resources: RuntimeResources; scale?: number },
   ): Rect {
-    const hinge = PerkPromptUi.hinge(screenW);
-    const tex = getTexture(resources, TextureId.UI_MENU_ITEM);
+    const _scale = opts.scale ?? 1.0;
+    const hinge = PerkPromptUi.hinge();
+    const tex = getTexture(opts.resources, TextureId.UI_MENU_ITEM);
     const barW = tex.width * PERK_PROMPT_BAR_SCALE;
     const barH = tex.height * PERK_PROMPT_BAR_SCALE;
     const localX = (PERK_PROMPT_BAR_BASE_OFFSET_X + PERK_PROMPT_BAR_SHIFT_X) * PERK_PROMPT_BAR_SCALE;
     const localY = PERK_PROMPT_BAR_BASE_OFFSET_Y * PERK_PROMPT_BAR_SCALE;
     return Rect.fromTopLeft(
-      hinge.offset(localX, localY),
+      hinge.offset({ dx: localX, dy: localY }),
       barW,
       barH,
     );
@@ -87,7 +87,7 @@ export class PerkPromptUi {
     }
 
     const screenW = wgl.getScreenWidth();
-    const hinge = PerkPromptUi.hinge(screenW);
+    const hinge = PerkPromptUi.hinge({ screenW });
     // Prompt swings counter-clockwise; WebGL Y-down makes positive rotation clockwise.
     const rotDeg = -(1.0 - alpha) * 90.0;
     const tint = wgl.makeColor(1, 1, 1, alpha);

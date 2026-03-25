@@ -7,13 +7,7 @@ import { ProjectileTemplateId } from "@crimson/projectiles/types.js";
 
 export type ProjectileSpawnFn = (
   state: GameplayState,
-  players: readonly PlayerState[] | null,
-  pos: Vec2,
-  angle: number,
-  typeId: ProjectileTemplateId,
-  owner: OwnerRef,
-  ownerPlayerIndex?: number | null,
-  hitsPlayers?: boolean,
+  opts: { players: readonly PlayerState[] | null; pos: Vec2; angle: number; typeId: ProjectileTemplateId; owner: OwnerRef; ownerPlayerIndex?: number | null; hitsPlayers?: boolean },
 ) => number;
 
 export type OwnerRefForPlayerFn = (playerIndex: number) => OwnerRef;

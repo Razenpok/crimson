@@ -454,7 +454,7 @@ export class PlayGameMenuView extends PanelMenuView {
     this._tooltipMs.set(key, Math.max(0, Math.min(1000, value)));
   }
 
-  private _playerCountWidgetLayout(pos: Vec2, scale: number, font: SmallFontData): PlayerCountWidgetLayout {
+  private _playerCountWidgetLayout(pos: Vec2, scale: number, opts: { font: SmallFontData }): PlayerCountWidgetLayout {
     /**
      * Return Play Game player-count dropdown metrics.
      *
@@ -469,7 +469,7 @@ export class PlayGameMenuView extends PanelMenuView {
     const textScale = 1.0 * scale;
     let maxLabelW = 0.0;
     for (const label of PlayGameMenuView._PLAYER_COUNT_LABELS) {
-      maxLabelW = Math.max(maxLabelW, measureSmallTextWidth(font, label));
+      maxLabelW = Math.max(maxLabelW, measureSmallTextWidth(opts.font, label));
     }
     const width = maxLabelW + 48.0 * scale;
     const headerH = 16.0 * scale;
@@ -492,12 +492,12 @@ export class PlayGameMenuView extends PanelMenuView {
 
   private _updatePlayerCount(pos: Vec2, scale: number, font: SmallFontData): boolean {
     const config = this._pgState.config;
-    const layout = this._playerCountWidgetLayout(pos, scale, font);
+    const layout = this._playerCountWidgetLayout(pos, scale, { font });
 
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const hoveredHeader = mouseInsideRectWithPadding(
-      mouse, layout.pos, layout.width, 14.0 * scale,
+      mouse, { pos: layout.pos, width: layout.width, height: 14.0 * scale },
     );
     if (hoveredHeader && InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
       this._playerListOpen = !this._playerListOpen;
@@ -517,7 +517,7 @@ export class PlayGameMenuView extends PanelMenuView {
     for (let idx = 0; idx < PlayGameMenuView._PLAYER_COUNT_LABELS.length; idx++) {
       const itemY = layout.rowsY0 + layout.rowH * idx;
       const itemHovered = mouseInsideRectWithPadding(
-        mouse, { x: layout.pos.x, y: itemY }, layout.width, 14.0 * scale,
+        mouse, { pos: { x: layout.pos.x, y: itemY }, width: layout.width, height: 14.0 * scale },
       );
       if (itemHovered && InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         config.gameplay.playerCount = idx + 1;
@@ -592,7 +592,7 @@ export class PlayGameMenuView extends PanelMenuView {
   ): void {
     const dropOn = getTexture(resources, TextureId.UI_DROP_ON);
     const dropOff = getTexture(resources, TextureId.UI_DROP_OFF);
-    const layout = this._playerCountWidgetLayout(pos, scale, font);
+    const layout = this._playerCountWidgetLayout(pos, scale, { font });
 
     // `ui_list_widget_update` draws a single bordered black rect for the widget.
     const widgetH = this._playerListOpen ? layout.fullH : layout.headerH;
@@ -613,7 +613,7 @@ export class PlayGameMenuView extends PanelMenuView {
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const hoveredHeader = mouseInsideRectWithPadding(
-      mouse, layout.pos, layout.width, 14.0 * scale,
+      mouse, { pos: layout.pos, width: layout.width, height: 14.0 * scale },
     );
     const arrowTex = (this._playerListOpen || hoveredHeader) ? dropOn : dropOff;
     if (this._playerListOpen || hoveredHeader) {
@@ -648,7 +648,7 @@ export class PlayGameMenuView extends PanelMenuView {
       const item = PlayGameMenuView._PLAYER_COUNT_LABELS[idx];
       const itemY = layout.rowsY0 + layout.rowH * idx;
       const hovered = mouseInsideRectWithPadding(
-        mouse, { x: layout.pos.x, y: itemY }, layout.width, 14.0 * scale,
+        mouse, { pos: { x: layout.pos.x, y: itemY }, width: layout.width, height: 14.0 * scale },
       );
       let alpha = 153; // 0x3f19999a
       if (hovered) {

@@ -20,5 +20,5 @@ export function applyWeapon(ctx: BonusApplyCtx): void {
     alt.shotCooldown = primary.shotCooldown;
     ctx.player.altWeapon = alt;
   }
-  weaponAssignPlayer(ctx.player, weaponId, ctx.state);
+  weaponAssignPlayer(ctx.player, weaponId, { state: ctx.state });
 }

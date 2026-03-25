@@ -4,18 +4,18 @@ import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 
-export function applyReflexBoostedDt(dt: number, players: PlayerState[]): number {
+export function applyReflexBoostedDt(opts: { dt: number; players: PlayerState[] }): number {
   // Apply Reflex Boosted dt scaling from perk effects.
-  if (dt <= 0.0) {
-    return dt;
+  if (opts.dt <= 0.0) {
+    return opts.dt;
   }
-  if (!players.length) {
-    return dt;
+  if (!opts.players.length) {
+    return opts.dt;
   }
-  if (!perkActive(players[0], PerkId.REFLEX_BOOSTED)) {
-    return dt;
+  if (!perkActive(opts.players[0], PerkId.REFLEX_BOOSTED)) {
+    return opts.dt;
   }
-  return dt * 0.9;
+  return opts.dt * 0.9;
 }
 
 export const HOOKS = {

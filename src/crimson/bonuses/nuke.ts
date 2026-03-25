@@ -17,53 +17,38 @@ export function applyNuke(
   const origin = ctx.originPos;
   const rng = ctx.state.rng;
 
-  let bulletCount = rng.rand(RngCallerStatic.BONUS_APPLY_NUKE_BULLET_COUNT) & 3;
+  let bulletCount = rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_BULLET_COUNT }) & 3;
   bulletCount += 4;
   for (let i = 0; i < bulletCount; i++) {
-    const angle = ((rng.rand(RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_ANGLE) | 0) % 628) * 0.01;
+    const angle = ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_ANGLE }) | 0) % 628) * 0.01;
     const projId = projectileSpawn(
       ctx.state,
-      ctx.players,
-      origin,
-      angle,
-      ProjectileTemplateId.PISTOL,
-      OwnerRef.fromLocalPlayer(0),
-      ctx.player.index,
+      { players: ctx.players, pos: origin, angle, typeId: ProjectileTemplateId.PISTOL, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
     );
     if (projId !== -1) {
       const speedScale =
-        ((rng.rand(RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_SPEED_SCALE) | 0) % 50) * 0.01 + 0.5;
+        ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_SPEED_SCALE }) | 0) % 50) * 0.01 + 0.5;
       ctx.state.projectiles.entries[projId].speedScale *= speedScale;
     }
   }
 
-  const gaussAngle1 = ((rng.rand(RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_1) | 0) % 628) * 0.01;
+  const gaussAngle1 = ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_1 }) | 0) % 628) * 0.01;
   projectileSpawn(
     ctx.state,
-    ctx.players,
-    origin,
-    gaussAngle1,
-    ProjectileTemplateId.GAUSS_GUN,
-    OwnerRef.fromLocalPlayer(0),
-    ctx.player.index,
+    { players: ctx.players, pos: origin, angle: gaussAngle1, typeId: ProjectileTemplateId.GAUSS_GUN, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
   );
-  const gaussAngle2 = ((rng.rand(RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_2) | 0) % 628) * 0.01;
+  const gaussAngle2 = ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_2 }) | 0) % 628) * 0.01;
   projectileSpawn(
     ctx.state,
-    ctx.players,
-    origin,
-    gaussAngle2,
-    ProjectileTemplateId.GAUSS_GUN,
-    OwnerRef.fromLocalPlayer(0),
-    ctx.player.index,
+    { players: ctx.players, pos: origin, angle: gaussAngle2, typeId: ProjectileTemplateId.GAUSS_GUN, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
   );
 
-  ctx.state.effects.spawnExplosionBurst(
-    origin,
-    1.0,
-    ctx.state.rng,
-    ctx.detailPreset | 0,
-  );
+  ctx.state.effects.spawnExplosionBurst({
+    pos: origin,
+    scale: 1.0,
+    rng: ctx.state.rng,
+    detailPreset: ctx.detailPreset | 0,
+  });
 
   const creatures = ctx.creatures;
   if (creatures && creatures.length > 0) {

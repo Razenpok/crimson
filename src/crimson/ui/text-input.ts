@@ -23,7 +23,8 @@ const KEY_END = 35;
  * Drain the char queue and return any printable characters typed this frame.
  * Characters outside 0x20..0xFF are discarded; space can be excluded.
  */
-export function pollTextInput(maxLen: number, allowSpace: boolean = true): string {
+export function pollTextInput(maxLen: number, opts: { allowSpace?: boolean } = {}): string {
+  const allowSpace = opts.allowSpace ?? true;
   let out = '';
   while (true) {
     const value = InputState.getCharPressed();
@@ -53,17 +54,19 @@ export function flushTextInputEvents(): void {
 export function updateNameEntryText(
   text: string,
   caret: number,
-  maxLen: number,
-  rng: CrandLike,
-  playSfx?: ((id: SfxId) => void) | null,
+  opts: {
+    maxLen: number;
+    rng: CrandLike;
+    playSfx?: ((id: SfxId) => void) | null;
+  },
 ): [string, number] {
-  const typed = pollTextInput(maxLen - text.length, true);
+  const typed = pollTextInput(opts.maxLen - text.length, { allowSpace: true });
   if (typed) {
-    text = (text.slice(0, caret) + typed + text.slice(caret)).slice(0, maxLen);
+    text = (text.slice(0, caret) + typed + text.slice(caret)).slice(0, opts.maxLen);
     caret = Math.min(text.length, caret + typed.length);
-    if (playSfx != null) {
-      playSfx(
-        (rng.rand(RngCallerStatic.UI_TEXT_INPUT_UPDATE_TYPECLICK) & 1) === 0
+    if (opts.playSfx != null) {
+      opts.playSfx(
+        (opts.rng.rand({ caller: RngCallerStatic.UI_TEXT_INPUT_UPDATE_TYPECLICK }) & 1) === 0
           ? SfxId.UI_TYPECLICK_01
           : SfxId.UI_TYPECLICK_02,
       );
@@ -74,9 +77,9 @@ export function updateNameEntryText(
   if (InputState.wasKeyPressed(KEY_BACKSPACE) && caret > 0) {
     text = text.slice(0, caret - 1) + text.slice(caret);
     caret -= 1;
-    if (playSfx != null) {
-      playSfx(
-        (rng.rand(RngCallerStatic.UI_TEXT_INPUT_UPDATE_TYPECLICK) & 1) === 0
+    if (opts.playSfx != null) {
+      opts.playSfx(
+        (opts.rng.rand({ caller: RngCallerStatic.UI_TEXT_INPUT_UPDATE_TYPECLICK }) & 1) === 0
           ? SfxId.UI_TYPECLICK_01
           : SfxId.UI_TYPECLICK_02,
       );
@@ -116,13 +119,13 @@ export function gameplayControlsHeld(config: CrimsonConfig): boolean {
     for (let i = 0; i < _CONTROL_BIND_SLOTS && i < codes.length; i++) {
       const code = codes[i];
       if (code === INPUT_CODE_UNBOUND) continue;
-      if (inputCodeIsDown(code, playerIndex)) return true;
+      if (inputCodeIsDown(code, { playerIndex })) return true;
     }
   }
 
   // Single-player alt movement (arrow keys in DirectInput codes)
   for (const code of _SINGLE_PLAYER_ALT_MOVE_CODES) {
-    if (inputCodeIsDown(code, 0)) return true;
+    if (inputCodeIsDown(code, { playerIndex: 0 })) return true;
   }
 
   return false;

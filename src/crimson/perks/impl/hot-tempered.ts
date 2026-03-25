@@ -29,19 +29,14 @@ export function tickHotTempered(ctx: PlayerPerkTickCtx): void {
     const angle = idx * (Math.PI / 4.0);
     ctx.projectileSpawn(
       ctx.state,
-      ctx.players,
-      ctx.playerPosBeforeMove,
-      angle,
-      typeId,
-      owner,
-      ctx.player.index,
+      { players: ctx.players, pos: ctx.playerPosBeforeMove, angle, typeId, owner, ownerPlayerIndex: ctx.player.index },
     );
   }
   ctx.state.sfxQueue.push(SfxId.EXPLOSION_SMALL);
 
   ctx.player.hotTemperedTimer -= ctx.state.perkIntervals.hotTempered;
   const intervalRoll = ctx.state.rng.rand(
-    RngCallerStatic.PLAYER_UPDATE_HOT_TEMPERED_INTERVAL_RESET,
+    { caller: RngCallerStatic.PLAYER_UPDATE_HOT_TEMPERED_INTERVAL_RESET },
   );
   ctx.state.perkIntervals.hotTempered = (intervalRoll % 8) + 2.0;
 }

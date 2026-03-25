@@ -13,12 +13,7 @@ import { CreatureState } from "@crimson/creatures/runtime.js";
 export interface BonusPoolLike {
   update(
     dt: number,
-    state: GameplayState,
-    players: PlayerState[],
-    creatures: readonly CreatureState[],
-    detailPreset: number,
-    deferFreezeCorpseFx: boolean,
-    freezeCorpseIndices: Set<number> | null,
+    opts: { state: GameplayState; players: PlayerState[]; creatures: readonly CreatureState[]; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
   ): BonusPickupEvent[];
 }
 
@@ -28,11 +23,12 @@ export function bonusTelekineticUpdate(
   state: GameplayState,
   players: PlayerState[],
   dt: number,
-  creatures: readonly CreatureState[],
-  detailPreset: number = 5,
-  deferFreezeCorpseFx: boolean = false,
-  freezeCorpseIndices: Set<number> | null = null,
+  opts: { creatures: readonly CreatureState[]; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
 ): BonusPickupEvent[] {
+  const creatures = opts.creatures;
+  const detailPreset = opts.detailPreset ?? 5;
+  const deferFreezeCorpseFx = opts.deferFreezeCorpseFx ?? false;
+  const freezeCorpseIndices = opts.freezeCorpseIndices ?? null;
   if (dt <= 0.0) {
     return [];
   }
@@ -70,13 +66,15 @@ export function bonusTelekineticUpdate(
       state,
       player,
       entry.bonusId,
-      entry.pos,
-      creatures,
-      players,
-      entry.amount | 0,
-      detailPreset | 0,
-      Boolean(deferFreezeCorpseFx),
-      freezeCorpseIndices,
+      {
+        origin: entry.pos,
+        creatures,
+        players,
+        amount: entry.amount | 0,
+        detailPreset: detailPreset | 0,
+        deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+        freezeCorpseIndices,
+      },
     );
     entry.picked = true;
     entry.timeLeft = BONUS_PICKUP_LINGER;
@@ -99,31 +97,36 @@ export function bonusUpdate(
   state: GameplayState,
   players: PlayerState[],
   dt: number,
-  creatures: readonly CreatureState[],
-  updateHud: boolean = true,
-  detailPreset: number = 5,
-  deferFreezeCorpseFx: boolean = false,
-  freezeCorpseIndices: Set<number> | null = null,
+  opts: { creatures: readonly CreatureState[]; updateHud?: boolean; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
 ): BonusPickupEvent[] {
+  const creatures = opts.creatures;
+  const updateHud = opts.updateHud ?? true;
+  const detailPreset = opts.detailPreset ?? 5;
+  const deferFreezeCorpseFx = opts.deferFreezeCorpseFx ?? false;
+  const freezeCorpseIndices = opts.freezeCorpseIndices ?? null;
   const pickups = bonusTelekineticUpdate(
     state,
     players,
     dt,
-    creatures,
-    detailPreset | 0,
-    Boolean(deferFreezeCorpseFx),
-    freezeCorpseIndices,
+    {
+      creatures,
+      detailPreset: detailPreset | 0,
+      deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+      freezeCorpseIndices,
+    },
   );
 
   const bonusPool = state.bonusPool as BonusPoolLike;
   const poolPickups = bonusPool.update(
     dt,
-    state,
-    players,
-    creatures,
-    detailPreset | 0,
-    Boolean(deferFreezeCorpseFx),
-    freezeCorpseIndices,
+    {
+      state,
+      players,
+      creatures,
+      detailPreset: detailPreset | 0,
+      deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+      freezeCorpseIndices,
+    },
   );
   for (const p of poolPickups) {
     pickups.push(p);
@@ -146,7 +149,7 @@ export function bonusUpdate(
   }
 
   if (updateHud) {
-    bonusHudUpdate(state, players, dt);
+    bonusHudUpdate(state, players, { dt });
   }
 
   return pickups;

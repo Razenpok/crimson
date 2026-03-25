@@ -50,7 +50,7 @@ export const RUSH_FORCED_AMMO = 30.0;
 export function enforceRushLoadout(world: WorldState): void {
   for (const player of world.players) {
     if (player.weapon.weaponId !== RUSH_WEAPON_ID) {
-      weaponAssignPlayer(player, RUSH_WEAPON_ID, world.state);
+      weaponAssignPlayer(player, RUSH_WEAPON_ID, { state: world.state });
     }
     player.weapon.ammo = RUSH_FORCED_AMMO;
   }
@@ -137,7 +137,7 @@ export function buildQuestSession(opts: {
       : opts.startWeaponId;
 
   for (const player of opts.world.players) {
-    weaponAssignPlayer(player, weaponId, opts.world.state);
+    weaponAssignPlayer(player, weaponId, { state: opts.world.state });
   }
 
   opts.world.creatures.captureSpawnEventsAuthoritative = false;
@@ -177,9 +177,7 @@ export function buildTypoSession(opts: {
 
   resetTypoState(
     opts.world.state.typo,
-    opts.world.creatures.entries.length,
-    dictionaryWords,
-    highscoreNames,
+    { creatureCapacity: opts.world.creatures.entries.length, dictionaryWords, highscoreNames },
   );
 
   const session = new DeterministicSession({
@@ -212,7 +210,7 @@ export function buildTutorialSession(opts: {
   resetTutorialState(
     opts.world.state.tutorial,
     opts.world.state.tutorialOverlay,
-    opts.world.state.preserveBugs,
+    { preserveBugs: opts.world.state.preserveBugs },
   );
 
   const session = new DeterministicSession({

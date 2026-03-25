@@ -67,9 +67,9 @@ export function inputSchemeLabel(scheme: MovementControlType): string {
 
 export function controlsMethodLabels(
   controls: { players: { aimScheme: AimScheme; movement: MovementControlType }[] },
-  playerIndex: number,
+  opts: { playerIndex: number },
 ): [string, string] {
-  const player = controls.players[playerIndex];
+  const player = controls.players[opts.playerIndex];
   return [inputConfigureForLabel(player.aimScheme), inputSchemeLabel(player.movement)];
 }
 
@@ -97,49 +97,47 @@ export function controlsAimMethodDropdownIds(currentAimScheme: AimScheme): AimSc
 // ---------------------------------------------------------------------------
 
 export function controlsRebindPlan(
-  aimScheme: AimScheme,
-  moveMode: MovementControlType,
-  playerIndex: number,
+  opts: { aimScheme: AimScheme; moveMode: MovementControlType; playerIndex: number },
 ): [RebindRowSpec[], RebindRowSpec[], RebindRowSpec[]] {
   const aimRows: RebindRowSpec[] = [];
   const moveRows: RebindRowSpec[] = [];
   const miscRows: RebindRowSpec[] = [];
 
-  if (aimScheme === AimScheme.KEYBOARD) {
+  if (opts.aimScheme === AimScheme.KEYBOARD) {
     aimRows.push(rebindRow('Torso left:', RebindTarget.PLAYER_KEYBOARD_AIM_CODES, 0));
     aimRows.push(rebindRow('Torso right:', RebindTarget.PLAYER_KEYBOARD_AIM_CODES, 1));
-  } else if (aimScheme === AimScheme.DUAL_ACTION_PAD) {
+  } else if (opts.aimScheme === AimScheme.DUAL_ACTION_PAD) {
     aimRows.push(rebindRow('Aim Up/Down Axis:', RebindTarget.PLAYER_AIM_AXIS_CODES, 0, true));
     aimRows.push(rebindRow('Aim Left/Right Axis:', RebindTarget.PLAYER_AIM_AXIS_CODES, 1, true));
   }
   aimRows.push(rebindRow('Fire:', RebindTarget.PLAYER_FIRE_CODE));
 
-  if (moveMode === MovementControlType.STATIC) {
+  if (opts.moveMode === MovementControlType.STATIC) {
     moveRows.push(
       rebindRow('Move Up:', RebindTarget.PLAYER_MOVE_CODES, 0),
       rebindRow('Move Down:', RebindTarget.PLAYER_MOVE_CODES, 1),
       rebindRow('Move Left:', RebindTarget.PLAYER_MOVE_CODES, 2),
       rebindRow('Move Right:', RebindTarget.PLAYER_MOVE_CODES, 3),
     );
-  } else if (moveMode === MovementControlType.RELATIVE) {
+  } else if (opts.moveMode === MovementControlType.RELATIVE) {
     moveRows.push(
       rebindRow('Forward:', RebindTarget.PLAYER_MOVE_CODES, 0),
       rebindRow('Backwards:', RebindTarget.PLAYER_MOVE_CODES, 1),
       rebindRow('Turn left:', RebindTarget.PLAYER_MOVE_CODES, 2),
       rebindRow('Turn right:', RebindTarget.PLAYER_MOVE_CODES, 3),
     );
-  } else if (moveMode === MovementControlType.DUAL_ACTION_PAD) {
+  } else if (opts.moveMode === MovementControlType.DUAL_ACTION_PAD) {
     moveRows.push(
       rebindRow('Up/Down Axis:', RebindTarget.PLAYER_MOVE_AXIS_CODES, 0, true),
       rebindRow('Left/Right Axis:', RebindTarget.PLAYER_MOVE_AXIS_CODES, 1, true),
     );
-  } else if (moveMode === MovementControlType.MOUSE_POINT_CLICK) {
+  } else if (opts.moveMode === MovementControlType.MOUSE_POINT_CLICK) {
     moveRows.push(rebindRow('Move to cursor:', RebindTarget.GLOBAL_RELOAD_CODE));
   }
 
-  if (playerIndex === 0) {
+  if (opts.playerIndex === 0) {
     miscRows.push(rebindRow('Level Up:', RebindTarget.GLOBAL_PICK_PERK_CODE));
-    if (moveMode !== MovementControlType.MOUSE_POINT_CLICK) {
+    if (opts.moveMode !== MovementControlType.MOUSE_POINT_CLICK) {
       miscRows.push(rebindRow('Reload:', RebindTarget.GLOBAL_RELOAD_CODE));
     }
   }

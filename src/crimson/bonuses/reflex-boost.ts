@@ -21,13 +21,11 @@ export function applyReflexBoost(ctx: BonusApplyCtx): void {
 }
 
 export function applyReflexBoostPickupFx(
-  state: GameplayState,
-  pickup: BonusPickupEvent,
-  detailPreset: number,
+  opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number },
 ): void {
-  state.effects.spawnRing(
-    pickup.pos,
-    detailPreset | 0,
-    new RGBA(0.6, 0.6, 1.0, 1.0),
-  );
+  opts.state.effects.spawnRing({
+    pos: opts.pickup.pos,
+    detailPreset: opts.detailPreset | 0,
+    color: new RGBA(0.6, 0.6, 1.0, 1.0),
+  });
 }

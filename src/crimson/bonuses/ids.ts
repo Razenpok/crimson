@@ -68,7 +68,8 @@ const _BONUS_FIXED_DESCRIPTIONS: Map<BonusId, string> = new Map([
   [BonusId.FIRE_BULLETS, 'For a few seconds -- make them count.'],
 ]);
 
-export function bonusDisplayName(bonusId: BonusId, preserveBugs = false): string {
+export function bonusDisplayName(bonusId: BonusId, opts: { preserveBugs?: boolean } = {}): string {
+  const preserveBugs = opts.preserveBugs ?? false;
   const entry = BONUS_BY_ID.get(bonusId);
   if (entry === undefined) return 'unknown';
   if (!preserveBugs) {
@@ -78,7 +79,8 @@ export function bonusDisplayName(bonusId: BonusId, preserveBugs = false): string
   return entry.name;
 }
 
-export function bonusDisplayDescription(bonusId: BonusId, preserveBugs = false): string | null {
+export function bonusDisplayDescription(bonusId: BonusId, opts: { preserveBugs?: boolean } = {}): string | null {
+  const preserveBugs = opts.preserveBugs ?? false;
   const entry = BONUS_BY_ID.get(bonusId);
   if (entry === undefined) return null;
   if (!preserveBugs) {
@@ -88,8 +90,9 @@ export function bonusDisplayDescription(bonusId: BonusId, preserveBugs = false):
   return entry.description;
 }
 
-export function bonusLabel(bonusId: BonusId, preserveBugs = false): string {
+export function bonusLabel(bonusId: BonusId, opts: { preserveBugs?: boolean } = {}): string {
+  const preserveBugs = opts.preserveBugs ?? false;
   const entry = BONUS_BY_ID.get(bonusId);
   if (entry === undefined) return 'unknown';
-  return bonusDisplayName(entry.bonusId, preserveBugs);
+  return bonusDisplayName(entry.bonusId, { preserveBugs });
 }

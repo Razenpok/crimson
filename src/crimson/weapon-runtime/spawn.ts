@@ -109,14 +109,15 @@ function fireBulletsActive(
 
 export function projectileSpawn(
   state: GameplayState,
-  players: readonly PlayerState[] | null,
-  pos: Vec2,
-  angle: number,
-  typeId: ProjectileTemplateId,
-  owner: OwnerRef,
-  ownerPlayerIndex: number | null = null,
-  hitsPlayers: boolean = false,
+  opts: { players: readonly PlayerState[] | null; pos: Vec2; angle: number; typeId: ProjectileTemplateId; owner: OwnerRef; ownerPlayerIndex?: number | null; hitsPlayers?: boolean },
 ): number {
+  const players = opts.players;
+  const pos = opts.pos;
+  const angle = opts.angle;
+  const typeId = opts.typeId;
+  const owner = opts.owner;
+  const ownerPlayerIndex = opts.ownerPlayerIndex ?? null;
+  const hitsPlayers = opts.hitsPlayers ?? false;
   const shotsFired = state.shotsFired as number[];
   let currentTypeId = typeId;
 
@@ -144,26 +145,27 @@ export function projectileSpawn(
   }
 
   const meta = travelBudgetForTypeId(currentTypeId);
-  return state.projectiles.spawn(
+  return state.projectiles.spawn({
     pos,
     angle,
-    currentTypeId,
+    typeId: currentTypeId,
     owner,
-    meta,
+    travelBudget: meta,
     hitsPlayers,
-  );
+  });
 }
 
 export function spawnProjectileRing(
   state: GameplayState,
   originPos: Vec2,
-  count: number,
-  angleOffset: number,
-  typeId: ProjectileTemplateId,
-  owner: OwnerRef,
-  ownerPlayerIndex: number | null = null,
-  players: readonly PlayerState[] | null = null,
+  opts: { count: number; angleOffset: number; typeId: ProjectileTemplateId; owner: OwnerRef; ownerPlayerIndex?: number | null; players?: readonly PlayerState[] | null },
 ): void {
+  const count = opts.count;
+  const angleOffset = opts.angleOffset;
+  const typeId = opts.typeId;
+  const owner = opts.owner;
+  const ownerPlayerIndex = opts.ownerPlayerIndex ?? null;
+  const players = opts.players ?? null;
   if (count <= 0) {
     return;
   }
@@ -171,12 +173,7 @@ export function spawnProjectileRing(
   for (let idx = 0; idx < count; idx++) {
     projectileSpawn(
       state,
-      players,
-      originPos,
-      idx * step + angleOffset,
-      typeId,
-      owner,
-      ownerPlayerIndex,
+      { players, pos: originPos, angle: idx * step + angleOffset, typeId, owner, ownerPlayerIndex },
     );
   }
 }

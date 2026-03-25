@@ -127,7 +127,7 @@ function damageType1Doctor(ctx: CreatureDamageCtx): void {
 function damageType1HeadingJitter(ctx: CreatureDamageCtx): void {
   const creature = ctx.creature;
   if ((creature.flags & CreatureFlags.ANIM_PING_PONG) !== 0) return;
-  const jitter = ((ctx.rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_HEADING_JITTER) & 0x7F) - 0x40) * 0.002;
+  const jitter = ((ctx.rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_HEADING_JITTER }) & 0x7F) - 0x40) * 0.002;
   const size = Math.max(1e-6, creature.size);
   let turn = jitter / (size * 0.025);
   turn = Math.min(Math.PI / 2.0, turn);
@@ -146,7 +146,7 @@ function damageType7IonGunMaster(ctx: CreatureDamageCtx): void {
 function damageType4Pyromaniac(ctx: CreatureDamageCtx): void {
   if (!anyPlayerHasPerk(ctx.players, PerkId.PYROMANIAC)) return;
   ctx.damage *= 1.5;
-  ctx.rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_PYROMANIAC);
+  ctx.rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_PYROMANIAC });
 }
 
 function damageLethalRangedShockBurst(
@@ -157,39 +157,40 @@ function damageLethalRangedShockBurst(
 ): void {
   if ((creature.flags & CreatureFlags.RANGED_ATTACK_SHOCK) === 0) return;
   for (let i = 0; i < 5; i++) {
-    const rotation = (rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_ROTATION) & 0x7F) * 0.049087387;
+    const rotation = (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_ROTATION }) & 0x7F) * 0.049087387;
     const vel = new Vec2(
-      (rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_VEL_X) & 0x7F) - 0x40,
-      (rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_VEL_Y) & 0x7F) - 0x40,
+      (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_VEL_X }) & 0x7F) - 0x40,
+      (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_VEL_Y }) & 0x7F) - 0x40,
     );
-    const scaleStep = (rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_SCALE_STEP) % 140) * 0.01 + 0.3;
+    const scaleStep = (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_SCALE_STEP }) % 140) * 0.01 + 0.3;
     if (effects === null) continue;
-    effects.spawn(
-      EffectId.BURST,
-      creature.pos,
+    effects.spawn({
+      effectId: EffectId.BURST,
+      pos: creature.pos,
       vel,
       rotation,
-      1.0,
-      36.0,
-      36.0,
-      0.0,
-      0.7,
-      0x1D,
-      new RGBA(0.8, 0.8, 0.3, 0.5),
-      0.0,
+      scale: 1.0,
+      halfWidth: 36.0,
+      halfHeight: 36.0,
+      age: 0.0,
+      lifetime: 0.7,
+      flags: 0x1D,
+      color: new RGBA(0.8, 0.8, 0.3, 0.5),
+      rotationStep: 0.0,
       scaleStep,
-      detailPreset | 0,
-    );
+      detailPreset: detailPreset | 0,
+    });
   }
 }
 
 export function resolveNativeDeathSfx(
   creature: CreatureState,
-  rng: CrandLike,
-  preserveBugs: boolean = false,
+  opts: { rng: CrandLike; preserveBugs?: boolean },
 ): SfxId[] {
+  const rng = opts.rng;
+  const preserveBugs = opts.preserveBugs ?? false;
   if ((creature.flags & CreatureFlags.RANGED_ATTACK_SHOCK) !== 0) return [];
-  const roll = rng.rand(RngCallerStatic.CREATURE_APPLY_DAMAGE_DEATH_SFX);
+  const roll = rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_DEATH_SFX });
   if (creature.typeId === CreatureTypeId.TROOPER) {
     if (preserveBugs) {
       return [TROOPER_DEATH_SFX_PRESERVE_BUGS[roll & 3]];
@@ -220,16 +221,17 @@ const CREATURE_DAMAGE_ALIVE_STEPS: Map<number, readonly CreatureDamageStep[]> = 
 
 export function creatureApplyDamage(
   creature: CreatureState,
-  damageAmount: number,
-  damageType: number,
-  impulse: Vec2,
-  owner: OwnerRef,
-  dt: number,
-  players: readonly PlayerState[],
-  rng: CrandLike,
-  effects: EffectPool | null = null,
-  detailPreset: number = 5,
+  opts: { damageAmount: number; damageType: number; impulse: Vec2; owner: OwnerRef; dt: number; players: readonly PlayerState[]; rng: CrandLike; effects?: EffectPool | null; detailPreset?: number },
 ): boolean {
+  const damageAmount = opts.damageAmount;
+  const damageType = opts.damageType;
+  const impulse = opts.impulse;
+  const owner = opts.owner;
+  const dt = opts.dt;
+  const players = opts.players;
+  const rng = opts.rng;
+  const effects = opts.effects ?? null;
+  const detailPreset = opts.detailPreset ?? 5;
   creature.lastHitOwner = owner;
   creature.hitFlashTimer = 0.2;
 
@@ -293,33 +295,26 @@ export function creatureApplyDamage(
 
 export function creatureApplyDamageWithLethalFollowup(
   creature: CreatureState,
-  damageAmount: number,
-  damageType: number,
-  impulse: Vec2,
-  owner: OwnerRef,
-  dt: number,
-  players: readonly PlayerState[],
-  rng: CrandLike,
-  preserveBugs: boolean = false,
-  effects: EffectPool | null = null,
-  detailPreset: number = 5,
-  onLethal: (sfx: SfxId[]) => void,
+  opts: { damageAmount: number; damageType: number; impulse: Vec2; owner: OwnerRef; dt: number; players: readonly PlayerState[]; rng: CrandLike; preserveBugs?: boolean; effects?: EffectPool | null; detailPreset?: number; onLethal: (sfx: SfxId[]) => void },
 ): boolean {
+  const damageAmount = opts.damageAmount;
+  const damageType = opts.damageType;
+  const impulse = opts.impulse;
+  const owner = opts.owner;
+  const dt = opts.dt;
+  const players = opts.players;
+  const rng = opts.rng;
+  const preserveBugs = opts.preserveBugs ?? false;
+  const effects = opts.effects ?? null;
+  const detailPreset = opts.detailPreset ?? 5;
+  const onLethal = opts.onLethal;
   const deathStartNeeded = creature.hp > 0.0 && creature.lifecycleStage === CREATURE_LIFECYCLE_ALIVE;
   const killed = creatureApplyDamage(
     creature,
-    damageAmount,
-    damageType | 0,
-    impulse,
-    owner,
-    dt,
-    players,
-    rng,
-    effects,
-    detailPreset | 0,
+    { damageAmount, damageType: damageType | 0, impulse, owner, dt, players, rng, effects, detailPreset: detailPreset | 0 },
   );
   if (killed && deathStartNeeded) {
-    onLethal(resolveNativeDeathSfx(creature, rng, preserveBugs));
+    onLethal(resolveNativeDeathSfx(creature, { rng, preserveBugs }));
     return true;
   }
   return false;

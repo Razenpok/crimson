@@ -162,8 +162,8 @@ export class GroundRenderer {
     this._drawView(cam, screenW, screenH, outW, outH);
   }
 
-  drawView(camera: Vec2, screenW: number, screenH: number, outW: number, outH: number): void {
-    this._drawView(camera, Math.max(1, screenW), Math.max(1, screenH), Math.max(1, outW), Math.max(1, outH));
+  drawView(camera: Vec2, opts: { screenW: number; screenH: number; outW: number; outH: number }): void {
+    this._drawView(camera, Math.max(1, opts.screenW), Math.max(1, opts.screenH), Math.max(1, opts.outW), Math.max(1, opts.outH));
   }
 
   private _drawView(camera: Vec2, screenW: number, screenH: number, outW: number, outH: number): void {

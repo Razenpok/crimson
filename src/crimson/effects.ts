@@ -98,52 +98,55 @@ export class ParticlePool {
       if (!this._entries[i].active) return i;
     }
     if (this._entries.length === 0) throw new Error('Particle pool has zero entries');
-    return this._rng.rand(caller) % this._entries.length;
+    return this._rng.rand({ caller }) % this._entries.length;
   }
 
-  spawnParticle(
-    pos: Vec2,
-    angle: number,
-    intensity = 1.0,
-    owner: OwnerRef = OwnerRef.fromLocalPlayer(0),
-  ): number {
+  spawnParticle(opts: {
+    pos: Vec2;
+    angle: number;
+    intensity?: number;
+    owner?: OwnerRef;
+  }): number {
+    const intensity = opts.intensity ?? 1.0;
+    const owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
     const idx = this._allocSlot(RngCallerStatic.FX_SPAWN_PARTICLE_ALLOC);
     const entry = this._entries[idx];
     entry.active = true;
     entry.renderFlag = true;
-    entry.pos = pos;
-    entry.vel = Vec2.fromAngle(angle).mul(90.0);
+    entry.pos = opts.pos;
+    entry.vel = Vec2.fromAngle(opts.angle).mul(90.0);
     entry.scaleX = 1.0;
     entry.scaleY = 1.0;
     entry.scaleZ = 1.0;
     entry.age = 0.0;
     entry.intensity = intensity;
-    entry.angle = angle;
-    entry.spin = (this._rng.rand(RngCallerStatic.FX_SPAWN_PARTICLE_SPIN) % 628) * 0.01;
+    entry.angle = opts.angle;
+    entry.spin = (this._rng.rand({ caller: RngCallerStatic.FX_SPAWN_PARTICLE_SPIN }) % 628) * 0.01;
     entry.styleId = ParticleStyleId.FLAMETHROWER;
     entry.targetId = -1;
     entry.owner = owner;
     return idx;
   }
 
-  spawnParticleSlow(
-    pos: Vec2,
-    angle: number,
-    owner: OwnerRef = OwnerRef.fromLocalPlayer(0),
-  ): number {
+  spawnParticleSlow(opts: {
+    pos: Vec2;
+    angle: number;
+    owner?: OwnerRef;
+  }): number {
+    const owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
     const idx = this._allocSlot(RngCallerStatic.FX_SPAWN_PARTICLE_SLOW_ALLOC);
     const entry = this._entries[idx];
     entry.active = true;
     entry.renderFlag = true;
-    entry.pos = pos;
-    entry.vel = Vec2.fromAngle(angle).mul(30.0);
+    entry.pos = opts.pos;
+    entry.vel = Vec2.fromAngle(opts.angle).mul(30.0);
     entry.scaleX = 1.0;
     entry.scaleY = 1.0;
     entry.scaleZ = 1.0;
     entry.age = 0.0;
     entry.intensity = 1.0;
-    entry.angle = angle;
-    entry.spin = (this._rng.rand(RngCallerStatic.FX_SPAWN_PARTICLE_SLOW_SPIN) % 628) * 0.01;
+    entry.angle = opts.angle;
+    entry.spin = (this._rng.rand({ caller: RngCallerStatic.FX_SPAWN_PARTICLE_SLOW_SPIN }) % 628) * 0.01;
     entry.styleId = ParticleStyleId.BUBBLEGUN;
     entry.targetId = -1;
     entry.owner = owner;
@@ -154,17 +157,20 @@ export class ParticlePool {
     return this._entries.filter((e) => e.active);
   }
 
-  update(
-    dt: number,
-    creatures: CreatureStateLike[] | null = null,
-    applyCreatureDamage: CreatureDamageApplier | null = null,
-    killCreature: CreatureKillHandler | null = null,
-    fxQueue: FxQueue | null = null,
-    spriteEffects: SpriteEffectPool | null = null,
-  ): number[] {
+  update(dt: number, opts?: {
+    creatures?: CreatureStateLike[] | null;
+    applyCreatureDamage?: CreatureDamageApplier | null;
+    killCreature?: CreatureKillHandler | null;
+    fxQueue?: FxQueue | null;
+    spriteEffects?: SpriteEffectPool | null;
+  }): number[] {
+    const creatures = opts?.creatures ?? null;
+    const killCreature = opts?.killCreature ?? null;
+    const fxQueue = opts?.fxQueue ?? null;
+    const spriteEffects = opts?.spriteEffects ?? null;
     if (dt <= 0.0) return [];
     dt = f32(dt);
-    const damageApplier = applyCreatureDamage ?? this._creatureDamageApplier;
+    const damageApplier = (opts?.applyCreatureDamage ?? null) ?? this._creatureDamageApplier;
 
     const creatureFindInRadius = (pos: Vec2, radius: number): number => {
       if (creatures === null) return -1;
@@ -237,7 +243,7 @@ export class ParticlePool {
           jitterCaller = RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_JITTER_BUBBLEGUN;
         }
         let jitter = f32(
-          (rng.rand(jitterCaller) % 100 - 50) * 0.06 * Math.max(entry.intensity, 0.0) * dt,
+          (rng.rand({ caller: jitterCaller }) % 100 - 50) * 0.06 * Math.max(entry.intensity, 0.0) * dt,
         );
         let speed: number;
         if (style === ParticleStyleId.FLAMETHROWER) {
@@ -297,7 +303,7 @@ export class ParticlePool {
 
             const bounceVelocity = Vec2.fromAngle(entry.angle).mul(82.0);
             const speedScale = f32(
-              (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_BOUNCE_SPEED_SCALE) % 10) * 0.1,
+              (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_BOUNCE_SPEED_SCALE }) % 10) * 0.1,
             );
             entry.vel = new Vec2(
               f32(bounceVelocity.x * speedScale),
@@ -322,14 +328,14 @@ export class ParticlePool {
 
             if (spriteEffects !== null && idx % 3 === 0) {
               const spriteVel = new Vec2(
-                rng.rand(RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_SPRITE_VEL_X) % 60 - 30,
-                rng.rand(RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_SPRITE_VEL_Y) % 60 - 30,
+                rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_SPRITE_VEL_X }) % 60 - 30,
+                rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_SPRITE_VEL_Y }) % 60 - 30,
               );
-              spriteEffects.spawn(creature.pos, spriteVel, 13.0, new RGBA(1.0, 1.0, 1.0, 0.7));
+              spriteEffects.spawn({ pos: creature.pos, vel: spriteVel, scale: 13.0, color: new RGBA(1.0, 1.0, 1.0, 0.7) });
             }
 
             if (fxQueue !== null) {
-              fxQueue.addRandom(creature.pos, rng);
+              fxQueue.addRandom({ pos: creature.pos, rng });
             }
 
             creature.pos = new Vec2(
@@ -373,12 +379,14 @@ export class SpriteEffectPool {
     for (const entry of this._entries) entry.active = false;
   }
 
-  spawn(
-    pos: Vec2,
-    vel: Vec2,
-    scale = 1.0,
-    color: RGBA | null = null,
-  ): number {
+  spawn(opts: {
+    pos: Vec2;
+    vel: Vec2;
+    scale?: number;
+    color?: RGBA | null;
+  }): number {
+    const scale = opts.scale ?? 1.0;
+    const color = opts.color ?? null;
     let idx: number | null = null;
     for (let i = 0; i < this._entries.length; i++) {
       if (!this._entries[i].active) {
@@ -388,15 +396,15 @@ export class SpriteEffectPool {
     }
     if (idx === null) {
       if (this._entries.length === 0) throw new Error('Sprite effect pool has zero entries');
-      idx = this._rng.rand(RngCallerStatic.FX_SPAWN_SPRITE_ALLOC) % this._entries.length;
+      idx = this._rng.rand({ caller: RngCallerStatic.FX_SPAWN_SPRITE_ALLOC }) % this._entries.length;
     }
 
     const entry = this._entries[idx];
     entry.active = true;
     entry.color = color ?? new RGBA();
-    entry.rotation = (this._rng.rand(RngCallerStatic.FX_SPAWN_SPRITE_ROTATION) % 628) * 0.01;
-    entry.pos = pos;
-    entry.vel = vel;
+    entry.rotation = (this._rng.rand({ caller: RngCallerStatic.FX_SPAWN_SPRITE_ROTATION }) % 628) * 0.01;
+    entry.pos = opts.pos;
+    entry.vel = opts.vel;
     entry.scale = scale;
     return idx;
   }
@@ -465,34 +473,34 @@ export class FxQueue {
     return this._entries.slice(0, this._count);
   }
 
-  add(
-    effectId: number,
-    pos: Vec2,
-    width: number,
-    height: number,
-    rotation: number,
-    rgba: RGBA,
-  ): boolean {
+  add(opts: {
+    effectId: number;
+    pos: Vec2;
+    width: number;
+    height: number;
+    rotation: number;
+    rgba: RGBA;
+  }): boolean {
     if (this._count >= this._maxCount) return false;
 
     const entry = this._entries[this._count];
-    entry.effectId = effectId;
-    entry.rotation = rotation;
-    entry.pos = pos;
-    entry.height = height;
-    entry.width = width;
-    entry.color = rgba;
+    entry.effectId = opts.effectId;
+    entry.rotation = opts.rotation;
+    entry.pos = opts.pos;
+    entry.height = opts.height;
+    entry.width = opts.width;
+    entry.color = opts.rgba;
     this._count++;
     return true;
   }
 
-  addRandom(pos: Vec2, rng: CrandLike): boolean {
+  addRandom(opts: { pos: Vec2; rng: CrandLike }): boolean {
     if (this.violenceDisabled !== 0) return false;
-    const gray = (rng.rand(RngCallerStatic.FX_QUEUE_ADD_RANDOM_GRAY) & 0xf) * 0.01 + 0.84;
-    const w = (rng.rand(RngCallerStatic.FX_QUEUE_ADD_RANDOM_WIDTH) % 24 - 12) + 30.0;
-    const rotation = (rng.rand(RngCallerStatic.FX_QUEUE_ADD_RANDOM_ROTATION) % 628) * 0.01;
-    const effectId = (rng.rand(RngCallerStatic.FX_QUEUE_ADD_RANDOM_EFFECT_ID) % 5) + 3;
-    return this.add(effectId, pos, w, w, rotation, new RGBA(gray, gray, gray, 1.0));
+    const gray = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_GRAY }) & 0xf) * 0.01 + 0.84;
+    const w = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_WIDTH }) % 24 - 12) + 30.0;
+    const rotation = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_ROTATION }) % 628) * 0.01;
+    const effectId = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_EFFECT_ID }) % 5) + 3;
+    return this.add({ effectId, pos: opts.pos, width: w, height: w, rotation, rgba: new RGBA(gray, gray, gray, 1.0) });
   }
 }
 
@@ -537,19 +545,21 @@ export class FxQueueRotated {
     return this._entries.slice(0, this._count);
   }
 
-  add(
-    topLeft: Vec2,
-    rgba: RGBA,
-    rotation: number,
-    scale: number,
-    creatureTypeId: number,
-    terrainBodiesTransparency = 0.0,
-    terrainTextureFailed = false,
-  ): boolean {
+  add(opts: {
+    topLeft: Vec2;
+    rgba: RGBA;
+    rotation: number;
+    scale: number;
+    creatureTypeId: number;
+    terrainBodiesTransparency?: number;
+    terrainTextureFailed?: boolean;
+  }): boolean {
+    const terrainBodiesTransparency = opts.terrainBodiesTransparency ?? 0.0;
+    const terrainTextureFailed = opts.terrainTextureFailed ?? false;
     if (terrainTextureFailed) return false;
     if (this._count >= this._maxCount) return false;
 
-    let a = rgba.a;
+    let a = opts.rgba.a;
     if (terrainBodiesTransparency !== 0.0) {
       a = a / terrainBodiesTransparency;
     } else {
@@ -557,11 +567,11 @@ export class FxQueueRotated {
     }
 
     const entry = this._entries[this._count];
-    entry.topLeft = topLeft;
-    entry.color = rgba.withAlpha(a);
-    entry.rotation = rotation;
-    entry.scale = scale;
-    entry.creatureTypeId = creatureTypeId;
+    entry.topLeft = opts.topLeft;
+    entry.color = opts.rgba.withAlpha(a);
+    entry.rotation = opts.rotation;
+    entry.scale = opts.scale;
+    entry.creatureTypeId = opts.creatureTypeId;
 
     this._count++;
     return true;
@@ -631,39 +641,39 @@ export class EffectPool {
     return idx;
   }
 
-  spawn(
-    effectId: number,
-    pos: Vec2,
-    vel: Vec2,
-    rotation: number,
-    scale: number,
-    halfWidth: number,
-    halfHeight: number,
-    age: number,
-    lifetime: number,
-    flags: number,
-    color: RGBA,
-    rotationStep: number,
-    scaleStep: number,
-    detailPreset: number,
-  ): number | null {
-    const idx = this._allocSlot(detailPreset);
+  spawn(opts: {
+    effectId: number;
+    pos: Vec2;
+    vel: Vec2;
+    rotation: number;
+    scale: number;
+    halfWidth: number;
+    halfHeight: number;
+    age: number;
+    lifetime: number;
+    flags: number;
+    color: RGBA;
+    rotationStep: number;
+    scaleStep: number;
+    detailPreset: number;
+  }): number | null {
+    const idx = this._allocSlot(opts.detailPreset);
     if (idx === null) return null;
 
     const entry = this._entries[idx];
-    entry.pos = pos;
-    entry.effectId = effectId;
-    entry.vel = vel;
-    entry.rotation = rotation;
-    entry.scale = scale;
-    entry.halfWidth = halfWidth;
-    entry.halfHeight = halfHeight;
-    entry.age = age;
-    entry.lifetime = lifetime;
-    entry.flags = flags;
-    entry.color = color;
-    entry.rotationStep = rotationStep;
-    entry.scaleStep = scaleStep;
+    entry.pos = opts.pos;
+    entry.effectId = opts.effectId;
+    entry.vel = opts.vel;
+    entry.rotation = opts.rotation;
+    entry.scale = opts.scale;
+    entry.halfWidth = opts.halfWidth;
+    entry.halfHeight = opts.halfHeight;
+    entry.age = opts.age;
+    entry.lifetime = opts.lifetime;
+    entry.flags = opts.flags;
+    entry.color = opts.color;
+    entry.rotationStep = opts.rotationStep;
+    entry.scaleStep = opts.scaleStep;
     return idx;
   }
 
@@ -673,7 +683,8 @@ export class EffectPool {
     this._free.push(idx);
   }
 
-  update(dt: number, fxQueue: FxQueue | null = null): void {
+  update(dt: number, opts?: { fxQueue?: FxQueue | null }): void {
+    const fxQueue = opts?.fxQueue ?? null;
     if (dt <= 0.0) return;
 
     for (let idx = 0; idx < this._entries.length; idx++) {
@@ -700,117 +711,124 @@ export class EffectPool {
 
       if (fxQueue !== null && (flags & 0x80)) {
         const alpha = (flags & 0x100) ? 0.35 : 0.8;
-        fxQueue.add(
-          entry.effectId,
-          entry.pos,
-          entry.halfWidth * 2.0,
-          entry.halfHeight * 2.0,
-          entry.rotation,
-          entry.color.withAlpha(alpha),
-        );
+        fxQueue.add({
+          effectId: entry.effectId,
+          pos: entry.pos,
+          width: entry.halfWidth * 2.0,
+          height: entry.halfHeight * 2.0,
+          rotation: entry.rotation,
+          rgba: entry.color.withAlpha(alpha),
+        });
       }
 
       this.free(idx);
     }
   }
 
-  spawnShellCasing(
-    pos: Vec2,
-    aimHeading: number,
-    draws: [number, number, number, number],
-    detailPreset: number,
-  ): void {
-    const [angleDraw, speedDraw, rotationDraw, rotationStepDraw] = draws;
+  spawnShellCasing(opts: {
+    pos: Vec2;
+    aimHeading: number;
+    draws: [number, number, number, number];
+    detailPreset: number;
+  }): void {
+    const [angleDraw, speedDraw, rotationDraw, rotationStepDraw] = opts.draws;
 
-    const angle = aimHeading + (angleDraw & 0x3f) * 0.01;
+    const angle = opts.aimHeading + (angleDraw & 0x3f) * 0.01;
     const speed = (speedDraw & 0x3f) * 0.022727273 + 1.0;
     const velocity = Vec2.fromAngle(angle).mul(speed * 100.0);
 
     const rotation = ((rotationDraw & 0x3f) - 0x20) * 0.1;
     const rotationStep = ((rotationStepDraw % 20) * 0.1 - 1.0) * 14.0;
 
-    this.spawn(
-      EffectId.CASING, pos, velocity, rotation, 1.0,
-      2.0, 2.0, 0.0, 0.15, 0x1c5,
-      new RGBA(1.0, 1.0, 1.0, 0.6), rotationStep, 0.0, detailPreset,
-    );
+    this.spawn({
+      effectId: EffectId.CASING, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
+      halfWidth: 2.0, halfHeight: 2.0, age: 0.0, lifetime: 0.15, flags: 0x1c5,
+      color: new RGBA(1.0, 1.0, 1.0, 0.6), rotationStep, scaleStep: 0.0, detailPreset: opts.detailPreset,
+    });
   }
 
-  spawnBloodSplatter(
-    pos: Vec2,
-    angle: number,
-    age: number,
-    rng: CrandLike,
-    detailPreset: number,
-    violenceDisabled: number,
-  ): void {
-    if (violenceDisabled !== 0) return;
+  spawnBloodSplatter(opts: {
+    pos: Vec2;
+    angle: number;
+    age: number;
+    rng: CrandLike;
+    detailPreset: number;
+    violenceDisabled: number;
+  }): void {
+    if (opts.violenceDisabled !== 0) return;
 
-    const lifetime = 0.25 - age;
-    const base = angle + Math.PI;
+    const lifetime = 0.25 - opts.age;
+    const base = opts.angle + Math.PI;
     const direction = Vec2.fromAngle(base);
 
     for (let i = 0; i < 2; i++) {
-      const r0 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_ROTATION);
+      const r0 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_ROTATION });
       const rotation = ((r0 & 0x3f) - 0x20) * 0.1 + base;
-      const r1 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_HALF);
+      const r1 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_HALF });
       const half = (r1 & 7) + 1;
-      const r2 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_SPEED_X);
+      const r2 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_SPEED_X });
       const speedX = (r2 & 0x3f) + 100;
-      const r3 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_SPEED_Y);
+      const r3 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_SPEED_Y });
       const speedY = (r3 & 0x3f) + 100;
       const velocity = new Vec2(direction.x * speedX, direction.y * speedY);
-      const r4 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_SCALE_STEP);
+      const r4 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BLOOD_SPLATTER_SCALE_STEP });
       const scaleStep = (r4 & 0x7f) * 0.03 + 0.1;
 
-      this.spawn(
-        EffectId.BLOOD_SPLATTER, pos, velocity, rotation, 1.0,
-        half, half, age, lifetime, 0xc9,
-        new RGBA(1.0, 1.0, 1.0, 0.5), 0.0, scaleStep, detailPreset,
-      );
+      this.spawn({
+        effectId: EffectId.BLOOD_SPLATTER, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
+        halfWidth: half, halfHeight: half, age: opts.age, lifetime, flags: 0xc9,
+        color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep: 0.0, scaleStep, detailPreset: opts.detailPreset,
+      });
     }
   }
 
-  spawnBurst(
-    pos: Vec2,
-    count: number,
-    rng: CrandLike,
-    detailPreset: number,
-    lifetime = 0.5,
-    scaleStep: number | null = null,
-    color: RGBA = new RGBA(0.4, 0.5, 1.0, 0.5),
-  ): void {
-    count = Math.max(0, count);
+  spawnBurst(opts: {
+    pos: Vec2;
+    count: number;
+    rng: CrandLike;
+    detailPreset: number;
+    lifetime?: number;
+    scaleStep?: number | null;
+    color?: RGBA;
+  }): void {
+    const lifetime = opts.lifetime ?? 0.5;
+    const scaleStep = opts.scaleStep ?? null;
+    const color = opts.color ?? new RGBA(0.4, 0.5, 1.0, 0.5);
+    const count = Math.max(0, opts.count);
     for (let i = 0; i < count; i++) {
-      const r0 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BURST_ROTATION);
-      const r1 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BURST_VEL_X);
-      const r2 = rng.rand(RngCallerStatic.EFFECT_SPAWN_BURST_VEL_Y);
+      const r0 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BURST_ROTATION });
+      const r1 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BURST_VEL_X });
+      const r2 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BURST_VEL_Y });
       let sampledScaleStep: number | null = null;
       if (scaleStep === null) {
-        sampledScaleStep = rng.rand(RngCallerStatic.EFFECT_SPAWN_BURST_SCALE_STEP);
+        sampledScaleStep = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BURST_SCALE_STEP });
       }
 
-      this.spawnBurstParticle(
-        pos, r0, r1, r2, sampledScaleStep, scaleStep, lifetime, color, detailPreset,
-      );
+      this.spawnBurstParticle({
+        pos: opts.pos, rotationDraw: r0, velXDraw: r1, velYDraw: r2, scaleStepDraw: sampledScaleStep, scaleStep, lifetime, color, detailPreset: opts.detailPreset,
+      });
     }
   }
 
-  spawnBurstParticle(
-    pos: Vec2,
-    rotationDraw: number,
-    velXDraw: number,
-    velYDraw: number,
-    scaleStepDraw: number | null = null,
-    scaleStep: number | null = null,
-    lifetime: number = 0.5,
-    color: RGBA = new RGBA(0.4, 0.5, 1.0, 0.5),
-    detailPreset: number = 5,
-  ): void {
-    const rotation = (rotationDraw & 0x7f) * 0.049087387;
+  spawnBurstParticle(opts: {
+    pos: Vec2;
+    rotationDraw: number;
+    velXDraw: number;
+    velYDraw: number;
+    scaleStepDraw?: number | null;
+    scaleStep?: number | null;
+    lifetime?: number;
+    color?: RGBA;
+    detailPreset: number;
+  }): void {
+    const scaleStepDraw = opts.scaleStepDraw ?? null;
+    const scaleStep = opts.scaleStep ?? null;
+    const lifetime = opts.lifetime ?? 0.5;
+    const color = opts.color ?? new RGBA(0.4, 0.5, 1.0, 0.5);
+    const rotation = (opts.rotationDraw & 0x7f) * 0.049087387;
     const velocity = new Vec2(
-      (velXDraw & 0x7f) - 0x40,
-      (velYDraw & 0x7f) - 0x40,
+      (opts.velXDraw & 0x7f) - 0x40,
+      (opts.velYDraw & 0x7f) - 0x40,
     );
     let step: number;
     if (scaleStep === null) {
@@ -819,136 +837,138 @@ export class EffectPool {
       step = scaleStep;
     }
 
-    this.spawn(
-      EffectId.BURST, pos, velocity, rotation, 1.0,
-      32.0, 32.0, 0.0, lifetime, 0x1d,
-      color, 0.0, step, detailPreset,
-    );
+    this.spawn({
+      effectId: EffectId.BURST, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
+      halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime, flags: 0x1d,
+      color, rotationStep: 0.0, scaleStep: step, detailPreset: opts.detailPreset,
+    });
   }
 
-  spawnRing(
-    pos: Vec2,
-    detailPreset: number,
-    color: RGBA,
-    lifetime = 0.25,
-    scaleStep = 50.0,
-  ): void {
-    this.spawn(
-      EffectId.RING, pos, new Vec2(), 0.0, 1.0,
-      32.0, 32.0, 0.0, lifetime, 0x19,
-      color, 0.0, scaleStep, detailPreset,
-    );
+  spawnRing(opts: {
+    pos: Vec2;
+    detailPreset: number;
+    color: RGBA;
+    lifetime?: number;
+    scaleStep?: number;
+  }): void {
+    const lifetime = opts.lifetime ?? 0.25;
+    const scaleStep = opts.scaleStep ?? 50.0;
+    this.spawn({
+      effectId: EffectId.RING, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
+      halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime, flags: 0x19,
+      color: opts.color, rotationStep: 0.0, scaleStep, detailPreset: opts.detailPreset,
+    });
   }
 
-  spawnFreezeShard(
-    pos: Vec2,
-    angle: number,
-    rng: CrandLike,
-    detailPreset: number,
-  ): void {
-    const lifetime = (rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_LIFETIME) & 0xf) * 0.01 + 0.2;
-    const base = angle + Math.PI;
+  spawnFreezeShard(opts: {
+    pos: Vec2;
+    angle: number;
+    rng: CrandLike;
+    detailPreset: number;
+  }): void {
+    const lifetime = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_LIFETIME }) & 0xf) * 0.01 + 0.2;
+    const base = opts.angle + Math.PI;
 
-    const rotation = (rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_ROTATION) % 100) * 0.01 + base;
-    const half = (rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_HALF) % 5) + 7;
+    const rotation = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_ROTATION }) % 100) * 0.01 + base;
+    const half = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_HALF }) % 5) + 7;
 
     const velocity = Vec2.fromAngle(base).mul(114.0);
 
-    const rotationStep = ((rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_ROTATION_STEP) % 20) * 0.1 - 1.0) * 4.0;
-    const scaleStep = -(rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_SCALE_STEP) & 0xf) * 0.1;
+    const rotationStep = ((opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_ROTATION_STEP }) % 20) * 0.1 - 1.0) * 4.0;
+    const scaleStep = -(opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_SCALE_STEP }) & 0xf) * 0.1;
 
-    const effectId = (rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_EFFECT_ID) % 3) + 8;
-    this.spawn(
-      effectId, pos, velocity, rotation, 1.0,
-      half, half, 0.0, lifetime, 0x1cd,
-      new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep, detailPreset,
-    );
+    const effectId = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_EFFECT_ID }) % 3) + 8;
+    this.spawn({
+      effectId, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
+      halfWidth: half, halfHeight: half, age: 0.0, lifetime, flags: 0x1cd,
+      color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep, detailPreset: opts.detailPreset,
+    });
   }
 
-  spawnFreezeShatter(
-    pos: Vec2,
-    angle: number,
-    rng: CrandLike,
-    detailPreset: number,
-  ): void {
+  spawnFreezeShatter(opts: {
+    pos: Vec2;
+    angle: number;
+    rng: CrandLike;
+    detailPreset: number;
+  }): void {
     const lifetime = 1.1;
     for (let i = 0; i < 4; i++) {
-      const rotation = i * (Math.PI / 2.0) + angle;
+      const rotation = i * (Math.PI / 2.0) + opts.angle;
       const velocity = Vec2.fromAngle(rotation).mul(42.0);
-      const half = (rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_HALF) % 10) + 18;
-      const rotationStep = ((rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_ROTATION_STEP) % 20) * 0.1 - 1.0) * 1.9;
+      const half = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_HALF }) % 10) + 18;
+      const rotationStep = ((opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_ROTATION_STEP }) % 20) * 0.1 - 1.0) * 1.9;
 
-      this.spawn(
-        EffectId.FREEZE_SHATTER, pos, velocity, rotation, 1.0,
-        half, half, 0.0, lifetime, 0x5d,
-        new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, 0.0, detailPreset,
-      );
+      this.spawn({
+        effectId: EffectId.FREEZE_SHATTER, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
+        halfWidth: half, halfHeight: half, age: 0.0, lifetime, flags: 0x5d,
+        color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep: 0.0, detailPreset: opts.detailPreset,
+      });
     }
 
     for (let i = 0; i < 4; i++) {
-      const shardAngle = (rng.rand(RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_SHARD_ANGLE) % 612) * 0.01;
-      this.spawnFreezeShard(pos, shardAngle, rng, detailPreset);
+      const shardAngle = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_SHARD_ANGLE }) % 612) * 0.01;
+      this.spawnFreezeShard({ pos: opts.pos, angle: shardAngle, rng: opts.rng, detailPreset: opts.detailPreset });
     }
   }
 
-  spawnExplosionBurst(
-    pos: Vec2,
-    scale: number,
-    rng: CrandLike,
-    detailPreset: number,
-  ): void {
+  spawnExplosionBurst(opts: {
+    pos: Vec2;
+    scale: number;
+    rng: CrandLike;
+    detailPreset: number;
+  }): void {
     // Shockwave ring.
-    this.spawn(
-      EffectId.RING, pos, new Vec2(), 0.0, 1.0,
-      32.0, 32.0, -0.1, 0.35, 0x19,
-      new RGBA(0.6, 0.6, 0.6, 1.0), 0.0, scale * 25.0, detailPreset,
-    );
+    this.spawn({
+      effectId: EffectId.RING, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
+      halfWidth: 32.0, halfHeight: 32.0, age: -0.1, lifetime: 0.35, flags: 0x19,
+      color: new RGBA(0.6, 0.6, 0.6, 1.0), rotationStep: 0.0, scaleStep: opts.scale * 25.0, detailPreset: opts.detailPreset,
+    });
 
     // Dark explosion puffs (high detail only).
-    if (detailPreset > 3) {
+    if (opts.detailPreset > 3) {
       for (let i = 0; i < 2; i++) {
         const puffAge = i * 0.2 - 0.5;
         const puffLifetime = i * 0.2 + 0.6;
         const puffRotation =
-          (rng.rand(RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_PUFF_ROTATION) % 614) * 0.02;
-        this.spawn(
-          EffectId.EXPLOSION_PUFF, pos, new Vec2(), puffRotation, 1.0,
-          32.0, 32.0, puffAge, puffLifetime, 0x5d,
-          new RGBA(0.1, 0.1, 0.1, 1.0), 1.4, scale * 5.0, detailPreset,
-        );
+          (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_PUFF_ROTATION }) % 614) * 0.02;
+        this.spawn({
+          effectId: EffectId.EXPLOSION_PUFF, pos: opts.pos, vel: new Vec2(), rotation: puffRotation, scale: 1.0,
+          halfWidth: 32.0, halfHeight: 32.0, age: puffAge, lifetime: puffLifetime, flags: 0x5d,
+          color: new RGBA(0.1, 0.1, 0.1, 1.0), rotationStep: 1.4, scaleStep: opts.scale * 5.0, detailPreset: opts.detailPreset,
+        });
       }
     }
 
     // Bright flash.
-    this.spawn(
-      EffectId.BURST, pos, new Vec2(), 0.0, 1.0,
-      32.0, 32.0, 0.0, 0.3, 0x19,
-      new RGBA(1.0, 1.0, 1.0, 1.0), 0.0, scale * 45.0, detailPreset,
-    );
+    this.spawn({
+      effectId: EffectId.BURST, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
+      halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime: 0.3, flags: 0x19,
+      color: new RGBA(1.0, 1.0, 1.0, 1.0), rotationStep: 0.0, scaleStep: opts.scale * 45.0, detailPreset: opts.detailPreset,
+    });
 
     let count: number;
-    if (detailPreset < 2) {
+    if (opts.detailPreset < 2) {
       count = 1;
     } else {
-      count = 3 + (detailPreset > 3 ? 1 : 0);
+      count = 3 + (opts.detailPreset > 3 ? 1 : 0);
     }
 
     for (let i = 0; i < count; i++) {
       const rotation =
-        (rng.rand(RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_ROTATION) % 314) * 0.02;
+        (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_ROTATION }) % 314) * 0.02;
       const velocity = new Vec2(
-        (rng.rand(RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_VEL_X) & 0x3f) * 2 - 0x40,
-        (rng.rand(RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_VEL_Y) & 0x3f) * 2 - 0x40,
+        (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_VEL_X }) & 0x3f) * 2 - 0x40,
+        (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_VEL_Y }) & 0x3f) * 2 - 0x40,
       );
       const burstScaleStep =
-        ((rng.rand(RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_SCALE_STEP) - 3) & 7) * scale;
+        ((opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_SCALE_STEP }) - 3) & 7) * opts.scale;
       const rotStep =
-        (rng.rand(RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_ROTATION_STEP) + 3) & 7;
-      this.spawn(
-        EffectId.EXPLOSION_BURST, pos, velocity, rotation, 1.0,
-        32.0, 32.0, 0.0, 0.7, 0x1d,
-        new RGBA(1.0, 1.0, 1.0, 1.0), rotStep, burstScaleStep, detailPreset,
-      );
+        (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_ROTATION_STEP }) + 3) & 7;
+      this.spawn({
+        effectId: EffectId.EXPLOSION_BURST, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
+        halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime: 0.7, flags: 0x1d,
+        color: new RGBA(1.0, 1.0, 1.0, 1.0), rotationStep: rotStep, scaleStep: burstScaleStep, detailPreset: opts.detailPreset,
+      });
     }
   }
 }

@@ -128,7 +128,7 @@ export class DemoTrialOverlayUi {
     });
     const gap = 20.0;
     const rowW = btnW * 2.0 + gap;
-    const buttonBasePos = panelPos.offset(256.0 - rowW * 0.5, 214.0);
+    const buttonBasePos = panelPos.offset({ dx: 256.0 - rowW * 0.5, dy: 214.0 });
 
     const purchaseClicked = buttonUpdate(this._purchaseButton, {
       pos: buttonBasePos,
@@ -138,7 +138,7 @@ export class DemoTrialOverlayUi {
       click,
     });
     const maybeClicked = buttonUpdate(this._maybeLaterButton, {
-      pos: buttonBasePos.offset(btnW + gap),
+      pos: buttonBasePos.offset({ dx: btnW + gap }),
       width: btnW,
       dtMs: dt,
       mouse,
@@ -216,7 +216,7 @@ export class DemoTrialOverlayUi {
     });
     const gap = 20.0;
     const rowW = btnW * 2.0 + gap;
-    const buttonBasePos = panelPos.offset(256.0 - rowW * 0.5, 214.0);
+    const buttonBasePos = panelPos.offset({ dx: 256.0 - rowW * 0.5, dy: 214.0 });
 
     buttonDraw(this._resources, this._purchaseButton, {
       pos: buttonBasePos,
@@ -224,7 +224,7 @@ export class DemoTrialOverlayUi {
       scale,
     });
     buttonDraw(this._resources, this._maybeLaterButton, {
-      pos: buttonBasePos.offset(btnW + gap),
+      pos: buttonBasePos.offset({ dx: btnW + gap }),
       width: btnW,
       scale,
     });
@@ -235,8 +235,7 @@ export class DemoTrialOverlayUi {
     drawMenuCursor(
       particlesTex,
       cursorTex,
-      new Vec2(mouseX, mouseY),
-      this._cursorPulseTime,
+      { pos: new Vec2(mouseX, mouseY), pulseTime: this._cursorPulseTime },
     );
   }
 }

@@ -25,8 +25,8 @@ export class PerkPromptState {
     this.pulse = 0.0;
   }
 
-  resetIfPending(pendingCount: number): void {
-    if (Math.floor(pendingCount) > 0) {
+  resetIfPending(opts: { pendingCount: number }): void {
+    if (Math.floor(opts.pendingCount) > 0) {
       this.reset();
     }
   }
@@ -60,10 +60,9 @@ export class PerkPromptState {
       return false;
     }
 
-    const label = PerkPromptUi.label(config, Math.floor(pendingCount));
+    const label = PerkPromptUi.label(config, { pendingCount: Math.floor(pendingCount) });
     if (label) {
-      const screenW = ctx.screenW ?? 1024;
-      const rect = PerkPromptUi.rect(ctx.resources, screenW, promptScale);
+      const rect = PerkPromptUi.rect({ resources: ctx.resources, scale: promptScale });
       this.hover = rect.contains(ctx.mouse);
     }
 
@@ -121,7 +120,7 @@ export class PerkPromptState {
     if (Math.floor(pendingCount) <= 0) {
       return;
     }
-    const label = PerkPromptUi.label(config, Math.floor(pendingCount));
+    const label = PerkPromptUi.label(config, { pendingCount: Math.floor(pendingCount) });
     if (!label) {
       return;
     }
@@ -139,7 +138,7 @@ export class PerkPromptState {
   private _promptOpenRequested(config: CrimsonConfig, playerCount: number): boolean {
     const fireKey = config.controls.players[0].fireCode;
     const pickKey = config.controls.pickPerkCode;
-    if (inputCodeIsPressed(pickKey, 0) && !inputCodeIsDown(fireKey, 0)) {
+    if (inputCodeIsPressed(pickKey, { playerIndex: 0 }) && !inputCodeIsDown(fireKey, { playerIndex: 0 })) {
       return true;
     }
     const fireCodes = [
@@ -148,6 +147,6 @@ export class PerkPromptState {
       config.controls.players[2].fireCode,
       config.controls.players[3].fireCode,
     ];
-    return this.hover && inputPrimaryJustPressed(fireCodes, playerCount);
+    return this.hover && inputPrimaryJustPressed({ fireCodes, playerCount });
   }
 }

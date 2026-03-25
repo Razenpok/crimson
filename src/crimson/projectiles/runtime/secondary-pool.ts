@@ -529,14 +529,14 @@ export class SecondaryProjectilePool {
         const scale = entry.detonationScale;
         if (t > 1.0) {
           if (fxQueue !== null) {
-            fxQueue.add(
-              EffectId.AURA,
-              entry.pos,
-              scale * 256.0,
-              scale * 256.0,
-              0.0,
-              new RGBA(0.0, 0.0, 0.0, 0.25),
-            );
+            fxQueue.add({
+              effectId: EffectId.AURA,
+              pos: entry.pos,
+              width: scale * 256.0,
+              height: scale * 256.0,
+              rotation: 0.0,
+              rgba: new RGBA(0.0, 0.0, 0.0, 0.25),
+            });
           }
           entry.active = false;
         }
@@ -562,8 +562,8 @@ export class SecondaryProjectilePool {
             creatureSpatial.syncIndex(creatureIdx | 0);
             if (onDetonationKill !== null && hpBefore > 0.0 && creature.hp <= 0.0) {
               if (fxQueue !== null) {
-                fxQueue.addRandom(creature.pos, rng);
-                fxQueue.addRandom(creature.pos, rng);
+                fxQueue.addRandom({ pos: creature.pos, rng });
+                fxQueue.addRandom({ pos: creature.pos, rng });
               }
               onDetonationKill(creatureIdx | 0);
             }
@@ -626,12 +626,12 @@ export class SecondaryProjectilePool {
         const spawnPos = entry.pos.sub(direction.mul(9.0));
         const trailVelocity = Vec2.fromHeading(entry.angle + Math.PI).mul(90.0);
         if (spriteEffects !== null) {
-          spriteEffects.spawn(
-            spawnPos,
-            trailVelocity,
-            14.0,
-            new RGBA(1.0, 1.0, 1.0, 0.25),
-          );
+          spriteEffects.spawn({
+            pos: spawnPos,
+            vel: trailVelocity,
+            scale: 14.0,
+            color: new RGBA(1.0, 1.0, 1.0, 0.25),
+          });
         }
         entry.trailTimer = f32(0.06);
       }
@@ -703,35 +703,35 @@ export class SecondaryProjectilePool {
         if (freezeActive) {
           if (effects !== null) {
             for (let i = 0; i < 4; i++) {
-              const shardAngle = (rng.rand(RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_PRE_HIT_FREEZE_SHARD_ANGLE) % 612) * 0.01;
-              effects.spawnFreezeShard(
-                entry.pos,
-                shardAngle,
+              const shardAngle = (rng.rand({ caller: RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_PRE_HIT_FREEZE_SHARD_ANGLE }) % 612) * 0.01;
+              effects.spawnFreezeShard({
+                pos: entry.pos,
+                angle: shardAngle,
                 rng,
-                detailPreset | 0,
-              );
+                detailPreset: detailPreset | 0,
+              });
             }
           }
         } else if (fxQueue !== null) {
           for (const [dxCaller, dyCaller] of _SECONDARY_PRE_HIT_DECAL_CALLERS) {
             const offset = new Vec2(
-              (rng.rand(dxCaller) % 20 - 10),
-              (rng.rand(dyCaller) % 20 - 10),
+              (rng.rand({ caller: dxCaller }) % 20 - 10),
+              (rng.rand({ caller: dyCaller }) % 20 - 10),
             );
-            fxQueue.addRandom(
-              creatures[hitIdx].pos.add(offset),
+            fxQueue.addRandom({
+              pos: creatures[hitIdx].pos.add(offset),
               rng,
-            );
+            });
           }
         }
 
         if (burstScale !== null && effects !== null && (detailPreset | 0) > (burstMinDetail | 0)) {
-          effects.spawnExplosionBurst(
-            entry.pos,
-            burstScale,
+          effects.spawnExplosionBurst({
+            pos: entry.pos,
+            scale: burstScale,
             rng,
-            detailPreset | 0,
-          );
+            detailPreset: detailPreset | 0,
+          });
         }
 
         const damage = entry.speed * damageSpeedMul + damageBase;
@@ -762,13 +762,13 @@ export class SecondaryProjectilePool {
               shardPos = creatures[hitIdx].pos;
             }
             for (let i = 0; i < 8; i++) {
-              const shardAngle = (rng.rand(freezeAngleCaller) % 612) * 0.01;
-              effects.spawnFreezeShard(
-                shardPos,
-                shardAngle,
+              const shardAngle = (rng.rand({ caller: freezeAngleCaller }) % 612) * 0.01;
+              effects.spawnFreezeShard({
+                pos: shardPos,
+                angle: shardAngle,
                 rng,
-                detailPreset | 0,
-              );
+                detailPreset: detailPreset | 0,
+              });
             }
           }
         } else {
@@ -784,17 +784,17 @@ export class SecondaryProjectilePool {
               radiusCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_MINIGUN_DECAL_RADIUS;
             }
             for (let i = 0; i < (extraDecals | 0); i++) {
-              const angle = (rng.rand(angleCaller) % 628) * 0.01;
+              const angle = (rng.rand({ caller: angleCaller }) % 628) * 0.01;
               let radius: number;
               if (rule.tag === 'homing_rocket') {
-                radius = rng.rand(radiusCaller) & 0x3F;
+                radius = rng.rand({ caller: radiusCaller }) & 0x3F;
               } else {
-                radius = rng.rand(radiusCaller) % Math.max(1, extraRadius | 0);
+                radius = rng.rand({ caller: radiusCaller }) % Math.max(1, extraRadius | 0);
               }
-              fxQueue.addRandom(
-                center.add(Vec2.fromAngle(angle).mul(radius)),
+              fxQueue.addRandom({
+                pos: center.add(Vec2.fromAngle(angle).mul(radius)),
                 rng,
-              );
+              });
             }
           }
         }
@@ -802,15 +802,15 @@ export class SecondaryProjectilePool {
         if (spriteEffects !== null) {
           const step = Math.PI * 2.0 / 10.0;
           for (let idx = 0; idx < 10; idx++) {
-            const mag = (rng.rand(RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_DETONATION_SPRITE_MAG) % 800) * 0.1;
+            const mag = (rng.rand({ caller: RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_DETONATION_SPRITE_MAG }) % 800) * 0.1;
             const ang = idx * step;
             const velocity = Vec2.fromAngle(ang).mul(mag);
-            spriteEffects.spawn(
-              entry.pos,
-              velocity,
-              14.0,
-              new RGBA(1.0, 1.0, 1.0, 0.37),
-            );
+            spriteEffects.spawn({
+              pos: entry.pos,
+              vel: velocity,
+              scale: 14.0,
+              color: new RGBA(1.0, 1.0, 1.0, 0.37),
+            });
           }
         }
 

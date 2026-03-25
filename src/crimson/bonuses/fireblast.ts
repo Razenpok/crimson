@@ -15,12 +15,7 @@ export function applyFireblast(ctx: BonusApplyCtx): void {
   spawnProjectileRing(
     ctx.state,
     origin,
-    16,
-    0.0,
-    ProjectileTemplateId.PLASMA_RIFLE,
-    owner,
-    ctx.player.index,
-    ctx.players,
+    { count: 16, angleOffset: 0.0, typeId: ProjectileTemplateId.PLASMA_RIFLE, owner, ownerPlayerIndex: ctx.player.index, players: ctx.players },
   );
   ctx.state.bonusSpawnGuard = false;
   ctx.state.sfxQueue.push(SfxId.EXPLOSION_MEDIUM);

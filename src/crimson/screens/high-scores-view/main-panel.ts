@@ -191,7 +191,7 @@ export function drawMainPanel(
   buttonDraw(resources, view.updateButton, { pos: buttonBasePos, width: w, scale });
 
   w = buttonWidth(resources, view.playButton.label, { scale, forceWide: view.playButton.forceWide });
-  buttonDraw(resources, view.playButton, { pos: buttonBasePos.offset(0.0, HS_BUTTON_STEP_Y * scale), width: w, scale });
+  buttonDraw(resources, view.playButton, { pos: buttonBasePos.offset({ dx: 0.0, dy: HS_BUTTON_STEP_Y * scale }), width: w, scale });
 
   w = buttonWidth(resources, view.backButton.label, { scale, forceWide: view.backButton.forceWide });
   buttonDraw(resources, view.backButton, {

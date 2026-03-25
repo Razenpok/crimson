@@ -12,8 +12,8 @@ export function clampShots(fired: number, hit: number): [number, number] {
   return [fired, hit];
 }
 
-export function shotsFromState(state: GameplayState, playerIndex: number): [number, number] {
-  const index = Math.floor(playerIndex);
+export function shotsFromState(state: GameplayState, opts: { playerIndex: number }): [number, number] {
+  const index = Math.floor(opts.playerIndex);
   if (index < 0 || index >= state.shotsFired.length || index >= state.shotsHit.length) {
     return [0, 0];
   }
@@ -43,15 +43,14 @@ export function buildHighscoreRecordForGameOver(opts: {
 
   const weaponId = mostUsedWeaponIdForPlayer(
     state,
-    Math.floor(player.index),
-    player.weapon.weaponId,
+    { playerIndex: Math.floor(player.index), fallbackWeaponId: player.weapon.weaponId },
   );
 
   let fired: number;
   let hit: number;
 
   if (opts.shotsFired == null || opts.shotsHit == null) {
-    [fired, hit] = shotsFromState(state, Math.floor(player.index));
+    [fired, hit] = shotsFromState(state, { playerIndex: Math.floor(player.index) });
   } else {
     fired = Math.floor(opts.shotsFired);
     hit = Math.floor(opts.shotsHit);

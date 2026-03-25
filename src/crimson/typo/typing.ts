@@ -23,12 +23,12 @@ export class TypingBuffer {
     this.text += ch[0];
   }
 
-  submit(matched: boolean): string | null {
+  submit(opts: { matched: boolean }): string | null {
     if (!this.text) return null;
 
     const entered = this.text;
     this.submitCount += 1;
-    if (matched) {
+    if (opts.matched) {
       this.matchCount += 1;
     }
     this.clear();

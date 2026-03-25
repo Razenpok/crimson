@@ -47,10 +47,10 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
     Math.max(0.0, cellH - 2.0),
   );
 
-  const drawDetonationQuad = (size: number, alphaMul: number): void => {
-    const a = fade * alphaMul;
+  const drawDetonationQuad = (opts: { size: number; alphaMul: number }): void => {
+    const a = fade * opts.alphaMul;
     if (a <= 1e-3) return;
-    const dstSize = size * scale;
+    const dstSize = opts.size * scale;
     if (dstSize <= 1e-3) return;
     const tint = new RGBA(1.0, 0.6, 0.1, a).toWgl();
     const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, dstSize, dstSize);
@@ -59,8 +59,8 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
   };
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
-  drawDetonationQuad(detScale * t * 64.0, 1.0);
-  drawDetonationQuad(detScale * t * 200.0, 0.3);
+  drawDetonationQuad({ size: detScale * t * 64.0, alphaMul: 1.0 });
+  drawDetonationQuad({ size: detScale * t * 200.0, alphaMul: 0.3 });
   wgl.endBlendMode();
   return true;
 }

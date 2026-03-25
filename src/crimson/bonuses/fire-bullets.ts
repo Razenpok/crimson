@@ -42,23 +42,23 @@ export function queueLargeHitDecalStreak(opts: {
   const spawnFreezeShard = opts.spawnFreezeShard ?? null;
   const direction = Vec2.fromAngle(baseAngle);
   for (let i = 0; i < 6; i++) {
-    let dist = (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_DIST) % 100) * 0.1;
+    let dist = (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_DIST }) % 100) * 0.1;
     if (dist > 4.0) {
-      dist = (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_DIST_GT4) % 90 + 10) * 0.1;
+      dist = (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_DIST_GT4 }) % 90 + 10) * 0.1;
     }
     if (dist > 7.0) {
-      dist = (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_DIST_GT7) % 80 + 20) * 0.1;
+      dist = (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_DIST_GT7 }) % 80 + 20) * 0.1;
     }
     // Native `projectile_update` consumes one unconditional draw per loop
     // before the freeze branch (`crt_rand` @ 0x0042184c).
-    rng.rand(RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_BURN);
+    rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_BURN });
     if (spawnFreezeShard !== null && freezeOrigin !== null) {
       const freezePos = freezeOrigin.add(direction.mul(dist * 20.0));
       const freezeAngle =
         baseAngle +
-        (rng.rand(RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_FREEZE_ANGLE) % 100) * 0.01;
+        (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_LARGE_STREAK_FREEZE_ANGLE }) % 100) * 0.01;
       spawnFreezeShard(freezePos, freezeAngle);
     }
-    fxQueue.addRandom(hit.target.add(direction.mul(dist * 20.0)), rng);
+    fxQueue.addRandom({ pos: hit.target.add(direction.mul(dist * 20.0)), rng });
   }
 }
