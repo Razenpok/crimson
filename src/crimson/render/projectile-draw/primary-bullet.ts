@@ -15,8 +15,8 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
     return false;
   }
 
-  const lifeAlpha = clamp(ctx.life, 0.0, 1.0) * 255.0;
-  const alphaByte = clamp(lifeAlpha * ctx.alpha, 0.0, 255.0) + 0.5 | 0;
+  const lifeAlpha = (clamp(ctx.life, 0.0, 1.0) * 255.0) | 0;
+  const alphaByte = (clamp(lifeAlpha * ctx.alpha, 0.0, 255.0) + 0.5) | 0;
   let drawn = false;
 
   const bulletTrail = getTexture(resources, TextureId.BULLET_TRAIL);
@@ -26,10 +26,7 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
     drawn = renderer.drawBulletTrail(
       originScreen,
       ctx.screenPos,
-      typeId,
-      alphaByte,
-      ctx.scale,
-      ctx.angle,
+      { typeId, alpha: alphaByte, scale: ctx.scale, angle: ctx.angle },
     );
   }
 

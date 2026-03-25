@@ -5,6 +5,7 @@ import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
 
 export function tickManBomb(ctx: PlayerPerkTickCtx): void {
@@ -39,7 +40,7 @@ export function tickManBomb(ctx: PlayerPerkTickCtx): void {
   }
 }
 
-export const HOOKS = {
-  perkId: PerkId.MAN_BOMB as const,
-  playerTickSteps: [tickManBomb] as const,
+export const HOOKS: PerkHooks = {
+  perkId: PerkId.MAN_BOMB,
+  playerTickSteps: [tickManBomb],
 };

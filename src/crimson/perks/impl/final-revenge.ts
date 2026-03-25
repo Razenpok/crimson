@@ -9,6 +9,7 @@ import type { FxQueue } from '@crimson/effects.ts';
 import type { PlayerState, GameplayState } from '@crimson/sim/state-types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { creatureApplyDamageWithLethalFollowup } from "@crimson/creatures/damage.js";
 
 export interface ApplyFinalRevengeOpts {
@@ -108,7 +109,7 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
   state.sfxQueue.push(SfxId.SHOCKWAVE);
 }
 
-export const HOOKS = {
-  perkId: PerkId.FINAL_REVENGE as const,
+export const HOOKS: PerkHooks = {
+  perkId: PerkId.FINAL_REVENGE,
   playerDeathHook: applyFinalRevengeOnPlayerDeath,
 };

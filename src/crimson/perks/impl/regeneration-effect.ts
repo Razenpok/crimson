@@ -3,6 +3,7 @@
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.js";
 
 export function updateRegeneration(ctx: PerksUpdateEffectsCtx): void {
@@ -57,7 +58,7 @@ export function updateRegeneration(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const HOOKS = {
-  perkId: PerkId.REGENERATION as const,
-  effectsSteps: [updateRegeneration] as const,
+export const HOOKS: PerkHooks = {
+  perkId: PerkId.REGENERATION,
+  effectsSteps: [updateRegeneration],
 };

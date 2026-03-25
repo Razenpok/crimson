@@ -21,6 +21,8 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
 
   const particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
   if (particlesTexture === null) {
+    // TODO: Python draws a circle outline via rl.draw_circle_lines here;
+    // the fallback below approximates it with a textured quad.
     // Fallback: approximate circle outline with a white-texture quad
     const radius = Math.max(1.0, detScale * t * 80.0);
     const size = radius * 2.0;
@@ -55,7 +57,7 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
     const tint = new RGBA(1.0, 0.6, 0.1, a).toWgl();
     const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, dstSize, dstSize);
     const origin = wgl.makeVector2(dstSize * 0.5, dstSize * 0.5);
-    wgl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
+    wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
   };
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);

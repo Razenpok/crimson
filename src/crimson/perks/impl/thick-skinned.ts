@@ -2,6 +2,7 @@
 
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from "@crimson/perks/runtime/apply-context.js";
+import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 export function applyThickSkinned(ctx: PerkApplyCtx): void {
   for (const player of ctx.players) {
@@ -11,7 +12,7 @@ export function applyThickSkinned(ctx: PerkApplyCtx): void {
   }
 }
 
-export const HOOKS = {
-  perkId: PerkId.THICK_SKINNED as const,
+export const HOOKS: PerkHooks = {
+  perkId: PerkId.THICK_SKINNED,
   applyHandler: applyThickSkinned,
 };

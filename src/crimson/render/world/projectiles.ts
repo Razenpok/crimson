@@ -71,7 +71,7 @@ export function drawBulletTrail(
   end: Vec2,
   opts: { typeId: number; alpha: number; scale: number; angle: number },
 ): boolean {
-  return renderCtx.drawBulletTrail(start, end, opts.typeId, opts.alpha, opts.scale, opts.angle);
+  return renderCtx.drawBulletTrail(start, end, opts);
 }
 
 export function drawSharpshooterLaserSight(

@@ -95,12 +95,9 @@ export class WorldRenderCtx {
   drawBulletTrail(
     start: Vec2,
     end: Vec2,
-    typeId: number,
-    alpha: number,
-    scale: number,
-    angle: number,
+    opts: { typeId: number; alpha: number; scale: number; angle: number },
   ): boolean {
-    return drawBulletTrail(this, start, end, typeId, alpha, scale, angle);
+    return drawBulletTrail(this, start, end, opts.typeId, opts.alpha, opts.scale, opts.angle);
   }
 
   worldToScreen(pos: Vec2): Vec2 {
