@@ -1,7 +1,6 @@
 // Port of crimson/modes/quest_mode.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState, audioPlayMusic } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -116,7 +115,6 @@ export class QuestMode extends BaseGameplayMode {
   protected _simSession: DeterministicSession | null = null;
 
   constructor(opts: {
-    gl: WebGLContext;
     worldSize?: number;
     demoModeActive?: boolean;
     config: CrimsonConfig;
@@ -125,7 +123,6 @@ export class QuestMode extends BaseGameplayMode {
     audioRng: Crand;
   }) {
     super({
-      gl: opts.gl,
       worldSize: opts.worldSize ?? WORLD_SIZE,
       defaultGameModeId: GameMode.QUESTS,
       demoModeActive: opts.demoModeActive ?? false,
@@ -295,18 +292,18 @@ export class QuestMode extends BaseGameplayMode {
     this._perkMenu.tickTimeline(dtUiMs);
   }
 
-  protected override _drawPerkMenu(ctx: WebGLContext, choices: readonly PerkId[]): void {
-    this._perkMenu.draw(ctx, this._perkMenuUiContext(), choices);
+  protected override _drawPerkMenu(choices: readonly PerkId[]): void {
+    this._perkMenu.draw(this._perkMenuUiContext(), choices);
   }
 
-  protected _drawPerkPrompt(ctx: WebGLContext, opts: {
+  protected override _drawPerkPrompt(opts: {
     pendingCount: number;
     anyAlive: boolean;
     menuActive: boolean;
     textColor: wgl.Color;
     promptScale: number;
   }): void {
-    this._perkPrompt.draw(ctx, {
+    this._perkPrompt.draw({
       uiCtx: this._perkMenuUiContext(),
       pendingCount: opts.pendingCount,
       anyAlive: opts.anyAlive,
@@ -757,7 +754,7 @@ export class QuestMode extends BaseGameplayMode {
   // Draw
   // ---------------------------------------------------------------------------
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     const perkMenuActive = this._perkMenu.active;
     let debugOverlayHeight = 0.0;
 
@@ -765,7 +762,7 @@ export class QuestMode extends BaseGameplayMode {
       drawAimIndicators: !perkMenuActive,
       entityAlpha: this._worldEntityAlpha(),
     });
-    this._drawScreenFade(ctx);
+    this._drawScreenFade();
 
     let hudBottom = 0.0;
     if (!perkMenuActive) {
@@ -774,8 +771,8 @@ export class QuestMode extends BaseGameplayMode {
       const questProgressRatio = total > 0 ? kills / total : null;
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
 
-      this._drawTargetHealthBar(ctx);
-      hudBottom = drawHudOverlay(ctx, {
+      this._drawTargetHealthBar();
+      hudBottom = drawHudOverlay({
         resources: this.renderResources.resources as RuntimeResources,
         state: this._hudState,
         font: this._small,
@@ -802,52 +799,50 @@ export class QuestMode extends BaseGameplayMode {
       const god = this.state.debugGodMode ? 'on' : 'off';
       const line = this._uiLineHeight(0.9);
       this._drawUiText(
-        ctx,
         `debug: [/] weapon  F3 perk+1  F2 god=${god}`,
         new Vec2(x, y),
         UI_HINT_COLOR,
         0.9,
       );
-      const overlayEndY = this._drawLanDebugInfo(ctx, { x, y: y + line, lineH: line });
+      const overlayEndY = this._drawLanDebugInfo({ x, y: y + line, lineH: line });
       debugOverlayHeight = Math.max(0.0, overlayEndY - y);
     }
 
-    this._drawQuestTitle(ctx);
-    this._drawQuestCompleteBanner(ctx);
+    this._drawQuestTitle();
+    this._drawQuestCompleteBanner();
 
-    this._drawPerkPrompt(ctx, {
+    this._drawPerkPrompt({
       pendingCount: this.state.perkSelection.pendingCount,
       anyAlive: this._anyPlayerAlive(),
       menuActive: this._perkMenu.active,
       textColor: UI_TEXT_COLOR,
       promptScale: UI_TEXT_SCALE,
     });
-    this._drawPerkMenu(ctx, perkSelectionPreparedChoices(
+    this._drawPerkMenu(perkSelectionPreparedChoices(
       this.simWorld.players,
       this.state.perkSelection,
     ));
 
     if (perkMenuActive) {
-      this._drawGameCursor(ctx);
+      this._drawGameCursor();
     } else if (this._paused) {
-      this._drawGameCursor(ctx);
+      this._drawGameCursor();
       const x = 18.0;
       let y = Math.max(18.0, hudBottom + 10.0);
       y += debugOverlayHeight;
-      this._drawUiText(ctx, 'paused (TAB)', new Vec2(x, y), UI_HINT_COLOR);
+      this._drawUiText('paused (TAB)', new Vec2(x, y), UI_HINT_COLOR);
     }
-    this._drawLanWaitOverlay(ctx);
+    this._drawLanWaitOverlay();
   }
 
   // ---------------------------------------------------------------------------
   // Draw helpers
   // ---------------------------------------------------------------------------
 
-  private _drawGameCursor(ctx: WebGLContext): void {
+  private _drawGameCursor(): void {
     const resources = this.renderResources.resources as RuntimeResources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       mousePos,
@@ -855,13 +850,12 @@ export class QuestMode extends BaseGameplayMode {
     );
   }
 
-  private _drawQuestTitle(ctx: WebGLContext): void {
+  private _drawQuestTitle(): void {
     const font = this._grimMono;
     const quest = this._questDef;
     if (font === null || quest === null) return;
     const [screenW, screenH] = this._screenSize();
     drawQuestTitleTimerOverlay(
-      ctx,
       screenW,
       screenH,
       font,
@@ -871,12 +865,11 @@ export class QuestMode extends BaseGameplayMode {
     );
   }
 
-  private _drawQuestCompleteBanner(ctx: WebGLContext): void {
+  private _drawQuestCompleteBanner(): void {
     const tex = getTexture(this.renderResources.resources as RuntimeResources, TextureId.UI_TEXT_LEVEL_COMPLETE);
     if (tex === null) return;
     const [screenW, screenH] = this._screenSize();
     drawQuestCompleteBannerOverlay(
-      ctx,
       screenW,
       screenH,
       tex,

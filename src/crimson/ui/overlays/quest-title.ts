@@ -1,7 +1,6 @@
 // Port of crimson/ui/overlays/quest_title.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type GrimMonoFont, drawGrimMonoText } from '@grim/fonts/grim-mono.ts';
 
@@ -62,7 +61,6 @@ export function layoutQuestTitleOverlay(
 }
 
 export function drawQuestTitleOverlay(
-  ctx: WebGLContext,
   screenW: number,
   screenH: number,
   font: GrimMonoFont,
@@ -90,6 +88,6 @@ export function drawQuestTitleOverlay(
     1.0,
     QUEST_TITLE_ALPHA * QUEST_NUMBER_ALPHA_RATIO * alpha,
   );
-  drawGrimMonoText(ctx, font, title, layout.titlePos, layout.titleScale, titleColor);
-  drawGrimMonoText(ctx, font, number, layout.numberPos, layout.numberScale, numberColor);
+  drawGrimMonoText(font, title, layout.titlePos, layout.titleScale, titleColor);
+  drawGrimMonoText(font, number, layout.numberPos, layout.numberScale, numberColor);
 }

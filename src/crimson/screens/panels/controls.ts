@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -757,7 +756,7 @@ export class ControlsMenuView extends PanelMenuView {
   // Panel drawing — two panels (left + right)
   // -----------------------------------------------------------------------
 
-  protected override _drawPanel(ctx: WebGLContext, resources: RuntimeResources): void {
+  protected override _drawPanel(resources: RuntimeResources): void {
     const fxDetail = this.state.config.display.fxDetail[0];
     const [panelScale] = this._menuItemScale(0);
     const panelW = MENU_PANEL_WIDTH * panelScale;
@@ -767,7 +766,7 @@ export class ControlsMenuView extends PanelMenuView {
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const leftH = MENU_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(
-      ctx, panel,
+      panel,
       wgl.makeRectangle(leftTopLeft.x, leftTopLeft.y, panelW, leftH),
       WHITE, fxDetail,
     );
@@ -776,7 +775,7 @@ export class ControlsMenuView extends PanelMenuView {
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
     const rightH = CONTROLS_RIGHT_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(
-      ctx, panel,
+      panel,
       wgl.makeRectangle(rightTopLeft.x, rightTopLeft.y, panelW, rightH),
       WHITE, fxDetail, true, // flipX
     );
@@ -786,7 +785,7 @@ export class ControlsMenuView extends PanelMenuView {
   // Contents drawing
   // -----------------------------------------------------------------------
 
-  protected override _drawContents(ctx: WebGLContext, resources: RuntimeResources): void {
+  protected override _drawContents(resources: RuntimeResources): void {
     const [panelScale] = this._menuItemScale(0);
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
@@ -827,7 +826,7 @@ export class ControlsMenuView extends PanelMenuView {
 
     // --- Left panel: "Configure for" + method selectors ---
     const textControls = getTexture(resources, TextureId.UI_TEXT_CONTROLS);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       textControls,
       wgl.makeRectangle(0.0, 0.0, textControls.width, textControls.height),
       wgl.makeRectangle(
@@ -840,19 +839,19 @@ export class ControlsMenuView extends PanelMenuView {
     );
 
     drawSmallText(
-      ctx, font, 'Configure for:',
+      font,'Configure for:',
       new Vec2(leftTopLeft.x + 339.0 * panelScale, leftTopLeft.y + 41.0 * panelScale),
       textColorSoft,
     );
 
     drawSmallText(
-      ctx, font, 'Aiming method:',
+      font,'Aiming method:',
       new Vec2(leftTopLeft.x + 213.0 * panelScale, leftTopLeft.y + 86.0 * panelScale),
       textColorFull,
     );
 
     drawSmallText(
-      ctx, font, 'Moving method:',
+      font,'Moving method:',
       new Vec2(leftTopLeft.x + 213.0 * panelScale, leftTopLeft.y + 128.0 * panelScale),
       textColorFull,
     );
@@ -861,7 +860,7 @@ export class ControlsMenuView extends PanelMenuView {
     const checkTex = this._directionArrowEnabled()
       ? getTexture(resources, TextureId.UI_CHECK_ON)
       : getTexture(resources, TextureId.UI_CHECK_OFF);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       checkTex,
       wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
       wgl.makeRectangle(
@@ -877,7 +876,7 @@ export class ControlsMenuView extends PanelMenuView {
     );
     const checkboxAlpha = checkboxHovered ? 1.0 : 178 / 255;
     drawSmallText(
-      ctx, font, 'Show direction arrow',
+      font,'Show direction arrow',
       new Vec2(leftTopLeft.x + 235.0 * panelScale, leftTopLeft.y + 175.0 * panelScale),
       wgl.makeColor(1, 1, 1, checkboxAlpha),
     );
@@ -900,38 +899,38 @@ export class ControlsMenuView extends PanelMenuView {
     ];
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (isOpen) continue;
-      this._drawDropdown(ctx, layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
+      this._drawDropdown(layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
     }
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (!isOpen) continue;
-      this._drawDropdown(ctx, layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
+      this._drawDropdown(layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
     }
 
     // --- Right panel: configured bindings list ---
     const drawSectionHeading = (title: string, y: number): void => {
       const xHeading = rightTopLeft.x + 44.0 * panelScale;
-      drawSmallText(ctx, font, title, new Vec2(xHeading, y), textColorFull);
+      drawSmallText(font, title, new Vec2(xHeading, y), textColorFull);
       const lineY = y + 13.0 * panelScale;
       const lineH = Math.max(1.0, panelScale);
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         xHeading, lineY,
         228.0 * panelScale, lineH,
-        1, 1, 1, 178 / 255,
+        wgl.makeColor(1, 1, 1, 178 / 255),
       );
     };
 
     drawSmallText(
-      ctx, font, 'Configured controls',
+      font,'Configured controls',
       new Vec2(rightTopLeft.x + 120.0 * panelScale, rightTopLeft.y + 38.0 * panelScale),
       textColorFull,
     );
     const headerW = measureSmallTextWidth(font, 'Configured controls');
     const headerLineY = rightTopLeft.y + 51.0 * panelScale;
     const headerLineH = Math.max(1.0, panelScale);
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       rightTopLeft.x + 120.0 * panelScale, headerLineY,
       headerW, headerLineH,
-      1, 1, 1, 204 / 255,
+      wgl.makeColor(1, 1, 1, 204 / 255),
     );
 
     const sections = this._rebindSections(playerIdx, aimScheme, moveMode);
@@ -962,7 +961,7 @@ export class ControlsMenuView extends PanelMenuView {
         const valuePos = rowLayout.valuePos;
 
         drawSmallText(
-          ctx, font, rowLayout.row.label,
+          font,rowLayout.row.label,
           new Vec2(rightTopLeft.x + 52.0 * panelScale, rowY),
           wgl.makeColor(1, 1, 1, 178 / 255),
         );
@@ -970,14 +969,14 @@ export class ControlsMenuView extends PanelMenuView {
         let valueColor = CONTROLS_REBIND_VALUE_COLOR;
         if (hoveredRow) valueColor = CONTROLS_REBIND_HOVER_COLOR;
         if (activeRow) valueColor = CONTROLS_REBIND_ACTIVE_COLOR;
-        drawSmallText(ctx, font, valueText, valuePos, valueColor);
+        drawSmallText(font, valueText, valuePos, valueColor);
 
         const valueW = measureSmallTextWidth(font, valueText);
         const underlineY = rowLayout.rowY + 13.0 * panelScale;
-        ctx.drawRectangle(
+        wgl.drawRectangle(
           valuePos.x, underlineY,
           valueW, Math.max(1.0, panelScale),
-          valueColor[0], valueColor[1], valueColor[2], valueColor[3],
+          valueColor,
         );
 
         rowY += 16.0 * panelScale;
@@ -992,7 +991,7 @@ export class ControlsMenuView extends PanelMenuView {
         rightTopLeft.y + (CONTROLS_RIGHT_PANEL_HEIGHT - 26.0) * panelScale,
       );
       drawSmallText(
-        ctx, font, 'Esc/Right: cancel  Backspace: default  Delete: unbind',
+        font,'Esc/Right: cancel  Backspace: default  Delete: unbind',
         hintPos,
         wgl.makeColor(1, 226 / 255, 188 / 255, 220 / 255),
       );
@@ -1004,7 +1003,6 @@ export class ControlsMenuView extends PanelMenuView {
   // -----------------------------------------------------------------------
 
   private _drawDropdown(
-    ctx: WebGLContext,
     layout: ControlsDropdownLayout,
     items: string[],
     selectedIndex: number,
@@ -1023,34 +1021,34 @@ export class ControlsMenuView extends PanelMenuView {
     const widgetH = isOpen ? layout.fullH : layout.headerH;
 
     // Outer border (white)
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       layout.pos.x | 0, layout.pos.y | 0,
       layout.width | 0, widgetH | 0,
-      1, 1, 1, 1,
+      wgl.makeColor(1, 1, 1, 1),
     );
     // Inner fill (black)
     const innerW = Math.max(0, (layout.width | 0) - 2);
     const innerH = Math.max(0, (widgetH | 0) - 2);
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       (layout.pos.x | 0) + 1, (layout.pos.y | 0) + 1,
       innerW, innerH,
-      0, 0, 0, 1,
+      wgl.makeColor(0, 0, 0, 1),
     );
 
     if ((isOpen || hoveredHeader) && enabled) {
       const lineH = Math.max(1, (1.0 * scale) | 0);
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         layout.pos.x | 0,
         (layout.pos.y + 15.0 * scale) | 0,
         layout.width | 0, lineH,
-        1, 1, 1, 128 / 255,
+        wgl.makeColor(1, 1, 1, 128 / 255),
       );
     }
 
     const arrowTex = ((isOpen || hoveredHeader) && enabled)
       ? getTexture(resources, TextureId.UI_DROP_ON)
       : getTexture(resources, TextureId.UI_DROP_OFF);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       arrowTex,
       wgl.makeRectangle(0.0, 0.0, arrowTex.width, arrowTex.height),
       wgl.makeRectangle(layout.arrowPos.x, layout.arrowPos.y, layout.arrowSize.x, layout.arrowSize.y),
@@ -1060,7 +1058,7 @@ export class ControlsMenuView extends PanelMenuView {
     const idx = items.length > 0 ? Math.max(0, Math.min(items.length - 1, selectedIndex | 0)) : 0;
     const headerAlpha = ((isOpen || hoveredHeader) && enabled) ? 242 / 255 : 191 / 255;
     if (items.length > 0) {
-      drawSmallText(ctx, font, items[idx], layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));
+      drawSmallText(font, items[idx], layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));
     }
 
     if (!isOpen) return;
@@ -1073,7 +1071,7 @@ export class ControlsMenuView extends PanelMenuView {
       let alpha = 153 / 255;
       if (hovered) alpha = 242 / 255;
       if (i === selectedIndex) alpha = Math.max(alpha, 245 / 255);
-      drawSmallText(ctx, font, items[i], new Vec2(layout.textPos.x, itemY), wgl.makeColor(1, 1, 1, alpha));
+      drawSmallText(font, items[i], new Vec2(layout.textPos.x, itemY), wgl.makeColor(1, 1, 1, alpha));
     }
   }
 }

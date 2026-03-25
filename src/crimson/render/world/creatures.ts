@@ -3,7 +3,6 @@
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { type GlTexture } from '@grim/webgl.ts';
 import { creatureAnimSelectFrame } from '@crimson/creatures/anim.ts';
 import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
 import { CREATURE_ANIM } from '@crimson/sim/world-defs.ts';
@@ -12,7 +11,7 @@ import { WorldRenderCtx } from './context.ts';
 
 export function drawCreatureSprite(
   renderCtx: WorldRenderCtx,
-  texture: GlTexture,
+  texture: wgl.Texture,
   typeId: CreatureTypeId,
   flags: CreatureFlags,
   phase: number,
@@ -71,10 +70,10 @@ export function drawCreatureSprite(
       screenPos.x + offset, screenPos.y + offset, shadowW, shadowH,
     );
     const shadowOrigin = wgl.makeVector2(shadowW * 0.5, shadowH * 0.5);
-    renderCtx.gl.drawTexturePro(texture, src, shadowDst, shadowOrigin, rotationDeg, shadowTint);
+    wgl.drawTexturePro(texture, src, shadowDst, shadowOrigin, rotationDeg, shadowTint);
   }
 
   const dst = wgl.makeRectangle(screenPos.x, screenPos.y, width, height);
   const origin = wgl.makeVector2(width * 0.5, height * 0.5);
-  renderCtx.gl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
+  wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
 }

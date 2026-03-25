@@ -127,7 +127,7 @@ export function typoMidStep(ctx: MidStepContext): void {
       rewardValue: 1.0,
       size,
       contactDamage: 100.0,
-      tint: call.tintRgba.toTuple(),
+      tint: call.tintRgba.toWgl(),
       orbitAngle: null,
       orbitRadius: null,
       rangedProjectileType: null,

@@ -6,7 +6,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { type AudioState, audioUpdate, audioStopMusic } from '@grim/audio.ts';
 import { type ConsoleState } from '@grim/console.ts';
@@ -309,12 +308,8 @@ export class BaseGameplayMode {
   creatures!: CreaturePool;
   player!: PlayerState;
 
-  // -- WebGL context --
-  protected _gl: WebGLContext;
-
   constructor(
     opts: {
-      gl: WebGLContext;
       assetsUrl?: string;
       worldSize: number;
       defaultGameModeId: GameMode;
@@ -328,7 +323,6 @@ export class BaseGameplayMode {
       preserveBugs?: boolean;
     },
   ) {
-    this._gl = opts.gl;
     this._assetsRoot = opts.assetsUrl ?? '';
     this._small = null;
     this._hudState = new HudState();
@@ -354,7 +348,7 @@ export class BaseGameplayMode {
     this.audioRng = opts.audioRng;
     this.rtxMode = RtxRenderMode.CLASSIC;
 
-    this._worldRuntime = new WorldRuntime(opts.gl, {
+    this._worldRuntime = new WorldRuntime({
       worldSize: this.worldSize,
       demoModeActive: this.demoModeActive,
       questFailRetryCount: this.questFailRetryCount,
@@ -569,7 +563,7 @@ export class BaseGameplayMode {
   // _drawTargetHealthBar
   // -----------------------------------------------------------------------
 
-  protected _drawTargetHealthBar(ctx: WebGLContext, opts?: { alpha?: number }): void {
+  protected _drawTargetHealthBar(opts?: { alpha?: number }): void {
     const alpha = opts?.alpha ?? 1.0;
     const creatures = this.creatures.entries;
     if (!creatures || creatures.length === 0) return;
@@ -608,7 +602,7 @@ export class BaseGameplayMode {
       const screenRight = this.worldToScreen(creature.pos.add(new Vec2(32.0, 32.0)));
       const width = screenRight.x - screenLeft.x;
       if (width <= 1e-3) continue;
-      drawTargetHealthBar(ctx, {
+      drawTargetHealthBar({
         pos: screenLeft,
         width,
         ratio,
@@ -702,7 +696,6 @@ export class BaseGameplayMode {
   }
 
   protected _drawUiText(
-    ctx: WebGLContext,
     text: string,
     pos: Vec2,
     color: wgl.Color,
@@ -710,7 +703,7 @@ export class BaseGameplayMode {
   ): void {
     const font = this._small;
     if (font === null) throw new Error('small font must be loaded before ui text draw');
-    drawSmallText(ctx, font, text, pos, color);
+    drawSmallText(font, text, pos, color);
   }
 
   // -----------------------------------------------------------------------
@@ -723,8 +716,8 @@ export class BaseGameplayMode {
       player: players[0],
       resources: this.renderResources.resources as RuntimeResources,
       mouse: this._uiMousePos(),
-      screenW: this._gl.screenWidth,
-      screenH: this._gl.screenHeight,
+      screenW: wgl.getScreenWidth(),
+      screenH: wgl.getScreenHeight(),
       violenceDisabled: 0,
       preserveBugs: this.state.preserveBugs ?? false,
     };
@@ -769,8 +762,8 @@ export class BaseGameplayMode {
 
   protected _updateUiMouse(): void {
     const [mx, my] = InputState.mousePosition();
-    const screenW = this._gl.screenWidth;
-    const screenH = this._gl.screenHeight;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     this._uiMouse = new Vec2(
       Math.max(0.0, Math.min(mx, Math.max(0.0, screenW - 1.0))),
       Math.max(0.0, Math.min(my, Math.max(0.0, screenH - 1.0))),
@@ -985,7 +978,6 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   protected _drawLanDebugInfo(
-    _ctx: WebGLContext,
     _opts: { x: number; y: number; lineH: number },
   ): number {
     return _opts.y;
@@ -995,7 +987,7 @@ export class BaseGameplayMode {
   // _drawLanWaitOverlay (stub)
   // -----------------------------------------------------------------------
 
-  protected _drawLanWaitOverlay(_ctx: WebGLContext): void {
+  protected _drawLanWaitOverlay(): void {
     // No LAN wait overlay in WebGL
   }
 
@@ -1045,7 +1037,7 @@ export class BaseGameplayMode {
     throw new Error(`${this.constructor.name}.update() must be implemented by gameplay mode`);
   }
 
-  draw(_ctx: WebGLContext): void {
+  draw(): void {
     throw new Error(`${this.constructor.name}.draw() must be implemented by gameplay mode`);
   }
 
@@ -1062,7 +1054,7 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   protected _screenSize(): [number, number] {
-    return [this._gl.screenWidth, this._gl.screenHeight];
+    return [wgl.getScreenWidth(), wgl.getScreenHeight()];
   }
 
   // -----------------------------------------------------------------------
@@ -1122,7 +1114,7 @@ export class BaseGameplayMode {
 
   protected _tickPerkMenuTimeline(_dtUiMs: number): void {}
 
-  protected _drawPerkPrompt(_ctx: WebGLContext, _opts: {
+  protected _drawPerkPrompt(_opts: {
     pendingCount: number;
     anyAlive: boolean;
     menuActive: boolean;
@@ -1130,7 +1122,7 @@ export class BaseGameplayMode {
     promptScale: number;
   }): void {}
 
-  protected _drawPerkMenu(_ctx: WebGLContext, _choices: readonly PerkId[]): void {}
+  protected _drawPerkMenu(_choices: readonly PerkId[]): void {}
 
   // -----------------------------------------------------------------------
   // open
@@ -1178,8 +1170,8 @@ export class BaseGameplayMode {
     this._resetTickRunnerState();
     this._resetReplayCaptureState({ clearRecorder: false });
 
-    const screenW = this._gl.screenWidth;
-    const screenH = this._gl.screenHeight;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     this._uiMouse = new Vec2(screenW * 0.5, screenH * 0.5);
     this._cursorPulseTime = 0.0;
     this._lanTerrainPendingLast = false;
@@ -1227,7 +1219,7 @@ export class BaseGameplayMode {
     }
     if (record === null) return;
 
-    const action = this._gameOverUi.update(this._gl, dt, {
+    const action = this._gameOverUi.update(dt, {
       record,
       playerNameDefault: this._playerNameDefault(),
       resources: this.renderResources.resources,
@@ -1319,16 +1311,16 @@ export class BaseGameplayMode {
   // _drawScreenFade
   // -----------------------------------------------------------------------
 
-  protected _drawScreenFade(ctx: WebGLContext): void {
+  protected _drawScreenFade(): void {
     let fadeAlpha = 0.0;
     if (this._screenFade !== null) {
       fadeAlpha = Number(this._screenFade.screenFadeAlpha);
     }
     if (fadeAlpha <= 0.0) return;
     const alpha = Math.max(0.0, Math.min(1.0, fadeAlpha));
-    const screenW = this._gl.screenWidth;
-    const screenH = this._gl.screenHeight;
-    ctx.drawRectangle(0, 0, screenW, screenH, 0, 0, 0, alpha);
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
+    wgl.drawRectangle(0, 0, screenW, screenH, wgl.makeColor(0, 0, 0, alpha));
   }
 
   // -----------------------------------------------------------------------
@@ -1336,8 +1328,8 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   protected _buildLocalInputs(opts: { dt: number }): PlayerInput[] {
-    const screenW = this._gl.screenWidth;
-    const screenH = this._gl.screenHeight;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     return this._localInput.buildFrameInputs({
       players: this.simWorld.players,
       config: this.config,

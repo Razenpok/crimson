@@ -1,6 +1,6 @@
 // Port of grim/app.py — main loop using requestAnimationFrame
 
-import { type WebGLContext } from './webgl.ts';
+import * as wgl from '@wgl';
 import { type View } from './view.ts';
 import { InputState } from './input.ts';
 
@@ -12,15 +12,13 @@ export interface AppConfig {
 }
 
 export class App {
-  private _ctx: WebGLContext;
   private _view: View | null = null;
   private _running = false;
   private _lastTime = 0;
   private _targetFps: number;
   private _frameId = 0;
 
-  constructor(ctx: WebGLContext, config?: AppConfig) {
-    this._ctx = ctx;
+  constructor(config?: AppConfig) {
     this._targetFps = config?.targetFps ?? 60;
 
     if (config?.title) {
@@ -29,10 +27,8 @@ export class App {
 
     const width = config?.width ?? 1280;
     const height = config?.height ?? 720;
-    ctx.resize(width, height);
+    wgl.resize(width, height);
   }
-
-  get ctx(): WebGLContext { return this._ctx; }
 
   run(view: View): void {
     this._view = view;
@@ -61,17 +57,17 @@ export class App {
     this._lastTime = now;
 
     // Handle canvas resize
-    const canvas = this._ctx.canvas;
+    const canvas = wgl.getCanvas();
     const displayWidth = canvas.clientWidth;
     const displayHeight = canvas.clientHeight;
     if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-      this._ctx.resize(displayWidth, displayHeight);
+      wgl.resize(displayWidth, displayHeight);
     }
 
     try {
       this._view.update(dt);
       this._view.draw();
-      this._ctx.flush();
+      wgl.flush();
 
       InputState.endFrame();
 

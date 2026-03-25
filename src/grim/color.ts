@@ -35,7 +35,7 @@ export class RGBA {
     );
   }
 
-  toTuple(): wgl.Color {
+  toWgl(): wgl.Color {
     return wgl.makeColor(this.r, this.g, this.b, this.a);
   }
 

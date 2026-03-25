@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
+
 import type { CrimsonConfig } from '@grim/config.ts';
 import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
@@ -67,7 +67,7 @@ export interface QuestResultsState {
   questFailRetryCount: number;
   pendingQuestLevel: QuestLevel | null;
   pendingHighScores: { gameModeId: number; questLevel: QuestLevel | null; highlightRank: number | null } | null;
-  pauseBackground: { drawPauseBackground(ctx: WebGLContext, opts?: { entityAlpha?: number }): void } | null;
+  pauseBackground: { drawPauseBackground(opts?: { entityAlpha?: number }): void } | null;
   menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
   menuGroundCamera: Vec2 | null;
   screenFadeAlpha: number;
@@ -92,7 +92,7 @@ export interface QuestResultsUi {
   }): void;
   close(): void;
   update(dt: number, playSfx: ((sfxId: SfxId) => void) | null): string | null;
-  draw(ctx: WebGLContext): void;
+  draw(): void;
   worldEntityAlpha(): number;
   highlightRank: number | null;
 }
@@ -270,8 +270,8 @@ export class QuestResultsView {
     }
   }
 
-  draw(ctx: WebGLContext, screenW: number = ctx.screenWidth, screenH: number = ctx.screenHeight): void {
-    ctx.clearBackground(0, 0, 0, 1);
+  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const ui = this._ui;
     let bgAlpha = 1.0;
     if (ui !== null) {
@@ -279,14 +279,14 @@ export class QuestResultsView {
     }
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx, { entityAlpha: bgAlpha });
+      pauseBackground.drawPauseBackground({ entityAlpha: bgAlpha });
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
     if (ui !== null) {
-      ui.draw(ctx);
+      ui.draw();
       return;
     }
 
@@ -294,8 +294,8 @@ export class QuestResultsView {
     const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
     const subColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1.0);
     // Simple fallback text (the real QuestResultsUi handles full rendering)
-    ctx.drawRectangle(32, 140, 400, 28, textColor[0], textColor[1], textColor[2], 0);
-    ctx.drawRectangle(32, 180, 400, 18, subColor[0], subColor[1], subColor[2], 0);
+    wgl.drawRectangle(32, 140, 400, 28, wgl.makeColor(textColor[0], textColor[1], textColor[2], 0));
+    wgl.drawRectangle(32, 180, 400, 18, wgl.makeColor(subColor[0], subColor[1], subColor[2], 0));
   }
 
   takeAction(): string | null {

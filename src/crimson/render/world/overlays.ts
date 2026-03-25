@@ -4,7 +4,6 @@ import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
@@ -29,18 +28,17 @@ export function drawAimCircle(
   const fillA = clamp((77 / 255) * alpha, 0, 1);
   const outlineA = clamp((255 * 0.55 / 255) * alpha, 0, 1);
 
-  const ctx = renderCtx.gl;
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 
-  const white = ctx.whiteTexture;
+  const white = wgl.getWhiteTexture();
 
   // Filled circle via degenerate quads (triangle fan)
   const fillSegs = Math.max(circleSegmentsFilled(radius), 64, radius | 0);
   const step = (Math.PI * 2) / fillSegs;
 
-  ctx.beginQuads(white);
-  ctx.texCoord2f(0.5, 0.5);
-  ctx.color4f(0, 0, 26 / 255, fillA);
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(0, 0, 26 / 255, fillA);
 
   for (let i = 0; i < fillSegs; i++) {
     const a0 = i * step;
@@ -49,12 +47,12 @@ export function drawAimCircle(
     // Index pattern 0,1,2, 2,3,0 gives triangles:
     //   (center, center, circ[i]) = degenerate
     //   (circ[i], circ[i+1], center) = visible
-    ctx.vertex2f(center.x, center.y);
-    ctx.vertex2f(center.x, center.y);
-    ctx.vertex2f(center.x + Math.cos(a0) * radius, center.y + Math.sin(a0) * radius);
-    ctx.vertex2f(center.x + Math.cos(a1) * radius, center.y + Math.sin(a1) * radius);
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x + Math.cos(a0) * radius, center.y + Math.sin(a0) * radius);
+    wgl.rlVertex2f(center.x + Math.cos(a1) * radius, center.y + Math.sin(a1) * radius);
   }
-  ctx.endQuads();
+  wgl.endQuads();
 
   // Outline ring (2px thick) via quad strip
   const outlineSegs = Math.max(circleSegmentsOutline(radius), fillSegs);
@@ -62,9 +60,9 @@ export function drawAimCircle(
   const innerR = radius;
   const outerR = radius + 2.0;
 
-  ctx.beginQuads(white);
-  ctx.texCoord2f(0.5, 0.5);
-  ctx.color4f(1, 1, 1, outlineA);
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(1, 1, 1, outlineA);
 
   for (let i = 0; i < outlineSegs; i++) {
     const a0 = i * outStep;
@@ -74,14 +72,14 @@ export function drawAimCircle(
     const cos1 = Math.cos(a1);
     const sin1 = Math.sin(a1);
     // Quad: inner[i], outer[i], outer[i+1], inner[i+1]
-    ctx.vertex2f(center.x + cos0 * innerR, center.y + sin0 * innerR);
-    ctx.vertex2f(center.x + cos0 * outerR, center.y + sin0 * outerR);
-    ctx.vertex2f(center.x + cos1 * outerR, center.y + sin1 * outerR);
-    ctx.vertex2f(center.x + cos1 * innerR, center.y + sin1 * innerR);
+    wgl.rlVertex2f(center.x + cos0 * innerR, center.y + sin0 * innerR);
+    wgl.rlVertex2f(center.x + cos0 * outerR, center.y + sin0 * outerR);
+    wgl.rlVertex2f(center.x + cos1 * outerR, center.y + sin1 * outerR);
+    wgl.rlVertex2f(center.x + cos1 * innerR, center.y + sin1 * innerR);
   }
-  ctx.endQuads();
+  wgl.endQuads();
 
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 }
 
 export function drawClockGauge(
@@ -103,14 +101,14 @@ export function drawClockGauge(
 
   const tableSrc = wgl.makeRectangle(0, 0, table.width, table.height);
   const tableDst = wgl.makeRectangle(pos.x, pos.y, size, size);
-  renderCtx.gl.drawTexturePro(table, tableSrc, tableDst, wgl.makeVector2(0, 0), 0.0, tint);
+  wgl.drawTexturePro(table, tableSrc, tableDst, wgl.makeVector2(0, 0), 0.0, tint);
 
   const seconds = (ms / 1000) | 0;
   const pointerSrc = wgl.makeRectangle(0, 0, pointer.width, pointer.height);
   const pointerDst = wgl.makeRectangle(pos.x + half, pos.y + half, size, size);
   const origin = wgl.makeVector2(half, half);
   const rotationDeg = seconds * 6.0;
-  renderCtx.gl.drawTexturePro(pointer, pointerSrc, pointerDst, origin, rotationDeg, tint);
+  wgl.drawTexturePro(pointer, pointerSrc, pointerDst, origin, rotationDeg, tint);
 }
 
 export function directionArrowEnabled(renderCtx: WorldRenderCtx, playerIndex: number): boolean {
@@ -160,6 +158,6 @@ export function drawDirectionArrows(
     const screen = WorldRenderCtx.worldToScreenWith(markerPos, camera, viewScale);
     const dst = wgl.makeRectangle(screen.x, screen.y, width, height);
     const tint = directionArrowTint(renderCtx, index, alpha);
-    renderCtx.gl.drawTexturePro(arrow, src, dst, origin, heading * RAD_TO_DEG, tint);
+    wgl.drawTexturePro(arrow, src, dst, origin, heading * RAD_TO_DEG, tint);
   }
 }

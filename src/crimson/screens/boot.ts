@@ -1,7 +1,6 @@
 // Port of crimson/screens/boot.py — Boot/splash screen with company logos
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '@grim/assets.ts';
 import { audioPlayMusic, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
 import { queueTrack } from '@grim/music.ts';
@@ -45,7 +44,6 @@ function clamp01(value: number): number {
 
 export class BootView {
   state: GameState;
-  private _ctx: WebGLContext;
   private _bootTime: number = 0.5;
   private _fadeOutReady: boolean = false;
   private _fadeOutDone: boolean = false;
@@ -56,8 +54,7 @@ export class BootView {
   private _themeStarted: boolean = false;
   private _loadingHoldRemaining: number = 0.5;
 
-  constructor(ctx: WebGLContext, state: GameState) {
-    this._ctx = ctx;
+  constructor(state: GameState) {
     this.state = state;
   }
 
@@ -76,11 +73,10 @@ export class BootView {
 
   private _loadResources(): void {
     const state = this.state;
-    const ctx = this._ctx;
 
     Promise.all([
       state.resources === null
-        ? loadRuntimeResources(ctx, state.assetsUrl)
+        ? loadRuntimeResources(state.assetsUrl)
         : Promise.resolve(state.resources),
       state.audio === null
         ? initAudioState(state.config, state.assetsUrl)
@@ -161,18 +157,18 @@ export class BootView {
     }
   }
 
-  draw(ctx: WebGLContext): void {
-    ctx.clearBackground(0, 0, 0, 1);
+  draw(): void {
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const resources = this.state.resources;
     if (resources === null) {
       return;
     }
     if (!this._fadeOutDone) {
-      this._drawSplash(ctx, resources, this._splashAlpha());
+      this._drawSplash(resources, this._splashAlpha());
       return;
     }
     if (this._logoActive && !this._themeStarted) {
-      this._drawCompanyLogoSequence(ctx);
+      this._drawCompanyLogoSequence();
     }
   }
 
@@ -243,7 +239,7 @@ export class BootView {
     return null;
   }
 
-  private _drawCompanyLogoSequence(ctx: WebGLContext): void {
+  private _drawCompanyLogoSequence(): void {
     const resources = this.state.resources;
     if (resources === null) return;
     const t = this._bootTime - LOGO_TIME_OFFSET;
@@ -253,10 +249,10 @@ export class BootView {
     const tex = getTexture(resources, textureId);
     const texW = tex.width;
     const texH = tex.height;
-    const x = (ctx.screenWidth - texW) * 0.5;
-    const y = (ctx.screenHeight - texH) * 0.5;
+    const x = (wgl.getScreenWidth() - texW) * 0.5;
+    const y = (wgl.getScreenHeight() - texH) * 0.5;
     const tint = wgl.makeColor(1, 1, 1, alpha);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       tex,
       wgl.makeRectangle(0, 0, texW, texH),
       wgl.makeRectangle(x, y, texW, texH),
@@ -270,9 +266,9 @@ export class BootView {
     return clamp01(this._bootTime * SPLASH_ALPHA_SCALE);
   }
 
-  private _drawSplash(ctx: WebGLContext, resources: RuntimeResources, alpha: number): void {
-    const screenW = ctx.screenWidth;
-    const screenH = ctx.screenHeight;
+  private _drawSplash(resources: RuntimeResources, alpha: number): void {
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     if (alpha <= 0.0) return;
 
     const logo = getTexture(resources, TextureId.CL_LOGO);
@@ -289,36 +285,36 @@ export class BootView {
     const lb = 198 / 255;
 
     // Top border line
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(bandLeft),
       Math.round(bandTop),
       Math.round(bandRight - bandLeft),
       1,
-      lr, lg, lb, lineAlpha,
+      wgl.makeColor(lr, lg, lb, lineAlpha),
     );
     // Bottom border line
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(bandLeft),
       Math.round(bandBottom),
       Math.round(bandRight - bandLeft),
       1,
-      lr, lg, lb, lineAlpha,
+      wgl.makeColor(lr, lg, lb, lineAlpha),
     );
     // Left border line
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(bandLeft),
       Math.round(bandTop),
       1,
       Math.round(bandHeight),
-      lr, lg, lb, lineAlpha,
+      wgl.makeColor(lr, lg, lb, lineAlpha),
     );
     // Right border line
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(bandRight),
       Math.round(bandTop),
       1,
       Math.round(bandHeight),
-      lr, lg, lb, lineAlpha,
+      wgl.makeColor(lr, lg, lb, lineAlpha),
     );
 
     const tint = wgl.makeColor(1, 1, 1, alpha);
@@ -327,7 +323,7 @@ export class BootView {
     const logoHf = logo.height;
     const logoX = (screenW - logoW) * 0.5;
     const logoY = (screenH - logoHf) * 0.5;
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       logo,
       wgl.makeRectangle(0, 0, logoW, logoHf),
       wgl.makeRectangle(logoX, logoY, logoW, logoHf),
@@ -339,7 +335,7 @@ export class BootView {
     const loading = getTexture(resources, TextureId.LOADING);
     const loadingX = screenW * 0.5 + 128.0;
     const loadingY = screenH * 0.5 + 16.0;
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       loading,
       wgl.makeRectangle(0, 0, loading.width, loading.height),
       wgl.makeRectangle(loadingX, loadingY, loading.width, loading.height),
@@ -353,7 +349,7 @@ export class BootView {
     const esrbH = esrb.height;
     const esrbX = screenW - esrbW - 1.0;
     const esrbY = screenH - esrbH - 1.0;
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       esrb,
       wgl.makeRectangle(0, 0, esrbW, esrbH),
       wgl.makeRectangle(esrbX, esrbY, esrbW, esrbH),

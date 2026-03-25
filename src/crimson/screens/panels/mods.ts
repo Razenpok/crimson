@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import {
@@ -75,7 +74,7 @@ export class ModsMenuView extends PanelMenuView {
     ];
   }
 
-  protected _drawContents(ctx: WebGLContext, resources: RuntimeResources): void {
+  protected _drawContents(resources: RuntimeResources): void {
     const layout = this._contentLayout();
     const basePos = layout.basePos;
     const labelPos = layout.labelPos;
@@ -85,11 +84,11 @@ export class ModsMenuView extends PanelMenuView {
     const titleColor = wgl.makeColor(1, 1, 1, 1);
     const textColor = wgl.makeColor(1, 1, 1, 0.8);
 
-    drawSmallText(ctx, font, 'MODS', basePos, titleColor);
+    drawSmallText(font, 'MODS', basePos, titleColor);
     let linePos = labelPos.offset(0, 44.0 * scale);
     const lineStep = (font.cellSize + 4.0) * scale;
     for (const line of this._lines) {
-      drawSmallText(ctx, font, line, linePos, textColor);
+      drawSmallText(font, line, linePos, textColor);
       linePos = linePos.offset(0, lineStep);
     }
   }

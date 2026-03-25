@@ -1,31 +1,23 @@
 // Port of crimson/screens/panels/databases_base.py — Base class for database views
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import * as wgl from "@wgl";
+import { Vec2 } from "@grim/geom.ts";
+
+import { getTexture, type RuntimeResources, TextureId } from "@grim/assets.ts";
 import { SmallFontData } from "@grim/fonts/small.ts";
-import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
-import { SfxId } from '@grim/sfx-map.ts';
-import { InputState } from '@grim/input.ts';
-import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
-import {
-  UiButtonState,
-  buttonDraw,
-  buttonUpdate,
-  buttonWidth,
-} from '@crimson/ui/perk-menu.ts';
-import { type GameState } from '@crimson/game/types.ts';
-import { fxDetailEnabled } from '@grim/config.ts';
-import {
-  hsLeftPanelPosX,
-  hsRightPanelPosX,
-} from '@crimson/screens/high-scores-layout.ts';
-import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import { audioPlaySfx, audioUpdate } from "@grim/audio.ts";
+import { SfxId } from "@grim/sfx-map.ts";
+import { InputState } from "@grim/input.ts";
+import { type GroundRenderer } from "@grim/terrain-render.ts";
+import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
+import { drawMenuCursor } from "@crimson/ui/cursor.ts";
+import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
+import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
+import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState, } from "@crimson/ui/perk-menu.ts";
+import { type GameState } from "@crimson/game/types.ts";
+import { fxDetailEnabled } from "@grim/config.ts";
+import { hsLeftPanelPosX, hsRightPanelPosX, } from "@crimson/screens/high-scores-layout.ts";
+import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import {
   MENU_PANEL_OFFSET_X,
   MENU_PANEL_OFFSET_Y,
@@ -38,11 +30,11 @@ import {
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
-  PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
-  uiElementAnim,
+  PANEL_TIMELINE_START_MS,
   signLayoutScale,
-} from './base.ts';
+  uiElementAnim,
+} from "./base.ts";
 
 // ---------------------------------------------------------------------------
 // Shared panel layout (state_14/15/16): tall left panel + short right panel
@@ -148,7 +140,7 @@ export abstract class DatabaseBaseView {
     this._closeAction = action;
   }
 
-  private _drawSign(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(screenW | 0);
@@ -168,12 +160,12 @@ export abstract class DatabaseBaseView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
@@ -247,18 +239,17 @@ export abstract class DatabaseBaseView {
     }
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
-    const pauseBackground = this.state.pauseBackground as { drawPauseBackground(ctx: WebGLContext): void } | null;
-    if (pauseBackground != null) {
-      pauseBackground.drawPauseBackground(ctx);
+    if (this.state.pauseBackground !== null) {
+      this.state.pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(ctx, this.state, this.state.config.display.width, this.state.config.display.height);
+    drawScreenFade(this.state, this.state.config.display.width, this.state.config.display.height);
 
     const screenWidth = this.state.config.display.width;
     const scale = 1.0;
@@ -293,13 +284,13 @@ export abstract class DatabaseBaseView {
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
 
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, LEFT_PANEL_HEIGHT * scale),
       WHITE,
       fxDetail,
     );
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, RIGHT_PANEL_HEIGHT * scale),
       WHITE,
       fxDetail,
@@ -307,22 +298,22 @@ export abstract class DatabaseBaseView {
     );
 
     const font = resources.smallFont;
-    this._drawContents(ctx, leftPanelTopLeft, rightPanelTopLeft, scale, font);
+    this._drawContents(leftPanelTopLeft, rightPanelTopLeft, scale, font);
 
     const backPos = this._backButtonPos();
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
-    buttonDraw(ctx, resources, this._backButton, {
+    buttonDraw(resources, this._backButton, {
       pos: leftPanelTopLeft.add(backPos.mul(scale)),
       width: backW,
       scale,
     });
 
-    this._drawSign(ctx, resources);
+    this._drawSign(resources);
 
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 
   // ---------------------------------------------------------------------------
@@ -332,7 +323,6 @@ export abstract class DatabaseBaseView {
   protected abstract _backButtonPos(): Vec2;
 
   protected abstract _drawContents(
-    ctx: WebGLContext,
     leftTopLeft: Vec2,
     rightTopLeft: Vec2,
     scale: number,

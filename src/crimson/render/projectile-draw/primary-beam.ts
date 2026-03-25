@@ -1,10 +1,10 @@
 // Port of crimson/render/projectile_draw/primary_beam.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { type GlTexture, BlendMode } from '@grim/webgl.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
@@ -27,7 +27,7 @@ function drawBeamBodySprites(opts: {
   step: number;
   baseAlpha: number;
   streakRgb: [number, number, number];
-  texture: GlTexture;
+  texture: wgl.Texture;
   grid: number;
   frame: number;
   spriteScale: number;
@@ -41,7 +41,7 @@ function drawBeamBodySprites(opts: {
     if (segAlpha > 1e-3) {
       const pos = origin.add(direction.mul(s));
       const posScreen = renderer.worldToScreen(pos);
-      const tint = new RGBA(streakRgb[0], streakRgb[1], streakRgb[2], segAlpha).toTuple();
+      const tint = new RGBA(streakRgb[0], streakRgb[1], streakRgb[2], segAlpha).toWgl();
       renderer.drawAtlasSprite(texture, grid, frame, posScreen, spriteScale, 0.0, tint);
     }
     s += step;
@@ -106,8 +106,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
   const step = Math.min(effectScale * 3.1, 9.0);
   const spriteScale = effectScale * ctx.scale;
 
-  const gl = renderer.gl;
-  gl.setBlendMode(BlendMode.ADDITIVE);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
   if (renderFrame.rtxMode === RtxRenderMode.RTX) {
     const drawn = drawBeamFastStampedBody({
@@ -149,7 +148,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       });
     }
     if (!headDrawn) {
-      const headTint = new RGBA(headRgb[0], headRgb[1], headRgb[2], baseAlpha).toTuple();
+      const headTint = new RGBA(headRgb[0], headRgb[1], headRgb[2], baseAlpha).toWgl();
       renderer.drawAtlasSprite(texture, grid, atlasFrame, ctx.screenPos, spriteScale, ctx.angle, headTint);
     }
 
@@ -171,17 +170,17 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
             const glowFrame = glowAtlas.frame;
             const col = glowFrame % glowGrid;
             const row = (glowFrame / glowGrid) | 0;
-            const src: [number, number, number, number] = [
+            const src = wgl.makeRectangle(
               cellW * col,
               cellH * row,
               Math.max(0.0, cellW - 2.0),
               Math.max(0.0, cellH - 2.0),
-            ];
-            const tint = new RGBA(1.0, 1.0, 1.0, alpha).toTuple();
+            );
+            const tint = new RGBA(1.0, 1.0, 1.0, alpha).toWgl();
             const size = 64.0 * ctx.scale;
-            const dst: [number, number, number, number] = [ctx.screenPos.x, ctx.screenPos.y, size, size];
-            const texOrigin: [number, number] = [size * 0.5, size * 0.5];
-            gl.drawTexturePro(particlesTexture, src, dst, texOrigin, ctx.angle * RAD_TO_DEG, tint);
+            const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
+            const texOrigin = wgl.makeVector2(size * 0.5, size * 0.5);
+            wgl.drawTexturePro(particlesTexture, src, dst, texOrigin, ctx.angle * RAD_TO_DEG, tint);
           }
         }
       }
@@ -202,7 +201,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       });
     }
     if (!coreDrawn) {
-      const coreTint = new RGBA(coreRgb[0], coreRgb[1], coreRgb[2], baseAlpha).toTuple();
+      const coreTint = new RGBA(coreRgb[0], coreRgb[1], coreRgb[2], baseAlpha).toWgl();
       renderer.drawAtlasSprite(texture, grid, atlasFrame, ctx.screenPos, ctx.scale, ctx.angle, coreTint);
     }
 
@@ -232,7 +231,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       const v1 = 0.25;
 
       const glowTargets: Array<{ pos: Vec2 }> = [];
-      gl.beginQuads(texture);
+      wgl.beginQuads(texture);
 
       for (const creature of targets) {
         const targetScreen = renderer.worldToScreen(creature.pos);
@@ -244,53 +243,53 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
 
         // Outer strip (softer).
         const outerTint = new RGBA(0.5, 0.6, 1.0, baseAlpha);
-        const [oR, oG, oB, oA] = outerTint.toTuple();
+        const [oR, oG, oB, oA] = outerTint.toWgl();
         let sideOffset = side.mul(outerHalf);
         let p0 = ctx.screenPos.sub(sideOffset);
         let p1 = ctx.screenPos.add(sideOffset);
         let p2 = targetScreen.add(sideOffset);
         let p3 = targetScreen.sub(sideOffset);
 
-        gl.color4f(oR, oG, oB, oA);
-        gl.texCoord2f(u, v0);
-        gl.vertex2f(p0.x, p0.y);
-        gl.texCoord2f(u, v1);
-        gl.vertex2f(p1.x, p1.y);
-        gl.texCoord2f(u, v1);
-        gl.vertex2f(p2.x, p2.y);
-        gl.texCoord2f(u, v0);
-        gl.vertex2f(p3.x, p3.y);
+        wgl.rlColor4f(oR, oG, oB, oA);
+        wgl.rlTexCoord2f(u, v0);
+        wgl.rlVertex2f(p0.x, p0.y);
+        wgl.rlTexCoord2f(u, v1);
+        wgl.rlVertex2f(p1.x, p1.y);
+        wgl.rlTexCoord2f(u, v1);
+        wgl.rlVertex2f(p2.x, p2.y);
+        wgl.rlTexCoord2f(u, v0);
+        wgl.rlVertex2f(p3.x, p3.y);
 
         // Inner strip (brighter).
         const innerTint = new RGBA(0.5, 0.6, 1.0, baseAlpha);
-        const [iR, iG, iB, iA] = innerTint.toTuple();
+        const [iR, iG, iB, iA] = innerTint.toWgl();
         sideOffset = side.mul(innerHalf);
         p0 = ctx.screenPos.sub(sideOffset);
         p1 = ctx.screenPos.add(sideOffset);
         p2 = targetScreen.add(sideOffset);
         p3 = targetScreen.sub(sideOffset);
 
-        gl.color4f(iR, iG, iB, iA);
-        gl.texCoord2f(u, v0);
-        gl.vertex2f(p0.x, p0.y);
-        gl.texCoord2f(u, v1);
-        gl.vertex2f(p1.x, p1.y);
-        gl.texCoord2f(u, v1);
-        gl.vertex2f(p2.x, p2.y);
-        gl.texCoord2f(u, v0);
-        gl.vertex2f(p3.x, p3.y);
+        wgl.rlColor4f(iR, iG, iB, iA);
+        wgl.rlTexCoord2f(u, v0);
+        wgl.rlVertex2f(p0.x, p0.y);
+        wgl.rlTexCoord2f(u, v1);
+        wgl.rlVertex2f(p1.x, p1.y);
+        wgl.rlTexCoord2f(u, v1);
+        wgl.rlVertex2f(p2.x, p2.y);
+        wgl.rlTexCoord2f(u, v0);
+        wgl.rlVertex2f(p3.x, p3.y);
       }
 
-      gl.endQuads();
+      wgl.endQuads();
 
       for (const creature of glowTargets) {
         const targetScreen = renderer.worldToScreen(creature.pos);
-        const targetTint = new RGBA(0.5, 0.6, 1.0, baseAlpha).toTuple();
+        const targetTint = new RGBA(0.5, 0.6, 1.0, baseAlpha).toWgl();
         renderer.drawAtlasSprite(texture, grid, atlasFrame, targetScreen, spriteScale, 0.0, targetTint);
       }
     }
   }
 
-  gl.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
   return true;
 }

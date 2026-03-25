@@ -1,7 +1,6 @@
 // Port of crimson/screens/high_scores_view/view.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
@@ -610,18 +609,18 @@ export class HighScoresView {
     return false;
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx, { entityAlpha: this._worldEntityAlpha() });
+      pauseBackground.drawPauseBackground({ entityAlpha: this._worldEntityAlpha() });
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(ctx, this.state, this.state.config.display.width, this.state.config.display.height);
+    drawScreenFade(this.state, this.state.config.display.width, this.state.config.display.height);
 
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
@@ -652,17 +651,17 @@ export class HighScoresView {
 
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(leftPanelTopLeft.x, leftPanelTopLeft.y, panelW, HS_LEFT_PANEL_HEIGHT * scale),
       WHITE, fxDetail,
     );
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(rightPanelTopLeft.x, rightPanelTopLeft.y, panelW, HS_RIGHT_PANEL_HEIGHT * scale),
       WHITE, fxDetail, true,
     );
 
-    const selectedRank = drawMainPanel(ctx, this, {
+    const selectedRank = drawMainPanel(this, {
       resources,
       font,
       leftPanelTopLeft,
@@ -673,7 +672,7 @@ export class HighScoresView {
       request,
     });
 
-    drawRightPanel(ctx, this, {
+    drawRightPanel(this, {
       resources,
       font,
       rightTopLeft: rightPanelTopLeft,
@@ -681,11 +680,11 @@ export class HighScoresView {
       highlightRank: selectedRank,
     });
 
-    this._drawSign(ctx, resources);
-    this._drawMenuCursor(ctx, resources);
+    this._drawSign(resources);
+    this._drawMenuCursor(resources);
   }
 
-  private _drawSign(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(screenW | 0);
@@ -704,24 +703,24 @@ export class HighScoresView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
 
-  private _drawMenuCursor(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuCursor(resources: RuntimeResources): void {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
     const pos = new Vec2(mx, my);
-    drawMenuCursor(ctx, particles, cursorTex, pos, this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, pos, this._cursorPulseTime);
   }
 
   private _worldEntityAlpha(): number {

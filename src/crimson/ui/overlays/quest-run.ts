@@ -1,7 +1,6 @@
 // Port of crimson/ui/overlays/quest_run.py
 
 import * as wgl from '@wgl';
-import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
 import { type GrimMonoFont } from '@grim/fonts/grim-mono.ts';
 import { clamp } from '@grim/math.ts';
 import { drawQuestTitleOverlay } from './quest-title.ts';
@@ -47,7 +46,6 @@ export function questCompleteBannerAlpha(timerMs: number): number {
 }
 
 export function drawQuestTitleTimerOverlay(
-  ctx: WebGLContext,
   screenW: number,
   screenH: number,
   font: GrimMonoFont,
@@ -57,14 +55,13 @@ export function drawQuestTitleTimerOverlay(
 ): void {
   const alpha = questTitleAlpha(timerMs);
   if (alpha <= 0.0) return;
-  drawQuestTitleOverlay(ctx, screenW, screenH, font, title, number, alpha);
+  drawQuestTitleOverlay(screenW, screenH, font, title, number, alpha);
 }
 
 export function drawQuestCompleteBannerOverlay(
-  ctx: WebGLContext,
   screenW: number,
   screenH: number,
-  texture: GlTexture,
+  texture: wgl.Texture,
   timerMs: number,
 ): void {
   if (timerMs <= 0.0) return;
@@ -84,5 +81,5 @@ export function drawQuestCompleteBannerOverlay(
     height,
   );
   const tint = wgl.makeColor(1.0, 1.0, 1.0, clamp(alpha, 0.0, 1.0));
-  ctx.drawTexturePro(texture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
+  wgl.drawTexturePro(texture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 }

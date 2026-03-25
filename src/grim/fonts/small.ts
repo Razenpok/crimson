@@ -1,18 +1,16 @@
 // Port of grim/fonts/small.py
 
 import * as wgl from '@wgl';
-import { type GlTexture, type WebGLContext } from "@grim/webgl.ts";
 import { Vec2 } from '@grim/geom.ts';
 
 export interface SmallFontData {
   widths: number[];
-  texture: GlTexture;
+  texture: wgl.Texture;
   cellSize: number;
   grid: number;
 }
 
 export function drawSmallText(
-  ctx: WebGLContext,
   font: SmallFontData,
   text: string,
   pos: Vec2,
@@ -45,7 +43,7 @@ export function drawSmallText(
     // Native Grim2D applies a 1/512 UV inset on the DX8 path. Raylib/OpenGL
     // renders visibly cropped glyphs with that bias, so we intentionally use
     // the full glyph rect here.
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       font.texture,
       wgl.makeRectangle(srcX, srcY, width, font.cellSize),
       wgl.makeRectangle(xPos, yPos, width, font.cellSize),

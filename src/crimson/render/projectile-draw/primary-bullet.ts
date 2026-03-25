@@ -40,7 +40,7 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
     const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const tint = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, alphaByte / 255);
-    renderer.gl.drawTexturePro(bullet, src, dst, origin, ctx.angle * RAD_TO_DEG, tint);
+    wgl.drawTexturePro(bullet, src, dst, origin, ctx.angle * RAD_TO_DEG, tint);
     drawn = true;
   }
 

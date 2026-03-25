@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
@@ -216,23 +215,22 @@ export class PauseMenuView {
     this._updateHoverAmounts(dtMs);
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
-    const pauseBackground = this.state.pauseBackground as { drawPauseBackground(ctx: WebGLContext, entityAlpha?: number): void } | null;
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
+    const pauseBackground = this.state.pauseBackground as { drawPauseBackground(entityAlpha?: number): void } | null;
     if (pauseBackground != null) {
-      pauseBackground.drawPauseBackground(ctx, this._pauseBackgroundEntityAlpha());
+      pauseBackground.drawPauseBackground(this._pauseBackgroundEntityAlpha());
     }
 
     const screenW = this.state.config.display.width;
     const screenH = this.state.config.display.height;
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
     const resources = requireRuntimeResources(this.state);
-    this._drawMenuItems(ctx, resources);
-    this._drawMenuSign(ctx, resources);
+    this._drawMenuItems(resources);
+    this._drawMenuSign(resources);
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       new Vec2(...InputState.mousePosition()),
@@ -374,7 +372,7 @@ export class PauseMenuView {
     return this._timelineMs >= menuSlotStartMs(entry.slot);
   }
 
-  private _drawMenuItems(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuItems(resources: RuntimeResources): void {
     if (this._menuEntries.length === 0) return;
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
@@ -406,13 +404,13 @@ export class PauseMenuView {
 
       if (fxDetail) {
         drawUiQuadShadow(
-          ctx, item,
+          item,
           wgl.makeRectangle(0.0, 0.0, itemW, itemH),
           wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
           origin, rotationDeg,
         );
       }
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         item,
         wgl.makeRectangle(0.0, 0.0, itemW, itemH),
         dst,
@@ -442,7 +440,7 @@ export class PauseMenuView {
         MENU_LABEL_HEIGHT * itemScale,
       );
       const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
-      ctx.drawTexturePro(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
+      wgl.drawTexturePro(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
 
       // Glow pass for enabled entries
       if (this._menuEntryEnabled(entry)) {
@@ -451,17 +449,17 @@ export class PauseMenuView {
           glowAlpha = 0xFF - ((entry.readyTimerMs / 2) | 0);
         }
         const glowAlphaNorm = glowAlpha / 255;
-        ctx.setBlendMode(BlendMode.ADDITIVE);
-        ctx.drawTexturePro(
+        wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+        wgl.drawTexturePro(
           labelTex, src, labelDst, labelOrigin, rotationDeg,
           wgl.makeColor(1, 1, 1, glowAlphaNorm),
         );
-        ctx.setBlendMode(BlendMode.ALPHA);
+        wgl.endBlendMode();
       }
     }
   }
 
-  private _drawMenuSign(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuSign(resources: RuntimeResources): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(screenW | 0);
     const signPosY = screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL;
@@ -487,12 +485,12 @@ export class PauseMenuView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,

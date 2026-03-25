@@ -1,8 +1,8 @@
 // Port of crimson/render/world/renderer.py
 
+import * as wgl from '@wgl';
 import { CrimsonConfig } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import type { RenderFrame } from '@crimson/render/frame.ts';
 import * as viewport from './viewport.ts';
 import { buildWorldRenderCtx } from './context.ts';
@@ -10,7 +10,6 @@ import { drawWorld } from './draw.ts';
 
 export class WorldRenderer {
   constructor(
-    private readonly _gl: WebGLContext,
     public worldSize: number = 0,
     public config: CrimsonConfig | null = null,
     public camera: Vec2 = new Vec2()
@@ -25,13 +24,13 @@ export class WorldRenderer {
 
   draw(renderFrame: RenderFrame, drawAimIndicators: boolean = true, entityAlpha: number = 1.0): void {
     this.syncViewport(renderFrame.worldSize, renderFrame.config, renderFrame.camera);
-    const renderCtx = buildWorldRenderCtx(this, renderFrame, this._gl);
+    const renderCtx = buildWorldRenderCtx(this, renderFrame);
     drawWorld(renderCtx, drawAimIndicators, entityAlpha);
   }
 
   cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
-    const outW = runtimeW ?? this._gl.screenWidth;
-    const outH = runtimeH ?? this._gl.screenHeight;
+    const outW = runtimeW ?? wgl.getScreenWidth();
+    const outH = runtimeH ?? wgl.getScreenHeight();
     return viewport.cameraScreenSize(this.worldSize, this.config, outW, outH);
   }
 
@@ -40,7 +39,7 @@ export class WorldRenderer {
   }
 
   worldParams(): [Vec2, Vec2] {
-    const outSize = new Vec2(this._gl.screenWidth, this._gl.screenHeight);
+    const outSize = new Vec2(wgl.getScreenWidth(), wgl.getScreenHeight());
     const [camera, viewScale] = viewport.viewTransform(
       this.worldSize,
       this.config,

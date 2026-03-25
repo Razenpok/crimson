@@ -1,7 +1,6 @@
 // Port of crimson/screens/high_scores_view/right_panel.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
@@ -92,7 +91,6 @@ function savedScoreNames(view: HighScoresView): string[] {
 }
 
 function drawDropdown(
-  ctx: WebGLContext,
   opts: {
     resources: RuntimeResources;
     font: SmallFontData;
@@ -122,23 +120,23 @@ function drawDropdown(
   );
 
   const widgetH = isOpen ? fullH : headerH;
-  ctx.drawRectangle(Math.floor(widgetPos.x), Math.floor(widgetPos.y), Math.floor(widgetW), Math.floor(widgetH), 1, 1, 1, 1);
-  ctx.drawRectangle(
+  wgl.drawRectangle(Math.floor(widgetPos.x), Math.floor(widgetPos.y), Math.floor(widgetW), Math.floor(widgetH), wgl.makeColor(1, 1, 1, 1));
+  wgl.drawRectangle(
     Math.floor(widgetPos.x) + 1,
     Math.floor(widgetPos.y) + 1,
     Math.max(0, Math.floor(widgetW) - 2),
     Math.max(0, Math.floor(widgetH) - 2),
-    0, 0, 0, 1,
+    wgl.makeColor(0, 0, 0, 1),
   );
 
   if ((isOpen || hoveredHeader) && enabled) {
     const lineH = Math.max(1, Math.floor(1.0 * scale));
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(widgetPos.x),
       Math.floor(widgetPos.y + 15.0 * scale),
       Math.floor(widgetW),
       lineH,
-      1, 1, 1, 0.5,
+      wgl.makeColor(1, 1, 1, 0.5),
     );
   }
 
@@ -147,7 +145,7 @@ function drawDropdown(
     : getTexture(resources, TextureId.UI_DROP_OFF);
   const arrowW = arrowTex.width * scale;
   const arrowH = arrowTex.height * scale;
-  ctx.drawTexturePro(
+  wgl.drawTexturePro(
     arrowTex,
     wgl.makeRectangle(0.0, 0.0, arrowTex.width, arrowTex.height),
     wgl.makeRectangle(arrowPos.x, arrowPos.y, arrowW, arrowH),
@@ -160,7 +158,7 @@ function drawDropdown(
 
   selectedIndex = Math.max(0, Math.min(itemCount - 1, Math.floor(selectedIndex)));
   const headerAlpha = ((isOpen || hoveredHeader) && enabled) ? 242 / 255 : 191 / 255;
-  drawSmallText(ctx, font, items[selectedIndex], valuePos, wgl.makeColor(1, 1, 1, headerAlpha));
+  drawSmallText(font, items[selectedIndex], valuePos, wgl.makeColor(1, 1, 1, headerAlpha));
 
   if (!isOpen) return;
 
@@ -173,12 +171,11 @@ function drawDropdown(
     let alpha = 153 / 255;
     if (hovered) alpha = 242 / 255;
     if (idx === selectedIndex) alpha = Math.max(alpha, 245 / 255);
-    drawSmallText(ctx, font, label, new Vec2(valuePos.x, itemY), wgl.makeColor(1, 1, 1, alpha));
+    drawSmallText(font, label, new Vec2(valuePos.x, itemY), wgl.makeColor(1, 1, 1, alpha));
   }
 }
 
 export function drawRightPanel(
-  ctx: WebGLContext,
   view: HighScoresView,
   opts: {
     resources: RuntimeResources;
@@ -189,10 +186,10 @@ export function drawRightPanel(
   },
 ): void {
   if (opts.highlightRank === null) {
-    drawRightPanelQuestOptions(ctx, view, opts);
+    drawRightPanelQuestOptions(view, opts);
     return;
   }
-  drawRightPanelLocalScore(ctx, view, {
+  drawRightPanelLocalScore(view, {
     resources: opts.resources,
     font: opts.font,
     rightTopLeft: opts.rightTopLeft,
@@ -202,7 +199,6 @@ export function drawRightPanel(
 }
 
 function drawRightPanelQuestOptions(
-  ctx: WebGLContext,
   view: HighScoresView,
   opts: {
     resources: RuntimeResources;
@@ -222,7 +218,7 @@ function drawRightPanelQuestOptions(
     : getTexture(resources, TextureId.UI_CHECK_OFF);
   const checkW = checkTex.width * scale;
   const checkH = checkTex.height * scale;
-  ctx.drawTexturePro(
+  wgl.drawTexturePro(
     checkTex,
     wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
     wgl.makeRectangle(
@@ -236,11 +232,11 @@ function drawRightPanelQuestOptions(
     WHITE,
   );
 
-  drawSmallText(ctx, font, 'Show internet scores', optionsTopLeft.add(new Vec2(HS_RIGHT_SHOW_INTERNET_X * scale, HS_RIGHT_SHOW_INTERNET_Y * scale)), textColor);
-  drawSmallText(ctx, font, 'Number of players', optionsTopLeft.add(new Vec2(HS_RIGHT_NUMBER_PLAYERS_X * scale, HS_RIGHT_NUMBER_PLAYERS_Y * scale)), textColor);
-  drawSmallText(ctx, font, 'Game mode', optionsTopLeft.add(new Vec2(HS_RIGHT_GAME_MODE_X * scale, HS_RIGHT_GAME_MODE_Y * scale)), textColor);
-  drawSmallText(ctx, font, 'Show scores:', optionsTopLeft.add(new Vec2(HS_RIGHT_SHOW_SCORES_X * scale, HS_RIGHT_SHOW_SCORES_Y * scale)), textColor);
-  drawSmallText(ctx, font, 'Selected score list:', optionsTopLeft.add(new Vec2(HS_RIGHT_SCORE_LIST_X * scale, HS_RIGHT_SCORE_LIST_Y * scale)), textColor);
+  drawSmallText(font, 'Show internet scores', optionsTopLeft.add(new Vec2(HS_RIGHT_SHOW_INTERNET_X * scale, HS_RIGHT_SHOW_INTERNET_Y * scale)), textColor);
+  drawSmallText(font, 'Number of players', optionsTopLeft.add(new Vec2(HS_RIGHT_NUMBER_PLAYERS_X * scale, HS_RIGHT_NUMBER_PLAYERS_Y * scale)), textColor);
+  drawSmallText(font, 'Game mode', optionsTopLeft.add(new Vec2(HS_RIGHT_GAME_MODE_X * scale, HS_RIGHT_GAME_MODE_Y * scale)), textColor);
+  drawSmallText(font, 'Show scores:', optionsTopLeft.add(new Vec2(HS_RIGHT_SHOW_SCORES_X * scale, HS_RIGHT_SHOW_SCORES_Y * scale)), textColor);
+  drawSmallText(font, 'Selected score list:', optionsTopLeft.add(new Vec2(HS_RIGHT_SCORE_LIST_X * scale, HS_RIGHT_SCORE_LIST_Y * scale)), textColor);
 
   // Dropdown items
   const showScoresItems = ['Best of all time', 'Best of month', 'Best of week', 'Best of day'];
@@ -311,7 +307,7 @@ function drawRightPanelQuestOptions(
   // Active list must render last so overlapping widgets don't occlude open options.
   for (const [isOpen, widgetOffset, widgetW, items, selectedIndex, valueOffset, arrowOffset, enabled] of dropdowns) {
     if (isOpen) continue;
-    drawDropdown(ctx, {
+    drawDropdown({
       resources,
       font,
       widgetPos: optionsTopLeft.add(widgetOffset.mul(scale)),
@@ -327,7 +323,7 @@ function drawRightPanelQuestOptions(
   }
   for (const [isOpen, widgetOffset, widgetW, items, selectedIndex, valueOffset, arrowOffset, enabled] of dropdowns) {
     if (!isOpen) continue;
-    drawDropdown(ctx, {
+    drawDropdown({
       resources,
       font,
       widgetPos: optionsTopLeft.add(widgetOffset.mul(scale)),
@@ -344,7 +340,6 @@ function drawRightPanelQuestOptions(
 }
 
 function drawRightPanelLocalScore(
-  ctx: WebGLContext,
   view: HighScoresView,
   opts: {
     resources: RuntimeResources;
@@ -373,31 +368,31 @@ function drawRightPanelLocalScore(
 
   let name = entry.name();
   if (!name) name = '???';
-  drawSmallText(ctx, font, name, cardTopLeft.add(new Vec2(HS_LOCAL_NAME_X * scale, HS_LOCAL_NAME_Y * scale)), textColor);
-  drawSmallText(ctx, font, 'Local score', cardTopLeft.add(new Vec2(HS_LOCAL_LABEL_X * scale, HS_LOCAL_LABEL_Y * scale)), textColor);
+  drawSmallText(font, name, cardTopLeft.add(new Vec2(HS_LOCAL_NAME_X * scale, HS_LOCAL_NAME_Y * scale)), textColor);
+  drawSmallText(font, 'Local score', cardTopLeft.add(new Vec2(HS_LOCAL_LABEL_X * scale, HS_LOCAL_LABEL_Y * scale)), textColor);
 
   // Separator line
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.floor(cardTopLeft.x + 78.0 * scale),
     Math.floor(cardTopLeft.y + 57.0 * scale),
     Math.floor(39.0 * scale),
     1,
-    separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+    separatorColor,
   );
 
   const dateText = formatScoreDate(entry);
   if (dateText) {
-    drawSmallText(ctx, font, dateText, cardTopLeft.add(new Vec2(HS_LOCAL_DATE_X * scale, HS_LOCAL_DATE_Y * scale)), textColor);
+    drawSmallText(font, dateText, cardTopLeft.add(new Vec2(HS_LOCAL_DATE_X * scale, HS_LOCAL_DATE_Y * scale)), textColor);
   }
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.floor(cardTopLeft.x + 74.0 * scale),
     Math.floor(cardTopLeft.y + 72.0 * scale),
     Math.floor(192.0 * scale),
     1,
-    separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+    separatorColor,
   );
 
-  drawSmallText(ctx, font, 'Score', cardTopLeft.add(new Vec2(HS_LOCAL_SCORE_LABEL_X * scale, HS_LOCAL_SCORE_LABEL_Y * scale)), textColor);
+  drawSmallText(font, 'Score', cardTopLeft.add(new Vec2(HS_LOCAL_SCORE_LABEL_X * scale, HS_LOCAL_SCORE_LABEL_Y * scale)), textColor);
 
   let modeId: GameMode;
   const modeRaw = Math.floor(entry.gameModeId);
@@ -416,14 +411,14 @@ function drawRightPanelLocalScore(
     timeLabel = 'Game time';
   }
 
-  drawSmallText(ctx, font, timeLabel, cardTopLeft.add(new Vec2(HS_LOCAL_TIME_LABEL_X * scale, HS_LOCAL_TIME_LABEL_Y * scale)), gameTimeColor);
+  drawSmallText(font, timeLabel, cardTopLeft.add(new Vec2(HS_LOCAL_TIME_LABEL_X * scale, HS_LOCAL_TIME_LABEL_Y * scale)), gameTimeColor);
   // Vertical separator
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.floor(cardTopLeft.x + 170.0 * scale),
     Math.floor(cardTopLeft.y + 90.0 * scale),
     1,
     Math.floor(48.0 * scale),
-    separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+    separatorColor,
   );
 
   // Score value
@@ -439,21 +434,21 @@ function drawRightPanelLocalScore(
   } else {
     scoreValue = `${scoreXp}`;
   }
-  drawSmallText(ctx, font, scoreValue, cardTopLeft.add(new Vec2(scoreValuePosX, scoreValuePosY)), valueColor);
+  drawSmallText(font, scoreValue, cardTopLeft.add(new Vec2(scoreValuePosX, scoreValuePosY)), valueColor);
 
   if (modeId === GameMode.QUESTS) {
-    drawSmallText(ctx, font, `${scoreXp}`, cardTopLeft.add(new Vec2(HS_LOCAL_TIME_VALUE_X * scale, HS_LOCAL_TIME_VALUE_Y * scale)), gameTimeColor);
+    drawSmallText(font, `${scoreXp}`, cardTopLeft.add(new Vec2(HS_LOCAL_TIME_VALUE_X * scale, HS_LOCAL_TIME_VALUE_Y * scale)), gameTimeColor);
   } else {
-    drawClockGauge(ctx, {
+    drawClockGauge({
       resources,
       elapsedMs,
       pos: cardTopLeft.add(new Vec2(HS_LOCAL_CLOCK_X * scale, HS_LOCAL_CLOCK_Y * scale)),
       scale,
     });
-    drawSmallText(ctx, font, formatTimeMmSs(elapsedMs), cardTopLeft.add(new Vec2(HS_LOCAL_TIME_VALUE_X * scale, HS_LOCAL_TIME_VALUE_Y * scale)), gameTimeColor);
+    drawSmallText(font, formatTimeMmSs(elapsedMs), cardTopLeft.add(new Vec2(HS_LOCAL_TIME_VALUE_X * scale, HS_LOCAL_TIME_VALUE_Y * scale)), gameTimeColor);
   }
 
-  drawSmallText(ctx, font, `Rank: ${formatOrdinal(idx + 1)}`, cardTopLeft.add(new Vec2(HS_LOCAL_RANK_X * scale, HS_LOCAL_RANK_Y * scale)), textColor);
+  drawSmallText(font, `Rank: ${formatOrdinal(idx + 1)}`, cardTopLeft.add(new Vec2(HS_LOCAL_RANK_X * scale, HS_LOCAL_RANK_Y * scale)), textColor);
 
   const frags = Math.floor(entry.creatureKillCount);
   const shotsFired = Math.floor(entry.shotsFired);
@@ -463,18 +458,18 @@ function drawRightPanelLocalScore(
     hitPct = Math.floor((shotsHit * 100) / shotsFired);
   }
 
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.floor(cardTopLeft.x + 74.0 * scale),
     Math.floor(cardTopLeft.y + 142.0 * scale),
     Math.floor(192.0 * scale),
     1,
-    separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+    separatorColor,
   );
 
   const weaponId = entry.mostUsedWeaponId;
   const [weaponName, iconIndex] = weaponLabelAndIcon(view, weaponId);
   if (iconIndex !== null) {
-    drawWicon(ctx, {
+    drawWicon({
       resources,
       iconIndex,
       pos: cardTopLeft.add(new Vec2(HS_LOCAL_WICON_X * scale, HS_LOCAL_WICON_Y * scale)),
@@ -485,21 +480,20 @@ function drawRightPanelLocalScore(
     0.0,
     32.0 * scale - measureSmallTextWidth(font, weaponName) * 0.5,
   );
-  drawSmallText(ctx, font, weaponName, cardTopLeft.add(new Vec2(weaponNameX, HS_LOCAL_WEAPON_Y * scale)), lowerSectionColor);
-  drawSmallText(ctx, font, `Frags: ${frags}`, cardTopLeft.add(new Vec2(HS_LOCAL_FRAGS_X * scale, HS_LOCAL_FRAGS_Y * scale)), lowerSectionColor);
-  drawSmallText(ctx, font, `Hit %: ${hitPct}%`, cardTopLeft.add(new Vec2(HS_LOCAL_HIT_X * scale, HS_LOCAL_HIT_Y * scale)), lowerSectionColor);
+  drawSmallText(font, weaponName, cardTopLeft.add(new Vec2(weaponNameX, HS_LOCAL_WEAPON_Y * scale)), lowerSectionColor);
+  drawSmallText(font, `Frags: ${frags}`, cardTopLeft.add(new Vec2(HS_LOCAL_FRAGS_X * scale, HS_LOCAL_FRAGS_Y * scale)), lowerSectionColor);
+  drawSmallText(font, `Hit %: ${hitPct}%`, cardTopLeft.add(new Vec2(HS_LOCAL_HIT_X * scale, HS_LOCAL_HIT_Y * scale)), lowerSectionColor);
 
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.floor(cardTopLeft.x + 74.0 * scale),
     Math.floor(cardTopLeft.y + 194.0 * scale),
     Math.floor(192.0 * scale),
     1,
-    separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+    separatorColor,
   );
 }
 
 function drawClockGauge(
-  ctx: WebGLContext,
   opts: {
     resources: RuntimeResources;
     elapsedMs: number;
@@ -515,13 +509,13 @@ function drawClockGauge(
   const dst = wgl.makeRectangle(pos.x, pos.y, drawW, drawH);
   const srcTable = wgl.makeRectangle(0.0, 0.0, tableTex.width, tableTex.height);
   const srcPointer = wgl.makeRectangle(0.0, 0.0, pointerTex.width, pointerTex.height);
-  ctx.drawTexturePro(tableTex, srcTable, dst, ORIGIN, 0.0, WHITE);
+  wgl.drawTexturePro(tableTex, srcTable, dst, ORIGIN, 0.0, WHITE);
 
   const seconds = Math.max(0, Math.floor(elapsedMs) / 1000) | 0;
   const rotationDeg = seconds * 6.0;
   const centerX = pos.x + drawW * 0.5;
   const centerY = pos.y + drawH * 0.5;
-  ctx.drawTexturePro(
+  wgl.drawTexturePro(
     pointerTex,
     srcPointer,
     wgl.makeRectangle(centerX, centerY, drawW, drawH),
@@ -532,7 +526,6 @@ function drawClockGauge(
 }
 
 function drawWicon(
-  ctx: WebGLContext,
   opts: {
     resources: RuntimeResources;
     iconIndex: number;
@@ -552,7 +545,7 @@ function drawWicon(
   const srcY = Math.floor(frame / grid) * cellH;
   const iconW = cellW * 2.0;
   const iconH = cellH;
-  ctx.drawTexturePro(
+  wgl.drawTexturePro(
     tex,
     wgl.makeRectangle(srcX, srcY, iconW, iconH),
     wgl.makeRectangle(pos.x, pos.y, iconW * scale, iconH * scale),

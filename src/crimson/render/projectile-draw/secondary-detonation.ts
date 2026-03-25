@@ -4,7 +4,6 @@ import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import type { SecondaryProjectileDrawCtx } from './types.ts';
 
@@ -19,17 +18,16 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
   if (fade <= 1e-3 || detScale <= 1e-6) return true;
 
   const scale = ctx.scale;
-  const gl = renderer.gl;
 
   const particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
   if (particlesTexture === null) {
     // Fallback: approximate circle outline with a white-texture quad
     const radius = Math.max(1.0, detScale * t * 80.0);
     const size = radius * 2.0;
-    const whTex = gl.whiteTexture;
+    const whTex = wgl.getWhiteTexture();
     const sp = ctx.screenPos;
     const tint = wgl.makeColor(1.0, 180 / 255, 100 / 255, fade * (180.0 / 255.0));
-    gl.drawTexturePro(whTex, wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
+    wgl.drawTexturePro(whTex, wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
     return true;
   }
 
@@ -54,15 +52,15 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
     if (a <= 1e-3) return;
     const dstSize = size * scale;
     if (dstSize <= 1e-3) return;
-    const tint = new RGBA(1.0, 0.6, 0.1, a).toTuple();
+    const tint = new RGBA(1.0, 0.6, 0.1, a).toWgl();
     const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, dstSize, dstSize);
     const origin = wgl.makeVector2(dstSize * 0.5, dstSize * 0.5);
-    gl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
+    wgl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
   };
 
-  gl.setBlendMode(BlendMode.ADDITIVE);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   drawDetonationQuad(detScale * t * 64.0, 1.0);
   drawDetonationQuad(detScale * t * 200.0, 0.3);
-  gl.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
   return true;
 }

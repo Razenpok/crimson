@@ -1,9 +1,9 @@
 // Port of crimson/render/world/projectiles.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
@@ -96,9 +96,8 @@ export function drawSharpshooterLaserSight(
   const tailAlpha = clamp(alpha * 0.5, 0.0, 1.0);
   const headAlpha = clamp(alpha * 0.2, 0.0, 1.0);
 
-  const ctx = renderCtx.gl;
-  ctx.setBlendMode(BlendMode.ADDITIVE);
-  ctx.beginQuads(bulletTrailTexture);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+  wgl.beginQuads(bulletTrailTexture);
 
   for (const player of players) {
     if (player.health <= 0.0) continue;
@@ -124,25 +123,25 @@ export function drawSharpshooterLaserSight(
     const p2 = endScreen.add(sideOffset);
     const p3 = endScreen.sub(sideOffset);
 
-    ctx.color4f(1, 0, 0, tailAlpha);
-    ctx.texCoord2f(0.0, 0.0);
-    ctx.vertex2f(p0.x, p0.y);
+    wgl.rlColor4f(1, 0, 0, tailAlpha);
+    wgl.rlTexCoord2f(0.0, 0.0);
+    wgl.rlVertex2f(p0.x, p0.y);
 
-    ctx.color4f(1, 0, 0, tailAlpha);
-    ctx.texCoord2f(1.0, 0.0);
-    ctx.vertex2f(p1.x, p1.y);
+    wgl.rlColor4f(1, 0, 0, tailAlpha);
+    wgl.rlTexCoord2f(1.0, 0.0);
+    wgl.rlVertex2f(p1.x, p1.y);
 
-    ctx.color4f(1, 0, 0, headAlpha);
-    ctx.texCoord2f(1.0, 0.5);
-    ctx.vertex2f(p2.x, p2.y);
+    wgl.rlColor4f(1, 0, 0, headAlpha);
+    wgl.rlTexCoord2f(1.0, 0.5);
+    wgl.rlVertex2f(p2.x, p2.y);
 
-    ctx.color4f(1, 0, 0, headAlpha);
-    ctx.texCoord2f(0.0, 0.5);
-    ctx.vertex2f(p3.x, p3.y);
+    wgl.rlColor4f(1, 0, 0, headAlpha);
+    wgl.rlTexCoord2f(0.0, 0.5);
+    wgl.rlVertex2f(p3.x, p3.y);
   }
 
-  ctx.endQuads();
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endQuads();
+  wgl.endBlendMode();
 }
 
 export function drawSecondaryProjectile(
@@ -174,13 +173,12 @@ export function drawSecondaryProjectile(
   if (drawSecondaryProjectileFromRegistry(registryCtx)) return;
 
   // Fallback: draw a small colored circle approximation using a white texture quad.
-  const ctx = renderCtx.gl;
   const r = Math.max(1.0, 4.0 * scale);
   const size = r * 2.0;
-  const whTex = ctx.whiteTexture;
-  const src: [number, number, number, number] = [0, 0, 1, 1];
-  const dst: [number, number, number, number] = [screen.x, screen.y, size, size];
-  const origin: [number, number] = [size * 0.5, size * 0.5];
-  const tint: [number, number, number, number] = [200 / 255, 200 / 255, 220 / 255, (200 / 255) * alpha];
-  ctx.drawTexturePro(whTex, src, dst, origin, 0, tint);
+  const whTex = wgl.getWhiteTexture();
+  const src = wgl.makeRectangle(0, 0, 1, 1);
+  const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
+  const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+  const tint = wgl.makeColor(200 / 255, 200 / 255, 220 / 255, (200 / 255) * alpha);
+  wgl.drawTexturePro(whTex, src, dst, origin, 0, tint);
 }

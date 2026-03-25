@@ -1,6 +1,6 @@
 // Port of grim/assets.py
 
-import { type GlTexture, type WebGLContext } from './webgl.ts';
+import * as wgl from '@wgl';
 import { paqToMap } from './paq.ts';
 import { decodeJazToImageBitmap } from './jaz.ts';
 import { SmallFontData } from "@grim/fonts/small.js";
@@ -188,11 +188,11 @@ export const TEXTURE_SPECS: ReadonlyMap<TextureId, TextureSpec> = new Map([
 
 export interface RuntimeResources {
   assetsUrl: string;
-  textures: Map<TextureId, GlTexture>;
+  textures: Map<TextureId, wgl.Texture>;
   smallFont: SmallFontData;
 }
 
-export function getTexture(res: RuntimeResources, id: TextureId): GlTexture {
+export function getTexture(res: RuntimeResources, id: TextureId): wgl.Texture {
   const tex = res.textures.get(id);
   if (!tex) {
     const spec = TEXTURE_SPECS.get(id);
@@ -202,9 +202,9 @@ export function getTexture(res: RuntimeResources, id: TextureId): GlTexture {
 }
 
 // Unused in WebGL port: browser handles resource cleanup on page unload
-export function unloadResources(ctx: WebGLContext, res: RuntimeResources): void {
+export function unloadResources(res: RuntimeResources): void {
   for (const tex of res.textures.values()) {
-    ctx.unloadTexture(tex);
+    wgl.unloadTexture(tex);
   }
   res.textures.clear();
 }
@@ -357,7 +357,6 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
 }
 
 export async function loadRuntimeResources(
-  ctx: WebGLContext,
   assetsUrl: string,
 ): Promise<RuntimeResources> {
   const fetchUrl = await resolveAssetsUrl(assetsUrl);
@@ -367,12 +366,12 @@ export async function loadRuntimeResources(
   const buffer = await response.arrayBuffer();
   const entries = paqToMap(buffer);
 
-  const textures = new Map<TextureId, GlTexture>();
+  const textures = new Map<TextureId, wgl.Texture>();
   for (const [textureId, spec] of TEXTURE_SPECS) {
     const data = entries.get(spec.relPath);
     if (!data) throw new Error(`Missing runtime texture: ${spec.relPath}`);
     const bitmap = await loadImageFromPaqEntry(spec.relPath, data);
-    const glTex = ctx.loadTexture(bitmap, {
+    const glTex = wgl.loadTexture(bitmap, {
       clamp: spec.clamp,
       pointFilter: spec.pointFilter,
     });

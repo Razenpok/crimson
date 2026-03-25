@@ -4,7 +4,6 @@ import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { type EffectEntry, ParticleStyleId } from '@crimson/effects.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { RAD_TO_DEG } from './constants.ts';
@@ -52,8 +51,7 @@ export function drawParticlePool(
   const config = frame.config;
   const fxDetail1 = config !== null ? fxDetailEnabled(config.display, 1) : true;
 
-  const ctx = renderCtx.gl;
-  ctx.setBlendMode(BlendMode.ADDITIVE);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
   if (fxDetail1 && srcLarge !== null) {
     const alphaByte = clamp(alpha * 0.065, 0.0, 1.0);
@@ -68,7 +66,7 @@ export function drawParticlePool(
       const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
       const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-      ctx.drawTexturePro(texture, srcLarge, dst, origin, 0.0, tint);
+      wgl.drawTexturePro(texture, srcLarge, dst, origin, 0.0, tint);
     }
   }
 
@@ -86,7 +84,7 @@ export function drawParticlePool(
     const tint = wgl.makeColor(
       entry.scaleX, entry.scaleY, entry.scaleZ, entry.age * alpha,
     );
-    ctx.drawTexturePro(texture, srcNormal, dst, origin, rotationDeg, tint);
+    wgl.drawTexturePro(texture, srcNormal, dst, origin, rotationDeg, tint);
   }
 
   const alphaClamped = clamp(alpha, 0.0, 1.0);
@@ -102,10 +100,10 @@ export function drawParticlePool(
     const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);
     const tint = wgl.makeColor(1, 1, 1, entry.age * alphaClamped);
-    ctx.drawTexturePro(texture, srcStyle8, dst, origin, 0.0, tint);
+    wgl.drawTexturePro(texture, srcStyle8, dst, origin, 0.0, tint);
   }
 
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 }
 
 export function drawSpriteEffectPool(
@@ -137,8 +135,7 @@ export function drawSpriteEffectPool(
   const src = wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
   const scale = WorldRenderCtx.viewScaleAvg(viewScale);
 
-  const ctx = renderCtx.gl;
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
   for (const entry of effects) {
     if (!entry.active) continue;
     const size = entry.scale * scale;
@@ -149,9 +146,9 @@ export function drawSpriteEffectPool(
     const rotationDeg = entry.rotation * RAD_TO_DEG;
     const c = entry.color.scaledAlpha(alpha);
     const tint = wgl.makeColor(c.r, c.g, c.b, c.a);
-    ctx.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
+    wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
   }
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 }
 
 export function drawEffectPool(
@@ -212,21 +209,20 @@ export function drawEffectPool(
 
     const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);
-    renderCtx.gl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
+    wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
   }
 
-  const ctx = renderCtx.gl;
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
   for (const entry of effects) {
     if (!entry.flags || entry.age < 0.0) continue;
     if (entry.flags & 0x40) drawEntry(entry);
   }
 
-  ctx.setBlendMode(BlendMode.ADDITIVE);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   for (const entry of effects) {
     if (!entry.flags || entry.age < 0.0) continue;
     if (!(entry.flags & 0x40)) drawEntry(entry);
   }
 
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 }

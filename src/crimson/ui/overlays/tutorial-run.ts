@@ -1,7 +1,6 @@
 // Port of crimson/ui/overlays/tutorial_run.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 
 export interface TutorialOverlayState {
@@ -48,7 +47,6 @@ export function tutorialPromptPanelRect(
 }
 
 function drawRectOutline(
-  ctx: WebGLContext,
   x: number,
   y: number,
   w: number,
@@ -58,18 +56,18 @@ function drawRectOutline(
   b: number,
   a: number,
 ): void {
+  const color = wgl.makeColor(r, g, b, a);
   // Top edge
-  ctx.drawRectangle(x, y, w, 1, r, g, b, a);
+  wgl.drawRectangle(x, y, w, 1, color);
   // Bottom edge
-  ctx.drawRectangle(x, y + h - 1, w, 1, r, g, b, a);
+  wgl.drawRectangle(x, y + h - 1, w, 1, color);
   // Left edge
-  ctx.drawRectangle(x, y + 1, 1, h - 2, r, g, b, a);
+  wgl.drawRectangle(x, y + 1, 1, h - 2, color);
   // Right edge
-  ctx.drawRectangle(x + w - 1, y + 1, 1, h - 2, r, g, b, a);
+  wgl.drawRectangle(x + w - 1, y + 1, 1, h - 2, color);
 }
 
 export function drawTutorialPromptPanel(
-  ctx: WebGLContext,
   screenW: number,
   text: string,
   alpha: number,
@@ -91,10 +89,10 @@ export function drawTutorialPromptPanel(
   const [rx, ry, rw, rh] = rect;
 
   // Background fill
-  ctx.drawRectangle(rx, ry, rw, rh, 0, 0, 0, alpha * 0.8);
+  wgl.drawRectangle(rx, ry, rw, rh, wgl.makeColor(0, 0, 0, alpha * 0.8));
 
   // Border outline
-  drawRectOutline(ctx, rx, ry, rw, rh, 1, 1, 1, alpha);
+  drawRectOutline(rx, ry, rw, rh, 1, 1, 1, alpha);
 
   // Draw text lines
   const textAlpha = Math.min(1.0, Math.max(0.0, alpha * 0.9));
@@ -108,7 +106,6 @@ export function drawTutorialPromptPanel(
 }
 
 export function drawTutorialOverlayPanels(
-  ctx: WebGLContext,
   screenW: number,
   overlay: TutorialOverlayState,
   scale: number,
@@ -118,7 +115,6 @@ export function drawTutorialOverlayPanels(
 ): void {
   if (overlay.promptText && overlay.promptAlpha > 1e-3) {
     drawTutorialPromptPanel(
-      ctx,
       screenW,
       overlay.promptText,
       overlay.promptAlpha,
@@ -131,7 +127,6 @@ export function drawTutorialOverlayPanels(
   }
   if (overlay.hintText && overlay.hintAlpha > 1e-3) {
     drawTutorialPromptPanel(
-      ctx,
       screenW,
       overlay.hintText,
       overlay.hintAlpha,

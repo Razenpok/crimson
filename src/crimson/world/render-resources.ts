@@ -10,7 +10,7 @@ import { TextureId as TId } from '@grim/assets.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { GroundRenderer } from '@grim/terrain-render.ts';
-import type { GlTexture, WebGLContext } from '@grim/webgl.ts';
+import * as wgl from '@wgl';
 import { creatureCorpseFrameForType } from '@crimson/creatures/anim.ts';
 import type { CreaturePool } from '@crimson/creatures/runtime.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
@@ -24,7 +24,6 @@ import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 import { terrainFxBatchIsEmpty } from '@crimson/sim/terrain-fx.ts';
 
 export class RenderResources {
-  private _ctx: WebGLContext;
   private _assetsUrl: string;
   worldSize: number;
   config: CrimsonConfig | null;
@@ -34,8 +33,7 @@ export class RenderResources {
   private _pendingTerrainFxBatches: TerrainFxBatch[] = [];
   private _resources: RuntimeResources | null = null;
 
-  constructor(ctx: WebGLContext, worldSize: number = 1024.0, config: CrimsonConfig | null = null, assetsUrl: string = './assets') {
-    this._ctx = ctx;
+  constructor(worldSize: number = 1024.0, config: CrimsonConfig | null = null, assetsUrl: string = './assets') {
     this._assetsUrl = assetsUrl;
     this.worldSize = worldSize;
     this.config = config;
@@ -50,7 +48,7 @@ export class RenderResources {
     this._resources = value;
   }
 
-  registryTexture(textureId: TextureId): GlTexture {
+  registryTexture(textureId: TextureId): wgl.Texture {
     return getTexture(this.resources, textureId);
   }
 
@@ -63,11 +61,10 @@ export class RenderResources {
     this.ground.textureScale = this.config.display.textureScale;
   }
 
-  setGroundTextures(base: GlTexture, overlay: GlTexture, detail: GlTexture): void {
+  setGroundTextures(base: wgl.Texture, overlay: wgl.Texture, detail: wgl.Texture): void {
     this.clearPendingTerrainFx();
     if (this.ground === null) {
       this.ground = new GroundRenderer(
-        this._ctx,
         base,
         overlay,
         detail,

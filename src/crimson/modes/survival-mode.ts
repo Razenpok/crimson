@@ -1,7 +1,6 @@
 // Port of crimson/modes/survival_mode.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -75,14 +74,12 @@ export class SurvivalMode extends BaseGameplayMode {
   private _lanLastTickIndex = -1;
 
   constructor(opts: {
-    gl: WebGLContext;
     config: CrimsonConfig;
     console?: ConsoleState | null;
     audio?: AudioState | null;
     audioRng: Crand;
   }) {
     super({
-      gl: opts.gl,
       worldSize: WORLD_SIZE,
       defaultGameModeId: GameMode.SURVIVAL,
       demoModeActive: false,
@@ -241,18 +238,18 @@ export class SurvivalMode extends BaseGameplayMode {
     this._perkMenu.tickTimeline(dtUiMs);
   }
 
-  protected override _drawPerkMenu(ctx: WebGLContext, choices: readonly PerkId[]): void {
-    this._perkMenu.draw(ctx, this._perkMenuUiContext(), choices);
+  protected override _drawPerkMenu(choices: readonly PerkId[]): void {
+    this._perkMenu.draw(this._perkMenuUiContext(), choices);
   }
 
-  protected _drawPerkPrompt(ctx: WebGLContext, opts: {
+  protected _drawPerkPrompt(opts: {
     pendingCount: number;
     anyAlive: boolean;
     menuActive: boolean;
     textColor: wgl.Color;
     promptScale: number;
   }): void {
-    this._perkPrompt.draw(ctx, {
+    this._perkPrompt.draw({
       uiCtx: this._perkMenuUiContext(),
       pendingCount: opts.pendingCount,
       anyAlive: opts.anyAlive,
@@ -597,11 +594,10 @@ export class SurvivalMode extends BaseGameplayMode {
   // Draw
   // ---------------------------------------------------------------------------
 
-  private _drawGameCursor(ctx: WebGLContext): void {
+  private _drawGameCursor(): void {
     const resources = this.renderResources.resources as RuntimeResources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       mousePos,
@@ -609,22 +605,22 @@ export class SurvivalMode extends BaseGameplayMode {
     );
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     const perkMenuActive = this._perkMenu.active;
 
     this._drawWorld({
       drawAimIndicators: !this._gameOverActive && !perkMenuActive,
       entityAlpha: this._worldEntityAlpha(),
     });
-    this._drawScreenFade(ctx);
+    this._drawScreenFade();
 
     let hudBottom = 0.0;
     if (!this._gameOverActive && !perkMenuActive) {
       const hudAlpha = clamp(this._hudFadeMs / PERK_MENU_TRANSITION_MS, 0.0, 1.0);
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
 
-      this._drawTargetHealthBar(ctx, { alpha: hudAlpha });
-      hudBottom = drawHudOverlay(ctx, {
+      this._drawTargetHealthBar({ alpha: hudAlpha });
+      hudBottom = drawHudOverlay({
         resources: this.renderResources.resources as RuntimeResources,
         state: this._hudState,
         font: this._small,
@@ -652,20 +648,17 @@ export class SurvivalMode extends BaseGameplayMode {
       const elapsedMs = this._sessionElapsedMs();
 
       this._drawUiText(
-        ctx,
         `survival: t=${(elapsedMs / 1000.0).toFixed(1)}s  stage=${this._spawnState.stage | 0}`,
         new Vec2(x, y),
         UI_TEXT_COLOR,
       );
       this._drawUiText(
-        ctx,
         `xp=${this.player.experience}  level=${this.player.level}  kills=${this.creatures.killCount}`,
         new Vec2(x, y + line),
         UI_HINT_COLOR,
       );
       const god = this.state.debugGodMode ? 'on' : 'off';
       this._drawUiText(
-        ctx,
         `debug: [/] weapon  F3 perk+1  F2 god=${god}  X xp+5000`,
         new Vec2(x, y + line * 2.0),
         UI_HINT_COLOR,
@@ -673,42 +666,42 @@ export class SurvivalMode extends BaseGameplayMode {
       );
       let yExtra = y + line * 3.0;
       if (this._paused) {
-        this._drawUiText(ctx, 'paused (TAB)', new Vec2(x, yExtra), UI_HINT_COLOR);
+        this._drawUiText('paused (TAB)', new Vec2(x, yExtra), UI_HINT_COLOR);
         yExtra += line;
       }
       if (this.player.health <= 0.0) {
-        this._drawUiText(ctx, 'game over', new Vec2(x, yExtra), UI_ERROR_COLOR);
+        this._drawUiText('game over', new Vec2(x, yExtra), UI_ERROR_COLOR);
         yExtra += line;
       }
-      this._drawLanDebugInfo(ctx, { x, y: yExtra, lineH: line });
+      this._drawLanDebugInfo({ x, y: yExtra, lineH: line });
     }
 
     if (!this._gameOverActive) {
-      this._drawPerkPrompt(ctx, {
+      this._drawPerkPrompt({
         pendingCount: this.state.perkSelection.pendingCount,
         anyAlive: this._anyPlayerAlive(),
         menuActive: this._perkMenu.active,
         textColor: UI_TEXT_COLOR,
         promptScale: UI_TEXT_SCALE,
       });
-      this._drawPerkMenu(ctx, perkSelectionPreparedChoices(
+      this._drawPerkMenu(perkSelectionPreparedChoices(
         this.simWorld.players,
         this.state.perkSelection,
       ));
     }
 
     if (!this._gameOverActive && perkMenuActive) {
-      this._drawGameCursor(ctx);
+      this._drawGameCursor();
     }
 
     if (this._gameOverActive && this._gameOverRecord !== null) {
-      this._gameOverUi.draw(ctx, {
+      this._gameOverUi.draw({
         record: this._gameOverRecord,
         bannerKind: this._gameOverBanner,
         resources: this.renderResources.resources as RuntimeResources,
         mouse: this._uiMousePos(),
       });
     }
-    this._drawLanWaitOverlay(ctx);
+    this._drawLanWaitOverlay();
   }
 }

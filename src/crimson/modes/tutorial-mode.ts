@@ -1,7 +1,6 @@
 // Port of crimson/modes/tutorial_mode.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -71,7 +70,6 @@ export class TutorialMode extends BaseGameplayMode {
   private _perkPickPending = false;
 
   constructor(opts: {
-    gl: WebGLContext;
     demoModeActive?: boolean;
     config: CrimsonConfig;
     console?: ConsoleState | null;
@@ -79,7 +77,6 @@ export class TutorialMode extends BaseGameplayMode {
     audioRng: Crand;
   }) {
     super({
-      gl: opts.gl,
       worldSize: WORLD_SIZE,
       defaultGameModeId: GameMode.TUTORIAL,
       demoModeActive: opts.demoModeActive ?? false,
@@ -280,7 +277,7 @@ export class TutorialMode extends BaseGameplayMode {
     }
 
     const resources = this.renderResources.resources as RuntimeResources;
-    const screenW = this._gl.screenWidth;
+    const screenW = wgl.getScreenWidth();
 
     if (stage === 8) {
       const promptText = overlay != null ? overlay.promptText : '';
@@ -312,7 +309,7 @@ export class TutorialMode extends BaseGameplayMode {
     }
 
     if (this._skipButton.enabled) {
-      const screenH = this._gl.screenHeight;
+      const screenH = wgl.getScreenHeight();
       const y = screenH - 50.0;
       const w = buttonWidth(resources, this._skipButton.label, { scale: 1.0, forceWide: true });
       if (buttonUpdate(this._skipButton, { pos: new Vec2(10.0, y), width: w, dtMs, mouse, click })) {
@@ -331,8 +328,8 @@ export class TutorialMode extends BaseGameplayMode {
       violenceDisabled: this._deterministicViolenceDisabled(),
       preserveBugs: this.preserveBugs,
       resources: this.renderResources.resources as RuntimeResources,
-      screenW: this._gl.screenWidth,
-      screenH: this._gl.screenHeight,
+      screenW: wgl.getScreenWidth(),
+      screenH: wgl.getScreenHeight(),
       mouse: this._uiMousePos(),
     };
   }
@@ -408,20 +405,20 @@ export class TutorialMode extends BaseGameplayMode {
   // Draw
   // ---------------------------------------------------------------------------
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     const perkMenuActive = this._perkMenu.active;
 
     this._drawWorld({
       drawAimIndicators: !perkMenuActive,
       entityAlpha: this._worldEntityAlpha(),
     });
-    this._drawScreenFade(ctx);
+    this._drawScreenFade();
 
     let hudBottom = 0.0;
     if (!perkMenuActive) {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
-      this._drawTargetHealthBar(ctx);
-      hudBottom = drawHudOverlay(ctx, {
+      this._drawTargetHealthBar();
+      hudBottom = drawHudOverlay({
         resources: this.renderResources.resources as RuntimeResources,
         state: this._hudState,
         font: this._small,
@@ -442,15 +439,14 @@ export class TutorialMode extends BaseGameplayMode {
       });
     }
 
-    this._drawTutorialPrompts(ctx, hudBottom);
+    this._drawTutorialPrompts(hudBottom);
 
     if (perkMenuActive) {
       this._perkMenu.draw(
-        ctx,
         this._fullPerkMenuUiContext(),
         perkSelectionPreparedChoices(this.simWorld.players, this.state.perkSelection),
       );
-      this._drawMenuCursor(ctx);
+      this._drawMenuCursor();
     }
   }
 
@@ -458,19 +454,18 @@ export class TutorialMode extends BaseGameplayMode {
   // Draw helpers
   // ---------------------------------------------------------------------------
 
-  private _drawTutorialPrompts(ctx: WebGLContext, hudBottom: number): void {
+  private _drawTutorialPrompts(hudBottom: number): void {
     const overlay = this.state.tutorialOverlay as TutorialOverlayState | null;
     if (overlay == null) return;
 
-    const screenW = this._gl.screenWidth;
+    const screenW = wgl.getScreenWidth();
 
     drawTutorialOverlayPanels(
-      ctx,
       screenW,
       overlay,
       1.0,
       (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
-        this._drawUiText(ctx, text, pos, color, scale),
+        this._drawUiText(text, pos, color, scale),
       (text: string, scale: number) => this._uiTextWidth(text, scale),
       (scale: number) => this._uiLineHeight(scale),
     );
@@ -493,9 +488,8 @@ export class TutorialMode extends BaseGameplayMode {
       const playW = buttonWidth(resources, this._playButton.label, { scale: 1.0, forceWide: true });
       const repeatW = buttonWidth(resources, this._repeatButton.label, { scale: 1.0, forceWide: true });
 
-      buttonDraw(ctx, resources, this._playButton, { pos: buttonBasePos, width: playW, scale: 1.0 });
+      buttonDraw(resources, this._playButton, { pos: buttonBasePos, width: playW, scale: 1.0 });
       buttonDraw(
-        ctx,
         resources,
         this._repeatButton,
         { pos: buttonBasePos.offset(playW + gap, 0.0), width: repeatW, scale: 1.0 },
@@ -504,24 +498,23 @@ export class TutorialMode extends BaseGameplayMode {
     }
 
     if (this._skipButton.alpha > 1e-3) {
-      const screenH = this._gl.screenHeight;
+      const screenH = wgl.getScreenHeight();
       const y = screenH - 50.0;
       const w = buttonWidth(resources, this._skipButton.label, { scale: 1.0, forceWide: true });
-      buttonDraw(ctx, resources, this._skipButton, { pos: new Vec2(10.0, y), width: w, scale: 1.0 });
+      buttonDraw(resources, this._skipButton, { pos: new Vec2(10.0, y), width: w, scale: 1.0 });
     }
 
     if (this._paused) {
       const x = 18.0;
       const y = Math.max(18.0, hudBottom + 10.0);
-      this._drawUiText(ctx, 'paused (TAB)', new Vec2(x, y), UI_HINT_COLOR);
+      this._drawUiText('paused (TAB)', new Vec2(x, y), UI_HINT_COLOR);
     }
   }
 
-  private _drawMenuCursor(ctx: WebGLContext): void {
+  private _drawMenuCursor(): void {
     const resources = this.renderResources.resources as RuntimeResources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       mousePos,

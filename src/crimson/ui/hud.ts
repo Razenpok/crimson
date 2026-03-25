@@ -1,7 +1,6 @@
 // Port of crimson/ui/hud.py — HUD overlay rendering
 
 import * as wgl from '@wgl';
-import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
@@ -208,7 +207,6 @@ export function hudLayout(
 // ---------------------------------------------------------------------------
 
 function _drawText(
-  ctx: WebGLContext,
   font: SmallFontData | null,
   text: string,
   pos: Vec2,
@@ -216,7 +214,7 @@ function _drawText(
   color: wgl.Color,
 ): void {
   if (font !== null) {
-    drawSmallText(ctx, font, text, pos, color);
+    drawSmallText(font, text, pos, color);
   }
   // No rl.draw_text fallback in WebGL — skip if font is null.
 }
@@ -246,7 +244,6 @@ function _survivalXpProgressRatio(xp: number, level: number): number {
 }
 
 function _drawProgressBar(
-  ctx: WebGLContext,
   pos: Vec2,
   width: number,
   ratio: number,
@@ -269,25 +266,24 @@ function _drawProgressBar(
   const fgG = rgba.g;
   const fgB = rgba.b;
   const fgA = rgba.a;
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     (pos.x) | 0,
     (pos.y) | 0,
     (width) | 0,
     (barH) | 0,
-    bgR, bgG, bgB, bgA,
+    wgl.makeColor(bgR, bgG, bgB, bgA),
   );
   const innerW = Math.max(0.0, (width - 2.0 * scale) * ratio);
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     (pos.x + scale) | 0,
     (pos.y + scale) | 0,
     (innerW) | 0,
     (innerH) | 0,
-    fgR, fgG, fgB, fgA,
+    wgl.makeColor(fgR, fgG, fgB, fgA),
   );
 }
 
 export function drawTargetHealthBar(
-  ctx: WebGLContext,
   opts: { pos: Vec2; width: number; ratio: number; alpha?: number; scale?: number },
 ): void {
   let ratio = Math.max(0.0, Math.min(1.0, opts.ratio));
@@ -297,7 +293,7 @@ export function drawTargetHealthBar(
   const r = (1.0 - ratio) * 0.9 + 0.1;
   const g = ratio * 0.9 + 0.1;
   const rgba = new RGBA(r, g, 0.7, 0.2 * alpha);
-  _drawProgressBar(ctx, opts.pos, opts.width, ratio, rgba, scale);
+  _drawProgressBar(opts.pos, opts.width, ratio, rgba, scale);
 }
 
 function _weaponIconIndex(weaponId: number): number | null {
@@ -316,7 +312,7 @@ function _weaponAmmoClass(weaponId: number): number {
 }
 
 function _weaponIconSrc(
-  texture: GlTexture,
+  texture: wgl.Texture,
   iconIndex: number,
 ): wgl.Rectangle {
   const grid = 8;
@@ -329,7 +325,7 @@ function _weaponIconSrc(
 }
 
 function _bonusIconSrc(
-  texture: GlTexture,
+  texture: wgl.Texture,
   iconId: number,
 ): wgl.Rectangle {
   const grid = 4;
@@ -345,7 +341,6 @@ function _bonusIconSrc(
 // ---------------------------------------------------------------------------
 
 export function drawHudOverlay(
-  ctx: WebGLContext,
   context: HudRenderContext,
   options: {
     player: PlayerState;
@@ -396,8 +391,8 @@ export function drawHudOverlay(
     players !== null && players.length > 0 ? [...players] : [player];
   const playerCount = hudPlayers.length;
 
-  const screenW = ctx.screenWidth;
-  const screenH = ctx.screenHeight;
+  const screenW = wgl.getScreenWidth();
+  const screenH = wgl.getScreenHeight();
   const layout = hudLayout(screenW, screenH, { font, showQuestHud });
   const scale = layout.scale;
   const textScale = layout.textScale;
@@ -425,7 +420,7 @@ export function drawHudOverlay(
       ui(HUD_TOP_BAR_SIZE[1]),
     );
     const topAlpha = alpha * HUD_TOP_BAR_ALPHA;
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       gameTop,
       src,
       dst,
@@ -474,7 +469,7 @@ export function drawHudOverlay(
         ui(size),
         ui(size),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         lifeHeart,
         src,
         dst,
@@ -506,7 +501,7 @@ export function drawHudOverlay(
         ui(barSize.x),
         ui(barSize.y),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         indLife,
         bgSrc,
         bgDst,
@@ -529,7 +524,7 @@ export function drawHudOverlay(
           indLife.width * healthRatio,
           indLife.height,
         );
-        ctx.drawTexturePro(
+        wgl.drawTexturePro(
           indLife,
           fillSrc,
           fillDst,
@@ -571,7 +566,7 @@ export function drawHudOverlay(
         ui(iconSize.x),
         ui(iconSize.y),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         wicons,
         src,
         dst,
@@ -601,7 +596,7 @@ export function drawHudOverlay(
     for (let playerIdx = 0; playerIdx < hudPlayers.length; playerIdx++) {
       const hudPlayer = hudPlayers[playerIdx];
       const ammoClass = _weaponAmmoClass(hudPlayer.weapon.weaponId);
-      let ammoTex: GlTexture;
+      let ammoTex: wgl.Texture;
       if (ammoClass === 1) {
         ammoTex = indFire;
       } else if (ammoClass === 2) {
@@ -628,7 +623,7 @@ export function drawHudOverlay(
           ui(HUD_AMMO_BAR_SIZE[1]),
         );
         const src = wgl.makeRectangle(0.0, 0.0, ammoTex.width, ammoTex.height);
-        ctx.drawTexturePro(
+        wgl.drawTexturePro(
           ammoTex,
           src,
           dst,
@@ -647,7 +642,6 @@ export function drawHudOverlay(
           ),
         );
         _drawText(
-          ctx,
           font,
           `+ ${extra}`,
           new Vec2(ui(textPos.x), ui(textPos.y)),
@@ -680,7 +674,7 @@ export function drawHudOverlay(
         ui(slidePanelSize.x),
         ui(slidePanelSize.y),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         indPanel,
         panelSrc,
         dst,
@@ -701,7 +695,7 @@ export function drawHudOverlay(
         ui(progressPanelSize.x),
         ui(progressPanelSize.y),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         indPanel,
         panelSrc,
         dst,
@@ -724,7 +718,7 @@ export function drawHudOverlay(
         ui(clockSz.y),
       );
       const src = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         clockTable,
         src,
         dst,
@@ -745,7 +739,7 @@ export function drawHudOverlay(
       const src2 = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
       const rotation = timeMs / 1000.0 * 6.0;
       const origin = wgl.makeVector2(ui(16.0), ui(16.0));
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         clockPointer,
         src2,
         dst2,
@@ -762,7 +756,6 @@ export function drawHudOverlay(
       const timeTextPos = new Vec2(slideX + 32.0, 86.0);
       const secondsStr = seconds < 10 ? `0${seconds}` : `${seconds}`;
       _drawText(
-        ctx,
         font,
         `${minutes}:${secondsStr}`,
         new Vec2(ui(timeTextPos.x), ui(timeTextPos.y)),
@@ -774,7 +767,6 @@ export function drawHudOverlay(
     {
       const progressLabelPos = new Vec2(18.0, 122.0);
       _drawText(
-        ctx,
         font,
         'Progress',
         new Vec2(ui(progressLabelPos.x), ui(progressLabelPos.y)),
@@ -788,7 +780,6 @@ export function drawHudOverlay(
       const questBarRgba = new RGBA(0.2, 0.8, 0.3, alpha * 0.8);
       const progressBarPos = new Vec2(10.0, 139.0);
       _drawProgressBar(
-        ctx,
         new Vec2(ui(progressBarPos.x), ui(progressBarPos.y)),
         ui(70.0),
         ratio,
@@ -813,7 +804,7 @@ export function drawHudOverlay(
       ui(panelSize.y),
     );
     const src = wgl.makeRectangle(0.0, 0.0, indPanel.width, indPanel.height);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       indPanel,
       src,
       dst,
@@ -829,7 +820,6 @@ export function drawHudOverlay(
     const xpValuePos = new Vec2(HUD_SURV_XP_VALUE_POS[0], HUD_SURV_XP_VALUE_POS[1] + hudYShift);
     const lvlValuePos = new Vec2(HUD_SURV_LVL_VALUE_POS[0], HUD_SURV_LVL_VALUE_POS[1] + hudYShift);
     _drawText(
-      ctx,
       font,
       'Xp',
       new Vec2(ui(xpLabelPos.x), ui(xpLabelPos.y)),
@@ -837,7 +827,6 @@ export function drawHudOverlay(
       panelTextColor,
     );
     _drawText(
-      ctx,
       font,
       `${xpDisplay}`,
       new Vec2(ui(xpValuePos.x), ui(xpValuePos.y)),
@@ -845,7 +834,6 @@ export function drawHudOverlay(
       panelTextColor,
     );
     _drawText(
-      ctx,
       font,
       `${player.level | 0}`,
       new Vec2(ui(lvlValuePos.x), ui(lvlValuePos.y)),
@@ -857,7 +845,6 @@ export function drawHudOverlay(
     const progressPos = new Vec2(HUD_SURV_PROGRESS_POS[0], HUD_SURV_PROGRESS_POS[1] + hudYShift);
     const barRgba = HUD_XP_BAR_RGBA.scaledAlpha(alpha);
     _drawProgressBar(
-      ctx,
       new Vec2(ui(progressPos.x), ui(progressPos.y)),
       ui(HUD_SURV_PROGRESS_WIDTH),
       progressRatio,
@@ -882,7 +869,7 @@ export function drawHudOverlay(
         ui(clockSz.y),
       );
       const src = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         clockTable,
         src,
         dst,
@@ -905,7 +892,7 @@ export function drawHudOverlay(
       const src = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
       const rotation = timeMs / 1000.0 * 6.0;
       const origin = wgl.makeVector2(ui(clockSz.x * 0.5), ui(clockSz.y * 0.5));
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         clockPointer,
         src,
         dst,
@@ -917,7 +904,7 @@ export function drawHudOverlay(
     {
       const totalSeconds = Math.max(0, (timeMs / 1000) | 0);
       const timeText = `${totalSeconds} seconds`;
-      _drawText(ctx, font, timeText, new Vec2(ui(255.0), ui(10.0)), textScale, textColor);
+      _drawText(font, timeText, new Vec2(ui(255.0), ui(10.0)), textScale, textColor);
       maxY = Math.max(maxY, ui(10.0 + lineH));
     }
   }
@@ -968,7 +955,7 @@ export function drawHudOverlay(
           ui(panelSize.x),
           ui(panelSize.y),
         );
-        ctx.drawTexturePro(
+        wgl.drawTexturePro(
           indPanel,
           src,
           dst,
@@ -989,7 +976,7 @@ export function drawHudOverlay(
           ui(HUD_BONUS_ICON_SIZE),
           ui(HUD_BONUS_ICON_SIZE),
         );
-        ctx.drawTexturePro(
+        wgl.drawTexturePro(
           bonusesTexture,
           src,
           dst,
@@ -1005,7 +992,6 @@ export function drawHudOverlay(
         if (!hasAlt) {
           const timerPos = slotPos.add(new Vec2(36.0, 21.0));
           _drawProgressBar(
-            ctx,
             new Vec2(ui(timerPos.x), ui(timerPos.y)),
             ui(100.0),
             timer * 0.05,
@@ -1014,7 +1000,6 @@ export function drawHudOverlay(
           );
           const labelPos = slotPos.add(new Vec2(36.0, 6.0));
           _drawText(
-            ctx,
             font,
             slot.label,
             new Vec2(ui(labelPos.x), ui(labelPos.y)),
@@ -1024,7 +1009,6 @@ export function drawHudOverlay(
         } else {
           const timer0Pos = slotPos.add(new Vec2(36.0, 17.0));
           _drawProgressBar(
-            ctx,
             new Vec2(ui(timer0Pos.x), ui(timer0Pos.y)),
             ui(100.0),
             timer * 0.05,
@@ -1033,7 +1017,6 @@ export function drawHudOverlay(
           );
           const timer1Pos = slotPos.add(new Vec2(36.0, 23.0));
           _drawProgressBar(
-            ctx,
             new Vec2(ui(timer1Pos.x), ui(timer1Pos.y)),
             ui(100.0),
             timerAlt * 0.05,
@@ -1042,7 +1025,6 @@ export function drawHudOverlay(
           );
           const labelPos = slotPos.add(new Vec2(36.0, 2.0));
           _drawText(
-            ctx,
             font,
             slot.label,
             new Vec2(ui(labelPos.x), ui(labelPos.y)),
@@ -1054,7 +1036,6 @@ export function drawHudOverlay(
         if (!hasAlt) {
           const timerPos = slotPos.add(new Vec2(36.0, 17.0));
           _drawProgressBar(
-            ctx,
             new Vec2(ui(timerPos.x), ui(timerPos.y)),
             ui(32.0),
             timer * 0.05,
@@ -1064,7 +1045,6 @@ export function drawHudOverlay(
         } else {
           const timer0Pos = slotPos.add(new Vec2(36.0, 13.0));
           _drawProgressBar(
-            ctx,
             new Vec2(ui(timer0Pos.x), ui(timer0Pos.y)),
             ui(32.0),
             timer * 0.05,
@@ -1073,7 +1053,6 @@ export function drawHudOverlay(
           );
           const timer1Pos = slotPos.add(new Vec2(36.0, 19.0));
           _drawProgressBar(
-            ctx,
             new Vec2(ui(timer1Pos.x), ui(timer1Pos.y)),
             ui(32.0),
             timerAlt * 0.05,
@@ -1123,7 +1102,7 @@ export function drawHudOverlay(
         ui(panelSize.x),
         ui(panelSize.y),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         indPanel,
         src,
         dst,
@@ -1144,7 +1123,7 @@ export function drawHudOverlay(
         ui(60.0),
         ui(30.0),
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         wicons,
         src,
         dst,
@@ -1162,7 +1141,6 @@ export function drawHudOverlay(
     const weaponColor = _withAlpha(HUD_TEXT_COLOR, textAlphaVal);
     const textPos = auxTextBasePos.add(auxStep.mul(idx));
     _drawText(
-      ctx,
       font,
       weaponName,
       new Vec2(ui(textPos.x), ui(textPos.y)),

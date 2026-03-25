@@ -1,5 +1,6 @@
 // Crimsonland WebGL — Entry Point
 
+import * as wgl from '@wgl';
 import { WebGLContext } from './grim/webgl.ts';
 import { App } from './grim/app.ts';
 import { InputState } from './grim/input.ts';
@@ -15,15 +16,13 @@ import { type GameConfig, GameState } from "./crimson/game/types.ts";
  * forward calls once it's ready.
  */
 class BootStrapView implements View {
-  private _ctx: WebGLContext;
   private _config: GameConfig;
   private _loading = false;
   private _gameView: View | null = null;
   private _state: GameState | null = null;
   private _onLoaded: (() => void) | null;
 
-  constructor(ctx: WebGLContext, config: GameConfig, onLoaded?: () => void) {
-    this._ctx = ctx;
+  constructor(config: GameConfig, onLoaded?: () => void) {
     this._config = config;
     this._onLoaded = onLoaded ?? null;
   }
@@ -40,7 +39,7 @@ class BootStrapView implements View {
     // runGame creates the GameState + GameLoopView synchronously.
     // Asset loading happens inside the boot screen asynchronously.
     try {
-      const result = runGame(this._ctx, this._config);
+      const result = runGame(this._config);
       this._gameView = result.view;
       this._state = result.state;
       this._gameView.open();
@@ -63,7 +62,7 @@ class BootStrapView implements View {
     if (this._gameView) {
       this._gameView.draw();
     } else {
-      this._ctx.clearBackground(0.05, 0.02, 0.01, 1.0);
+      wgl.clearBackground(wgl.makeColor(0.05, 0.02, 0.01, 1.0));
     }
   }
 
@@ -119,6 +118,7 @@ function main(): void {
 
   const ctx = new WebGLContext(canvas);
   InputState.init(canvas);
+  wgl.setContext(ctx);
 
   const config: GameConfig = {
     assetsUrl: './assets',
@@ -133,7 +133,7 @@ function main(): void {
     preserveBugs: false,
   };
 
-  const app = new App(ctx, {
+  const app = new App({
     width: canvas.width,
     height: canvas.height,
     title: 'Crimsonland',
@@ -159,7 +159,7 @@ function main(): void {
     document.removeEventListener('keydown', start);
     overlay.style.cursor = 'default';
     label.textContent = 'Downloading assets...';
-    app.run(new BootStrapView(ctx, config, () => overlay.remove()));
+    app.run(new BootStrapView(config, () => overlay.remove()));
   };
   overlay.addEventListener('click', start);
   document.addEventListener('keydown', start);

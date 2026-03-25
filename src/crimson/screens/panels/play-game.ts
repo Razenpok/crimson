@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
+
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -529,7 +529,7 @@ export class PlayGameMenuView extends PanelMenuView {
     return false;
   }
 
-  protected override _drawContents(ctx: WebGLContext, resources: RuntimeResources): void {
+  protected override _drawContents(resources: RuntimeResources): void {
     const font = resources.smallFont;
     const labelsTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const layout = this._contentLayout();
@@ -553,7 +553,7 @@ export class PlayGameMenuView extends PanelMenuView {
       titlePos.x, titlePos.y,
       titleW * scale, titleH * scale,
     );
-    ctx.drawTexturePro(labelsTex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, WHITE);
+    wgl.drawTexturePro(labelsTex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, WHITE);
 
     const [entries, yStep, yStart, yEnd] = this._modeEntries();
     let y = basePos.y + yStart * scale;
@@ -561,17 +561,17 @@ export class PlayGameMenuView extends PanelMenuView {
 
     if (showCounts) {
       drawSmallText(
-        ctx, font, 'times played:',
+        font, 'times played:',
         basePos.add(new Vec2(132.0 * scale, 16.0 * scale)),
         textColor,
       );
     }
 
     for (const mode of entries) {
-      this._drawModeButton(ctx, mode, new Vec2(basePos.x, y), scale, resources, font);
+      this._drawModeButton(mode, new Vec2(basePos.x, y), scale, resources, font);
       if (showCounts && mode.showCount) {
         this._drawModeCount(
-          ctx, mode.key,
+          mode.key,
           new Vec2(basePos.x + 158.0 * scale, y + 8.0 * scale),
           textScale, textColor, font,
         );
@@ -580,12 +580,11 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     // `sub_44ed80`: the list widget is drawn before tooltips, so tooltips can overlay it.
-    this._drawPlayerCount(ctx, layout.dropPos, scale, resources, font);
-    this._drawTooltips(ctx, entries, basePos, yEnd, scale, font);
+    this._drawPlayerCount(layout.dropPos, scale, resources, font);
+    this._drawTooltips(entries, basePos, yEnd, scale, font);
   }
 
   private _drawPlayerCount(
-    ctx: WebGLContext,
     pos: Vec2,
     scale: number,
     resources: RuntimeResources,
@@ -597,17 +596,17 @@ export class PlayGameMenuView extends PanelMenuView {
 
     // `ui_list_widget_update` draws a single bordered black rect for the widget.
     const widgetH = this._playerListOpen ? layout.fullH : layout.headerH;
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       layout.pos.x | 0, layout.pos.y | 0,
       layout.width | 0, widgetH | 0,
-      1, 1, 1, 1,
+      wgl.makeColor(1, 1, 1, 1),
     );
     const innerW = Math.max(0, (layout.width | 0) - 2);
     const innerH = Math.max(0, (widgetH | 0) - 2);
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       (layout.pos.x | 0) + 1, (layout.pos.y | 0) + 1,
       innerW, innerH,
-      0, 0, 0, 1,
+      wgl.makeColor(0, 0, 0, 1),
     );
 
     // Arrow icon (the ui_drop* assets are 16x16 icons, not the background).
@@ -619,15 +618,15 @@ export class PlayGameMenuView extends PanelMenuView {
     const arrowTex = (this._playerListOpen || hoveredHeader) ? dropOn : dropOff;
     if (this._playerListOpen || hoveredHeader) {
       const lineH = Math.max(1, (1.0 * scale) | 0);
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         layout.pos.x | 0,
         (layout.pos.y + 15.0 * scale) | 0,
         layout.width | 0,
         lineH,
-        1, 1, 1, 128 / 255,
+        wgl.makeColor(1, 1, 1, 128 / 255),
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       arrowTex,
       wgl.makeRectangle(0.0, 0.0, arrowTex.width, arrowTex.height),
       wgl.makeRectangle(layout.arrowPos.x, layout.arrowPos.y, layout.arrowSize.x, layout.arrowSize.y),
@@ -641,7 +640,7 @@ export class PlayGameMenuView extends PanelMenuView {
     }
     const label = PlayGameMenuView._PLAYER_COUNT_LABELS[playerCount - 1];
     const headerAlpha = hoveredHeader ? (242 / 255) : (191 / 255); // 0x3f733333 / 0x3f400000
-    drawSmallText(ctx, font, label, layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));
+    drawSmallText(font, label, layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));
 
     if (!this._playerListOpen) return;
 
@@ -658,12 +657,11 @@ export class PlayGameMenuView extends PanelMenuView {
       if (idx === (playerCount - 1)) {
         alpha = Math.max(alpha, 245); // 0x3f75c28f
       }
-      drawSmallText(ctx, font, item, new Vec2(layout.textPos.x, itemY), wgl.makeColor(1, 1, 1, alpha / 255));
+      drawSmallText(font, item, new Vec2(layout.textPos.x, itemY), wgl.makeColor(1, 1, 1, alpha / 255));
     }
   }
 
   private _drawModeButton(
-    ctx: WebGLContext,
     mode: PlayGameModeEntry,
     pos: Vec2,
     scale: number,
@@ -672,11 +670,10 @@ export class PlayGameMenuView extends PanelMenuView {
   ): void {
     const state = this._modeButtonState(mode);
     const width = buttonWidth(resources, state.label, { scale, forceWide: state.forceWide });
-    buttonDraw(ctx, resources, state, { pos, width, scale });
+    buttonDraw(resources, state, { pos, width, scale });
   }
 
   private _drawModeCount(
-    ctx: WebGLContext,
     key: string,
     pos: Vec2,
     _scale: number,
@@ -696,11 +693,10 @@ export class PlayGameMenuView extends PanelMenuView {
     } else {
       return;
     }
-    drawSmallText(ctx, font, `${count}`, pos, color);
+    drawSmallText(font, `${count}`, pos, color);
   }
 
   private _drawTooltips(
-    ctx: WebGLContext,
     entries: PlayGameModeEntry[],
     basePos: Vec2,
     yEnd: number,
@@ -729,7 +725,7 @@ export class PlayGameMenuView extends PanelMenuView {
       let y = tooltipY + offY * scale;
       const lines = mode.tooltip.split('\n');
       for (const line of lines) {
-        drawSmallText(ctx, font, line, new Vec2(x, y), wgl.makeColor(1, 1, 1, alpha / 255));
+        drawSmallText(font, line, new Vec2(x, y), wgl.makeColor(1, 1, 1, alpha / 255));
         y += font.cellSize * 1.0 * scale;
       }
     }

@@ -5,7 +5,6 @@ import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { PLASMA_PARTICLE_TYPES } from '@crimson/sim/world-defs.ts';
 import { plasmaProjectileRenderConfig } from '@crimson/render/projectile-render-registry.ts';
@@ -60,8 +59,6 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
   const auraSize = plasmaCfg.auraSize;
   const auraAlphaMul = plasmaCfg.auraAlphaMul;
 
-  const gl = renderer.gl;
-
   if (ctx.life >= 0.4) {
     // Reconstruct the tail length heuristic used by the native render path.
     let segCount = ctx.proj.travelBudget | 0;
@@ -73,11 +70,11 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
     const direction = Vec2.fromHeading(ctx.angle + Math.PI).mul(speedScale);
 
     const alpha = ctx.alpha;
-    const tailTint = new RGBA(rgb[0], rgb[1], rgb[2], alpha * 0.4).toTuple();
-    const headTint = new RGBA(rgb[0], rgb[1], rgb[2], alpha * headAlphaMul).toTuple();
-    const auraTint = new RGBA(auraRgb[0], auraRgb[1], auraRgb[2], alpha * auraAlphaMul).toTuple();
+    const tailTint = new RGBA(rgb[0], rgb[1], rgb[2], alpha * 0.4).toWgl();
+    const headTint = new RGBA(rgb[0], rgb[1], rgb[2], alpha * headAlphaMul).toWgl();
+    const auraTint = new RGBA(auraRgb[0], auraRgb[1], auraRgb[2], alpha * auraAlphaMul).toWgl();
 
-    gl.setBlendMode(BlendMode.ADDITIVE);
+    wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
     if (segCount > 0) {
       const size = tailSize * ctx.scale;
@@ -87,7 +84,7 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
         const pos = ctx.pos.add(step.mul(idx));
         const posScreen = renderer.worldToScreen(pos);
         const dst = wgl.makeRectangle(posScreen.x, posScreen.y, size, size);
-        gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tailTint);
+        wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tailTint);
       }
     }
 
@@ -95,30 +92,30 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
       const size = headSize * ctx.scale;
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
       const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
-      gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, headTint);
+      wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, headTint);
     }
 
     if (fxDetail1) {
       const size = auraSize * ctx.scale;
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
       const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
-      gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, auraTint);
+      wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, auraTint);
     }
 
-    gl.setBlendMode(BlendMode.ALPHA);
+    wgl.endBlendMode();
     return true;
   }
 
   const fade = clamp(ctx.life * 2.5, 0.0, 1.0);
   const fadeAlpha = fade * ctx.alpha;
   if (fadeAlpha > 1e-3) {
-    const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toTuple();
+    const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toWgl();
     const size = 56.0 * ctx.scale;
     const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-    gl.setBlendMode(BlendMode.ADDITIVE);
-    gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
-    gl.setBlendMode(BlendMode.ALPHA);
+    wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+    wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
+    wgl.endBlendMode();
   }
 
   return true;

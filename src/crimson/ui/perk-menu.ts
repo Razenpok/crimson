@@ -1,7 +1,6 @@
 // Port of perk_menu.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
@@ -151,14 +150,13 @@ function _uiTextWidth(resources: RuntimeResources, text: string, scale: number):
 }
 
 export function drawUiText(
-  ctx: WebGLContext,
   resources: RuntimeResources,
   text: string,
   pos: Vec2,
   opts: { scale: number; color: wgl.Color },
 ): void {
   const font = resources.smallFont;
-  drawSmallText(ctx, font, text, pos, opts.color);
+  drawSmallText(font, text, pos, opts.color);
 }
 
 export function wrapUiText(
@@ -191,7 +189,6 @@ export function wrapUiText(
 }
 
 export function drawWrappedUiTextInRect(
-  ctx: WebGLContext,
   resources: RuntimeResources,
   text: string,
   opts: { rect: Rect; scale: number; color: wgl.Color },
@@ -203,7 +200,7 @@ export function drawWrappedUiTextInRect(
   const maxY = opts.rect.bottom;
   for (const line of lines) {
     if (pos.y + lineH > maxY) break;
-    drawUiText(ctx, resources, line, pos, { scale: opts.scale, color: opts.color });
+    drawUiText(resources, line, pos, { scale: opts.scale, color: opts.color });
     pos = pos.offset(0.0, lineH);
   }
 }
@@ -223,7 +220,6 @@ export function menuItemHitRect(
 }
 
 export function drawMenuItem(
-  ctx: WebGLContext,
   resources: RuntimeResources,
   label: string,
   opts: { pos: Vec2; scale: number; hovered: boolean },
@@ -231,19 +227,16 @@ export function drawMenuItem(
   const alpha = opts.hovered ? MENU_ITEM_ALPHA_HOVER : MENU_ITEM_ALPHA_IDLE;
   const [r, g, b] = MENU_ITEM_RGB;
   const color = wgl.makeColor(r / 255, g / 255, b / 255, alpha);
-  drawUiText(ctx, resources, label, opts.pos, { scale: opts.scale, color });
+  drawUiText(resources, label, opts.pos, { scale: opts.scale, color });
   const width = _uiTextWidth(resources, label, opts.scale);
   const lineY = opts.pos.y + 13.0 * opts.scale;
   // draw_line as a 1px rectangle
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.floor(opts.pos.x),
     Math.floor(lineY),
     Math.floor(width),
     1,
-    r / 255,
-    g / 255,
-    b / 255,
-    alpha,
+    wgl.makeColor(r / 255, g / 255, b / 255, alpha),
   );
   return width;
 }
@@ -281,7 +274,7 @@ export class UiButtonState {
   }
 }
 
-function _resolveButtonTextures(resources: RuntimeResources): [GlTexture, GlTexture] {
+function _resolveButtonTextures(resources: RuntimeResources): [wgl.Texture, wgl.Texture] {
   return [
     getTexture(resources, TextureId.UI_BUTTON_SM),
     getTexture(resources, TextureId.UI_BUTTON_MD),
@@ -329,7 +322,6 @@ export function buttonUpdate(
 }
 
 export function buttonDraw(
-  ctx: WebGLContext,
   resources: RuntimeResources,
   state: UiButtonState,
   opts: { pos: Vec2; width: number; scale: number },
@@ -352,15 +344,12 @@ export function buttonDraw(
     const hlG = g;
     const hlB = b;
     const hlA = clamp(a, 0.0, 1.0);
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(opts.pos.x + 12.0 * opts.scale),
       Math.floor(opts.pos.y + 5.0 * opts.scale),
       Math.floor(opts.width - 24.0 * opts.scale),
       Math.floor(22.0 * opts.scale),
-      hlR,
-      hlG,
-      hlB,
-      hlA,
+      wgl.makeColor(hlR, hlG, hlB, hlA),
     );
   }
 
@@ -368,7 +357,7 @@ export function buttonDraw(
   const plateTint = wgl.makeColor(1.0, 1.0, 1.0, plateAlpha);
   const src = wgl.makeRectangle(0.0, 0.0, texture.width, texture.height);
   const dst = wgl.makeRectangle(opts.pos.x, opts.pos.y, opts.width, 32.0 * opts.scale);
-  ctx.drawTexturePro(texture, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, plateTint);
+  wgl.drawTexturePro(texture, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, plateTint);
 
   const textA = state.hovered ? state.alpha : state.alpha * 0.7;
   const textTint = wgl.makeColor(1.0, 1.0, 1.0, clamp(textA, 0.0, 1.0));
@@ -377,11 +366,10 @@ export function buttonDraw(
     opts.pos.x + opts.width * 0.5 - textW * 0.5 + 1.0 * opts.scale,
     opts.pos.y + 10.0 * opts.scale,
   );
-  drawUiText(ctx, resources, state.label, textPos, { scale: opts.scale, color: textTint });
+  drawUiText(resources, state.label, textPos, { scale: opts.scale, color: textTint });
 }
 
 export function cursorDraw(
-  ctx: WebGLContext,
   resources: RuntimeResources,
   opts: { mouse: Vec2; scale: number; alpha?: number },
 ): void {
@@ -392,5 +380,5 @@ export function cursorDraw(
   const size = 32.0 * opts.scale;
   const src = wgl.makeRectangle(0.0, 0.0, tex.width, tex.height);
   const dst = wgl.makeRectangle(opts.mouse.x, opts.mouse.y, size, size);
-  ctx.drawTexturePro(tex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
+  wgl.drawTexturePro(tex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
 }

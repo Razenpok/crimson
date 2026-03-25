@@ -1,7 +1,6 @@
 // Port of crimson/screens/high_scores_view/main_panel.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
@@ -33,7 +32,6 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
 export function drawMainPanel(
-  ctx: WebGLContext,
   view: HighScoresView,
   opts: {
     resources: RuntimeResources;
@@ -61,17 +59,17 @@ export function drawMainPanel(
   }
 
   const titleDrawPos = leftPanelTopLeft.add(new Vec2(titleX * scale, 41.0 * scale));
-  drawSmallText(ctx, font, title, titleDrawPos, wgl.makeColor(1, 1, 1, 1));
+  drawSmallText(font, title, titleDrawPos, wgl.makeColor(1, 1, 1, 1));
 
   const ulW = measureSmallTextWidth(font, title);
   const ulH = Math.max(1, Math.round(1.0 * scale));
   const ulPos = leftPanelTopLeft.add(new Vec2(titleX * scale, HS_TITLE_UNDERLINE_Y * scale));
-  ctx.drawRectangle(
+  wgl.drawRectangle(
     Math.round(ulPos.x),
     Math.round(ulPos.y),
     Math.round(ulW),
     ulH,
-    1, 1, 1, 0.7,
+    wgl.makeColor(1, 1, 1, 0.7),
   );
 
   if (modeId === GameMode.QUESTS) {
@@ -85,7 +83,7 @@ export function drawMainPanel(
     const questLevel: QuestLevel = { major: Math.floor(questMajor), minor: Math.floor(questMinor) };
     const quest = questByLevel(questLevel);
     const questLabel = `${questLevelText(questLevel)}: ${quest !== null ? quest.title : '???'}`;
-    drawSmallText(ctx, font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
+    drawSmallText(font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
 
     const arrow = getTexture(resources, TextureId.UI_ARROW);
     const globalIndex = questLevelGlobalIndex(questLevel);
@@ -102,7 +100,7 @@ export function drawMainPanel(
       const src = wgl.makeRectangle(0.0, 0.0, arrow.width, arrow.height);
       const arrowPos = leftPanelTopLeft.add(new Vec2((HS_QUEST_ARROW_X - 255.0) * scale, HS_QUEST_ARROW_Y * scale));
       const dst = wgl.makeRectangle(arrowPos.x, arrowPos.y, dstW, dstH);
-      ctx.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
+      wgl.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
     }
 
     if (globalIndex < maxIndex) {
@@ -110,28 +108,28 @@ export function drawMainPanel(
       const src = wgl.makeRectangle(0.0, 0.0, -arrow.width, arrow.height);
       const arrowPos = leftPanelTopLeft.add(new Vec2(HS_QUEST_ARROW_X * scale, HS_QUEST_ARROW_Y * scale));
       const dst = wgl.makeRectangle(arrowPos.x, arrowPos.y, dstW, dstH);
-      ctx.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
+      wgl.drawTexturePro(arrow, src, dst, ORIGIN, 0.0, tint);
     }
   }
 
   // Column headers
   const headerColor = wgl.makeColor(1, 1, 1, 1);
-  drawSmallText(ctx, font, 'Rank', leftPanelTopLeft.add(new Vec2(211.0 * scale, 84.0 * scale)), headerColor);
-  drawSmallText(ctx, font, 'Score', leftPanelTopLeft.add(new Vec2(246.0 * scale, 84.0 * scale)), headerColor);
-  drawSmallText(ctx, font, 'Player', leftPanelTopLeft.add(new Vec2(302.0 * scale, 84.0 * scale)), headerColor);
+  drawSmallText(font, 'Rank', leftPanelTopLeft.add(new Vec2(211.0 * scale, 84.0 * scale)), headerColor);
+  drawSmallText(font, 'Score', leftPanelTopLeft.add(new Vec2(246.0 * scale, 84.0 * scale)), headerColor);
+  drawSmallText(font, 'Player', leftPanelTopLeft.add(new Vec2(302.0 * scale, 84.0 * scale)), headerColor);
 
   // Score list viewport frame (white 1px border + black interior).
   const frameX = leftPanelTopLeft.x + HS_SCORE_FRAME_X * scale;
   const frameY = leftPanelTopLeft.y + HS_SCORE_FRAME_Y * scale;
   const frameW = HS_SCORE_FRAME_W * scale;
   const frameH = HS_SCORE_FRAME_H * scale;
-  ctx.drawRectangle(Math.round(frameX), Math.round(frameY), Math.round(frameW), Math.round(frameH), 1, 1, 1, 1);
-  ctx.drawRectangle(
+  wgl.drawRectangle(Math.round(frameX), Math.round(frameY), Math.round(frameW), Math.round(frameH), wgl.makeColor(1, 1, 1, 1));
+  wgl.drawRectangle(
     Math.round(frameX + 1.0 * scale),
     Math.round(frameY + 1.0 * scale),
     Math.max(0, Math.round(frameW - 2.0 * scale)),
     Math.max(0, Math.round(frameH - 2.0 * scale)),
-    0, 0, 0, 1,
+    wgl.makeColor(0, 0, 0, 1),
   );
 
   const rowStep = 16.0 * scale;
@@ -159,7 +157,7 @@ export function drawMainPanel(
   }
 
   if (start >= end) {
-    drawSmallText(ctx, font, 'No scores yet.', new Vec2(leftPanelTopLeft.x + 211.0 * scale, y + 8.0 * scale), wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1));
+    drawSmallText(font, 'No scores yet.', new Vec2(leftPanelTopLeft.x + 211.0 * scale, y + 8.0 * scale), wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1));
   } else {
     for (let idx = start; idx < end; idx++) {
       const entry = view.records[idx];
@@ -180,9 +178,9 @@ export function drawMainPanel(
         color = wgl.makeColor(1, 1, 1, 1);
       }
 
-      drawSmallText(ctx, font, `${idx + 1}`, new Vec2(leftPanelTopLeft.x + 216.0 * scale, y), color);
-      drawSmallText(ctx, font, value, new Vec2(leftPanelTopLeft.x + 246.0 * scale, y), color);
-      drawSmallText(ctx, font, name, new Vec2(leftPanelTopLeft.x + 304.0 * scale, y), color);
+      drawSmallText(font, `${idx + 1}`, new Vec2(leftPanelTopLeft.x + 216.0 * scale, y), color);
+      drawSmallText(font, value, new Vec2(leftPanelTopLeft.x + 246.0 * scale, y), color);
+      drawSmallText(font, name, new Vec2(leftPanelTopLeft.x + 304.0 * scale, y), color);
       y += rowStep;
     }
   }
@@ -190,13 +188,13 @@ export function drawMainPanel(
   // Buttons
   const buttonBasePos = leftPanelTopLeft.add(new Vec2(HS_BUTTON_X * scale, HS_BUTTON_Y0 * scale));
   let w = buttonWidth(resources, view.updateButton.label, { scale, forceWide: view.updateButton.forceWide });
-  buttonDraw(ctx, resources, view.updateButton, { pos: buttonBasePos, width: w, scale });
+  buttonDraw(resources, view.updateButton, { pos: buttonBasePos, width: w, scale });
 
   w = buttonWidth(resources, view.playButton.label, { scale, forceWide: view.playButton.forceWide });
-  buttonDraw(ctx, resources, view.playButton, { pos: buttonBasePos.offset(0.0, HS_BUTTON_STEP_Y * scale), width: w, scale });
+  buttonDraw(resources, view.playButton, { pos: buttonBasePos.offset(0.0, HS_BUTTON_STEP_Y * scale), width: w, scale });
 
   w = buttonWidth(resources, view.backButton.label, { scale, forceWide: view.backButton.forceWide });
-  buttonDraw(ctx, resources, view.backButton, {
+  buttonDraw(resources, view.backButton, {
     pos: leftPanelTopLeft.add(new Vec2(HS_BACK_BUTTON_X * scale, HS_BACK_BUTTON_Y * scale)),
     width: w,
     scale,

@@ -1,7 +1,6 @@
 // Port of grim/fonts/grim_mono.py
 
 import * as wgl from '@wgl';
-import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 
 export const GRIM_MONO_ADVANCE = 16.0;
@@ -9,14 +8,14 @@ export const GRIM_MONO_DRAW_SIZE = 32.0;
 export const GRIM_MONO_LINE_HEIGHT = 28.0;
 
 export interface GrimMonoFont {
-  texture: GlTexture;
+  texture: wgl.Texture;
   grid: number;
   cellWidth: number;
   cellHeight: number;
   advance: number;
 }
 
-export function createGrimMonoFont(texture: GlTexture): GrimMonoFont {
+export function createGrimMonoFont(texture: wgl.Texture): GrimMonoFont {
   // TODO: rl.set_texture_filter(texture, GRIM_MONO_TEXTURE_FILTER)
   const grid = 16;
   return {
@@ -29,7 +28,6 @@ export function createGrimMonoFont(texture: GlTexture): GrimMonoFont {
 }
 
 export function drawGrimMonoText(
-  ctx: WebGLContext,
   font: GrimMonoFont,
   text: string,
   pos: Vec2,
@@ -68,7 +66,7 @@ export function drawGrimMonoText(
     const col = charCode % font.grid;
     const row = Math.floor(charCode / font.grid);
 
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       font.texture,
       wgl.makeRectangle(col * font.cellWidth, row * font.cellHeight, font.cellWidth, font.cellHeight),
       wgl.makeRectangle(xPos, yPos + 1.0, drawSize, drawSize),

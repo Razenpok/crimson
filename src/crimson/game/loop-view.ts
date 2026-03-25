@@ -6,7 +6,7 @@
 // Networking (LAN lobby, lockstep, rollback, network sessions) is excluded;
 // all network-related paths are stubbed as no-ops.
 
-import { type WebGLContext } from '@grim/webgl.ts';
+import * as wgl from '@wgl';
 import { type View, ViewContext } from '@grim/view.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type CrandLike } from '@grim/rand.ts';
@@ -157,9 +157,7 @@ let _gammaRampShader: WebGLProgram | null = null;
 let _gammaRampShaderGainLoc: WebGLUniformLocation | null = null;
 let _gammaRampShaderTried = false;
 
-function getGammaRampShader(
-  _gl: WebGLContext,
-): [WebGLProgram | null, WebGLUniformLocation | null] {
+function getGammaRampShader(): [WebGLProgram | null, WebGLUniformLocation | null] {
   // TODO: compile GAMMA_RAMP_VS / GAMMA_RAMP_FS into a WebGL2 program
   // For now, gamma correction is deferred until shader pipeline is wired up.
   if (_gammaRampShaderTried) {
@@ -200,7 +198,6 @@ function isGameplayScreen(view: Screen | null): view is GameplayScreen {
 export class GameLoopView implements View {
   readonly state: GameState;
   private _status: GameStatusPersist;
-  private _ctx: WebGLContext;
 
   private _boot: BootView;
   private _demo: DemoView | null = null;
@@ -220,17 +217,16 @@ export class GameLoopView implements View {
   private _runtimeUpdatesPerFrame = 0;
   private _debugEnabled = false;
 
-  constructor(ctx: WebGLContext, state: GameState, status: GameStatusPersist) {
-    this._ctx = ctx;
+  constructor(state: GameState, status: GameStatusPersist) {
     this.state = state;
     this._status = status;
     this._debugEnabled = state.debugEnabled;
 
-    this._boot = new BootView(ctx, state);
-    // DemoView requires a WorldRuntime which depends on WebGLContext;
+    this._boot = new BootView(state);
+    // DemoView requires a WorldRuntime;
     // deferred to _ensureDemo() when the demo is actually needed.
     this._demo = null;
-    this._menu = new MenuView(ctx, state);
+    this._menu = new MenuView(state);
 
     const _viewCtx = modeViewContext(state);
 
@@ -249,7 +245,6 @@ export class GameLoopView implements View {
       open_quests: new QuestsMenuView(gs),
       open_pause_menu: new PauseMenuView(gs),
       start_quest: new QuestMode({
-        gl: ctx,
         demoModeActive: state.demoEnabled,
         config: state.config,
         console: state.console,
@@ -261,28 +256,24 @@ export class GameLoopView implements View {
       end_note: new EndNoteView(gs),
       open_high_scores: new HighScoresView(gs),
       start_survival: new SurvivalMode({
-        gl: ctx,
         config: state.config,
         console: state.console,
         audio: state.audio,
         audioRng: state.rng,
       }),
       start_rush: new RushMode({
-        gl: ctx,
         config: state.config,
         console: state.console,
         audio: state.audio,
         audioRng: state.rng,
       }),
       start_typo: new TypoShooterMode({
-        gl: ctx,
         config: state.config,
         console: state.console,
         audio: state.audio,
         audioRng: state.rng,
       }),
       start_tutorial: new TutorialMode({
-        gl: ctx,
         demoModeActive: state.demoEnabled,
         config: state.config,
         console: state.console,
@@ -316,7 +307,7 @@ export class GameLoopView implements View {
     if (this._demo !== null) return this._demo;
     // TODO: WorldRuntime constructor requires several parameters;
     // for now, create a minimal instance for the demo.
-    const runtime = new WorldRuntime(this._ctx, {
+    const runtime = new WorldRuntime({
       worldSize: 1024,
       demoModeActive: true,
       config: this.state.config,
@@ -735,7 +726,7 @@ export class GameLoopView implements View {
         this.state.quitRequested = true;
         return;
       }
-      ensureMenuGround(this._ctx, this.state, true);
+      ensureMenuGround(this.state, true);
       this._menu.open();
       this._active = this._menu;
       this._menuActive = true;
@@ -802,7 +793,7 @@ export class GameLoopView implements View {
   }
 
   private _regenerateTerrainForConsole(): void {
-    ensureMenuGround(this._ctx, this.state, true);
+    ensureMenuGround(this.state, true);
     const views: Screen[] = [];
     if (this._frontActive !== null) views.push(this._frontActive);
     if (this._frontStack.length > 0) {
@@ -883,10 +874,9 @@ export class GameLoopView implements View {
     if (overlayView === null) return false;
     const [mouseX, mouseY] = InputState.mousePosition();
     const click = InputState.wasMouseButtonPressed(0);
-    // TODO: pass actual screen dimensions once ctx is wired
-    const screenW = this._ctx.screenWidth || 1024;
-    const screenH = this._ctx.screenHeight || 768;
-    const action = overlayView.update(this._ctx, dtMs, screenW, screenH, mouseX, mouseY, click);
+    const screenW = wgl.getScreenWidth() || 1024;
+    const screenH = wgl.getScreenHeight() || 768;
+    const action = overlayView.update(dtMs, screenW, screenH, mouseX, mouseY, click);
     if (action === 'purchase') {
       this.state.quitRequested = true;
       try {
@@ -1118,13 +1108,13 @@ export class GameLoopView implements View {
   // -----------------------------------------------------------------------
 
   private _drawSceneLayers(): void {
-    this._active.draw(this._ctx);
+    this._active.draw();
     const info = this._demoTrialInfo;
     if (info !== null && info.visible) {
-      const screenW = this._ctx.screenWidth || 1024;
-      const screenH = this._ctx.screenHeight || 768;
+      const screenW = wgl.getScreenWidth() || 1024;
+      const screenH = wgl.getScreenHeight() || 768;
       const [mouseX, mouseY] = InputState.mousePosition();
-      this._demoTrialOverlayView()?.draw(this._ctx, info, screenW, screenH, mouseX, mouseY);
+      this._demoTrialOverlayView()?.draw(info, screenW, screenH, mouseX, mouseY);
     }
     // Console draw is handled by the console's own draw method
     // which requires ctx — deferred to the caller or the console itself.

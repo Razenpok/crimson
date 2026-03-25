@@ -4,7 +4,6 @@ import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { type GlTexture, BlendMode } from '@grim/webgl.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
@@ -48,15 +47,14 @@ export function drawLanPlayerRing(
 
   // Approximate ring with a color quad since WebGLContext doesn't have drawRing.
   // Use additive blend with the white texture as a filled circle approximation.
-  const ctx = renderCtx.gl;
   const coreAlpha = clamp(alpha * 0.9, 0.0, 1.0);
   const glowAlpha = clamp(alpha * 0.35, 0.0, 1.0);
 
-  ctx.setBlendMode(BlendMode.ADDITIVE);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
   // Core ring approximation: draw a color quad at the ring location.
   // A proper ring shader would be better, but this is a reasonable approximation.
-  const whTex = ctx.whiteTexture;
+  const whTex = wgl.getWhiteTexture();
   const ringSize = outer * 2.0;
   const src = wgl.makeRectangle(0, 0, 1, 1);
   const dst = wgl.makeRectangle(
@@ -66,7 +64,7 @@ export function drawLanPlayerRing(
   const coreTint = wgl.makeColor(
     red / 255, green / 255, blue / 255, coreAlpha * 0.3,
   );
-  ctx.drawTexturePro(whTex, src, dst, origin, 0, coreTint);
+  wgl.drawTexturePro(whTex, src, dst, origin, 0, coreTint);
 
   // Glow ring
   const glowSize = glowOuter * 2.0;
@@ -76,14 +74,14 @@ export function drawLanPlayerRing(
   const glowTint = wgl.makeColor(
     red / 255, green / 255, blue / 255, glowAlpha * 0.2,
   );
-  ctx.drawTexturePro(whTex, src, glowDst, origin, 0, glowTint);
+  wgl.drawTexturePro(whTex, src, glowDst, origin, 0, glowTint);
 
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 }
 
 export function drawPlayerTrooperSprite(
   renderCtx: WorldRenderCtx,
-  texture: GlTexture,
+  texture: wgl.Texture,
   player: PlayerState,
   camera: Vec2,
   viewScale: Vec2,
@@ -131,9 +129,9 @@ export function drawPlayerTrooperSprite(
           const tint = wgl.makeColor(
             77 / 255, 153 / 255, 77 / 255, clamp(auraAlpha, 0.0, 1.0),
           );
-          renderCtx.gl.setBlendMode(BlendMode.ADDITIVE);
-          renderCtx.gl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
-          renderCtx.gl.setBlendMode(BlendMode.ALPHA);
+          wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+          wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
+          wgl.endBlendMode();
         }
       }
     }
@@ -234,10 +232,10 @@ export function drawPlayerTrooperSprite(
             const origin2 = wgl.makeVector2(size2 * 0.5, size2 * 0.5);
             const rotation2Deg = (t * -2.0) * RAD_TO_DEG;
 
-            renderCtx.gl.setBlendMode(BlendMode.ADDITIVE);
-            renderCtx.gl.drawTexturePro(particlesTexture, src, dst, origin, rotationDeg, shieldTint);
-            renderCtx.gl.drawTexturePro(particlesTexture, src, dst2, origin2, rotation2Deg, shieldTint2);
-            renderCtx.gl.setBlendMode(BlendMode.ALPHA);
+            wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+            wgl.drawTexturePro(particlesTexture, src, dst, origin, rotationDeg, shieldTint);
+            wgl.drawTexturePro(particlesTexture, src, dst2, origin2, rotation2Deg, shieldTint2);
+            wgl.endBlendMode();
           }
         }
       }
@@ -261,12 +259,12 @@ export function drawPlayerTrooperSprite(
             const dst = wgl.makeRectangle(flashPos.x, flashPos.y, size, size);
             const origin = wgl.makeVector2(size * 0.5, size * 0.5);
             const tintFlash = wgl.makeColor(1, 1, 1, flashAlpha);
-            renderCtx.gl.setBlendMode(BlendMode.ADDITIVE);
-            renderCtx.gl.drawTexturePro(
+            wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+            wgl.drawTexturePro(
               muzzleFlashTexture, src, dst, origin,
               player.aimHeading * RAD_TO_DEG, tintFlash,
             );
-            renderCtx.gl.setBlendMode(BlendMode.ALPHA);
+            wgl.endBlendMode();
           }
         }
       }

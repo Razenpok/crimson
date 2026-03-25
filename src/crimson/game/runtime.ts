@@ -5,7 +5,7 @@
 // wires up the GameState, registers console commands, and hands off to the
 // GameLoopView via the engine App.
 
-import { type WebGLContext } from '@grim/webgl.ts';
+import * as wgl from '@wgl';
 import { defaultCrimsonConfig } from '@grim/config.ts';
 import { type ConsoleState, type CommandHandler, createConsole } from '@grim/console.ts';
 import { Crand } from '@grim/rand.ts';
@@ -382,7 +382,6 @@ function registerBootCommands(
  * boot screen asynchronously via fetch().
  */
 export function runGame(
-  ctx: WebGLContext,
   config: GameConfig,
 ): { view: GameLoopView; state: GameState } {
   const cfg = defaultCrimsonConfig();
@@ -390,6 +389,7 @@ export function runGame(
   const height = config.height ?? cfg.display.height;
   cfg.display.width = width;
   cfg.display.height = height;
+  wgl.resize(width, height);
 
   const seed = config.seed ?? ((Date.now() * 0xDEAD + 0xBEEF) >>> 0);
   const rng = new Crand(seed);
@@ -430,7 +430,7 @@ export function runGame(
 
   // NOTE: autoexec.txt exec is skipped in WebGL — no filesystem
 
-  const view = new GameLoopView(ctx, state, status);
+  const view = new GameLoopView(state, status);
 
   return { view, state };
 }

@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
+
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -140,7 +140,7 @@ export interface QuestsMenuState {
   menuGroundCamera: Vec2 | null;
   screenFadeAlpha: number;
   screenFadeRamp: boolean;
-  pauseBackground: { drawPauseBackground(ctx: WebGLContext): void } | null;
+  pauseBackground: { drawPauseBackground(): void } | null;
   demoEnabled: boolean;
   debugEnabled: boolean;
   pendingQuestLevel: QuestLevel | null;
@@ -326,29 +326,29 @@ export class QuestsMenuView {
     }
   }
 
-  draw(ctx: WebGLContext, screenW: number = ctx.screenWidth, screenH: number = ctx.screenHeight): void {
+  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx);
+      pauseBackground.drawPauseBackground();
     } else if (this.state.menuGround !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this.state.menuGround.draw(camera);
     }
 
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
-    this._drawPanel(ctx);
-    this._drawSign(ctx);
-    this._drawContents(ctx);
+    this._drawPanel();
+    this._drawSign();
+    this._drawContents();
 
     const resources = this._requireResources();
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 
   takeAction(): string | null {
@@ -567,7 +567,7 @@ export class QuestsMenuView {
     return [completed, games];
   }
 
-  private _drawContents(ctx: WebGLContext): void {
+  private _drawContents(): void {
     const resources = this._requireResources();
     const layout = this._layout();
     const titlePos = layout.titlePos;
@@ -585,7 +585,7 @@ export class QuestsMenuView {
     // Title texture tinted (0.7, 0.7, 0.7, 0.7).
     const titleTex = getTexture(resources, TextureId.UI_TEXT_QUEST);
     const titleTint = wgl.makeColor(179 / 255, 179 / 255, 179 / 255, 179 / 255);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       titleTex,
       wgl.makeRectangle(0.0, 0.0, titleTex.width, titleTex.height),
       wgl.makeRectangle(titlePos.x, titlePos.y, QUEST_TITLE_W, QUEST_TITLE_H),
@@ -607,7 +607,7 @@ export class QuestsMenuView {
       let tint = baseTint;
       if (hoveredStage === idx) tint = hoverTint;
       if (idx === stage) tint = selectedTint;
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         icon,
         wgl.makeRectangle(0.0, 0.0, icon.width, icon.height),
         wgl.makeRectangle(x, iconsStartPos.y, size, size),
@@ -632,14 +632,14 @@ export class QuestsMenuView {
         listPos.x + QUEST_HARDCORE_CHECKBOX_X_OFFSET,
         listPos.y + QUEST_HARDCORE_CHECKBOX_Y_OFFSET,
       );
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         checkTex,
         wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
         wgl.makeRectangle(checkPos.x, checkPos.y, checkTex.width, checkTex.height),
         ORIGIN, 0.0, WHITE,
       );
       drawSmallText(
-        ctx, font, 'Hardcore',
+        font, 'Hardcore',
         new Vec2(checkPos.x + checkTex.width + 6.0, checkPos.y + 1.0),
         baseColor,
       );
@@ -651,17 +651,17 @@ export class QuestsMenuView {
       const unlocked = this._questUnlocked(stage, row);
       const color = hoveredRow === row ? hoverColor : baseColor;
 
-      drawSmallText(ctx, font, `${stage}.${row + 1}`, new Vec2(listPos.x, y), color);
+      drawSmallText(font, `${stage}.${row + 1}`, new Vec2(listPos.x, y), color);
 
       const title = unlocked ? this._questTitle(stage, row) : '???';
-      drawSmallText(ctx, font, title, new Vec2(listPos.x + QUEST_LIST_NAME_X_OFFSET, y), color);
+      drawSmallText(font, title, new Vec2(listPos.x + QUEST_LIST_NAME_X_OFFSET, y), color);
       const titleW = unlocked ? measureSmallTextWidth(font, title) : 0.0;
       if (unlocked) {
         const lineY = y + 13.0;
-        ctx.drawRectangle(
+        wgl.drawRectangle(
           Math.floor(listPos.x), Math.floor(lineY),
           Math.floor(listPos.x + titleW + 32.0) - Math.floor(listPos.x), 1,
-          color[0], color[1], color[2], color[3],
+          color,
         );
       }
 
@@ -670,7 +670,7 @@ export class QuestsMenuView {
         if (counts !== null) {
           const [completed, games] = counts;
           const countsX = listPos.x + QUEST_LIST_NAME_X_OFFSET + titleW + 12.0;
-          drawSmallText(ctx, font, `(${completed}/${games})`, new Vec2(countsX, y), color);
+          drawSmallText(font, `(${completed}/${games})`, new Vec2(countsX, y), color);
         }
       }
     }
@@ -678,7 +678,7 @@ export class QuestsMenuView {
     if (showCounts) {
       const headerX = listPos.x + 96.0;
       const headerY = y0 + QUEST_LIST_ROW_STEP * 10.0 - 2.0;
-      drawSmallText(ctx, font, '(completed/games)', new Vec2(headerX, headerY), baseColor);
+      drawSmallText(font, '(completed/games)', new Vec2(headerX, headerY), baseColor);
     }
 
     // Back button.
@@ -687,10 +687,10 @@ export class QuestsMenuView {
       y0 + QUEST_BACK_BUTTON_Y_OFFSET,
     );
     const backW = buttonWidth(resources, this._backButton.label, { scale: 1.0, forceWide: this._backButton.forceWide });
-    buttonDraw(ctx, resources, this._backButton, { pos: backPos, width: backW, scale: 1.0 });
+    buttonDraw(resources, this._backButton, { pos: backPos, width: backW, scale: 1.0 });
   }
 
-  private _drawSign(ctx: WebGLContext): void {
+  private _drawSign(): void {
     const resources = this._requireResources();
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(screenW | 0);
@@ -722,19 +722,19 @@ export class QuestsMenuView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
 
-  private _drawPanel(ctx: WebGLContext): void {
+  private _drawPanel(): void {
     const resources = this._requireResources();
     const [_angleRad, slideX] = uiElementAnim(
       this,
@@ -746,7 +746,7 @@ export class QuestsMenuView {
     const fxDetail = this.state.config.display.fxDetail[0];
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(
         QUEST_MENU_BASE_X + slideX + QUEST_MENU_PANEL_OFFSET_X,
         QUEST_MENU_BASE_Y + MENU_PANEL_OFFSET_Y + this._widescreenYShift,

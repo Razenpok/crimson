@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
+
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { audioPlaySfx, audioPlayMusic, audioStopMusic, audioUpdate } from '@grim/audio.ts';
@@ -316,13 +316,13 @@ export class StatisticsMenuView {
     }
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx);
+      pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
@@ -330,7 +330,7 @@ export class StatisticsMenuView {
 
     const screenW = this.state.config.display.width;
     const screenH = this.state.config.display.height;
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
     const resources = requireRuntimeResources(this.state);
 
@@ -346,13 +346,13 @@ export class StatisticsMenuView {
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, STATISTICS_PANEL_HEIGHT * scale);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
 
     // Title: full-size row from UI_ITEM_TEXTS (128x32).
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const rowH = MENU_LABEL_ROW_HEIGHT;
     const src = wgl.makeRectangle(0.0, MENU_LABEL_ROW_STATISTICS * rowH, labelTex.width, rowH);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       labelTex, src,
       wgl.makeRectangle(
         panelTopLeft.x + _TITLE_X * scale,
@@ -368,14 +368,14 @@ export class StatisticsMenuView {
     const playtimeMs = (this.state as unknown as { status?: { gameSequenceId?: number } }).status?.gameSequenceId ?? 0;
     const playtimeText = formatPlaytimeText(playtimeMs, this.state.preserveBugs);
     const playtimePos = panelTopLeft.add(new Vec2(_PLAYTIME_X * scale, _PLAYTIME_Y * scale));
-    drawSmallText(ctx, font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));
+    drawSmallText(font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));
 
     // Easter egg: Orbes Volantes Exstare
     const today = new Date();
     if (isOrbesVolantesDay(today) && this.state.statsMenuEasterEggRoll === _STATS_EASTER_TRIGGER_ROLL) {
       this.state.statsMenuEasterEggRoll = _STATS_EASTER_ROLL_UNSET;
       const easterX = this.state.rng.rand(RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X) % 64 + 16;
-      drawSmallText(ctx, font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 0.5));
+      drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 0.5));
     }
 
     // Buttons
@@ -385,18 +385,18 @@ export class StatisticsMenuView {
       const btn = buttons[i];
       const w = buttonWidth(resources, btn.label, { scale, forceWide: btn.forceWide });
       const btnPos = buttonBase.offset(0, _BUTTON_STEP_Y * i * scale);
-      buttonDraw(ctx, resources, btn, { pos: btnPos, width: w, scale });
+      buttonDraw(resources, btn, { pos: btnPos, width: w, scale });
     }
 
     const backW = buttonWidth(resources, this._btnBack.label, { scale, forceWide: this._btnBack.forceWide });
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
-    buttonDraw(ctx, resources, this._btnBack, { pos: backPos, width: backW, scale });
+    buttonDraw(resources, this._btnBack, { pos: backPos, width: backW, scale });
 
-    this._drawSign(ctx, resources, scale);
-    this._drawMenuCursor(ctx, resources);
+    this._drawSign(resources, scale);
+    this._drawMenuCursor(resources);
   }
 
-  private _drawSign(ctx: WebGLContext, resources: RuntimeResources, _scale: number): void {
+  private _drawSign(resources: RuntimeResources, _scale: number): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(screenW | 0);
@@ -413,22 +413,22 @@ export class StatisticsMenuView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
 
-  private _drawMenuCursor(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuCursor(resources: RuntimeResources): void {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 }

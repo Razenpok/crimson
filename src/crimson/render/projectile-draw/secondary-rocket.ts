@@ -5,7 +5,6 @@ import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import type { SecondaryProjectileDrawCtx } from './types.ts';
@@ -73,26 +72,25 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
   const direction = Vec2.fromHeading(ctx.angle);
   const scale = ctx.scale;
   const alpha = ctx.alpha;
-  const gl = renderer.gl;
 
   const drawRocketFx = (size: number, offset: number, rgba: RGBA): void => {
     const fxAlpha = rgba.a;
     if (fxAlpha <= 1e-3) return;
-    const tint = rgba.toTuple();
+    const tint = rgba.toWgl();
     const fxPos = ctx.screenPos.sub(direction.mul(offset * scale));
     const dstSize = size * scale;
     const dst = wgl.makeRectangle(fxPos.x, fxPos.y, dstSize, dstSize);
     const origin = wgl.makeVector2(dstSize * 0.5, dstSize * 0.5);
-    gl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
+    wgl.drawTexturePro(particlesTexture!, src, dst, origin, 0.0, tint);
   };
 
-  gl.setBlendMode(BlendMode.ADDITIVE);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   // Large bloom around the rocket.
   drawRocketFx(140.0, 5.0, new RGBA(1.0, 1.0, 1.0, alpha * 0.48));
 
   const [glowR, glowG, glowB] = style.glowRgb;
   drawRocketFx(style.glowSize, 9.0, new RGBA(glowR, glowG, glowB, alpha * style.glowAlphaMul));
-  gl.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
 }
 
 export function drawSecondaryRocket(ctx: SecondaryProjectileDrawCtx): boolean {
@@ -113,7 +111,7 @@ export function drawSecondaryRocket(ctx: SecondaryProjectileDrawCtx): boolean {
   const alpha = ctx.alpha;
   const spriteScale = (style.baseSize * ctx.scale) / cellW;
   const baseAlpha = clamp(alpha * 0.9, 0.0, 1.0);
-  const baseTint = new RGBA(0.8, 0.8, 0.8, baseAlpha).toTuple();
+  const baseTint = new RGBA(0.8, 0.8, 0.8, baseAlpha).toWgl();
 
   drawSecondaryRocketGlow(ctx, style);
 
@@ -124,12 +122,11 @@ export function drawSecondaryRocket(ctx: SecondaryProjectileDrawCtx): boolean {
 export function drawSecondaryType4Fallback(ctx: SecondaryProjectileDrawCtx): boolean {
   if (ctx.projType !== SecondaryProjectileTypeId.ROCKET_MINIGUN) return false;
   // Native draws a filled purple circle. Approximate with a white-texture quad.
-  const gl = ctx.renderer.gl;
   const scale = ctx.scale;
   const radius = Math.max(1.0, 12.0 * scale);
   const size = radius * 2.0;
   const sp = ctx.screenPos;
   const tint = wgl.makeColor(200 / 255, 120 / 255, 1.0, ctx.alpha);
-  gl.drawTexturePro(gl.whiteTexture, wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
+  wgl.drawTexturePro(wgl.getWhiteTexture(), wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
   return true;
 }

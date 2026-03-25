@@ -1,7 +1,6 @@
 // Port of crimson/ui/overlays/typo_run.py
 
 import * as wgl from '@wgl';
-import { type GlTexture, type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
@@ -20,7 +19,6 @@ export type MeasureUiTextWidth = (text: string, scale: number) => number;
 export type WorldToScreen = (worldPos: Vec2) => Vec2;
 
 export function drawTypoNameLabels(
-  ctx: WebGLContext,
   creatures: readonly CreatureState[],
   names: readonly string[],
   worldToScreen: WorldToScreen,
@@ -48,15 +46,14 @@ export function drawTypoNameLabels(
     const x = screenPos.x - textW * 0.5;
     const bgAlpha = labelAlpha * NAME_LABEL_BG_ALPHA;
 
-    ctx.drawRectangle(x - 4, y, textW + 8, textH, 0, 0, 0, bgAlpha);
+    wgl.drawRectangle(x - 4, y, textW + 8, textH, wgl.makeColor(0, 0, 0, bgAlpha));
     drawText(text, new Vec2(x, y), wgl.makeColor(1, 1, 1, labelAlpha), NAME_LABEL_SCALE);
   }
 }
 
 export function drawTypingBox(
-  ctx: WebGLContext,
   screenH: number,
-  panelTexture: GlTexture,
+  panelTexture: wgl.Texture,
   text: string,
   cursorPulseTime: number,
   drawText: DrawUiText,
@@ -69,7 +66,7 @@ export function drawTypingBox(
   const src = wgl.makeRectangle(0, 0, panelTexture.width, panelTexture.height);
   const dst = wgl.makeRectangle(panelX, panelY, TYPING_PANEL_WIDTH, TYPING_PANEL_HEIGHT);
   const tint = wgl.makeColor(1, 1, 1, TYPING_PANEL_ALPHA);
-  ctx.drawTexturePro(panelTexture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
+  wgl.drawTexturePro(panelTexture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 
   drawText(TYPING_PROMPT + text, new Vec2(TYPING_TEXT_X, textY), wgl.makeColor(1, 1, 1, 1), 1.0);
 

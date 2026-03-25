@@ -1,13 +1,13 @@
 // Port of crimson/render/terrain_fx.py
 
-import { GlTexture } from '@grim/webgl.ts';
+import * as wgl from '@wgl';
 import { GroundRenderer, GroundDecal, GroundCorpseDecal } from '@grim/terrain-render.ts';
 import { effectSrcRect } from '@crimson/effects-atlas.ts';
 import { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 
 export interface FxQueueTextures {
-  readonly particles: GlTexture;
-  readonly bodyset: GlTexture;
+  readonly particles: wgl.Texture;
+  readonly bodyset: wgl.Texture;
 }
 
 export function bakeTerrainFxBatch(
@@ -33,7 +33,7 @@ export function bakeTerrainFxBatch(
       width: entry.width,
       height: entry.height,
       rotationRad: entry.rotation,
-      tint: entry.color.toTuple(),
+      tint: entry.color.toWgl(),
     });
   }
 
@@ -44,7 +44,7 @@ export function bakeTerrainFxBatch(
       topLeft: entry.topLeft,
       size: entry.scale,
       rotationRad: entry.rotation,
-      tint: entry.color.toTuple(),
+      tint: entry.color.toWgl(),
     });
   }
 

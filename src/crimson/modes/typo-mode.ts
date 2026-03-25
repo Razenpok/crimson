@@ -1,7 +1,6 @@
 // Port of crimson/modes/typo_mode.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -49,14 +48,12 @@ const WORLD_SIZE = 1024.0;
 
 export class TypoShooterMode extends BaseGameplayMode {
   constructor(opts: {
-    gl: WebGLContext;
     config: CrimsonConfig;
     console?: ConsoleState | null;
     audio?: AudioState | null;
     audioRng: Crand;
   }) {
     super({
-      gl: opts.gl,
       worldSize: WORLD_SIZE,
       defaultGameModeId: GameMode.TYPO,
       demoModeActive: false,
@@ -307,7 +304,7 @@ export class TypoShooterMode extends BaseGameplayMode {
   // Draw
   // ---------------------------------------------------------------------------
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     const alive = this.player.health > 0.0;
     const showGameplayUi = alive && !this._gameOverActive;
 
@@ -315,16 +312,16 @@ export class TypoShooterMode extends BaseGameplayMode {
       drawAimIndicators: showGameplayUi,
       entityAlpha: this._worldEntityAlpha(),
     });
-    this._drawScreenFade(ctx);
+    this._drawScreenFade();
 
     if (showGameplayUi) {
-      this._drawNameLabels(ctx);
+      this._drawNameLabels();
     }
 
     if (showGameplayUi) {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
-      this._drawTargetHealthBar(ctx);
-      drawHudOverlay(ctx, {
+      this._drawTargetHealthBar();
+      drawHudOverlay({
         resources: this.renderResources.resources as RuntimeResources,
         state: this._hudState,
         font: this._small,
@@ -345,13 +342,13 @@ export class TypoShooterMode extends BaseGameplayMode {
     }
 
     if (showGameplayUi) {
-      this._drawTypingBox(ctx);
+      this._drawTypingBox();
     }
 
     if (this._gameOverActive) {
-      this._drawGameCursor(ctx);
+      this._drawGameCursor();
       if (this._gameOverRecord !== null) {
-        this._gameOverUi.draw(ctx, {
+        this._gameOverUi.draw({
           record: this._gameOverRecord,
           bannerKind: this._gameOverBanner,
           resources: this.renderResources.resources as RuntimeResources,
@@ -365,11 +362,10 @@ export class TypoShooterMode extends BaseGameplayMode {
   // Draw helpers
   // ---------------------------------------------------------------------------
 
-  private _drawGameCursor(ctx: WebGLContext): void {
+  private _drawGameCursor(): void {
     const resources = this.renderResources.resources as RuntimeResources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       mousePos,
@@ -377,34 +373,32 @@ export class TypoShooterMode extends BaseGameplayMode {
     );
   }
 
-  private _drawNameLabels(ctx: WebGLContext): void {
+  private _drawNameLabels(): void {
     const typo = this.state.typo;
     if (typo == null || typo.names == null) return;
     drawTypoNameLabels(
-      ctx,
       this.creatures.entries,
       typo.names.names ?? [],
       (worldPos: Vec2) => this.worldToScreen(worldPos),
       (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
-        this._drawUiText(ctx, text, pos, color, scale),
+        this._drawUiText(text, pos, color, scale),
       (text: string, scale: number) => this._uiTextWidth(text, scale),
     );
   }
 
-  private _drawTypingBox(ctx: WebGLContext): void {
+  private _drawTypingBox(): void {
     const typo = this.state.typo;
     if (typo == null || typo.typing == null) return;
-    const screenH = this._gl.screenHeight;
+    const screenH = wgl.getScreenHeight();
     const panelTexture = getTexture(this.renderResources.resources as RuntimeResources, TextureId.UI_IND_PANEL);
     if (panelTexture === null) return;
     drawTypingBox(
-      ctx,
       screenH,
       panelTexture,
       typo.typing.text ?? '',
       this._cursorPulseTime,
       (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
-        this._drawUiText(ctx, text, pos, color, scale),
+        this._drawUiText(text, pos, color, scale),
       (text: string, scale: number) => this._uiTextWidth(text, scale),
     );
   }

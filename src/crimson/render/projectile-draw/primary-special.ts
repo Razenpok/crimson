@@ -1,23 +1,22 @@
 // Port of crimson/render/projectile_draw/primary_special.py
 
+import * as wgl from '@wgl';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { BlendMode } from '@grim/webgl.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
 import { projOrigin } from './common.ts';
 import type { ProjectileDrawCtx } from './types.ts';
 
-function beginDarkenSrcZeroBlend(gl: { setCustomBlendFactorsSeparate(srcRGB: number, dstRGB: number, eqRGB: number, srcA: number, dstA: number, eqA: number): void; setBlendMode(mode: BlendMode): void; readonly gl: WebGL2RenderingContext }): void {
+function beginDarkenSrcZeroBlend(): void {
   // Native projectile_render switches Plague Spreader to D3D8 SRC=ZERO / DST=INVSRCALPHA.
   // Alpha channel: SRC=ZERO, DST=ONE (preserve destination alpha).
-  const rawGl = gl.gl;
-  gl.setCustomBlendFactorsSeparate(
-    rawGl.ZERO, rawGl.ONE_MINUS_SRC_ALPHA, rawGl.FUNC_ADD,
-    rawGl.ZERO, rawGl.ONE, rawGl.FUNC_ADD,
+  wgl.rlSetBlendFactorsSeparate(
+    wgl.RL_ZERO, wgl.RL_ONE_MINUS_SRC_ALPHA, wgl.RL_FUNC_ADD,
+    wgl.RL_ZERO, wgl.RL_ONE, wgl.RL_FUNC_ADD,
   );
-  gl.setBlendMode(BlendMode.CUSTOM);
+  wgl.beginBlendMode(wgl.BlendMode.CUSTOM);
 }
 
 export function drawPulseGun(ctx: ProjectileDrawCtx): boolean {
@@ -32,7 +31,6 @@ export function drawPulseGun(ctx: ProjectileDrawCtx): boolean {
 
   const alpha = ctx.alpha;
   const life = ctx.life;
-  const gl = renderer.gl;
 
   if (life >= 0.4) {
     const origin = projOrigin(ctx.proj, ctx.pos);
@@ -43,10 +41,10 @@ export function drawPulseGun(ctx: ProjectileDrawCtx): boolean {
     const spriteScale = cellW > 1e-6 ? desiredSize / cellW : 0.0;
     if (spriteScale <= 1e-6) return true;
 
-    const tint = new RGBA(0.1, 0.6, 0.2, alpha * 0.7).toTuple();
-    gl.setBlendMode(BlendMode.ADDITIVE);
+    const tint = new RGBA(0.1, 0.6, 0.2, alpha * 0.7).toWgl();
+    wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
     renderer.drawAtlasSprite(ctx.texture, grid, frame, ctx.screenPos, spriteScale, ctx.angle, tint);
-    gl.setBlendMode(BlendMode.ALPHA);
+    wgl.endBlendMode();
     return true;
   }
 
@@ -58,10 +56,10 @@ export function drawPulseGun(ctx: ProjectileDrawCtx): boolean {
   const spriteScale = cellW > 1e-6 ? desiredSize / cellW : 0.0;
   if (spriteScale <= 1e-6) return true;
 
-  const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toTuple();
-  gl.setBlendMode(BlendMode.ADDITIVE);
+  const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toWgl();
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   renderer.drawAtlasSprite(ctx.texture, grid, frame, ctx.screenPos, spriteScale, ctx.angle, tint);
-  gl.setBlendMode(BlendMode.ALPHA);
+  wgl.endBlendMode();
   return true;
 }
 
@@ -96,7 +94,7 @@ export function drawSplitterOrBlade(ctx: ProjectileDrawCtx): boolean {
     rgb = [0.8, 0.8, 0.8];
   }
 
-  const tint = new RGBA(rgb[0], rgb[1], rgb[2], ctx.alpha).toTuple();
+  const tint = new RGBA(rgb[0], rgb[1], rgb[2], ctx.alpha).toWgl();
   renderer.drawAtlasSprite(ctx.texture, grid, frame, ctx.screenPos, spriteScale, rotationRad, tint);
   return true;
 }
@@ -113,10 +111,10 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
 
   const alpha = ctx.alpha;
   const life = ctx.life;
-  const gl = renderer.gl;
+
 
   if (life >= 0.4) {
-    const tint = new RGBA(1.0, 1.0, 1.0, alpha).toTuple();
+    const tint = new RGBA(1.0, 1.0, 1.0, alpha).toWgl();
 
     const drawPlagueQuad = (pos: Vec2, size: number): void => {
       if (size <= 1e-3) return;
@@ -127,7 +125,7 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
       renderer.drawAtlasSprite(texture, grid, frame, posScreen, spriteScale, 0.0, tint);
     };
 
-    beginDarkenSrcZeroBlend(gl);
+    beginDarkenSrcZeroBlend();
     try {
       drawPlagueQuad(ctx.pos, 60.0);
 
@@ -155,7 +153,7 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
         62.0,
       );
     } finally {
-      gl.setBlendMode(BlendMode.ALPHA);
+      wgl.endBlendMode();
     }
     return true;
   }
@@ -168,12 +166,12 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
   const spriteScale = cellW > 1e-6 ? desiredSize / cellW : 0.0;
   if (spriteScale <= 1e-6) return true;
 
-  const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toTuple();
-  beginDarkenSrcZeroBlend(gl);
+  const tint = new RGBA(1.0, 1.0, 1.0, fadeAlpha).toWgl();
+  beginDarkenSrcZeroBlend();
   try {
     renderer.drawAtlasSprite(texture, grid, frame, ctx.screenPos, spriteScale, 0.0, tint);
   } finally {
-    gl.setBlendMode(BlendMode.ALPHA);
+    wgl.endBlendMode();
   }
   return true;
 }

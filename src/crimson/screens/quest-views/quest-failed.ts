@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
+
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -96,7 +96,7 @@ export interface QuestFailedState {
   questOutcome: QuestFailedOutcome | null;
   questFailRetryCount: number;
   pendingQuestLevel: QuestLevel | null;
-  pauseBackground: { drawPauseBackground(ctx: WebGLContext, opts?: { entityAlpha?: number }): void } | null;
+  pauseBackground: { drawPauseBackground(opts?: { entityAlpha?: number }): void } | null;
   menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
   menuGroundCamera: Vec2 | null;
   screenFadeAlpha: number;
@@ -231,23 +231,23 @@ export class QuestFailedView {
     }
   }
 
-  draw(ctx: WebGLContext, screenW: number = ctx.screenWidth, screenH: number = ctx.screenHeight): void {
-    ctx.clearBackground(0, 0, 0, 1);
+  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx, { entityAlpha: this._worldEntityAlpha() });
+      pauseBackground.drawPauseBackground({ entityAlpha: this._worldEntityAlpha() });
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
     const panelTopLeft = this._panelTopLeft();
     const resources = this._requireResources();
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     const fxDetail = this.state.config.display.fxDetail[0];
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, QUEST_FAILED_PANEL_W, QUEST_FAILED_PANEL_H),
       WHITE, fxDetail,
     );
@@ -255,7 +255,7 @@ export class QuestFailedView {
     // Reaper banner
     const reaperTex = getTexture(resources, TextureId.UI_TEXT_REAPER);
     const bannerPos = panelTopLeft.add(new Vec2(QUEST_FAILED_BANNER_X_OFFSET, QUEST_FAILED_BANNER_Y_OFFSET));
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       reaperTex,
       wgl.makeRectangle(0.0, 0.0, reaperTex.width, reaperTex.height),
       wgl.makeRectangle(bannerPos.x, bannerPos.y, QUEST_FAILED_BANNER_W, QUEST_FAILED_BANNER_H),
@@ -266,31 +266,31 @@ export class QuestFailedView {
     const font = resources.smallFont;
     const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
     const msgPos = panelTopLeft.add(new Vec2(QUEST_FAILED_MESSAGE_X_OFFSET, QUEST_FAILED_MESSAGE_Y_OFFSET));
-    drawSmallText(ctx, font, this._failureMessage(), msgPos, textColor);
+    drawSmallText(font, this._failureMessage(), msgPos, textColor);
 
     // Score preview
-    this._drawScorePreview(ctx, font, panelTopLeft);
+    this._drawScorePreview(font, panelTopLeft);
 
     // Buttons
     const scale = 1.0;
     let buttonPos = panelTopLeft.add(new Vec2(QUEST_FAILED_BUTTON_X_OFFSET, QUEST_FAILED_BUTTON_Y_OFFSET));
 
     const retryW = buttonWidth(resources, this._retryButton.label, { scale, forceWide: this._retryButton.forceWide });
-    buttonDraw(ctx, resources, this._retryButton, { pos: buttonPos, width: retryW, scale });
+    buttonDraw(resources, this._retryButton, { pos: buttonPos, width: retryW, scale });
     buttonPos = buttonPos.offset(0.0, QUEST_FAILED_BUTTON_STEP_Y);
 
     const playAnotherW = buttonWidth(resources, this._questListButton.label, { scale, forceWide: this._questListButton.forceWide });
-    buttonDraw(ctx, resources, this._questListButton, { pos: buttonPos, width: playAnotherW, scale });
+    buttonDraw(resources, this._questListButton, { pos: buttonPos, width: playAnotherW, scale });
     buttonPos = buttonPos.offset(0.0, QUEST_FAILED_BUTTON_STEP_Y);
 
     const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
-    buttonDraw(ctx, resources, this._mainMenuButton, { pos: buttonPos, width: mainMenuW, scale });
+    buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainMenuW, scale });
 
     // Menu cursor
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 
   takeAction(): string | null {
@@ -413,7 +413,7 @@ export class QuestFailedView {
     return measureSmallTextWidth(this._requireResources().smallFont, text);
   }
 
-  private _drawScorePreview(ctx: WebGLContext, font: SmallFontData, panelTopLeft: Vec2): void {
+  private _drawScorePreview(font: SmallFontData, panelTopLeft: Vec2): void {
     const record = this._record;
     if (record === null) return;
 
@@ -425,33 +425,33 @@ export class QuestFailedView {
 
     const scoreLabel = 'Score';
     const scoreLabelW = this._textWidth(scoreLabel);
-    drawSmallText(ctx, font, scoreLabel, scorePos.offset(32.0 - scoreLabelW * 0.5, 0.0), labelColor);
+    drawSmallText(font, scoreLabel, scorePos.offset(32.0 - scoreLabelW * 0.5, 0.0), labelColor);
 
     const scoreValue = `${(record.survivalElapsedMs * 0.001).toFixed(2)} secs`;
     const scoreValueW = this._textWidth(scoreValue);
-    drawSmallText(ctx, font, scoreValue, scorePos.add(new Vec2(32.0 - scoreValueW * 0.5, 15.0)), valueColor);
+    drawSmallText(font, scoreValue, scorePos.add(new Vec2(32.0 - scoreValueW * 0.5, 15.0)), valueColor);
 
     // Vertical separator
     const sepPos = scorePos.offset(80.0, 0.0);
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(sepPos.x), Math.floor(sepPos.y),
       1, 48,
-      separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+      separatorColor,
     );
 
     // Experience column
     const col2Pos = scorePos.offset(96.0, 0.0);
-    drawSmallText(ctx, font, 'Experience', col2Pos, valueColor);
+    drawSmallText(font, 'Experience', col2Pos, valueColor);
     const xpValue = `${record.scoreXp}`;
     const xpW = this._textWidth(xpValue);
-    drawSmallText(ctx, font, xpValue, col2Pos.add(new Vec2(32.0 - xpW * 0.5, 15.0)), labelColor);
+    drawSmallText(font, xpValue, col2Pos.add(new Vec2(32.0 - xpW * 0.5, 15.0)), labelColor);
 
     // Horizontal separator
     const linePos = scorePos.add(new Vec2(-16.0, 52.0));
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(linePos.x), Math.floor(linePos.y),
       192, 1,
-      separatorColor[0], separatorColor[1], separatorColor[2], separatorColor[3],
+      separatorColor,
     );
   }
 }

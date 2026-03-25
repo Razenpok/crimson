@@ -1,7 +1,6 @@
 // Port of crimson/modes/components/perk_menu_controller.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
@@ -291,7 +290,7 @@ export class PerkMenuController {
     return null;
   }
 
-  draw(glCtx: WebGLContext, ctx: PerkMenuUiContext, choices: readonly PerkId[]): void {
+  draw(ctx: PerkMenuUiContext, choices: readonly PerkId[]): void {
     const menuT = clamp(this._timelineMs / PERK_MENU_TRANSITION_MS, 0.0, 1.0);
     if (menuT <= 1e-3) {
       return;
@@ -330,7 +329,7 @@ export class PerkMenuController {
       computed.panel.w,
       computed.panel.h,
     );
-    drawClassicMenuPanel(glCtx, panelTex, panelDst, undefined, ctx.fxDetail ?? false);
+    drawClassicMenuPanel(panelTex, panelDst, undefined, ctx.fxDetail ?? false);
 
     // Draw title texture
     const titleTex = getTexture(ctx.resources, TextureId.UI_TEXT_PICK_A_PERK);
@@ -341,7 +340,7 @@ export class PerkMenuController {
       computed.title.w,
       computed.title.h,
     );
-    glCtx.drawTexturePro(titleTex, titleSrc, titleDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
+    wgl.drawTexturePro(titleTex, titleSrc, titleDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
 
     // Sponsor text
     let sponsor: string | null = null;
@@ -351,7 +350,7 @@ export class PerkMenuController {
       sponsor = 'extra perk sponsored by the Perk Expert';
     }
     if (sponsor) {
-      drawUiText(glCtx, ctx.resources, sponsor, computed.sponsorPos, {
+      drawUiText(ctx.resources, sponsor, computed.sponsorPos, {
         scale,
         color: UI_SPONSOR_COLOR,
       });
@@ -365,7 +364,7 @@ export class PerkMenuController {
       const itemPos = computed.listPos.offset(0.0, idx * computed.listStepY);
       const rect = menuItemHitRect(ctx.resources, label, { pos: itemPos, scale });
       const hovered = rect.contains(ctx.mouse) || idx === this._selectedIndex;
-      drawMenuItem(glCtx, ctx.resources, label, { pos: itemPos, scale, hovered });
+      drawMenuItem(ctx.resources, label, { pos: itemPos, scale, hovered });
     }
 
     // Draw selected perk description
@@ -374,7 +373,7 @@ export class PerkMenuController {
       violenceDisabled: ctx.violenceDisabled,
       preserveBugs,
     });
-    drawUiText(glCtx, ctx.resources, desc, computed.desc.topLeft, {
+    drawUiText(ctx.resources, desc, computed.desc.topLeft, {
       scale,
       color: UI_TEXT_COLOR,
     });
@@ -384,7 +383,7 @@ export class PerkMenuController {
       scale,
       forceWide: this._cancelButton.forceWide,
     });
-    buttonDraw(glCtx, ctx.resources, this._cancelButton, {
+    buttonDraw(ctx.resources, this._cancelButton, {
       pos: computed.cancelPos,
       width: cancelW,
       scale,

@@ -1,7 +1,6 @@
 // Port of grim/console.py — simplified for WebGL (no file I/O, no script exec)
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from './webgl.ts';
 import { Vec2 } from './geom.ts';
 import { clamp } from './math.ts';
 import { type SmallFontData, drawSmallText, measureSmallTextWidth } from './fonts/small.ts';
@@ -201,19 +200,19 @@ export class ConsoleState {
     this._pollTextInput();
   }
 
-  draw(ctx: WebGLContext, smallFont: SmallFontData | null, monoFont: GrimMonoFont | null): void {
+  draw(smallFont: SmallFontData | null, monoFont: GrimMonoFont | null): void {
     const height = this.heightPx;
     if (height <= 0) return;
     const ratio = this._openRatio(height);
     if (ratio <= 0) return;
 
-    const screenW = ctx.screenWidth;
+    const screenW = wgl.getScreenWidth();
     const offsetY = this._offsetY;
 
     // Background
-    ctx.drawRectangle(0, offsetY, screenW, height, ...CONSOLE_BG_COLOR, ratio);
+    wgl.drawRectangle(0, offsetY, screenW, height, wgl.makeColor(...CONSOLE_BG_COLOR, ratio));
     const borderY = offsetY + height - CONSOLE_BORDER_HEIGHT;
-    ctx.drawRectangle(0, borderY, screenW, CONSOLE_BORDER_HEIGHT, ...CONSOLE_BORDER_COLOR, ratio);
+    wgl.drawRectangle(0, borderY, screenW, CONSOLE_BORDER_HEIGHT, wgl.makeColor(...CONSOLE_BORDER_COLOR, ratio));
 
     const useMono = this._useMonoFont() && monoFont !== null;
 
@@ -222,10 +221,10 @@ export class ConsoleState {
     const versionY = offsetY + height - CONSOLE_VERSION_OFFSET_Y;
     const versionColor = wgl.makeColor(1.0, 1.0, 1.0, ratio * 0.3);
     if (smallFont) {
-      drawSmallText(ctx, smallFont, CONSOLE_VERSION_TEXT, new Vec2(versionX, versionY), versionColor);
+      drawSmallText(smallFont, CONSOLE_VERSION_TEXT, new Vec2(versionX, versionY), versionColor);
     } else if (monoFont) {
       const advance = monoFont.advance * CONSOLE_MONO_SCALE;
-      drawGrimMonoText(ctx, monoFont, CONSOLE_VERSION_TEXT, new Vec2(versionX - advance, versionY), CONSOLE_MONO_SCALE, versionColor);
+      drawGrimMonoText(monoFont, CONSOLE_VERSION_TEXT, new Vec2(versionX - advance, versionY), CONSOLE_MONO_SCALE, versionColor);
     }
 
     // Compute visible log block
@@ -236,11 +235,11 @@ export class ConsoleState {
     const textColor = wgl.makeColor(1.0, 1.0, 1.0, ratio);
     if (useMono && monoFont) {
       const advance = monoFont.advance * CONSOLE_MONO_SCALE;
-      drawGrimMonoText(ctx, monoFont, CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X - advance, inputY), CONSOLE_MONO_SCALE, textColor);
-      drawGrimMonoText(ctx, monoFont, this.inputBuffer, new Vec2(CONSOLE_INPUT_X_MONO - advance, inputY), CONSOLE_MONO_SCALE, textColor);
+      drawGrimMonoText(monoFont, CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X - advance, inputY), CONSOLE_MONO_SCALE, textColor);
+      drawGrimMonoText(monoFont, this.inputBuffer, new Vec2(CONSOLE_INPUT_X_MONO - advance, inputY), CONSOLE_MONO_SCALE, textColor);
     } else if (smallFont) {
       const prompt = `>${this.inputBuffer}`;
-      drawSmallText(ctx, smallFont, prompt, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
+      drawSmallText(smallFont, prompt, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
     }
 
     // Log lines
@@ -249,9 +248,9 @@ export class ConsoleState {
     for (const line of visible) {
       if (useMono && monoFont) {
         const advance = monoFont.advance * CONSOLE_MONO_SCALE;
-        drawGrimMonoText(ctx, monoFont, line, new Vec2(CONSOLE_TEXT_X - advance, y), CONSOLE_MONO_SCALE, logColor);
+        drawGrimMonoText(monoFont, line, new Vec2(CONSOLE_TEXT_X - advance, y), CONSOLE_MONO_SCALE, logColor);
       } else if (smallFont) {
-        drawSmallText(ctx, smallFont, line, new Vec2(CONSOLE_TEXT_X, y), logColor);
+        drawSmallText(smallFont, line, new Vec2(CONSOLE_TEXT_X, y), logColor);
       }
       y += CONSOLE_LINE_HEIGHT;
     }
@@ -263,10 +262,10 @@ export class ConsoleState {
     if (useMono && monoFont) {
       const advance = monoFont.advance * CONSOLE_MONO_SCALE;
       const caretX = CONSOLE_INPUT_X_MONO + this.inputCaret * 8.0;
-      drawGrimMonoText(ctx, monoFont, CONSOLE_CARET_TEXT, new Vec2(caretX - advance, caretY), CONSOLE_MONO_SCALE, caretColor);
+      drawGrimMonoText(monoFont, CONSOLE_CARET_TEXT, new Vec2(caretX - advance, caretY), CONSOLE_MONO_SCALE, caretColor);
     } else if (smallFont) {
       const caretX = this._smallCaretX(smallFont);
-      drawSmallText(ctx, smallFont, CONSOLE_CARET_TEXT, new Vec2(caretX, caretY), caretColor);
+      drawSmallText(smallFont, CONSOLE_CARET_TEXT, new Vec2(caretX, caretY), caretColor);
     }
   }
 

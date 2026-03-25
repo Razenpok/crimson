@@ -1,5 +1,4 @@
 import * as wgl from '@wgl';
-import { WebGLContext, GlTexture } from '@grim/webgl.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from './shadow.ts';
 
 const MENU_PANEL_INSET = 1.0;
@@ -11,8 +10,7 @@ const MENU_PANEL_DST_BOTTOM_H = 116.0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 export function drawClassicMenuPanel(
-  ctx: WebGLContext,
-  texture: GlTexture,
+  texture: wgl.Texture,
   dst: wgl.Rectangle,
   tint: wgl.Color = WHITE,
   shadow: boolean = false,
@@ -46,12 +44,12 @@ export function drawClassicMenuPanel(
     const src = flipSrc(wgl.makeRectangle(srcX, srcY, srcW, srcH));
     if (shadow) {
       drawUiQuadShadow(
-        ctx, texture, src,
+        texture, src,
         wgl.makeRectangle(dstX + UI_SHADOW_OFFSET, dstY + UI_SHADOW_OFFSET, dstW, dstH),
         origin, 0.0,
       );
     }
-    ctx.drawTexturePro(texture, src, dst, origin, 0.0, tint);
+    wgl.drawTexturePro(texture, src, dst, origin, 0.0, tint);
     return;
   }
 
@@ -67,14 +65,14 @@ export function drawClassicMenuPanel(
     const slices: [typeof srcTop, typeof dstTop][] = [[srcTop, dstTop], [srcMid, dstMid], [srcBot, dstBot]];
     for (const [s, d] of slices) {
       drawUiQuadShadow(
-        ctx, texture, s,
+        texture, s,
         wgl.makeRectangle(d[0] + UI_SHADOW_OFFSET, d[1] + UI_SHADOW_OFFSET, d[2], d[3]),
         origin, 0.0,
       );
     }
   }
 
-  ctx.drawTexturePro(texture, srcTop, dstTop, origin, 0.0, tint);
-  ctx.drawTexturePro(texture, srcMid, dstMid, origin, 0.0, tint);
-  ctx.drawTexturePro(texture, srcBot, dstBot, origin, 0.0, tint);
+  wgl.drawTexturePro(texture, srcTop, dstTop, origin, 0.0, tint);
+  wgl.drawTexturePro(texture, srcMid, dstMid, origin, 0.0, tint);
+  wgl.drawTexturePro(texture, srcBot, dstBot, origin, 0.0, tint);
 }

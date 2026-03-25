@@ -1,39 +1,38 @@
 // Port of crimson/screens/panels/alien_zookeeper.py — AlienZooKeeper mini-game panel
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { drawSmallText } from '@grim/fonts/small.ts';
-import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
-import { SfxId } from '@grim/sfx-map.ts';
-import { fxDetailEnabled } from '@grim/config.ts';
-import { InputState } from '@grim/input.ts';
-import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
-import { UiButtonState, buttonDraw, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
-import { type GameState } from '@crimson/game/types.ts';
-import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import { requireRuntimeResources } from '@crimson/screens/assets.ts';
-import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import * as wgl from "@wgl";
+import { Vec2 } from "@grim/geom.ts";
+import { getTexture, type RuntimeResources, TextureId } from "@grim/assets.ts";
+import { drawSmallText } from "@grim/fonts/small.ts";
+import { audioPlaySfx, audioUpdate } from "@grim/audio.ts";
+import { SfxId } from "@grim/sfx-map.ts";
+import { fxDetailEnabled } from "@grim/config.ts";
+import { InputState } from "@grim/input.ts";
+import { type GroundRenderer } from "@grim/terrain-render.ts";
+import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
+import { drawMenuCursor } from "@crimson/ui/cursor.ts";
+import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
+import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
+import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "@crimson/ui/perk-menu.ts";
+import { type GameState } from "@crimson/game/types.ts";
+import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
+import { requireRuntimeResources } from "@crimson/screens/assets.ts";
+import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import {
   MENU_PANEL_WIDTH,
   MENU_SCALE_SMALL_THRESHOLD,
-  MENU_SIGN_WIDTH,
   MENU_SIGN_HEIGHT,
   MENU_SIGN_OFFSET_X,
   MENU_SIGN_OFFSET_Y,
+  MENU_SIGN_POS_X_PAD,
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
-  MENU_SIGN_POS_X_PAD,
-  PANEL_TIMELINE_START_MS,
+  MENU_SIGN_WIDTH,
   PANEL_TIMELINE_END_MS,
-  uiElementAnim,
+  PANEL_TIMELINE_START_MS,
   signLayoutScale,
-} from './base.ts';
+  uiElementAnim,
+} from "./base.ts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -425,12 +424,11 @@ export class AlienZooKeeperView {
     }
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
-    const pauseBackground = this.state.pauseBackground as { drawPauseBackground(ctx: WebGLContext): void } | null;
-    if (pauseBackground != null) {
-      pauseBackground.drawPauseBackground(ctx);
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
+    if (this.state.pauseBackground !== null) {
+      this.state.pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
@@ -438,7 +436,7 @@ export class AlienZooKeeperView {
 
     const screenW = this.state.config.display.width;
     const screenH = this.state.config.display.height;
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
@@ -454,25 +452,25 @@ export class AlienZooKeeperView {
     );
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
 
     // Title and subtitles
-    drawSmallText(ctx, font, _TITLE, new Vec2(layout.titleX, layout.titleY), WHITE);
-    drawSmallText(ctx, font, _SUBTITLE_1, new Vec2(layout.subtitle1X, layout.subtitle1Y), WHITE);
-    drawSmallText(ctx, font, _SUBTITLE_2, new Vec2(layout.subtitle2X, layout.subtitle2Y), WHITE);
+    drawSmallText(font, _TITLE, new Vec2(layout.titleX, layout.titleY), WHITE);
+    drawSmallText(font, _SUBTITLE_1, new Vec2(layout.subtitle1X, layout.subtitle1Y), WHITE);
+    drawSmallText(font, _SUBTITLE_2, new Vec2(layout.subtitle2X, layout.subtitle2Y), WHITE);
 
     // Score
     const scoreText = `score: ${this._score | 0}`;
-    drawSmallText(ctx, font, scoreText, new Vec2(layout.scoreX, layout.scoreY), wgl.makeColor(1.0, 1.0, 1.0, 0.7));
+    drawSmallText(font, scoreText, new Vec2(layout.scoreX, layout.scoreY), wgl.makeColor(1.0, 1.0, 1.0, 0.7));
 
     // Board background
-    ctx.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, layout.boardSize, 0.0, 0.0, 0.0, 0.6);
+    wgl.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, layout.boardSize, wgl.makeColor(0.0, 0.0, 0.0, 0.6));
     // Board border
     const borderW = Math.max(1.0, scale);
-    ctx.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, borderW, 1, 1, 1, 1);
-    ctx.drawRectangle(layout.boardX, layout.boardY + layout.boardSize - borderW, layout.boardSize, borderW, 1, 1, 1, 1);
-    ctx.drawRectangle(layout.boardX, layout.boardY, borderW, layout.boardSize, 1, 1, 1, 1);
-    ctx.drawRectangle(layout.boardX + layout.boardSize - borderW, layout.boardY, borderW, layout.boardSize, 1, 1, 1, 1);
+    wgl.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, borderW, WHITE);
+    wgl.drawRectangle(layout.boardX, layout.boardY + layout.boardSize - borderW, layout.boardSize, borderW, WHITE);
+    wgl.drawRectangle(layout.boardX, layout.boardY, borderW, layout.boardSize, WHITE);
+    wgl.drawRectangle(layout.boardX + layout.boardSize - borderW, layout.boardY, borderW, layout.boardSize, WHITE);
 
     // Timer bar
     let timerValue = (this._timerMs / 100) | 0;
@@ -480,12 +478,12 @@ export class AlienZooKeeperView {
     const timerH = 6.0 * scale;
     const timerY = layout.boardY + (200.0 * scale);
     const timerFillW = timerValue * scale;
-    ctx.drawRectangle(layout.boardX, timerY, timerFillW, timerH, 0.2, 0.6, 1.0, 0.6);
+    wgl.drawRectangle(layout.boardX, timerY, timerFillW, timerH, wgl.makeColor(0.2, 0.6, 1.0, 0.6));
     // Timer border
-    ctx.drawRectangle(layout.boardX, timerY, layout.boardSize, borderW, 1, 1, 1, 1);
-    ctx.drawRectangle(layout.boardX, timerY + timerH - borderW, layout.boardSize, borderW, 1, 1, 1, 1);
-    ctx.drawRectangle(layout.boardX, timerY, borderW, timerH, 1, 1, 1, 1);
-    ctx.drawRectangle(layout.boardX + layout.boardSize - borderW, timerY, borderW, timerH, 1, 1, 1, 1);
+    wgl.drawRectangle(layout.boardX, timerY, layout.boardSize, borderW, WHITE);
+    wgl.drawRectangle(layout.boardX, timerY + timerH - borderW, layout.boardSize, borderW, WHITE);
+    wgl.drawRectangle(layout.boardX, timerY, borderW, timerH, WHITE);
+    wgl.drawRectangle(layout.boardX + layout.boardSize - borderW, timerY, borderW, timerH, WHITE);
 
     // Selection highlight
     if (this._selectedIndex >= 0) {
@@ -494,12 +492,12 @@ export class AlienZooKeeperView {
       const selX = layout.boardX + selCol * layout.tileSize + (4.0 * scale);
       const selY = layout.boardY + selRow * layout.tileSize + (4.0 * scale);
       const selSize = 24.0 * scale;
-      ctx.drawRectangle(selX, selY, selSize, selSize, 0.2, 0.4, 0.7, 0.4);
+      wgl.drawRectangle(selX, selY, selSize, selSize, wgl.makeColor(0.2, 0.4, 0.7, 0.4));
       // Selection border
-      ctx.drawRectangle(selX, selY, selSize, borderW, 1, 1, 1, 1);
-      ctx.drawRectangle(selX, selY + selSize - borderW, selSize, borderW, 1, 1, 1, 1);
-      ctx.drawRectangle(selX, selY, borderW, selSize, 1, 1, 1, 1);
-      ctx.drawRectangle(selX + selSize - borderW, selY, borderW, selSize, 1, 1, 1, 1);
+      wgl.drawRectangle(selX, selY, selSize, borderW, WHITE);
+      wgl.drawRectangle(selX, selY + selSize - borderW, selSize, borderW, WHITE);
+      wgl.drawRectangle(selX, selY, borderW, selSize, WHITE);
+      wgl.drawRectangle(selX + selSize - borderW, selY, borderW, selSize, WHITE);
     }
 
     // Draw alien tiles
@@ -535,27 +533,27 @@ export class AlienZooKeeperView {
       } else {
         tint = WHITE;
       }
-      ctx.drawTexturePro(alien, src, tileDst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
+      wgl.drawTexturePro(alien, src, tileDst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
     }
 
     // Game over text (blinks)
     if (this._timerMs === 0 && Math.cos(this._animTimeMs * 0.005) > 0.0) {
-      drawSmallText(ctx, font, _LABEL_GAME_OVER, new Vec2(layout.gameOverX, layout.gameOverY), WHITE);
+      drawSmallText(font, _LABEL_GAME_OVER, new Vec2(layout.gameOverX, layout.gameOverY), WHITE);
     }
 
     // Buttons
     const resetW = buttonWidth(resources, this._resetButton.label, { scale, forceWide: this._resetButton.forceWide });
-    buttonDraw(ctx, resources, this._resetButton, { pos: layout.resetPos, width: resetW, scale });
+    buttonDraw(resources, this._resetButton, { pos: layout.resetPos, width: resetW, scale });
 
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
-    buttonDraw(ctx, resources, this._backButton, { pos: layout.backPos, width: backW, scale });
+    buttonDraw(resources, this._backButton, { pos: layout.backPos, width: backW, scale });
 
     // Sign and cursor
-    this._drawSign(ctx, resources);
-    this._drawMenuCursor(ctx, resources);
+    this._drawSign(resources);
+    this._drawMenuCursor(resources);
   }
 
-  private _drawSign(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(screenW | 0);
@@ -572,22 +570,22 @@ export class AlienZooKeeperView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
 
-  private _drawMenuCursor(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuCursor(resources: RuntimeResources): void {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 }

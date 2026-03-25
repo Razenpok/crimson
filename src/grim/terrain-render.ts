@@ -1,16 +1,16 @@
 // Port of grim/terrain_render.py
 
-import { type WebGLContext, type GlTexture, type RenderTarget, BlendMode } from './webgl.ts';
+import * as wgl from '@wgl';
 import { Vec2 } from './geom.ts';
 import { CrtRand } from './rand.ts';
 
 export const TERRAIN_TEXTURE_SIZE = 1024;
 export const TERRAIN_PATCH_SIZE = 128.0;
 export const TERRAIN_PATCH_OVERSCAN = 64.0;
-export const TERRAIN_CLEAR_COLOR: [number, number, number, number] = [63 / 255, 56 / 255, 25 / 255, 1.0];
-export const TERRAIN_BASE_TINT: [number, number, number, number] = [178 / 255, 178 / 255, 178 / 255, 230 / 255];
-export const TERRAIN_OVERLAY_TINT: [number, number, number, number] = [178 / 255, 178 / 255, 178 / 255, 230 / 255];
-export const TERRAIN_DETAIL_TINT: [number, number, number, number] = [178 / 255, 178 / 255, 178 / 255, 153 / 255];
+export const TERRAIN_CLEAR_COLOR = wgl.makeColor(63 / 255, 56 / 255, 25 / 255, 1.0);
+export const TERRAIN_BASE_TINT = wgl.makeColor(178 / 255, 178 / 255, 178 / 255, 230 / 255);
+export const TERRAIN_OVERLAY_TINT = wgl.makeColor(178 / 255, 178 / 255, 178 / 255, 230 / 255);
+export const TERRAIN_DETAIL_TINT = wgl.makeColor(178 / 255, 178 / 255, 178 / 255, 153 / 255);
 export const TERRAIN_DENSITY_BASE = 800;
 export const TERRAIN_DENSITY_OVERLAY = 0x23;
 export const TERRAIN_DENSITY_DETAIL = 0x0F;
@@ -18,13 +18,13 @@ export const TERRAIN_DENSITY_SHIFT = 19;
 export const TERRAIN_ROTATION_MAX = 0x13A;
 
 export interface GroundDecal {
-  texture: GlTexture;
-  srcRect: [number, number, number, number];
+  texture: wgl.Texture;
+  srcRect: wgl.Rectangle;
   pos: Vec2;
   width: number;
   height: number;
   rotationRad: number;
-  tint: [number, number, number, number];
+  tint: wgl.Color;
 }
 
 export interface GroundCorpseDecal {
@@ -32,24 +32,22 @@ export interface GroundCorpseDecal {
   topLeft: Vec2;
   size: number;
   rotationRad: number;
-  tint: [number, number, number, number];
+  tint: wgl.Color;
 }
 
 export class GroundRenderer {
-  texture: GlTexture;
-  overlay: GlTexture;
-  overlayDetail: GlTexture;
+  texture: wgl.Texture;
+  overlay: wgl.Texture;
+  overlayDetail: wgl.Texture;
   width = TERRAIN_TEXTURE_SIZE;
   height = TERRAIN_TEXTURE_SIZE;
   textureScale = 1.0;
   textureFailed = false;
-  renderTarget: RenderTarget | null = null;
+  renderTarget: wgl.RenderTarget | null = null;
   private _renderTargetReady = false;
   private _scheduledSeed: number | null = null;
-  private _ctx: WebGLContext;
 
-  constructor(ctx: WebGLContext, texture: GlTexture, overlay: GlTexture, overlayDetail: GlTexture) {
-    this._ctx = ctx;
+  constructor(texture: wgl.Texture, overlay: wgl.Texture, overlayDetail: wgl.Texture) {
     this.texture = texture;
     this.overlay = overlay;
     this.overlayDetail = overlayDetail;
@@ -86,13 +84,13 @@ export class GroundRenderer {
         this.textureFailed = false;
         return;
       }
-      this._ctx.destroyRenderTarget(this.renderTarget);
+      wgl.unloadRenderTexture(this.renderTarget);
       this.renderTarget = null;
       this._renderTargetReady = false;
     }
 
     try {
-      this.renderTarget = this._ctx.createRenderTarget(renderW, renderH);
+      this.renderTarget = wgl.loadRenderTexture(renderW, renderH);
       this.textureFailed = false;
     } catch {
       this.textureFailed = true;
@@ -105,29 +103,28 @@ export class GroundRenderer {
     this._ensureRenderTarget();
     if (!this.renderTarget) return;
 
-    const ctx = this._ctx;
     const rng = new CrtRand(seed);
 
-    ctx.beginRenderTarget(this.renderTarget);
-    ctx.clearBackground(...TERRAIN_CLEAR_COLOR);
+    wgl.beginTextureMode(this.renderTarget);
+    wgl.clearBackground(TERRAIN_CLEAR_COLOR);
 
-    ctx.setAlphaTest(true);
-    ctx.setColorMask(true, true, true, false);
-    ctx.setBlendMode(BlendMode.ALPHA);
+    wgl.setAlphaTest(true);
+    wgl.rlColorMask(true, true, true, false);
+    wgl.endBlendMode();
 
     this._scatterTexture(this.texture, TERRAIN_BASE_TINT, rng, TERRAIN_DENSITY_BASE);
     this._scatterTexture(this.overlay, TERRAIN_OVERLAY_TINT, rng, TERRAIN_DENSITY_OVERLAY);
     this._scatterTexture(this.overlayDetail, TERRAIN_DETAIL_TINT, rng, TERRAIN_DENSITY_DETAIL);
 
-    ctx.setAlphaTest(false);
-    ctx.setColorMask(true, true, true, true);
-    ctx.endRenderTarget();
+    wgl.setAlphaTest(false);
+    wgl.rlColorMask(true, true, true, true);
+    wgl.endTextureMode();
     this._renderTargetReady = true;
   }
 
   private _scatterTexture(
-    texture: GlTexture,
-    tint: [number, number, number, number],
+    texture: wgl.Texture,
+    tint: wgl.Color,
     rng: CrtRand,
     density: number,
   ): void {
@@ -146,11 +143,11 @@ export class GroundRenderer {
       const y = ((rng.rand() % spanH) - TERRAIN_PATCH_OVERSCAN) * invScale;
       const x = ((rng.rand() % spanW) - TERRAIN_PATCH_OVERSCAN) * invScale;
 
-      this._ctx.drawTexturePro(
+      wgl.drawTexturePro(
         texture,
-        [0, 0, texture.width, texture.height],
-        [x + halfSize, y + halfSize, size, size],
-        [halfSize, halfSize],
+        wgl.makeRectangle(0, 0, texture.width, texture.height),
+        wgl.makeRectangle(x + halfSize, y + halfSize, size, size),
+        wgl.makeVector2(halfSize, halfSize),
         angle * (180.0 / Math.PI),
         tint,
       );
@@ -158,8 +155,8 @@ export class GroundRenderer {
   }
 
   draw(camera: Vec2): void {
-    const outW = Math.max(1.0, this._ctx.screenWidth);
-    const outH = Math.max(1.0, this._ctx.screenHeight);
+    const outW = Math.max(1.0, wgl.getScreenWidth());
+    const outH = Math.max(1.0, wgl.getScreenHeight());
     const [screenW, screenH] = this._fitViewWindow(outW, outH);
     const cam = this._clampCamera(camera, screenW, screenH);
     this._drawView(cam, screenW, screenH, outW, outH);
@@ -171,7 +168,7 @@ export class GroundRenderer {
 
   private _drawView(camera: Vec2, screenW: number, screenH: number, outW: number, outH: number): void {
     if (!this.renderTarget || !this._renderTargetReady) {
-      this._ctx.drawRectangle(0, 0, outW, outH, ...TERRAIN_CLEAR_COLOR);
+      wgl.drawRectangle(0, 0, outW, outH, TERRAIN_CLEAR_COLOR);
       return;
     }
 
@@ -187,16 +184,16 @@ export class GroundRenderer {
     const srcH = (v1 - v0) * target.height;
 
     // WebGL render targets are NOT flipped (unlike raylib), so we sample directly
-    this._ctx.setBlendMode(BlendMode.NONE);
-    this._ctx.drawTexturePro(
+    wgl.beginBlendMode(wgl.BlendMode.NONE);
+    wgl.drawTexturePro(
       target.texture,
-      [srcX, srcY, srcW, srcH],
-      [0, 0, outW, outH],
-      [0, 0],
+      wgl.makeRectangle(srcX, srcY, srcW, srcH),
+      wgl.makeRectangle(0, 0, outW, outH),
+      wgl.makeVector2(0, 0),
       0,
-      [1, 1, 1, 1],
+      wgl.makeColor(1, 1, 1, 1),
     );
-    this._ctx.setBlendMode(BlendMode.ALPHA);
+    wgl.endBlendMode();
   }
 
   private _fitViewWindow(screenW: number, screenH: number): [number, number] {
@@ -242,50 +239,48 @@ export class GroundRenderer {
     if (decals.length === 0) return false;
     if (!this.renderTarget || !this._renderTargetReady) return false;
 
-    const ctx = this._ctx;
     const invScale = 1.0 / this._normalizedTextureScale();
 
-    ctx.beginRenderTarget(this.renderTarget);
-    ctx.setAlphaTest(true);
-    ctx.setColorMask(true, true, true, false);
-    ctx.setBlendMode(BlendMode.ALPHA);
+    wgl.beginTextureMode(this.renderTarget);
+    wgl.setAlphaTest(true);
+    wgl.rlColorMask(true, true, true, false);
+    wgl.endBlendMode();
 
     for (const decal of decals) {
       const w = decal.width * invScale;
       const h = decal.height * invScale;
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         decal.texture,
         decal.srcRect,
-        [decal.pos.x * invScale, decal.pos.y * invScale, w, h],
-        [w * 0.5, h * 0.5],
+        wgl.makeRectangle(decal.pos.x * invScale, decal.pos.y * invScale, w, h),
+        wgl.makeVector2(w * 0.5, h * 0.5),
         decal.rotationRad * (180 / Math.PI),
         decal.tint,
       );
     }
 
-    ctx.setAlphaTest(false);
-    ctx.setColorMask(true, true, true, true);
-    ctx.endRenderTarget();
+    wgl.setAlphaTest(false);
+    wgl.rlColorMask(true, true, true, true);
+    wgl.endTextureMode();
     this._renderTargetReady = true;
     return true;
   }
 
-  bakeCorpseDecals(bodysetTexture: GlTexture, decals: GroundCorpseDecal[]): boolean {
+  bakeCorpseDecals(bodysetTexture: wgl.Texture, decals: GroundCorpseDecal[]): boolean {
     if (decals.length === 0) return false;
     if (!this.renderTarget || !this._renderTargetReady) return false;
 
-    const ctx = this._ctx;
     const scale = this._normalizedTextureScale();
     const invScale = 1.0 / scale;
     const offset = 2.0 * scale / this.width;
 
-    ctx.beginRenderTarget(this.renderTarget);
-    ctx.setAlphaTest(true);
+    wgl.beginTextureMode(this.renderTarget);
+    wgl.setAlphaTest(true);
 
     // Shadow pass
-    ctx.setColorMask(true, true, true, false);
-    ctx.setCustomBlendFactors(ctx.RL_ZERO, ctx.RL_ONE_MINUS_SRC_ALPHA, ctx.RL_FUNC_ADD);
-    ctx.setBlendMode(BlendMode.CUSTOM);
+    wgl.rlColorMask(true, true, true, false);
+    wgl.rlSetBlendFactors(wgl.RL_ZERO, wgl.RL_ONE_MINUS_SRC_ALPHA, wgl.RL_FUNC_ADD);
+    wgl.beginBlendMode(wgl.BlendMode.CUSTOM);
 
     for (const decal of decals) {
       const src = this._corpseSrc(bodysetTexture, decal.bodysetFrame);
@@ -293,50 +288,50 @@ export class GroundRenderer {
       const x = (decal.topLeft.x - 0.5) * invScale - offset;
       const y = (decal.topLeft.y - 0.5) * invScale - offset;
       const halfAlpha = Math.floor(decal.tint[3] * 0.5 * 255) / 255;
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         bodysetTexture, src,
-        [x + size * 0.5, y + size * 0.5, size, size],
-        [size * 0.5, size * 0.5],
+        wgl.makeRectangle(x + size * 0.5, y + size * 0.5, size, size),
+        wgl.makeVector2(size * 0.5, size * 0.5),
         (decal.rotationRad - Math.PI * 0.5) * (180 / Math.PI),
-        [decal.tint[0], decal.tint[1], decal.tint[2], halfAlpha],
+        wgl.makeColor(decal.tint[0], decal.tint[1], decal.tint[2], halfAlpha),
       );
     }
 
     // Color pass
-    ctx.setBlendMode(BlendMode.ALPHA);
+    wgl.endBlendMode();
     for (const decal of decals) {
       const src = this._corpseSrc(bodysetTexture, decal.bodysetFrame);
       const size = decal.size * invScale;
       const x = decal.topLeft.x * invScale - offset;
       const y = decal.topLeft.y * invScale - offset;
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         bodysetTexture, src,
-        [x + size * 0.5, y + size * 0.5, size, size],
-        [size * 0.5, size * 0.5],
+        wgl.makeRectangle(x + size * 0.5, y + size * 0.5, size, size),
+        wgl.makeVector2(size * 0.5, size * 0.5),
         (decal.rotationRad - Math.PI * 0.5) * (180 / Math.PI),
         decal.tint,
       );
     }
 
-    ctx.setAlphaTest(false);
-    ctx.setColorMask(true, true, true, true);
-    ctx.endRenderTarget();
+    wgl.setAlphaTest(false);
+    wgl.rlColorMask(true, true, true, true);
+    wgl.endTextureMode();
     this._renderTargetReady = true;
     return true;
   }
 
-  private _corpseSrc(bodysetTexture: GlTexture, frame: number): [number, number, number, number] {
+  private _corpseSrc(bodysetTexture: wgl.Texture, frame: number): wgl.Rectangle {
     frame = frame & 0xF;
     const cellW = bodysetTexture.width * 0.25;
     const cellH = bodysetTexture.height * 0.25;
     const col = frame & 3;
     const row = frame >> 2;
-    return [cellW * col, cellH * row, cellW, cellH];
+    return wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
   }
 
   destroy(): void {
     if (this.renderTarget) {
-      this._ctx.destroyRenderTarget(this.renderTarget);
+      wgl.unloadRenderTexture(this.renderTarget);
       this.renderTarget = null;
       this._renderTargetReady = false;
     }

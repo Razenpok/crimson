@@ -1,7 +1,6 @@
 // Port of crimson/screens/results/quest_results.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
@@ -83,7 +82,7 @@ const MOUSE_BUTTON_LEFT = 0;
 // ---------------------------------------------------------------------------
 
 function weaponIconSrc(
-  texture: GlTexture,
+  texture: wgl.Texture,
   weaponIdNative: number,
 ): wgl.Rectangle | null {
   const weaponId = weaponIdNative as WeaponId;
@@ -110,13 +109,12 @@ function textWidth(font: SmallFontData, text: string): number {
 }
 
 function drawSmall(
-  ctx: WebGLContext,
   font: SmallFontData,
   text: string,
   pos: Vec2,
   color: wgl.Color,
 ): void {
-  drawSmallText(ctx, font, text, pos, color);
+  drawSmallText(font, text, pos, color);
 }
 
 // ---------------------------------------------------------------------------
@@ -265,7 +263,6 @@ export class QuestResultsUi {
   }
 
   private _drawNameEntryStats(
-    ctx: WebGLContext,
     opts: {
       pos: Vec2;
       scale: number;
@@ -304,44 +301,44 @@ export class QuestResultsUi {
     const rightCenterX = rightLabelX + 32.0 * scale;
 
     const scoreW = textWidth(font, 'Score');
-    drawSmall(ctx, font, 'Score', new Vec2(leftCenterX - scoreW * 0.5, y), colLabel);
+    drawSmall(font, 'Score', new Vec2(leftCenterX - scoreW * 0.5, y), colLabel);
     const scoreValueW = textWidth(font, scoreValue);
     drawSmall(
-      ctx, font, scoreValue,
+      font, scoreValue,
       new Vec2(leftCenterX - scoreValueW * 0.5, y + 15.0 * scale),
       colScoreValue,
     );
     const rankLabel = `Rank: ${rankText}`;
     const rankW = textWidth(font, rankLabel);
     drawSmall(
-      ctx, font, rankLabel,
+      font, rankLabel,
       new Vec2(leftCenterX - rankW * 0.5, y + 30.0 * scale),
       colLabel,
     );
 
     // Experience column
-    drawSmall(ctx, font, 'Experience', new Vec2(rightLabelX, y), colLine);
+    drawSmall(font, 'Experience', new Vec2(rightLabelX, y), colLine);
     const xpValueW = textWidth(font, xpValue);
     drawSmall(
-      ctx, font, xpValue,
+      font, xpValue,
       new Vec2(rightCenterX - xpValueW * 0.5, y + 15.0 * scale),
       colLabel,
     );
 
     // Vertical separator
     const sepX = x + 84.0 * scale;
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(sepX), Math.floor(y),
       1, Math.floor(48.0 * scale),
-      colLine[0], colLine[1], colLine[2], colLine[3],
+      wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
     );
 
     // Horizontal separator
     const rowTop = y + 52.0 * scale;
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(x - 12.0 * scale), Math.floor(rowTop),
       Math.floor(192.0 * scale), 1,
-      colLine[0], colLine[1], colLine[2], colLine[3],
+      wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
     );
     if (!opts.showWeaponRow) return;
 
@@ -350,34 +347,33 @@ export class QuestResultsUi {
     const src = weaponIconSrc(wicons, record.mostUsedWeaponId);
     if (src !== null) {
       const dst = wgl.makeRectangle(x + 4.0 * scale, rowY, 64.0 * scale, 32.0 * scale);
-      ctx.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, iconTint);
+      wgl.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, iconTint);
     }
 
     const weaponId = record.mostUsedWeaponId as WeaponId;
     const weaponName = weaponDisplayName(weaponId, this.preserveBugs);
     const nameW = textWidth(font, weaponName);
     const nameX = Math.max(x + 4.0 * scale, leftCenterX - nameW * 0.5);
-    drawSmall(ctx, font, weaponName, new Vec2(nameX, rowY + 32.0 * scale), colRow);
+    drawSmall(font, weaponName, new Vec2(nameX, rowY + 32.0 * scale), colRow);
 
     const fragsText = `Frags: ${Math.floor(record.creatureKillCount)}`;
-    drawSmall(ctx, font, fragsText, new Vec2(x + 114.0 * scale, rowY + 1.0 * scale), colRow);
+    drawSmall(font, fragsText, new Vec2(x + 114.0 * scale, rowY + 1.0 * scale), colRow);
 
     const fired = Math.max(0, Math.floor(record.shotsFired));
     const hit = Math.max(0, Math.min(Math.floor(record.shotsHit), fired));
     const ratio = fired > 0 ? Math.floor((hit * 100) / fired) : 0;
     const hitText = `Hit %: ${ratio}%`;
-    drawSmall(ctx, font, hitText, new Vec2(x + 114.0 * scale, rowY + 15.0 * scale), colRow);
+    drawSmall(font, hitText, new Vec2(x + 114.0 * scale, rowY + 15.0 * scale), colRow);
 
     // Bottom horizontal separator
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(x - 12.0 * scale), Math.floor(rowY + 48.0 * scale),
       Math.floor(192.0 * scale), 1,
-      colLine[0], colLine[1], colLine[2], colLine[3],
+      wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
     );
   }
 
   update(
-    ctx: WebGLContext,
     dt: number,
     opts: {
       resources: RuntimeResources;
@@ -486,8 +482,8 @@ export class QuestResultsUi {
       this.inputText = newText;
       this.inputCaret = newCaret;
 
-      const screenW = ctx.screenWidth;
-      const screenH = ctx.screenHeight;
+      const screenW = wgl.getScreenWidth();
+      const screenH = wgl.getScreenHeight();
       const scale = uiScale(screenW, screenH);
       const panelLayout = this._panelLayout(screenW, scale);
       const contentPos = panelLayout.topLeft.offset(QUEST_RESULTS_CONTENT_X * scale);
@@ -529,8 +525,8 @@ export class QuestResultsUi {
         return null;
       }
 
-      const screenW = ctx.screenWidth;
-      const screenH = ctx.screenHeight;
+      const screenW = wgl.getScreenWidth();
+      const screenH = wgl.getScreenHeight();
       const scale = uiScale(screenW, screenH);
       const panelLayout = this._panelLayout(screenW, scale);
       const contentPos = panelLayout.topLeft.offset(QUEST_RESULTS_CONTENT_X * scale);
@@ -596,7 +592,6 @@ export class QuestResultsUi {
   }
 
   draw(
-    ctx: WebGLContext,
     opts: {
       resources: RuntimeResources;
       mouse?: { x: number; y: number } | null;
@@ -607,8 +602,8 @@ export class QuestResultsUi {
     const resources = opts.resources;
     const font = resources.smallFont;
 
-    const screenW = ctx.screenWidth;
-    const screenH = ctx.screenHeight;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
 
     const panelLayout = this._panelLayout(screenW, scale);
@@ -616,7 +611,6 @@ export class QuestResultsUi {
 
     const fxDetail = this.config.display.fxDetail[0] ?? false;
     drawClassicMenuPanel(
-      ctx,
       getTexture(resources, TextureId.UI_MENU_PANEL),
       wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h),
       wgl.makeColor(1, 1, 1, 1),
@@ -628,7 +622,7 @@ export class QuestResultsUi {
     const textWellDone = getTexture(resources, TextureId.UI_TEXT_WELL_DONE);
     const bannerSrc = wgl.makeRectangle(0.0, 0.0, textWellDone.width, textWellDone.height);
     const bannerDst = wgl.makeRectangle(bannerPos.x, bannerPos.y, TEXTURE_TOP_BANNER_W * scale, TEXTURE_TOP_BANNER_H * scale);
-    ctx.drawTexturePro(textWellDone, bannerSrc, bannerDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
+    wgl.drawTexturePro(textWellDone, bannerSrc, bannerDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
 
     const qualifies = this.rank < TABLE_MAX;
 
@@ -674,70 +668,70 @@ export class QuestResultsUi {
       const perkValue = formatTimeMmSs(perkBonusMs);
       const finalValue = formatTimeMmSs(finalTimeMs);
 
-      drawSmall(ctx, font, 'Base Time:', new Vec2(labelX, y), rowColor(0));
-      drawSmall(ctx, font, baseValue, new Vec2(valueX, y), rowColor(0));
+      drawSmall(font, 'Base Time:', new Vec2(labelX, y), rowColor(0));
+      drawSmall(font, baseValue, new Vec2(valueX, y), rowColor(0));
       y += 20.0 * scale;
 
-      drawSmall(ctx, font, 'Life Bonus:', new Vec2(labelX, y), rowColor(1));
-      drawSmall(ctx, font, lifeValue, new Vec2(valueX, y), rowColor(1));
+      drawSmall(font, 'Life Bonus:', new Vec2(labelX, y), rowColor(1));
+      drawSmall(font, lifeValue, new Vec2(valueX, y), rowColor(1));
       y += 20.0 * scale;
 
-      drawSmall(ctx, font, 'Unpicked Perk Bonus:', new Vec2(labelX, y), rowColor(2));
-      drawSmall(ctx, font, perkValue, new Vec2(valueX, y), rowColor(2));
+      drawSmall(font, 'Unpicked Perk Bonus:', new Vec2(labelX, y), rowColor(2));
+      drawSmall(font, perkValue, new Vec2(valueX, y), rowColor(2));
       y += 20.0 * scale;
 
       // Final time underline
       const lineY = y + 1.0 * scale;
       const lineColor = rowColor(3, true);
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(labelX - 4.0 * scale), Math.floor(lineY),
         Math.floor(168.0 * scale), Math.floor(1.0 * scale),
-        lineColor[0], lineColor[1], lineColor[2], lineColor[3],
+        wgl.makeColor(lineColor[0], lineColor[1], lineColor[2], lineColor[3]),
       );
 
       y += 8.0 * scale;
-      drawSmall(ctx, font, 'Final Time:', new Vec2(labelX, y), rowColor(3, true));
-      drawSmall(ctx, font, finalValue, new Vec2(valueX, y), rowColor(3, true));
+      drawSmall(font, 'Final Time:', new Vec2(labelX, y), rowColor(3, true));
+      drawSmall(font, finalValue, new Vec2(valueX, y), rowColor(3, true));
 
     } else if (this.phase === 1) {
       const textY = panelLayout.topLeft.y + 118.0 * scale;
       const namePrompt = this.preserveBugs ? 'State your name trooper!' : 'State your name, trooper!';
       drawSmall(
-        ctx, font, namePrompt,
+        font, namePrompt,
         new Vec2(contentPos.x + 42.0 * scale, textY),
         COLOR_UI_ACCENT,
       );
 
       const inputPos = contentPos.offset(0.0, 150.0 * scale);
       // Input box outline
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x), Math.floor(inputPos.y),
         Math.floor(INPUT_BOX_W * scale), 1,
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x), Math.floor(inputPos.y + INPUT_BOX_H * scale - 1),
         Math.floor(INPUT_BOX_W * scale), 1,
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x), Math.floor(inputPos.y),
         1, Math.floor(INPUT_BOX_H * scale),
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x + INPUT_BOX_W * scale - 1), Math.floor(inputPos.y),
         1, Math.floor(INPUT_BOX_H * scale),
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
       // Input box fill
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x + 1.0 * scale), Math.floor(inputPos.y + 1.0 * scale),
         Math.floor((INPUT_BOX_W - 2.0) * scale), Math.floor((INPUT_BOX_H - 2.0) * scale),
-        0, 0, 0, 1,
+        wgl.makeColor(0, 0, 0, 1),
       );
       drawUiText(
-        ctx, resources, this.inputText,
+        resources, this.inputText,
         inputPos.add(new Vec2(4.0 * scale, 2.0 * scale)),
         { scale: 1.0 * scale, color: COLOR_TEXT_MUTED },
       );
@@ -748,19 +742,19 @@ export class QuestResultsUi {
       }
       const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(caretX), Math.floor(inputPos.y + 2.0 * scale),
         Math.floor(1.0 * scale), Math.floor(14.0 * scale),
-        caretColor[0], caretColor[1], caretColor[2], caretColor[3],
+        wgl.makeColor(caretColor[0], caretColor[1], caretColor[2], caretColor[3]),
       );
 
       const okPos = inputPos.add(new Vec2(170.0 * scale, -8.0 * scale));
       const okW = buttonWidth(resources, this._okButton.label, { scale, forceWide: this._okButton.forceWide });
-      buttonDraw(ctx, resources, this._okButton, { pos: okPos, width: okW, scale });
+      buttonDraw(resources, this._okButton, { pos: okPos, width: okW, scale });
 
       // Score card during name entry
       const scoreCardPos = inputPos.add(new Vec2(26.0 * scale, 46.0 * scale));
-      this._drawNameEntryStats(ctx, {
+      this._drawNameEntryStats({
         pos: scoreCardPos,
         scale,
         alpha: 1.0,
@@ -775,7 +769,7 @@ export class QuestResultsUi {
       let varC12 = panelLayout.topLeft.y + (qualifies ? 96.0 : 108.0) * scale;
       if (!qualifies) {
         drawSmall(
-          ctx, font,
+          font,
           'Score too low for top100.',
           new Vec2(scoreCardPos.x + 8.0 * scale, panelLayout.topLeft.y + 102.0 * scale),
           wgl.makeColor(200 / 255, 200 / 255, 200 / 255, 1.0),
@@ -783,7 +777,7 @@ export class QuestResultsUi {
       }
 
       const cardY = varC12 + 16.0 * scale;
-      this._drawNameEntryStats(ctx, {
+      this._drawNameEntryStats({
         pos: new Vec2(scoreCardPos.x, cardY),
         scale,
         alpha: 1.0,
@@ -796,13 +790,13 @@ export class QuestResultsUi {
       let varC14 = varC12 + 84.0 * scale;
       if (this.unlockWeaponName) {
         drawSmall(
-          ctx, font,
+          font,
           'Weapon unlocked:',
           new Vec2(scoreCardPos.x, varC14 + 1.0 * scale),
           COLOR_TEXT_SUBTLE,
         );
         drawSmall(
-          ctx, font,
+          font,
           this.unlockWeaponName,
           new Vec2(scoreCardPos.x, varC14 + 14.0 * scale),
           COLOR_TEXT,
@@ -811,13 +805,13 @@ export class QuestResultsUi {
       }
       if (this.unlockPerkName) {
         drawSmall(
-          ctx, font,
+          font,
           'Perk unlocked:',
           new Vec2(scoreCardPos.x, varC14 + 1.0 * scale),
           COLOR_TEXT_SUBTLE,
         );
         drawSmall(
-          ctx, font,
+          font,
           this.unlockPerkName,
           new Vec2(scoreCardPos.x, varC14 + 14.0 * scale),
           COLOR_TEXT,
@@ -831,32 +825,31 @@ export class QuestResultsUi {
         scale,
         forceWide: this._playNextButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._playNextButton, { pos: btnPos, width: playNextW, scale });
+      buttonDraw(resources, this._playNextButton, { pos: btnPos, width: playNextW, scale });
       btnPos = btnPos.offset(0.0, 32.0 * scale);
 
       const playAgainW = buttonWidth(resources, this._playAgainButton.label, {
         scale,
         forceWide: this._playAgainButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._playAgainButton, { pos: btnPos, width: playAgainW, scale });
+      buttonDraw(resources, this._playAgainButton, { pos: btnPos, width: playAgainW, scale });
       btnPos = btnPos.offset(0.0, 32.0 * scale);
 
       const highScoresW = buttonWidth(resources, this._highScoresButton.label, {
         scale,
         forceWide: this._highScoresButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._highScoresButton, { pos: btnPos, width: highScoresW, scale });
+      buttonDraw(resources, this._highScoresButton, { pos: btnPos, width: highScoresW, scale });
       btnPos = btnPos.offset(0.0, 32.0 * scale);
 
       const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, {
         scale,
         forceWide: this._mainMenuButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._mainMenuButton, { pos: btnPos, width: mainMenuW, scale });
+      buttonDraw(resources, this._mainMenuButton, { pos: btnPos, width: mainMenuW, scale });
     }
 
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       new Vec2(mouse.x, mouse.y),

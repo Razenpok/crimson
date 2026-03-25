@@ -4,7 +4,6 @@ import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { type GlTexture } from '@grim/webgl.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { BONUS_BY_ID, BonusId } from '@crimson/bonuses/ids.ts';
 import { bonusFindAimHoverEntry, bonusLabelForEntry } from '@crimson/bonuses/pool.ts';
@@ -12,7 +11,7 @@ import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
-function bonusIconSrc(texture: GlTexture, iconId: number): wgl.Rectangle {
+function bonusIconSrc(texture: wgl.Texture, iconId: number): wgl.Rectangle {
   const grid = 4;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
@@ -21,7 +20,7 @@ function bonusIconSrc(texture: GlTexture, iconId: number): wgl.Rectangle {
   return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
-function weaponIconSrc(texture: GlTexture, iconIndex: number): wgl.Rectangle {
+function weaponIconSrc(texture: wgl.Texture, iconIndex: number): wgl.Rectangle {
   const grid = 8;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
@@ -69,7 +68,7 @@ export function drawBonusPickups(
     const bubbleDst = wgl.makeRectangle(screen.x, screen.y, bubbleSize, bubbleSize);
     const bubbleOrigin = wgl.makeVector2(bubbleSize * 0.5, bubbleSize * 0.5);
     const tint = wgl.makeColor(1, 1, 1, bubbleAlpha);
-    renderCtx.gl.drawTexturePro(bonusesTexture, bubbleSrc, bubbleDst, bubbleOrigin, 0.0, tint);
+    wgl.drawTexturePro(bonusesTexture, bubbleSrc, bubbleDst, bubbleOrigin, 0.0, tint);
 
     const bonusId = bonus.bonusId;
     if (bonusId === BonusId.WEAPON) {
@@ -89,7 +88,7 @@ export function drawBonusPickups(
       const h = 30.0 * iconScale * scale;
       const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
       const origin = wgl.makeVector2(w * 0.5, h * 0.5);
-      renderCtx.gl.drawTexturePro(wiconsTexture, src, dst, origin, 0.0, tint);
+      wgl.drawTexturePro(wiconsTexture, src, dst, origin, 0.0, tint);
       continue;
     }
 
@@ -109,7 +108,7 @@ export function drawBonusPickups(
     const rotationRad = Math.sin(idx - frame.elapsedMs * 0.003) * 0.2;
     const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-    renderCtx.gl.drawTexturePro(bonusesTexture, src, dst, origin, rotationRad * RAD_TO_DEG, tint);
+    wgl.drawTexturePro(bonusesTexture, src, dst, origin, rotationRad * RAD_TO_DEG, tint);
   }
 }
 
@@ -125,7 +124,7 @@ export function drawBonusHoverLabels(
   const frame = renderCtx.frame;
   const font = frame.resources.smallFont;
   if (font === null || font === undefined) return;
-  const screenW = renderCtx.gl.screenWidth;
+  const screenW = wgl.getScreenWidth();
 
   const shadow = wgl.makeColor(0, 0, 0, (180 / 255) * alpha);
   const color = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alpha);
@@ -149,7 +148,7 @@ export function drawBonusHoverLabels(
       x = Math.max(0.0, screenW - textW);
     }
 
-    drawSmallText(renderCtx.gl, font, label, new Vec2(x + 1.0, y + 1.0), shadow);
-    drawSmallText(renderCtx.gl, font, label, new Vec2(x, y), color);
+    drawSmallText(font, label, new Vec2(x + 1.0, y + 1.0), shadow);
+    drawSmallText(font, label, new Vec2(x, y), color);
   }
 }

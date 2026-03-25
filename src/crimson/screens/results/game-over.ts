@@ -1,7 +1,6 @@
 // Port of crimson/screens/results/game_over.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
@@ -92,7 +91,7 @@ const MOUSE_BUTTON_LEFT = 0;
 // ---------------------------------------------------------------------------
 
 function weaponIconSrc(
-  texture: GlTexture,
+  texture: wgl.Texture,
   weaponIdNative: number,
 ): wgl.Rectangle | null {
   const weaponId = weaponIdNative as WeaponId;
@@ -115,8 +114,7 @@ interface GameOverPanelLayout {
 }
 
 function drawTextureCentered(
-  ctx: WebGLContext,
-  tex: GlTexture,
+  tex: wgl.Texture,
   pos: Vec2,
   w: number,
   h: number,
@@ -126,7 +124,7 @@ function drawTextureCentered(
   const dst = wgl.makeRectangle(pos.x, pos.y, w, h);
   const a = Math.max(0.0, Math.min(1.0, alpha));
   const tint = wgl.makeColor(1.0, 1.0, 1.0, a);
-  ctx.drawTexturePro(tex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
+  wgl.drawTexturePro(tex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
 }
 
 function easeOutCubic(t: number): number {
@@ -139,13 +137,12 @@ function textWidth(font: SmallFontData, text: string): number {
 }
 
 function drawSmall(
-  ctx: WebGLContext,
   font: SmallFontData,
   text: string,
   pos: Vec2,
   color: wgl.Color,
 ): void {
-  drawSmallText(ctx, font, text, pos, color);
+  drawSmallText(font, text, pos, color);
 }
 
 // ---------------------------------------------------------------------------
@@ -253,7 +250,6 @@ export class GameOverUi {
   }
 
   update(
-    ctx: WebGLContext,
     dt: number,
     opts: {
       record: HighScoreRecord;
@@ -318,8 +314,8 @@ export class GameOverUi {
       }
     }
 
-    const screenW = ctx.screenWidth;
-    const screenH = ctx.screenHeight;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
 
     if (this.phase === 0) {
@@ -413,7 +409,6 @@ export class GameOverUi {
   }
 
   private _drawScoreCard(
-    ctx: WebGLContext,
     opts: {
       pos: Vec2;
       record: HighScoreRecord;
@@ -453,7 +448,7 @@ export class GameOverUi {
     const scoreLabel = 'Score';
     const scoreLabelW = textWidth(font, scoreLabel);
     drawSmall(
-      ctx, font, scoreLabel,
+      font, scoreLabel,
       cardOrigin.offset(32.0 * scale - scoreLabelW * 0.5),
       labelColor,
     );
@@ -467,7 +462,7 @@ export class GameOverUi {
     }
     const scoreValueW = textWidth(font, scoreValue);
     drawSmall(
-      ctx, font, scoreValue,
+      font, scoreValue,
       cardOrigin.add(new Vec2(32.0 * scale - scoreValueW * 0.5, 15.0 * scale)),
       valueColor,
     );
@@ -476,35 +471,35 @@ export class GameOverUi {
     const rankText = `Rank: ${rankValue}`;
     const rankW = textWidth(font, rankText);
     drawSmall(
-      ctx, font, rankText,
+      font, rankText,
       cardOrigin.add(new Vec2(32.0 * scale - rankW * 0.5, 30.0 * scale)),
       labelColor,
     );
 
     // Separator between columns
     const separatorX = cardOrigin.x + 80.0 * scale;
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(separatorX),
       Math.floor(cardOrigin.y),
       1,
       Math.floor(48.0 * scale),
-      labelColor[0], labelColor[1], labelColor[2], labelColor[3],
+      wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], labelColor[3]),
     );
 
     // Right column: Game time + gauge, or Experience in quest mode.
     const col2Pos = cardOrigin.offset(96.0 * scale);
     if (modeId === GameMode.QUESTS) {
-      drawSmall(ctx, font, 'Experience', col2Pos, labelColor);
+      drawSmall(font, 'Experience', col2Pos, labelColor);
       const xpValue = `${Math.floor(record.scoreXp)}`;
       const xpW = textWidth(font, xpValue);
       drawSmall(
-        ctx, font, xpValue,
+        font, xpValue,
         col2Pos.add(new Vec2(32.0 * scale - xpW * 0.5, 15.0 * scale)),
         labelColor,
       );
       this._hoverTime = Math.max(0.0, this._hoverTime - dtHover);
     } else {
-      drawSmall(ctx, font, 'Game time', col2Pos.offset(6.0 * scale), labelColor);
+      drawSmall(font, 'Game time', col2Pos.offset(6.0 * scale), labelColor);
       const timeRectPos = col2Pos.add(new Vec2(8.0 * scale, 16.0 * scale));
       const timeRect = Rect.fromTopLeft(timeRectPos, 64.0 * scale, 29.0 * scale);
       const hoveringTime = timeRect.contains(mouse);
@@ -516,7 +511,7 @@ export class GameOverUi {
       const clockTablePos = col2Pos.add(new Vec2(8.0 * scale, 14.0 * scale));
       const clockTableDst = wgl.makeRectangle(clockTablePos.x, clockTablePos.y, 32.0 * scale, 32.0 * scale);
       const texTint = wgl.makeColor(1.0, 1.0, 1.0, alpha);
-      ctx.drawTexturePro(clockTable, clockTableSrc, clockTableDst, wgl.makeVector2(0.0, 0.0), 0.0, texTint);
+      wgl.drawTexturePro(clockTable, clockTableSrc, clockTableDst, wgl.makeVector2(0.0, 0.0), 0.0, texTint);
 
       const clockPointer = getTexture(resources, TextureId.UI_CLOCK_POINTER);
       const clockPointerSrc = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
@@ -525,10 +520,10 @@ export class GameOverUi {
       const seconds = Math.max(0, Math.floor(elapsedMs / 1000));
       const rotation = seconds * 6.0;
       const origin = wgl.makeVector2(16.0 * scale, 16.0 * scale);
-      ctx.drawTexturePro(clockPointer, clockPointerSrc, clockPointerDst, origin, rotation, texTint);
+      wgl.drawTexturePro(clockPointer, clockPointerSrc, clockPointerDst, origin, rotation, texTint);
 
       const timeText = formatTimeMmSs(elapsedMs);
-      drawSmall(ctx, font, timeText, col2Pos.add(new Vec2(40.0 * scale, 19.0 * scale)), labelColor);
+      drawSmall(font, timeText, col2Pos.add(new Vec2(40.0 * scale, 19.0 * scale)), labelColor);
     }
 
     // Second row: weapon icon + frags + hit ratio
@@ -547,7 +542,7 @@ export class GameOverUi {
       if (src !== null) {
         const dst = wgl.makeRectangle(weaponPos.x, weaponPos.y, 64.0 * scale, 32.0 * scale);
         const tint = wgl.makeColor(1.0, 1.0, 1.0, alpha);
-        ctx.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
+        wgl.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
       }
 
       const weaponId = record.mostUsedWeaponId as WeaponId;
@@ -557,17 +552,17 @@ export class GameOverUi {
         cardOrigin.x + Math.max(0.0, 32.0 * scale - nameW * 0.5),
         rowPos.y + 32.0 * scale,
       );
-      drawSmall(ctx, font, weaponName, namePos, hintColor);
+      drawSmall(font, weaponName, namePos, hintColor);
 
       const fragsText = `Frags: ${Math.floor(record.creatureKillCount)}`;
       const statsPos = rowPos.offset(110.0 * scale);
-      drawSmall(ctx, font, fragsText, statsPos.offset(0.0, 1.0 * scale), labelColor);
+      drawSmall(font, fragsText, statsPos.offset(0.0, 1.0 * scale), labelColor);
 
       const fired = Math.max(0, Math.floor(record.shotsFired));
       const hit = Math.max(0, Math.floor(record.shotsHit));
       const ratio = fired > 0 ? Math.floor((hit * 100) / fired) : 0;
       const hitText = `Hit %: ${ratio}%`;
-      drawSmall(ctx, font, hitText, statsPos.offset(0.0, 15.0 * scale), labelColor);
+      drawSmall(font, hitText, statsPos.offset(0.0, 15.0 * scale), labelColor);
 
       const hitRectPos = statsPos.offset(0.0, 15.0 * scale);
       const hitRect = Rect.fromTopLeft(hitRectPos, 64.0 * scale, 17.0 * scale);
@@ -588,7 +583,7 @@ export class GameOverUi {
       const t = (this._hoverWeapon - 0.5) * 2.0;
       const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
       drawSmall(
-        ctx, font,
+        font,
         'Most used weapon during the game',
         tooltipPos.offset(-20.0 * scale),
         col,
@@ -598,7 +593,7 @@ export class GameOverUi {
       const t = (this._hoverTime - 0.5) * 2.0;
       const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
       drawSmall(
-        ctx, font,
+        font,
         'The time the game lasted',
         tooltipPos.offset(12.0 * scale),
         col,
@@ -611,7 +606,7 @@ export class GameOverUi {
         ? 'The % of shot bullets hit the target'
         : 'The % of bullets that hit the target';
       drawSmall(
-        ctx, font,
+        font,
         hitRatioTooltip,
         tooltipPos.offset(-22.0 * scale),
         col,
@@ -620,7 +615,6 @@ export class GameOverUi {
   }
 
   draw(
-    ctx: WebGLContext,
     opts: {
       record: HighScoreRecord;
       bannerKind: string;
@@ -634,8 +628,8 @@ export class GameOverUi {
     const record = opts.record;
     const bannerKind = opts.bannerKind;
 
-    const screenW = ctx.screenWidth;
-    const screenH = ctx.screenHeight;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
 
     const panelLayout = this._panelLayout(screenW, scale);
@@ -645,7 +639,6 @@ export class GameOverUi {
     // Panel background
     const fxDetail = this.config.display.fxDetail[0] ?? false;
     drawClassicMenuPanel(
-      ctx,
       getTexture(resources, TextureId.UI_MENU_PANEL),
       wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h),
       wgl.makeColor(1, 1, 1, 1),
@@ -658,7 +651,7 @@ export class GameOverUi {
       ? getTexture(resources, TextureId.UI_TEXT_REAPER)
       : getTexture(resources, TextureId.UI_TEXT_WELL_DONE);
     drawTextureCentered(
-      ctx, banner, bannerPos,
+      banner, bannerPos,
       TEXTURE_TOP_BANNER_W * scale,
       TEXTURE_TOP_BANNER_H * scale,
       1.0,
@@ -667,51 +660,51 @@ export class GameOverUi {
     if (this.phase === 0) {
       const formPos = bannerPos.add(new Vec2(8.0 * scale, 84.0 * scale));
       drawSmall(
-        ctx, font, 'State your name, trooper!',
+        font, 'State your name, trooper!',
         formPos.offset(42.0 * scale),
         COLOR_TEXT,
       );
 
       const inputPos = formPos.offset(0.0, 40.0 * scale);
       // Input box outline
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x),
         Math.floor(inputPos.y),
         Math.floor(INPUT_BOX_W * scale),
         1,
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x),
         Math.floor(inputPos.y + INPUT_BOX_H * scale - 1),
         Math.floor(INPUT_BOX_W * scale),
         1,
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x),
         Math.floor(inputPos.y),
         1,
         Math.floor(INPUT_BOX_H * scale),
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x + INPUT_BOX_W * scale - 1),
         Math.floor(inputPos.y),
         1,
         Math.floor(INPUT_BOX_H * scale),
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
       // Input box fill
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(inputPos.x + 1.0 * scale),
         Math.floor(inputPos.y + 1.0 * scale),
         Math.floor((INPUT_BOX_W - 2.0) * scale),
         Math.floor((INPUT_BOX_H - 2.0) * scale),
-        0, 0, 0, 1,
+        wgl.makeColor(0, 0, 0, 1),
       );
       drawUiText(
-        ctx, resources, this.inputText,
+        resources, this.inputText,
         inputPos.add(new Vec2(4.0 * scale, 2.0 * scale)),
         { scale: 1.0 * scale, color: COLOR_TEXT_MUTED },
       );
@@ -722,20 +715,20 @@ export class GameOverUi {
       }
       const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.floor(caretX),
         Math.floor(inputPos.y + 2.0 * scale),
         Math.floor(1.0 * scale),
         Math.floor(14.0 * scale),
-        caretColor[0], caretColor[1], caretColor[2], caretColor[3],
+        wgl.makeColor(caretColor[0], caretColor[1], caretColor[2], caretColor[3]),
       );
 
       const okPos = formPos.add(new Vec2(170.0 * scale, 32.0 * scale));
       const okW = buttonWidth(resources, this._okButton.label, { scale, forceWide: this._okButton.forceWide });
-      buttonDraw(ctx, resources, this._okButton, { pos: okPos, width: okW, scale });
+      buttonDraw(resources, this._okButton, { pos: okPos, width: okW, scale });
 
       const scorePos = formPos.add(new Vec2(16.0 * scale, 116.0 * scale));
-      this._drawScoreCard(ctx, {
+      this._drawScoreCard({
         pos: scorePos,
         record,
         resources,
@@ -752,14 +745,14 @@ export class GameOverUi {
       ));
       if (this.rank >= TABLE_MAX && bannerKind === 'reaper') {
         drawSmall(
-          ctx, font,
+          font,
           'Score too low for top100.',
           bannerPos.add(new Vec2(38.0 * scale, 62.0 * scale)),
           wgl.makeColor(200 / 255, 200 / 255, 200 / 255, 1.0),
         );
       }
 
-      this._drawScoreCard(ctx, {
+      this._drawScoreCard({
         pos: scoreCardPos,
         record,
         resources,
@@ -781,25 +774,24 @@ export class GameOverUi {
         scale,
         forceWide: this._playAgainButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._playAgainButton, { pos: btnPos, width: playAgainW, scale });
+      buttonDraw(resources, this._playAgainButton, { pos: btnPos, width: playAgainW, scale });
       btnPos = btnPos.offset(0.0, 32.0 * scale);
 
       const highScoresW = buttonWidth(resources, this._highScoresButton.label, {
         scale,
         forceWide: this._highScoresButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._highScoresButton, { pos: btnPos, width: highScoresW, scale });
+      buttonDraw(resources, this._highScoresButton, { pos: btnPos, width: highScoresW, scale });
       btnPos = btnPos.offset(0.0, 32.0 * scale);
 
       const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, {
         scale,
         forceWide: this._mainMenuButton.forceWide,
       });
-      buttonDraw(ctx, resources, this._mainMenuButton, { pos: btnPos, width: mainMenuW, scale });
+      buttonDraw(resources, this._mainMenuButton, { pos: btnPos, width: mainMenuW, scale });
     }
 
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       new Vec2(mouse.x, mouse.y),

@@ -4,7 +4,7 @@ import type { AudioState } from '@grim/audio.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
-import type { WebGLContext } from '@grim/webgl.ts';
+import * as wgl from '@wgl';
 import type { RenderFrame } from '@crimson/render/frame.ts';
 import { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import * as viewport from '@crimson/render/world/viewport.ts';
@@ -15,7 +15,6 @@ import { SimWorldState } from './sim-world-state.ts';
 import { TerrainRuntime } from './terrain-runtime.ts';
 
 export class WorldRuntime {
-  private _ctx: WebGLContext;
   worldSize: number;
   demoModeActive: boolean;
   questFailRetryCount: number;
@@ -37,7 +36,7 @@ export class WorldRuntime {
   lanLocalPlayerSlotIndex = 0;
   renderer: WorldRenderer;
 
-  constructor(ctx: WebGLContext, opts: {
+  constructor(opts: {
     worldSize?: number;
     demoModeActive?: boolean;
     questFailRetryCount?: number;
@@ -48,7 +47,6 @@ export class WorldRuntime {
     audio?: AudioState | null;
     rtxMode?: RtxRenderMode;
   }) {
-    this._ctx = ctx;
     this.worldSize = opts.worldSize ?? 1024.0;
     this.demoModeActive = opts.demoModeActive ?? false;
     this.questFailRetryCount = opts.questFailRetryCount ?? 0;
@@ -67,7 +65,7 @@ export class WorldRuntime {
       preserveBugs: this.preserveBugs,
     });
 
-    const renderResources = new RenderResources(ctx, this.worldSize, this.config);
+    const renderResources = new RenderResources(this.worldSize, this.config);
     this.renderResources = renderResources;
 
     this.audioBridge = new AudioBridge({
@@ -81,7 +79,6 @@ export class WorldRuntime {
 
     this.camera = new Vec2(-1.0, -1.0);
     this.renderer = new WorldRenderer(
-      ctx,
       this.worldSize,
       this.config,
       this.camera,
@@ -153,8 +150,8 @@ export class WorldRuntime {
     const screenSize = viewport.cameraScreenSize(
       this.worldSize,
       this.config,
-      this._ctx.screenWidth,
-      this._ctx.screenHeight,
+      wgl.getScreenWidth(),
+      wgl.getScreenHeight(),
     );
     const alive = this.simWorld.players.filter((player) => player.health > 0.0);
     let camera: Vec2;

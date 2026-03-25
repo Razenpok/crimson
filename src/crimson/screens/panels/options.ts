@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type WebGLContext, type GlTexture } from '@grim/webgl.ts';
+
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -279,8 +279,8 @@ export class OptionsMenuView extends PanelMenuView {
     sliderId: string,
     slider: SliderState,
     pos: Vec2,
-    rectOn: GlTexture,
-    rectOff: GlTexture,
+    rectOn: wgl.Texture,
+    rectOff: wgl.Texture,
     scale: number,
   ): boolean {
     const rectW = rectOn.width * scale;
@@ -344,11 +344,11 @@ export class OptionsMenuView extends PanelMenuView {
     return false;
   }
 
-  protected override _drawContents(ctx: WebGLContext, resources: RuntimeResources): void {
-    this._drawOptionsContents(ctx, resources);
+  protected override _drawContents(resources: RuntimeResources): void {
+    this._drawOptionsContents(resources);
   }
 
-  private _drawOptionsContents(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawOptionsContents(resources: RuntimeResources): void {
     const labelsTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const layout = this._contentLayout();
     const basePos = layout.basePos;
@@ -370,12 +370,12 @@ export class OptionsMenuView extends PanelMenuView {
       basePos.x, basePos.y,
       titleW * scale, MENU_LABEL_ROW_HEIGHT * scale,
     );
-    ctx.drawTexturePro(labelsTex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, WHITE);
+    wgl.drawTexturePro(labelsTex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, WHITE);
 
     const yOffsets = [47.0, 67.0, 87.0, 107.0];
     for (let i = 0; i < OptionsMenuView._LABELS.length; i++) {
       drawSmallText(
-        ctx, font, OptionsMenuView._LABELS[i],
+        font, OptionsMenuView._LABELS[i],
         labelPos.offset(0.0, yOffsets[i] * scale),
         textColor,
       );
@@ -386,10 +386,10 @@ export class OptionsMenuView extends PanelMenuView {
     const rectW = rectOn.width * scale;
     const rectH = rectOn.height * scale;
 
-    this._drawSlider(ctx, this._sliderSfx, sliderPos.offset(0.0, 47.0 * scale), rectOn, rectOff, rectW, rectH);
-    this._drawSlider(ctx, this._sliderMusic, sliderPos.offset(0.0, 67.0 * scale), rectOn, rectOff, rectW, rectH);
-    this._drawSlider(ctx, this._sliderDetail, sliderPos.offset(0.0, 87.0 * scale), rectOn, rectOff, rectW, rectH);
-    this._drawSlider(ctx, this._sliderMouse, sliderPos.offset(0.0, 107.0 * scale), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderSfx, sliderPos.offset(0.0, 47.0 * scale), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderMusic, sliderPos.offset(0.0, 67.0 * scale), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderDetail, sliderPos.offset(0.0, 87.0 * scale), rectOn, rectOff, rectW, rectH);
+    this._drawSlider(this._sliderMouse, sliderPos.offset(0.0, 107.0 * scale), rectOn, rectOff, rectW, rectH);
 
     const checkTex = this._uiInfoTexts
       ? getTexture(resources, TextureId.UI_CHECK_ON)
@@ -397,14 +397,14 @@ export class OptionsMenuView extends PanelMenuView {
     const checkW = checkTex.width * scale;
     const checkH = checkTex.height * scale;
     const checkPos = labelPos.offset(0.0, 135.0 * scale);
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       checkTex,
       wgl.makeRectangle(0.0, 0.0, checkTex.width, checkTex.height),
       wgl.makeRectangle(checkPos.x, checkPos.y, checkW, checkH),
       wgl.makeVector2(0.0, 0.0), 0.0, WHITE,
     );
     drawSmallText(
-      ctx, font, 'UI Info texts',
+      font, 'UI Info texts',
       checkPos.add(new Vec2(checkW + 6.0 * scale, 1.0 * scale)),
       textColor,
     );
@@ -414,17 +414,16 @@ export class OptionsMenuView extends PanelMenuView {
       resources, this._controlsButton.label,
       { scale, forceWide: this._controlsButton.forceWide },
     );
-    buttonDraw(ctx, resources, this._controlsButton, {
+    buttonDraw(resources, this._controlsButton, {
       pos: buttonPos, width: buttonW, scale,
     });
   }
 
   private _drawSlider(
-    ctx: WebGLContext,
     slider: SliderState,
     pos: Vec2,
-    rectOn: GlTexture,
-    rectOff: GlTexture,
+    rectOn: wgl.Texture,
+    rectOff: wgl.Texture,
     rectW: number,
     rectH: number,
   ): void {
@@ -432,7 +431,7 @@ export class OptionsMenuView extends PanelMenuView {
       const tex = idx < slider.value ? rectOn : rectOff;
       const dst = wgl.makeRectangle(pos.x + idx * rectW, pos.y, rectW, rectH);
       const tint = idx < slider.value ? WHITE : wgl.makeColor(1, 1, 1, 0.5);
-      ctx.drawTexturePro(
+      wgl.drawTexturePro(
         tex,
         wgl.makeRectangle(0.0, 0.0, tex.width, tex.height),
         dst,

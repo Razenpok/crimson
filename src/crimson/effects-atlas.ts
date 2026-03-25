@@ -1,4 +1,5 @@
 // Port of crimson/effects_atlas.py
+import * as wgl from '@wgl';
 
 export const SIZE_CODE_GRID: Record<number, number> = {
   0x10: 16,
@@ -69,7 +70,7 @@ export function effectSrcRect(
   effectId: number,
   textureWidth: number,
   textureHeight: number,
-): [number, number, number, number] | null {
+): wgl.Rectangle | null {
   const e = EFFECT_ID_ATLAS_TABLE_BY_ID.get(effectId);
   if (e === undefined) return null;
 
@@ -81,5 +82,5 @@ export function effectSrcRect(
   const row = (frame / grid) | 0;
   const cellW = textureWidth / grid;
   const cellH = textureHeight / grid;
-  return [cellW * col, cellH * row, cellW, cellH];
+  return wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
 }

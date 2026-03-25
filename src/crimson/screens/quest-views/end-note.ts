@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
+
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -69,7 +69,7 @@ export interface EndNoteState {
   audio: AudioState | null;
   resources: RuntimeResources | null;
   preserveBugs: boolean;
-  pauseBackground: { drawPauseBackground(ctx: WebGLContext, opts?: { entityAlpha?: number }): void } | null;
+  pauseBackground: { drawPauseBackground(opts?: { entityAlpha?: number }): void } | null;
   menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
   menuGroundCamera: Vec2 | null;
   screenFadeAlpha: number;
@@ -202,16 +202,16 @@ export class EndNoteView {
     }
   }
 
-  draw(ctx: WebGLContext, screenW: number = ctx.screenWidth, screenH: number = ctx.screenHeight): void {
-    ctx.clearBackground(0, 0, 0, 1);
+  draw(screenW: number = wgl.getScreenWidth(), screenH: number = wgl.getScreenHeight()): void {
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx, { entityAlpha: this._worldEntityAlpha() });
+      pauseBackground.drawPauseBackground({ entityAlpha: this._worldEntityAlpha() });
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
     }
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
     const resources = this._requireResources();
     const scale = 1.0;
@@ -226,7 +226,7 @@ export class EndNoteView {
     const fxDetail = this.state.config.display.fxDetail[0];
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
-      ctx, panelTex,
+      panelTex,
       wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, END_NOTE_PANEL_W * scale, END_NOTE_PANEL_H * scale),
       WHITE, fxDetail,
     );
@@ -264,20 +264,20 @@ export class EndNoteView {
     const headerColor = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
     const bodyColor = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
 
-    drawSmallText(ctx, font, header, headerPos, headerColor);
+    drawSmallText(font, header, headerPos, headerColor);
 
     let bodyPos = new Vec2(
       panelTopLeft.x + END_NOTE_BODY_X_OFFSET * scale,
       headerPos.y + END_NOTE_BODY_Y_GAP * scale,
     );
     for (let idx = 0; idx < bodyLines.length; idx++) {
-      drawSmallText(ctx, font, bodyLines[idx], bodyPos, bodyColor);
+      drawSmallText(font, bodyLines[idx], bodyPos, bodyColor);
       if (idx !== bodyLines.length - 1) {
         bodyPos = bodyPos.offset(0.0, END_NOTE_LINE_STEP_Y * scale);
       }
     }
     bodyPos = bodyPos.offset(0.0, END_NOTE_AFTER_BODY_Y_GAP * scale);
-    drawSmallText(ctx, font, 'Good luck with your battles, trooper!', bodyPos, bodyColor);
+    drawSmallText(font, 'Good luck with your battles, trooper!', bodyPos, bodyColor);
 
     // Buttons
     let buttonPos = panelTopLeft.add(new Vec2(
@@ -285,22 +285,22 @@ export class EndNoteView {
       END_NOTE_BUTTON_Y_OFFSET * scale,
     ));
     const survivalW = buttonWidth(resources, this._survivalButton.label, { scale, forceWide: this._survivalButton.forceWide });
-    buttonDraw(ctx, resources, this._survivalButton, { pos: buttonPos, width: survivalW, scale });
+    buttonDraw(resources, this._survivalButton, { pos: buttonPos, width: survivalW, scale });
     buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
     const rushW = buttonWidth(resources, this._rushButton.label, { scale, forceWide: this._rushButton.forceWide });
-    buttonDraw(ctx, resources, this._rushButton, { pos: buttonPos, width: rushW, scale });
+    buttonDraw(resources, this._rushButton, { pos: buttonPos, width: rushW, scale });
     buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
     const typoW = buttonWidth(resources, this._typoButton.label, { scale, forceWide: this._typoButton.forceWide });
-    buttonDraw(ctx, resources, this._typoButton, { pos: buttonPos, width: typoW, scale });
+    buttonDraw(resources, this._typoButton, { pos: buttonPos, width: typoW, scale });
     buttonPos = buttonPos.offset(0.0, END_NOTE_BUTTON_STEP_Y * scale);
     const mainW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
-    buttonDraw(ctx, resources, this._mainMenuButton, { pos: buttonPos, width: mainW, scale });
+    buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainW, scale });
 
     // Menu cursor
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 
   takeAction(): string | null {

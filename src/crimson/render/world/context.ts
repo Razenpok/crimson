@@ -1,8 +1,8 @@
 // Port of crimson/render/world/context.py
 
+import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
-import { type GlTexture, type WebGLContext, BlendMode } from '@grim/webgl.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import type { RenderFrame } from '@crimson/render/frame.ts';
 import { RAD_TO_DEG } from './constants.ts';
@@ -12,19 +12,17 @@ import type { WorldRenderer } from './renderer.ts';
 export class WorldRenderCtx {
   renderer: WorldRenderer;
   frame: RenderFrame;
-  gl: WebGLContext;
   projectionCamera: Vec2 | null = null;
   projectionViewScale: Vec2 | null = null;
 
-  constructor(renderer: WorldRenderer, frame: RenderFrame, gl: WebGLContext) {
+  constructor(renderer: WorldRenderer, frame: RenderFrame) {
     this.renderer = renderer;
     this.frame = frame;
-    this.gl = gl;
   }
 
   cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
-    const outW = runtimeW ?? this.gl.screenWidth;
-    const outH = runtimeH ?? this.gl.screenHeight;
+    const outW = runtimeW ?? wgl.getScreenWidth();
+    const outH = runtimeH ?? wgl.getScreenHeight();
     return viewport.cameraScreenSize(
       this.frame.worldSize,
       this.frame.config,
@@ -38,7 +36,7 @@ export class WorldRenderCtx {
   }
 
   worldParams(): [Vec2, Vec2] {
-    const outSize = new Vec2(this.gl.screenWidth, this.gl.screenHeight);
+    const outSize = new Vec2(wgl.getScreenWidth(), wgl.getScreenHeight());
     const [camera, viewScale] = viewport.viewTransform(
       this.frame.worldSize,
       this.frame.config,
@@ -57,7 +55,7 @@ export class WorldRenderCtx {
   }
 
   drawAtlasSprite(
-    texture: GlTexture,
+    texture: wgl.Texture,
     grid: number,
     frame: number,
     pos: Vec2,
@@ -71,16 +69,16 @@ export class WorldRenderCtx {
     const cellH = texture.height / grid;
     const col = frame % grid;
     const row = (frame / grid) | 0;
-    const src: [number, number, number, number] = [cellW * col, cellH * row, cellW, cellH];
+    const src = wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
     const w = cellW * scale;
     const h = cellH * scale;
-    const dst: [number, number, number, number] = [pos.x, pos.y, w, h];
-    const origin: [number, number] = [w * 0.5, h * 0.5];
-    this.gl.drawTexturePro(texture, src, dst, origin, rotationRad * RAD_TO_DEG, tint);
+    const dst = wgl.makeRectangle(pos.x, pos.y, w, h);
+    const origin = wgl.makeVector2(w * 0.5, h * 0.5);
+    wgl.drawTexturePro(texture, src, dst, origin, rotationRad * RAD_TO_DEG, tint as wgl.Color);
   }
 
   withProjection(camera: Vec2, viewScale: Vec2): WorldRenderCtx {
-    const ctx = new WorldRenderCtx(this.renderer, this.frame, this.gl);
+    const ctx = new WorldRenderCtx(this.renderer, this.frame);
     ctx.projectionCamera = camera;
     ctx.projectionViewScale = viewScale;
     return ctx;
@@ -127,9 +125,8 @@ export class WorldRenderCtx {
 export function buildWorldRenderCtx(
   renderer: WorldRenderer,
   renderFrame: RenderFrame,
-  gl: WebGLContext,
 ): WorldRenderCtx {
-  return new WorldRenderCtx(renderer, renderFrame, gl);
+  return new WorldRenderCtx(renderer, renderFrame);
 }
 
 export function isBulletTrailType(typeId: number): boolean {
@@ -193,27 +190,26 @@ function drawBulletTrail(
   const tailRgb: [number, number, number] = [128 / 255, 128 / 255, 128 / 255];
   const alphaNorm = alpha / 255;
 
-  const ctx = renderCtx.gl;
-  ctx.setBlendMode(BlendMode.ADDITIVE);
-  ctx.beginQuads(bulletTrailTexture);
+  wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+  wgl.beginQuads(bulletTrailTexture);
 
-  ctx.color4f(tailRgb[0], tailRgb[1], tailRgb[2], 0);
-  ctx.texCoord2f(0.0, 0.0);
-  ctx.vertex2f(p0.x, p0.y);
+  wgl.rlColor4f(tailRgb[0], tailRgb[1], tailRgb[2], 0);
+  wgl.rlTexCoord2f(0.0, 0.0);
+  wgl.rlVertex2f(p0.x, p0.y);
 
-  ctx.color4f(tailRgb[0], tailRgb[1], tailRgb[2], 0);
-  ctx.texCoord2f(1.0, 0.0);
-  ctx.vertex2f(p1.x, p1.y);
+  wgl.rlColor4f(tailRgb[0], tailRgb[1], tailRgb[2], 0);
+  wgl.rlTexCoord2f(1.0, 0.0);
+  wgl.rlVertex2f(p1.x, p1.y);
 
-  ctx.color4f(headRgb[0], headRgb[1], headRgb[2], alphaNorm);
-  ctx.texCoord2f(1.0, 0.5);
-  ctx.vertex2f(p2.x, p2.y);
+  wgl.rlColor4f(headRgb[0], headRgb[1], headRgb[2], alphaNorm);
+  wgl.rlTexCoord2f(1.0, 0.5);
+  wgl.rlVertex2f(p2.x, p2.y);
 
-  ctx.color4f(headRgb[0], headRgb[1], headRgb[2], alphaNorm);
-  ctx.texCoord2f(0.0, 0.5);
-  ctx.vertex2f(p3.x, p3.y);
+  wgl.rlColor4f(headRgb[0], headRgb[1], headRgb[2], alphaNorm);
+  wgl.rlTexCoord2f(0.0, 0.5);
+  wgl.rlVertex2f(p3.x, p3.y);
 
-  ctx.endQuads();
-  ctx.setBlendMode(BlendMode.ALPHA);
+  wgl.endQuads();
+  wgl.endBlendMode();
   return true;
 }

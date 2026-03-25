@@ -1,7 +1,6 @@
 // Port of crimson/modes/components/perk_prompt_controller.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources } from '@grim/assets.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { type Vec2 } from '@grim/geom.ts';
@@ -94,7 +93,6 @@ export class PerkPromptState {
   }
 
   draw(
-    ctx: WebGLContext,
     opts: {
       uiCtx: PerkMenuUiContext;
       pendingCount: number;
@@ -127,7 +125,7 @@ export class PerkPromptState {
     if (!label) {
       return;
     }
-    PerkPromptUi.draw(ctx, {
+    PerkPromptUi.draw({
       resources: uiCtx.resources,
       label,
       timerMs: this.timerMs,

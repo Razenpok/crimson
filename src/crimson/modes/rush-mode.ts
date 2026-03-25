@@ -1,7 +1,6 @@
 // Port of crimson/modes/rush_mode.py
 
 import * as wgl from '@wgl';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -50,14 +49,12 @@ export class RushMode extends BaseGameplayMode {
   protected _simSession: DeterministicSession | null = null;
 
   constructor(opts: {
-    gl: WebGLContext;
     config: CrimsonConfig;
     console?: ConsoleState | null;
     audio?: AudioState | null;
     audioRng: Crand;
   }) {
     super({
-      gl: opts.gl,
       worldSize: WORLD_SIZE,
       defaultGameModeId: GameMode.RUSH,
       demoModeActive: false,
@@ -309,11 +306,10 @@ export class RushMode extends BaseGameplayMode {
   // Draw
   // ---------------------------------------------------------------------------
 
-  private _drawGameCursor(ctx: WebGLContext): void {
+  private _drawGameCursor(): void {
     const resources = this.renderResources.resources as RuntimeResources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
-      ctx,
       getTexture(resources, TextureId.PARTICLES),
       getTexture(resources, TextureId.UI_CURSOR),
       mousePos,
@@ -321,19 +317,19 @@ export class RushMode extends BaseGameplayMode {
     );
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._drawWorld({
       drawAimIndicators: !this._gameOverActive,
       entityAlpha: this._worldEntityAlpha(),
     });
-    this._drawScreenFade(ctx);
+    this._drawScreenFade();
 
     let hudBottom = 0.0;
     if (!this._gameOverActive) {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
 
-      this._drawTargetHealthBar(ctx);
-      hudBottom = drawHudOverlay(ctx, {
+      this._drawTargetHealthBar();
+      hudBottom = drawHudOverlay({
         resources: this.renderResources.resources as RuntimeResources,
         state: this._hudState,
         font: this._small,
@@ -359,33 +355,31 @@ export class RushMode extends BaseGameplayMode {
       const line = this._uiLineHeight();
 
       this._drawUiText(
-        ctx,
         `rush: t=${(this._sessionElapsedMs() / 1000.0).toFixed(1)}s`,
         new Vec2(x, y),
         UI_TEXT_COLOR,
       );
       this._drawUiText(
-        ctx,
         `kills=${this.creatures.killCount}`,
         new Vec2(x, y + line),
         UI_HINT_COLOR,
       );
       let yExtra = y + line * 2.0;
       if (this._paused) {
-        this._drawUiText(ctx, 'paused (TAB)', new Vec2(x, yExtra), UI_HINT_COLOR);
+        this._drawUiText('paused (TAB)', new Vec2(x, yExtra), UI_HINT_COLOR);
         yExtra += line;
       }
       if (this.player.health <= 0.0) {
-        this._drawUiText(ctx, 'game over', new Vec2(x, yExtra), UI_ERROR_COLOR);
+        this._drawUiText('game over', new Vec2(x, yExtra), UI_ERROR_COLOR);
         yExtra += line;
       }
-      this._drawLanDebugInfo(ctx, { x, y: yExtra, lineH: line });
+      this._drawLanDebugInfo({ x, y: yExtra, lineH: line });
     }
 
     if (this._gameOverActive) {
-      this._drawGameCursor(ctx);
+      this._drawGameCursor();
       if (this._gameOverRecord !== null) {
-        this._gameOverUi.draw(ctx, {
+        this._gameOverUi.draw({
           record: this._gameOverRecord,
           bannerKind: this._gameOverBanner,
           resources: this.renderResources.resources as RuntimeResources,
@@ -393,6 +387,6 @@ export class RushMode extends BaseGameplayMode {
         });
       }
     }
-    this._drawLanWaitOverlay(ctx);
+    this._drawLanWaitOverlay();
   }
 }

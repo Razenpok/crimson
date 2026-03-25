@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx } from '@grim/audio.ts';
@@ -79,7 +78,6 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   }
 
   protected override _drawContents(
-    ctx: WebGLContext,
     leftTopLeft: Vec2,
     rightTopLeft: Vec2,
     scale: number,
@@ -95,22 +93,22 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     // state_16 title at (163,244) => relative to left panel (-98,194): (261,50)
     const titlePos = left.add(new Vec2(261.0 * scale, 50.0 * scale));
     const titleText = 'Unlocked Perks Database';
-    drawSmallText(ctx, font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
+    drawSmallText(font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
     const titleW = measureSmallTextWidth(font, titleText);
     // 1px outline strip under the title with alpha 0.5
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(titlePos.x),
       Math.floor(titlePos.y + 13.0 * scale),
       Math.floor(titleW),
       Math.max(1, Math.floor(1.0 * scale)),
-      1, 1, 1, 0.5,
+      wgl.makeColor(1, 1, 1, 0.5),
     );
 
     const perkIds = this._perkIds;
     const count = perkIds.length;
     const perkLabel = count === 1 ? 'perk' : 'perks';
-    drawSmallText(ctx, font, `${count} ${perkLabel} in database`, left.add(new Vec2(210.0 * scale, 78.0 * scale)), dimColor);
-    drawSmallText(ctx, font, 'Perks', left.add(new Vec2(210.0 * scale, 106.0 * scale)), textColor);
+    drawSmallText(font, `${count} ${perkLabel} in database`, left.add(new Vec2(210.0 * scale, 78.0 * scale)), dimColor);
+    drawSmallText(font, 'Perks', left.add(new Vec2(210.0 * scale, 106.0 * scale)), textColor);
 
     const VR = UnlockedPerksDatabaseView._VISIBLE_ROWS;
     const LFX = UnlockedPerksDatabaseView._LIST_FRAME_X;
@@ -124,17 +122,17 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const frameY = left.y + LFY * scale;
     const frameW = LW * scale;
     const frameH = (VR * LRH + 4.0) * scale;
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(frameX), Math.round(frameY),
       Math.round(frameW), Math.round(frameH),
-      1, 1, 1, 1,
+      wgl.makeColor(1, 1, 1, 1),
     );
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(frameX + 1.0 * scale),
       Math.round(frameY + 1.0 * scale),
       Math.max(0, Math.round(frameW - 2.0 * scale)),
       Math.max(0, Math.round(frameH - 2.0 * scale)),
-      0, 0, 0, 1,
+      wgl.makeColor(0, 0, 0, 1),
     );
 
     const maxScroll = Math.max(0, perkIds.length - VR);
@@ -155,7 +153,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         rowAlpha = 0.7;
       }
       drawSmallText(
-        ctx, font,
+        font,
         this._perkName(perkId, violenceDisabled, preserveBugs),
         listTopLeft.offset(0.0, row * rowStep),
         wgl.makeColor(1, 1, 1, rowAlpha),
@@ -167,26 +165,26 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
       const [trackX, trackY, trackH, thumbTop, thumbH, _scrollSpan] = this._scrollbarGeometry(
         left, scale, count, start,
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.round(trackX),
         Math.round(trackY),
         Math.max(1, Math.round(1.0 * scale)),
         Math.round(trackH),
-        1, 1, 1, 1,
+        wgl.makeColor(1, 1, 1, 1),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.round(trackX + 1.0 * scale),
         Math.round(thumbTop),
         Math.max(1, Math.round(8.0 * scale)),
         Math.max(1, Math.round(thumbH + 1.0 * scale)),
-        1, 1, 1, 0.8,
+        wgl.makeColor(1, 1, 1, 0.8),
       );
-      ctx.drawRectangle(
+      wgl.drawRectangle(
         Math.round(trackX + 2.0 * scale),
         Math.round(thumbTop + 1.0 * scale),
         Math.max(1, Math.round(6.0 * scale)),
         Math.max(1, Math.round(Math.max(1.0, thumbH - 1.0 * scale))),
-        51 / 255, 204 / 255, 1, 0.2,
+        wgl.makeColor(51 / 255, 204 / 255, 1, 0.2),
       );
     }
 
@@ -196,28 +194,28 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const perkName = this._perkName(perkId, violenceDisabled, preserveBugs);
     const detailAnchor = right.add(new Vec2((34.0 + detailShiftX) * scale, 72.0 * scale));
     const perkNoLabel = preserveBugs ? 'perkno' : 'perk';
-    drawSmallText(ctx, font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
+    drawSmallText(font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
     const nameW = measureSmallTextWidth(font, perkName);
     const perkNamePos = new Vec2(detailAnchor.x + 128.0 * scale - nameW * 0.5, detailAnchor.y - 22.0 * scale);
-    drawSmallText(ctx, font, perkName, perkNamePos, textColor);
-    ctx.drawRectangle(
+    drawSmallText(font, perkName, perkNamePos, textColor);
+    wgl.drawRectangle(
       Math.floor(perkNamePos.x),
       Math.floor(perkNamePos.y + 13.0 * scale),
       Math.floor(nameW),
       Math.max(1, Math.floor(1.0 * scale)),
-      1, 1, 1, 0.5,
+      wgl.makeColor(1, 1, 1, 0.5),
     );
 
     let descPos = detailAnchor.add(new Vec2(16.0 * scale, 0.0));
     const prereqName = this._perkPrereqName(perkId, violenceDisabled, preserveBugs);
     if (prereqName) {
-      drawSmallText(ctx, font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, 0.8));
+      drawSmallText(font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, 0.8));
       descPos = descPos.offset(0.0, 18.0 * scale);
     }
 
     const wrappedDesc = this._prewrappedPerkDesc(perkId, font, violenceDisabled);
     if (wrappedDesc) {
-      drawSmallText(ctx, font, wrappedDesc, descPos, dimColor);
+      drawSmallText(font, wrappedDesc, descPos, dimColor);
     }
   }
 

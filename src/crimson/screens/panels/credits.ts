@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
@@ -570,13 +569,13 @@ export class CreditsView {
     }
   }
 
-  draw(ctx: WebGLContext): void {
+  draw(): void {
     this._assertOpen();
-    ctx.clearBackground(0, 0, 0, 1);
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx);
+      pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
       this._ground.draw(camera);
@@ -584,7 +583,7 @@ export class CreditsView {
 
     const screenW = this.state.config.display.width;
     const screenH = this.state.config.display.height;
-    drawScreenFade(ctx, this.state, screenW, screenH);
+    drawScreenFade(this.state, screenW, screenH);
 
     const resources = requireRuntimeResources(this.state);
 
@@ -597,11 +596,11 @@ export class CreditsView {
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
 
     const font = resources.smallFont;
     const titlePos = panelTopLeft.add(new Vec2(_TITLE_X * scale, _TITLE_Y * scale));
-    drawSmallText(ctx, font, 'credits', titlePos, wgl.makeColor(1, 1, 1, 1));
+    drawSmallText(font, 'credits', titlePos, wgl.makeColor(1, 1, 1, 1));
 
     const visibleCount = this._scrollLineEndIndex - this._scrollLineStartIndex;
     if (visibleCount > 0) {
@@ -617,25 +616,25 @@ export class CreditsView {
         const alpha = this._lineAlpha(y, baseY, visibleCount, scale);
         const color = lineColor(line.flags, alpha);
         const textW = measureSmallTextWidth(font, line.text);
-        drawSmallText(ctx, font, line.text, new Vec2(centerX - (textW * 0.5), y), color);
+        drawSmallText(font, line.text, new Vec2(centerX - (textW * 0.5), y), color);
       }
     }
 
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
-    buttonDraw(ctx, resources, this._backButton, { pos: backPos, width: backW, scale });
+    buttonDraw(resources, this._backButton, { pos: backPos, width: backW, scale });
 
     if (this._secretButtonVisible()) {
       const secretW = buttonWidth(resources, this._secretButton.label, { scale, forceWide: this._secretButton.forceWide });
       const secretPos = panelTopLeft.add(new Vec2(_SECRET_BUTTON_X * scale, _SECRET_BUTTON_Y * scale));
-      buttonDraw(ctx, resources, this._secretButton, { pos: secretPos, width: secretW, scale });
+      buttonDraw(resources, this._secretButton, { pos: secretPos, width: secretW, scale });
     }
 
-    this._drawSign(ctx, resources);
-    this._drawMenuCursor(ctx, resources);
+    this._drawSign(resources);
+    this._drawMenuCursor(resources);
   }
 
-  private _drawSign(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(screenW | 0);
@@ -652,22 +651,22 @@ export class CreditsView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
 
-  private _drawMenuCursor(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuCursor(resources: RuntimeResources): void {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(ctx, particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, new Vec2(mx, my), this._cursorPulseTime);
   }
 }

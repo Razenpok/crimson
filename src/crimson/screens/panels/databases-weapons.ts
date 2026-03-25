@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type WebGLContext } from '@grim/webgl.ts';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
@@ -59,7 +58,6 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   protected override _drawContents(
-    ctx: WebGLContext,
     leftTopLeft: Vec2,
     rightTopLeft: Vec2,
     scale: number,
@@ -75,39 +73,39 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     // state_15 title at (153,244) => relative to left panel (-98,194): (251,50)
     const titlePos = left.add(new Vec2(251.0 * scale, 50.0 * scale));
     const titleText = 'Unlocked Weapons Database';
-    drawSmallText(ctx, font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
+    drawSmallText(font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
     const titleW = measureSmallTextWidth(font, titleText);
     // 1px outline strip under the title with alpha 0.5
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.floor(titlePos.x),
       Math.floor(titlePos.y + 13.0 * scale),
       Math.floor(titleW),
       Math.max(1, Math.floor(1.0 * scale)),
-      1, 1, 1, 0.5,
+      wgl.makeColor(1, 1, 1, 0.5),
     );
 
     const weaponIds = this._weaponIds;
     const count = weaponIds.length;
     const weaponLabel = count === 1 ? 'weapon' : 'weapons';
-    drawSmallText(ctx, font, `${count} ${weaponLabel} in database`, left.add(new Vec2(210.0 * scale, 80.0 * scale)), dimColor);
-    drawSmallText(ctx, font, 'Weapon', left.add(new Vec2(210.0 * scale, 108.0 * scale)), textColor);
+    drawSmallText(font, `${count} ${weaponLabel} in database`, left.add(new Vec2(210.0 * scale, 80.0 * scale)), dimColor);
+    drawSmallText(font, 'Weapon', left.add(new Vec2(210.0 * scale, 108.0 * scale)), textColor);
 
     // Oracle frame: outer [114,322]-[364,486], inner [115,323]-[363,485]
     const frameX = left.x + 212.0 * scale;
     const frameY = left.y + 128.0 * scale;
     const frameW = 250.0 * scale;
     const frameH = 164.0 * scale;
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(frameX), Math.round(frameY),
       Math.round(frameW), Math.round(frameH),
-      1, 1, 1, 1,
+      wgl.makeColor(1, 1, 1, 1),
     );
-    ctx.drawRectangle(
+    wgl.drawRectangle(
       Math.round(frameX + 1.0 * scale),
       Math.round(frameY + 1.0 * scale),
       Math.max(0, Math.round(frameW - 2.0 * scale)),
       Math.max(0, Math.round(frameH - 2.0 * scale)),
-      0, 0, 0, 1,
+      wgl.makeColor(0, 0, 0, 1),
     );
 
     // Oracle list widget is 10 rows tall
@@ -125,7 +123,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
         this._selectedWeaponId !== null && weaponId === this._selectedWeaponId
           ? textColor
           : dimColor;
-      drawSmallText(ctx, font, name, listTopLeft.offset(0.0, row * rowStep), rowColor);
+      drawSmallText(font, name, listTopLeft.offset(0.0, row * rowStep), rowColor);
     }
 
     if (this._selectedWeaponId === null) return;
@@ -135,10 +133,10 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const weapon = this._weaponEntry(weaponId);
     const preserveBugs = this.state.preserveBugs;
     const weaponNoLabel = preserveBugs ? 'wepno' : 'weapon';
-    drawSmallText(ctx, font, `${weaponNoLabel} #${weaponId}`, detailTopLeft.add(new Vec2(240.0 * scale, 32.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
-    drawSmallText(ctx, font, name, detailTopLeft.add(new Vec2(50.0 * scale, 50.0 * scale)), textColor);
+    drawSmallText(font, `${weaponNoLabel} #${weaponId}`, detailTopLeft.add(new Vec2(240.0 * scale, 32.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
+    drawSmallText(font, name, detailTopLeft.add(new Vec2(50.0 * scale, 50.0 * scale)), textColor);
     if (iconIndex !== null) {
-      this._drawWicon(ctx, iconIndex, detailTopLeft.add(new Vec2(82.0 * scale, 82.0 * scale)), scale);
+      this._drawWicon(iconIndex, detailTopLeft.add(new Vec2(82.0 * scale, 82.0 * scale)), scale);
     }
 
     const reloadTime = weapon.reloadTime;
@@ -151,9 +149,9 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     } else {
       firerateText = `${firerateLabel}: ${this._weaponRpm(weapon)} rpm`;
     }
-    drawSmallText(ctx, font, firerateText, detailTopLeft.add(new Vec2(66.0 * scale, 128.0 * scale)), textColor);
-    drawSmallText(ctx, font, `Reload time: ${reloadTime.toFixed(1)} secs`, detailTopLeft.add(new Vec2(66.0 * scale, 146.0 * scale)), textColor);
-    drawSmallText(ctx, font, `Clip size: ${clipSize}`, detailTopLeft.add(new Vec2(66.0 * scale, 164.0 * scale)), textColor);
+    drawSmallText(font, firerateText, detailTopLeft.add(new Vec2(66.0 * scale, 128.0 * scale)), textColor);
+    drawSmallText(font, `Reload time: ${reloadTime.toFixed(1)} secs`, detailTopLeft.add(new Vec2(66.0 * scale, 146.0 * scale)), textColor);
+    drawSmallText(font, `Clip size: ${clipSize}`, detailTopLeft.add(new Vec2(66.0 * scale, 164.0 * scale)), textColor);
   }
 
   protected override _updateContentInteraction(
@@ -241,7 +239,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     return (60.0 / weapon.shotCooldown) | 0;
   }
 
-  private _drawWicon(ctx: WebGLContext, iconIndex: number, pos: Vec2, scale: number): void {
+  private _drawWicon(iconIndex: number, pos: Vec2, scale: number): void {
     const resources = this.state.resources!;
     const tex = getTexture(resources, TextureId.UI_WICONS);
     const idx = iconIndex | 0;
@@ -254,7 +252,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const srcY = ((frame / grid) | 0) * cellH;
     const iconW = cellW * 2.0;
     const iconH = cellH;
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       tex,
       wgl.makeRectangle(srcX, srcY, iconW, iconH),
       wgl.makeRectangle(pos.x, pos.y, iconW * scale, iconH * scale),

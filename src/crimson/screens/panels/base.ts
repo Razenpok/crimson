@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type WebGLContext, BlendMode } from '@grim/webgl.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
@@ -115,7 +114,7 @@ export interface PanelGameState {
   menuSignLocked: boolean;
   screenFadeAlpha: number;
   screenFadeRamp: boolean;
-  pauseBackground: { drawPauseBackground(ctx: WebGLContext): void } | null;
+  pauseBackground: { drawPauseBackground(): void } | null;
   menuGround: GroundRenderer | null;
   menuGroundCamera: Vec2 | null;
   console?: { log: { log(msg: string): void } };
@@ -315,25 +314,25 @@ export class PanelMenuView {
     }
   }
 
-  draw(ctx: WebGLContext, resources: RuntimeResources | null = this.state.resources): void {
+  draw(resources: RuntimeResources | null = this.state.resources): void {
     this._assertOpen();
     if (resources === null) {
       throw new Error('PanelMenuView.draw() requires resources (none provided and state.resources is null)');
     }
     this._cachedResources = resources;
-    this._drawBackground(ctx);
-    this._drawScreenFade(ctx);
+    this._drawBackground();
+    this._drawScreenFade();
 
     const entry = this._entry;
     if (entry === null) {
       throw new Error('PanelMenuView entry must be initialized before draw()');
     }
 
-    this._drawPanel(ctx, resources);
-    this._drawEntry(ctx, resources, entry);
-    this._drawSign(ctx, resources);
-    this._drawContents(ctx, resources);
-    this._drawMenuCursor(ctx, resources);
+    this._drawPanel(resources);
+    this._drawEntry(resources, entry);
+    this._drawSign(resources);
+    this._drawContents(resources);
+    this._drawMenuCursor(resources);
   }
 
   takeAction(): string | null {
@@ -347,8 +346,8 @@ export class PanelMenuView {
   // Protected — subclasses may override
   // ---------------------------------------------------------------------------
 
-  protected _drawContents(ctx: WebGLContext, resources: RuntimeResources): void {
-    this._drawTitleText(ctx, resources);
+  protected _drawContents(resources: RuntimeResources): void {
+    this._drawTitleText(resources);
   }
 
   // ---------------------------------------------------------------------------
@@ -361,16 +360,16 @@ export class PanelMenuView {
     }
   }
 
-  private _drawTitleText(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawTitleText(resources: RuntimeResources): void {
     const font = resources.smallFont;
     const x = 32;
     let y = 140;
     const titleColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1);
-    drawSmallText(ctx, font, this._title, new Vec2(x, y), titleColor);
+    drawSmallText(font, this._title, new Vec2(x, y), titleColor);
     y += 34;
     const bodyColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1);
     for (const line of this._bodyLines) {
-      drawSmallText(ctx, font, line, new Vec2(x, y), bodyColor);
+      drawSmallText(font, line, new Vec2(x, y), bodyColor);
       y += 22;
     }
   }
@@ -398,11 +397,11 @@ export class PanelMenuView {
     this._ground = this.state.menuGround;
   }
 
-  private _drawBackground(ctx: WebGLContext): void {
-    ctx.clearBackground(0, 0, 0, 1);
+  private _drawBackground(): void {
+    wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground(ctx);
+      pauseBackground.drawPauseBackground();
       return;
     }
     if (this._ground !== null) {
@@ -411,7 +410,7 @@ export class PanelMenuView {
     }
   }
 
-  private _drawScreenFade(ctx: WebGLContext): void {
+  private _drawScreenFade(): void {
     // Port of _draw_screen_fade: draws a fullscreen fade overlay.
     // The actual implementation depends on the transitions module;
     // stub here with alpha overlay when fade is active.
@@ -419,11 +418,11 @@ export class PanelMenuView {
     if (alpha > 0.0) {
       const w = this.state.config.display.width;
       const h = this.state.config.display.height;
-      ctx.drawRectangle(0, 0, w, h, 0, 0, 0, alpha);
+      wgl.drawRectangle(0, 0, w, h, wgl.makeColor(0, 0, 0, alpha));
     }
   }
 
-  protected _drawPanel(ctx: WebGLContext, resources: RuntimeResources): void {
+  protected _drawPanel(resources: RuntimeResources): void {
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     const [_angleRad, slideX] = uiElementAnim(
       this,
@@ -441,10 +440,10 @@ export class PanelMenuView {
     ).add(this._panelOffset.mul(itemScale));
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
     const fxDetail = this.state.config.display.fxDetail[0];
-    drawClassicMenuPanel(ctx, panel, dst, WHITE, fxDetail);
+    drawClassicMenuPanel(panel, dst, WHITE, fxDetail);
   }
 
-  private _drawEntry(ctx: WebGLContext, resources: RuntimeResources, entry: MenuEntry): void {
+  private _drawEntry(resources: RuntimeResources, entry: MenuEntry): void {
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const itemW = item.width;
@@ -466,13 +465,13 @@ export class PanelMenuView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, item,
+        item,
         wgl.makeRectangle(0.0, 0.0, itemW, itemH),
         wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
         origin, 0.0,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       item,
       wgl.makeRectangle(0.0, 0.0, itemW, itemH),
       dst,
@@ -497,19 +496,19 @@ export class PanelMenuView {
       MENU_LABEL_HEIGHT * itemScale,
     );
     const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
-    ctx.drawTexturePro(labelTex, src, labelDst, labelOrigin, 0.0, tint);
+    wgl.drawTexturePro(labelTex, src, labelDst, labelOrigin, 0.0, tint);
 
     if (this._entryEnabled(entry)) {
-      ctx.setBlendMode(BlendMode.ADDITIVE);
-      ctx.drawTexturePro(
+      wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+      wgl.drawTexturePro(
         labelTex, src, labelDst, labelOrigin, 0.0,
         wgl.makeColor(1, 1, 1, alphaNorm),
       );
-      ctx.setBlendMode(BlendMode.ALPHA);
+      wgl.endBlendMode();
     }
   }
 
-  private _drawSign(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawSign(resources: RuntimeResources): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(screenW | 0);
     const signPos = new Vec2(
@@ -531,24 +530,24 @@ export class PanelMenuView {
 
     if (fxDetail) {
       drawUiQuadShadow(
-        ctx, sign, signSrc,
+        sign, signSrc,
         wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
         signOrigin, rotationDeg,
       );
     }
-    ctx.drawTexturePro(
+    wgl.drawTexturePro(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
   }
 
-  private _drawMenuCursor(ctx: WebGLContext, resources: RuntimeResources): void {
+  private _drawMenuCursor(resources: RuntimeResources): void {
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
     const pos = new Vec2(mx, my);
-    drawMenuCursor(ctx, particles, cursorTex, pos, this._cursorPulseTime);
+    drawMenuCursor(particles, cursorTex, pos, this._cursorPulseTime);
   }
 
   protected _entryEnabled(_entry: MenuEntry): boolean {
