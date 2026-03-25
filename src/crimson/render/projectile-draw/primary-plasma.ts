@@ -61,7 +61,7 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
 
   if (ctx.life >= 0.4) {
     // Reconstruct the tail length heuristic used by the native render path.
-    let segCount = ctx.proj.travelBudget | 0;
+    let segCount = int(ctx.proj.travelBudget);
     if (segCount < 0) segCount = 0;
     segCount = (segCount / 5) | 0;
     if (segCount > segLimit) segCount = segLimit;

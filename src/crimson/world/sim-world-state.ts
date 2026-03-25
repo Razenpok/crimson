@@ -41,7 +41,7 @@ export function resetWorldPlayers(
   players.length = 0;
 
   const base = spawnPos ?? new Vec2(worldSize * 0.5, worldSize * 0.5);
-  const count = Math.max(1, playerCount | 0);
+  const count = Math.max(1, int(playerCount));
   let offsets: Vec2[];
   if (count <= 1) {
     offsets = [new Vec2()];
@@ -127,14 +127,14 @@ export class SimWorldState {
       worldSize: this.worldSize,
       demoModeActive: Boolean(this.demoModeActive),
       hardcore: Boolean(this.hardcore),
-      questFailRetryCount: this.questFailRetryCount | 0,
+      questFailRetryCount: int(this.questFailRetryCount),
       preserveBugs: Boolean(this.preserveBugs),
     });
     this.spawnEnv = this.worldState.spawnEnv;
     this.state = this.worldState.state;
     this.players = this.worldState.players;
     this.creatures = this.worldState.creatures;
-    this.state.rng.srand(seed | 0);
+    this.state.rng.srand(int(seed));
 
     this.lastEvents = _emptyWorldEvents();
     this.lastPresentation = new PresentationStepCommands();
@@ -145,7 +145,7 @@ export class SimWorldState {
 
     resetWorldPlayers(
       this.players,
-      { state: this.state, worldSize: this.worldSize, playerCount: playerCount | 0, spawnPos },
+      { state: this.state, worldSize: this.worldSize, playerCount: int(playerCount), spawnPos },
     );
   }
 

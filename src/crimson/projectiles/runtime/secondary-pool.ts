@@ -277,10 +277,10 @@ class CreatureSpatialHash {
 
   candidateIndices(pos: Vec2, radius: number): number[] {
     if (this._cells.size === 0) return [];
-    const projCellX = Math.floor(pos.x / this._bucketSize);
-    const projCellY = Math.floor(pos.y / this._bucketSize);
+    const projCellX = int(Math.floor(pos.x / this._bucketSize));
+    const projCellY = int(Math.floor(pos.y / this._bucketSize));
     const maxAxisDelta = radius + this._maxFindMargin + _NATIVE_FIND_RADIUS_MARGIN_EPS;
-    const cellSpan = Math.ceil(maxAxisDelta / this._bucketSize);
+    const cellSpan = int(Math.ceil(maxAxisDelta / this._bucketSize));
 
     const candidates: number[] = [];
     for (let cellY = projCellY - cellSpan; cellY <= projCellY + cellSpan; cellY++) {
@@ -302,8 +302,8 @@ class CreatureSpatialHash {
   }
 
   private _cellForPos(pos: Vec2): string {
-    const cellX = Math.floor(pos.x / this._bucketSize);
-    const cellY = Math.floor(pos.y / this._bucketSize);
+    const cellX = int(Math.floor(pos.x / this._bucketSize));
+    const cellY = int(Math.floor(pos.y / this._bucketSize));
     return `${cellX},${cellY}`;
   }
 
@@ -365,7 +365,7 @@ function _applyDamageToCreature(
   applyCreatureDamage: CreatureDamageApplier | null,
 ): void {
   if (damage <= 0.0) return;
-  const idx = creatureIndex | 0;
+  const idx = int(creatureIndex);
   if (!(idx >= 0 && idx < creatures.length)) return;
   if (applyCreatureDamage !== null) {
     applyCreatureDamage(idx, damage, damageType, impulse, owner);
@@ -485,7 +485,7 @@ export class SecondaryProjectilePool {
     ): void => {
       _applyDamageToCreature(
         creatures,
-        creatureIndex | 0,
+        int(creatureIndex),
         damage,
         CREATURE_DAMAGE_TYPE_EXPLOSION,
         impulse,
@@ -545,7 +545,7 @@ export class SecondaryProjectilePool {
         const radiusSq = radius * radius;
         const damage = dt * scale * 700.0;
         for (const creatureIdx of creatureSpatial.candidateIndices(entry.pos, radius)) {
-          const creature = creatures[creatureIdx | 0];
+          const creature = creatures[int(creatureIdx)];
           if (!_creatureIsCollidable(creature)) continue;
           if (creature.hp <= 0.0) continue;
           const dSq = Vec2.distanceSq(entry.pos, creature.pos);
@@ -559,13 +559,13 @@ export class SecondaryProjectilePool {
               entry.owner,
               impulse,
             );
-            creatureSpatial.syncIndex(creatureIdx | 0);
+            creatureSpatial.syncIndex(int(creatureIdx));
             if (onDetonationKill !== null && hpBefore > 0.0 && creature.hp <= 0.0) {
               if (fxQueue !== null) {
                 fxQueue.addRandom({ pos: creature.pos, rng });
                 fxQueue.addRandom({ pos: creature.pos, rng });
               }
-              onDetonationKill(creatureIdx | 0);
+              onDetonationKill(int(creatureIdx));
             }
           }
         }
@@ -638,7 +638,7 @@ export class SecondaryProjectilePool {
 
       let hitIdx: number | null = null;
       for (const idx of creatureSpatial.candidateIndices(entry.pos, 8.0)) {
-        const creature = creatures[idx | 0];
+        const creature = creatures[int(idx)];
         if (!_creatureIsCollidable(creature)) continue;
         if (_withinNativeFindRadius(
           entry.pos,
@@ -656,7 +656,7 @@ export class SecondaryProjectilePool {
             runtimeState.shotsHit.length,
           );
           if (ownerPlayerIndex !== null && creatureLifecycleIsAlive(
-            creatures[hitIdx | 0].lifecycleStage,
+            creatures[int(hitIdx)].lifecycleStage,
           )) {
             const shotsHit: number[] = runtimeState.shotsHit;
             shotsHit[ownerPlayerIndex] += 1;
@@ -708,7 +708,7 @@ export class SecondaryProjectilePool {
                 pos: entry.pos,
                 angle: shardAngle,
                 rng,
-                detailPreset: detailPreset | 0,
+                detailPreset: int(detailPreset),
               });
             }
           }
@@ -725,12 +725,12 @@ export class SecondaryProjectilePool {
           }
         }
 
-        if (burstScale !== null && effects !== null && (detailPreset | 0) > (burstMinDetail | 0)) {
+        if (burstScale !== null && effects !== null && int(detailPreset) > int(burstMinDetail)) {
           effects.spawnExplosionBurst({
             pos: entry.pos,
             scale: burstScale,
             rng,
-            detailPreset: detailPreset | 0,
+            detailPreset: int(detailPreset),
           });
         }
 
@@ -741,7 +741,7 @@ export class SecondaryProjectilePool {
           entry.owner,
           entry.vel.div(dt),
         );
-        creatureSpatial.syncIndex(hitIdx | 0);
+        creatureSpatial.syncIndex(int(hitIdx));
 
         entry.typeId = SecondaryProjectileTypeId.DETONATION;
         entry.vel = new Vec2();
@@ -767,7 +767,7 @@ export class SecondaryProjectilePool {
                 pos: shardPos,
                 angle: shardAngle,
                 rng,
-                detailPreset: detailPreset | 0,
+                detailPreset: int(detailPreset),
               });
             }
           }
@@ -783,13 +783,13 @@ export class SecondaryProjectilePool {
               angleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_MINIGUN_DECAL_ANGLE;
               radiusCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_MINIGUN_DECAL_RADIUS;
             }
-            for (let i = 0; i < (extraDecals | 0); i++) {
+            for (let i = 0; i < int(extraDecals); i++) {
               const angle = (rng.rand({ caller: angleCaller }) % 628) * 0.01;
               let radius: number;
               if (rule.tag === 'homing_rocket') {
                 radius = rng.rand({ caller: radiusCaller }) & 0x3F;
               } else {
-                radius = rng.rand({ caller: radiusCaller }) % Math.max(1, extraRadius | 0);
+                radius = rng.rand({ caller: radiusCaller }) % Math.max(1, int(extraRadius));
               }
               fxQueue.addRandom({
                 pos: center.add(Vec2.fromAngle(angle).mul(radius)),

@@ -143,7 +143,7 @@ export abstract class DatabaseBaseView {
   private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
-    const [signScale, shiftX] = signLayoutScale(screenW | 0);
+    const [signScale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
       screenW + MENU_SIGN_POS_X_PAD,
       screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL,
@@ -184,7 +184,7 @@ export abstract class DatabaseBaseView {
     }
     this._cursorPulseTime += Math.min(dt, 0.1) * 1.1;
 
-    const dtMs = (Math.min(dt, 0.1) * 1000.0) | 0;
+    const dtMs = int(Math.min(dt, 0.1) * 1000.0);
     if (this._closing) {
       if (dtMs > 0 && this._pendingAction === null) {
         this._timelineMs -= dtMs;

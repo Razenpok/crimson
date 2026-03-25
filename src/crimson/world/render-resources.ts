@@ -70,8 +70,8 @@ export class RenderResources {
         overlay,
         detail,
       );
-      this.ground.width = Math.floor(this.worldSize);
-      this.ground.height = Math.floor(this.worldSize);
+      this.ground.width = int(this.worldSize);
+      this.ground.height = int(this.worldSize);
       this.ground.textureScale = 1.0;
     } else {
       this.ground.texture = base;
@@ -185,7 +185,7 @@ export class RenderResources {
       bonusAnimPhase: opts.bonusAnimPhase,
       lanPlayerRingsEnabled: Boolean(opts.lanPlayerRingsEnabled),
       lanLocalAimIndicatorsOnly: Boolean(opts.lanLocalAimIndicatorsOnly),
-      lanLocalPlayerSlotIndex: opts.lanLocalPlayerSlotIndex | 0,
+      lanLocalPlayerSlotIndex: int(opts.lanLocalPlayerSlotIndex),
       rtxMode: opts.rtxMode,
     };
   }

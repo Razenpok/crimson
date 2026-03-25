@@ -45,7 +45,7 @@ export function typoBuildName(
   const dictionaryWords = opts.dictionaryWords ?? null;
   const highscoreNames = opts.highscoreNames ?? [];
   let scoreXp = opts.scoreXp;
-  scoreXp = scoreXp | 0;
+  scoreXp = int(scoreXp);
 
   if (dictionaryWords && dictionaryWords.length > 0) {
     return _typoBuildCustomName(rng, scoreXp, dictionaryWords);
@@ -125,7 +125,7 @@ function _typoBuildCustomName(
   scoreXp: number,
   dictionaryWords: readonly string[],
 ): string {
-  scoreXp = scoreXp | 0;
+  scoreXp = int(scoreXp);
 
   if (scoreXp > 120) {
     if (_draw(rng) % 100 < 10) return _pickWord(rng, dictionaryWords);
@@ -185,11 +185,11 @@ export class CreatureNameTable {
   }
 
   static sized(size: number): CreatureNameTable {
-    return new CreatureNameTable(new Array(size | 0).fill(''));
+    return new CreatureNameTable(new Array(int(size)).fill(''));
   }
 
   clear(idx: number): void {
-    idx = idx | 0;
+    idx = int(idx);
     if (idx >= 0 && idx < this.names.length) {
       this.names[idx] = '';
     }
@@ -237,7 +237,7 @@ export class CreatureNameTable {
     const activeMask = opts.activeMask;
     const dictionaryWords = opts.dictionaryWords ?? null;
     const highscoreNames = opts.highscoreNames ?? [];
-    const idx = creatureIdx | 0;
+    const idx = int(creatureIdx);
     if (idx < 0 || idx >= this.names.length) {
       throw new RangeError(`creature_idx out of range: ${idx}`);
     }

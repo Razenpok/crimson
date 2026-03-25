@@ -33,7 +33,7 @@ export class OwnerRef {
   }
 
   static fromLegacy(ownerId: number): OwnerRef {
-    const legacy = ownerId | 0;
+    const legacy = int(ownerId);
     if (legacy === LOCAL_PLAYER_OWNER_ID) return OwnerRef.fromLocalPlayer(0);
     if (legacy < 0) {
       const idx = -1 - legacy;

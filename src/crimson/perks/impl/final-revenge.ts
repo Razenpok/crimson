@@ -46,7 +46,7 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
     pos: playerPos,
     scale: 1.8,
     rng: state.rng,
-    detailPreset: detailPreset | 0,
+    detailPreset: int(detailPreset),
   });
 
   const prevGuard = state.bonusSpawnGuard;
@@ -68,20 +68,20 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
     }
 
     const damage = remaining * 5.0;
-    const deathCreatureIdx = creatureIdx | 0;
+    const deathCreatureIdx = int(creatureIdx);
     creatureApplyDamageWithLethalFollowup(
       creature,
       {
         damageAmount: damage,
         damageType: CreatureDamageType.EXPLOSION,
         impulse: new Vec2(),
-        owner: OwnerRef.fromPlayer(player.index | 0),
+        owner: OwnerRef.fromPlayer(int(player.index)),
         dt,
         players,
         rng: state.rng,
         preserveBugs: state.preserveBugs,
         effects: state.effects,
-        detailPreset: detailPreset | 0,
+        detailPreset: int(detailPreset),
         onLethal: (deathSfx: SfxId[]) => {
           deaths.push(
             creatures.handleDeath(
@@ -91,7 +91,7 @@ export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): voi
                 players,
                 rng: state.rng,
                 dt,
-                detailPreset: detailPreset | 0,
+                detailPreset: int(detailPreset),
                 worldWidth: worldSize,
                 worldHeight: worldSize,
                 fxQueue,

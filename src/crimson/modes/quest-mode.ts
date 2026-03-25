@@ -328,14 +328,14 @@ export class QuestMode extends BaseGameplayMode {
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
-    return this._questSpawnState.spawnTimelineMs | 0;
+    return int(this._questSpawnState.spawnTimelineMs);
   }
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     const stamp = opts.stamp;
     const level = this._questLevel !== null ? questLevelText(this._questLevel) : 'quest';
     const kind = this._outcome !== null ? this._outcome.kind : 'quest';
-    const baseTimeMs = this._questSpawnState.spawnTimelineMs | 0;
+    const baseTimeMs = int(this._questSpawnState.spawnTimelineMs);
     return `quest_${level}_${stamp}_${kind}_t${baseTimeMs}`;
   }
 
@@ -486,7 +486,7 @@ export class QuestMode extends BaseGameplayMode {
     const hardcoreFlag = this.config.gameplay.hardcore;
     this.hardcore = hardcoreFlag;
 
-    const seed = (this.state.rng.state | 0) & 0xFFFFFFFF;
+    const seed = int(this.state.rng.state) & 0xFFFFFFFF;
     this._runResetSeed = seed;
 
     const playerCount = this.config.gameplay.playerCount;
@@ -501,7 +501,7 @@ export class QuestMode extends BaseGameplayMode {
 
     advanceUnlockTerrain(
       this.state.rng,
-      { unlockIndex: genericUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
+      { unlockIndex: genericUnlockIndex, width: int(this.worldSize), height: int(this.worldSize) },
     );
 
     // Native burns one crt_rand for highscore_record_random_tag
@@ -509,13 +509,13 @@ export class QuestMode extends BaseGameplayMode {
 
     const questTerrain = advanceExplicitTerrain(
       this.state.rng,
-      { terrainSlots: quest.terrainSlots, width: this.worldSize | 0, height: this.worldSize | 0 },
+      { terrainSlots: quest.terrainSlots, width: int(this.worldSize), height: int(this.worldSize) },
     );
     this.applyTerrainSetup({ terrainSlots: questTerrain.terrainSlots, seed: questTerrain.terrainSeed });
 
     const ctx: QuestContext = {
-      width: this.worldSize | 0,
-      height: this.worldSize | 0,
+      width: int(this.worldSize),
+      height: int(this.worldSize),
       playerCount: this.simWorld.players.length,
     };
     const entries = buildQuestSpawnTable(quest, ctx, {
@@ -523,7 +523,7 @@ export class QuestMode extends BaseGameplayMode {
       hardcore: hardcoreFlag,
       fullVersion: !this.demoModeActive,
     });
-    this.simWorld.state.rng.srand(this.state.rng.state | 0);
+    this.simWorld.state.rng.srand(int(this.state.rng.state));
     const totalSpawnCount = entries.reduce((sum, e) => sum + e.count, 0);
     this._questDef = quest;
     this._questLevel = quest.level;
@@ -630,7 +630,7 @@ export class QuestMode extends BaseGameplayMode {
     this._outcome = {
       kind: 'completed',
       level: this._questLevel,
-      baseTimeMs: this._questSpawnState.spawnTimelineMs | 0,
+      baseTimeMs: int(this._questSpawnState.spawnTimelineMs),
       playerHealth: healthValues.length > 0 ? healthValues[0] : this.player.health,
       player2Health,
       playerHealthValues: healthValues,
@@ -659,7 +659,7 @@ export class QuestMode extends BaseGameplayMode {
       this._outcome = {
         kind: 'failed',
         level: this._questLevel,
-        baseTimeMs: this._questSpawnState.spawnTimelineMs | 0,
+        baseTimeMs: int(this._questSpawnState.spawnTimelineMs),
         playerHealth: healthValues.length > 0 ? healthValues[0] : this.player.health,
         player2Health,
         playerHealthValues: healthValues,

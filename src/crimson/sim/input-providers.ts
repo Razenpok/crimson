@@ -190,7 +190,7 @@ export class LocalInputProvider implements InputProvider {
   }
 
   pullTick(tickIndex: number, defaultDtSeconds: number): TickSupply {
-    const ti = Math.trunc(tickIndex);
+    const ti = int(tickIndex);
     const dt = Number(defaultDtSeconds);
     if (this._firstTickPending) {
       this._firstTickPending = false;

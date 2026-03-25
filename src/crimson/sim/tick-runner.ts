@@ -76,8 +76,8 @@ export class TickRunner {
     ticksRequested: number;
     tickDt: number;
   }): TickBatchResult {
-    let startTick = Math.trunc(opts.startTick);
-    let ticksRequested = Math.max(0, Math.trunc(opts.ticksRequested));
+    let startTick = int(opts.startTick);
+    let ticksRequested = Math.max(0, int(opts.ticksRequested));
     const tickDt = Number(opts.tickDt);
 
     if (tickDt <= 0.0) {
@@ -161,7 +161,7 @@ export class TickRunner {
     if (sourceTick === null) {
       throw new Error('ready tick supply must carry a resolved tick');
     }
-    if (Math.trunc(sourceTick.tickIndex) !== Math.trunc(expectedTickIndex)) {
+    if (int(sourceTick.tickIndex) !== int(expectedTickIndex)) {
       throw new Error('resolved tick index mismatch');
     }
     const dtSeconds = Number(sourceTick.dtSeconds);
@@ -169,7 +169,7 @@ export class TickRunner {
       throw new Error('resolved tick dt_seconds must be positive');
     }
     return new ResolvedTick({
-      tickIndex: Math.trunc(sourceTick.tickIndex),
+      tickIndex: int(sourceTick.tickIndex),
       dtSeconds,
       inputs: [...sourceTick.inputs],
       commands: [...sourceTick.commands],

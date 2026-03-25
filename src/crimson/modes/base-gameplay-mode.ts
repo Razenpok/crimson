@@ -162,7 +162,7 @@ class LanRuntimeInputProvider {
   private _popBlocked = false;
 
   constructor(opts: { playerCount: number; tickRate: number }) {
-    this._captureClockRate = Math.max(1, Math.trunc(opts.tickRate));
+    this._captureClockRate = Math.max(1, int(opts.tickRate));
     this._captureClock = new FixedStepClock(this._captureClockRate);
   }
 
@@ -682,15 +682,15 @@ export class BaseGameplayMode {
 
   protected _uiLineHeight(scale: number = 1.0): number {
     if (this._small !== null) {
-      return Math.trunc(this._small.cellSize * scale);
+      return int(this._small.cellSize * scale);
     }
-    return Math.trunc(20 * scale);
+    return int(20 * scale);
   }
 
   protected _uiTextWidth(text: string, _scale: number = 1.0): number {
     const font = this._small;
     if (font === null) throw new Error('small font must be loaded before ui text measurement');
-    return Math.trunc(measureSmallTextWidth(font, text));
+    return int(measureSmallTextWidth(font, text));
   }
 
   protected _drawUiText(
@@ -814,7 +814,7 @@ export class BaseGameplayMode {
   // -----------------------------------------------------------------------
 
   setRuntimeUpdatesPerFrame(value: number): void {
-    this._runtimeUpdatesPerFrame = Math.max(0, Math.trunc(value));
+    this._runtimeUpdatesPerFrame = Math.max(0, int(value));
   }
 
   enqueueInputCommand(command: GameCommand): void {
@@ -843,7 +843,7 @@ export class BaseGameplayMode {
 
   recordPerkPickCommand(choiceIndex: number, opts?: { playerIndex?: number }): void {
     this.enqueueInputCommand(
-      new PerkPickCommand(opts?.playerIndex ?? 0, Math.trunc(choiceIndex)),
+      new PerkPickCommand(opts?.playerIndex ?? 0, int(choiceIndex)),
     );
   }
 
@@ -866,7 +866,7 @@ export class BaseGameplayMode {
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
-    return Math.trunc(this._replayCheckpointElapsedMs());
+    return int(this._replayCheckpointElapsedMs());
   }
 
   protected _replayClaimedShots(): [number, number] {

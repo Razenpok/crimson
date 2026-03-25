@@ -16,7 +16,7 @@ import { enforceTypoPlayerFrame } from './player.ts';
 import { tickTypoSpawns } from './spawns.ts';
 
 function _requireSinglePlayerTypo(command: { playerIndex: number }): void {
-  if ((command.playerIndex | 0) !== 0) {
+  if (int(command.playerIndex) !== 0) {
     throw new Error('Typ-o Shooter commands are single-player only');
   }
 }
@@ -90,14 +90,14 @@ export function typoMidStep(ctx: MidStepContext): void {
   const typo = ctx.world.state.typo;
 
   const [cooldown, spawns] = tickTypoSpawns({
-    elapsedMs: ctx.elapsedBeforeMs | 0,
-    spawnCooldownMs: typo.spawnCooldownMs | 0,
-    frameDtMs: ctx.dtSimMs | 0,
+    elapsedMs: int(ctx.elapsedBeforeMs),
+    spawnCooldownMs: int(typo.spawnCooldownMs),
+    frameDtMs: int(ctx.dtSimMs),
     playerCount: ctx.world.players.length,
     worldWidth: ctx.worldSize,
     worldHeight: ctx.worldSize,
   });
-  typo.spawnCooldownMs = cooldown | 0;
+  typo.spawnCooldownMs = int(cooldown);
 
   for (const call of spawns) {
     const heading =
@@ -144,10 +144,10 @@ export function typoMidStep(ctx: MidStepContext): void {
 
     const activeMask = ctx.world.creatures.entries.map((entry) => entry.active);
     typo.names.assignRandom(
-      creatureIdx | 0,
+      int(creatureIdx),
       ctx.world.state.rng,
       {
-        scoreXp: ctx.world.players.length > 0 ? ctx.world.players[0].experience | 0 : 0,
+        scoreXp: ctx.world.players.length > 0 ? int(ctx.world.players[0].experience) : 0,
         activeMask,
         dictionaryWords: typo.dictionaryWords.length > 0 ? typo.dictionaryWords : null,
         highscoreNames: typo.highscoreNames,

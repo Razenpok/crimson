@@ -453,10 +453,10 @@ export class GameOverUi {
 
     let scoreValue: string;
     if (modeId === GameMode.RUSH || modeId === GameMode.QUESTS) {
-      const seconds = Math.floor(record.survivalElapsedMs) * 0.001;
+      const seconds = int(record.survivalElapsedMs) * 0.001;
       scoreValue = `${seconds.toFixed(2)} secs`;
     } else {
-      scoreValue = `${Math.floor(record.scoreXp)}`;
+      scoreValue = `${int(record.scoreXp)}`;
     }
     const scoreValueW = textWidth(font, scoreValue);
     drawSmall(
@@ -477,10 +477,10 @@ export class GameOverUi {
     // Separator between columns
     const separatorX = cardOrigin.x + 80.0 * scale;
     wgl.drawRectangle(
-      Math.floor(separatorX),
-      Math.floor(cardOrigin.y),
+      int(separatorX),
+      int(cardOrigin.y),
       1,
-      Math.floor(48.0 * scale),
+      int(48.0 * scale),
       wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], labelColor[3]),
     );
 
@@ -488,7 +488,7 @@ export class GameOverUi {
     const col2Pos = cardOrigin.offset({ dx: 96.0 * scale });
     if (modeId === GameMode.QUESTS) {
       drawSmall(font, 'Experience', col2Pos, labelColor);
-      const xpValue = `${Math.floor(record.scoreXp)}`;
+      const xpValue = `${int(record.scoreXp)}`;
       const xpW = textWidth(font, xpValue);
       drawSmall(
         font, xpValue,
@@ -503,7 +503,7 @@ export class GameOverUi {
       const hoveringTime = timeRect.contains(mouse);
       this._hoverTime = Math.max(0.0, Math.min(1.0, this._hoverTime + (hoveringTime ? dtHover : -dtHover)));
 
-      const elapsedMs = Math.floor(record.survivalElapsedMs);
+      const elapsedMs = int(record.survivalElapsedMs);
       const clockTable = getTexture(resources, TextureId.UI_CLOCK_TABLE);
       const clockTableSrc = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
       const clockTablePos = col2Pos.add(new Vec2(8.0 * scale, 14.0 * scale));
@@ -552,13 +552,13 @@ export class GameOverUi {
       );
       drawSmall(font, weaponName, namePos, hintColor);
 
-      const fragsText = `Frags: ${Math.floor(record.creatureKillCount)}`;
+      const fragsText = `Frags: ${int(record.creatureKillCount)}`;
       const statsPos = rowPos.offset({ dx: 110.0 * scale });
       drawSmall(font, fragsText, statsPos.offset({ dy: 1.0 * scale }), labelColor);
 
-      const fired = Math.max(0, Math.floor(record.shotsFired));
-      const hit = Math.max(0, Math.floor(record.shotsHit));
-      const ratio = fired > 0 ? Math.floor((hit * 100) / fired) : 0;
+      const fired = Math.max(0, int(record.shotsFired));
+      const hit = Math.max(0, int(record.shotsHit));
+      const ratio = fired > 0 ? int((hit * 100) / fired) : 0;
       const hitText = `Hit %: ${ratio}%`;
       drawSmall(font, hitText, statsPos.offset({ dy: 15.0 * scale }), labelColor);
 
@@ -664,39 +664,39 @@ export class GameOverUi {
       const inputPos = formPos.offset({ dy: 40.0 * scale });
       // Input box outline
       wgl.drawRectangle(
-        Math.floor(inputPos.x),
-        Math.floor(inputPos.y),
-        Math.floor(INPUT_BOX_W * scale),
+        int(inputPos.x),
+        int(inputPos.y),
+        int(INPUT_BOX_W * scale),
         1,
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.floor(inputPos.x),
-        Math.floor(inputPos.y + INPUT_BOX_H * scale - 1),
-        Math.floor(INPUT_BOX_W * scale),
+        int(inputPos.x),
+        int(inputPos.y + INPUT_BOX_H * scale - 1),
+        int(INPUT_BOX_W * scale),
         1,
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.floor(inputPos.x),
-        Math.floor(inputPos.y),
+        int(inputPos.x),
+        int(inputPos.y),
         1,
-        Math.floor(INPUT_BOX_H * scale),
+        int(INPUT_BOX_H * scale),
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.floor(inputPos.x + INPUT_BOX_W * scale - 1),
-        Math.floor(inputPos.y),
+        int(inputPos.x + INPUT_BOX_W * scale - 1),
+        int(inputPos.y),
         1,
-        Math.floor(INPUT_BOX_H * scale),
+        int(INPUT_BOX_H * scale),
         wgl.makeColor(1, 1, 1, 1),
       );
       // Input box fill
       wgl.drawRectangle(
-        Math.floor(inputPos.x + 1.0 * scale),
-        Math.floor(inputPos.y + 1.0 * scale),
-        Math.floor((INPUT_BOX_W - 2.0) * scale),
-        Math.floor((INPUT_BOX_H - 2.0) * scale),
+        int(inputPos.x + 1.0 * scale),
+        int(inputPos.y + 1.0 * scale),
+        int((INPUT_BOX_W - 2.0) * scale),
+        int((INPUT_BOX_H - 2.0) * scale),
         wgl.makeColor(0, 0, 0, 1),
       );
       drawUiText(
@@ -712,10 +712,10 @@ export class GameOverUi {
       const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
       wgl.drawRectangle(
-        Math.floor(caretX),
-        Math.floor(inputPos.y + 2.0 * scale),
-        Math.floor(1.0 * scale),
-        Math.floor(14.0 * scale),
+        int(caretX),
+        int(inputPos.y + 2.0 * scale),
+        int(1.0 * scale),
+        int(14.0 * scale),
         wgl.makeColor(caretColor[0], caretColor[1], caretColor[2], caretColor[3]),
       );
 

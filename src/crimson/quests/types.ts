@@ -38,9 +38,9 @@ export interface QuestDefinition {
 }
 
 export function questDefinitionMajor(quest: QuestDefinition): number {
-  return quest.level.major;
+  return int(quest.level.major);
 }
 
 export function questDefinitionMinor(quest: QuestDefinition): number {
-  return quest.level.minor;
+  return int(quest.level.minor);
 }

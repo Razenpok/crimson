@@ -64,7 +64,7 @@ export class AudioRouter implements PresentationAudioSink {
     const weapon = WEAPON_BY_ID.get(player.weapon.weaponId);
     if (weapon === undefined) return;
 
-    if ((player.shotSeq | 0) > (prevShotSeq | 0)) {
+    if (int(player.shotSeq) > int(prevShotSeq)) {
       if (Number(player.fireBulletsTimer) > 0.0) {
         const fireBullets = WEAPON_BY_ID.get(WeaponId.FIRE_BULLETS);
         const plasmaMinigun = WEAPON_BY_ID.get(WeaponId.PLASMA_MINIGUN);
@@ -105,7 +105,7 @@ export class AudioRouter implements PresentationAudioSink {
         gameTuneStarted = true;
         continue;
       }
-      const typeId = hits[idx].typeId | 0;
+      const typeId = int(hits[idx].typeId);
       this.playSfx(this._hitSfxForType(typeId, beamTypes, rng));
     }
   }

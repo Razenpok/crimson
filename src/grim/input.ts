@@ -126,7 +126,7 @@ export class InputState {
   }
 
   static mousePosition(): [number, number] {
-    return [this._mouseX | 0, this._mouseY | 0];
+    return [int(this._mouseX), int(this._mouseY)];
   }
 
   static getCharPressed(): number {

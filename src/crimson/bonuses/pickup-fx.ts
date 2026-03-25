@@ -17,7 +17,7 @@ function _applyDefaultPickupBurst(state: GameplayState, pickup: BonusPickupEvent
     pos: pickup.pos,
     count: 12,
     rng: state.rng,
-    detailPreset: detailPreset | 0,
+    detailPreset: int(detailPreset),
     lifetime: 0.4,
     scaleStep: 0.1,
     color: new RGBA(0.4, 0.5, 1.0, 0.5),
@@ -40,10 +40,10 @@ const _BONUS_PICKUP_HOOKS: Map<BonusId, BonusPickupFxHook> = new Map([
 export function emitBonusPickupEffects(opts: { state: GameplayState; pickups: BonusPickupEvent[]; detailPreset: number }): void {
   // Emit deterministic pickup FX for the provided pickup list.
   for (const pickup of opts.pickups) {
-    _applyDefaultPickupBurst(opts.state, pickup, opts.detailPreset | 0);
+    _applyDefaultPickupBurst(opts.state, pickup, int(opts.detailPreset));
     const hook = _BONUS_PICKUP_HOOKS.get(pickup.bonusId);
     if (hook !== undefined) {
-      hook(opts.state, pickup, opts.detailPreset | 0);
+      hook(opts.state, pickup, int(opts.detailPreset));
     }
   }
 }

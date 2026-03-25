@@ -42,11 +42,11 @@ export function layoutQuestTitleOverlay(
     fontAdvance: number;
   },
 ): QuestTitleOverlayLayout {
-  const titleScale = questTitleBaseScale(Math.floor(opts.screenWidth));
+  const titleScale = questTitleBaseScale(int(opts.screenWidth));
   const numberSc = questNumberScale(titleScale);
   const titleWidth = opts.title.length * opts.fontAdvance * titleScale;
-  const centerX = (Math.floor(opts.screenWidth) >> 1);
-  const centerY = (Math.floor(opts.screenHeight) >> 1);
+  const centerX = (int(opts.screenWidth) >> 1);
+  const centerY = (int(opts.screenHeight) >> 1);
   const titlePos = new Vec2(centerX - titleWidth / 2.0, centerY - QUEST_TITLE_Y_OFFSET);
   const numberX =
     titlePos.x -

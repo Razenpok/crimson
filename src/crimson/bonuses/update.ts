@@ -49,7 +49,7 @@ export function bonusTelekineticUpdate(
     }
 
     const [idx, entry] = hovered;
-    player.bonusAimHoverIndex = idx | 0;
+    player.bonusAimHoverIndex = int(idx);
     player.bonusAimHoverTimerMs += dtMs;
 
     if (player.bonusAimHoverTimerMs <= BONUS_TELEKINETIC_PICKUP_MS) {
@@ -70,8 +70,8 @@ export function bonusTelekineticUpdate(
         origin: entry.pos,
         creatures,
         players,
-        amount: entry.amount | 0,
-        detailPreset: detailPreset | 0,
+        amount: int(entry.amount),
+        detailPreset: int(detailPreset),
         deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
         freezeCorpseIndices,
       },
@@ -79,9 +79,9 @@ export function bonusTelekineticUpdate(
     entry.picked = true;
     entry.timeLeft = BONUS_PICKUP_LINGER;
     pickups.push({
-      playerIndex: player.index | 0,
+      playerIndex: int(player.index),
       bonusId: entry.bonusId,
-      amount: entry.amount | 0,
+      amount: int(entry.amount),
       pos: entry.pos,
     });
 
@@ -110,7 +110,7 @@ export function bonusUpdate(
     dt,
     {
       creatures,
-      detailPreset: detailPreset | 0,
+      detailPreset: int(detailPreset),
       deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
       freezeCorpseIndices,
     },
@@ -123,7 +123,7 @@ export function bonusUpdate(
       state,
       players,
       creatures,
-      detailPreset: detailPreset | 0,
+      detailPreset: int(detailPreset),
       deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
       freezeCorpseIndices,
     },

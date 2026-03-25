@@ -16,8 +16,8 @@ export function drawSmallText(
   pos: Vec2,
   color: wgl.Color,
 ): void {
-  let xPos = Math.floor(pos.x);
-  let yPos = Math.floor(pos.y);
+  let xPos = int(pos.x);
+  let yPos = int(pos.y);
   const baseX = xPos;
   const lineHeight = font.cellSize;
   const origin = wgl.makeVector2(0, 0);

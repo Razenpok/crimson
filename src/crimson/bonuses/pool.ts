@@ -42,7 +42,7 @@ function bonusEntryIsEmpty(entry: BonusEntry): boolean {
 }
 
 function weaponIdFromNativeAmount(amount: number): WeaponId | null {
-  const weaponId = amount | 0;
+  const weaponId = int(amount);
   if (!WEAPON_BY_ID.has(weaponId as WeaponId)) return null;
   return weaponId as WeaponId;
 }
@@ -70,7 +70,7 @@ export class BonusPool {
   private _creatureDamageApplier: CreatureDamageApplier | null = null;
 
   constructor(size: number = BONUS_POOL_SIZE) {
-    this._entries = Array.from({ length: size | 0 }, () => new BonusEntry());
+    this._entries = Array.from({ length: int(size) }, () => new BonusEntry());
     this._sentinel = new BonusEntry();
   }
 
@@ -152,9 +152,9 @@ export class BonusPool {
     let amount = durationOverride;
     if (amount === -1) {
       const meta = BONUS_BY_ID.get(bonusId);
-      amount = meta !== undefined ? ((meta.nativeAmount ?? 0) | 0) : 0;
+      amount = meta !== undefined ? int(meta.nativeAmount ?? 0) : 0;
     }
-    entry.amount = amount | 0;
+    entry.amount = int(amount);
     return entry;
   }
 
@@ -194,12 +194,12 @@ export class BonusPool {
 
     const rng = opts.state.rng;
     if (entry.bonusId === BonusId.WEAPON) {
-      entry.amount = weaponPickRandomAvailable(opts.state, null) | 0;
+      entry.amount = int(weaponPickRandomAvailable(opts.state, null));
     } else if (entry.bonusId === BonusId.POINTS) {
       entry.amount = (rng.rand({ caller: RngCallerStatic.BONUS_SPAWN_AT_POS_POINTS_AMOUNT }) & 7) < 3 ? 1000 : 500;
     } else {
       const meta = BONUS_BY_ID.get(entry.bonusId);
-      entry.amount = meta !== undefined ? ((meta.nativeAmount ?? 0) | 0) : 0;
+      entry.amount = meta !== undefined ? int(meta.nativeAmount ?? 0) : 0;
     }
     return entry;
   }
@@ -227,10 +227,10 @@ export class BonusPool {
 
         entry.bonusId = BonusId.WEAPON;
         let weaponId = weaponPickRandomAvailable(state, null);
-        entry.amount = weaponId | 0;
+        entry.amount = int(weaponId);
         if (weaponId === WeaponId.PISTOL) {
           weaponId = weaponPickRandomAvailable(state, null);
-          entry.amount = weaponId | 0;
+          entry.amount = int(weaponId);
         }
 
         let matches = 0;
@@ -399,7 +399,7 @@ export class BonusPool {
               creatures,
               players,
               amount: entry.amount,
-              detailPreset: detailPreset | 0,
+              detailPreset: int(detailPreset),
               deferFreezeCorpseFx,
               freezeCorpseIndices,
             },
@@ -452,7 +452,7 @@ export function bonusLabelForEntry(entry: BonusEntry, opts: { preserveBugs?: boo
     return weaponDisplayName(weaponId, { preserveBugs });
   }
   if (bonusId === BonusId.POINTS) {
-    const points = entry.amount | 0;
+    const points = int(entry.amount);
     const pointsLabel = bonusDisplayName(BonusId.POINTS, { preserveBugs });
     return `${pointsLabel}: ${points}`;
   }

@@ -104,7 +104,7 @@ export class WorldRuntime {
     this.renderer.syncViewport({ worldSize, config: this.config, camera: this.camera });
     const ground = this.renderResources.ground;
     if (ground !== null) {
-      const side = Math.max(0, Math.floor(worldSize));
+      const side = Math.max(0, int(worldSize));
       ground.width = side;
       ground.height = side;
     }
@@ -117,9 +117,9 @@ export class WorldRuntime {
     this._syncWorldSizeOwnership();
     this.simWorld.demoModeActive = Boolean(this.demoModeActive);
     this.simWorld.hardcore = Boolean(this.hardcore);
-    this.simWorld.questFailRetryCount = this.questFailRetryCount | 0;
+    this.simWorld.questFailRetryCount = int(this.questFailRetryCount);
     this.simWorld.preserveBugs = Boolean(this.preserveBugs);
-    this.simWorld.reset({ seed: seed | 0, playerCount: playerCount | 0, spawnPos });
+    this.simWorld.reset({ seed: int(seed), playerCount: int(playerCount), spawnPos });
     this.renderResources.clearPendingTerrainFx();
     this.camera = new Vec2(-1.0, -1.0);
     this.renderer.syncViewport({ worldSize: this.worldSize, config: this.config, camera: this.camera });
@@ -195,7 +195,7 @@ export class WorldRuntime {
       bonusAnimPhase: this.simWorld.bonusAnimPhase,
       lanPlayerRingsEnabled: Boolean(this.lanPlayerRingsEnabled),
       lanLocalAimIndicatorsOnly: Boolean(this.lanLocalAimIndicatorsOnly),
-      lanLocalPlayerSlotIndex: this.lanLocalPlayerSlotIndex | 0,
+      lanLocalPlayerSlotIndex: int(this.lanLocalPlayerSlotIndex),
       rtxMode: this.rtxMode,
     });
   }

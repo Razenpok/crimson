@@ -79,7 +79,7 @@ export function tutorialBeforeStep(world: TutorialWorldState): void {
   if (hintRef === null || !(hintRef >= 0 && hintRef < world.creatures.entries.length)) {
     return;
   }
-  const entry = world.creatures.entries[hintRef | 0];
+  const entry = world.creatures.entries[int(hintRef)];
   tutorial.hintBonusAliveBeforeTick = entry.active && entry.hp > 0.0;
 }
 
@@ -117,7 +117,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
   const hintRef = tutorial.hintBonusCreatureRef;
   let hintAliveAfter = false;
   if (hintRef !== null && hintRef >= 0 && hintRef < ctx.world.creatures.entries.length) {
-    const entry = ctx.world.creatures.entries[hintRef | 0];
+    const entry = ctx.world.creatures.entries[int(hintRef)];
     hintAliveAfter = entry.active && entry.hp > 0.0;
   }
   const hintBonusDied = tutorial.hintBonusAliveBeforeTick && !hintAliveAfter;
@@ -130,7 +130,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
       anyFireActive: tutorial.fireActiveThisTick,
       creaturesNoneActive: !ctx.world.creatures.iterActive().length,
       bonusPoolEmpty: !state.bonusPool.iterActive().length,
-      perkPendingCount: state.perkSelection.pendingCount | 0,
+      perkPendingCount: int(state.perkSelection.pendingCount),
       hintBonusDied,
     },
   );
@@ -144,7 +144,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
   if (players.length > 0) {
     players[0].health = +actions.forcePlayerHealth;
     if (actions.forcePlayerExperience !== null) {
-      players[0].experience = actions.forcePlayerExperience | 0;
+      players[0].experience = int(actions.forcePlayerExperience);
       survivalCheckLevelUp(players[0], state.perkSelection);
     }
   }
@@ -157,7 +157,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
     const spawned = state.bonusPool.spawnAt({
       pos: call.pos,
       bonusId: call.bonusId,
-      durationOverride: call.amount | 0,
+      durationOverride: int(call.amount),
       state: state,
       worldWidth: +ctx.worldSize,
       worldHeight: +ctx.worldSize,
@@ -167,7 +167,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
         pos: spawned.pos,
         count: 12,
         rng: state.rng,
-        detailPreset: ctx.detailPreset | 0,
+        detailPreset: int(ctx.detailPreset),
       });
     }
   }
@@ -183,16 +183,16 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
     if (primary === null || actions.stage5BonusCarrierDrop === null) {
       continue;
     }
-    if ((call.templateId | 0) !== (SpawnId.ALIEN_CONST_WEAPON_BONUS_27 | 0)) {
+    if (int(call.templateId) !== int(SpawnId.ALIEN_CONST_WEAPON_BONUS_27)) {
       continue;
     }
     const [dropId, dropAmount] = actions.stage5BonusCarrierDrop;
-    updatedTutorial.hintBonusCreatureRef = primary | 0;
+    updatedTutorial.hintBonusCreatureRef = int(primary);
     if (primary >= 0 && primary < ctx.world.creatures.entries.length) {
-      const creature = ctx.world.creatures.entries[primary | 0];
+      const creature = ctx.world.creatures.entries[int(primary)];
       creature.flags |= CreatureFlags.BONUS_ON_DEATH;
       creature.bonusId = dropId;
-      creature.bonusDurationOverride = dropAmount | 0;
+      creature.bonusDurationOverride = int(dropAmount);
     }
   }
 

@@ -92,7 +92,7 @@ function setRowBindingCode(
   playerIndex: number,
   controls: CrimsonControlsConfig,
 ): void {
-  const code = value | 0;
+  const code = int(value);
   const pc = controls.players[playerIndex];
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
@@ -141,14 +141,14 @@ function defaultRowBindingCode(opts: { playerIndex: number; row: RebindRowSpec }
 // ---------------------------------------------------------------------------
 
 function controlsLeftPanelPosX(screenWidth: number): number {
-  if ((screenWidth | 0) <= 640) {
+  if (int(screenWidth) <= 640) {
     return CONTROLS_LEFT_PANEL_POS_X - 18.0;
   }
   return CONTROLS_LEFT_PANEL_POS_X;
 }
 
 function controlsRightPanelPosX(screenWidth: number): number {
-  const w = screenWidth | 0;
+  const w = int(screenWidth);
   let x = (w - 434) as number;
   if (w <= 640) {
     x += 80.0;
@@ -157,7 +157,7 @@ function controlsRightPanelPosX(screenWidth: number): number {
 }
 
 function controlsRightPanelPosY(screenWidth: number): number {
-  if ((screenWidth | 0) <= 640) {
+  if (int(screenWidth) <= 640) {
     return CONTROLS_RIGHT_PANEL_POS_Y - 14.0;
   }
   return CONTROLS_RIGHT_PANEL_POS_Y;
@@ -266,7 +266,7 @@ export class ControlsMenuView extends PanelMenuView {
 
   override open(): void {
     super.open();
-    this._configPlayer = Math.max(1, Math.min(4, this._configPlayer | 0));
+    this._configPlayer = Math.max(1, Math.min(4, int(this._configPlayer)));
     this._moveMethodOpen = false;
     this._aimMethodOpen = false;
     this._playerProfileOpen = false;
@@ -327,7 +327,7 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _currentPlayerIndex(): number {
-    return Math.max(0, Math.min(3, (this._configPlayer | 0) - 1));
+    return Math.max(0, Math.min(3, int(this._configPlayer) - 1));
   }
 
   private _rebindActive(): boolean {
@@ -342,7 +342,7 @@ export class ControlsMenuView extends PanelMenuView {
 
   private _startRebindCapture(row: RebindRowSpec, playerIndex: number): void {
     this._rebindRow = row;
-    this._rebindPlayerIndex = Math.max(0, Math.min(3, playerIndex | 0));
+    this._rebindPlayerIndex = Math.max(0, Math.min(3, int(playerIndex)));
     this._moveMethodOpen = false;
     this._aimMethodOpen = false;
     this._playerProfileOpen = false;
@@ -364,7 +364,7 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _setBindingCode(playerIndex: number, row: RebindRowSpec, code: number): void {
-    setRowBindingCode(row, code | 0, playerIndex, this.state.config.controls);
+    setRowBindingCode(row, int(code), playerIndex, this.state.config.controls);
   }
 
   // -----------------------------------------------------------------------
@@ -484,7 +484,7 @@ export class ControlsMenuView extends PanelMenuView {
     for (const [, sectionRows] of sections) {
       let rowY = y + 18.0 * panelScale;
       for (const row of sectionRows) {
-        const keyCode = this._bindingCode(playerIndex, row) | 0;
+        const keyCode = int(this._bindingCode(playerIndex, row));
         const valueText = inputCodeName(keyCode);
         const valuePos = new Vec2(rightTopLeft.x + 180.0 * panelScale, rowY);
         const valueW = Math.max(60.0 * panelScale, measureSmallTextWidth(font, valueText));
@@ -515,7 +515,7 @@ export class ControlsMenuView extends PanelMenuView {
 
     if (this._rebindActive()) {
       const activeRow = this._rebindRow!;
-      const activePlayer = this._rebindPlayerIndex! | 0;
+      const activePlayer = int(this._rebindPlayerIndex!);
 
       if (InputState.wasKeyPressed(KEY_ESCAPE) || InputState.wasMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
         this._clearRebindCapture();
@@ -540,7 +540,7 @@ export class ControlsMenuView extends PanelMenuView {
       }
 
       if (this._rebindSkipFrames > 0) {
-        this._rebindSkipFrames = Math.max(0, (this._rebindSkipFrames | 0) - 1);
+        this._rebindSkipFrames = Math.max(0, int(this._rebindSkipFrames) - 1);
         return true;
       }
 
@@ -554,7 +554,7 @@ export class ControlsMenuView extends PanelMenuView {
         0.5,          // axisThreshold
       );
       if (captured !== null) {
-        this._setBindingCode(activePlayer, activeRow, captured | 0);
+        this._setBindingCode(activePlayer, activeRow, int(captured));
         this._dirty = true;
         this._clearRebindCapture();
       }
@@ -721,7 +721,7 @@ export class ControlsMenuView extends PanelMenuView {
       );
       this._moveMethodOpen = newOpen;
       if (selected !== null) {
-        const selectedIdx = Math.max(0, Math.min(selected | 0, moveMethodIds.length - 1));
+        const selectedIdx = Math.max(0, Math.min(int(selected), moveMethodIds.length - 1));
         this._setPlayerMoveMode(playerIdx, moveMethodIds[selectedIdx]);
         this._dirty = true;
       }
@@ -734,7 +734,7 @@ export class ControlsMenuView extends PanelMenuView {
       );
       this._aimMethodOpen = newOpen;
       if (selected !== null) {
-        const selectedIdx = Math.max(0, Math.min(selected | 0, aimItemIds.length - 1));
+        const selectedIdx = Math.max(0, Math.min(int(selected), aimItemIds.length - 1));
         this._setPlayerAimScheme(playerIdx, aimItemIds[selectedIdx]);
         this._dirty = true;
       }
@@ -1023,25 +1023,25 @@ export class ControlsMenuView extends PanelMenuView {
 
     // Outer border (white)
     wgl.drawRectangle(
-      layout.pos.x | 0, layout.pos.y | 0,
-      layout.width | 0, widgetH | 0,
+      int(layout.pos.x), int(layout.pos.y),
+      int(layout.width), int(widgetH),
       wgl.makeColor(1, 1, 1, 1),
     );
     // Inner fill (black)
-    const innerW = Math.max(0, (layout.width | 0) - 2);
-    const innerH = Math.max(0, (widgetH | 0) - 2);
+    const innerW = Math.max(0, int(layout.width) - 2);
+    const innerH = Math.max(0, int(widgetH) - 2);
     wgl.drawRectangle(
-      (layout.pos.x | 0) + 1, (layout.pos.y | 0) + 1,
+      int(layout.pos.x) + 1, int(layout.pos.y) + 1,
       innerW, innerH,
       wgl.makeColor(0, 0, 0, 1),
     );
 
     if ((isOpen || hoveredHeader) && enabled) {
-      const lineH = Math.max(1, (1.0 * scale) | 0);
+      const lineH = Math.max(1, int(1.0 * scale));
       wgl.drawRectangle(
-        layout.pos.x | 0,
-        (layout.pos.y + 15.0 * scale) | 0,
-        layout.width | 0, lineH,
+        int(layout.pos.x),
+        int(layout.pos.y + 15.0 * scale),
+        int(layout.width), lineH,
         wgl.makeColor(1, 1, 1, 128 / 255),
       );
     }
@@ -1056,7 +1056,7 @@ export class ControlsMenuView extends PanelMenuView {
       ORIGIN, 0.0, WHITE,
     );
 
-    const idx = items.length > 0 ? Math.max(0, Math.min(items.length - 1, selectedIndex | 0)) : 0;
+    const idx = items.length > 0 ? Math.max(0, Math.min(items.length - 1, int(selectedIndex))) : 0;
     const headerAlpha = ((isOpen || hoveredHeader) && enabled) ? 242 / 255 : 191 / 255;
     if (items.length > 0) {
       drawSmallText(font, items[idx], layout.textPos, wgl.makeColor(1, 1, 1, headerAlpha));

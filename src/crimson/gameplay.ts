@@ -218,7 +218,7 @@ export function playerFrameDtAfterRoundtrip(opts: {
 // ---------------------------------------------------------------------------
 
 export function awardExperience(state: GameplayState, player: PlayerState, amount: number): number {
-  let xp = amount | 0;
+  let xp = int(amount);
   if (xp <= 0) return 0;
   if (state.bonuses.doubleExperience > 0.0) {
     xp *= 2;
@@ -231,11 +231,11 @@ function _awardExperienceOnceFromReward(player: PlayerState, rewardValue: number
   const rewardF32 = f32(rewardValue);
   if (rewardF32 <= 0.0) return 0;
 
-  const before = player.experience | 0;
+  const before = int(player.experience);
   const totalF32 = f32(f32(before) + rewardF32);
-  const after = Math.trunc(totalF32) | 0;
-  player.experience = after;
-  return (after - before) | 0;
+  const after = int(totalF32);
+  player.experience = int(after);
+  return int(after - before);
 }
 
 export function awardExperienceFromReward(
@@ -248,7 +248,7 @@ export function awardExperienceFromReward(
   if (state.bonuses.doubleExperience > 0.0) {
     gained += _awardExperienceOnceFromReward(player, rewardValue);
   }
-  return gained | 0;
+  return int(gained);
 }
 
 // ---------------------------------------------------------------------------
@@ -256,8 +256,8 @@ export function awardExperienceFromReward(
 // ---------------------------------------------------------------------------
 
 export function survivalLevelThreshold(level: number): number {
-  level = Math.max(1, level | 0);
-  return (1000.0 + Math.pow(level, 1.8) * 1000.0) | 0;
+  level = Math.max(1, int(level));
+  return int(1000.0 + Math.pow(level, 1.8) * 1000.0);
 }
 
 export function survivalCheckLevelUp(player: PlayerState, perkState: PerkSelectionState): number {
@@ -285,7 +285,7 @@ export function survivalProgressionUpdate(
 const _SURVIVAL_RECENT_DEATH_CENTROID_SCALE = 0.33333334;
 
 export function survivalRecordRecentDeath(state: GameplayState, opts: { pos: Vec2 }): void {
-  let recentCount = state.survivalRecentDeathCount | 0;
+  let recentCount = int(state.survivalRecentDeathCount);
   if (recentCount >= 6) return;
 
   if (recentCount < 3) {
@@ -293,7 +293,7 @@ export function survivalRecordRecentDeath(state: GameplayState, opts: { pos: Vec
   }
 
   recentCount += 1;
-  state.survivalRecentDeathCount = recentCount | 0;
+  state.survivalRecentDeathCount = int(recentCount);
   if (recentCount === 3) {
     state.survivalRewardFireSeen = false;
     state.survivalRewardHandoutEnabled = false;
@@ -311,7 +311,7 @@ export function survivalUpdateWeaponHandouts(
   if (
     !state.survivalRewardDamageSeen &&
     !state.survivalRewardFireSeen &&
-    (opts.survivalElapsedMs | 0) > 64000 &&
+    int(opts.survivalElapsedMs) > 64000 &&
     state.survivalRewardHandoutEnabled
   ) {
     if (player.weapon.weaponId === WeaponId.PISTOL) {
@@ -324,7 +324,7 @@ export function survivalUpdateWeaponHandouts(
   }
 
   if (
-    (state.survivalRecentDeathCount | 0) === 3 &&
+    int(state.survivalRecentDeathCount) === 3 &&
     !state.survivalRewardFireSeen
   ) {
     const pos0 = state.survivalRecentDeathPos[0];
@@ -392,7 +392,7 @@ function _playerApplyMoveWithSpawnAvoidance(
 
   if (spawnSlots && creatures) {
     for (const slot of spawnSlots) {
-      const ownerIndex = slot.ownerCreature | 0;
+      const ownerIndex = int(slot.ownerCreature);
       if (!(ownerIndex >= 0 && ownerIndex < creatures.length)) continue;
       const owner = creatures[ownerIndex];
       const ownerPos = owner.pos;
@@ -686,7 +686,7 @@ export function playerUpdate(
           angle: aimHeading,
           age: 0.0,
           rng: state.rng,
-          detailPreset: detailPreset | 0,
+          detailPreset: int(detailPreset),
           violenceDisabled: 0,
         });
       }
@@ -1000,7 +1000,7 @@ export function playerUpdate(
       const nextTimer = f32(player.weapon.reloadTimer - reloadScale * dt);
       player.weapon.reloadTimer = nextTimer;
       if (nextTimer <= half) {
-        const count = 7 + ((player.weapon.reloadTimerMax * 4.0) | 0);
+        const count = 7 + int(player.weapon.reloadTimerMax * 4.0);
         state.bonusSpawnGuard = true;
         spawnProjectileRing(
           state,
@@ -1067,7 +1067,7 @@ export function playerUpdate(
   const reloadKeyReleased =
     reloadActiveAny !== null ? !reloadActiveAny : !reloadKeyActive;
   if (hasAltWeaponPerk) {
-    let cooldownMs = state.playerAltWeaponSwapCooldownMs | 0;
+    let cooldownMs = int(state.playerAltWeaponSwapCooldownMs);
     const dtMs = dt > 0.0 ? ftolMsI32(dt) : 0;
     if (cooldownMs < 1) {
       cooldownMs = 0;
@@ -1086,7 +1086,7 @@ export function playerUpdate(
         state.playerAltWeaponSwapCooldownMs = 0;
       }
     } else {
-      state.playerAltWeaponSwapCooldownMs = Math.max(0, cooldownMs | 0);
+      state.playerAltWeaponSwapCooldownMs = Math.max(0, int(cooldownMs));
       if (reloadKeyReleased) {
         state.playerAltWeaponSwapCooldownMs = 0;
       }
@@ -1108,7 +1108,7 @@ export function playerUpdate(
     inputState,
     dt,
     state,
-    detailPreset: detailPreset | 0,
+    detailPreset: int(detailPreset),
     creatures,
     players,
     forcePreSwapFireGate,

@@ -122,13 +122,13 @@ export class TutorialMode extends BaseGameplayMode {
 
   protected _replayClaimedStatsComplete(): boolean {
     const tutorial = this.state.tutorial as TutorialState;
-    return tutorial != null && (tutorial.stageIndex | 0) >= 8;
+    return tutorial != null && int(tutorial.stageIndex) >= 8;
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
     const session = this._simSession;
     if (session === null) return 0;
-    return session.elapsedMs | 0;
+    return int(session.elapsedMs);
   }
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
@@ -154,14 +154,14 @@ export class TutorialMode extends BaseGameplayMode {
     this.state.perkSelection.choicesDirty = true;
 
     const status = this.state.status as GameStatus | null;
-    const questUnlockIndex = status !== null ? (status.questUnlockIndex | 0) : 0;
+    const questUnlockIndex = status !== null ? int(status.questUnlockIndex) : 0;
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
+      { unlockIndex: questUnlockIndex, width: int(this.worldSize), height: int(this.worldSize) },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
-    this.simWorld.state.rng.srand(this.state.rng.state | 0);
+    this.simWorld.state.rng.srand(int(this.state.rng.state));
 
     this.player.pos = new Vec2(this.worldSize * 0.5, this.worldSize * 0.5);
     weaponAssignPlayer(this.player, WeaponId.PISTOL, { state: this.state });
@@ -259,7 +259,7 @@ export class TutorialMode extends BaseGameplayMode {
   private _updatePromptButtons(dtMs: number, mouse: Vec2, click: boolean): void {
     const tutorial = this.state.tutorial as TutorialState;
     const overlay = this.state.tutorialOverlay as TutorialOverlayState | null;
-    const stage = tutorial != null ? (tutorial.stageIndex | 0) : 0;
+    const stage = tutorial != null ? int(tutorial.stageIndex) : 0;
     const promptAlpha = overlay != null ? overlay.promptAlpha : 0.0;
 
     if (stage === 8) {
@@ -352,7 +352,7 @@ export class TutorialMode extends BaseGameplayMode {
       this.state.perkSelection,
     );
     const tutorial = this.state.tutorial as TutorialState;
-    const stageIndex = tutorial != null ? (tutorial.stageIndex | 0) : 0;
+    const stageIndex = tutorial != null ? int(tutorial.stageIndex) : 0;
 
     if (stageIndex === 6 && perkPending && !this._perkMenu.active && !this._perkPickPending) {
       this._openPerkMenu();
@@ -434,7 +434,7 @@ export class TutorialMode extends BaseGameplayMode {
         players: this.simWorld.players,
         bonusHud: this.state.bonusHud,
         elapsedMs: this._simSession !== null ? this._sessionElapsedMs() : 0.0,
-        score: this.player.experience | 0,
+        score: int(this.player.experience),
         frameDtMs: this._lastDtMs,
       });
     }
@@ -474,7 +474,7 @@ export class TutorialMode extends BaseGameplayMode {
 
     const resources = this.renderResources.resources as RuntimeResources;
     const tutorial = this.state.tutorial as TutorialState;
-    const stage = tutorial != null ? (tutorial.stageIndex | 0) : 0;
+    const stage = tutorial != null ? int(tutorial.stageIndex) : 0;
 
     if (stage === 8) {
       const { rect } = tutorialPromptPanelRect(

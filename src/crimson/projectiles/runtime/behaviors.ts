@@ -218,7 +218,7 @@ export function preHitSplitter(ctx: ProjectileUpdateCtx, proj: Projectile, hitId
     pos: proj.pos,
     angle: proj.angle - 1.0471976,
     typeId: ProjectileTemplateId.SPLITTER_GUN,
-    owner: OwnerRef.fromCreature(hitIdx | 0),
+    owner: OwnerRef.fromCreature(int(hitIdx)),
     travelBudget: proj.travelBudget,
     hitsPlayers: splitHitsPlayers,
   });
@@ -226,7 +226,7 @@ export function preHitSplitter(ctx: ProjectileUpdateCtx, proj: Projectile, hitId
     pos: proj.pos,
     angle: proj.angle + 1.0471976,
     typeId: ProjectileTemplateId.SPLITTER_GUN,
-    owner: OwnerRef.fromCreature(hitIdx | 0),
+    owner: OwnerRef.fromCreature(int(hitIdx)),
     travelBudget: proj.travelBudget,
     hitsPlayers: splitHitsPlayers,
   });
@@ -246,13 +246,13 @@ export function postHitIonCommon(ctx: ProjectileUpdateCtx, hit: ProjectileHitInf
 export function postHitIonRifle(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo): void {
   const runtimeState = ctx.runtimeState;
   const creatures = ctx.creatures;
-  const hitCreature = hit.hitIdx | 0;
+  const hitCreature = int(hit.hitIdx);
   if (
     runtimeState !== null &&
     runtimeState.shockChainProjectileId === hit.projIndex &&
     0 <= hitCreature && hitCreature < creatures.length
   ) {
-    let linksLeft = runtimeState.shockChainLinksLeft | 0;
+    let linksLeft = int(runtimeState.shockChainLinksLeft);
     if (linksLeft > 0 && creatures.length > 0) {
       runtimeState.shockChainLinksLeft = linksLeft - 1;
 
@@ -309,7 +309,7 @@ export function postHitIonRifle(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo
 }
 
 export function postHitPlasmaCannon(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo): void {
-  const creature = ctx.creatures[hit.hitIdx | 0];
+  const creature = ctx.creatures[int(hit.hitIdx)];
   const size = creature.size;
   const ringRadius = size * 0.5 + 1.0;
 
@@ -356,13 +356,13 @@ export function postHitShrinkifier(ctx: ProjectileUpdateCtx, hit: ProjectileHitI
     ctx.detailPreset,
   );
 
-  const creature = ctx.creatures[hit.hitIdx | 0];
+  const creature = ctx.creatures[int(hit.hitIdx)];
   const newSize = creature.size * 0.65;
   creature.size = newSize;
   if (newSize < 16.0) {
     applyDamageToCreature(
       ctx.creatures,
-      hit.hitIdx | 0,
+      int(hit.hitIdx),
       creature.hp + 1.0,
       CREATURE_DAMAGE_TYPE_BULLET,
       new Vec2(),
@@ -374,11 +374,11 @@ export function postHitShrinkifier(ctx: ProjectileUpdateCtx, hit: ProjectileHitI
 }
 
 export function postHitPulseGun(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo): void {
-  const creature = ctx.creatures[hit.hitIdx | 0];
+  const creature = ctx.creatures[int(hit.hitIdx)];
   creature.pos = creature.pos.add(hit.move.mul(3.0));
 }
 
 export function postHitPlagueSpreader(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo): void {
-  const creature = ctx.creatures[hit.hitIdx | 0];
+  const creature = ctx.creatures[int(hit.hitIdx)];
   creature.plagueInfected = true;
 }

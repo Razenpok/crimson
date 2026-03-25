@@ -20,24 +20,24 @@ export function applyNuke(
   let bulletCount = rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_BULLET_COUNT }) & 3;
   bulletCount += 4;
   for (let i = 0; i < bulletCount; i++) {
-    const angle = ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_ANGLE }) | 0) % 628) * 0.01;
+    const angle = (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_ANGLE })) % 628) * 0.01;
     const projId = projectileSpawn(
       ctx.state,
       { players: ctx.players, pos: origin, angle, typeId: ProjectileTemplateId.PISTOL, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
     );
     if (projId !== -1) {
       const speedScale =
-        ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_SPEED_SCALE }) | 0) % 50) * 0.01 + 0.5;
+        (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_SPEED_SCALE })) % 50) * 0.01 + 0.5;
       ctx.state.projectiles.entries[projId].speedScale *= speedScale;
     }
   }
 
-  const gaussAngle1 = ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_1 }) | 0) % 628) * 0.01;
+  const gaussAngle1 = (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_1 })) % 628) * 0.01;
   projectileSpawn(
     ctx.state,
     { players: ctx.players, pos: origin, angle: gaussAngle1, typeId: ProjectileTemplateId.GAUSS_GUN, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
   );
-  const gaussAngle2 = ((rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_2 }) | 0) % 628) * 0.01;
+  const gaussAngle2 = (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_2 })) % 628) * 0.01;
   projectileSpawn(
     ctx.state,
     { players: ctx.players, pos: origin, angle: gaussAngle2, typeId: ProjectileTemplateId.GAUSS_GUN, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
@@ -47,7 +47,7 @@ export function applyNuke(
     pos: origin,
     scale: 1.0,
     rng: ctx.state.rng,
-    detailPreset: ctx.detailPreset | 0,
+    detailPreset: int(ctx.detailPreset),
   });
 
   const creatures = ctx.creatures;
@@ -69,7 +69,7 @@ export function applyNuke(
         const damage = (256.0 - dist) * 5.0;
         if (applyCreatureDamage !== null) {
           applyCreatureDamage(
-            idx | 0,
+            int(idx),
             damage,
             3,
             new Vec2(),

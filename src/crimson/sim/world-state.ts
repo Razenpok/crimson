@@ -148,7 +148,7 @@ export class WorldState {
       terrainHeight: Number(opts.worldSize),
       demoModeActive: opts.demoModeActive,
       hardcore: opts.hardcore,
-      questFailRetryCount: opts.questFailRetryCount | 0,
+      questFailRetryCount: int(opts.questFailRetryCount),
     };
     const state = buildGameplayState();
     state.demoModeActive = opts.demoModeActive;
@@ -196,7 +196,7 @@ export class WorldState {
     let inputs = opts.inputs;
 
     dt = Number(dt);
-    fxQueue.violenceDisabled = violenceDisabled | 0;
+    fxQueue.violenceDisabled = int(violenceDisabled);
     this.state.playerDeathHookSkipIndices.clear();
 
     // Apply world-dt perk steps (e.g. reflex-boost time scale)
@@ -235,7 +235,7 @@ export class WorldState {
     // --- Creature update ---
 
     const _applyProjectileDamageToPlayer = (playerIndex: number, damage: number): void => {
-      const idx = playerIndex | 0;
+      const idx = int(playerIndex);
       if (!(idx >= 0 && idx < this.players.length)) return;
       playerTakeProjectileDamage(this.state, this.players[idx], Number(damage));
     };
@@ -249,8 +249,8 @@ export class WorldState {
       worldHeight: Number(worldSize),
       fxQueue,
       fxQueueRotated,
-      detailPreset: detailPreset | 0,
-      violenceDisabled: violenceDisabled | 0,
+      detailPreset: int(detailPreset),
+      violenceDisabled: int(violenceDisabled),
     } });
 
     const deaths: CreatureDeath[] = [...creatureResult.deaths];
@@ -268,7 +268,7 @@ export class WorldState {
       impulse: Vec2,
       owner: OwnerRef,
     ): void => {
-      const idx = creatureIndex | 0;
+      const idx = int(creatureIndex);
       if (!(idx >= 0 && idx < creatureEntries.length)) return;
       const creature = creatureEntries[idx];
       if (!creature.active) return;
@@ -277,7 +277,7 @@ export class WorldState {
         creature,
         {
           damageAmount: Number(damage),
-          damageType: damageType | 0,
+          damageType: int(damageType),
           impulse,
           owner,
           dt: Number(dt),
@@ -285,12 +285,12 @@ export class WorldState {
           rng: this.state.rng,
           preserveBugs: Boolean(this.state.preserveBugs),
           effects: this.state.effects,
-          detailPreset: detailPreset | 0,
+          detailPreset: int(detailPreset),
           onLethal: (deathSfx: SfxId[]) => {
             this._recordCreatureDeath({
               creatureIndex: idx,
               dt: Number(dt),
-              detailPreset: detailPreset | 0,
+              detailPreset: int(detailPreset),
               worldSize: Number(worldSize),
               fxQueue,
               deaths,
@@ -307,7 +307,7 @@ export class WorldState {
     // --- Secondary detonation kill handler ---
 
     const _onSecondaryDetonationKill = (creatureIndex: number): void => {
-      const idx = creatureIndex | 0;
+      const idx = int(creatureIndex);
       if (!(idx >= 0 && idx < creatureEntries.length) || Number(creatureEntries[idx].hp) > 0.0) {
         return;
       }
@@ -316,7 +316,7 @@ export class WorldState {
       this._recordCreatureDeath({
         creatureIndex: idx,
         dt: Number(dt),
-        detailPreset: detailPreset | 0,
+        detailPreset: int(detailPreset),
         worldSize: Number(worldSize),
         fxQueue,
         deaths,
@@ -329,8 +329,8 @@ export class WorldState {
     const _onProjectileHitPre = (hit: ProjectileHit): ProjectileDecalPostCtx => {
       return this._prepareProjectileHitPresentation(hit, {
         fxQueue,
-        detailPreset: detailPreset | 0,
-        violenceDisabled: violenceDisabled | 0,
+        detailPreset: int(detailPreset),
+        violenceDisabled: int(violenceDisabled),
       });
     };
 
@@ -369,7 +369,7 @@ export class WorldState {
         runtimeState: this.state,
         players: this.players,
         applyPlayerDamage: _applyProjectileDamageToPlayer,
-        detailPreset: detailPreset | 0,
+        detailPreset: int(detailPreset),
         onHit: _onProjectileHitPre,
         onHitPost: _onProjectileHitPost,
       },
@@ -382,7 +382,7 @@ export class WorldState {
       creatures: creatureEntries,
       runtimeState: this.state,
       fxQueue,
-      detailPreset: detailPreset | 0,
+      detailPreset: int(detailPreset),
       onDetonationKill: _onSecondaryDetonationKill,
     });
 
@@ -392,7 +392,7 @@ export class WorldState {
       prevHealth,
       dt: Number(dt),
       worldSize: Number(worldSize),
-      detailPreset: detailPreset | 0,
+      detailPreset: int(detailPreset),
       fxQueue,
       deaths,
     });
@@ -400,7 +400,7 @@ export class WorldState {
     // --- Particle kill handler (no corpse) ---
 
     const _killCreatureNoCorpse = (creatureIndex: number, owner: OwnerRef): void => {
-      const idx = creatureIndex | 0;
+      const idx = int(creatureIndex);
       if (!(idx >= 0 && idx < creatureEntries.length)) return;
       const creature = creatureEntries[idx];
       if (!creature.active) return;
@@ -409,7 +409,7 @@ export class WorldState {
       this._recordCreatureDeath({
         creatureIndex: idx,
         dt: Number(dt),
-        detailPreset: detailPreset | 0,
+        detailPreset: int(detailPreset),
         worldSize: Number(worldSize),
         fxQueue,
         deaths,
@@ -444,7 +444,7 @@ export class WorldState {
       const inputState = idx < normalizedInputs.length ? normalizedInputs[idx] : new PlayerInput();
 
       playerUpdate(player, inputState, playerDt, this.state, {
-        detailPreset: detailPreset | 0,
+        detailPreset: int(detailPreset),
         worldSize: Number(worldSize),
         players: this.players,
         creatures: creatureEntries,
@@ -454,7 +454,7 @@ export class WorldState {
             player: deadPlayer,
             dt: Number(playerDt),
             worldSize: Number(worldSize),
-            detailPreset: detailPreset | 0,
+            detailPreset: int(detailPreset),
             fxQueue,
             deaths,
           });
@@ -516,14 +516,14 @@ export class WorldState {
       {
         creatures: creatureEntries,
         updateHud: true,
-        detailPreset: detailPreset | 0,
+        detailPreset: int(detailPreset),
         deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
         freezeCorpseIndices: freezeCorpseIndicesAtTickStart,
       },
     );
 
     if (pickups.length > 0) {
-      emitBonusPickupEffects({ state: this.state, pickups, detailPreset: detailPreset | 0 });
+      emitBonusPickupEffects({ state: this.state, pickups, detailPreset: int(detailPreset) });
     }
 
     survivalEnforceRewardWeaponGuard(this.state, this.players);
@@ -619,7 +619,7 @@ export class WorldState {
         player: opts.player,
         dt: Number(opts.dt),
         worldSize: Number(opts.worldSize),
-        detailPreset: opts.detailPreset | 0,
+        detailPreset: int(opts.detailPreset),
         fxQueue: opts.fxQueue,
         deaths: opts.deaths,
       });
@@ -644,7 +644,7 @@ export class WorldState {
       if (Number(opts.prevHealth[idx]) < 0.0) continue;
       if (Number(player.health) >= 0.0) continue;
 
-      const playerIdx = player.index | 0;
+      const playerIdx = int(player.index);
       if (this.state.playerDeathHookSkipIndices.has(playerIdx)) {
         this.state.playerDeathHookSkipIndices.delete(playerIdx);
         continue;
@@ -654,7 +654,7 @@ export class WorldState {
         player,
         dt: Number(opts.dt),
         worldSize: Number(opts.worldSize),
-        detailPreset: opts.detailPreset | 0,
+        detailPreset: int(opts.detailPreset),
         fxQueue: opts.fxQueue,
         deaths: opts.deaths,
       });
@@ -676,12 +676,12 @@ export class WorldState {
     keepCorpse?: boolean;
     deathSfx?: SfxId[];
   }): void {
-    const death = this.creatures.handleDeath(opts.creatureIndex | 0, {
+    const death = this.creatures.handleDeath(int(opts.creatureIndex), {
       state: this.state,
       players: this.players,
       rng: this.state.rng,
       dt: Number(opts.dt),
-      detailPreset: opts.detailPreset | 0,
+      detailPreset: int(opts.detailPreset),
       worldWidth: Number(opts.worldSize),
       worldHeight: Number(opts.worldSize),
       fxQueue: opts.fxQueue,
@@ -711,8 +711,8 @@ export class WorldState {
       fxQueue: opts.fxQueue,
       hit,
       rng: this.state.rng,
-      detailPreset: opts.detailPreset | 0,
-      violenceDisabled: opts.violenceDisabled | 0,
+      detailPreset: int(opts.detailPreset),
+      violenceDisabled: int(opts.violenceDisabled),
     });
   }
 

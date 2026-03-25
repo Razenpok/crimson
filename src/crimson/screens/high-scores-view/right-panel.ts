@@ -120,21 +120,21 @@ function drawDropdown(
   );
 
   const widgetH = isOpen ? fullH : headerH;
-  wgl.drawRectangle(Math.floor(widgetPos.x), Math.floor(widgetPos.y), Math.floor(widgetW), Math.floor(widgetH), wgl.makeColor(1, 1, 1, 1));
+  wgl.drawRectangle(int(widgetPos.x), int(widgetPos.y), int(widgetW), int(widgetH), wgl.makeColor(1, 1, 1, 1));
   wgl.drawRectangle(
-    Math.floor(widgetPos.x) + 1,
-    Math.floor(widgetPos.y) + 1,
-    Math.max(0, Math.floor(widgetW) - 2),
-    Math.max(0, Math.floor(widgetH) - 2),
+    int(widgetPos.x) + 1,
+    int(widgetPos.y) + 1,
+    Math.max(0, int(widgetW) - 2),
+    Math.max(0, int(widgetH) - 2),
     wgl.makeColor(0, 0, 0, 1),
   );
 
   if ((isOpen || hoveredHeader) && enabled) {
-    const lineH = Math.max(1, Math.floor(1.0 * scale));
+    const lineH = Math.max(1, int(1.0 * scale));
     wgl.drawRectangle(
-      Math.floor(widgetPos.x),
-      Math.floor(widgetPos.y + 15.0 * scale),
-      Math.floor(widgetW),
+      int(widgetPos.x),
+      int(widgetPos.y + 15.0 * scale),
+      int(widgetW),
       lineH,
       wgl.makeColor(1, 1, 1, 0.5),
     );
@@ -156,7 +156,7 @@ function drawDropdown(
 
   if (itemCount <= 0) return;
 
-  selectedIndex = Math.max(0, Math.min(itemCount - 1, Math.floor(selectedIndex)));
+  selectedIndex = Math.max(0, Math.min(itemCount - 1, int(selectedIndex)));
   const headerAlpha = ((isOpen || hoveredHeader) && enabled) ? 242 / 255 : 191 / 255;
   drawSmallText(font, items[selectedIndex], valuePos, wgl.makeColor(1, 1, 1, headerAlpha));
 
@@ -242,14 +242,14 @@ function drawRightPanelQuestOptions(
   const showScoresItems = ['Best of all time', 'Best of month', 'Best of week', 'Best of day'];
   const playerItems = ['1 player', '2 players', '3 players', '4 players'];
   const modeItems: [string, number][] = [['Quests', 3], ['Rush', 2], ['Survival', 1]];
-  if ((view.questUnlockIndex | 0) >= 0x28) {
+  if (int(view.questUnlockIndex) >= 0x28) {
     modeItems.push(["Typ'o'Shooter", 4]);
   }
   const names = savedScoreNames(view);
 
   const playerCount = Math.max(1, Math.min(4, view.state.config.gameplay.playerCount));
   const playerSelected = playerCount - 1;
-  const showScoresSelected = Math.max(0, Math.min(showScoresItems.length - 1, Math.floor(view.state.config.profile.scoreDateMode)));
+  const showScoresSelected = Math.max(0, Math.min(showScoresItems.length - 1, int(view.state.config.profile.scoreDateMode)));
   const modeId = view.state.config.gameplay.mode;
   let modeSelected = 0;
   for (let idx = 0; idx < modeItems.length; idx++) {
@@ -258,7 +258,7 @@ function drawRightPanelQuestOptions(
       break;
     }
   }
-  const nameSelected = Math.max(0, Math.min(names.length - 1, Math.floor(view.state.config.profile.selectedSavedNameSlot)));
+  const nameSelected = Math.max(0, Math.min(names.length - 1, int(view.state.config.profile.selectedSavedNameSlot)));
 
   type DropdownSpec = [boolean, Vec2, number, string[], number, Vec2, Vec2, boolean];
   const dropdowns: DropdownSpec[] = [
@@ -355,7 +355,7 @@ function drawRightPanelLocalScore(
 
   if (view.records.length === 0) return;
 
-  let idx = highlightRank !== null ? Math.floor(highlightRank) : Math.floor(view.scrollIndex);
+  let idx = highlightRank !== null ? int(highlightRank) : int(view.scrollIndex);
   if (idx < 0) idx = 0;
   if (idx >= view.records.length) idx = view.records.length - 1;
   const entry = view.records[idx];
@@ -373,9 +373,9 @@ function drawRightPanelLocalScore(
 
   // Separator line
   wgl.drawRectangle(
-    Math.floor(cardTopLeft.x + 78.0 * scale),
-    Math.floor(cardTopLeft.y + 57.0 * scale),
-    Math.floor(39.0 * scale),
+    int(cardTopLeft.x + 78.0 * scale),
+    int(cardTopLeft.y + 57.0 * scale),
+    int(39.0 * scale),
     1,
     separatorColor,
   );
@@ -385,9 +385,9 @@ function drawRightPanelLocalScore(
     drawSmallText(font, dateText, cardTopLeft.add(new Vec2(HS_LOCAL_DATE_X * scale, HS_LOCAL_DATE_Y * scale)), textColor);
   }
   wgl.drawRectangle(
-    Math.floor(cardTopLeft.x + 74.0 * scale),
-    Math.floor(cardTopLeft.y + 72.0 * scale),
-    Math.floor(192.0 * scale),
+    int(cardTopLeft.x + 74.0 * scale),
+    int(cardTopLeft.y + 72.0 * scale),
+    int(192.0 * scale),
     1,
     separatorColor,
   );
@@ -395,14 +395,14 @@ function drawRightPanelLocalScore(
   drawSmallText(font, 'Score', cardTopLeft.add(new Vec2(HS_LOCAL_SCORE_LABEL_X * scale, HS_LOCAL_SCORE_LABEL_Y * scale)), textColor);
 
   let modeId: GameMode;
-  const modeRaw = Math.floor(entry.gameModeId);
+  const modeRaw = int(entry.gameModeId);
   try {
     modeId = modeRaw as GameMode;
   } catch {
     modeId = GameMode.DEMO;
   }
-  const elapsedMs = Math.floor(entry.survivalElapsedMs);
-  const scoreXp = Math.floor(entry.scoreXp);
+  const elapsedMs = int(entry.survivalElapsedMs);
+  const scoreXp = int(entry.scoreXp);
 
   let timeLabel: string;
   if (modeId === GameMode.QUESTS) {
@@ -414,10 +414,10 @@ function drawRightPanelLocalScore(
   drawSmallText(font, timeLabel, cardTopLeft.add(new Vec2(HS_LOCAL_TIME_LABEL_X * scale, HS_LOCAL_TIME_LABEL_Y * scale)), gameTimeColor);
   // Vertical separator
   wgl.drawRectangle(
-    Math.floor(cardTopLeft.x + 170.0 * scale),
-    Math.floor(cardTopLeft.y + 90.0 * scale),
+    int(cardTopLeft.x + 170.0 * scale),
+    int(cardTopLeft.y + 90.0 * scale),
     1,
-    Math.floor(48.0 * scale),
+    int(48.0 * scale),
     separatorColor,
   );
 
@@ -450,18 +450,18 @@ function drawRightPanelLocalScore(
 
   drawSmallText(font, `Rank: ${formatOrdinal(idx + 1)}`, cardTopLeft.add(new Vec2(HS_LOCAL_RANK_X * scale, HS_LOCAL_RANK_Y * scale)), textColor);
 
-  const frags = Math.floor(entry.creatureKillCount);
-  const shotsFired = Math.floor(entry.shotsFired);
-  const shotsHit = Math.floor(entry.shotsHit);
+  const frags = int(entry.creatureKillCount);
+  const shotsFired = int(entry.shotsFired);
+  const shotsHit = int(entry.shotsHit);
   let hitPct = 0;
   if (shotsFired > 0) {
     hitPct = Math.floor((shotsHit * 100) / shotsFired);
   }
 
   wgl.drawRectangle(
-    Math.floor(cardTopLeft.x + 74.0 * scale),
-    Math.floor(cardTopLeft.y + 142.0 * scale),
-    Math.floor(192.0 * scale),
+    int(cardTopLeft.x + 74.0 * scale),
+    int(cardTopLeft.y + 142.0 * scale),
+    int(192.0 * scale),
     1,
     separatorColor,
   );
@@ -485,9 +485,9 @@ function drawRightPanelLocalScore(
   drawSmallText(font, `Hit %: ${hitPct}%`, cardTopLeft.add(new Vec2(HS_LOCAL_HIT_X * scale, HS_LOCAL_HIT_Y * scale)), lowerSectionColor);
 
   wgl.drawRectangle(
-    Math.floor(cardTopLeft.x + 74.0 * scale),
-    Math.floor(cardTopLeft.y + 194.0 * scale),
-    Math.floor(192.0 * scale),
+    int(cardTopLeft.x + 74.0 * scale),
+    int(cardTopLeft.y + 194.0 * scale),
+    int(192.0 * scale),
     1,
     separatorColor,
   );
@@ -511,7 +511,7 @@ function drawClockGauge(
   const srcPointer = wgl.makeRectangle(0.0, 0.0, pointerTex.width, pointerTex.height);
   wgl.drawTexturePro(tableTex, srcTable, dst, ORIGIN, 0.0, WHITE);
 
-  const seconds = Math.max(0, Math.floor(elapsedMs) / 1000) | 0;
+  const seconds = Math.max(0, int(elapsedMs) / 1000) | 0;
   const rotationDeg = seconds * 6.0;
   const centerX = pos.x + drawW * 0.5;
   const centerY = pos.y + drawH * 0.5;
@@ -535,7 +535,7 @@ function drawWicon(
 ): void {
   const { resources, iconIndex, pos, scale } = opts;
   const tex = getTexture(resources, TextureId.UI_WICONS);
-  const idx = Math.floor(iconIndex);
+  const idx = int(iconIndex);
   if (idx < 0 || idx > 31) return;
   const grid = 8;
   const cellW = tex.width / grid;

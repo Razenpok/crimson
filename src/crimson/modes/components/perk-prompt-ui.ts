@@ -37,7 +37,7 @@ export class PerkPromptUi {
     if (!config.gameplay.showInfoTexts) {
       return '';
     }
-    const pending = Math.floor(opts.pendingCount);
+    const pending = int(opts.pendingCount);
     if (pending <= 0) {
       return '';
     }
@@ -48,7 +48,7 @@ export class PerkPromptUi {
   static hinge(opts: { screenW?: number } = {}): Vec2 {
     const screenW = opts.screenW ?? wgl.getScreenWidth();
     const hingeX = screenW + PERK_PROMPT_OUTSET_X;
-    const hingeY = Math.floor(screenW) === 640 ? 80.0 : 40.0;
+    const hingeY = int(screenW) === 640 ? 80.0 : 40.0;
     return new Vec2(hingeX, hingeY);
   }
 
@@ -116,7 +116,7 @@ export class PerkPromptUi {
     const luLocalY = PERK_PROMPT_LEVEL_UP_BASE_OFFSET_Y * PERK_PROMPT_LEVEL_UP_SCALE + PERK_PROMPT_LEVEL_UP_SHIFT_Y;
     const luW = PERK_PROMPT_LEVEL_UP_BASE_W * PERK_PROMPT_LEVEL_UP_SCALE;
     const luH = PERK_PROMPT_LEVEL_UP_BASE_H * PERK_PROMPT_LEVEL_UP_SCALE;
-    const pulseAlpha = Math.max(0.0, Math.min(1.0, (100.0 + Math.floor(pulse * 155.0 / 1000.0)) / 255.0));
+    const pulseAlpha = Math.max(0.0, Math.min(1.0, (100.0 + int(pulse * 155.0 / 1000.0)) / 255.0));
     const labelAlpha = Math.max(0.0, Math.min(1.0, alpha * pulseAlpha));
     const pulseTint = wgl.makeColor(1, 1, 1, labelAlpha);
     const luSrc = wgl.makeRectangle(0, 0, luTex.width, luTex.height);

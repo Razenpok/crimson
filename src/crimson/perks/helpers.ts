@@ -7,7 +7,7 @@ export function perkCountGet(player: PlayerState, perkId: PerkId): number {
   const idx = perkId as number;
   if (idx < 0) return 0;
   if (idx >= player.perkCounts.length) return 0;
-  return player.perkCounts[idx];
+  return int(player.perkCounts[idx]);
 }
 
 export function perkActive(player: PlayerState, perkId: PerkId): boolean {

@@ -90,7 +90,7 @@ registerQuest({
   let trigger = 1500;
   let wave = 0;
   while (trigger < 0x2B55C) {
-    const count = Math.floor(wave * 0.8 + 7);
+    const count = int(wave * 0.8 + 7);
     entries.push(spawnAt(edges.right, { heading: 0.0, spawnId: SpawnId.AI1_ALIEN_BLUE_TINT_1A, triggerMs: trigger, count }));
     entries.push(spawnAt(edges.bottom, { heading: 0.0, spawnId: SpawnId.AI1_SPIDER_SP1_BLUE_TINT_1B, triggerMs: trigger, count }));
     entries.push(spawnAt(edges.left, { heading: 0.0, spawnId: SpawnId.AI1_LIZARD_BLUE_TINT_1C, triggerMs: trigger, count }));

@@ -178,7 +178,7 @@ function damageLethalRangedShockBurst(
       color: new RGBA(0.8, 0.8, 0.3, 0.5),
       rotationStep: 0.0,
       scaleStep,
-      detailPreset: detailPreset | 0,
+      detailPreset: int(detailPreset),
     });
   }
 }
@@ -238,7 +238,7 @@ export function creatureApplyDamage(
   const ctx: CreatureDamageCtx = {
     creature,
     damage: damageAmount,
-    damageType: damageType | 0,
+    damageType: int(damageType),
     impulse,
     owner,
     dt,
@@ -285,7 +285,7 @@ export function creatureApplyDamage(
       creature,
       rng,
       effects,
-      detailPreset | 0,
+      int(detailPreset),
     );
     return true;
   }
@@ -311,7 +311,7 @@ export function creatureApplyDamageWithLethalFollowup(
   const deathStartNeeded = creature.hp > 0.0 && creature.lifecycleStage === CREATURE_LIFECYCLE_ALIVE;
   const killed = creatureApplyDamage(
     creature,
-    { damageAmount, damageType: damageType | 0, impulse, owner, dt, players, rng, effects, detailPreset: detailPreset | 0 },
+    { damageAmount, damageType: int(damageType), impulse, owner, dt, players, rng, effects, detailPreset: int(detailPreset) },
   );
   if (killed && deathStartNeeded) {
     onLethal(resolveNativeDeathSfx(creature, { rng, preserveBugs }));

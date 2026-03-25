@@ -62,12 +62,12 @@ export function drawMainPanel(
   drawSmallText(font, title, titleDrawPos, wgl.makeColor(1, 1, 1, 1));
 
   const ulW = measureSmallTextWidth(font, title);
-  const ulH = Math.max(1, Math.round(1.0 * scale));
+  const ulH = Math.max(1, int(Math.round(1.0 * scale)));
   const ulPos = leftPanelTopLeft.add(new Vec2(titleX * scale, HS_TITLE_UNDERLINE_Y * scale));
   wgl.drawRectangle(
-    Math.round(ulPos.x),
-    Math.round(ulPos.y),
-    Math.round(ulW),
+    int(Math.round(ulPos.x)),
+    int(Math.round(ulPos.y)),
+    int(Math.round(ulW)),
     ulH,
     wgl.makeColor(1, 1, 1, 0.7),
   );
@@ -80,7 +80,7 @@ export function drawMainPanel(
     } else {
       questColor = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 0.7);
     }
-    const questLevel: QuestLevel = { major: Math.floor(questMajor), minor: Math.floor(questMinor) };
+    const questLevel: QuestLevel = { major: int(questMajor), minor: int(questMinor) };
     const quest = questByLevel(questLevel);
     const questLabel = `${questLevelText(questLevel)}: ${quest !== null ? quest.title : '???'}`;
     drawSmallText(font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
@@ -88,8 +88,8 @@ export function drawMainPanel(
     const arrow = getTexture(resources, TextureId.UI_ARROW);
     const globalIndex = questLevelGlobalIndex(questLevel);
     const unlock = hardcore
-      ? (view.questUnlockIndexFull | 0)
-      : (view.questUnlockIndex | 0);
+      ? int(view.questUnlockIndexFull)
+      : int(view.questUnlockIndex);
     const maxIndex = Math.max(0, Math.min(49, unlock));
 
     const dstW = arrow.width * scale;
@@ -123,23 +123,23 @@ export function drawMainPanel(
   const frameY = leftPanelTopLeft.y + HS_SCORE_FRAME_Y * scale;
   const frameW = HS_SCORE_FRAME_W * scale;
   const frameH = HS_SCORE_FRAME_H * scale;
-  wgl.drawRectangle(Math.round(frameX), Math.round(frameY), Math.round(frameW), Math.round(frameH), wgl.makeColor(1, 1, 1, 1));
+  wgl.drawRectangle(int(Math.round(frameX)), int(Math.round(frameY)), int(Math.round(frameW)), int(Math.round(frameH)), wgl.makeColor(1, 1, 1, 1));
   wgl.drawRectangle(
-    Math.round(frameX + 1.0 * scale),
-    Math.round(frameY + 1.0 * scale),
-    Math.max(0, Math.round(frameW - 2.0 * scale)),
-    Math.max(0, Math.round(frameH - 2.0 * scale)),
+    int(Math.round(frameX + 1.0 * scale)),
+    int(Math.round(frameY + 1.0 * scale)),
+    Math.max(0, int(Math.round(frameW - 2.0 * scale))),
+    Math.max(0, int(Math.round(frameH - 2.0 * scale))),
     wgl.makeColor(0, 0, 0, 1),
   );
 
   const rowStep = 16.0 * scale;
   const rows = 10;
-  const start = Math.max(0, Math.floor(view.scrollIndex));
+  const start = Math.max(0, int(view.scrollIndex));
   const end = Math.min(view.records.length, start + rows);
   let y = leftPanelTopLeft.y + 103.0 * scale;
   let selectedRank: number | null =
     (request !== null && request.highlightRank !== null)
-      ? Math.floor(request.highlightRank)
+      ? int(request.highlightRank)
       : null;
 
   const [mx, my] = InputState.mousePosition();
@@ -167,14 +167,14 @@ export function drawMainPanel(
 
       let value: string;
       if (modeId === GameMode.RUSH || modeId === GameMode.QUESTS) {
-        const elapsedMs = Math.floor(entry.survivalElapsedMs);
+        const elapsedMs = int(entry.survivalElapsedMs);
         value = `${Math.floor(Math.max(0, elapsedMs) / 1000)}`;
       } else {
-        value = `${Math.floor(entry.scoreXp)}`;
+        value = `${int(entry.scoreXp)}`;
       }
 
       let color = wgl.makeColor(1, 1, 1, 0.7);
-      if (selectedRank !== null && Math.floor(selectedRank) === idx) {
+      if (selectedRank !== null && int(selectedRank) === idx) {
         color = wgl.makeColor(1, 1, 1, 1);
       }
 

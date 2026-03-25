@@ -22,7 +22,7 @@ type WeaponAssignClipModifier = (ctx: WeaponAssignCtx) => void;
 
 function weaponAssignClipAmmoManiac(ctx: WeaponAssignCtx): void {
   if (perkActive(ctx.player, PerkId.AMMO_MANIAC)) {
-    ctx.clipSize += Math.max(1, (ctx.clipSize * 0.25) | 0);
+    ctx.clipSize += Math.max(1, int(ctx.clipSize * 0.25));
   }
 }
 
@@ -53,7 +53,7 @@ const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
 const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = 52;
 
 function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  const id = weaponId | 0;
+  const id = int(weaponId);
   if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
     return id;
   }
@@ -81,12 +81,12 @@ export function weaponAssignPlayer(
   const weapon = weaponEntry(weaponId);
   player.weapon.weaponId = weaponId;
 
-  let clipSize = weapon.clipSize | 0;
+  let clipSize = int(weapon.clipSize);
   const clipCtx: WeaponAssignCtx = { player, clipSize: Math.max(0, clipSize) };
   for (const modifier of WEAPON_ASSIGN_CLIP_MODIFIERS) {
     modifier(clipCtx);
   }
-  player.weapon.clipSize = Math.max(0, clipCtx.clipSize | 0);
+  player.weapon.clipSize = Math.max(0, int(clipCtx.clipSize));
   player.weapon.ammo = player.weapon.clipSize;
   player.weaponResetLatch = 0;
   player.weapon.reloadActive = false;
@@ -102,7 +102,7 @@ export function mostUsedWeaponIdForPlayer(
   state: GameplayState,
   opts: { playerIndex: number; fallbackWeaponId: WeaponId },
 ): WeaponId {
-  const idx = opts.playerIndex | 0;
+  const idx = int(opts.playerIndex);
   const weaponShotsFired = state.weaponShotsFired;
   if (idx >= 0 && idx < weaponShotsFired.length) {
     const counts = weaponShotsFired[idx];
@@ -110,11 +110,11 @@ export function mostUsedWeaponIdForPlayer(
       const start = counts.length > 1 ? 1 : 0;
       let best = start;
       for (let i = start + 1; i < counts.length; i++) {
-        if ((counts[i] | 0) > (counts[best] | 0)) {
+        if (int(counts[i]) > int(counts[best])) {
           best = i;
         }
       }
-      if ((counts[best] | 0) > 0) {
+      if (int(counts[best]) > 0) {
         return best as WeaponId;
       }
     }

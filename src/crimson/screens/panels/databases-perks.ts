@@ -67,9 +67,9 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
       return;
     }
     const maxScroll = Math.max(0, this._perkIds.length - UnlockedPerksDatabaseView._VISIBLE_ROWS);
-    this._listScrollIndex = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
-    this._selectedRowIndex = Math.max(0, this._selectedRowIndex | 0);
-    this._navFocusIndex = Math.max(0, Math.min(1, this._navFocusIndex | 0));
+    this._listScrollIndex = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
+    this._selectedRowIndex = Math.max(0, int(this._selectedRowIndex));
+    this._navFocusIndex = Math.max(0, Math.min(1, int(this._navFocusIndex)));
   }
 
   protected override _backButtonPos(): Vec2 {
@@ -123,20 +123,20 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const frameW = LW * scale;
     const frameH = (VR * LRH + 4.0) * scale;
     wgl.drawRectangle(
-      Math.round(frameX), Math.round(frameY),
-      Math.round(frameW), Math.round(frameH),
+      int(Math.round(frameX)), int(Math.round(frameY)),
+      int(Math.round(frameW)), int(Math.round(frameH)),
       wgl.makeColor(1, 1, 1, 1),
     );
     wgl.drawRectangle(
-      Math.round(frameX + 1.0 * scale),
-      Math.round(frameY + 1.0 * scale),
-      Math.max(0, Math.round(frameW - 2.0 * scale)),
-      Math.max(0, Math.round(frameH - 2.0 * scale)),
+      int(Math.round(frameX + 1.0 * scale)),
+      int(Math.round(frameY + 1.0 * scale)),
+      Math.max(0, int(Math.round(frameW - 2.0 * scale))),
+      Math.max(0, int(Math.round(frameH - 2.0 * scale))),
       wgl.makeColor(0, 0, 0, 1),
     );
 
     const maxScroll = Math.max(0, perkIds.length - VR);
-    const start = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
+    const start = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
     const end = Math.min(perkIds.length, start + VR);
     const listTopLeft = left.add(new Vec2(LTX * scale, LTY * scale));
     const rowStep = LRH * scale;
@@ -166,24 +166,24 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         left, scale, count, start,
       );
       wgl.drawRectangle(
-        Math.round(trackX),
-        Math.round(trackY),
-        Math.max(1, Math.round(1.0 * scale)),
-        Math.round(trackH),
+        int(Math.round(trackX)),
+        int(Math.round(trackY)),
+        Math.max(1, int(Math.round(1.0 * scale))),
+        int(Math.round(trackH)),
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.round(trackX + 1.0 * scale),
-        Math.round(thumbTop),
-        Math.max(1, Math.round(8.0 * scale)),
-        Math.max(1, Math.round(thumbH + 1.0 * scale)),
+        int(Math.round(trackX + 1.0 * scale)),
+        int(Math.round(thumbTop)),
+        Math.max(1, int(Math.round(8.0 * scale))),
+        Math.max(1, int(Math.round(thumbH + 1.0 * scale))),
         wgl.makeColor(1, 1, 1, 0.8),
       );
       wgl.drawRectangle(
-        Math.round(trackX + 2.0 * scale),
-        Math.round(thumbTop + 1.0 * scale),
-        Math.max(1, Math.round(6.0 * scale)),
-        Math.max(1, Math.round(Math.max(1.0, thumbH - 1.0 * scale))),
+        int(Math.round(trackX + 2.0 * scale)),
+        int(Math.round(thumbTop + 1.0 * scale)),
+        Math.max(1, int(Math.round(6.0 * scale))),
+        Math.max(1, int(Math.round(Math.max(1.0, thumbH - 1.0 * scale)))),
         wgl.makeColor(51 / 255, 204 / 255, 1, 0.2),
       );
     }
@@ -243,14 +243,14 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const LTY = UnlockedPerksDatabaseView._LIST_TEXT_Y;
 
     const maxScroll = Math.max(0, count - VR);
-    this._listScrollIndex = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
-    this._selectedRowIndex = Math.max(0, this._selectedRowIndex | 0);
+    this._listScrollIndex = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
+    this._selectedRowIndex = Math.max(0, int(this._selectedRowIndex));
 
     if (InputState.wasKeyPressed(KEY_LEFT)) {
-      this._navFocusIndex = Math.max(0, (this._navFocusIndex | 0) - 1);
+      this._navFocusIndex = Math.max(0, int(this._navFocusIndex) - 1);
     }
     if (InputState.wasKeyPressed(KEY_RIGHT)) {
-      this._navFocusIndex = Math.min(1, (this._navFocusIndex | 0) + 1);
+      this._navFocusIndex = Math.min(1, int(this._navFocusIndex) + 1);
     }
 
     if (this._navFocusIndex === 1) {
@@ -279,13 +279,13 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
       this._navFocusIndex = 1;
     }
 
-    const wheel = InputState.mouseWheelDelta() | 0;
+    const wheel = int(InputState.mouseWheelDelta());
     if (wheel && (mouseInList || this._navFocusIndex === 1)) {
       this._listScrollIndex -= wheel;
     }
 
     if (count > VR) {
-      const start = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
+      const start = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
       const [trackX, trackY, trackH, thumbTop, thumbH, scrollSpan] = this._scrollbarGeometry(
         leftTopLeft, scale, count, start,
       );
@@ -309,7 +309,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
           const travel = Math.max(1.0, trackH - 3.0 * scale - thumbH);
           let target = mouse.y - trackY - 1.0 * scale - thumbH * 0.5;
           target = Math.max(0.0, Math.min(travel, target));
-          this._listScrollIndex = Math.round((target / travel) * scrollSpan);
+          this._listScrollIndex = int(Math.round((target / travel) * scrollSpan));
           this._scrollDragActive = true;
           this._scrollDragOffset = thumbH * 0.5;
         }
@@ -320,7 +320,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
           const travel = Math.max(1.0, trackH - 3.0 * scale - thumbH);
           let target = mouse.y - trackY - 1.0 * scale - this._scrollDragOffset;
           target = Math.max(0.0, Math.min(travel, target));
-          this._listScrollIndex = Math.round((target / travel) * scrollSpan);
+          this._listScrollIndex = int(Math.round((target / travel) * scrollSpan));
         } else {
           this._scrollDragActive = false;
         }
@@ -329,9 +329,9 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
       this._scrollDragActive = false;
     }
 
-    this._listScrollIndex = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
+    this._listScrollIndex = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
 
-    const startFinal = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
+    const startFinal = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
     const endFinal = Math.min(count, startFinal + VR);
     const rowCount = endFinal - startFinal;
     if (rowCount > 0 && mouseInList) {

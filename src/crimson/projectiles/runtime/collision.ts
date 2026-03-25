@@ -70,7 +70,7 @@ export function applyDamageToCreature(
   if (damage <= 0.0) {
     return;
   }
-  const idx = creatureIndex | 0;
+  const idx = int(creatureIndex);
   if (!(0 <= idx && idx < creatures.length)) {
     return;
   }

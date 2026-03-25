@@ -6,7 +6,7 @@ import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyGrimDeal(ctx: PerkApplyCtx): void {
   ctx.owner.health = -1.0;
-  ctx.owner.experience += (ctx.owner.experience * 0.18) | 0;
+  ctx.owner.experience += int(ctx.owner.experience * 0.18);
 }
 
 export const HOOKS: PerkHooks = {

@@ -15,11 +15,11 @@ function awardExperienceOnceFromReward(player: PlayerState, reward_value: number
     return 0;
   }
 
-  const before = player.experience | 0;
+  const before = int(player.experience);
   const totalF32 = f32(f32(before) + rewardF32);
-  const after = totalF32 | 0;
-  player.experience = after | 0;
-  return (after - before) | 0;
+  const after = int(totalF32);
+  player.experience = int(after);
+  return int(after - before);
 }
 
 function awardExperienceFromReward(ctx: PerksUpdateEffectsCtx, reward_value: number): number {
@@ -34,7 +34,7 @@ function awardExperienceFromReward(ctx: PerksUpdateEffectsCtx, reward_value: num
   if (ctx.state.bonuses.doubleExperience > 0.0) {
     gained += awardExperienceOnceFromReward(player, reward_value);
   }
-  return gained | 0;
+  return int(gained);
 }
 
 function selectJinxedAccidentTarget(ctx: PerksUpdateEffectsCtx): PlayerState {

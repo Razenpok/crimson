@@ -143,7 +143,7 @@ function uiElementAnim(
     return [0.0, 0.0];
   }
   const dirSign = directionFlag ? 1.0 : -1.0;
-  const t = view._timelineMs | 0;
+  const t = int(view._timelineMs);
   if (t < endMs) {
     const angle = 1.5707964;
     const offsetX = dirSign * Math.abs(width);
@@ -229,7 +229,7 @@ export class PanelMenuView {
 
   open(): void {
     const layoutW = this.state.config.display.width;
-    this._menuScreenWidth = layoutW | 0;
+    this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
     this._entry = new MenuEntry(0, MENU_LABEL_ROW_BACK, this._backPos.y);
     this._hovered = false;
@@ -261,7 +261,7 @@ export class PanelMenuView {
     }
 
     this._cursorPulseTime += Math.min(dt, 0.1) * 1.1;
-    const dtMs = (Math.min(dt, 0.1) * 1000.0) | 0;
+    const dtMs = int(Math.min(dt, 0.1) * 1000.0);
 
     if (this._closing) {
       if (dtMs > 0 && this._pendingAction === null) {
@@ -510,7 +510,7 @@ export class PanelMenuView {
 
   private _drawSign(resources: RuntimeResources): void {
     const screenW = this.state.config.display.width;
-    const [scale, shiftX] = signLayoutScale(screenW | 0);
+    const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
       screenW + MENU_SIGN_POS_X_PAD,
       screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL,

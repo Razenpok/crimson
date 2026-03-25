@@ -14,10 +14,10 @@ export interface TypoSpawnCall {
 export function tickTypoSpawns(
   opts: { elapsedMs: number; spawnCooldownMs: number; frameDtMs: number; playerCount: number; worldWidth: number; worldHeight: number },
 ): [number, TypoSpawnCall[]] {
-  let elapsedMs = opts.elapsedMs | 0;
-  let cooldown = opts.spawnCooldownMs | 0;
-  const dtMs = opts.frameDtMs | 0;
-  let playerCount = Math.max(1, opts.playerCount | 0);
+  let elapsedMs = int(opts.elapsedMs);
+  let cooldown = int(opts.spawnCooldownMs);
+  const dtMs = int(opts.frameDtMs);
+  let playerCount = Math.max(1, int(opts.playerCount));
 
   cooldown -= dtMs * playerCount;
 

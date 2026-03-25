@@ -232,9 +232,9 @@ export function drawMenuItem(
   const lineY = opts.pos.y + 13.0 * opts.scale;
   // draw_line as a 1px rectangle
   wgl.drawRectangle(
-    Math.floor(opts.pos.x),
-    Math.floor(lineY),
-    Math.floor(width),
+    int(opts.pos.x),
+    int(lineY),
+    int(width),
     1,
     wgl.makeColor(r / 255, g / 255, b / 255, alpha),
   );
@@ -312,9 +312,9 @@ export function buttonUpdate(
     state.hovered = buttonHitRect({ pos: opts.pos, width: opts.width }).contains(opts.mouse);
   }
   const delta = (state.enabled && state.hovered) ? 6 : -4;
-  state.hoverT = Math.floor(clamp(state.hoverT + Math.floor(opts.dtMs) * delta, 0.0, 1000.0));
+  state.hoverT = int(clamp(state.hoverT + int(opts.dtMs) * delta, 0.0, 1000.0));
   if (state.pressT > 0) {
-    state.pressT = Math.floor(clamp(state.pressT - Math.floor(opts.dtMs) * 6, 0.0, 1000.0));
+    state.pressT = int(clamp(state.pressT - int(opts.dtMs) * 6, 0.0, 1000.0));
   }
   state.activated = state.enabled && state.hovered && opts.click;
   if (state.activated) state.pressT = 1000;
@@ -345,10 +345,10 @@ export function buttonDraw(
     const hlB = b;
     const hlA = clamp(a, 0.0, 1.0);
     wgl.drawRectangle(
-      Math.floor(opts.pos.x + 12.0 * opts.scale),
-      Math.floor(opts.pos.y + 5.0 * opts.scale),
-      Math.floor(opts.width - 24.0 * opts.scale),
-      Math.floor(22.0 * opts.scale),
+      int(opts.pos.x + 12.0 * opts.scale),
+      int(opts.pos.y + 5.0 * opts.scale),
+      int(opts.width - 24.0 * opts.scale),
+      int(22.0 * opts.scale),
       wgl.makeColor(hlR, hlG, hlB, hlA),
     );
   }

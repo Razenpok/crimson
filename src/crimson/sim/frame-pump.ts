@@ -43,8 +43,8 @@ export function advanceTickRunnerFrame(opts: {
   isReplay: boolean;
   refundClock?: FixedStepClock | null;
 }): TickFrameAdvance {
-  const nextFrameIndex = Math.trunc(opts.frameIndex) + 1;
-  const ticksRequested = Math.max(0, Math.trunc(opts.ticksRequested));
+  const nextFrameIndex = int(opts.frameIndex) + 1;
+  const ticksRequested = Math.max(0, int(opts.ticksRequested));
 
   opts.runner.beginFrame(
     new FrameContext({
@@ -58,12 +58,12 @@ export function advanceTickRunnerFrame(opts: {
   );
 
   const batch = opts.runner.advanceTicks({
-    startTick: Math.trunc(opts.startTick),
+    startTick: int(opts.startTick),
     ticksRequested,
     tickDt: Number(opts.tickDtSeconds),
   });
 
-  const nextTickIndex = Math.trunc(batch.nextTickIndex);
+  const nextTickIndex = int(batch.nextTickIndex);
 
   const refundClock = opts.refundClock ?? null;
   if (
@@ -73,7 +73,7 @@ export function advanceTickRunnerFrame(opts: {
   ) {
     const unconsumedTicks = Math.max(
       0,
-      Math.trunc(ticksRequested) - Math.trunc(batch.ticksCompleted),
+      int(ticksRequested) - int(batch.ticksCompleted),
     );
     if (unconsumedTicks > 0) {
       refundClock.accum += unconsumedTicks * Number(opts.tickDtSeconds);

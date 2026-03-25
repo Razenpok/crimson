@@ -20,7 +20,7 @@ const LAN_PLAYER_RING_RGB: [number, number, number][] = [
 ];
 
 export function lanPlayerRingRgb(playerIndex: number): [number, number, number] {
-  const idx = Math.max(0, Math.min(LAN_PLAYER_RING_RGB.length - 1, playerIndex | 0));
+  const idx = Math.max(0, Math.min(LAN_PLAYER_RING_RGB.length - 1, int(playerIndex)));
   return LAN_PLAYER_RING_RGB[idx];
 }
 
@@ -155,7 +155,7 @@ export function drawPlayerTrooperSprite(
     renderCtx.drawAtlasSprite(
       texture,
       spriteGrid,
-      Math.max(0, Math.min(63, frameIdx | 0)),
+      Math.max(0, Math.min(63, int(frameIdx))),
       opts.pos,
       baseScale * opts.scaleMul,
       opts.rotation,
@@ -164,7 +164,7 @@ export function drawPlayerTrooperSprite(
   }
 
   if (player.health > 0.0) {
-    const legFrame = Math.max(0, Math.min(14, (player.movePhase + 0.5) | 0));
+    const legFrame = Math.max(0, Math.min(14, int(player.movePhase + 0.5)));
     const torsoFrame = legFrame + 16;
 
     const recoilDir = player.aimHeading + Math.PI / 2.0;
@@ -277,7 +277,7 @@ export function drawPlayerTrooperSprite(
   // Dead player
   let deadFrame: number;
   if (player.deathTimer >= 0.0) {
-    deadFrame = 32 + (((16.0 - player.deathTimer) * 1.25) | 0);
+    deadFrame = 32 + int((16.0 - player.deathTimer) * 1.25);
     if (deadFrame > 52) deadFrame = 52;
     if (deadFrame < 32) deadFrame = 32;
   } else {

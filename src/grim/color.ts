@@ -78,10 +78,10 @@ export class RGBA {
   toBytes(): [number, number, number, number] {
     const c = this.clamped();
     return [
-      (c.r * 255.0 + 0.5) | 0,
-      (c.g * 255.0 + 0.5) | 0,
-      (c.b * 255.0 + 0.5) | 0,
-      (c.a * 255.0 + 0.5) | 0,
+      int(c.r * 255.0 + 0.5),
+      int(c.g * 255.0 + 0.5),
+      int(c.b * 255.0 + 0.5),
+      int(c.a * 255.0 + 0.5),
     ];
   }
 }

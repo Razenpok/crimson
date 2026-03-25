@@ -176,7 +176,7 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     this._cursorPulseTime += Math.min(dt, 0.1) * 1.1;
-    const dtMs = (Math.min(dt, 0.1) * 1000.0) | 0;
+    const dtMs = int(Math.min(dt, 0.1) * 1000.0);
 
     // Close transition (matches PanelMenuView).
     if (this._closing) {
@@ -319,7 +319,7 @@ export class PlayGameMenuView extends PanelMenuView {
     // Our `quest_play_counts` array starts at blob+0xd8, so this is indices 11..50.
     let total = 0;
     for (let i = 11; i < 51 && i < counts.length; i++) {
-      total += counts[i] | 0;
+      total += int(counts[i]);
     }
     return total;
   }
@@ -341,12 +341,12 @@ export class PlayGameMenuView extends PanelMenuView {
     if (playerCount > PlayGameMenuView._PLAYER_COUNT_LABELS.length) {
       playerCount = PlayGameMenuView._PLAYER_COUNT_LABELS.length;
     }
-    const questUnlock = status.questUnlockIndex | 0;
+    const questUnlock = int(status.questUnlockIndex);
     const fullVersion = !this._pgState.demoEnabled;
 
     const questsTotal = this._questsTotalPlayed();
-    const rushTotal = status.modePlayCountForMode(GameMode.RUSH) | 0;
-    const survivalTotal = status.modePlayCountForMode(GameMode.SURVIVAL) | 0;
+    const rushTotal = int(status.modePlayCountForMode(GameMode.RUSH));
+    const survivalTotal = int(status.modePlayCountForMode(GameMode.SURVIVAL));
     // Matches the tutorial placement gating in `sub_44ed80` (excludes Typ-o).
     const mainTotal = questsTotal + rushTotal + survivalTotal;
 
@@ -597,14 +597,14 @@ export class PlayGameMenuView extends PanelMenuView {
     // `ui_list_widget_update` draws a single bordered black rect for the widget.
     const widgetH = this._playerListOpen ? layout.fullH : layout.headerH;
     wgl.drawRectangle(
-      layout.pos.x | 0, layout.pos.y | 0,
-      layout.width | 0, widgetH | 0,
+      int(layout.pos.x), int(layout.pos.y),
+      int(layout.width), int(widgetH),
       wgl.makeColor(1, 1, 1, 1),
     );
-    const innerW = Math.max(0, (layout.width | 0) - 2);
-    const innerH = Math.max(0, (widgetH | 0) - 2);
+    const innerW = Math.max(0, int(layout.width) - 2);
+    const innerH = Math.max(0, int(widgetH) - 2);
     wgl.drawRectangle(
-      (layout.pos.x | 0) + 1, (layout.pos.y | 0) + 1,
+      int(layout.pos.x) + 1, int(layout.pos.y) + 1,
       innerW, innerH,
       wgl.makeColor(0, 0, 0, 1),
     );
@@ -617,11 +617,11 @@ export class PlayGameMenuView extends PanelMenuView {
     );
     const arrowTex = (this._playerListOpen || hoveredHeader) ? dropOn : dropOff;
     if (this._playerListOpen || hoveredHeader) {
-      const lineH = Math.max(1, (1.0 * scale) | 0);
+      const lineH = Math.max(1, int(1.0 * scale));
       wgl.drawRectangle(
-        layout.pos.x | 0,
-        (layout.pos.y + 15.0 * scale) | 0,
-        layout.width | 0,
+        int(layout.pos.x),
+        int(layout.pos.y + 15.0 * scale),
+        int(layout.width),
         lineH,
         wgl.makeColor(1, 1, 1, 128 / 255),
       );
@@ -685,11 +685,11 @@ export class PlayGameMenuView extends PanelMenuView {
     if (key === 'quests') {
       count = this._questsTotalPlayed();
     } else if (key === 'rush') {
-      count = status.modePlayCountForMode(GameMode.RUSH) | 0;
+      count = int(status.modePlayCountForMode(GameMode.RUSH));
     } else if (key === 'survival') {
-      count = status.modePlayCountForMode(GameMode.SURVIVAL) | 0;
+      count = int(status.modePlayCountForMode(GameMode.SURVIVAL));
     } else if (key === 'typo') {
-      count = status.modePlayCountForMode(GameMode.TYPO) | 0;
+      count = int(status.modePlayCountForMode(GameMode.TYPO));
     } else {
       return;
     }
@@ -719,7 +719,7 @@ export class PlayGameMenuView extends PanelMenuView {
       const ms = this._tooltipMs.get(mode.key) ?? 0;
       if (ms <= 0) continue;
       const alphaF = Math.min(1.0, ms * 0.0009);
-      const alpha = (255 * alphaF) | 0;
+      const alpha = int(255 * alphaF);
       const [offX, offY] = offsets[mode.key] ?? [0.0, 0.0];
       const x = tooltipX + offX * scale;
       let y = tooltipY + offY * scale;

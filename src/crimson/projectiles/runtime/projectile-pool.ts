@@ -305,7 +305,7 @@ export class ProjectilePool {
         continue;
       }
 
-      let steps = proj.travelBudget | 0;
+      let steps = int(proj.travelBudget);
       if (barrelGreaserActive && proj.owner.isPlayer()) {
         steps *= 2;
       }

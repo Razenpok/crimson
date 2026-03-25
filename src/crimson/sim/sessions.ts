@@ -139,7 +139,7 @@ export function survivalMidStep(ctx: MidStepContext, spawn: SurvivalSpawnState):
   survivalUpdateWeaponHandouts(state, ctx.world.players, { survivalElapsedMs: ctx.elapsedBeforeMs });
 
   const playerLevel = ctx.world.players.length > 0 ? ctx.world.players[0].level : 1;
-  const [stage, milestoneCalls] = advanceSurvivalSpawnStage(spawn.stage, { playerLevel: playerLevel | 0 });
+  const [stage, milestoneCalls] = advanceSurvivalSpawnStage(spawn.stage, { playerLevel: int(playerLevel) });
   spawn.stage = stage;
 
   for (const call of milestoneCalls) {
@@ -154,9 +154,9 @@ export function survivalMidStep(ctx: MidStepContext, spawn: SurvivalSpawnState):
     {
       playerCount: ctx.world.players.length,
       survivalElapsedMs: ctx.elapsedBeforeMs,
-      playerExperience: playerXp | 0,
-      terrainWidth: ctx.worldSize | 0,
-      terrainHeight: ctx.worldSize | 0,
+      playerExperience: int(playerXp),
+      terrainWidth: int(ctx.worldSize),
+      terrainHeight: int(ctx.worldSize),
     },
   );
   spawn.spawnCooldownMs = cooldown;
@@ -171,7 +171,7 @@ export function rushMidStep(ctx: MidStepContext, spawn: RushSpawnState): void {
     state.rng,
     {
       playerCount: ctx.world.players.length,
-      survivalElapsedMs: ctx.elapsedBeforeMs | 0,
+      survivalElapsedMs: int(ctx.elapsedBeforeMs),
       terrainWidth: ctx.worldSize,
       terrainHeight: ctx.worldSize,
     },

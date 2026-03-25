@@ -5,7 +5,7 @@ export class FixedStepClock {
   accum: number;
 
   constructor(tickRate: number = 60, accum: number = 0.0) {
-    tickRate = Math.trunc(tickRate);
+    tickRate = int(tickRate);
     if (tickRate <= 0) {
       throw new Error(`tick_rate must be positive, got ${tickRate}`);
     }
@@ -28,7 +28,7 @@ export class FixedStepClock {
     this.accum += dt;
     const dtTick = this.dtTick;
     if (!(dtTick > 0.0)) return 0;
-    const ticks = Math.trunc((this.accum + 1e-9) / dtTick);
+    const ticks = int((this.accum + 1e-9) / dtTick);
     if (ticks <= 0) return 0;
     this.accum -= dtTick * ticks;
     if (this.accum < 0.0) this.accum = 0.0;

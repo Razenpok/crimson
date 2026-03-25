@@ -7,7 +7,7 @@ import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 
 export function ownerRefForPlayer(playerIndex: number): OwnerRef {
-  return OwnerRef.fromPlayer(playerIndex | 0);
+  return OwnerRef.fromPlayer(int(playerIndex));
 }
 
 export function ownerRefForPlayerProjectiles(state: GameplayState, playerIndex: number): OwnerRef {
@@ -22,15 +22,15 @@ export function travelBudgetForTypeId(typeId: ProjectileTemplateId): number {
 }
 
 function resolvePlayerSlot(players: readonly PlayerState[], playerIndex: number): number | null {
-  const targetIndex = playerIndex | 0;
+  const targetIndex = int(playerIndex);
   if (targetIndex >= 0 && targetIndex < players.length) {
     const direct = players[targetIndex];
-    if ((direct.index | 0) === targetIndex) {
+    if (int(direct.index) === targetIndex) {
       return targetIndex;
     }
   }
   for (let slot = 0; slot < players.length; slot++) {
-    if ((players[slot].index | 0) === targetIndex) {
+    if (int(players[slot].index) === targetIndex) {
       return slot;
     }
   }
@@ -45,21 +45,21 @@ function shotsFiredPlayerIndex(
 ): number | null {
   const shotsFired = state.shotsFired as number[];
   if (ownerPlayerIndex !== null) {
-    const playerIndex = ownerPlayerIndex | 0;
+    const playerIndex = int(ownerPlayerIndex);
     if (playerIndex >= 0 && playerIndex < shotsFired.length) {
       return playerIndex;
     }
   }
 
   if (owner.isPlayer() && !(owner.localHost && owner.index === 0)) {
-    const playerIndex = owner.index | 0;
+    const playerIndex = int(owner.index);
     if (playerIndex >= 0 && playerIndex < shotsFired.length) {
       return playerIndex;
     }
   }
 
   if (owner.localHost && owner.index === 0 && players && players.length === 1) {
-    const playerIndex = players[0].index | 0;
+    const playerIndex = int(players[0].index);
     if (playerIndex >= 0 && playerIndex < shotsFired.length) {
       return playerIndex;
     }
@@ -89,9 +89,9 @@ function fireBulletsActive(
 
   let resolvedOwnerSlot: number | null = null;
   if (ownerPlayerIndex !== null) {
-    resolvedOwnerSlot = resolvePlayerSlot(players, ownerPlayerIndex | 0);
+    resolvedOwnerSlot = resolvePlayerSlot(players, int(ownerPlayerIndex));
   } else if (owner.isPlayer() && !(owner.localHost && owner.index === 0)) {
-    resolvedOwnerSlot = resolvePlayerSlot(players, owner.index | 0);
+    resolvedOwnerSlot = resolvePlayerSlot(players, int(owner.index));
   } else if (owner.localHost && owner.index === 0 && players.length === 1) {
     // Callers that only pass one player are explicitly indicating the owner
     // context (for example OwnerRef.from_local_player(0) with friendly fire disabled).

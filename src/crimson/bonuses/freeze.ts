@@ -41,11 +41,11 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
         creature.active = false;
         continue;
       }
-      const allowShatterFx = allowedIndices === null || allowedIndices.has(idx | 0);
+      const allowShatterFx = allowedIndices === null || allowedIndices.has(int(idx));
       const pos = creature.pos;
       if (allowShatterFx && deferCorpseFx) {
         ctx.state.deferredFreezeCorpseFx.push(
-          makeDeferredFreezeCorpseFx(pos, ctx.detailPreset | 0),
+          makeDeferredFreezeCorpseFx(pos, int(ctx.detailPreset)),
         );
       } else if (allowShatterFx) {
         for (let j = 0; j < 8; j++) {
@@ -54,7 +54,7 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
             pos,
             angle,
             rng: ctx.state.rng,
-            detailPreset: ctx.detailPreset | 0,
+            detailPreset: int(ctx.detailPreset),
           });
         }
         const angle = (ctx.state.rng.rand({ caller: RngCallerStatic.BONUS_APPLY_FREEZE_SHATTER_ANGLE }) % 612) * 0.01;
@@ -62,7 +62,7 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
           pos,
           angle,
           rng: ctx.state.rng,
-          detailPreset: ctx.detailPreset | 0,
+          detailPreset: int(ctx.detailPreset),
         });
       }
       creature.active = false;
@@ -81,7 +81,7 @@ export function flushDeferredFreezeCorpseFx(state: GameplayState): void {
   for (let i = 0; i < pending.length; i++) {
     const queued = pending[i];
     const pos = queued.pos;
-    const detail = queued.detailPreset | 0;
+    const detail = int(queued.detailPreset);
     for (let j = 0; j < 8; j++) {
       const angle = (state.rng.rand({ caller: RngCallerStatic.BONUS_APPLY_FREEZE_SHARD_ANGLE }) % 612) * 0.01;
       state.effects.spawnFreezeShard({
@@ -109,7 +109,7 @@ export function freezeBonusActive(opts: { state: GameplayState }): boolean {
 export function applyFreezePickupFx(opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number }): void {
   opts.state.effects.spawnRing({
     pos: opts.pickup.pos,
-    detailPreset: opts.detailPreset | 0,
+    detailPreset: int(opts.detailPreset),
     color: new RGBA(0.3, 0.5, 0.8, 1.0),
   });
 }

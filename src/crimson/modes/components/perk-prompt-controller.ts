@@ -26,7 +26,7 @@ export class PerkPromptState {
   }
 
   resetIfPending(opts: { pendingCount: number }): void {
-    if (Math.floor(opts.pendingCount) > 0) {
+    if (int(opts.pendingCount) > 0) {
       this.reset();
     }
   }
@@ -56,17 +56,17 @@ export class PerkPromptState {
       promptScale = 1.0,
     } = opts;
 
-    if (Math.floor(pendingCount) <= 0 || !anyAlive || paused || menuActive) {
+    if (int(pendingCount) <= 0 || !anyAlive || paused || menuActive) {
       return false;
     }
 
-    const label = PerkPromptUi.label(config, { pendingCount: Math.floor(pendingCount) });
+    const label = PerkPromptUi.label(config, { pendingCount: int(pendingCount) });
     if (label) {
       const rect = PerkPromptUi.rect({ resources: ctx.resources, scale: promptScale });
       this.hover = rect.contains(ctx.mouse);
     }
 
-    if (this._promptOpenRequested(config, Math.floor(playerCount))) {
+    if (this._promptOpenRequested(config, int(playerCount))) {
       this.pulse = 1000.0;
       return true;
     }
@@ -81,7 +81,7 @@ export class PerkPromptState {
     dtUiMs: number;
   }): void {
     const { pendingCount, anyAlive, paused, menuActive, dtUiMs } = opts;
-    const promptVisible = Math.floor(pendingCount) > 0 && anyAlive && !paused && !menuActive;
+    const promptVisible = int(pendingCount) > 0 && anyAlive && !paused && !menuActive;
     const timerDelta = promptVisible ? dtUiMs : -dtUiMs;
     this.timerMs = clamp(this.timerMs + timerDelta, 0.0, PERK_PROMPT_MAX_TIMER_MS);
   }
@@ -117,10 +117,10 @@ export class PerkPromptState {
     if (menuActive || !anyAlive) {
       return;
     }
-    if (Math.floor(pendingCount) <= 0) {
+    if (int(pendingCount) <= 0) {
       return;
     }
-    const label = PerkPromptUi.label(config, { pendingCount: Math.floor(pendingCount) });
+    const label = PerkPromptUi.label(config, { pendingCount: int(pendingCount) });
     if (!label) {
       return;
     }

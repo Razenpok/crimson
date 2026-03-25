@@ -314,7 +314,7 @@ export class DemoView {
   private _applyTerrainSetup(terrainSlots: TerrainSlotTriplet): void {
     const terrain = advanceExplicitTerrain(
       this._runtime.simWorld.state.rng,
-      { terrainSlots, width: WORLD_SIZE | 0, height: WORLD_SIZE | 0 },
+      { terrainSlots, width: int(WORLD_SIZE), height: int(WORLD_SIZE) },
     );
     this._runtime.terrainRuntime.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
     this._syncAudioRngFromRuntime();
@@ -331,15 +331,15 @@ export class DemoView {
   }
 
   private _commitLiveRngStateToApp(): void {
-    this.state.rng.srand(this._runtime.simWorld.state.rng.state | 0);
+    this.state.rng.srand(int(this._runtime.simWorld.state.rng.state));
   }
 
   private _nextDemoResetSeed(): number {
     if (this._seedFromAppState) {
       this._seedFromAppState = false;
-      return this.state.rng.state | 0;
+      return int(this.state.rng.state);
     }
-    return this._runtime.simWorld.state.rng.state | 0;
+    return int(this._runtime.simWorld.state.rng.state);
   }
 
   // -----------------------------------------------------------------------
@@ -389,7 +389,7 @@ export class DemoView {
     if (this._finished) return;
 
     const frameDt = Math.min(dt, 0.1);
-    const frameDtMs = (frameDt * 1000.0) | 0;
+    const frameDtMs = int(frameDt * 1000.0);
     if (frameDtMs <= 0) return;
 
     if (
@@ -463,7 +463,7 @@ export class DemoView {
     if (resetTimeline) {
       this._questSpawnTimelineMs = 0;
     }
-    this._demoTimeLimitMs = Math.max(0, limitMs | 0);
+    this._demoTimeLimitMs = Math.max(0, int(limitMs));
   }
 
   get purchaseLayoutWideShift(): number {
@@ -590,15 +590,15 @@ export class DemoView {
     this._runtime.simWorld.state.bonuses.weaponPowerUp = 15.0;
     for (let idx = 0; idx < 20; idx++) {
       const x =
-        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_X }) % 200) | 0) + 32;
+        int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_X }) % 200) + 32;
       const y =
-        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_Y }) % 899) | 0) + 64;
+        int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP1_Y }) % 899) + 64;
       this._spawn(SpawnId.SPIDER_SP1_RANDOM_GREEN_34, new Vec2(x, y), { heading: RANDOM_HEADING_SENTINEL });
       if (idx % 3 !== 0) {
         const sx =
-          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_X }) % 30) | 0) + 32;
+          int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_X }) % 30) + 32;
         const sy =
-          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_Y }) % 899) | 0) + 64;
+          int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_1_SPIDER_SP2_Y }) % 899) + 64;
         this._spawn(SpawnId.SPIDER_SP2_RANDOM_35, new Vec2(sx, sy), { heading: RANDOM_HEADING_SENTINEL });
       }
     }
@@ -636,15 +636,15 @@ export class DemoView {
     }
     for (let idx = 0; idx < 20; idx++) {
       const x =
-        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_X }) % 200) | 0) + 32;
+        int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_X }) % 200) + 32;
       const y =
-        ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_Y }) % 899) | 0) + 64;
+        int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_Y }) % 899) + 64;
       this._spawn(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(x, y), { heading: 0.0 });
       if (idx % 3 !== 0) {
         const sx =
-          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_X }) % 30) | 0) + 32;
+          int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_X }) % 30) + 32;
         const sy =
-          ((rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_Y }) % 899) | 0) + 64;
+          int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_SMALL_Y }) % 899) + 64;
         this._spawn(SpawnId.ALIEN_CONST_GREEN_SMALL_25, new Vec2(sx, sy), { heading: 0.0 });
       }
     }

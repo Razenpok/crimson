@@ -98,14 +98,14 @@ export class RushMode extends BaseGameplayMode {
     const status = this.state.status as GameStatus | null;
     const baseStatus = this.saveStatus;
     const simUnlockIndex = status != null ? (status.questUnlockIndex ?? 0) : 0;
-    const questUnlockIndex = simUnlockIndex | 0;
+    const questUnlockIndex = int(simUnlockIndex);
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
+      { unlockIndex: questUnlockIndex, width: int(this.worldSize), height: int(this.worldSize) },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
-    this.simWorld.state.rng.srand(this.state.rng.state | 0);
+    this.simWorld.state.rng.srand(int(this.state.rng.state));
 
     this._simSession = this._newSimSession();
     enforceRushLoadout(this.simWorld.worldState);
@@ -148,8 +148,8 @@ export class RushMode extends BaseGameplayMode {
 
     const gameModeId = this.config.gameplay.mode;
     const record = this._buildHighscoreRecordForGameOver({
-      survivalElapsedMs: this._sessionElapsedMs() | 0,
-      creatureKillCount: this.creatures.killCount | 0,
+      survivalElapsedMs: int(this._sessionElapsedMs()),
+      creatureKillCount: int(this.creatures.killCount),
       gameModeId,
     });
 
@@ -172,12 +172,12 @@ export class RushMode extends BaseGameplayMode {
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
-    return this._sessionElapsedMs() | 0;
+    return int(this._sessionElapsedMs());
   }
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     const stamp = opts.stamp;
-    const kills = this.creatures.killCount | 0;
+    const kills = int(this.creatures.killCount);
     return `rush_${stamp}_kills${kills}`;
   }
 
@@ -217,7 +217,7 @@ export class RushMode extends BaseGameplayMode {
         tickIndex: frameTick,
         elapsedMs,
         spawnCooldownMs,
-        killCount: this.creatures.killCount | 0,
+        killCount: int(this.creatures.killCount),
       });
     }
 

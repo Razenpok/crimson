@@ -124,12 +124,12 @@ export class SurvivalMode extends BaseGameplayMode {
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
-    return this._sessionElapsedMs() | 0;
+    return int(this._sessionElapsedMs());
   }
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     const stamp = opts.stamp;
-    const score = this.player.experience | 0;
+    const score = int(this.player.experience);
     return `survival_${stamp}_score${score}`;
   }
 
@@ -311,14 +311,14 @@ export class SurvivalMode extends BaseGameplayMode {
     const status = this.state.status as GameStatus | null;
     const baseStatus = this.saveStatus;
     const simUnlockIndex = status != null ? (status.questUnlockIndex ?? 0) : 0;
-    const questUnlockIndex = simUnlockIndex | 0;
+    const questUnlockIndex = int(simUnlockIndex);
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
+      { unlockIndex: questUnlockIndex, width: int(this.worldSize), height: int(this.worldSize) },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
-    this.simWorld.state.rng.srand(this.state.rng.state | 0);
+    this.simWorld.state.rng.srand(int(this.state.rng.state));
 
     this._simSession = this._newSimSession();
     this._hudFadeMs = PERK_MENU_TRANSITION_MS;
@@ -413,8 +413,8 @@ export class SurvivalMode extends BaseGameplayMode {
 
     const gameModeId = this.config.gameplay.mode;
     const record = this._buildHighscoreRecordForGameOver({
-      survivalElapsedMs: this._sessionElapsedMs() | 0,
-      creatureKillCount: this.creatures.killCount | 0,
+      survivalElapsedMs: int(this._sessionElapsedMs()),
+      creatureKillCount: int(this.creatures.killCount),
       gameModeId,
     });
 
@@ -478,7 +478,7 @@ export class SurvivalMode extends BaseGameplayMode {
     _dtTick: number,
   ): LanStepAction {
     const sessionElapsedMs = this._sessionElapsedMs();
-    const sessionStage = this._spawnState.stage | 0;
+    const sessionStage = int(this._spawnState.stage);
     const sessionSpawnCooldownMs = this._spawnState.spawnCooldownMs;
 
     if (frameTick !== null) {
@@ -645,7 +645,7 @@ export class SurvivalMode extends BaseGameplayMode {
       const elapsedMs = this._sessionElapsedMs();
 
       this._drawUiText(
-        `survival: t=${(elapsedMs / 1000.0).toFixed(1)}s  stage=${this._spawnState.stage | 0}`,
+        `survival: t=${(elapsedMs / 1000.0).toFixed(1)}s  stage=${int(this._spawnState.stage)}`,
         new Vec2(x, y),
         UI_TEXT_COLOR,
       );

@@ -25,7 +25,7 @@ export const HS_RIGHT_PANEL_HEIGHT = 254.0;
  * whole left stack 50px left in 640-wide mode.
  */
 export function hsLeftPanelPosX(screenWidth: number): number {
-  if (Math.trunc(screenWidth) <= 640) {
+  if (int(screenWidth) <= 640) {
     return HS_LEFT_PANEL_POS_X - 50.0;
   }
   return HS_LEFT_PANEL_POS_X;
@@ -44,7 +44,7 @@ export function hsLeftPanelPosX(screenWidth: number): number {
  * At 1024 this resolves to 609 (our original constant).
  */
 export function hsRightPanelPosX(screenWidth: number): number {
-  const w = Math.trunc(screenWidth);
+  const w = int(screenWidth);
   let x = w - 350;
   if (w <= 800) {
     if (w <= 640) {
@@ -64,7 +64,7 @@ export function hsRightPanelPosX(screenWidth: number): number {
  * `highscore_screen_update` nudges this block by +10 at 640 width.
  */
 export function hsRightOptionsXShift(screenWidth: number): number {
-  if (Math.trunc(screenWidth) <= 640) {
+  if (int(screenWidth) <= 640) {
     return 10.0;
   }
   return 0.0;
@@ -76,7 +76,7 @@ export function hsRightOptionsXShift(screenWidth: number): number {
  * Capture-backed effective offset at 640 width.
  */
 export function hsRightLocalCardXShift(screenWidth: number): number {
-  if (Math.trunc(screenWidth) <= 640) {
+  if (int(screenWidth) <= 640) {
     return 12.0;
   }
   return 0.0;
@@ -88,7 +88,7 @@ export function hsRightLocalCardXShift(screenWidth: number): number {
  * `unlocked_weapons_database_update` adds +20 at 640 width.
  */
 export function weaponsDbRightDetailXShift(screenWidth: number): number {
-  if (Math.trunc(screenWidth) <= 640) {
+  if (int(screenWidth) <= 640) {
     return 20.0;
   }
   return 0.0;
@@ -100,7 +100,7 @@ export function weaponsDbRightDetailXShift(screenWidth: number): number {
  * `unlocked_perks_database_update` subtracts 10 at 640 width.
  */
 export function perksDbRightDetailXShift(screenWidth: number): number {
-  if (Math.trunc(screenWidth) <= 640) {
+  if (int(screenWidth) <= 640) {
     return -10.0;
   }
   return 0.0;

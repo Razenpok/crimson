@@ -212,7 +212,7 @@ export class HighScoresView {
     }
     this._cursorPulseTime += Math.min(dt, 0.1) * 1.1;
 
-    const dtMs = (Math.min(dt, 0.1) * 1000.0) | 0;
+    const dtMs = int(Math.min(dt, 0.1) * 1000.0);
     if (this._closing) {
       if (dtMs > 0 && this._action === null) {
         this._timelineMs -= dtMs;
@@ -502,7 +502,7 @@ export class HighScoresView {
       ['Rush', GameMode.RUSH],
       ['Survival', GameMode.SURVIVAL],
     ];
-    if ((this.questUnlockIndex | 0) >= 0x28) {
+    if (int(this.questUnlockIndex) >= 0x28) {
       modeItems.push(["Typ'o'Shooter", GameMode.TYPO]);
     }
     const gameModePos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_GAME_MODE_WIDGET_X * scale, HS_RIGHT_GAME_MODE_WIDGET_Y * scale));
@@ -573,8 +573,8 @@ export class HighScoresView {
 
     const globalIndex = questLevelGlobalIndex(level);
     const unlock = this.state.config.gameplay.hardcore
-      ? (this.questUnlockIndexFull | 0)
-      : (this.questUnlockIndex | 0);
+      ? int(this.questUnlockIndexFull)
+      : int(this.questUnlockIndex);
     const maxIndex = Math.max(0, Math.min(49, unlock));
     const arrow = getTexture(resources, TextureId.UI_ARROW);
 
@@ -687,7 +687,7 @@ export class HighScoresView {
   private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
-    const [signScale, shiftX] = signLayoutScale(screenW | 0);
+    const [signScale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
       screenW + MENU_SIGN_POS_X_PAD,
       screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL,

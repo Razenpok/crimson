@@ -942,7 +942,7 @@ export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS: SurvivalSpawnPosCallers = {
 
 
 export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { playerExperience: number }): CreatureInit {
-  const xp = opts.playerExperience | 0;
+  const xp = int(opts.playerExperience);
 
   const c = allocCreature(-1, pos, rng);
   c.aiMode = CreatureAiMode.ORBIT_PLAYER;
@@ -1168,11 +1168,11 @@ export function tickSurvivalWaveSpawns(
 
   const spawns: CreatureInit[] = [];
   while (cooldown < 0.0) {
-    let intervalMs = 500 - ((f32(opts.survivalElapsedMs) | 0) / 1800 | 0);
+    let intervalMs = 500 - (int(f32(opts.survivalElapsedMs)) / 1800 | 0);
     if (intervalMs < 0) {
       const extra = (1 - intervalMs) >> 1;
-      intervalMs += (extra | 0) * 2;
-      for (let i = 0; i < (extra | 0); i++) {
+      intervalMs += int(extra) * 2;
+      for (let i = 0; i < int(extra); i++) {
         const pos = randSurvivalSpawnPos(
           rng, { terrainWidth: opts.terrainWidth, terrainHeight: opts.terrainHeight, callers: SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS },
         );
@@ -1203,8 +1203,8 @@ export interface SpawnTemplateCall {
 
 
 export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: number }): [number, SpawnTemplateCall[]] {
-  stage = stage | 0;
-  const level = opts.playerLevel | 0;
+  stage = int(stage);
+  const level = int(opts.playerLevel);
 
   const spawns: SpawnTemplateCall[] = [];
   const heading = Math.PI;
@@ -1352,7 +1352,7 @@ export function buildRushModeSpawnCreature(
     survivalElapsedMs: number;
   },
 ): CreatureInit {
-  const elapsedMs = opts.survivalElapsedMs | 0;
+  const elapsedMs = int(opts.survivalElapsedMs);
   const typeId = opts.typeId;
 
   const c = allocCreature(-1, pos, rng);
@@ -1394,14 +1394,14 @@ export function tickRushModeSpawns(
   while (cooldown < 0.0) {
     cooldown = f32(cooldown + 250.0);
 
-    const t = f32((opts.survivalElapsedMs + 1.0) | 0);
+    const t = f32(int(opts.survivalElapsedMs + 1.0));
     const tintR = clamp01(f32(t * f32(1.0 / 120000.0) + 0.3));
     const tintG = clamp01(f32(t * 10000.0 + 0.3));
     const tintB = clamp01(f32(Math.sin(f32(t * f32(1e-4))) + 0.3));
     const tintA = 1.0;
     const tint: TintRGBA = [tintR, tintG, tintB, tintA];
 
-    const elapsedMs = opts.survivalElapsedMs | 0;
+    const elapsedMs = int(opts.survivalElapsedMs);
     const theta = f32(f32(elapsedMs) * f32(0.001));
     const terrainWidthF = f32(opts.terrainWidth);
     const terrainHeightF = f32(opts.terrainHeight);
@@ -1452,7 +1452,7 @@ export function buildTutorialStage4ClearSpawns(): SpawnTemplateCall[] {
 
 
 export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): SpawnTemplateCall[] {
-  const n = repeatSpawnCount | 0;
+  const n = int(repeatSpawnCount);
   if (n < 1 || 8 <= n) {
     return [];
   }

@@ -4,7 +4,7 @@ import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyPoints(ctx: BonusApplyCtx): void {
   // Native adds Points directly to player0 XP (no Double XP multiplier).
-  const amount = ctx.amount | 0;
+  const amount = int(ctx.amount);
   if (amount <= 0) {
     return;
   }

@@ -34,14 +34,14 @@ function passesDateFilter(entry: HighScoreRecord, dateMode: number, now: Date): 
   //   1 = Best of month
   //   2 = Best of week
   //   3 = Best of day
-  const mode = Math.floor(dateMode);
+  const mode = int(dateMode);
   if (mode <= 0) {
     return true;
   }
 
-  const day = Math.floor(entry.day);
-  const month = Math.floor(entry.month);
-  const yearOff = Math.floor(entry.yearOffset);
+  const day = int(entry.day);
+  const month = int(entry.month);
+  const yearOff = int(entry.yearOffset);
   if (day <= 0 || month <= 0) {
     return false;
   }

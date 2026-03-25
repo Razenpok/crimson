@@ -82,7 +82,7 @@ export function createGameStatus(): GameStatusPersist {
     },
     set gameSequenceId(v: number) {
       if (v !== _gameSequenceId) {
-        _gameSequenceId = v | 0;
+        _gameSequenceId = int(v);
         _dirty = true;
       }
     },
@@ -170,7 +170,7 @@ function bootCommandHandlers(
   }
 
   function cmdTellTimeSurvived(_args: string[]): void {
-    const seconds = (Math.max(0.0, state.survivalElapsedMs) * 0.00100000005) | 0;
+    const seconds = int(Math.max(0.0, state.survivalElapsedMs) * 0.00100000005);
     con.log.log(`Survived: ${seconds} seconds.`);
   }
 
@@ -220,7 +220,7 @@ function bootCommandHandlers(
     }
     let value: number;
     try {
-      value = Math.trunc(parseFloat(args[0]));
+      value = int(parseFloat(args[0]));
     } catch {
       value = 0;
     }
@@ -239,7 +239,7 @@ function bootCommandHandlers(
     }
     let value: number;
     try {
-      value = Math.trunc(parseFloat(args[0]));
+      value = int(parseFloat(args[0]));
     } catch {
       value = 0;
     }
@@ -272,8 +272,8 @@ function bootCommandHandlers(
     const info = demoTrialOverlayInfo({
       demoBuild: state.demoEnabled,
       gameModeId: modeId,
-      globalPlaytimeMs: status.gameSequenceId | 0,
-      questGraceElapsedMs: state.demoTrialElapsedMs | 0,
+      globalPlaytimeMs: int(status.gameSequenceId),
+      questGraceElapsedMs: int(state.demoTrialElapsedMs),
       questLevel,
     });
     const remaining = formatDemoTrialTime(info.remainingMs);

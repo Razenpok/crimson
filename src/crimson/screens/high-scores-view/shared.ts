@@ -18,9 +18,9 @@ export interface HighScoreRecord {
 }
 
 export function formatScoreDate(entry: HighScoreRecord): string {
-  const day = Math.floor(entry.day);
-  const month = Math.floor(entry.month);
-  const yearOff = Math.floor(entry.yearOffset);
+  const day = int(entry.day);
+  const month = int(entry.month);
+  const yearOff = int(entry.yearOffset);
   if (day <= 0 || month <= 0) {
     return '';
   }
@@ -34,7 +34,7 @@ export function formatScoreDate(entry: HighScoreRecord): string {
 }
 
 export function ordinal(value: number): string {
-  const n = Math.floor(value);
+  const n = int(value);
   const suffix = (n % 100 >= 11 && n % 100 <= 13) ? 'th'
     : (n % 10 === 1) ? 'st'
     : (n % 10 === 2) ? 'nd'
@@ -59,8 +59,8 @@ export function modeLabel(modeId: GameMode, questMajor: number, questMinor: numb
     case GameMode.TYPO:
       return 'Typ-o Shooter';
     case GameMode.QUESTS:
-      if (Math.floor(questMajor) > 0 && Math.floor(questMinor) > 0) {
-        return `Quest ${Math.floor(questMajor)}.${Math.floor(questMinor)}`;
+      if (int(questMajor) > 0 && int(questMinor) > 0) {
+        return `Quest ${int(questMajor)}.${int(questMinor)}`;
       }
       return 'Quests';
     default:

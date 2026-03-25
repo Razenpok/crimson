@@ -105,7 +105,7 @@ function resolveStaticMoveVector(
 }
 
 function configPlayerCount(config: CrimsonConfig): number {
-  return Math.max(1, config.gameplay.playerCount | 0);
+  return Math.max(1, int(config.gameplay.playerCount));
 }
 
 function singlePlayerAltKeysEnabled(
@@ -192,8 +192,8 @@ export class LocalInputInterpreter {
     playerIndex: number,
     player?: PlayerState | null,
   ): number {
-    let slot = playerIndex | 0;
-    if (player != null) slot = player.index | 0;
+    let slot = int(playerIndex);
+    if (player != null) slot = int(player.index);
     return Math.max(0, Math.min(3, slot));
   }
 
@@ -246,7 +246,7 @@ export class LocalInputInterpreter {
       player.pos,
       creatures,
     );
-    const current = state.computerTargetCreatureIndex | 0;
+    const current = int(state.computerTargetCreatureIndex);
 
     if (candidate === null) {
       state.computerTargetCreatureIndex = -1;
@@ -312,7 +312,7 @@ export class LocalInputInterpreter {
       creatures = null,
     } = opts;
     const dt = opts.dt;
-    const idx = Math.max(0, Math.min(3, opts.playerIndex | 0));
+    const idx = Math.max(0, Math.min(3, int(opts.playerIndex)));
     const state = this._stateForPlayer(idx, player);
     const binds: CrimsonPlayerControls = config.controls.players[idx];
     const aimScheme = binds.aimScheme;

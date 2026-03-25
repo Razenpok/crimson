@@ -28,7 +28,7 @@ function nextRateScaleHz(currentRateScaleHz: number, reflexBoostTimer: number): 
   if (reflexF32 <= 1.0) {
     if (reflexF32 < 1.0) {
       const rateExpr = f32((f32(1.0) - reflexF32 + f32(1.0)) * f32(SFX_RATE_MIN_HZ));
-      return Math.round(rateExpr);
+      return int(Math.round(rateExpr));
     }
     return currentRateScaleHz;
   }

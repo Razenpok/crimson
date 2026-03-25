@@ -213,7 +213,7 @@ export function resolveFireRecipe(
     return recipe({
       tag: 'PrimaryPelletsMode',
       typeId: ProjectileTemplateId.FIRE_BULLETS,
-      count: Math.max(0, opts.pelletCount | 0),
+      count: Math.max(0, int(opts.pelletCount)),
       jitter: _DEFAULT_SPREAD_JITTER,
       speedScale: noSpeedScale(),
     });
@@ -224,7 +224,7 @@ export function resolveFireRecipe(
     return existing;
   }
 
-  const pellets = Math.max(1, opts.pelletCount | 0);
+  const pellets = Math.max(1, int(opts.pelletCount));
   let jitter: PelletJitterRule = noJitter();
   if (pellets > 1) {
     jitter = moduloCenteredJitter(

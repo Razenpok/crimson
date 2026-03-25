@@ -106,7 +106,7 @@ export class TypoShooterMode extends BaseGameplayMode {
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
-    return this._sessionElapsedMs() | 0;
+    return int(this._sessionElapsedMs());
   }
 
   protected _replayClaimedShots(): [number, number] {
@@ -115,7 +115,7 @@ export class TypoShooterMode extends BaseGameplayMode {
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     const stamp = opts.stamp;
-    const score = this.player.experience | 0;
+    const score = int(this.player.experience);
     return `typo_${stamp}_score${score}`;
   }
 
@@ -142,14 +142,14 @@ export class TypoShooterMode extends BaseGameplayMode {
     // we skip the file I/O and rely on the pre-populated state.
 
     const status = this.state.status as GameStatus | null;
-    const questUnlockIndex = status !== null ? (status.questUnlockIndex | 0) : 0;
+    const questUnlockIndex = status !== null ? int(status.questUnlockIndex) : 0;
 
     const terrain = advanceUnlockTerrain(
       this.state.rng,
-      { unlockIndex: questUnlockIndex, width: this.worldSize | 0, height: this.worldSize | 0 },
+      { unlockIndex: questUnlockIndex, width: int(this.worldSize), height: int(this.worldSize) },
     );
     this.applyTerrainSetup({ terrainSlots: terrain.terrainSlots, seed: terrain.terrainSeed });
-    this.simWorld.state.rng.srand(this.state.rng.state | 0);
+    this.simWorld.state.rng.srand(int(this.state.rng.state));
 
     this._simSession = this._newSimSession();
     this._replayRecorder = null; // WebGL: no file-based replay recording
@@ -221,8 +221,8 @@ export class TypoShooterMode extends BaseGameplayMode {
     const record = buildHighscoreRecordForGameOver({
       state: this.state,
       player: this.player,
-      survivalElapsedMs: this._sessionElapsedMs() | 0,
-      creatureKillCount: this.creatures.killCount | 0,
+      survivalElapsedMs: int(this._sessionElapsedMs()),
+      creatureKillCount: int(this.creatures.killCount),
       gameModeId: GameMode.TYPO,
       shotsFired,
       shotsHit,

@@ -18,7 +18,7 @@ export function normalizeInputFrame(
   opts: { playerCount: number },
 ): InputFrame {
   // Return a fixed-size, player-index-ordered input frame.
-  const count = Math.max(0, Math.trunc(opts.playerCount));
+  const count = Math.max(0, int(opts.playerCount));
   const frame: PlayerInput[] = [];
   for (let i = 0; i < count; i++) {
     frame.push(new PlayerInput());

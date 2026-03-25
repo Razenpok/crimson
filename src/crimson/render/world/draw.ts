@@ -352,7 +352,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
         shadowA += lifecycleStage * (longStrip ? 0.5 : 0.1);
         shadowA = Math.max(0.0, shadowA);
       }
-      shadowAlpha = (clamp(shadowA * ctx.entityAlpha * 255.0, 0.0, 255.0) + 0.5) | 0;
+      shadowAlpha = int(clamp(shadowA * ctx.entityAlpha * 255.0, 0.0, 255.0) + 0.5);
     }
 
     drawCreatureSprite(
@@ -493,9 +493,9 @@ export function drawAimIndicators(
     if (reloadMax > 1e-6 && reloadTimer > 1e-6) {
       const progress = reloadTimer / reloadMax;
       if (progress > 0.0) {
-        const ms = (progress * 60000.0) | 0;
+        const ms = int(progress * 60000.0);
         drawGauge(
-          new Vec2(aimScreen.x | 0, aimScreen.y | 0),
+          new Vec2(int(aimScreen.x), int(aimScreen.y)),
           ms, ctx.scale, ctx.entityAlpha,
         );
       }

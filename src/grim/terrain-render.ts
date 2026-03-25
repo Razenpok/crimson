@@ -76,8 +76,8 @@ export class GroundRenderer {
     const scale = Math.min(Math.max(this.textureScale, 0.5), 4.0);
     this.textureScale = scale;
     const pixelScale = this._renderPixelRatio();
-    const renderW = Math.max(1, Math.floor((this.width * pixelScale) / scale));
-    const renderH = Math.max(1, Math.floor((this.height * pixelScale) / scale));
+    const renderW = Math.max(1, int((this.width * pixelScale) / scale));
+    const renderH = Math.max(1, int((this.height * pixelScale) / scale));
 
     if (this.renderTarget) {
       if (this.renderTarget.width === renderW && this.renderTarget.height === renderH) {
@@ -134,7 +134,7 @@ export class GroundRenderer {
 
     const invScale = 1.0 / this._normalizedTextureScale();
     const size = TERRAIN_PATCH_SIZE * invScale;
-    const spanW = this.width + (TERRAIN_PATCH_OVERSCAN * 2) | 0;
+    const spanW = this.width + int(TERRAIN_PATCH_OVERSCAN * 2);
     const spanH = spanW;
     const halfSize = size * 0.5;
 
@@ -287,7 +287,7 @@ export class GroundRenderer {
       const size = decal.size * invScale * 1.064;
       const x = (decal.topLeft.x - 0.5) * invScale - offset;
       const y = (decal.topLeft.y - 0.5) * invScale - offset;
-      const halfAlpha = Math.floor(decal.tint[3] * 0.5 * 255) / 255;
+      const halfAlpha = int(decal.tint[3] * 0.5 * 255) / 255;
       wgl.drawTexturePro(
         bodysetTexture, src,
         wgl.makeRectangle(x + size * 0.5, y + size * 0.5, size, size),

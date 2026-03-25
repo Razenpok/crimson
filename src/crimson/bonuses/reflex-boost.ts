@@ -25,7 +25,7 @@ export function applyReflexBoostPickupFx(
 ): void {
   opts.state.effects.spawnRing({
     pos: opts.pickup.pos,
-    detailPreset: opts.detailPreset | 0,
+    detailPreset: int(opts.detailPreset),
     color: new RGBA(0.6, 0.6, 1.0, 1.0),
   });
 }

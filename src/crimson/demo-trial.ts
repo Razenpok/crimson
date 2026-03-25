@@ -11,7 +11,7 @@ export interface QuestLevel {
 }
 
 export function formatDemoTrialTime(ms: number): string {
-  let value = ms | 0;
+  let value = int(ms);
   if (value < 0) value = 0;
   const minutes = (value / 60_000) | 0;
   const seconds = ((value / 1_000) | 0) % 60;
@@ -68,27 +68,27 @@ export function tickDemoTrialTimers(opts: {
   const { demoBuild, gameModeId, overlayVisible, dtMs } = opts;
 
   if (!demoBuild) {
-    return [opts.globalPlaytimeMs | 0, opts.questGraceElapsedMs | 0];
+    return [int(opts.globalPlaytimeMs), int(opts.questGraceElapsedMs)];
   }
 
   if (gameModeId === GameMode.TUTORIAL) {
-    return [opts.globalPlaytimeMs | 0, opts.questGraceElapsedMs | 0];
+    return [int(opts.globalPlaytimeMs), int(opts.questGraceElapsedMs)];
   }
 
-  let usedMs = Math.max(0, opts.globalPlaytimeMs | 0);
-  let graceMs = Math.max(0, opts.questGraceElapsedMs | 0);
+  let usedMs = Math.max(0, int(opts.globalPlaytimeMs));
+  let graceMs = Math.max(0, int(opts.questGraceElapsedMs));
   if (usedMs >= DEMO_TOTAL_PLAY_TIME_MS && graceMs < 1) {
     graceMs = 1;
   }
   usedMs = Math.min(DEMO_TOTAL_PLAY_TIME_MS, usedMs);
 
   if (overlayVisible) {
-    return [usedMs | 0, graceMs | 0];
+    return [int(usedMs), int(graceMs)];
   }
 
-  const deltaMs = dtMs | 0;
+  const deltaMs = int(dtMs);
   if (deltaMs <= 0) {
-    return [usedMs | 0, graceMs | 0];
+    return [int(usedMs), int(graceMs)];
   }
 
   usedMs = Math.min(DEMO_TOTAL_PLAY_TIME_MS, usedMs + deltaMs);
@@ -102,7 +102,7 @@ export function tickDemoTrialTimers(opts: {
     }
   }
 
-  return [usedMs | 0, graceMs | 0];
+  return [int(usedMs), int(graceMs)];
 }
 
 /**
@@ -131,8 +131,8 @@ export function demoTrialOverlayInfo(opts: {
     return new DemoTrialOverlayInfo(false, 'none', 0, formatDemoTrialTime(0), false);
   }
 
-  const usedMs = Math.max(0, opts.globalPlaytimeMs | 0);
-  const graceMs = Math.max(0, opts.questGraceElapsedMs | 0);
+  const usedMs = Math.max(0, int(opts.globalPlaytimeMs));
+  const graceMs = Math.max(0, int(opts.questGraceElapsedMs));
 
   const globalRemainingMs = Math.max(0, DEMO_TOTAL_PLAY_TIME_MS - usedMs);
   const graceRemainingMs = Math.max(0, DEMO_QUEST_GRACE_TIME_MS - graceMs);
@@ -140,7 +140,7 @@ export function demoTrialOverlayInfo(opts: {
   const tierLocked =
     gameModeId === GameMode.QUESTS &&
     questLevel !== null &&
-    ((questLevel.major | 0) > 1 || (questLevel.minor | 0) > 10);
+    (int(questLevel.major) > 1 || int(questLevel.minor) > 10);
 
   if (graceMs > 0) {
     if (graceRemainingMs <= 0) {
@@ -150,7 +150,7 @@ export function demoTrialOverlayInfo(opts: {
       return new DemoTrialOverlayInfo(
         true,
         'quest_tier_limit',
-        graceRemainingMs | 0,
+        int(graceRemainingMs),
         formatDemoTrialTime(graceRemainingMs),
         false,
       );
@@ -161,7 +161,7 @@ export function demoTrialOverlayInfo(opts: {
       return new DemoTrialOverlayInfo(
         true,
         'quest_grace_left',
-        graceRemainingMs | 0,
+        int(graceRemainingMs),
         formatDemoTrialTime(graceRemainingMs),
         false,
       );
@@ -169,7 +169,7 @@ export function demoTrialOverlayInfo(opts: {
     return new DemoTrialOverlayInfo(
       false,
       'none',
-      graceRemainingMs | 0,
+      int(graceRemainingMs),
       formatDemoTrialTime(graceRemainingMs),
       false,
     );
@@ -185,7 +185,7 @@ export function demoTrialOverlayInfo(opts: {
     return new DemoTrialOverlayInfo(
       true,
       'quest_tier_limit',
-      globalRemainingMs | 0,
+      int(globalRemainingMs),
       formatDemoTrialTime(globalRemainingMs),
       true,
     );
@@ -194,7 +194,7 @@ export function demoTrialOverlayInfo(opts: {
   return new DemoTrialOverlayInfo(
     false,
     'none',
-    globalRemainingMs | 0,
+    int(globalRemainingMs),
     formatDemoTrialTime(globalRemainingMs),
     false,
   );

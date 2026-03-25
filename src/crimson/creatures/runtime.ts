@@ -925,7 +925,7 @@ export class CreaturePool {
     const deaths: CreatureDeath[] = [];
     const spawned: number[] = [];
     const sfx: SfxId[] = [];
-    this._updateTick = (this._updateTick | 0) + 1;
+    this._updateTick = int(this._updateTick) + 1;
     let singlePlayerDeadTargetPos: Vec2 | null = null;
     if (players.length === 1) {
       singlePlayerDeadTargetPos = new Vec2(
@@ -956,7 +956,7 @@ export class CreaturePool {
     const _applySelfDamageTick = (creatureIndex: number, creature: CreatureState): boolean => {
       if (dt <= 0.0 || state.bonuses.freeze > 0.0) return false;
       let damageAmount = 0.0;
-      const creatureFlags = creature.flags | 0;
+      const creatureFlags = int(creature.flags);
       if ((creatureFlags & _FLAG_SELF_DAMAGE_TICK_STRONG) !== 0) {
         damageAmount = dt * 180.0;
       } else if ((creatureFlags & _FLAG_SELF_DAMAGE_TICK) !== 0) {
@@ -1016,7 +1016,7 @@ export class CreaturePool {
         if (
           dt > 0.0 &&
           state.bonuses.freeze <= 0.0 &&
-          ((creature.flags | 0) & _FLAG_AI7_LINK_TIMER) !== 0
+          ((int(creature.flags)) & _FLAG_AI7_LINK_TIMER) !== 0
         ) {
           creatureAi7TickLinkTimer(creature, { dtMs, rng });
         }
@@ -1170,7 +1170,7 @@ export class CreaturePool {
       }
 
       const turnRate = f32(creature.move_speed * CREATURE_TURN_RATE_SCALE);
-      if (((creature.flags | 0) & (CreatureFlags.ANIM_PING_PONG as number)) === 0) {
+      if (((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) === 0) {
         if (creature.ai_mode !== CreatureAiMode.HOLD_TIMER) {
           creature.heading = _angleApproach(
             creature.heading,
@@ -1192,7 +1192,7 @@ export class CreaturePool {
         const maxX = Math.max(radius, worldWidth - radius);
         const maxY = Math.max(radius, worldHeight - radius);
         creature.pos = f32Vec2(creature.pos.clampRect(radius, radius, maxX, maxY));
-        if (((creature.flags | 0) & (CreatureFlags.ANIM_LONG_STRIP as number)) === 0) {
+        if (((int(creature.flags)) & (CreatureFlags.ANIM_LONG_STRIP as number)) === 0) {
           creature.vel = new Vec2();
         } else {
           creature.heading = _angleApproach(
@@ -1250,7 +1250,7 @@ export class CreaturePool {
                 creature.hp = 1.0;
               } else {
                 radioactivePlayer.experience =
-                  (radioactivePlayer.experience | 0) + (creature.reward_value | 0);
+                  int(radioactivePlayer.experience + creature.reward_value);
                 creature.lifecycleStage -= dt;
               }
             }
@@ -1263,12 +1263,12 @@ export class CreaturePool {
 
       if (
         !frozenByEvilEyes &&
-        ((creature.flags | 0) &
+        ((int(creature.flags)) &
           ((CreatureFlags.RANGED_ATTACK_SHOCK as number) |
             (CreatureFlags.RANGED_ATTACK_VARIANT as number))) !== 0
       ) {
         if (targetDist > 64.0 && creature.attack_cooldown <= 0.0) {
-          if ((creature.flags | 0) & (CreatureFlags.RANGED_ATTACK_SHOCK as number)) {
+          if ((int(creature.flags)) & (CreatureFlags.RANGED_ATTACK_SHOCK as number)) {
             const typeId = ProjectileTemplateId.PLASMA_RIFLE;
             state.projectiles.spawn({
               pos: creature.pos,
@@ -1283,7 +1283,7 @@ export class CreaturePool {
           }
 
           if (
-            ((creature.flags | 0) & (CreatureFlags.RANGED_ATTACK_VARIANT as number)) !== 0 &&
+            ((int(creature.flags)) & (CreatureFlags.RANGED_ATTACK_VARIANT as number)) !== 0 &&
             creature.attack_cooldown <= 0.0
           ) {
             const projectileType = creature.orbit_radius as ProjectileTemplateId;
@@ -1335,7 +1335,7 @@ export class CreaturePool {
         dt > 0.0 &&
         state.bonuses.freeze <= 0.0 &&
         !this.captureSpawnEventsAuthoritative &&
-        ((creature.flags | 0) & (HAS_SPAWN_SLOT_FLAG as number)) !== 0
+        ((int(creature.flags)) & (HAS_SPAWN_SLOT_FLAG as number)) !== 0
       ) {
         const slotIndex = creature.spawnSlotIndex;
         if (slotIndex !== null && slotIndex >= 0 && slotIndex < this.spawnSlots.length) {
@@ -1384,10 +1384,10 @@ export class CreaturePool {
     const worldHeight = opts.worldHeight;
     const fxQueue = opts.fxQueue;
     const keepCorpse = opts.keepCorpse ?? true;
-    const creature = this._entries[idx | 0];
+    const creature = this._entries[int(idx)];
     survivalRecordRecentDeath(state, creature.pos);
     if (
-      ((creature.flags | 0) & (CreatureFlags.BONUS_ON_DEATH as number)) !== 0 &&
+      ((int(creature.flags)) & (CreatureFlags.BONUS_ON_DEATH as number)) !== 0 &&
       creature.bonusId !== null
     ) {
       state.bonusPool.spawnAt(
@@ -1543,8 +1543,8 @@ export class CreaturePool {
     }
 
     const longStrip =
-      ((creature.flags | 0) & (CreatureFlags.ANIM_PING_PONG as number)) === 0 ||
-      ((creature.flags | 0) & (CreatureFlags.ANIM_LONG_STRIP as number)) !== 0;
+      ((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) === 0 ||
+      ((int(creature.flags)) & (CreatureFlags.ANIM_LONG_STRIP as number)) !== 0;
 
     const newHitbox = f32(hitbox - f32(dtF32 * CREATURE_DEATH_TIMER_DECAY));
     creature.lifecycleStage = f32(newHitbox);
@@ -1586,7 +1586,7 @@ export class CreaturePool {
 
     if (
       violenceDisabled === 0 &&
-      ((creature.flags | 0) & (CreatureFlags.ANIM_PING_PONG as number)) !== 0 &&
+      ((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) !== 0 &&
       rng !== null &&
       this.effects !== null
     ) {
@@ -1639,7 +1639,7 @@ export class CreaturePool {
     }
 
     if (
-      ((creature.flags | 0) & (CreatureFlags.SPLIT_ON_DEATH as number)) !== 0 &&
+      ((int(creature.flags)) & (CreatureFlags.SPLIT_ON_DEATH as number)) !== 0 &&
       creature.size > 35.0
     ) {
       const splits: [number, number][] = [
@@ -1678,7 +1678,7 @@ export class CreaturePool {
     let xpAwarded = 0;
     if (killer !== null) {
       if (perkActive(killer, PerkId.BLOODY_MESS_QUICK_LEARNER)) {
-        xpAwarded = awardExperience(state, killer, (creature.reward_value * 1.3) | 0);
+        xpAwarded = awardExperience(state, killer, int(creature.reward_value * 1.3));
       } else {
         xpAwarded = awardExperienceFromReward(state, killer, creature.reward_value);
       }

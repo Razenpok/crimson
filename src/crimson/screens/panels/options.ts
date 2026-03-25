@@ -234,11 +234,11 @@ export class OptionsMenuView extends PanelMenuView {
 
     this._sliderSfx.value = Math.max(
       this._sliderSfx.minValue,
-      Math.min(this._sliderSfx.maxValue, (sfxVolume * 10.0) | 0),
+      Math.min(this._sliderSfx.maxValue, int(sfxVolume * 10.0)),
     );
     this._sliderMusic.value = Math.max(
       this._sliderMusic.minValue,
-      Math.min(this._sliderMusic.maxValue, (musicVolume * 10.0) | 0),
+      Math.min(this._sliderMusic.maxValue, int(musicVolume * 10.0)),
     );
     if (detailPreset < this._sliderDetail.minValue) {
       detailPreset = this._sliderDetail.minValue;
@@ -249,7 +249,7 @@ export class OptionsMenuView extends PanelMenuView {
     this._sliderDetail.value = detailPreset;
     this._sliderMouse.value = Math.max(
       this._sliderMouse.minValue,
-      Math.min(this._sliderMouse.maxValue, (mouseSensitivity * 10.0 + 0.5) | 0),
+      Math.min(this._sliderMouse.maxValue, int(mouseSensitivity * 10.0 + 0.5)),
     );
   }
 

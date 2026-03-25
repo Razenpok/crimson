@@ -129,7 +129,7 @@ const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
 const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = 52;
 
 function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  const id = weaponId | 0;
+  const id = int(weaponId);
   if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
     return id;
   }

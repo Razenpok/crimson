@@ -431,9 +431,9 @@ export class GameLoopView implements View {
       presentationApplyMs,
     ] = gameplay.frameTelemetry();
 
-    this.state.runtimeUpdatesPerFrame = runtimeUpdatesPerFrame | 0;
-    this.state.inputStallCount = inputStallCount | 0;
-    this.state.ticksAdvancedPerFrame = ticksAdvancedPerFrame | 0;
+    this.state.runtimeUpdatesPerFrame = int(runtimeUpdatesPerFrame);
+    this.state.inputStallCount = int(inputStallCount);
+    this.state.ticksAdvancedPerFrame = int(ticksAdvancedPerFrame);
     this.state.simMs = simMs;
     this.state.presentationPlanMs = presentationPlanMs;
     this.state.presentationApplyMs = presentationApplyMs;
@@ -464,7 +464,7 @@ export class GameLoopView implements View {
     const gameplay = this._gameplayScreen(frontActive);
 
     if (gameplay !== null) {
-      gameplay.setRuntimeUpdatesPerFrame(this._runtimeUpdatesPerFrame | 0);
+      gameplay.setRuntimeUpdatesPerFrame(int(this._runtimeUpdatesPerFrame));
     }
 
     // Debug hotkeys
@@ -759,9 +759,9 @@ export class GameLoopView implements View {
   private _tickStatisticsPlaytime(dt: number): void {
     if (this.state.demoEnabled) return;
     if (this._gameplayScreen(this._frontActive) === null) return;
-    const deltaMs = (dt * 1000.0) | 0;
+    const deltaMs = int(dt * 1000.0);
     if (deltaMs <= 0) return;
-    this._status.gameSequenceId = (this._status.gameSequenceId + deltaMs) | 0;
+    this._status.gameSequenceId = int(this._status.gameSequenceId + deltaMs);
   }
 
   // -----------------------------------------------------------------------
@@ -834,32 +834,32 @@ export class GameLoopView implements View {
     const current = demoTrialOverlayInfo({
       demoBuild: true,
       gameModeId: modeId,
-      globalPlaytimeMs: this._status.gameSequenceId | 0,
-      questGraceElapsedMs: this.state.demoTrialElapsedMs | 0,
+      globalPlaytimeMs: int(this._status.gameSequenceId),
+      questGraceElapsedMs: int(this.state.demoTrialElapsedMs),
       questLevel,
     });
 
     const frameDt = Math.min(dt, 0.1);
-    const dtMs = (frameDt * 1000.0) | 0;
+    const dtMs = int(frameDt * 1000.0);
     const [usedMs, graceMs] = tickDemoTrialTimers({
       demoBuild: true,
       gameModeId: modeId,
       overlayVisible: current.visible,
-      globalPlaytimeMs: this._status.gameSequenceId | 0,
-      questGraceElapsedMs: this.state.demoTrialElapsedMs | 0,
-      dtMs: dtMs | 0,
+      globalPlaytimeMs: int(this._status.gameSequenceId),
+      questGraceElapsedMs: int(this.state.demoTrialElapsedMs),
+      dtMs: int(dtMs),
     });
 
-    if (usedMs !== (this._status.gameSequenceId | 0)) {
-      this._status.gameSequenceId = usedMs | 0;
+    if (usedMs !== int(this._status.gameSequenceId)) {
+      this._status.gameSequenceId = int(usedMs);
     }
-    this.state.demoTrialElapsedMs = graceMs | 0;
+    this.state.demoTrialElapsedMs = int(graceMs);
 
     const info = demoTrialOverlayInfo({
       demoBuild: true,
       gameModeId: modeId,
-      globalPlaytimeMs: this._status.gameSequenceId | 0,
-      questGraceElapsedMs: this.state.demoTrialElapsedMs | 0,
+      globalPlaytimeMs: int(this._status.gameSequenceId),
+      questGraceElapsedMs: int(this.state.demoTrialElapsedMs),
       questLevel,
     });
     this._demoTrialInfo = info;

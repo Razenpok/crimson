@@ -176,7 +176,7 @@ export function creatureAnimSelectFrame(
             mirrored = false;
         } else {
             // Matches __ftol(phase + 0.5f) used by the original binary.
-            frame = Math.trunc(phase + 0.5);
+            frame = int(phase + 0.5);
             mirrored = false;
             if (opts.mirrorLong && frame > 0x0F) {
                 frame = 0x1F - frame;
@@ -191,7 +191,7 @@ export function creatureAnimSelectFrame(
 
     // Ping-pong strip:
     //   idx = (__ftol(phase + 0.5f) & 0x8000000f); then normalize negatives; then mirror >7.
-    const raw = Math.trunc(phase + 0.5);
+    const raw = int(phase + 0.5);
     let idx = _i32(_u32(raw) & 0x8000000F);
     if (idx < 0) {
         idx = _i32(_u32(((idx - 1) | 0xFFFFFFF0) + 1));

@@ -284,9 +284,9 @@ export class QuestResultsUi {
     const resources = opts.resources;
     const font = opts.font;
 
-    const seconds = Math.floor(record.survivalElapsedMs) * 0.001;
+    const seconds = int(record.survivalElapsedMs) * 0.001;
     const scoreValue = `${seconds.toFixed(2)} secs`;
-    const xpValue = `${Math.floor(record.scoreXp)}`;
+    const xpValue = `${int(record.scoreXp)}`;
 
     const alphaF = Math.max(0.0, Math.min(1.0, opts.alpha));
     const colLabel = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alphaF * 0.8);
@@ -330,16 +330,16 @@ export class QuestResultsUi {
     // Vertical separator
     const sepX = x + 84.0 * scale;
     wgl.drawRectangle(
-      Math.floor(sepX), Math.floor(y),
-      1, Math.floor(48.0 * scale),
+      int(sepX), int(y),
+      1, int(48.0 * scale),
       wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
     );
 
     // Horizontal separator
     const rowTop = y + 52.0 * scale;
     wgl.drawRectangle(
-      Math.floor(x - 12.0 * scale), Math.floor(rowTop),
-      Math.floor(192.0 * scale), 1,
+      int(x - 12.0 * scale), int(rowTop),
+      int(192.0 * scale), 1,
       wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
     );
     if (!opts.showWeaponRow) return;
@@ -358,19 +358,19 @@ export class QuestResultsUi {
     const nameX = Math.max(x + 4.0 * scale, leftCenterX - nameW * 0.5);
     drawSmall(font, weaponName, new Vec2(nameX, rowY + 32.0 * scale), colRow);
 
-    const fragsText = `Frags: ${Math.floor(record.creatureKillCount)}`;
+    const fragsText = `Frags: ${int(record.creatureKillCount)}`;
     drawSmall(font, fragsText, new Vec2(x + 114.0 * scale, rowY + 1.0 * scale), colRow);
 
-    const fired = Math.max(0, Math.floor(record.shotsFired));
-    const hit = Math.max(0, Math.min(Math.floor(record.shotsHit), fired));
-    const ratio = fired > 0 ? Math.floor((hit * 100) / fired) : 0;
+    const fired = Math.max(0, int(record.shotsFired));
+    const hit = Math.max(0, Math.min(int(record.shotsHit), fired));
+    const ratio = fired > 0 ? int((hit * 100) / fired) : 0;
     const hitText = `Hit %: ${ratio}%`;
     drawSmall(font, hitText, new Vec2(x + 114.0 * scale, rowY + 15.0 * scale), colRow);
 
     // Bottom horizontal separator
     wgl.drawRectangle(
-      Math.floor(x - 12.0 * scale), Math.floor(rowY + 48.0 * scale),
-      Math.floor(192.0 * scale), 1,
+      int(x - 12.0 * scale), int(rowY + 48.0 * scale),
+      int(192.0 * scale), 1,
       wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
     );
   }
@@ -446,7 +446,7 @@ export class QuestResultsUi {
       }
 
       const clinks = tickQuestResultsBreakdownAnim(anim, {
-        frameDtMs: Math.floor(dtS * 1000.0),
+        frameDtMs: int(dtS * 1000.0),
         target: this.breakdown,
       });
       if (clinks > 0 && playSfx !== null) {
@@ -631,10 +631,10 @@ export class QuestResultsUi {
       const anim = this._breakdownAnim;
       let step = 4;
       let highlightAlpha = 1.0;
-      let baseTimeMs = Math.floor(this.breakdown.baseTimeMs);
-      let lifeBonusMs = Math.floor(this.breakdown.lifeBonusMs);
-      let perkBonusMs = Math.floor(this.breakdown.unpickedPerkBonusMs);
-      let finalTimeMs = Math.floor(this.breakdown.finalTimeMs);
+      let baseTimeMs = int(this.breakdown.baseTimeMs);
+      let lifeBonusMs = int(this.breakdown.lifeBonusMs);
+      let perkBonusMs = int(this.breakdown.unpickedPerkBonusMs);
+      let finalTimeMs = int(this.breakdown.finalTimeMs);
       if (anim !== null && !anim.done) {
         step = anim.step;
         highlightAlpha = anim.highlightAlpha();
@@ -682,8 +682,8 @@ export class QuestResultsUi {
       const lineY = y + 1.0 * scale;
       const lineColor = rowColor(3, true);
       wgl.drawRectangle(
-        Math.floor(labelX - 4.0 * scale), Math.floor(lineY),
-        Math.floor(168.0 * scale), Math.floor(1.0 * scale),
+        int(labelX - 4.0 * scale), int(lineY),
+        int(168.0 * scale), int(1.0 * scale),
         wgl.makeColor(lineColor[0], lineColor[1], lineColor[2], lineColor[3]),
       );
 
@@ -703,29 +703,29 @@ export class QuestResultsUi {
       const inputPos = contentPos.offset({ dy: 150.0 * scale });
       // Input box outline
       wgl.drawRectangle(
-        Math.floor(inputPos.x), Math.floor(inputPos.y),
-        Math.floor(INPUT_BOX_W * scale), 1,
+        int(inputPos.x), int(inputPos.y),
+        int(INPUT_BOX_W * scale), 1,
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.floor(inputPos.x), Math.floor(inputPos.y + INPUT_BOX_H * scale - 1),
-        Math.floor(INPUT_BOX_W * scale), 1,
+        int(inputPos.x), int(inputPos.y + INPUT_BOX_H * scale - 1),
+        int(INPUT_BOX_W * scale), 1,
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.floor(inputPos.x), Math.floor(inputPos.y),
-        1, Math.floor(INPUT_BOX_H * scale),
+        int(inputPos.x), int(inputPos.y),
+        1, int(INPUT_BOX_H * scale),
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        Math.floor(inputPos.x + INPUT_BOX_W * scale - 1), Math.floor(inputPos.y),
-        1, Math.floor(INPUT_BOX_H * scale),
+        int(inputPos.x + INPUT_BOX_W * scale - 1), int(inputPos.y),
+        1, int(INPUT_BOX_H * scale),
         wgl.makeColor(1, 1, 1, 1),
       );
       // Input box fill
       wgl.drawRectangle(
-        Math.floor(inputPos.x + 1.0 * scale), Math.floor(inputPos.y + 1.0 * scale),
-        Math.floor((INPUT_BOX_W - 2.0) * scale), Math.floor((INPUT_BOX_H - 2.0) * scale),
+        int(inputPos.x + 1.0 * scale), int(inputPos.y + 1.0 * scale),
+        int((INPUT_BOX_W - 2.0) * scale), int((INPUT_BOX_H - 2.0) * scale),
         wgl.makeColor(0, 0, 0, 1),
       );
       drawUiText(
@@ -741,8 +741,8 @@ export class QuestResultsUi {
       const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
       wgl.drawRectangle(
-        Math.floor(caretX), Math.floor(inputPos.y + 2.0 * scale),
-        Math.floor(1.0 * scale), Math.floor(14.0 * scale),
+        int(caretX), int(inputPos.y + 2.0 * scale),
+        int(1.0 * scale), int(14.0 * scale),
         wgl.makeColor(caretColor[0], caretColor[1], caretColor[2], caretColor[3]),
       );
 

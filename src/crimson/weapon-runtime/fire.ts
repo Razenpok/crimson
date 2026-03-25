@@ -105,7 +105,7 @@ function spawnNativeFireMuzzleSprites(
   if (fireBulletsActiveFlag) {
     specs = [[25.0, 1.0, 0.413]];
   } else {
-    specs = _NATIVE_FIRE_MUZZLE_SPRITES.get(weaponId | 0) ?? [];
+    specs = _NATIVE_FIRE_MUZZLE_SPRITES.get(int(weaponId)) ?? [];
   }
   if (specs.length === 0) {
     return;
@@ -163,9 +163,9 @@ function applyPelletJitter(
     case 'NoJitter':
       return shotAngle;
     case 'ModuloCenteredJitter':
-      return shotAngle + (rng.rand(caller !== null ? { caller } : undefined) % (jitterRule.modulo | 0) - (jitterRule.center | 0)) * jitterRule.step;
+      return shotAngle + (rng.rand(caller !== null ? { caller } : undefined) % int(jitterRule.modulo) - int(jitterRule.center)) * jitterRule.step;
     case 'MaskCenteredJitter':
-      return shotAngle + ((rng.rand(caller !== null ? { caller } : undefined) & (jitterRule.mask | 0)) - (jitterRule.center | 0)) * jitterRule.step;
+      return shotAngle + ((rng.rand(caller !== null ? { caller } : undefined) & int(jitterRule.mask)) - int(jitterRule.center)) * jitterRule.step;
   }
 }
 
@@ -179,8 +179,8 @@ function applySpeedScaleRule(
     case 'NoSpeedScale':
       return;
     case 'ModuloSpeedScale':
-      state.projectiles.entries[projId | 0].speedScale =
-        speedRule.base + (state.rng.rand(caller !== null ? { caller } : undefined) % (speedRule.modulo | 0)) * speedRule.step;
+      state.projectiles.entries[int(projId)].speedScale =
+        speedRule.base + (state.rng.rand(caller !== null ? { caller } : undefined) % int(speedRule.modulo)) * speedRule.step;
       return;
   }
 }
@@ -212,16 +212,16 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
       return { fired: false, shotCount: 0, ammoCost: 0.0 };
     }
     if (perkActive(player, PerkId.REGRESSION_BULLETS)) {
-      const ammoClass = weapon.ammoClass !== null ? (weapon.ammoClass | 0) : 0;
+      const ammoClass = weapon.ammoClass !== null ? int(weapon.ammoClass) : 0;
 
       const reloadTime = weapon.reloadTime;
       const factor = ammoClass === 1 ? 4.0 : 200.0;
-      player.experience = (player.experience - reloadTime * factor) | 0;
+      player.experience = int(player.experience - reloadTime * factor);
       if (player.experience < 0) {
         player.experience = 0;
       }
     } else if (perkActive(player, PerkId.AMMUNITION_WITHIN)) {
-      const ammoClass = weapon.ammoClass !== null ? (weapon.ammoClass | 0) : 0;
+      const ammoClass = weapon.ammoClass !== null ? int(weapon.ammoClass) : 0;
 
       const cost = ammoClass === 1 ? 0.15 : 1.0;
       playerTakeDamage(
@@ -235,7 +235,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
     }
   }
 
-  const pelletCount = weapon.pelletCount | 0;
+  const pelletCount = int(weapon.pelletCount);
   const fireBulletsWeapon = weaponEntryForProjectileTypeId(ProjectileTemplateId.FIRE_BULLETS);
 
   let shotCooldown = f32(weapon.shotCooldown);
@@ -262,7 +262,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   const aimHeading = headingFromDeltaF32({ dx: aimDelta.x, dy: aimDelta.y });
 
   const muzzle = player.pos.add(Vec2.fromHeading(aimHeading).rotated(-0.150915).mul(16.0));
-  const weaponFlags = (weapon.flags ?? 0) | 0;
+  const weaponFlags = int(weapon.flags ?? 0);
   if (weaponFlags & 0x1) {
     const shellCasingDraws: [number, number, number, number] = [
       state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_ANGLE }),
@@ -274,7 +274,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
       pos: muzzle,
       aimHeading,
       draws: shellCasingDraws,
-      detailPreset: (ctx.detailPreset ?? 5) | 0,
+      detailPreset: int(ctx.detailPreset ?? 5),
     });
   }
 
@@ -322,7 +322,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
       if (typeId === null) {
         throw new Error(`missing projectile type in recipe for weapon ${weaponId as number}`);
       }
-      const pellets = Math.max(0, (mode.count ?? 0) | 0);
+      const pellets = Math.max(0, int(mode.count ?? 0));
       shotCount = pellets;
       const meta = travelBudgetForTypeId(typeId);
       const pelletJitterCaller = isFireBullets ? null : (_PELLET_JITTER_CALLER_BY_WEAPON.get(weaponId) ?? null);
@@ -343,7 +343,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         });
         applySpeedScaleRule(
           state,
-          projId | 0,
+          int(projId),
           mode.speedScale,
           pelletSpeedCaller,
         );
@@ -413,7 +413,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
     }
     case 'SwarmerDumpMode': {
       // Mini-Rocket Swarmers -> secondary type 2 (fires the full clip in a spread).
-      const rocketCount = Math.max(1, player.weapon.ammo | 0);
+      const rocketCount = Math.max(1, int(player.weapon.ammo));
       let step: number;
       let angle: number;
       if (state.preserveBugs) {
@@ -446,10 +446,10 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
 
   const shotsFired = state.shotsFired as number[];
   const weaponShotsFired = state.weaponShotsFired as number[][];
-  if ((player.index | 0) >= 0 && (player.index | 0) < shotsFired.length) {
-    shotsFired[player.index | 0] += shotCount | 0;
+  if (int(player.index) >= 0 && int(player.index) < shotsFired.length) {
+    shotsFired[int(player.index)] += int(shotCount);
     if ((weaponId as number) >= 0 && (weaponId as number) < WEAPON_COUNT_SIZE) {
-      weaponShotsFired[player.index | 0][weaponId as number] += shotCount | 0;
+      weaponShotsFired[int(player.index)][weaponId as number] += int(shotCount);
     }
   }
 
@@ -490,5 +490,5 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   if (player.weapon.ammo <= 0.0 && reloadStartGateOpen) {
     playerStartReload(player, state);
   }
-  return { fired: true, shotCount: shotCount | 0, ammoCost };
+  return { fired: true, shotCount: int(shotCount), ammoCost };
 }

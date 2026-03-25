@@ -22,7 +22,7 @@ export function _spawnShrinkifierHitEffects(
 ): void {
   if (effects === null) return;
 
-  const detail = detailPreset | 0;
+  const detail = int(detailPreset);
 
   effects.spawn({
     effectId: EffectId.RING,
@@ -104,7 +104,7 @@ export function _spawnIonHitEffects(
       return;
   }
 
-  const detail = detailPreset | 0;
+  const detail = int(detailPreset);
 
   effects.spawn({
     effectId: EffectId.RING,
@@ -126,7 +126,7 @@ export function _spawnIonHitEffects(
   const burst = burstScale * 0.8;
   const lifetime = Math.min(burst * 0.7, 1.1);
   const half = burst * 32.0;
-  let count = (burst * 5.0) | 0;
+  let count = int(burst * 5.0);
   if (detail < 3) {
     count = (count / 2) | 0;
   }
@@ -170,7 +170,7 @@ export function _spawnPlasmaCannonHitEffects(
     sfxQueue.push(SfxId.SHOCKWAVE);
   }
 
-  const detail = detailPreset | 0;
+  const detail = int(detailPreset);
 
   const _spawnRing = (scale: number): void => {
     effects.spawn({
@@ -203,7 +203,7 @@ export function _spawnSplitterHitEffects(
 ): void {
   if (effects === null) return;
 
-  const detail = detailPreset | 0;
+  const detail = int(detailPreset);
   for (let i = 0; i < 3; i++) {
     const angle = (rng.rand({ caller: RngCallerStatic.SPLITTER_HIT_ANGLE }) & 0x1FF) * (Math.PI * 2.0 / 512.0);
     const radius = rng.rand({ caller: RngCallerStatic.SPLITTER_HIT_RADIUS }) % 26;

@@ -48,7 +48,7 @@ export function planPlayerAudioSfx(
   const sfx: SfxId[] = [];
   const weapon = WEAPON_BY_ID.get(player.weapon.weaponId)!;
 
-  if ((player.shotSeq | 0) > (opts.prevShotSeq | 0)) {
+  if (int(player.shotSeq) > int(opts.prevShotSeq)) {
     if (player.fireBulletsTimer > 0.0) {
       const fireBullets = WEAPON_BY_ID.get(WeaponId.FIRE_BULLETS)!;
       const plasmaMinigun = WEAPON_BY_ID.get(WeaponId.PLASMA_MINIGUN)!;
@@ -147,7 +147,7 @@ export function queueProjectileDecalsPreHit(
   let freezeShardSpawn: ((pos: Vec2, angle: number) => void) | null = null;
   if (freezeActive) {
     freezeShardSpawn = (pos: Vec2, angle: number): void => {
-      opts.state.effects.spawnFreezeShard({ pos, angle, rng: opts.rng, detailPreset: opts.detailPreset | 0 });
+      opts.state.effects.spawnFreezeShard({ pos, angle, rng: opts.rng, detailPreset: int(opts.detailPreset) });
     };
   }
 
@@ -274,7 +274,7 @@ export function planWorldPresentationStep(opts: {
 
   const commands = new PresentationStepCommands();
 
-  if (perkProgressionEnabled && (state.perkSelection.pendingCount | 0) > (prevPerkPending | 0)) {
+  if (perkProgressionEnabled && int(state.perkSelection.pendingCount) > int(prevPerkPending)) {
     commands.sfx.push(SfxId.UI_LEVELUP);
   }
 
@@ -282,7 +282,7 @@ export function planWorldPresentationStep(opts: {
     if (hits.length > 0) {
       queueProjectileDecals({
         state, players, fxQueue, hits, rng,
-        detailPreset: detailPreset | 0, violenceDisabled: violenceDisabled | 0,
+        detailPreset: int(detailPreset), violenceDisabled: int(violenceDisabled),
       });
       if (freezeBonusActive({ state })) {
         if (!demoModeActive && gameMode !== GameMode.RUSH && !gameTuneStarted) {
@@ -311,7 +311,7 @@ export function planWorldPresentationStep(opts: {
     commands.sfx.push(
       ...planPlayerAudioSfx(
         players[idx],
-        { prevShotSeq: prevShotSeq | 0, prevReloadActive, prevReloadTimer },
+        { prevShotSeq: int(prevShotSeq), prevReloadActive, prevReloadTimer },
       ),
     );
   }

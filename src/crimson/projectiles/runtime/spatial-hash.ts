@@ -107,10 +107,10 @@ export class CreatureSpatialHash {
     if (this._cells.size === 0) {
       return [];
     }
-    const projCellX = Math.floor(opts.pos.x / this._bucketSize);
-    const projCellY = Math.floor(opts.pos.y / this._bucketSize);
+    const projCellX = int(Math.floor(opts.pos.x / this._bucketSize));
+    const projCellY = int(Math.floor(opts.pos.y / this._bucketSize));
     const maxAxisDelta = opts.radius + this._maxFindMargin + _NATIVE_FIND_RADIUS_MARGIN_EPS;
-    const cellSpan = Math.ceil(maxAxisDelta / this._bucketSize) | 0;
+    const cellSpan = int(Math.ceil(maxAxisDelta / this._bucketSize));
 
     const candidates: number[] = [];
     for (let cellY = projCellY - cellSpan; cellY <= projCellY + cellSpan; cellY++) {
@@ -131,8 +131,8 @@ export class CreatureSpatialHash {
   }
 
   private _cellForPos(pos: Vec2): string {
-    const cellX = Math.floor(pos.x / this._bucketSize);
-    const cellY = Math.floor(pos.y / this._bucketSize);
+    const cellX = int(Math.floor(pos.x / this._bucketSize));
+    const cellY = int(Math.floor(pos.y / this._bucketSize));
     return cellKey(cellX, cellY);
   }
 

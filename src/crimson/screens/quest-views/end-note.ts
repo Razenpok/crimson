@@ -128,7 +128,7 @@ export class EndNoteView {
     }
     const dtStep = Math.min(dt, 0.1);
     this._cursorPulseTime += dtStep * 1.1;
-    const dtMs = (dtStep * 1000.0) | 0;
+    const dtMs = int(dtStep * 1000.0);
 
     if (this._closing) {
       if (dtMs > 0 && this._action === null) {

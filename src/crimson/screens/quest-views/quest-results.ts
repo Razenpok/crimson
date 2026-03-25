@@ -159,11 +159,11 @@ export class QuestResultsView {
       const hardcore = this.state.config.gameplay.hardcore;
       try {
         if (hardcore) {
-          if (nextUnlock > (this.state.status.questUnlockIndexFull | 0)) {
+          if (nextUnlock > int(this.state.status.questUnlockIndexFull)) {
             this.state.status.questUnlockIndexFull = nextUnlock;
           }
         } else {
-          if (nextUnlock > (this.state.status.questUnlockIndex | 0)) {
+          if (nextUnlock > int(this.state.status.questUnlockIndex)) {
             this.state.status.questUnlockIndex = nextUnlock;
           }
         }

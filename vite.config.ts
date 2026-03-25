@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import unimport from 'unimport/unplugin';
 
 export default defineConfig({
   base: './',
@@ -16,4 +17,12 @@ export default defineConfig({
       '@wgl': resolve(__dirname, 'src/grim/wgl'),
     },
   },
+  plugins: [
+    unimport.vite({
+      imports: [
+        { name: 'int', from: 'src/compat' },
+      ],
+      dts: 'src/types/unimport.d.ts',
+    }),
+  ]
 });

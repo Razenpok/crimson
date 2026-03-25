@@ -8,11 +8,11 @@ import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
 function circleSegmentsFilled(radius: number): number {
-  return Math.max(3, (radius * 0.125 + 12.0) | 0);
+  return Math.max(3, int(radius * 0.125 + 12.0));
 }
 
 function circleSegmentsOutline(radius: number): number {
-  return Math.max(3, (radius * 0.2 + 14.0) | 0);
+  return Math.max(3, int(radius * 0.2 + 14.0));
 }
 
 export function drawAimCircle(
@@ -34,7 +34,7 @@ export function drawAimCircle(
   const white = wgl.getWhiteTexture();
 
   // Filled circle via degenerate quads (triangle fan)
-  const fillSegs = Math.max(circleSegmentsFilled(radius), 64, radius | 0);
+  const fillSegs = Math.max(circleSegmentsFilled(radius), 64, int(radius));
   const step = (Math.PI * 2) / fillSegs;
 
   wgl.beginQuads(white);

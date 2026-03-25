@@ -11,7 +11,7 @@ export function creatureFindInRadius(
   creatures: readonly CreatureState[],
   opts: { pos: Vec2; radius: number; startIndex: number },
 ): number {
-  let startIndex = Math.max(0, opts.startIndex | 0);
+  let startIndex = Math.max(0, int(opts.startIndex));
   const maxIndex = Math.min(creatures.length, 0x180);
   if (startIndex >= maxIndex) {
     return -1;
@@ -49,7 +49,7 @@ export class PerksUpdateEffectsCtx {
   }
 
   aimTargetForPlayer(playerIndex: number): number {
-    playerIndex = playerIndex | 0;
+    playerIndex = int(playerIndex);
     const cached = this._aimTargetByPlayerIndex.get(playerIndex);
     if (cached !== undefined) {
       return cached;

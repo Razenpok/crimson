@@ -297,13 +297,13 @@ export function perkSelectionPick(
   if (choices.length === 0) {
     return null;
   }
-  const idx = choiceIndex | 0;
+  const idx = int(choiceIndex);
   if (idx < 0 || idx >= choices.length) {
     return null;
   }
   const perkId = choices[idx];
   perkApply(state, players, perkId, { perkState, dt, creatures });
-  console.assert((perkState.pendingCount | 0) > 0, 'pendingCount must be > 0 after perkApply');
+  console.assert(int(perkState.pendingCount) > 0, 'pendingCount must be > 0 after perkApply');
   perkState.pendingCount -= 1;
   perkState.choicesDirty = true;
   if (refreshChoices) {

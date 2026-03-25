@@ -104,7 +104,7 @@ export function creatureAiUpdateTarget(
   opts: { playerPos: Vec2; creatures: readonly CreatureAIStateLike[]; dt: number },
 ): CreatureAIUpdate {
   const dist_to_player = _distanceF32(creature.pos, opts.playerPos);
-  const orbit_phase = f32(f32((creature.phase_seed | 0) * f32(3.7)) * NATIVE_PI);
+  const orbit_phase = f32(f32(int(creature.phase_seed) * f32(3.7)) * NATIVE_PI);
   let move_scale: number = 1.0;
   let self_damage: number | null = null;
 

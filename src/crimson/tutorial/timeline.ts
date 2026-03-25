@@ -68,7 +68,7 @@ export interface TutorialFrameActions {
 
 
 export function tutorialStage5BonusCarrierConfig(repeatSpawnCount: number): [BonusId, number] | null {
-  const n = repeatSpawnCount | 0;
+  const n = int(repeatSpawnCount);
   if (n === 1) return [BonusId.SPEED, -1];
   if (n === 2) return [BonusId.WEAPON, 5];
   if (n === 3) return [BonusId.DOUBLE_EXPERIENCE, -1];
@@ -90,9 +90,9 @@ function tickStageTransition(
   transitionTimerMs: number,
   frameDtMs: number,
 ): [number, number] {
-  stageIndex = stageIndex | 0;
-  transitionTimerMs = transitionTimerMs | 0;
-  const dtMs = frameDtMs | 0;
+  stageIndex = int(stageIndex);
+  transitionTimerMs = int(transitionTimerMs);
+  const dtMs = int(frameDtMs);
 
   if (transitionTimerMs < -1) {
     transitionTimerMs += dtMs;
@@ -118,9 +118,9 @@ function tickStageTransition(
 
 
 function promptAlpha(opts: { stageIndex: number; stageTimerMs: number; transitionTimerMs: number }): number {
-  let stageIndex = opts.stageIndex | 0;
-  let stageTimerMs = opts.stageTimerMs | 0;
-  let transitionTimerMs = opts.transitionTimerMs | 0;
+  let stageIndex = int(opts.stageIndex);
+  let stageTimerMs = int(opts.stageTimerMs);
+  let transitionTimerMs = int(opts.transitionTimerMs);
 
   if (stageIndex < 0) return 0.0;
 
@@ -155,15 +155,15 @@ function tickHint(
 
   if (!state.hintFadeIn && hintBonusDied) {
     state.hintFadeIn = true;
-    state.hintIndex = (state.hintIndex | 0) + 1;
+    state.hintIndex = int(state.hintIndex) + 1;
     hintSpawns.push(
       { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(128.0, 128.0), heading: 3.1415927 },
       { templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26, pos: new Vec2(152.0, 160.0), heading: 3.1415927 },
     );
   }
 
-  const delta = (frameDtMs | 0) * 3;
-  state.hintAlpha = (state.hintAlpha | 0) + (state.hintFadeIn ? delta : -delta);
+  const delta = int(frameDtMs) * 3;
+  state.hintAlpha = int(state.hintAlpha) + (state.hintFadeIn ? delta : -delta);
   if (state.hintAlpha < 0) {
     state.hintAlpha = 0;
   } else if (state.hintAlpha > 1000) {
@@ -171,9 +171,9 @@ function tickHint(
   }
 
   const hintTextTable = state.preserveBugs ? TUTORIAL_HINT_TEXT_BUGS : TUTORIAL_HINT_TEXT;
-  const idx = state.hintIndex | 0;
+  const idx = int(state.hintIndex);
   const text = (idx >= 0 && idx < hintTextTable.length) ? hintTextTable[idx] : '';
-  const alpha = text ? (state.hintAlpha | 0) * 0.001 : 0.0;
+  const alpha = text ? int(state.hintAlpha) * 0.001 : 0.0;
   return [hintSpawns, text, clamp01(alpha)];
 }
 
@@ -208,23 +208,23 @@ export function tickTutorialTimeline(
   const bonusPoolEmpty = opts.bonusPoolEmpty;
   const perkPendingCount = opts.perkPendingCount;
   const hintBonusDied = opts.hintBonusDied ?? false;
-  const dtMs = frameDtMs | 0;
+  const dtMs = int(frameDtMs);
   const state = cloneState(stateIn);
-  state.stageTimerMs = (state.stageTimerMs | 0) + dtMs;
+  state.stageTimerMs = int(state.stageTimerMs) + dtMs;
 
   const [stageIndex, transitionTimerMs] = tickStageTransition(
     state.stageIndex,
     state.stageTransitionTimerMs,
     dtMs,
   );
-  state.stageIndex = stageIndex | 0;
-  state.stageTransitionTimerMs = transitionTimerMs | 0;
+  state.stageIndex = int(stageIndex);
+  state.stageTransitionTimerMs = int(transitionTimerMs);
 
   let basePromptText = (stageIndex >= 0 && stageIndex < TUTORIAL_STAGE_TEXT.length)
     ? TUTORIAL_STAGE_TEXT[stageIndex]
     : '';
   let basePromptAlpha = promptAlpha({ stageIndex, stageTimerMs: state.stageTimerMs, transitionTimerMs });
-  if (stageIndex === 6 && (perkPendingCount | 0) < 1) {
+  if (stageIndex === 6 && int(perkPendingCount) < 1) {
     basePromptText = '';
     basePromptAlpha = 0.0;
   }
@@ -243,7 +243,7 @@ export function tickTutorialTimeline(
   if (stageIndex === 0) {
     if (state.stageTimerMs > 6000 && state.stageTransitionTimerMs === -1) {
       state.repeatSpawnCount = 0;
-      state.hintIndex = state.stageTransitionTimerMs | 0;
+      state.hintIndex = int(state.stageTransitionTimerMs);
       state.hintFadeIn = false;
       state.stageTransitionTimerMs = -1000;
     }
@@ -278,12 +278,12 @@ export function tickTutorialTimeline(
     }
   } else if (stageIndex === 5) {
     if (bonusPoolEmpty && creaturesNoneActive) {
-      state.repeatSpawnCount = (state.repeatSpawnCount | 0) + 1;
-      if ((state.repeatSpawnCount | 0) < 8) {
+      state.repeatSpawnCount = int(state.repeatSpawnCount) + 1;
+      if (int(state.repeatSpawnCount) < 8) {
         state.hintFadeIn = false;
         state.hintBonusCreatureRef = null;
-        spawnTemplates.push(...buildTutorialStage5RepeatSpawns(state.repeatSpawnCount | 0));
-        stage5BonusCarrierDrop = tutorialStage5BonusCarrierConfig(state.repeatSpawnCount | 0);
+        spawnTemplates.push(...buildTutorialStage5RepeatSpawns(int(state.repeatSpawnCount)));
+        stage5BonusCarrierDrop = tutorialStage5BonusCarrierConfig(int(state.repeatSpawnCount));
       } else if (state.stageTransitionTimerMs === -1) {
         state.stageTransitionTimerMs = -1000;
         playLevelupSfx = true;
@@ -291,7 +291,7 @@ export function tickTutorialTimeline(
       }
     }
   } else if (stageIndex === 6) {
-    if ((perkPendingCount | 0) < 1 && state.stageTransitionTimerMs === -1) {
+    if (int(perkPendingCount) < 1 && state.stageTransitionTimerMs === -1) {
       state.stageTransitionTimerMs = -1000;
       spawnTemplates.push(...buildTutorialStage6PerksDoneSpawns());
     }

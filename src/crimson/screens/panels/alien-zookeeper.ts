@@ -360,7 +360,7 @@ export class AlienZooKeeperView {
     }
 
     const dtClamped = Math.min(dt, 0.1);
-    const dtMs = (dtClamped * 1000.0) | 0;
+    const dtMs = int(dtClamped * 1000.0);
     this._cursorPulseTime += dtClamped * 1.1;
 
     if (this._closing) {
@@ -461,7 +461,7 @@ export class AlienZooKeeperView {
     drawSmallText(font, _SUBTITLE_2, new Vec2(layout.subtitle2X, layout.subtitle2Y), WHITE);
 
     // Score
-    const scoreText = `score: ${this._score | 0}`;
+    const scoreText = `score: ${int(this._score)}`;
     drawSmallText(font, scoreText, new Vec2(layout.scoreX, layout.scoreY), wgl.makeColor(1.0, 1.0, 1.0, 0.7));
 
     // Board background
@@ -557,7 +557,7 @@ export class AlienZooKeeperView {
   private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
-    const [signScale, shiftX] = signLayoutScale(screenW | 0);
+    const [signScale, shiftX] = signLayoutScale(int(screenW));
     const signPosY = screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL;
     const signPos = new Vec2(screenW + MENU_SIGN_POS_X_PAD, signPosY);
     const signW = MENU_SIGN_WIDTH * signScale;

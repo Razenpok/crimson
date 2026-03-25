@@ -113,7 +113,7 @@ export class DemoTrialOverlayUi {
     mouseY: number,
     click: boolean,
   ): string | null {
-    const dt = Math.max(0, dtMs | 0);
+    const dt = Math.max(0, int(dtMs));
     this._cursorPulseTime += dt * 0.001 * 1.1;
 
     const mx = clamp(mouseX, 0.0, Math.max(0.0, screenW - 1.0));
@@ -160,8 +160,8 @@ export class DemoTrialOverlayUi {
     if (!info.visible) return;
 
     const panelPos = _panelXY(screenW, screenH);
-    const px = Math.floor(panelPos.x);
-    const py = Math.floor(panelPos.y);
+    const px = int(panelPos.x);
+    const py = int(panelPos.y);
     const pw = 512;
     const ph = 256;
 

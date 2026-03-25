@@ -78,7 +78,7 @@ export class PerkMenuController {
   }
 
   set selectedIndex(value: number) {
-    this._selectedIndex = Math.floor(value);
+    this._selectedIndex = int(value);
   }
 
   get timelineMs(): number {

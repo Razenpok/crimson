@@ -342,7 +342,7 @@ export class QuestFailedView {
   }
 
   private _failureMessage(): string {
-    const retryCount = this.state.questFailRetryCount | 0;
+    const retryCount = int(this.state.questFailRetryCount);
     if (retryCount === 1) return "You didn't make it, do try again.";
     if (retryCount === 2) return 'Third time no good.';
     if (retryCount === 3) return "No luck this time, have another go?";
@@ -359,8 +359,8 @@ export class QuestFailedView {
     if (outcome === null) return;
 
     const level = outcome.level;
-    const elapsed = Math.max(1, outcome.baseTimeMs | 0);
-    const xp = outcome.experience | 0;
+    const elapsed = Math.max(1, int(outcome.baseTimeMs));
+    const xp = int(outcome.experience);
 
     this._record = {
       survivalElapsedMs: elapsed,
@@ -371,7 +371,7 @@ export class QuestFailedView {
   private _activateRetry(): void {
     const outcome = this._outcome;
     if (outcome === null) return;
-    this.state.questFailRetryCount = (this.state.questFailRetryCount | 0) + 1;
+    this.state.questFailRetryCount = int(this.state.questFailRetryCount) + 1;
     const level = outcome.level;
     this.state.pendingQuestLevel = level;
     this.state.config.gameplay.mode = GameMode.QUESTS;
@@ -434,7 +434,7 @@ export class QuestFailedView {
     // Vertical separator
     const sepPos = scorePos.offset({ dx: 80.0 });
     wgl.drawRectangle(
-      Math.floor(sepPos.x), Math.floor(sepPos.y),
+      int(sepPos.x), int(sepPos.y),
       1, 48,
       separatorColor,
     );
@@ -449,7 +449,7 @@ export class QuestFailedView {
     // Horizontal separator
     const linePos = scorePos.add(new Vec2(-16.0, 52.0));
     wgl.drawRectangle(
-      Math.floor(linePos.x), Math.floor(linePos.y),
+      int(linePos.x), int(linePos.y),
       192, 1,
       separatorColor,
     );

@@ -63,7 +63,7 @@ export class BonusHudState {
     slot.active = true;
     slot.bonusId = bonusId;
     slot.label = label;
-    slot.iconId = iconId | 0;
+    slot.iconId = int(iconId);
     slot.slideX = -184.0;
     slot.timerRef = timerRefValue;
     slot.timerRefAlt = timerRefAlt;

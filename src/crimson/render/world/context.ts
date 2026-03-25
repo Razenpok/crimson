@@ -63,8 +63,8 @@ export class WorldRenderCtx {
     rotationRad: number = 0.0,
     tint: [number, number, number, number] = [1, 1, 1, 1],
   ): void {
-    grid = Math.max(1, grid | 0);
-    frame = Math.max(0, frame | 0);
+    grid = Math.max(1, int(grid));
+    frame = Math.max(0, int(frame));
     const cellW = texture.width / grid;
     const cellH = texture.height / grid;
     const col = frame % grid;

@@ -21,7 +21,7 @@ export function resetTypoState(
   const dictionaryWords = opts.dictionaryWords ?? [];
   const highscoreNames = opts.highscoreNames ?? [];
   typo.typing = new TypingBuffer();
-  typo.names = CreatureNameTable.sized(opts.creatureCapacity | 0);
+  typo.names = CreatureNameTable.sized(int(opts.creatureCapacity));
   typo.spawnCooldownMs = 0;
   typo.dictionaryWords = Array.from(dictionaryWords);
   typo.highscoreNames = Array.from(highscoreNames);
@@ -30,5 +30,5 @@ export function resetTypoState(
 }
 
 export function typoShotCounts(typo: TypoState): [number, number] {
-  return [typo.typing.submitCount | 0, typo.typing.matchCount | 0];
+  return [int(typo.typing.submitCount), int(typo.typing.matchCount)];
 }

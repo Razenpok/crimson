@@ -20,7 +20,7 @@ const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
 const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = 52;
 
 function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  const id = weaponId | 0;
+  const id = int(weaponId);
   if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
     return id;
   }
@@ -96,15 +96,15 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const frameW = 250.0 * scale;
     const frameH = 164.0 * scale;
     wgl.drawRectangle(
-      Math.round(frameX), Math.round(frameY),
-      Math.round(frameW), Math.round(frameH),
+      int(Math.round(frameX)), int(Math.round(frameY)),
+      int(Math.round(frameW)), int(Math.round(frameH)),
       wgl.makeColor(1, 1, 1, 1),
     );
     wgl.drawRectangle(
-      Math.round(frameX + 1.0 * scale),
-      Math.round(frameY + 1.0 * scale),
-      Math.max(0, Math.round(frameW - 2.0 * scale)),
-      Math.max(0, Math.round(frameH - 2.0 * scale)),
+      int(Math.round(frameX + 1.0 * scale)),
+      int(Math.round(frameY + 1.0 * scale)),
+      Math.max(0, int(Math.round(frameW - 2.0 * scale))),
+      Math.max(0, int(Math.round(frameH - 2.0 * scale))),
       wgl.makeColor(0, 0, 0, 1),
     );
 
@@ -113,7 +113,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const rowStep = 16.0 * scale;
     const visibleRows = 10;
     const maxScroll = Math.max(0, weaponIds.length - visibleRows);
-    const start = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
+    const start = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
     const end = Math.min(weaponIds.length, start + visibleRows);
     const visibleWeaponIds = weaponIds.slice(start, end);
     for (let row = 0; row < visibleWeaponIds.length; row++) {
@@ -141,7 +141,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
 
     const reloadTime = weapon.reloadTime;
     const clipSize = weapon.clipSize;
-    const ammoClass = (weapon.ammoClass ?? 0) | 0;
+    const ammoClass = int(weapon.ammoClass ?? 0);
     const firerateLabel = preserveBugs ? 'Firerate' : 'Fire rate';
     let firerateText: string;
     if (ammoClass === 1) {
@@ -168,11 +168,11 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
 
     const visibleRows = 10;
     const maxScroll = Math.max(0, weaponIds.length - visibleRows);
-    const mouseWheel = InputState.mouseWheelDelta() | 0;
+    const mouseWheel = int(InputState.mouseWheelDelta());
     if (mouseWheel) {
-      this._listScrollIndex = Math.max(0, Math.min(maxScroll, (this._listScrollIndex | 0) - mouseWheel));
+      this._listScrollIndex = Math.max(0, Math.min(maxScroll, (int(this._listScrollIndex)) - mouseWheel));
     }
-    const start = Math.max(0, Math.min(maxScroll, this._listScrollIndex | 0));
+    const start = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
     const end = Math.min(weaponIds.length, start + visibleRows);
     const rowCount = end - start;
     if (rowCount <= 0) {
@@ -236,13 +236,13 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _weaponRpm(weapon: Weapon): number {
-    return (60.0 / weapon.shotCooldown) | 0;
+    return int(60.0 / weapon.shotCooldown);
   }
 
   private _drawWicon(iconIndex: number, pos: Vec2, scale: number): void {
     const resources = this.state.resources!;
     const tex = getTexture(resources, TextureId.UI_WICONS);
-    const idx = iconIndex | 0;
+    const idx = int(iconIndex);
     if (idx < 0 || idx > 31) return;
     const grid = 8;
     const cellW = tex.width / grid;

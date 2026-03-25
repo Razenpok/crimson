@@ -56,7 +56,7 @@ export function applySimMetadataTickResult(opts: {
   const step = tickResult.payload.step;
   applyTickToSim({ simWorld, step, gameTuneStarted });
   return new PresentationTickOutput({
-    tickIndex: tickResult.sourceTick.tickIndex | 0,
+    tickIndex: int(tickResult.sourceTick.tickIndex),
     dtSim: Number(step.dtSim),
     presentation: step.presentation,
     terrainFx: step.terrainFx,

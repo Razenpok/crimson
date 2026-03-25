@@ -57,8 +57,8 @@ export class RenderPipeline {
 
   open(opts: { width: number; height: number }): void {
     if (this._opened) return;
-    const w = Math.max(0, opts.width | 0);
-    const h = Math.max(0, opts.height | 0);
+    const w = Math.max(0, int(opts.width));
+    const h = Math.max(0, int(opts.height));
     try {
       if (this._onResize) this._onResize(w, h);
       this._sink.open();
@@ -79,8 +79,8 @@ export class RenderPipeline {
   }
 
   private _resizeIfNeeded(width: number, height: number): void {
-    const w = Math.max(0, width | 0);
-    const h = Math.max(0, height | 0);
+    const w = Math.max(0, int(width));
+    const h = Math.max(0, int(height));
     if (w === this._width && h === this._height) return;
     if (this._onResize) this._onResize(w, h);
     this._width = w;

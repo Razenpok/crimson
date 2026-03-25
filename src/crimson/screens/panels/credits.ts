@@ -398,7 +398,7 @@ export class CreditsView {
       this._scrollLineStartIndex = 0;
     }
 
-    const wholeScroll = Math.floor(this._scrollTimeS);
+    const wholeScroll = int(this._scrollTimeS);
     this._scrollLineStartIndex = wholeScroll - 0x0F;
     this._scrollLineEndIndex = wholeScroll + 1;
     if (this._lineMaxIndex < this._scrollLineEndIndex) {
@@ -508,7 +508,7 @@ export class CreditsView {
       this._ground.processPending();
     }
     const dtClamped = Math.min(dt, 0.1);
-    const dtMs = (dtClamped * 1000.0) | 0;
+    const dtMs = int(dtClamped * 1000.0);
     this._cursorPulseTime += dtClamped * 1.1;
 
     if (this._closing) {
@@ -637,7 +637,7 @@ export class CreditsView {
   private _drawSign(resources: RuntimeResources): void {
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
-    const [signScale, shiftX] = signLayoutScale(screenW | 0);
+    const [signScale, shiftX] = signLayoutScale(int(screenW));
     const signPosY = screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL;
     const signPos = new Vec2(screenW + MENU_SIGN_POS_X_PAD, signPosY);
     const signW = MENU_SIGN_WIDTH * signScale;

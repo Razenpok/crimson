@@ -178,11 +178,11 @@ export class QuestsMenuView {
 
   open(): void {
     const layoutW = this.state.config.display.width;
-    this._menuScreenWidth = layoutW | 0;
+    this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
     this._action = null;
     this._dirty = false;
-    this._stage = Math.max(1, Math.min(5, this._stage | 0));
+    this._stage = Math.max(1, Math.min(5, int(this._stage)));
     this._cursorPulseTime = 0.0;
     this._timelineMs = 0;
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;
@@ -216,7 +216,7 @@ export class QuestsMenuView {
     }
 
     this._cursorPulseTime += Math.min(dt, 0.1) * 1.1;
-    const dtMs = (Math.min(dt, 0.1) * 1000.0) | 0;
+    const dtMs = int(Math.min(dt, 0.1) * 1000.0);
 
     if (this._closing) {
       if (dtMs > 0 && this._action === null) {
@@ -254,10 +254,10 @@ export class QuestsMenuView {
     // Debug: unlock all quests
     if (this.state.debugEnabled && InputState.wasKeyPressed(KEY_F5)) {
       const unlock = 49;
-      if ((status.questUnlockIndex | 0) < unlock) {
+      if (int(status.questUnlockIndex) < unlock) {
         status.questUnlockIndex = unlock;
       }
-      if ((status.questUnlockIndexFull | 0) < unlock) {
+      if (int(status.questUnlockIndexFull) < unlock) {
         status.questUnlockIndexFull = unlock;
       }
       this.state.console.log.log('debug: unlocked all quests');
@@ -409,7 +409,7 @@ export class QuestsMenuView {
 
   private _hardcoreCheckboxClicked(layout: QuestMenuLayout): boolean {
     const status = this.state.status;
-    if ((status.questUnlockIndex | 0) < QUEST_HARDCORE_UNLOCK_INDEX) {
+    if (int(status.questUnlockIndex) < QUEST_HARDCORE_UNLOCK_INDEX) {
       return false;
     }
     const resources = this._requireResources();
@@ -457,7 +457,7 @@ export class QuestsMenuView {
   private _rowsY0(layout: QuestMenuLayout): number {
     const status = this.state.status;
     let y0 = layout.listPos.y;
-    if ((status.questUnlockIndex | 0) >= QUEST_HARDCORE_UNLOCK_INDEX) {
+    if (int(status.questUnlockIndex) >= QUEST_HARDCORE_UNLOCK_INDEX) {
       y0 += QUEST_HARDCORE_LIST_Y_SHIFT;
     }
     return y0;
@@ -484,17 +484,17 @@ export class QuestsMenuView {
   private _questUnlocked(stage: number, row: number): boolean {
     const status = this.state.status;
     const config = this.state.config;
-    let unlock = status.questUnlockIndex | 0;
+    let unlock = int(status.questUnlockIndex);
     if (config.gameplay.hardcore) {
-      unlock = status.questUnlockIndexFull | 0;
+      unlock = int(status.questUnlockIndexFull);
     }
-    const level: QuestLevel = { major: stage | 0, minor: (row | 0) + 1 };
+    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
     return unlock >= questLevelGlobalIndex(level);
   }
 
   private _tryStartQuest(stage: number, row: number): void {
     if (!this._questUnlocked(stage, row)) return;
-    const level: QuestLevel = { major: stage | 0, minor: (row | 0) + 1 };
+    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
     this.state.pendingQuestLevel = level;
     this.state.config.gameplay.mode = GameMode.QUESTS;
     this.state.config.gameplay.questLevel = level;
@@ -503,7 +503,7 @@ export class QuestsMenuView {
   }
 
   private _questTitle(stage: number, row: number): string {
-    const level: QuestLevel = { major: stage | 0, minor: (row | 0) + 1 };
+    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
     const quest = questByLevel(level);
     if (quest === null) return '???';
     return quest.title;
@@ -522,7 +522,7 @@ export class QuestsMenuView {
   }
 
   private _questCounts(stage: number, row: number): [number, number] | null {
-    const level: QuestLevel = { major: stage | 0, minor: (row | 0) + 1 };
+    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
     const globalIndex = questLevelGlobalIndex(level);
     const status = this.state.status;
     const gamesIdx = questGamesCounterIndex(level);
@@ -530,27 +530,27 @@ export class QuestsMenuView {
 
     let games: number;
     try {
-      games = status.questPlayCount(gamesIdx) | 0;
+      games = int(status.questPlayCount(gamesIdx));
     } catch {
       return null;
     }
 
     let completed: number;
     try {
-      completed = status.questPlayCount(completedIdx) | 0;
+      completed = int(status.questPlayCount(completedIdx));
     } catch {
-      if ((stage | 0) !== 5) return null;
+      if (int(stage) !== 5) return null;
       const tailSlot = globalIndex - 40;
       if (tailSlot === 0) {
-        completed = status.modePlayCountForMode(GameMode.SURVIVAL) | 0;
+        completed = int(status.modePlayCountForMode(GameMode.SURVIVAL));
       } else if (tailSlot === 1) {
-        completed = status.modePlayCountForMode(GameMode.RUSH) | 0;
+        completed = int(status.modePlayCountForMode(GameMode.RUSH));
       } else if (tailSlot === 2) {
-        completed = status.modePlayCountForMode(GameMode.TYPO) | 0;
+        completed = int(status.modePlayCountForMode(GameMode.TYPO));
       } else if (tailSlot === 3) {
-        completed = status.modePlayOther | 0;
+        completed = int(status.modePlayOther);
       } else if (tailSlot === 4) {
-        completed = status.gameSequenceId | 0;
+        completed = int(status.gameSequenceId);
       } else if (tailSlot >= 5 && tailSlot <= 8) {
         const tail = status.unknownTail;
         const off = (tailSlot - 5) * 4;
@@ -574,7 +574,7 @@ export class QuestsMenuView {
     const iconsStartPos = layout.iconsStartPos;
     const listPos = layout.listPos;
 
-    let stage = this._stage | 0;
+    let stage = int(this._stage);
     if (stage < 1) stage = 1;
     if (stage > 5) stage = 5;
 
@@ -624,7 +624,7 @@ export class QuestsMenuView {
     const y0 = this._rowsY0(layout);
 
     // Hardcore checkbox (only drawn once tier5 is reachable in normal mode).
-    if ((status.questUnlockIndex | 0) >= QUEST_HARDCORE_UNLOCK_INDEX) {
+    if (int(status.questUnlockIndex) >= QUEST_HARDCORE_UNLOCK_INDEX) {
       const checkTex = hardcoreFlag
         ? getTexture(resources, TextureId.UI_CHECK_ON)
         : getTexture(resources, TextureId.UI_CHECK_OFF);
@@ -659,8 +659,8 @@ export class QuestsMenuView {
       if (unlocked) {
         const lineY = y + 13.0;
         wgl.drawRectangle(
-          Math.floor(listPos.x), Math.floor(lineY),
-          Math.floor(listPos.x + titleW + 32.0) - Math.floor(listPos.x), 1,
+          int(listPos.x), int(lineY),
+          int(listPos.x + titleW + 32.0) - int(listPos.x), 1,
           color,
         );
       }
@@ -693,7 +693,7 @@ export class QuestsMenuView {
   private _drawSign(): void {
     const resources = this._requireResources();
     const screenW = this.state.config.display.width;
-    const [scale, shiftX] = signLayoutScale(screenW | 0);
+    const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
       screenW + MENU_SIGN_POS_X_PAD,
       screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL,

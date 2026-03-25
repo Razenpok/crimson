@@ -93,18 +93,18 @@ export class HudState {
   preserveBugs = false;
 
   smoothXp(target: number, frameDtMs: number): number {
-    target = target | 0;
+    target = int(target);
     if (target <= 0) {
       this.survivalXpSmoothed = 0;
       return 0;
     }
 
-    let smoothed = this.survivalXpSmoothed | 0;
+    let smoothed = int(this.survivalXpSmoothed);
     if (smoothed === target) {
       return smoothed;
     }
 
-    let step = Math.max(1, (frameDtMs | 0) >> 1);
+    let step = Math.max(1, int(frameDtMs) >> 1);
     const diff = Math.abs(smoothed - target);
     if (diff > 1000) {
       step *= (diff / 100) | 0;
@@ -236,11 +236,11 @@ function _questPanelSlideX(timeMs: number): number {
 }
 
 function _survivalXpProgressRatio(xp: number, level: number): number {
-  level = Math.max(1, level | 0);
+  level = Math.max(1, int(level));
   const prevThreshold = level <= 1 ? 0 : survivalLevelThreshold(level - 1);
   const nextThreshold = survivalLevelThreshold(level);
   if (nextThreshold <= prevThreshold) return 0.0;
-  return ((xp | 0) - prevThreshold) / (nextThreshold - prevThreshold);
+  return (int(xp) - prevThreshold) / (nextThreshold - prevThreshold);
 }
 
 function _drawProgressBar(
@@ -267,18 +267,18 @@ function _drawProgressBar(
   const fgB = rgba.b;
   const fgA = rgba.a;
   wgl.drawRectangle(
-    (pos.x) | 0,
-    (pos.y) | 0,
-    (width) | 0,
-    (barH) | 0,
+    int(pos.x),
+    int(pos.y),
+    int(width),
+    int(barH),
     wgl.makeColor(bgR, bgG, bgB, bgA),
   );
   const innerW = Math.max(0.0, (width - 2.0 * scale) * ratio);
   wgl.drawRectangle(
-    (pos.x + scale) | 0,
-    (pos.y + scale) | 0,
-    (innerW) | 0,
-    (innerH) | 0,
+    int(pos.x + scale),
+    int(pos.y + scale),
+    int(innerW),
+    int(innerH),
     wgl.makeColor(fgR, fgG, fgB, fgA),
   );
 }
@@ -299,7 +299,7 @@ export function drawTargetHealthBar(
 function _weaponIconIndex(weaponId: number): number | null {
   const entry = WEAPON_BY_ID.get(weaponId as WeaponId);
   if (!entry) return null;
-  const iconIndex = entry.iconIndex | 0;
+  const iconIndex = int(entry.iconIndex);
   if (iconIndex < 0 || iconIndex > 31) return null;
   return iconIndex;
 }
@@ -308,7 +308,7 @@ function _weaponAmmoClass(weaponId: number): number {
   const entry = WEAPON_BY_ID.get(weaponId as WeaponId);
   if (!entry) return 0;
   const value = entry.ammoClass;
-  return value !== null ? value | 0 : 0;
+  return value !== null ? int(value) : 0;
 }
 
 function _weaponIconSrc(
@@ -318,7 +318,7 @@ function _weaponIconSrc(
   const grid = 8;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
-  const frame = (iconIndex | 0) * 2;
+  const frame = int(iconIndex) * 2;
   const col = frame % grid;
   const row = (frame / grid) | 0;
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
@@ -331,8 +331,8 @@ function _bonusIconSrc(
   const grid = 4;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
-  const col = (iconId | 0) % grid;
-  const row = ((iconId | 0) / grid) | 0;
+  const col = int(iconId) % grid;
+  const row = (int(iconId) / grid) | 0;
   return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
@@ -608,11 +608,11 @@ export function drawHudOverlay(
       }
 
       const playerAmmoBase = ammoBasePos.add(ammoStep.mul(playerIdx));
-      let bars = Math.max(0, hudPlayer.weapon.clipSize | 0);
+      let bars = Math.max(0, int(hudPlayer.weapon.clipSize));
       if (bars > HUD_AMMO_BAR_LIMIT) {
         bars = HUD_AMMO_BAR_CLAMP;
       }
-      const ammoCount = Math.max(0, hudPlayer.weapon.ammo | 0);
+      const ammoCount = Math.max(0, int(hudPlayer.weapon.ammo));
       for (let barIdx = 0; barIdx < bars; barIdx++) {
         const barAlpha = barIdx < ammoCount ? baseAlpha : baseAlpha * HUD_AMMO_DIM_ALPHA;
         const barPos = playerAmmoBase.offset({ dx: barIdx * HUD_AMMO_BAR_STEP });
@@ -792,7 +792,7 @@ export function drawHudOverlay(
   // -----------------------------------------------------------------------
   // Survival XP panel.
   // -----------------------------------------------------------------------
-  const xpTarget = score === null ? (player.experience | 0) : (score | 0);
+  const xpTarget = score === null ? int(player.experience) : int(score);
   const xpDisplay = showXp ? state.smoothXp(xpTarget, frameDtMs) : xpTarget;
   if (showXp) {
     const panelPos = new Vec2(HUD_SURV_PANEL_POS[0], HUD_SURV_PANEL_POS[1] + hudYShift);
@@ -835,13 +835,13 @@ export function drawHudOverlay(
     );
     _drawText(
       font,
-      `${player.level | 0}`,
+      `${int(player.level)}`,
       new Vec2(ui(lvlValuePos.x), ui(lvlValuePos.y)),
       textScale,
       panelTextColor,
     );
 
-    const progressRatio = _survivalXpProgressRatio(xpTarget, player.level | 0);
+    const progressRatio = _survivalXpProgressRatio(xpTarget, int(player.level));
     const progressPos = new Vec2(HUD_SURV_PROGRESS_POS[0], HUD_SURV_PROGRESS_POS[1] + hudYShift);
     const barRgba = HUD_XP_BAR_RGBA.scaledAlpha(alpha);
     _drawProgressBar(

@@ -52,7 +52,7 @@ export class BonusApplyCtx {
         {
           label: this.label,
           iconId: this.iconId,
-          timerRef: timerRef('player', String(timerKey), this.player.index | 0),
+          timerRef: timerRef('player', String(timerKey), int(this.player.index)),
         },
       );
     }

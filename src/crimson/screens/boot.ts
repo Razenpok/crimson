@@ -286,34 +286,34 @@ export class BootView {
 
     // Top border line
     wgl.drawRectangle(
-      Math.round(bandLeft),
-      Math.round(bandTop),
-      Math.round(bandRight - bandLeft),
+      int(Math.round(bandLeft)),
+      int(Math.round(bandTop)),
+      int(Math.round(bandRight - bandLeft)),
       1,
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
     // Bottom border line
     wgl.drawRectangle(
-      Math.round(bandLeft),
-      Math.round(bandBottom),
-      Math.round(bandRight - bandLeft),
+      int(Math.round(bandLeft)),
+      int(Math.round(bandBottom)),
+      int(Math.round(bandRight - bandLeft)),
       1,
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
     // Left border line
     wgl.drawRectangle(
-      Math.round(bandLeft),
-      Math.round(bandTop),
+      int(Math.round(bandLeft)),
+      int(Math.round(bandTop)),
       1,
-      Math.round(bandHeight),
+      int(Math.round(bandHeight)),
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
     // Right border line
     wgl.drawRectangle(
-      Math.round(bandRight),
-      Math.round(bandTop),
+      int(Math.round(bandRight)),
+      int(Math.round(bandTop)),
       1,
-      Math.round(bandHeight),
+      int(Math.round(bandHeight)),
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
 

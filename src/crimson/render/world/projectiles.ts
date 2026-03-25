@@ -36,7 +36,7 @@ export function drawProjectile(
   const registryCtx: ProjectileDrawCtx = {
     renderer: projectileRenderCtx,
     proj,
-    projIndex: projIndex | 0,
+    projIndex: int(projIndex),
     texture,
     typeId: typeId as number,
     pos: projPos,
