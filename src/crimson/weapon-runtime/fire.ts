@@ -11,7 +11,7 @@ import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projec
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { PlayerInput } from '@crimson/sim/input.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { WEAPON_TABLE, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import { playerStartReload, weaponEntry } from './assign.ts';
 import type {
@@ -23,6 +23,7 @@ import type {
 } from './fire-recipes.ts';
 import { resolveFireRecipe } from './fire-recipes.ts';
 import { ownerRefForPlayer, ownerRefForPlayerProjectiles, travelBudgetForTypeId } from './spawn.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((e) => e.weaponId as number)) + 1;
 

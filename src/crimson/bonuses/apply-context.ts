@@ -1,10 +1,11 @@
 // Port of crimson/bonuses/apply_context.py
 
 import type { Vec2 } from '@grim/geom.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { timerRef } from './hud.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';
 import { CreatureState } from "@crimson/creatures/runtime.js";
+import { GameplayState } from "@crimson/gameplay.js";
 
 export class BonusApplyCtx {
   constructor(

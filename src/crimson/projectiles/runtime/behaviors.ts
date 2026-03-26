@@ -17,13 +17,13 @@ import {
   spawnShrinkifierHitEffects,
   spawnSplitterHitEffects,
 } from '@crimson/projectiles/effects.ts';
-import type { GameplayState } from '@crimson/sim/state-types.ts';
 import {
   Projectile,
   ProjectileTemplateId,
 } from '@crimson/projectiles/types.ts';
 import { applyDamageToCreature, hitRadiusFor } from './collision.ts';
 import type { ProjectilePool } from './projectile-pool.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export type CreatureStateForBehavior = CreatureStateLike;
 

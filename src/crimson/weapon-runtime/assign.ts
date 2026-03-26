@@ -2,11 +2,12 @@
 
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { WeaponSlot } from '@crimson/sim/state-types.ts';
 import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import type { Weapon } from '@crimson/weapons.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export function weaponEntry(weaponId: WeaponId): Weapon {
   const entry = WEAPON_BY_ID.get(weaponId);

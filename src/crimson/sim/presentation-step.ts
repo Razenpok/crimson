@@ -13,8 +13,9 @@ import type { ProjectileHit } from '@crimson/projectiles/types.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from './state-types.ts';
+import type { BonusPickupEvent, PlayerState } from './state-types.ts';
 import { BEAM_TYPES } from './world-defs.ts';
+import { GameplayState } from "@crimson/gameplay.ts";
 
 const _MAX_HIT_SFX_PER_FRAME = 4;
 const _BULLET_HIT_SFX: readonly SfxId[] = [

@@ -2,9 +2,9 @@
 
 import { SfxId } from '@grim/sfx-map.ts';
 import { CreatureFlags, SpawnId } from '@crimson/creatures/spawn-ids.ts';
-import { survivalCheckLevelUp } from '@crimson/gameplay.ts';
+import { GameplayState, survivalCheckLevelUp } from "@crimson/gameplay.ts";
 import type { PlayerInput } from '@crimson/sim/input.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { TutorialOverlayState, TutorialState } from "./state.ts";
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
 import { Vec2 } from "@grim/geom.js";

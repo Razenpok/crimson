@@ -13,9 +13,10 @@ import {
   perkDisplayName,
   perkDisplayDescription,
 } from '@crimson/perks/ids.ts';
-import { buildPerkAvailability, type GameStatus } from '@crimson/perks/availability.ts';
+import { buildPerkAvailability } from '@crimson/perks/availability.ts';
 import { perksDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
+import { GameStatus } from "@crimson/gameplay.js";
 
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;

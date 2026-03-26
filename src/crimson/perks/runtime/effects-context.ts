@@ -5,7 +5,8 @@ import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import type { FxQueue } from '@crimson/effects.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export function creatureFindInRadius(
   creatures: readonly CreatureState[],

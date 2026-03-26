@@ -6,8 +6,9 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { CREATURE_CORPSE_DESPAWN_LIFECYCLE } from '@crimson/creatures/lifecycle.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
+import type { BonusPickupEvent } from '@crimson/sim/state-types.ts';
 import type { BonusApplyCtx } from "./apply-context.js";
+import { GameplayState } from "@crimson/gameplay.js";
 
 export interface DeferredFreezeCorpseFx {
   readonly pos: Vec2;

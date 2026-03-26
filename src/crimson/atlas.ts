@@ -57,7 +57,7 @@ export function gridSizeForIndex(index: number) {
  * Compute UV coordinates for a frame within an NxN atlas grid.
  */
 export function uvForIndex(grid: number, index: number): [u0: number, v0: number, u1: number, v1: number] {
-  const row = (index / grid) | 0;
+  const row = Math.floor(index / grid);
   const col = index % grid;
   const step = 1.0 / grid;
   const u0 = col * step;
@@ -77,10 +77,10 @@ export function rectForIndex(
   grid: number,
   index: number,
 ): [x0: number, y0: number, x1: number, y1: number] {
-  const row = (index / grid) | 0;
+  const row = Math.floor(index / grid);
   const col = index % grid;
-  const cellW = (width / grid) | 0;
-  const cellH = (height / grid) | 0;
+  const cellW = Math.floor(width / grid);
+  const cellH = Math.floor(height / grid);
   const x0 = col * cellW;
   const y0 = row * cellH;
   return [x0, y0, x0 + cellW, y0 + cellH];

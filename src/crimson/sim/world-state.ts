@@ -36,7 +36,7 @@ import {
   queueProjectileDecalsPostHit,
   queueProjectileDecalsPreHit,
 } from './presentation-step.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from './state-types.ts';
+import type { BonusPickupEvent, PlayerState } from './state-types.ts';
 import { CREATURE_ANIM } from './world-defs.ts';
 import {
   buildGameplayState,
@@ -44,7 +44,8 @@ import {
   playerFrameDtAfterRoundtrip,
   survivalProgressionUpdate,
   survivalEnforceRewardWeaponGuard,
-} from '@crimson/gameplay.ts';
+  GameplayState,
+} from "@crimson/gameplay.ts";
 
 // ---------------------------------------------------------------------------
 // WorldEvents

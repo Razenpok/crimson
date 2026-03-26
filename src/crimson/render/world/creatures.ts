@@ -53,10 +53,10 @@ export function drawCreatureSprite(
   const cellHf = texture.height / 8.0;
   const width = cellWf * opts.sizeScale * opts.scale;
   const height = cellHf * opts.sizeScale * opts.scale;
-  const cellW = (texture.width / 8) | 0;
-  const cellH = (texture.height / 8) | 0;
+  const cellW = Math.floor(texture.width / 8);
+  const cellH = Math.floor(texture.height / 8);
   const srcX = (index % 8) * cellW;
-  const srcY = ((index / 8) | 0) * cellH;
+  const srcY = Math.floor(index / 8) * cellH;
   const src = wgl.makeRectangle(srcX, srcY, cellWf, cellHf);
 
   const rotationDeg = opts.rotationRad * RAD_TO_DEG;

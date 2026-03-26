@@ -30,7 +30,7 @@ import {
   awardExperienceFromReward as _gameplayAwardExperienceFromReward,
   survivalRecordRecentDeath as _gameplaySurvivalRecordRecentDeath,
 } from '@crimson/gameplay.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { ftolMsI32 } from '@crimson/sim/timing.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import { applyFinalRevengeOnPlayerDeath } from '@crimson/perks/impl/final-revenge.ts';
@@ -53,6 +53,7 @@ import {
   type Tint,
   type TintRGBA,
 } from './spawn-ids.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 // ---------------------------------------------------------------------------
 // Imports from spawn module

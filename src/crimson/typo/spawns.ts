@@ -23,7 +23,7 @@ export function tickTypoSpawns(
 
   const spawns: TypoSpawnCall[] = [];
   while (cooldown < 0) {
-    cooldown += 3500 - ((elapsedMs / 800) | 0);
+    cooldown += 3500 - Math.floor(elapsedMs / 800);
     cooldown = Math.max(100, cooldown);
 
     const t = elapsedMs * 0.001;

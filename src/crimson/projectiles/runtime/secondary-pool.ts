@@ -13,7 +13,6 @@ import { EffectId } from '@crimson/effects-atlas.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { GameplayState } from '@crimson/sim/state-types.ts';
 import {
   SECONDARY_PROJECTILE_POOL_SIZE,
   SecondaryProjectileTypeId,
@@ -38,6 +37,7 @@ import type {
   RocketMinigunRule,
 } from './secondary-rules.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
   [

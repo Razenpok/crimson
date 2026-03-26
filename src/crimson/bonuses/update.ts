@@ -3,12 +3,13 @@
 import { f32 } from '@crimson/math-parity.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { BonusPickupEvent, PlayerState } from '@crimson/sim/state-types.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { bonusApply } from './apply.ts';
 import { bonusHudUpdate } from './hud.ts';
 import { BonusId } from './ids.ts';
-import { BonusPool, bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
+import { bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 const _REFLEX_TIMER_SUBTRACT_BIAS = 4e-9;
 

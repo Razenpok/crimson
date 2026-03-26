@@ -1,7 +1,8 @@
 // Port of crimson/bonuses/hud.py
 
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { BonusId } from './ids.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export interface TimerRef {
   readonly kind: string; // "global" or "player"

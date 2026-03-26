@@ -2,8 +2,9 @@
 
 import { RGBA } from '@grim/color.ts';
 import { f32 } from '@crimson/math-parity.ts';
-import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
+import type { BonusPickupEvent } from '@crimson/sim/state-types.ts';
 import type { BonusApplyCtx } from './apply-context.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export function applyReflexBoost(ctx: BonusApplyCtx): void {
   const old = ctx.state.bonuses.reflexBoost;

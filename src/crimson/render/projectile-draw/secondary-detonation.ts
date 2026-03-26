@@ -39,7 +39,7 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
   if (!grid) return true;
   const frame = atlas.frame;
   const col = frame % grid;
-  const row = (frame / grid) | 0;
+  const row = Math.floor(frame / grid);
   const cellW = particlesTexture.width / grid;
   const cellH = particlesTexture.height / grid;
   const src = wgl.makeRectangle(

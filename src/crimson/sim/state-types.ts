@@ -80,6 +80,3 @@ export interface BonusPickupEvent {
   readonly amount: number;
   readonly pos: Vec2;
 }
-
-// Re-export the full GameplayState class so all existing import sites work.
-export { GameplayState } from '@crimson/gameplay.ts';

@@ -5,7 +5,8 @@ import { f32 } from './math-parity.ts';
 import { PerkId } from './perks/ids.ts';
 import { perkActive } from './perks/helpers.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
-import type { GameplayState, PlayerState } from './sim/state-types.ts';
+import type { PlayerState } from './sim/state-types.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 const _PLAYER_PAIN_SFX: readonly SfxId[] = [
   SfxId.TROOPER_INPAIN_01,

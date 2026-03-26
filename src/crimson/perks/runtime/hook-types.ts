@@ -2,11 +2,12 @@
 
 import type { CreaturePool, CreatureDeath } from '@crimson/creatures/runtime.ts';
 import type { FxQueue } from '@crimson/effects.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyHandler } from './apply-context.ts';
 import type { PerksUpdateEffectsCtx } from "./effects-context.ts";
 import type { PlayerPerkTickCtx } from './player-tick-context.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export type WorldDtStep = (opts: { dt: number; players: PlayerState[] }) => number;
 export type PerksUpdateEffectsStep = (ctx: PerksUpdateEffectsCtx) => void;

@@ -1,11 +1,11 @@
 // Port of crimson/bonuses/pickup_fx.py
 
 import { RGBA } from '@grim/color.ts';
-import type { EffectPool } from '@crimson/effects.ts';
-import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
+import type { BonusPickupEvent } from '@crimson/sim/state-types.ts';
 import { applyFreezePickupFx } from './freeze.ts';
 import { BonusId } from './ids.ts';
 import { applyReflexBoostPickupFx } from './reflex-boost.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export type BonusPickupFxHook = (state: GameplayState, pickup: BonusPickupEvent, detailPreset: number) => void;
 

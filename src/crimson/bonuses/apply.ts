@@ -3,7 +3,7 @@
 import type { Vec2 } from '@grim/geom.ts';
 import { perkCountGet } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { BonusApplyHandler } from './apply-context.ts';
 import { BonusApplyCtx } from './apply-context.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';
@@ -22,6 +22,7 @@ import { applyWeapon } from './weapon.ts';
 import { applyFireblast } from './fireblast.ts';
 import { applyNuke } from './nuke.ts';
 import { CreatureState } from "@crimson/creatures/runtime.js";
+import { GameplayState } from "@crimson/gameplay.js";
 
 const _BONUS_APPLY_HANDLERS: Map<BonusId, BonusApplyHandler> = new Map([
   [BonusId.POINTS, applyPoints],

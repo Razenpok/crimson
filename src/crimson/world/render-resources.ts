@@ -13,7 +13,7 @@ import { GroundRenderer } from '@grim/terrain-render.ts';
 import * as wgl from '@wgl';
 import { creatureCorpseFrameForType } from '@crimson/creatures/anim.ts';
 import type { CreaturePool } from '@crimson/creatures/runtime.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { RenderFrame } from '@crimson/render/frame.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
@@ -22,6 +22,7 @@ import {
 } from '@crimson/render/terrain-fx.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 import { terrainFxBatchIsEmpty } from '@crimson/sim/terrain-fx.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export class RenderResources {
   private _assetsUrl: string;

@@ -3,7 +3,7 @@
 import { Vec2 } from '@grim/geom.ts';
 import type { CreaturePool } from '@crimson/creatures/runtime.ts';
 import type { SpawnEnv } from '@crimson/creatures/runtime.ts';
-import { type GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { PlayerState } from '@crimson/sim/state-types.ts';
 import { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import {
   type WorldEvents,
@@ -11,6 +11,7 @@ import {
 } from '@crimson/sim/world-state.ts';
 import { weaponAssignPlayer, initDefaultAltWeapon } from '@crimson/weapon-runtime/index.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 // ---------------------------------------------------------------------------
 // Weapon damage scale map (built once from the weapon table)

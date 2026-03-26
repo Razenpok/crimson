@@ -359,7 +359,7 @@ export class DemoView {
     //   - per-corner color slots, with a sin^2 pulse at bottom-right
 
     function _to_u8(value: number) {
-      return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5)
+      return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255.0
     }
 
     const c0 = wgl.makeColor(_to_u8(0.0), _to_u8(0.0), _to_u8(0.0), _to_u8(1.0))
@@ -668,7 +668,7 @@ export class DemoView {
 
     wgl.drawRectangle(
       int(bgX), int(bgY), int(textW + 12.0), 30,
-      wgl.makeColor(0, 0, 0, bgAlpha),
+      wgl.makeColor(0, 0, 0, bgAlpha / 255.0),
     );
 
     let progress = 0.0;

@@ -1,9 +1,10 @@
 // Port of crimson/perks/runtime/apply_context.py
 
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkSelectionState } from '@crimson/perks/state.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export class PerkApplyCtx {
   constructor(

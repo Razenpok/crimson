@@ -18,7 +18,6 @@ import { type GroundRenderer } from '@grim/terrain-render.ts';
 
 import type { CreatureDeath, CreaturePool } from '@crimson/creatures/runtime.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import type { GameplayState } from '@crimson/sim/state-types.ts';
 import { LocalInputInterpreter, clearInputEdges } from '@crimson/local-input.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkCountGet } from '@crimson/perks/helpers.ts';
@@ -71,6 +70,7 @@ import type { AudioBridge } from '@crimson/world/audio-bridge.ts';
 import type { TerrainRuntime } from '@crimson/world/terrain-runtime.ts';
 import type { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 /** Replay is not applicable to WebGL port; stubs retained for structure. */
 interface ReplayRecorder {

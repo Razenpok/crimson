@@ -3,8 +3,9 @@
 import { Vec2 } from '@grim/geom.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 export function ownerRefForPlayer(playerIndex: number): OwnerRef {
   return OwnerRef.fromPlayer(int(playerIndex));

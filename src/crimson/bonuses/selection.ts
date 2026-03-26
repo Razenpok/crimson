@@ -5,8 +5,9 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { BONUS_BY_ID, BonusId } from './ids.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { BonusPool } from './pool.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 function bonusEnabled(bonusId: BonusId): boolean {
   const meta = BONUS_BY_ID.get(bonusId);

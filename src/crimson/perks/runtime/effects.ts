@@ -2,9 +2,10 @@
 
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { FxQueue } from '@crimson/effects.ts';
-import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { PerksUpdateEffectsCtx } from './effects-context.ts';
 import { PERKS_UPDATE_EFFECT_STEPS } from './manifest.ts';
+import { GameplayState } from "@crimson/gameplay.js";
 
 const _PERKS_UPDATE_EFFECT_STEPS = PERKS_UPDATE_EFFECT_STEPS;
 
