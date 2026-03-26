@@ -7,8 +7,7 @@ import type { CrimsonConfig } from '@grim/config.ts';
 import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import type { QuestLevel } from '@crimson/quests/level.ts';
-import { questLevelEqual, questLevelGlobalIndex } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { type QuestFinalTime, computeQuestFinalTime } from '@crimson/quests/results.ts';
@@ -143,7 +142,7 @@ export class QuestResultsView {
       this._unlockPerkName = perkDisplayName(quest.unlockPerkId, { violenceDisabled: this.state.config.display.violenceDisabled, preserveBugs: this.state.preserveBugs });
     }
 
-    const globalIndex = questLevelGlobalIndex(level);
+    const globalIndex = level.globalIndex;
     const completedIdx = trackedQuestCompletedCounterIndex(level);
     if (completedIdx !== null) {
       try {
@@ -246,7 +245,7 @@ export class QuestResultsView {
       return;
     }
     if (action === 'play_next') {
-      if (this._questLevel !== null && questLevelEqual(this._questLevel, { major: 5, minor: 10 })) {
+      if (this._questLevel !== null && this._questLevel.equal(new QuestLevel(5, 10))) {
         this._action = 'end_note';
         return;
       }

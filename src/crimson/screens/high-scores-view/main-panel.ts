@@ -7,8 +7,7 @@ import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts
 import { InputState } from '@grim/input.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import type { HighScoresRequest } from '@crimson/game/types.ts';
-import type { QuestLevel } from '@crimson/quests/level.ts';
-import { questLevelText, questLevelGlobalIndex } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { buttonDraw, buttonWidth } from '@crimson/ui/perk-menu.ts';
 import {
@@ -80,13 +79,13 @@ export function drawMainPanel(
     } else {
       questColor = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 0.7);
     }
-    const questLevel: QuestLevel = { major: int(questMajor), minor: int(questMinor) };
+    const questLevel = new QuestLevel(int(questMajor), int(questMinor));
     const quest = questByLevel(questLevel);
-    const questLabel = `${questLevelText(questLevel)}: ${quest !== null ? quest.title : '???'}`;
+    const questLabel = `${questLevel.text}: ${quest !== null ? quest.title : '???'}`;
     drawSmallText(font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
 
     const arrow = getTexture(resources, TextureId.UI_ARROW);
-    const globalIndex = questLevelGlobalIndex(questLevel);
+    const globalIndex = questLevel.globalIndex;
     const unlock = hardcore
       ? int(view.questUnlockIndexFull)
       : int(view.questUnlockIndex);

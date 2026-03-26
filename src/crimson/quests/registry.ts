@@ -2,8 +2,7 @@
 
 import { terrainSlotsForQuest, TerrainSlotTriplet } from "@crimson/terrain-slots.ts";
 import { WeaponId } from "@crimson/weapons.ts";
-import type { QuestLevel } from "./level.ts";
-import { questLevelGlobalIndex, questLevelKey, questLevelParse } from "./level.ts";
+import { QuestLevel } from "./level.ts";
 import type { QuestBuilder, QuestDefinition } from "./types.ts";
 
 const _QUESTS: Map<string, QuestDefinition> = new Map();
@@ -18,7 +17,7 @@ export function registerQuest(opts: {
   terrainSlots?: TerrainSlotTriplet | null;
 }): (builder: QuestBuilder) => QuestBuilder {
   return (builder: QuestBuilder): QuestBuilder => {
-    const questLevel = questLevelParse(opts.level);
+    const questLevel = QuestLevel.parse(opts.level);
     const quest: QuestDefinition = {
       level: questLevel,
       title: opts.title,
@@ -29,7 +28,7 @@ export function registerQuest(opts: {
       unlockWeaponId: opts.unlockWeaponId ?? null,
       terrainSlots: opts.terrainSlots ?? terrainSlotsForQuest(questLevel),
     };
-    const key = questLevelKey(quest.level);
+    const key = quest.level.key;
     const existing = _QUESTS.get(key);
     if (existing !== undefined) {
       throw new Error(
@@ -47,12 +46,12 @@ let allQuestsCached: QuestDefinition[] | undefined;
 export function allQuests() {
   if (allQuestsCached === undefined) {
     allQuestsCached = Array.from(_QUESTS.values()).sort(
-      (a, b) => questLevelGlobalIndex(a.level) - questLevelGlobalIndex(b.level),
+      (a, b) => a.level.globalIndex - b.level.globalIndex,
     );
   }
   return allQuestsCached;
 }
 
 export function questByLevel(level: QuestLevel): QuestDefinition | null {
-  return _QUESTS.get(questLevelKey(level)) ?? null;
+  return _QUESTS.get(level.key) ?? null;
 }

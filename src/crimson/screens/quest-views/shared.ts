@@ -1,7 +1,6 @@
 // Port of crimson/screens/quest_views/shared.py
 
-import type { QuestLevel } from '@crimson/quests/level.ts';
-import { questLevelFromGlobalIndex, questLevelGlobalIndex, QUEST_COUNT } from '@crimson/quests/level.ts';
+import { QuestLevel, QUEST_COUNT } from '@crimson/quests/level.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 
 // ---------------------------------------------------------------------------
@@ -106,9 +105,9 @@ export function playerNameDefault(config: CrimsonConfig): string {
 }
 
 export function nextQuestLevel(level: QuestLevel): QuestLevel | null {
-  const nextIndex = questLevelGlobalIndex(level) + 1;
+  const nextIndex = level.globalIndex + 1;
   if (nextIndex >= QUEST_COUNT) {
     return null;
   }
-  return questLevelFromGlobalIndex(nextIndex);
+  return QuestLevel.fromGlobalIndex(nextIndex);
 }

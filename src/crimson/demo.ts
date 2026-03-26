@@ -34,6 +34,7 @@ import {
 import { DeterministicSession } from './sim/sessions.ts';
 import type { PlayerState } from './sim/state-types.ts';
 import { TickRunner, type TickBatchResult } from './sim/tick-runner.ts';
+import { QuestLevel } from './quests/level.ts';
 import { questByLevel } from './quests/registry.ts';
 import { advanceExplicitTerrain } from './sim/bootstrap.ts';
 import { Q2_TERRAIN_SLOTS, type TerrainSlotTriplet } from './terrain-slots.ts';
@@ -628,7 +629,7 @@ export class DemoView {
     const weaponId = 18;
     const rng = this._runtime.simWorld.state.rng;
     this._setupWorldPlayers([[new Vec2(512.0, 512.0), weaponId]]);
-    const quest = questByLevel({ major: 1, minor: 1 });
+    const quest = questByLevel(new QuestLevel(1, 1));
     // Native variant 3 calls terrain_generate(&quest_selected_meta), which is the
     // base of the quest metadata array in this build, so it resolves to quest 1.1.
     if (quest !== null) {

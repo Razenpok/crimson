@@ -10,8 +10,7 @@ import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { InputState } from '@grim/input.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
-import type { QuestLevel } from '@crimson/quests/level.ts';
-import { questLevelGlobalIndex, questLevelFromGlobalIndex } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import { HighScoreDateMode } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { UiButtonState, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
@@ -519,7 +518,7 @@ export class HighScoresView {
         this.state.config.gameplay.playerCount = 1;
       } else if (modeId === GameMode.QUESTS) {
         if (request.questLevel === null) {
-          request.questLevel = (this.state.config.gameplay.questLevel as unknown as QuestLevel) ?? { major: 1, minor: 1 };
+          request.questLevel = this.state.config.gameplay.questLevel ?? new QuestLevel(1, 1);
         }
       }
       this._dirty = true;
@@ -571,7 +570,7 @@ export class HighScoresView {
     const level = request.questLevel;
     if (level === null) return false;
 
-    const globalIndex = questLevelGlobalIndex(level);
+    const globalIndex = level.globalIndex;
     const unlock = this.state.config.gameplay.hardcore
       ? int(this.questUnlockIndexFull)
       : int(this.questUnlockIndex);
@@ -591,7 +590,7 @@ export class HighScoresView {
 
     const setLevel = (index: number): void => {
       index = Math.max(0, Math.min(maxIndex, index));
-      const newLevel = questLevelFromGlobalIndex(index);
+      const newLevel = QuestLevel.fromGlobalIndex(index);
       request.questLevel = newLevel;
       this.state.config.gameplay.questLevel = newLevel;
       this._dirty = true;

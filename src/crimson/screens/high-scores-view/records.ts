@@ -2,7 +2,7 @@
 
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
-import type { QuestLevel } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import type { HighScoreRecord } from './shared.ts';
 
 export function resolveRequest(state: GameState): HighScoresRequest {
@@ -22,7 +22,7 @@ export function resolveRequest(state: GameState): HighScoresRequest {
       level = state.config.gameplay.questLevel;
     }
     // Native screen always has a valid quest stage selected (defaults to 1.1).
-    request.questLevel = level ?? { major: 1, minor: 1 };
+    request.questLevel = level ?? new QuestLevel(1, 1);
   }
 
   return request;

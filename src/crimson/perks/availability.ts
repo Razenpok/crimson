@@ -5,7 +5,7 @@ import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { perkCountGet } from './helpers.ts';
 import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
 import { PERK_COUNT_SIZE } from '@crimson/sim/state-types.ts';
-import { questLevelEqual } from "@crimson/quests/level.js";
+import { QuestLevel } from "@crimson/quests/level.js";
 import { allQuests } from "@crimson/quests/registry.js";
 
 const _PERK_BASE_AVAILABLE_MAX_ID = PerkId.BONUS_MAGNET as number;
@@ -76,7 +76,7 @@ export function perkCanOffer(
   if (
     opts.gameMode === GameMode.QUESTS &&
     state.hardcore &&
-    questLevelEqual(state.questLevel, { major: 2, minor: 10 }) &&
+    state.questLevel !== null && state.questLevel.equal(new QuestLevel(2, 10)) &&
     (perkId === PerkId.POISON_BULLETS || perkId === PerkId.VEINS_OF_POISON || perkId === PerkId.PLAGUEBEARER)
   ) {
     return false;

@@ -8,7 +8,7 @@ import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type CrandLike } from '@grim/rand.ts';
-import { type QuestLevel, questLevelEqual } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import {
   type QuestFinalTime,
   QuestResultsBreakdownAnim,
@@ -185,7 +185,7 @@ export class QuestResultsUi {
     this._saved = false;
 
     // Native behavior: the final quest replaces "Play Next" with "Show End Note".
-    if (this.questLevel && questLevelEqual(this.questLevel, { major: 5, minor: 10 })) {
+    if (this.questLevel && this.questLevel.equal(new QuestLevel(5, 10))) {
       this._playNextButton.label = 'Show End Note';
     } else {
       this._playNextButton.label = 'Play Next';

@@ -22,7 +22,7 @@ import {
   buildQuestSession,
 } from '@crimson/sim/session-builders.ts';
 import { advanceExplicitTerrain, advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
-import { type QuestLevel, questLevelText, questLevelFromGlobalIndex } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import {
   type QuestDefinition,
   type SpawnEntry,
@@ -133,7 +133,7 @@ export class QuestMode extends BaseGameplayMode {
       audio: opts.audio ?? null,
       audioRng: opts.audioRng,
     });
-    this._questLevel = opts.config.gameplay.questLevel ?? { major: 1, minor: 1 };
+    this._questLevel = opts.config.gameplay.questLevel ?? new QuestLevel(1, 1);
   }
 
   // ---------------------------------------------------------------------------
@@ -144,7 +144,7 @@ export class QuestMode extends BaseGameplayMode {
     super.open();
     this._questDef = null;
     const cfgLevel = this.config.gameplay.questLevel;
-    this._questLevel = cfgLevel ?? { major: 1, minor: 1 };
+    this._questLevel = cfgLevel ?? new QuestLevel(1, 1);
     this._questTotalSpawnCount = 0;
     this._outcome = null;
     const courierTex = getTexture(this.renderResources.resources as RuntimeResources, TextureId.DEFAULT_FONT_COURIER);
@@ -333,7 +333,7 @@ export class QuestMode extends BaseGameplayMode {
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     const stamp = opts.stamp;
-    const level = this._questLevel !== null ? questLevelText(this._questLevel) : 'quest';
+    const level = this._questLevel !== null ? this._questLevel.text : 'quest';
     const kind = this._outcome !== null ? this._outcome.kind : 'quest';
     const baseTimeMs = int(this._questSpawnState.spawnTimelineMs);
     return `quest_${level}_${stamp}_${kind}_t${baseTimeMs}`;
@@ -850,7 +850,7 @@ export class QuestMode extends BaseGameplayMode {
     drawQuestTitleTimerOverlay(
       font,
       quest.title,
-      questLevelText(quest.level),
+      quest.level.text,
       { timerMs: this._questSpawnState.spawnTimelineMs },
     );
   }

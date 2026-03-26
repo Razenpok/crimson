@@ -9,8 +9,7 @@ import { InputState } from '@grim/input.ts';
 import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import type { QuestLevel } from '@crimson/quests/level.ts';
-import { questLevelGlobalIndex } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { questGamesCounterIndex, questCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
@@ -488,13 +487,13 @@ export class QuestsMenuView {
     if (config.gameplay.hardcore) {
       unlock = int(status.questUnlockIndexFull);
     }
-    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
-    return unlock >= questLevelGlobalIndex(level);
+    const level = new QuestLevel(int(stage), int(row) + 1);
+    return unlock >= level.globalIndex;
   }
 
   private _tryStartQuest(stage: number, row: number): void {
     if (!this._questUnlocked(stage, row)) return;
-    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
+    const level = new QuestLevel(int(stage), int(row) + 1);
     this.state.pendingQuestLevel = level;
     this.state.config.gameplay.mode = GameMode.QUESTS;
     this.state.config.gameplay.questLevel = level;
@@ -503,7 +502,7 @@ export class QuestsMenuView {
   }
 
   private _questTitle(stage: number, row: number): string {
-    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
+    const level = new QuestLevel(int(stage), int(row) + 1);
     const quest = questByLevel(level);
     if (quest === null) return '???';
     return quest.title;
@@ -522,8 +521,8 @@ export class QuestsMenuView {
   }
 
   private _questCounts(stage: number, row: number): [number, number] | null {
-    const level: QuestLevel = { major: int(stage), minor: int(row) + 1 };
-    const globalIndex = questLevelGlobalIndex(level);
+    const level = new QuestLevel(int(stage), int(row) + 1);
+    const globalIndex = level.globalIndex;
     const status = this.state.status;
     const gamesIdx = questGamesCounterIndex(level);
     const completedIdx = questCompletedCounterIndex(level);
