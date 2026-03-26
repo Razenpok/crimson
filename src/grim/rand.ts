@@ -1,6 +1,11 @@
 // Port of grim/rand.py
 
+// Exact static caller address when known.
 export type CallerStatic = number | null;
+
+const CRT_RAND_MULT = 214013;
+const CRT_RAND_INC = 2531011;
+
 export type RngTraceSink = (stateBefore: number, stateAfter: number, value: number, caller: CallerStatic) => void;
 
 export interface RngDrawRecord {
@@ -10,6 +15,7 @@ export interface RngDrawRecord {
   readonly caller: CallerStatic;
 }
 
+// Raised when strict RNG tracing sees an untagged gameplay draw.
 export class MissingRngCallerError extends Error {
   constructor(message: string) {
     super(message);
@@ -17,6 +23,7 @@ export class MissingRngCallerError extends Error {
   }
 }
 
+// Protocol for RNGs that follow the native CRT rand/srand/state contract.
 export interface CrandLike {
   readonly state: number;
   srand(seed: number): void;
@@ -24,9 +31,10 @@ export interface CrandLike {
   advance(draws: number): void;
 }
 
-const CRT_RAND_MULT = 214013;
-const CRT_RAND_INC = 2531011;
-
+// MSVCRT-compatible `rand()` LCG used by the original game.
+// Matches:
+//   seed = seed * 214013 + 2531011
+//   return (seed >> 16) & 0x7fff
 export class CrtRand implements CrandLike {
   private _state: number;
   private _traceSink: RngTraceSink | null = null;
@@ -51,9 +59,10 @@ export class CrtRand implements CrandLike {
   }
 
   advance(draws: number): void {
-    if (draws < 0) throw new Error(`draws must be >= 0, got ${draws}`);
+    const steps = int(draws);
+    if (steps < 0) throw new Error(`draws must be >= 0, got ${draws}`);
     let state = this._state;
-    for (let i = 0; i < draws; i++) {
+    for (let i = 0; i < steps; i++) {
       state = (Math.imul(state, CRT_RAND_MULT) + CRT_RAND_INC) >>> 0;
     }
     this._state = state;
@@ -84,12 +93,13 @@ export class CrtRand implements CrandLike {
       if (this._traceRequireCaller && caller === null) {
         throw new MissingRngCallerError('strict RNG trace requires caller');
       }
-      this._traceSink(stateBefore, this._state, value, caller);
+      this._traceSink(int(stateBefore), int(this._state), int(value), caller);
     }
     return value;
   }
 }
 
+// MSVCRT-compatible `rand()` LCG.
 export class Crand extends CrtRand {}
 
 class RecordingState {

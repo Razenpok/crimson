@@ -156,4 +156,6 @@ const _SFX_NATIVE_SPECS: readonly [SfxId, SfxSpec][] = [
 
 export const SFX_SPECS: ReadonlyMap<SfxId, SfxSpec> = new Map(_SFX_NATIVE_SPECS);
 
+// Extracted from `audio_init_sfx` (FUN_0043caa0) in `crimsonland.exe`.
+// `sfx_load_sample()` allocates the first free slot, so the load order defines stable ids.
 export const SFX_NATIVE_ORDER: readonly SfxId[] = _SFX_NATIVE_SPECS.map(([id]) => id);

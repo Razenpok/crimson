@@ -1,5 +1,7 @@
 // Port of crimson/bonuses/ids.py
 
+// Bonus ids extracted from bonus_metadata_init (bonus_meta_label).
+
 export enum BonusId {
   UNUSED = 0,
   POINTS = 1,
@@ -24,37 +26,136 @@ export interface BonusMeta {
   readonly description: string | null;
   readonly iconId: number | null;
   readonly nativeAmount: number | null;
-  readonly applySeconds: number | null;
+  readonly applySeconds?: number | null;
   readonly notes?: string | null;
 }
 
-function bm(
-  bonusId: BonusId,
-  name: string,
-  description: string | null,
-  iconId: number | null,
-  nativeAmount: number | null,
-  applySeconds: number | null = null,
-): BonusMeta {
-  return { bonusId, name, description, iconId, nativeAmount, applySeconds };
-}
-
 export const BONUS_TABLE: readonly BonusMeta[] = [
-  bm(BonusId.UNUSED, '(unused)', null, null, null),
-  bm(BonusId.POINTS, 'Points', 'You gain some experience points.', 12, 500),
-  bm(BonusId.ENERGIZER, 'Energizer', 'Suddenly monsters run away from you and you can eat them.', 10, 8, 8.0),
-  bm(BonusId.WEAPON, 'Weapon', 'You get a new weapon.', -1, 3),
-  bm(BonusId.WEAPON_POWER_UP, 'Weapon Power Up', 'Your firerate and load time increase for a short period.', 7, 10),
-  bm(BonusId.NUKE, 'Nuke', 'An amazing explosion of ATOMIC power.', 1, 0),
-  bm(BonusId.DOUBLE_EXPERIENCE, 'Double Experience', 'Every experience point you get is doubled when this bonus is active.', 4, 0, 6.0),
-  bm(BonusId.SHOCK_CHAIN, 'Shock Chain', 'Chain of shocks shock the crowd.', 3, 0),
-  bm(BonusId.FIREBLAST, 'Fireblast', 'Fireballs all over the place.', 2, 0),
-  bm(BonusId.REFLEX_BOOST, 'Reflex Boost', 'You get more time to react as the game slows down.', 5, 3),
-  bm(BonusId.SHIELD, 'Shield', 'Force field protects you for a while.', 6, 7),
-  bm(BonusId.FREEZE, 'Freeze', 'Monsters are frozen.', 8, 5),
-  bm(BonusId.MEDIKIT, 'MediKit', 'You regain some of your health.', 14, 10),
-  bm(BonusId.SPEED, 'Speed', 'Your movement speed increases for a while.', 9, 8),
-  bm(BonusId.FIRE_BULLETS, 'Fire Bullets', 'For few seconds -- make them count.', 11, 4, 5.0),
+  {
+    bonusId: BonusId.UNUSED,
+    name: '(unused)',
+    description: null,
+    iconId: null,
+    nativeAmount: null,
+    notes: '`DAT_004853dc` is set to `0`, disabling this entry.',
+  },
+  {
+    bonusId: BonusId.POINTS,
+    name: 'Points',
+    description: 'You gain some experience points.',
+    iconId: 12,
+    nativeAmount: 500,
+    notes: '`bonus_apply` adds the stored native amount to score.',
+  },
+  {
+    bonusId: BonusId.ENERGIZER,
+    name: 'Energizer',
+    description: 'Suddenly monsters run away from you and you can eat them.',
+    iconId: 10,
+    nativeAmount: 8,
+    applySeconds: 8.0,
+    notes: '`bonus_apply` updates `bonus_energizer_timer` (fixed +8 seconds, scaled by Bonus Economist).',
+  },
+  {
+    bonusId: BonusId.WEAPON,
+    name: 'Weapon',
+    description: 'You get a new weapon.',
+    iconId: -1,
+    nativeAmount: 3,
+    notes: '`bonus_apply` treats the stored native amount as weapon id; often overridden.',
+  },
+  {
+    bonusId: BonusId.WEAPON_POWER_UP,
+    name: 'Weapon Power Up',
+    description: 'Your firerate and load time increase for a short period.',
+    iconId: 7,
+    nativeAmount: 10,
+    notes: '`bonus_apply` updates `bonus_weapon_power_up_timer`.',
+  },
+  {
+    bonusId: BonusId.NUKE,
+    name: 'Nuke',
+    description: 'An amazing explosion of ATOMIC power.',
+    iconId: 1,
+    nativeAmount: 0,
+    notes: '`bonus_apply` performs the large explosion + shake sequence.',
+  },
+  {
+    bonusId: BonusId.DOUBLE_EXPERIENCE,
+    name: 'Double Experience',
+    description: 'Every experience point you get is doubled when this bonus is active.',
+    iconId: 4,
+    nativeAmount: 0,
+    applySeconds: 6.0,
+    notes: '`bonus_apply` updates `bonus_double_xp_timer` (fixed +6 seconds, scaled by Bonus Economist).',
+  },
+  {
+    bonusId: BonusId.SHOCK_CHAIN,
+    name: 'Shock Chain',
+    description: 'Chain of shocks shock the crowd.',
+    iconId: 3,
+    nativeAmount: 0,
+    notes: '`bonus_apply` spawns chained lightning via `projectile_spawn` type `0x15`; `shock_chain_links_left` / `shock_chain_projectile_id` track the active chain.',
+  },
+  {
+    bonusId: BonusId.FIREBLAST,
+    name: 'Fireblast',
+    description: 'Fireballs all over the place.',
+    iconId: 2,
+    nativeAmount: 0,
+    notes: '`bonus_apply` spawns a radial projectile burst (type `9`).',
+  },
+  {
+    bonusId: BonusId.REFLEX_BOOST,
+    name: 'Reflex Boost',
+    description: 'You get more time to react as the game slows down.',
+    iconId: 5,
+    nativeAmount: 3,
+    notes: '`bonus_apply` updates `bonus_reflex_boost_timer`.',
+  },
+  {
+    bonusId: BonusId.SHIELD,
+    name: 'Shield',
+    description: 'Force field protects you for a while.',
+    iconId: 6,
+    nativeAmount: 7,
+    notes: '`bonus_apply` updates `player_shield_timer` (`DAT_00490bc8`).',
+  },
+  {
+    bonusId: BonusId.FREEZE,
+    name: 'Freeze',
+    description: 'Monsters are frozen.',
+    iconId: 8,
+    nativeAmount: 5,
+    notes: '`bonus_apply` updates `bonus_freeze_timer`.',
+  },
+  {
+    bonusId: BonusId.MEDIKIT,
+    name: 'MediKit',
+    description: 'You regain some of your health.',
+    iconId: 14,
+    nativeAmount: 10,
+    notes: '`bonus_apply` restores health in 10-point increments.',
+  },
+  {
+    bonusId: BonusId.SPEED,
+    name: 'Speed',
+    description: 'Your movement speed increases for a while.',
+    iconId: 9,
+    nativeAmount: 8,
+    notes: '`bonus_apply` updates `player_speed_bonus_timer` (`DAT_00490bc4`).',
+  },
+  {
+    // Native stored amount is 4; the pickup adds a fixed 5 seconds (scaled by Bonus Economist).
+    bonusId: BonusId.FIRE_BULLETS,
+    name: 'Fire Bullets',
+    description: 'For few seconds -- make them count.',
+    iconId: 11,
+    // Native stored amount is 4; the pickup adds a fixed 5 seconds (scaled by Bonus Economist).
+    nativeAmount: 4,
+    applySeconds: 5.0,
+    notes: '`bonus_apply` updates `player_fire_bullets_timer` (`DAT_00490bcc`) (fixed +5 seconds, scaled by Bonus Economist). While active, `projectile_spawn` overrides player-owned projectiles to type `0x2d` (pellet count from `weapon_projectile_pellet_count[weapon_id]`).',
+  },
 ];
 
 export const BONUS_BY_ID: Map<BonusId, BonusMeta> = new Map(

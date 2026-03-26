@@ -63,8 +63,8 @@ export type BonusApplyHandler = (ctx: BonusApplyCtx) => void;
 
 export function bonusApplySeconds(ctx: BonusApplyCtx): number {
   const meta = BONUS_BY_ID.get(ctx.bonusId);
-  if (meta !== undefined && meta.applySeconds !== null) {
-    return Number(meta.applySeconds);
+  if (meta !== undefined && meta.applySeconds !== null && meta.applySeconds !== undefined) {
+    return meta.applySeconds;
   }
-  return Number(ctx.amount);
+  return ctx.amount;
 }

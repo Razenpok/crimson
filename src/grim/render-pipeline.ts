@@ -10,6 +10,7 @@ export interface RenderSink {
   close(): void;
 }
 
+// Default interactive sink; present/flush delegate to the frame loop.
 export class WindowSink implements RenderSink {
   private _presentFrame: RenderPresent | null;
   private _opened = false;
@@ -28,6 +29,7 @@ export class WindowSink implements RenderSink {
   close(): void { this._opened = false; }
 }
 
+// Shared draw/present orchestration for live and replay contexts.
 export class RenderPipeline {
   private _sink: RenderSink;
   private _onResize: ((w: number, h: number) => void) | null;
@@ -88,8 +90,8 @@ export class RenderPipeline {
   }
 
   draw(opts: { drawFrame: RenderDraw; width: number; height: number }): void {
-    this._ensureOpen(opts.width, opts.height);
-    this._resizeIfNeeded(opts.width, opts.height);
+    this._ensureOpen(int(opts.width), int(opts.height));
+    this._resizeIfNeeded(int(opts.width), int(opts.height));
     if (this._beginEndDrawing) {
       this._beginDraw!();
       try {
@@ -108,7 +110,7 @@ export class RenderPipeline {
   }
 
   render(opts: { drawFrame: RenderDraw; width: number; height: number }): void {
-    this.draw({ drawFrame: opts.drawFrame, width: opts.width, height: opts.height });
+    this.draw({ drawFrame: opts.drawFrame, width: int(opts.width), height: int(opts.height) });
     this.present();
   }
 

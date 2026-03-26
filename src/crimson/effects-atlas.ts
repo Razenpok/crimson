@@ -1,4 +1,5 @@
 // Port of crimson/effects_atlas.py
+
 import * as wgl from '@wgl';
 
 export const SIZE_CODE_GRID: Record<number, number> = {

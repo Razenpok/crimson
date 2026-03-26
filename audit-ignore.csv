@@ -115,4 +115,10 @@ crimson/render/world/viewport.ts
 crimson/owner-ref.ts
 crimson/quests/runtime.ts
 crimson/atlas.ts
+grim/geom.ts
+grim/rand.ts
+grim/render-pipeline.ts
+grim/sfx-map.ts
+crimson/bonuses/ids.ts
+crimson/perks/ids.ts
 
