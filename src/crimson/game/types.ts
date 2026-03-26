@@ -62,7 +62,7 @@ export interface Screen {
   close(): void;
   update(dt: number): void;
   draw(): void;
-  takeAction(): string | null;
+  takeAction?(): string | null;
 }
 
 // ---------------------------------------------------------------------------

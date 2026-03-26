@@ -10,18 +10,19 @@ import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
 import { perkApply } from './runtime/apply.ts';
 import type { PerkSelectionState } from './state.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import { QuestLevel } from "@crimson/quests/level.js";
 
 export const PERK_ID_MAX: number = (() => {
   let maxId = 0;
   for (const perkId of PERK_BY_ID.keys()) {
-    if ((perkId as number) > maxId) {
-      maxId = perkId as number;
+    if (perkId > maxId) {
+      maxId = perkId;
     }
   }
   return maxId;
 })();
 
-const _DEATH_CLOCK_BLOCKED: ReadonlySet<PerkId> = new Set([
+const DEATH_CLOCK_BLOCKED: ReadonlySet<PerkId> = new Set([
   PerkId.JINXED,
   PerkId.BREATHING_ROOM,
   PerkId.GRIM_DEAL,
@@ -35,7 +36,7 @@ const _DEATH_CLOCK_BLOCKED: ReadonlySet<PerkId> = new Set([
   PerkId.BANDAGE,
 ]);
 
-const _PERK_RARITY_GATE: ReadonlySet<PerkId> = new Set([
+const PERK_RARITY_GATE: ReadonlySet<PerkId> = new Set([
   PerkId.JINXED,
   PerkId.AMMUNITION_WITHIN,
   PerkId.ANXIOUS_LOADER,
@@ -58,12 +59,11 @@ export function perkSelectRandom(
   opts: { gameMode: GameMode; playerCount: number },
 ): PerkId {
   for (let i = 0; i < 1000; i++) {
-    const perkIdNum = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
-    const perkId = perkIdNum as PerkId;
-    if (!(perkIdNum >= 0 && perkIdNum < state.perkAvailable.length)) {
+    const perkId = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
+    if (!(perkId >= 0 && perkId < state.perkAvailable.length)) {
       continue;
     }
-    if (!state.perkAvailable[perkIdNum]) {
+    if (!state.perkAvailable[perkId]) {
       continue;
     }
     if (perkCanOffer(state, player, perkId, { gameMode: opts.gameMode, playerCount: opts.playerCount })) {
@@ -77,17 +77,16 @@ export function perkSelectRandom(
 function perkOfferableMask(
   state: GameplayState,
   player: PlayerState,
-  gameMode: GameMode,
-  playerCount: number,
+  opts: { gameMode: GameMode; playerCount: number },
 ): boolean[] {
+  // Build a cached `perk_select_random` eligibility mask for `1..PERK_ID_MAX`.
   const offerable: boolean[] = new Array(PERK_ID_MAX + 1).fill(false);
   const maxPerkIndex = Math.min(PERK_ID_MAX, state.perkAvailable.length - 1);
   for (let perkIndex = 1; perkIndex <= maxPerkIndex; perkIndex++) {
     if (!state.perkAvailable[perkIndex]) {
       continue;
     }
-    const perkId = perkIndex as PerkId;
-    if (perkCanOffer(state, player, perkId, { gameMode, playerCount })) {
+    if (perkCanOffer(state, player, perkIndex, { gameMode: opts.gameMode, playerCount: opts.playerCount })) {
       offerable[perkIndex] = true;
     }
   }
@@ -97,8 +96,15 @@ function perkOfferableMask(
 export function perkGenerateChoices(
   state: GameplayState,
   player: PlayerState,
-  opts: { players?: PlayerState[] | null; gameMode: GameMode; playerCount: number; count?: number | null },
+  opts: {
+    players?: PlayerState[] | null;
+    gameMode: GameMode;
+    playerCount: number;
+    count?: number | null
+  },
 ): PerkId[] {
+  // Generate a unique list of perk choices for the current selection.
+
   const players = opts.players ?? null;
   const gameMode = opts.gameMode;
   const playerCount = opts.playerCount;
@@ -107,14 +113,14 @@ export function perkGenerateChoices(
     count = perkChoiceCount(player);
   }
 
-  const offerableMask = perkOfferableMask(state, player, gameMode, playerCount);
+  const offerableMask = perkOfferableMask(state, player, { gameMode, playerCount });
   const playerPerkCounts = player.perkCounts;
   const playerWeaponId = player.weapon.weaponId;
-  const deathClockActive = playerPerkCounts[PerkId.DEATH_CLOCK as number] > 0;
+  const deathClockActive = playerPerkCounts[PerkId.DEATH_CLOCK] > 0;
   const flamethrowerId = WeaponId.FLAMETHROWER;
 
   let pyromaniacAllowed = playerWeaponId === flamethrowerId;
-  if (!state.preserveBugs && playerCount > 1) {
+  if (!state.preserveBugs && int(playerCount) > 1) {
     pyromaniacAllowed = false;
     const sourcePlayers = players !== null ? players : [player];
     for (const sourcePlayer of sourcePlayers) {
@@ -132,20 +138,24 @@ export function perkGenerateChoices(
     for (let i = 0; i < 1000; i++) {
       const perkIndex = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
       if (offerableMask[perkIndex]) {
-        return perkIndex as PerkId;
+        return perkIndex;
       }
     }
     return PerkId.INSTANT_WINNER;
   }
 
-  const choices: PerkId[] = new Array(7).fill(PerkId.ANTIPERK);
+  // `perks_generate_choices` always fills a fixed array of 7 entries, even if the UI
+  // only shows 5/6 (Perk Expert/Master). Preserve RNG consumption by generating the
+  // full list, then slicing.
+  let choices: PerkId[] = new Array(7).fill(PerkId.ANTIPERK);
   let choiceIndex = 0;
 
+  // Native `quest_monster_vision_meta` points to quest 3-4 (Hidden Evil):
+  // force Monster Vision as the first choice if not owned.
   if (
     state.questLevel !== null &&
-    state.questLevel.major === 3 &&
-    state.questLevel.minor === 4 &&
-    playerPerkCounts[PerkId.MONSTER_VISION as number] === 0
+    state.questLevel.equal(new QuestLevel(3, 4)) &&
+    int(playerPerkCounts[PerkId.MONSTER_VISION]) === 0
   ) {
     choices[0] = PerkId.MONSTER_VISION;
     choiceIndex = 1;
@@ -158,16 +168,19 @@ export function perkGenerateChoices(
       attempts += 1;
       perkId = selectRandomOffer();
 
+      // Native gates this on player-1 weapon only. In default mode, allow
+      // it in co-op when any alive player has Flamethrower equipped.
       if (perkId === PerkId.PYROMANIAC && !pyromaniacAllowed) {
         continue;
       }
 
-      if (deathClockActive && _DEATH_CLOCK_BLOCKED.has(perkId)) {
+      if (deathClockActive && DEATH_CLOCK_BLOCKED.has(perkId)) {
         continue;
       }
 
+      // Global rarity gate: certain perks have a 25% chance to be rejected.
       if (
-        _PERK_RARITY_GATE.has(perkId) &&
+        PERK_RARITY_GATE.has(perkId) &&
         (state.rng.rand({ caller: RngCallerStatic.PERKS_GENERATE_CHOICES_RARITY_GATE }) & 3) === 1
       ) {
         continue;
@@ -192,7 +205,7 @@ export function perkGenerateChoices(
         continue;
       }
 
-      if (stackable || playerPerkCounts[perkId as number] < 1 || attempts > 29_999) {
+      if (stackable || int(playerPerkCounts[perkId]) < 1 || attempts > 29_999) {
         break;
       }
     }
@@ -202,7 +215,7 @@ export function perkGenerateChoices(
   }
 
   if (gameMode === GameMode.TUTORIAL) {
-    return [
+    choices = [
       PerkId.SHARPSHOOTER,
       PerkId.LONG_DISTANCE_RUNNER,
       PerkId.EVIL_EYES,
@@ -210,7 +223,7 @@ export function perkGenerateChoices(
       PerkId.FASTSHOT,
       PerkId.FASTSHOT,
       PerkId.FASTSHOT,
-    ].slice(0, count);
+    ];
   }
 
   return choices.slice(0, count);
@@ -220,12 +233,16 @@ function perkSelectionPrepareIfNeeded(
   state: GameplayState,
   players: PlayerState[],
   perkState: PerkSelectionState,
-  gameMode: GameMode,
-  playerCount: number | null = null,
+  opts: {
+    gameMode: GameMode;
+    playerCount?: number | null
+  },
 ): PerkId[] {
   if (players.length === 0) {
     return [];
   }
+  const gameMode = opts.gameMode;
+  let playerCount = opts.playerCount ?? null;
   if (playerCount === null) {
     playerCount = players.length;
   }
@@ -244,13 +261,14 @@ export function perkSelectionPreparedChoices(
   players: PlayerState[],
   perkState: PerkSelectionState,
 ): PerkId[] {
+  // Return already-prepared visible choices without mutating state.
   if (players.length === 0) {
     return [];
   }
   if (perkState.choicesDirty || perkState.choices.length === 0) {
     return [];
   }
-  const visibleCount = Math.max(1, perkChoiceCount(players[0]));
+  const visibleCount = Math.max(1, int(perkChoiceCount(players[0])));
   return perkState.choices.slice(0, visibleCount);
 }
 
@@ -260,13 +278,18 @@ export function perkSelectionOpenChoices(
   perkState: PerkSelectionState,
   opts: { gameMode: GameMode; playerCount?: number | null },
 ): PerkId[] {
+  // Prepare current perk choices for the selection UI and return the visible list.
+  // Mirrors `perk_choices_dirty` + `perks_generate_choices` before entering the
+  // perk selection screen (state 6).
   const playerCount = opts.playerCount ?? null;
   perkSelectionPrepareIfNeeded(
     state,
     players,
     perkState,
-    opts.gameMode,
-    playerCount,
+    {
+      gameMode: opts.gameMode,
+      playerCount,
+    }
   );
   return perkSelectionPreparedChoices(players, perkState);
 }
@@ -276,8 +299,17 @@ export function perkSelectionPick(
   players: PlayerState[],
   perkState: PerkSelectionState,
   choiceIndex: number,
-  opts: { gameMode: GameMode; playerCount?: number | null; dt?: number | null; creatures?: readonly CreatureState[] | null; refreshChoices?: boolean },
+  opts: {
+    gameMode: GameMode;
+    playerCount?: number | null;
+    dt?: number | null;
+    creatures?: readonly CreatureState[] | null;
+    refreshChoices?: boolean
+  },
 ): PerkId | null {
+  // Pick a perk from the current choice list and apply it.
+  // On success, decrements `pending_count` (one perk resolved) and marks the
+  // choice list dirty, matching `perk_selection_screen_update`.
   const gameMode = opts.gameMode;
   const playerCount = opts.playerCount ?? null;
   const dt = opts.dt ?? null;
@@ -290,8 +322,10 @@ export function perkSelectionPick(
     state,
     players,
     perkState,
-    gameMode,
-    playerCount,
+    {
+      gameMode,
+      playerCount,
+    },
   );
   const choices = perkSelectionPreparedChoices(players, perkState);
   if (choices.length === 0) {
@@ -311,8 +345,10 @@ export function perkSelectionPick(
       state,
       players,
       perkState,
-      gameMode,
-      playerCount,
+      {
+        gameMode,
+        playerCount,
+      }
     );
   }
   return perkId;

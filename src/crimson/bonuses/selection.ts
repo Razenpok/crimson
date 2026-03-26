@@ -15,11 +15,14 @@ function bonusEnabled(bonusId: BonusId): boolean {
 }
 
 function bonusPickSuppressed(
-  state: GameplayState,
-  players: PlayerState[],
-  bonusId: BonusId,
-  hasFireBulletsDrop: boolean,
+  opts: {
+    state: GameplayState,
+    players: PlayerState[],
+    bonusId: BonusId,
+    hasFireBulletsDrop: boolean
+  }
 ): boolean {
+  const { state, players, bonusId, hasFireBulletsDrop } = opts;
   if (!bonusEnabled(bonusId)) return true;
   if (state.shockChainLinksLeft > 0 && bonusId === BonusId.SHOCK_CHAIN) return true;
   if (bonusId === BonusId.FREEZE && state.bonuses.freeze > 0.0) return true;
@@ -47,6 +50,12 @@ export function bonusPickRandomType(pool: BonusPool, state: GameplayState, playe
 
   for (let i = 0; i < 101; i++) {
     const roll = state.rng.rand({ caller: RngCallerStatic.BONUS_PICK_RANDOM_TYPE_ROLL }) % 162 + 1;
+    // Mirrors `bonus_pick_random_type` (0x412470) mapping:
+    // - roll = rand() % 162 + 1  (1..162)
+    // - Points: roll 1..13
+    // - Energizer: roll 14 with (rand & 0x3F) == 0, else Weapon
+    // - Bucketed ids 3..14 via a 10-step loop; if it would exceed 14, returns 0
+    //   to force a reroll (matching the `goto LABEL_18` path leaving `v3 == 0`).
     let bonusId: BonusId;
     if (roll <= 13) {
       bonusId = BonusId.POINTS;
@@ -58,19 +67,19 @@ export function bonusPickRandomType(pool: BonusPool, state: GameplayState, playe
       }
     } else {
       let bucketOffset = roll - 14;
-      let bonusValue = BonusId.WEAPON as number;
+      let bonusValue = BonusId.WEAPON;
       while (bucketOffset > 10) {
         bucketOffset -= 10;
         bonusValue += 1;
         if (bonusValue >= 15) {
-          bonusValue = BonusId.UNUSED as number;
+          bonusValue = BonusId.UNUSED;
           break;
         }
       }
-      bonusId = bonusValue as BonusId;
+      bonusId = bonusValue;
     }
     if (bonusId === BonusId.UNUSED) continue;
-    if (bonusPickSuppressed(state, players, bonusId, hasFireBulletsDrop)) continue;
+    if (bonusPickSuppressed({ state, players, bonusId, hasFireBulletsDrop })) continue;
     return bonusId;
   }
   return BonusId.POINTS;

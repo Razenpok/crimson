@@ -8,22 +8,30 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { ownerRefForPlayer, projectileSpawn } from '@crimson/weapon-runtime/spawn.ts';
 import type { BonusApplyCtx } from "./apply-context.js";
 
-export function applyNuke(
-  ctx: BonusApplyCtx,
-): void {
+export function applyNuke(ctx: BonusApplyCtx): void {
+  // `bonus_apply` (crimsonland.exe @ 0x00409890) starts screen shake via:
+  // camera_shake_pulses = 0x14;
+  // camera_shake_timer = 0.2f;
   ctx.state.cameraShakePulses = 0x14;
   ctx.state.cameraShakeTimer = 0.2;
 
   const origin = ctx.originPos;
   const rng = ctx.state.rng;
 
-  let bulletCount = rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_BULLET_COUNT }) & 3;
+  let bulletCount = int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_BULLET_COUNT })) & 3;
   bulletCount += 4;
   for (let i = 0; i < bulletCount; i++) {
     const angle = (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_PISTOL_ANGLE })) % 628) * 0.01;
     const projId = projectileSpawn(
       ctx.state,
-      { players: ctx.players, pos: origin, angle, typeId: ProjectileTemplateId.PISTOL, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
+      {
+        players: ctx.players,
+        pos: origin,
+        angle,
+        typeId: ProjectileTemplateId.PISTOL,
+        owner: OwnerRef.fromLocalPlayer(0),
+        ownerPlayerIndex: ctx.player.index
+      },
     );
     if (projId !== -1) {
       const speedScale =
@@ -35,12 +43,26 @@ export function applyNuke(
   const gaussAngle1 = (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_1 })) % 628) * 0.01;
   projectileSpawn(
     ctx.state,
-    { players: ctx.players, pos: origin, angle: gaussAngle1, typeId: ProjectileTemplateId.GAUSS_GUN, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
+    {
+      players: ctx.players,
+      pos: origin,
+      angle: gaussAngle1,
+      typeId: ProjectileTemplateId.GAUSS_GUN,
+      owner: OwnerRef.fromLocalPlayer(0),
+      ownerPlayerIndex: ctx.player.index
+    },
   );
   const gaussAngle2 = (int(rng.rand({ caller: RngCallerStatic.BONUS_APPLY_NUKE_GAUSS_ANGLE_2 })) % 628) * 0.01;
   projectileSpawn(
     ctx.state,
-    { players: ctx.players, pos: origin, angle: gaussAngle2, typeId: ProjectileTemplateId.GAUSS_GUN, owner: OwnerRef.fromLocalPlayer(0), ownerPlayerIndex: ctx.player.index },
+    {
+      players: ctx.players,
+      pos: origin,
+      angle: gaussAngle2,
+      typeId: ProjectileTemplateId.GAUSS_GUN,
+      owner: OwnerRef.fromLocalPlayer(0),
+      ownerPlayerIndex: ctx.player.index
+    },
   );
 
   ctx.state.effects.spawnExplosionBurst({
@@ -56,6 +78,9 @@ export function applyNuke(
     const prevGuard = ctx.state.bonusSpawnGuard;
     ctx.state.bonusSpawnGuard = true;
     for (let idx = 0; idx < creatures.length; idx++) {
+      // Native applies explosion damage to any active creature, including
+      // those already in the death/corpse state (this shrinks corpses
+      // faster via the hp<=0 path in creature_apply_damage).
       const creature = creatures[idx];
       if (!creature.active) {
         continue;

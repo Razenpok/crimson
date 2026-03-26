@@ -12,7 +12,7 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { creatureApplyDamageWithLethalFollowup } from "@crimson/creatures/damage.js";
 
-export interface ApplyFinalRevengeOpts {
+export function applyFinalRevengeOnPlayerDeath(opts: {
   state: GameplayState;
   creatures: CreaturePool;
   players: PlayerState[];
@@ -22,9 +22,7 @@ export interface ApplyFinalRevengeOpts {
   detailPreset: number;
   fxQueue: FxQueue | null;
   deaths: CreatureDeath[];
-}
-
-export function applyFinalRevengeOnPlayerDeath(opts: ApplyFinalRevengeOpts): void {
+}): void {
   const {
     state,
     creatures,

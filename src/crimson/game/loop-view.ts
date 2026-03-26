@@ -57,7 +57,6 @@ import { TutorialMode } from '@crimson/modes/tutorial-mode.ts';
 
 import { DEMO_PURCHASE_URL } from '@crimson/demo.ts';
 import { DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
-import { WorldRuntime } from '@crimson/world/runtime.ts';
 
 import { type GameStatusPersist } from './runtime.ts';
 
@@ -200,7 +199,7 @@ export class GameLoopView implements View {
   private _status: GameStatusPersist;
 
   private _boot: BootView;
-  private _demo: DemoView | null = null;
+  private _demo: DemoView;
   private _menu: MenuView;
 
   private _frontViews: Record<string, Screen>;
@@ -223,9 +222,7 @@ export class GameLoopView implements View {
     this._debugEnabled = state.debugEnabled;
 
     this._boot = new BootView(state);
-    // DemoView requires a WorldRuntime;
-    // deferred to _ensureDemo() when the demo is actually needed.
-    this._demo = null;
+    this._demo = new DemoView(state);
     this._menu = new MenuView(state);
 
     const _viewCtx = modeViewContext(state);
@@ -298,25 +295,6 @@ export class GameLoopView implements View {
     };
 
     this._active = this._boot;
-  }
-
-  /**
-   * Lazily create the DemoView — requires WorldRuntime allocation.
-   */
-  private _ensureDemo(): DemoView | null {
-    if (this._demo !== null) return this._demo;
-    // TODO: WorldRuntime constructor requires several parameters;
-    // for now, create a minimal instance for the demo.
-    const runtime = new WorldRuntime({
-      worldSize: 1024,
-      demoModeActive: true,
-      config: this.state.config,
-      audio: this.state.audio,
-      audioRng: this.state.rng,
-      preserveBugs: this.state.preserveBugs,
-    });
-    this._demo = new DemoView(this.state, runtime);
-    return this._demo;
   }
 
   // -----------------------------------------------------------------------
@@ -500,7 +478,7 @@ export class GameLoopView implements View {
     if (this._frontActive !== null) {
       const fa = this._frontActive;
       const gp = this._gameplayScreen(fa);
-      let action = fa.takeAction();
+      let action = fa.takeAction!();
 
       if (gp !== null) {
         action = this._resolveGameplayAction(gp, action);
@@ -662,7 +640,7 @@ export class GameLoopView implements View {
       }
 
       if (action === 'start_demo') {
-        const demo = this._ensureDemo();
+        const demo = this._demo;
         if (demo === null) return;
         this._menu.close();
         this._menuActive = false;
@@ -673,7 +651,7 @@ export class GameLoopView implements View {
       }
 
       if (action === 'quit_after_demo') {
-        const demo = this._ensureDemo();
+        const demo = this._demo;
         if (demo === null) return;
         this._menu.close();
         this._menuActive = false;
@@ -708,7 +686,7 @@ export class GameLoopView implements View {
       this.state.demoEnabled &&
       this._boot.isThemeStarted()
     ) {
-      const demo = this._ensureDemo();
+      const demo = this._demo;
       if (demo !== null) {
         demo.open();
         this._active = demo;

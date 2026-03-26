@@ -85,7 +85,7 @@ crimson/modes/components/highscore-record-builder.ts
 crimson/quests/level.ts
 crimson/quests/registry.ts
 crimson/render/terrain-fx.ts
-step-pipeline.ts
+crimson/sim/step-pipeline.ts
 crimson/bonuses/apply-context.ts
 crimson/typo/spawns.ts
 crimson/bonuses/fire-bullets.ts
@@ -121,4 +121,15 @@ grim/render-pipeline.ts
 grim/sfx-map.ts
 crimson/bonuses/ids.ts
 crimson/perks/ids.ts
-
+crimson/audio-router.ts
+crimson/bonuses/nuke.ts
+crimson/bonuses/reflex-boost.ts
+crimson/bonuses/selection.ts
+crimson/creatures/anim.ts
+crimson/creatures/spawn-ids.ts
+crimson/creatures/spawn-templates.ts
+crimson/world/standalone-tick-harness.ts
+crimson/demo.ts
+crimson/modes/components/perk-prompt-ui.ts
+crimson/perks/impl/final-revenge.ts
+crimson/perks/selection.ts

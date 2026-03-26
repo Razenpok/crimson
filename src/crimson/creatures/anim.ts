@@ -2,9 +2,9 @@
 
 import { CreatureAiMode, CreatureFlags } from './spawn-ids';
 
-const _FLAG_ANIM_PING_PONG = CreatureFlags.ANIM_PING_PONG as number;
-const _FLAG_ANIM_LONG_STRIP = CreatureFlags.ANIM_LONG_STRIP as number;
-const _FLAG_RANGED_ATTACK_SHOCK = CreatureFlags.RANGED_ATTACK_SHOCK as number;
+const _FLAG_ANIM_PING_PONG = int(CreatureFlags.ANIM_PING_PONG);
+const _FLAG_ANIM_LONG_STRIP = int(CreatureFlags.ANIM_LONG_STRIP);
+const _FLAG_RANGED_ATTACK_SHOCK = int(CreatureFlags.RANGED_ATTACK_SHOCK);
 
 const _f32Buffer = new Float32Array(1);
 
@@ -37,18 +37,19 @@ const _CREATURE_CORPSE_FRAMES: Record<number, number> = {
 
 
 export function creatureCorpseFrameForType(typeId: number): number {
+    // Resolve the bodyset frame index used for corpse decals (`fx_queue_render`).
     const frame = _CREATURE_CORPSE_FRAMES[typeId];
     if (frame !== undefined) {
-        return frame;
+        return int(frame);
     }
-    return typeId & 0xF;
+    return int(typeId) & 0xF;
 }
 
 
 export function creatureAnimIsLongStrip(flags: CreatureFlags): boolean {
     // From creature_update_all / creature_render_type:
     // long strip when (flags & 4) == 0 OR (flags & 0x40) != 0
-    const flagsBits = flags as number;
+    const flagsBits = int(flags);
     return (flagsBits & _FLAG_ANIM_PING_PONG) === 0 || (flagsBits & _FLAG_ANIM_LONG_STRIP) !== 0;
 }
 
@@ -69,6 +70,7 @@ export function creatureAnimPhaseStep(opts: {
     const aiMode = opts.aiMode ?? CreatureAiMode.ORBIT_PLAYER;
     const quantizeF32 = opts.quantizeF32 ?? true;
 
+    // Compute the per-frame animation phase increment (creature_update_all).
     if (size === 0.0) {
         return 0.0;
     }
@@ -82,7 +84,7 @@ export function creatureAnimPhaseStep(opts: {
     }
 
     const speedScale = (quantizeF32 ? _f32(30.0) : 30.0) / size;
-    const flagsBits = flags as number;
+    const flagsBits = int(flags);
     const isLongStrip = (flagsBits & _FLAG_ANIM_PING_PONG) === 0 || (flagsBits & _FLAG_ANIM_LONG_STRIP) !== 0;
     let stripMul: number;
     if (!isLongStrip) {
@@ -112,6 +114,8 @@ export function creatureAnimAdvancePhase(
         quantizeF32?: boolean;
     },
 ): [number, number] {
+    // Advance anim_phase and wrap it the same way as creature_update_all.
+    // Returns (new_phase, applied_step).
     const quantizeF32 = opts.quantizeF32 ?? true;
 
     if (quantizeF32) {
@@ -129,7 +133,7 @@ export function creatureAnimAdvancePhase(
     }
 
     const flags = opts.flags ?? (0 as CreatureFlags);
-    const flagsBits = flags as number;
+    const flagsBits = int(flags);
     const isLongStrip = (flagsBits & _FLAG_ANIM_PING_PONG) === 0 || (flagsBits & _FLAG_ANIM_LONG_STRIP) !== 0;
     if (isLongStrip) {
         const limit = quantizeF32 ? _f32(31.0) : 31.0;
@@ -162,9 +166,12 @@ export function creatureAnimSelectFrame(
         mirrorLong: boolean;
         flags?: CreatureFlags;
     },
-): [number, boolean, string] {
+): [frameIndex: number, mirrorApplied: boolean, mode: string] {
+    // Select an 8x8 atlas frame index (creature_render_type).
+    // Note: mirrorApplied refers to the long-strip ping-pong index mirroring
+    // (frame = 0x1f - frame) when the per-type mirror flag is set, not a texture flip.
     const flags = opts.flags ?? (0 as CreatureFlags);
-    const flagsBits = flags as number;
+    const flagsBits = int(flags);
     const isLongStrip = (flagsBits & _FLAG_ANIM_PING_PONG) === 0 || (flagsBits & _FLAG_ANIM_LONG_STRIP) !== 0;
     if (isLongStrip) {
         let frame: number;

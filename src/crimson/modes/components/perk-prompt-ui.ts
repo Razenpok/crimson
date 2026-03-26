@@ -77,17 +77,18 @@ export class PerkPromptUi {
       pulse: number;
       uiTextWidth: UiTextWidthFn;
       textColor: wgl.Color;
-      scale: number;
+      scale?: number;
     },
   ): void {
-    const { resources, label, timerMs, pulse, uiTextWidth, textColor, scale } = opts;
+    const { resources, label, timerMs, pulse, uiTextWidth, textColor } = opts;
     const alpha = timerMs / PERK_PROMPT_MAX_TIMER_MS;
     if (alpha <= 1e-3) {
       return;
     }
 
+    const scale = opts.scale ?? 1.0;
     const screenW = wgl.getScreenWidth();
-    const hinge = PerkPromptUi.hinge({ screenW });
+    const hinge = PerkPromptUi.hinge();
     // Prompt swings counter-clockwise; WebGL Y-down makes positive rotation clockwise.
     const rotDeg = -(1.0 - alpha) * 90.0;
     const tint = wgl.makeColor(1, 1, 1, alpha);
@@ -105,6 +106,10 @@ export class PerkPromptUi {
     const barH = barTex.height * PERK_PROMPT_BAR_SCALE;
     const barLocalX = (PERK_PROMPT_BAR_BASE_OFFSET_X + PERK_PROMPT_BAR_SHIFT_X) * PERK_PROMPT_BAR_SCALE;
     const barLocalY = PERK_PROMPT_BAR_BASE_OFFSET_Y * PERK_PROMPT_BAR_SCALE;
+
+    // Raylib clamps out-of-range UVs when the texture wrap mode is CLAMP.
+    // Using src.x=tex.width with a negative width relies on REPEAT wrap to
+    // wrap UVs back into range, making the bar disappear when clamped.
     const barSrc = wgl.makeRectangle(0, 0, -barTex.width, barTex.height);
     const barDst = wgl.makeRectangle(hinge.x, hinge.y, barW, barH);
     const barOrigin = wgl.makeVector2(-barLocalX, -barLocalY);

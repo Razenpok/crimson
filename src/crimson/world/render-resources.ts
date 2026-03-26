@@ -145,7 +145,7 @@ export class RenderResources {
 
   consumeTerrainFxBatch(
     batch: TerrainFxBatch,
-    opts: { corpseFrameForType?: (creatureTypeId: number) => number },
+    opts: { corpseFrameForType?: (creatureTypeId: number) => number } = {},
   ): void {
     const corpseFrameForType = opts.corpseFrameForType ?? creatureCorpseFrameForType;
     if (terrainFxBatchIsEmpty(batch)) return;

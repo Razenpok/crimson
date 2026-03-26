@@ -23,6 +23,7 @@ export function applyReflexBoost(ctx: BonusApplyCtx): void {
 export function applyReflexBoostPickupFx(
   opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number },
 ): void {
+  // Spawn the blue ring used by Reflex Boost bonus pickups.
   opts.state.effects.spawnRing({
     pos: opts.pickup.pos,
     detailPreset: int(opts.detailPreset),

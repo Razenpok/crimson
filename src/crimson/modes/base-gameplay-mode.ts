@@ -1629,7 +1629,7 @@ export class BaseGameplayMode {
       syncAudioBridgeState: () => this._worldRuntime.syncAudioBridgeState(),
       applyAudioPlan: (plan: PresentationStepCommands, applyAudio: boolean) =>
         this.audioBridge.applyPlan({ plan, applyAudio }),
-      applyTerrainFx: (batch: TerrainFxBatch) => this.renderResources.consumeTerrainFxBatch(batch, {}),
+      applyTerrainFx: (batch: TerrainFxBatch) => this.renderResources.consumeTerrainFxBatch(batch),
       updateCamera: opts.updateCamera
         ? (dtSim: number) => this._worldRuntime.updateCamera(dtSim)
         : null,

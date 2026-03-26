@@ -9,9 +9,17 @@ export interface QuestPresentationReaction {
   readonly playCompletionMusic: boolean;
 }
 
-export interface PostApplyReaction {
+export class PostApplyReaction {
   readonly sfx: readonly SfxId[];
   readonly quest: QuestPresentationReaction | null;
+
+  constructor(opts: {
+    sfx?: readonly SfxId[];
+    quest?: QuestPresentationReaction;
+  } = {}) {
+    this.sfx = opts.sfx ?? [];
+    this.quest = opts.quest ?? null;
+  }
 }
 
 export function buildPostApplyReaction(opts: {
