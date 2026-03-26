@@ -749,7 +749,7 @@ export function playerUpdate(
     playerPosBeforeMove: prevPos,
     dt,
     state,
-    players: players as PlayerState[] | null,
+    players,
     stationary: perkTickStationary,
     ownerRefForPlayer,
     ownerRefForPlayerProjectiles,

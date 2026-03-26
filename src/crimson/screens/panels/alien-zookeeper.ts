@@ -304,7 +304,7 @@ export class AlienZooKeeperView {
     for (let index = 0; index < this._board.length; index++) {
       const cellValue = this._board[index];
       if (cellValue === -3) continue;
-      const row = (index / _BOARD_SIDE) | 0;
+      const row = Math.floor(index / _BOARD_SIDE);
       const col = index % _BOARD_SIDE;
       const x = layout.boardX + col * layout.tileSize;
       const y = layout.boardY + row * layout.tileSize;
@@ -472,7 +472,7 @@ export class AlienZooKeeperView {
     wgl.drawRectangle(layout.boardX + layout.boardSize - borderW, layout.boardY, borderW, layout.boardSize, WHITE);
 
     // Timer bar
-    let timerValue = (this._timerMs / 100) | 0;
+    let timerValue = Math.floor(this._timerMs / 100);
     if (timerValue > 0xC0) timerValue = 0xC0;
     const timerH = 6.0 * scale;
     const timerY = layout.boardY + (200.0 * scale);
@@ -506,11 +506,11 @@ export class AlienZooKeeperView {
     for (let index = 0; index < this._board.length; index++) {
       const tile = this._board[index];
       if (tile === -3) continue;
-      const row = (index / _BOARD_SIDE) | 0;
+      const row = Math.floor(index / _BOARD_SIDE);
       const col = index % _BOARD_SIDE;
-      const animFrame = (((this._animTimeMs / 50) | 0) + (tile * 2)) % 32;
+      const animFrame = (Math.floor(this._animTimeMs / 50) + (tile * 2)) % 32;
       const srcCol = animFrame % 8;
-      const srcRow = (animFrame / 8) | 0;
+      const srcRow = Math.floor(animFrame / 8);
       const src = wgl.makeRectangle(srcCol * frameW, srcRow * frameH, frameW, frameH);
       const tileDst = wgl.makeRectangle(
         layout.boardX + col * layout.tileSize,

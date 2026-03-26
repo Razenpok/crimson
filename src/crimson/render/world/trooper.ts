@@ -115,7 +115,7 @@ export function drawPlayerTrooperSprite(
       if (auraGrid) {
         const atlasFrame = atlas.frame;
         const col = atlasFrame % auraGrid;
-        const row = (atlasFrame / auraGrid) | 0;
+        const row = Math.floor(atlasFrame / auraGrid);
         const cellW = particlesTexture.width / auraGrid;
         const cellH = particlesTexture.height / auraGrid;
         const src = wgl.makeRectangle(
@@ -202,7 +202,7 @@ export function drawPlayerTrooperSprite(
         if (shieldGrid) {
           const atlasFrame = atlas.frame;
           const col = atlasFrame % shieldGrid;
-          const row = (atlasFrame / shieldGrid) | 0;
+          const row = Math.floor(atlasFrame / shieldGrid);
           const cellW = particlesTexture.width / shieldGrid;
           const cellH = particlesTexture.height / shieldGrid;
           const src = wgl.makeRectangle(

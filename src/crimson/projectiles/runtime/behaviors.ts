@@ -17,60 +17,35 @@ import {
   spawnShrinkifierHitEffects,
   spawnSplitterHitEffects,
 } from '@crimson/projectiles/effects.ts';
+import type { GameplayState } from '@crimson/sim/state-types.ts';
 import {
   Projectile,
   ProjectileTemplateId,
 } from '@crimson/projectiles/types.ts';
 import { applyDamageToCreature, hitRadiusFor } from './collision.ts';
+import type { ProjectilePool } from './projectile-pool.ts';
 
 export type CreatureStateForBehavior = CreatureStateLike;
 
-export interface ProjectilePoolLike {
-  creatureDamageApplier: ((
-    creatureIndex: number,
-    damage: number,
-    damageType: number,
-    knockback: Vec2,
-    owner: OwnerRef,
-  ) => void) | null;
-  spawn(
-    opts: {
-      pos: Vec2;
-      angle: number;
-      typeId: ProjectileTemplateId;
-      owner: OwnerRef;
-      travelBudget?: number;
-      hitsPlayers?: boolean;
-    },
-  ): number;
-}
-
-export interface GameplayStateLike {
-  shockChainProjectileId: number;
-  shockChainLinksLeft: number;
-  preserveBugs: boolean;
-  bonusSpawnGuard: boolean;
-}
-
 export class ProjectileUpdateCtx {
-  pool: ProjectilePoolLike;
+  pool: ProjectilePool;
   creatures: readonly CreatureStateLike[];
   dt: number;
   ionScale: number;
   detailPreset: number;
   rng: CrandLike;
-  runtimeState: GameplayStateLike | null;
+  runtimeState: GameplayState | null;
   effects: EffectPool | null;
   sfxQueue: SfxId[] | null;
 
   constructor(
-    pool: ProjectilePoolLike,
+    pool: ProjectilePool,
     creatures: readonly CreatureStateLike[],
     dt: number,
     ionScale: number,
     detailPreset: number,
     rng: CrandLike,
-    runtimeState: GameplayStateLike | null,
+    runtimeState: GameplayState | null,
     effects: EffectPool | null,
     sfxQueue: SfxId[] | null,
   ) {

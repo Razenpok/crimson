@@ -213,7 +213,7 @@ function uiElementAnim(
 
 function labelAlpha(counterValue: number): number {
   // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
-  return 100 + (((counterValue * 155) / 1000) | 0);
+  return 100 + int((counterValue * 155) / 1000);
 }
 
 function signLayoutScale(width: number): [number, number] {
@@ -600,7 +600,7 @@ export class MenuView {
       if (this._menuEntryEnabled(entry)) {
         let glowAlpha = alpha;
         if (0 <= entry.readyTimerMs && entry.readyTimerMs < 0x100) {
-          glowAlpha = 0xFF - ((entry.readyTimerMs / 2) | 0);
+          glowAlpha = 0xFF - int(entry.readyTimerMs / 2);
         }
         const glowAlphaNorm = glowAlpha / 255;
         wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);

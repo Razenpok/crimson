@@ -10,7 +10,7 @@ export interface TutorialOverlayState {
   hintAlpha: number;
 }
 
-const TUTORIAL_PANEL_POS = new Vec2(0.0, 64.0);
+export const TUTORIAL_PANEL_POS = new Vec2(0.0, 64.0);
 const TUTORIAL_PANEL_PADDING = new Vec2(20.0, 8.0);
 
 export type DrawUiText = (text: string, pos: Vec2, color: wgl.Color, scale: number) => void;

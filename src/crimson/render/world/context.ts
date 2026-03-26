@@ -68,7 +68,7 @@ export class WorldRenderCtx {
     const cellW = texture.width / grid;
     const cellH = texture.height / grid;
     const col = frame % grid;
-    const row = (frame / grid) | 0;
+    const row = Math.floor(frame / grid);
     const src = wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
     const w = cellW * scale;
     const h = cellH * scale;
@@ -155,6 +155,8 @@ function drawBulletTrail(
   const segment = end.sub(start);
   const [direction, dist] = segment.normalizedWithLength();
 
+  // Native uses projectile travel direction as the side-offset basis and still emits the
+  // trail quad even when origin=head (degenerate impact frames).
   let sideMul: number;
   if (typeId === ProjectileTemplateId.PISTOL || typeId === ProjectileTemplateId.ASSAULT_RIFLE) {
     sideMul = 1.2;
@@ -178,6 +180,8 @@ function drawBulletTrail(
   const p2 = end.add(sideOffset);
   const p3 = end.sub(sideOffset);
 
+  // Native uses additive blending for bullet trails and sets color slots per projectile type.
+  // Gauss has a distinct blue tint; most other bullet trails are neutral gray.
   let headRgb: [number, number, number];
   if (typeId === ProjectileTemplateId.GAUSS_GUN) {
     headRgb = [51 / 255, 128 / 255, 255 / 255];

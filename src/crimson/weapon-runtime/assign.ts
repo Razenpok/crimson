@@ -6,6 +6,7 @@ import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { WeaponSlot } from '@crimson/sim/state-types.ts';
 import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import type { Weapon } from '@crimson/weapons.ts';
+import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
 
 export function weaponEntry(weaponId: WeaponId): Weapon {
   const entry = WEAPON_BY_ID.get(weaponId);
@@ -46,18 +47,6 @@ export function initDefaultAltWeapon(player: PlayerState): void {
   slot.reloadTimerMax = 1.2;
   slot.shotCooldown = 0.0;
   player.altWeapon = slot;
-}
-
-// Inline helper — mirrors weapon_usage_slot_for_weapon_id from weapon_usage.py
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = 52;
-
-function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  const id = int(weaponId);
-  if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
-    return id;
-  }
-  return null;
 }
 
 export interface WeaponAssignStatus {

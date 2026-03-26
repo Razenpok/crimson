@@ -41,6 +41,8 @@ function bonusEntryIsEmpty(entry: BonusEntry): boolean {
   );
 }
 
+// Keep native amount-domain behavior: any raw bonus amount that happens to
+// match a weapon id can trip suppression checks under `--preserve-bugs`.
 function weaponIdFromNativeAmount(amount: number): WeaponId | null {
   const weaponId = int(amount);
   if (!WEAPON_BY_ID.has(weaponId as WeaponId)) return null;
@@ -71,6 +73,8 @@ export class BonusPool {
 
   constructor(size: number = BONUS_POOL_SIZE) {
     this._entries = Array.from({ length: int(size) }, () => new BonusEntry());
+    // Native bonus code uses a writable sentinel entry when allocation/spacing
+    // checks fail. Some callers still mutate it, which affects RNG consumption.
     this._sentinel = new BonusEntry();
   }
 
@@ -128,7 +132,7 @@ export class BonusPool {
   spawnAt(
     pos: Vec2,
     bonusId: BonusId,
-    durationOverride: number,
+    durationOverride: number = -1,
     opts: { state: GameplayState; worldWidth?: number; worldHeight?: number },
   ): BonusEntry | null {
     const worldWidth = opts.worldWidth ?? 1024.0;
@@ -194,7 +198,7 @@ export class BonusPool {
 
     const rng = opts.state.rng;
     if (entry.bonusId === BonusId.WEAPON) {
-      entry.amount = int(weaponPickRandomAvailable(opts.state, null));
+      entry.amount = int(weaponPickRandomAvailable(opts.state));
     } else if (entry.bonusId === BonusId.POINTS) {
       entry.amount = (rng.rand({ caller: RngCallerStatic.BONUS_SPAWN_AT_POS_POINTS_AMOUNT }) & 7) < 3 ? 1000 : 500;
     } else {
@@ -221,15 +225,16 @@ export class BonusPool {
     if (state.bonusSpawnGuard) return null;
 
     const rng = state.rng;
+    // Native special-case: while any player has Pistol, 3/4 chance to force a Weapon drop.
     if (players.length > 0 && players.some((player) => player.weapon.weaponId === WeaponId.PISTOL)) {
       if ((rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_PISTOL_FORCE_WEAPON }) & 3) < 3) {
         const entry = this.spawnAtPos(pos, { state, players, worldWidth, worldHeight });
 
         entry.bonusId = BonusId.WEAPON;
-        let weaponId = weaponPickRandomAvailable(state, null);
+        let weaponId = weaponPickRandomAvailable(state);
         entry.amount = int(weaponId);
         if (weaponId === WeaponId.PISTOL) {
-          weaponId = weaponPickRandomAvailable(state, null);
+          weaponId = weaponPickRandomAvailable(state);
           entry.amount = int(weaponId);
         }
 
@@ -292,6 +297,7 @@ export class BonusPool {
       let nearPlayer = false;
       if (players.length > 0) {
         if (state.preserveBugs) {
+          // Native checks player 1 position only.
           nearPlayer = Vec2.distanceSq(pos, players[0].pos) < nearSq;
         } else {
           nearPlayer = players.some((player) => Vec2.distanceSq(pos, player.pos) < nearSq);
@@ -347,8 +353,6 @@ export class BonusPool {
         velXDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_VEL_X }),
         velYDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_VEL_Y }),
         scaleStepDraw: rng.rand({ caller: RngCallerStatic.BONUS_TRY_SPAWN_ON_KILL_BURST_SCALE_STEP }),
-        scaleStep: null,
-        lifetime: 0.5,
         detailPreset,
       });
     }
@@ -381,6 +385,8 @@ export class BonusPool {
           this.clearEntry(entry);
           continue;
         }
+        // Native `bonus_update` sets bonus_id to NONE before pickup checks
+        // and still allows one final in-range pickup in that tick.
         entry.bonusId = BonusId.UNUSED;
         expiredToUnused = true;
       }
@@ -426,6 +432,7 @@ export class BonusPool {
   }
 }
 
+/** Return the first bonus entry within the aim hover radius, matching the exe scan order. */
 export function bonusFindAimHoverEntry(
   player: PlayerState,
   bonusPool: BonusPool,
@@ -443,6 +450,7 @@ export function bonusFindAimHoverEntry(
   return null;
 }
 
+/** Return the classic label text for a bonus entry. */
 export function bonusLabelForEntry(entry: BonusEntry, opts: { preserveBugs?: boolean } = {}): string {
   const preserveBugs = opts.preserveBugs ?? false;
   const bonusId = entry.bonusId;

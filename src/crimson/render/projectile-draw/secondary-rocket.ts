@@ -59,7 +59,7 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
 
   const frame = atlas.frame;
   const col = frame % grid;
-  const row = (frame / grid) | 0;
+  const row = Math.floor(frame / grid);
   const particleCellW = particlesTexture.width / grid;
   const particleCellH = particlesTexture.height / grid;
   const src = wgl.makeRectangle(

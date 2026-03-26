@@ -40,8 +40,11 @@ export class RenderResources {
   }
 
   get resources(): RuntimeResources {
-    if (this._resources !== null) return this._resources;
-    return runtimeResourcesFor(this._assetsUrl);
+    const resources = this._resources;
+    if (resources === null) {
+      throw new Error('runtime resources must be loaded before use');
+    }
+    return resources;
   }
 
   set resources(value: RuntimeResources | null) {
@@ -49,7 +52,11 @@ export class RenderResources {
   }
 
   registryTexture(textureId: TextureId): wgl.Texture {
-    return getTexture(this.resources, textureId);
+    const resources = this._resources;
+    if (resources !== null) {
+      return getTexture(resources, textureId);
+    }
+    return getTexture(runtimeResourcesFor(this._assetsUrl), textureId);
   }
 
   syncGroundSettings(): void {
@@ -107,7 +114,8 @@ export class RenderResources {
   open(opts: { terrainSeed: number }): void {
     const { terrainSeed } = opts;
     this.close();
-    const resources = this.resources;
+    const resources = runtimeResourcesFor(this._assetsUrl);
+    this._resources = resources;
 
     const base = getTexture(resources, TId.TER_Q1_BASE);
     const overlay = getTexture(resources, TId.TER_Q1_OVERLAY);

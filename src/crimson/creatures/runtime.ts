@@ -31,6 +31,7 @@ import {
   survivalRecordRecentDeath as _gameplaySurvivalRecordRecentDeath,
 } from '@crimson/gameplay.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { ftolMsI32 } from '@crimson/sim/timing.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import { applyFinalRevengeOnPlayerDeath } from '@crimson/perks/impl/final-revenge.ts';
 import { creatureAi7TickLinkTimer, creatureAiUpdateTarget } from './ai.ts';
@@ -209,12 +210,6 @@ function _ownerToPlayerIndex(owner: OwnerRef): number | null {
 
 function _travelBudgetForTypeId(typeId: ProjectileTemplateId): number {
   return weaponEntryForProjectileTypeId(typeId).travelBudget;
-}
-
-function ftolMsI32(dtSeconds: number): number {
-  const dtF32 = f32(dtSeconds);
-  const scaledMsF32 = f32(dtF32 * 1000.0);
-  return Math.trunc(scaledMsF32) | 0;
 }
 
 function awardExperience(

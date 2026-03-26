@@ -12,22 +12,10 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { CreatureState } from './runtime.ts';
 import { CreatureDamageType } from './damage-types.ts';
 import { CREATURE_LIFECYCLE_ALIVE } from './lifecycle.ts';
 import { CreatureFlags, CreatureTypeId } from './spawn-ids.ts';
-
-export interface CreatureState {
-  pos: Vec2;
-  vel: Vec2;
-  heading: number;
-  hp: number;
-  size: number;
-  flags: number;
-  lifecycleStage: number;
-  typeId: CreatureTypeId;
-  lastHitOwner: OwnerRef;
-  hitFlashTimer: number;
-}
 
 function anyPlayerHasPerk(players: readonly PlayerState[], perkId: PerkId): boolean {
   for (const player of players) {
@@ -149,6 +137,7 @@ function damageType4Pyromaniac(ctx: CreatureDamageCtx): void {
   ctx.rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_PYROMANIAC });
 }
 
+/** Port the `creature_apply_damage` lethal branch for `flags & 0x10`. */
 function damageLethalRangedShockBurst(
   creature: CreatureState,
   rng: CrandLike,
@@ -183,6 +172,7 @@ function damageLethalRangedShockBurst(
   }
 }
 
+/** Resolve the native `creature_apply_damage` death sound, if this path owns one. */
 export function resolveNativeDeathSfx(
   creature: CreatureState,
   opts: { rng: CrandLike; preserveBugs?: boolean },
@@ -219,6 +209,15 @@ const CREATURE_DAMAGE_ALIVE_STEPS: Map<number, readonly CreatureDamageStep[]> = 
   [CreatureDamageType.FIRE, [damageType4Pyromaniac]],
 ]);
 
+/**
+ * Apply damage to a creature, returning true if the hit killed it.
+ *
+ * This is a partial port of `creature_apply_damage` (FUN_004207c0).
+ *
+ * Notes:
+ * - Death side-effects are handled by the caller.
+ * - `damageType` is a native integer category; call sites must supply it.
+ */
 export function creatureApplyDamage(
   creature: CreatureState,
   opts: { damageAmount: number; damageType: number; impulse: Vec2; owner: OwnerRef; dt: number; players: readonly PlayerState[]; rng: CrandLike; effects?: EffectPool | null; detailPreset?: number },
@@ -293,6 +292,12 @@ export function creatureApplyDamage(
   return false;
 }
 
+/**
+ * Apply damage and run a required lethal follow-up exactly on death transition.
+ *
+ * This helper keeps lethal bookkeeping adjacent to damage application so runtime
+ * call sites cannot accidentally skip death handling side effects.
+ */
 export function creatureApplyDamageWithLethalFollowup(
   creature: CreatureState,
   opts: { damageAmount: number; damageType: number; impulse: Vec2; owner: OwnerRef; dt: number; players: readonly PlayerState[]; rng: CrandLike; preserveBugs?: boolean; effects?: EffectPool | null; detailPreset?: number; onLethal: (sfx: SfxId[]) => void },

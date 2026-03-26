@@ -4,6 +4,7 @@ import { GameMode } from '@crimson/game-modes.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { GameplayState } from '@crimson/sim/state-types.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
+import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
 import { QuestLevel } from "@crimson/quests/level.js";
 import { allQuests } from "@crimson/quests/registry.js";
 
@@ -124,14 +125,3 @@ export function weaponPickRandomAvailable(
   return WeaponId.PISTOL;
 }
 
-// Inline helper — mirrors weapon_usage_slot_for_weapon_id from weapon_usage.py
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = 52;
-
-function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  const id = int(weaponId);
-  if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
-    return id;
-  }
-  return null;
-}

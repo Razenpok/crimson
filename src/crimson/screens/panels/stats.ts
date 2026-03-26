@@ -373,7 +373,7 @@ export class StatisticsMenuView {
     if (isOrbesVolantesDay(today) && this.state.statsMenuEasterEggRoll === _STATS_EASTER_TRIGGER_ROLL) {
       this.state.statsMenuEasterEggRoll = _STATS_EASTER_ROLL_UNSET;
       const easterX = this.state.rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X }) % 64 + 16;
-      drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 0.5));
+      drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 128 / 255));
     }
 
     // Buttons

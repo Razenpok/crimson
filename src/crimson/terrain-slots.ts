@@ -2,6 +2,7 @@
 
 import type { CrandLike } from '@grim/rand';
 import { TextureId } from '@grim/assets.ts';
+import type { QuestLevel } from './quests/level.ts';
 import { RngCallerStatic } from './rng-caller-static';
 
 export type TerrainSlotTriplet = readonly [number, number, number];
@@ -29,11 +30,6 @@ const _TEXTURE_ID_BY_TERRAIN_SLOT: Record<number, TextureId> = {
   6: TextureId.TER_Q4_BASE,
   7: TextureId.TER_Q4_OVERLAY,
 };
-
-export interface QuestLevel {
-  major: number;
-  minor: number;
-}
 
 export function terrainSlotsForQuest(level: QuestLevel): TerrainSlotTriplet {
   if (level.major <= 4) {

@@ -1,7 +1,7 @@
 // Port of crimson/modes/typo_mode.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { type ConsoleState } from '@grim/console.ts';
@@ -320,7 +320,7 @@ export class TypoShooterMode extends BaseGameplayMode {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
       this._drawTargetHealthBar();
       drawHudOverlay({
-        resources: this.renderResources.resources as RuntimeResources,
+        resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
         alpha: 1.0,
@@ -349,7 +349,7 @@ export class TypoShooterMode extends BaseGameplayMode {
         this._gameOverUi.draw({
           record: this._gameOverRecord,
           bannerKind: this._gameOverBanner,
-          resources: this.renderResources.resources as RuntimeResources,
+          resources: this.renderResources.resources,
           mouse: this._uiMousePos(),
         });
       }
@@ -361,7 +361,7 @@ export class TypoShooterMode extends BaseGameplayMode {
   // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
-    const resources = this.renderResources.resources as RuntimeResources;
+    const resources = this.renderResources.resources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
@@ -387,7 +387,7 @@ export class TypoShooterMode extends BaseGameplayMode {
     const typo = this.state.typo;
     if (typo == null || typo.typing == null) return;
     const screenH = wgl.getScreenHeight();
-    const panelTexture = getTexture(this.renderResources.resources as RuntimeResources, TextureId.UI_IND_PANEL);
+    const panelTexture = getTexture(this.renderResources.resources, TextureId.UI_IND_PANEL);
     if (panelTexture === null) return;
     drawTypingBox(
       screenH,

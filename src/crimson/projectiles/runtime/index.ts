@@ -6,8 +6,8 @@ export {
   type PrimaryProjectileRule,
   primaryRuleForTypeId,
 } from './primary-rules.ts';
+export { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 export {
-  CreatureDamageType,
   type PrimaryStepCtx,
   ProjectilePool,
   type ProjectileUpdateOptions,

@@ -44,6 +44,7 @@ export function bonusApplyRegisterHandler(bonusId: BonusId, handler: BonusApplyH
   _BONUS_APPLY_HANDLERS.set(bonusId, handler);
 }
 
+/** Apply a bonus to player + global timers (subset of `bonusApply`). */
 export function bonusApply(
   state: GameplayState,
   player: PlayerState,
@@ -97,5 +98,6 @@ export function bonusApply(
     handler(ctx);
   }
 
+  // Bonus types not modeled yet.
   return;
 }

@@ -269,7 +269,7 @@ export class PauseMenuView {
     const entry = this._menuEntries[index];
     const action = PauseMenuView._actionForEntry(entry);
     if (action === null) return;
-    audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+    if (this.state.audio) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
     this._beginCloseTransition(action);
   }
 
@@ -443,7 +443,7 @@ export class PauseMenuView {
       if (this._menuEntryEnabled(entry)) {
         let glowAlpha = alpha;
         if (0 <= entry.readyTimerMs && entry.readyTimerMs < 0x100) {
-          glowAlpha = 0xFF - ((entry.readyTimerMs / 2) | 0);
+          glowAlpha = 0xFF - int(entry.readyTimerMs / 2);
         }
         const glowAlphaNorm = glowAlpha / 255;
         wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);

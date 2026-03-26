@@ -310,7 +310,7 @@ export class OptionsMenuView extends PanelMenuView {
     }
     if (this._activeSlider === sliderId && mouseDown) {
       const relative = mx - pos.x;
-      let idx = ((relative / rectW) | 0) + 1;
+      let idx = Math.floor(relative / rectW) + 1;
       if (idx < slider.minValue) idx = slider.minValue;
       if (idx > slider.maxValue) idx = slider.maxValue;
       if (slider.value !== idx) {

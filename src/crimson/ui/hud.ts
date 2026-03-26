@@ -107,7 +107,7 @@ export class HudState {
     let step = Math.max(1, int(frameDtMs) >> 1);
     const diff = Math.abs(smoothed - target);
     if (diff > 1000) {
-      step *= (diff / 100) | 0;
+      step *= Math.floor(diff / 100);
     }
 
     if (smoothed < target) {
@@ -320,7 +320,7 @@ function _weaponIconSrc(
   const cellH = texture.height / grid;
   const frame = int(iconIndex) * 2;
   const col = frame % grid;
-  const row = (frame / grid) | 0;
+  const row = Math.floor(frame / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
@@ -332,7 +332,7 @@ function _bonusIconSrc(
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const col = int(iconId) % grid;
-  const row = (int(iconId) / grid) | 0;
+  const row = Math.floor(int(iconId) / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
@@ -750,8 +750,8 @@ export function drawHudOverlay(
     }
 
     {
-      const totalSeconds = Math.max(0, (timeMs / 1000) | 0);
-      const minutes = (totalSeconds / 60) | 0;
+      const totalSeconds = Math.max(0, Math.floor(timeMs / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
       const timeTextPos = new Vec2(slideX + 32.0, 86.0);
       const secondsStr = seconds < 10 ? `0${seconds}` : `${seconds}`;
@@ -902,7 +902,7 @@ export function drawHudOverlay(
       );
     }
     {
-      const totalSeconds = Math.max(0, (timeMs / 1000) | 0);
+      const totalSeconds = Math.max(0, Math.floor(timeMs / 1000));
       const timeText = `${totalSeconds} seconds`;
       _drawText(font, timeText, new Vec2(ui(255.0), ui(10.0)), textScale, textColor);
       maxY = Math.max(maxY, ui(10.0 + lineH));

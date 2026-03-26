@@ -1,21 +1,17 @@
 // Port of crimson/demo_trial.py
 
 import { GameMode } from './game-modes.ts';
+import type { QuestLevel } from './quests/level.ts';
 
 export const DEMO_TOTAL_PLAY_TIME_MS = 2_400_000;
 export const DEMO_QUEST_GRACE_TIME_MS = 300_000;
 
-export interface QuestLevel {
-  readonly major: number;
-  readonly minor: number;
-}
-
 export function formatDemoTrialTime(ms: number): string {
   let value = int(ms);
   if (value < 0) value = 0;
-  const minutes = (value / 60_000) | 0;
-  const seconds = ((value / 1_000) | 0) % 60;
-  const centiseconds = ((value % 1_000) / 10) | 0;
+  const minutes = Math.floor(value / 60_000);
+  const seconds = Math.floor(value / 1_000) % 60;
+  const centiseconds = Math.floor((value % 1_000) / 10);
   const secStr = seconds < 10 ? `0${seconds}` : `${seconds}`;
   const csStr = centiseconds < 10 ? `0${centiseconds}` : `${centiseconds}`;
   return `${minutes}:${secStr}.${csStr}`;

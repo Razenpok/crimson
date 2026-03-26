@@ -15,7 +15,7 @@ export interface DeferredFreezeCorpseFx {
 }
 
 export function makeDeferredFreezeCorpseFx(pos: Vec2, detailPreset: number): DeferredFreezeCorpseFx {
-  return { pos: new Vec2(pos.x, pos.y), detailPreset: detailPreset | 0 };
+  return { pos: new Vec2(pos.x, pos.y), detailPreset: int(detailPreset) };
 }
 
 export function applyFreeze(ctx: BonusApplyCtx): void {

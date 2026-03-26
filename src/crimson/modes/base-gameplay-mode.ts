@@ -15,7 +15,6 @@ import { drawSmallText } from '@grim/fonts/small.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { type RuntimeResources } from '@grim/assets.ts';
 
 import type { CreatureDeath, CreaturePool } from '@crimson/creatures/runtime.ts';
 import { GameMode } from '@crimson/game-modes.ts';
@@ -712,7 +711,7 @@ export class BaseGameplayMode {
     const players = this._worldRuntime.simWorld.players;
     return {
       player: players[0],
-      resources: this.renderResources.resources as RuntimeResources,
+      resources: this.renderResources.resources,
       mouse: this._uiMousePos(),
       screenW: wgl.getScreenWidth(),
       screenH: wgl.getScreenHeight(),

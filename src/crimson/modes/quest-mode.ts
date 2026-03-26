@@ -1,7 +1,7 @@
 // Port of crimson/modes/quest_mode.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState, audioPlayMusic } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { type ConsoleState } from '@grim/console.ts';
@@ -147,7 +147,7 @@ export class QuestMode extends BaseGameplayMode {
     this._questLevel = cfgLevel ?? new QuestLevel(1, 1);
     this._questTotalSpawnCount = 0;
     this._outcome = null;
-    const courierTex = getTexture(this.renderResources.resources as RuntimeResources, TextureId.DEFAULT_FONT_COURIER);
+    const courierTex = getTexture(this.renderResources.resources, TextureId.DEFAULT_FONT_COURIER);
     this._grimMono = courierTex != null ? createGrimMonoFont(courierTex) : null;
 
     this._perkPromptPendingCount = 0;
@@ -767,7 +767,7 @@ export class QuestMode extends BaseGameplayMode {
 
       this._drawTargetHealthBar();
       hudBottom = drawHudOverlay({
-        resources: this.renderResources.resources as RuntimeResources,
+        resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
         alpha: 1.0,
@@ -834,7 +834,7 @@ export class QuestMode extends BaseGameplayMode {
   // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
-    const resources = this.renderResources.resources as RuntimeResources;
+    const resources = this.renderResources.resources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
@@ -856,7 +856,7 @@ export class QuestMode extends BaseGameplayMode {
   }
 
   private _drawQuestCompleteBanner(): void {
-    const tex = getTexture(this.renderResources.resources as RuntimeResources, TextureId.UI_TEXT_LEVEL_COMPLETE);
+    const tex = getTexture(this.renderResources.resources, TextureId.UI_TEXT_LEVEL_COMPLETE);
     if (tex === null) return;
     drawQuestCompleteBannerOverlay(
       tex,

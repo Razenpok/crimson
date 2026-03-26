@@ -10,6 +10,7 @@ import { playerTakeDamage } from '@crimson/player-damage.ts';
 import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import type { PlayerInput } from '@crimson/sim/input.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { WEAPON_TABLE, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import { playerStartReload, weaponEntry } from './assign.ts';
@@ -64,25 +65,13 @@ const _PELLET_SPEED_SCALE_CALLER_BY_WEAPON: ReadonlyMap<WeaponId, number> = new 
   [WeaponId.PLASMA_SHOTGUN, RngCallerStatic.PLAYER_UPDATE_PLASMA_SHOTGUN_PELLET_SPEED_SCALE],
 ]);
 
-// Minimal creature interface for fire.ts — full type in creatures/runtime.ts
-export interface CreatureStateLike {
-  active: boolean;
-  pos: Vec2;
-  size: number;
-}
-
-export interface PlayerInputLike {
-  readonly fireDown: boolean;
-  readonly aim: Vec2;
-}
-
 export interface WeaponFireCtx {
   player: PlayerState;
-  inputState: PlayerInputLike;
+  inputState: PlayerInput;
   dt: number;
   state: GameplayState;
   detailPreset?: number;
-  creatures?: readonly CreatureStateLike[] | null;
+  creatures?: readonly CreatureState[] | null;
   players?: readonly PlayerState[] | null;
   forcePreSwapFireGate?: boolean;
   onPlayerLethal?: ((player: PlayerState) => void) | null;
@@ -352,7 +341,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
     }
     case 'SecondaryShotMode': {
       let targetHint: Vec2 | null = null;
-      let spawnCreatures: readonly CreatureStateLike[] | null = null;
+      let spawnCreatures: readonly CreatureState[] | null = null;
       if (mode.targeting.tag === 'UseAimTargetHint') {
         targetHint = aim;
         spawnCreatures = creatures;

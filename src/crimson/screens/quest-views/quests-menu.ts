@@ -155,6 +155,7 @@ export class QuestsMenuView {
   private state: QuestsMenuState;
 
   private _isOpen: boolean = false;
+  private _ground: { processPending(): void; draw(camera: Vec2): void } | null = null;
   private _backButton: UiButtonState;
 
   private _menuScreenWidth: number = 0;
@@ -179,6 +180,7 @@ export class QuestsMenuView {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
+    this._ground = this.state.pauseBackground !== null ? null : (this.state.menuGround ?? null);
     this._action = null;
     this._dirty = false;
     this._stage = Math.max(1, Math.min(5, int(this._stage)));
@@ -194,6 +196,7 @@ export class QuestsMenuView {
 
   close(): void {
     this._isOpen = false;
+    this._ground = null;
     if (this._dirty) {
       try {
         this.state.config.save();

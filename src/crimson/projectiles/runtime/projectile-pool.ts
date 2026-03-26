@@ -13,6 +13,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { GameplayState } from '@crimson/sim/state-types.ts';
 import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
+import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import {
   MAIN_PROJECTILE_POOL_SIZE,
   type CreatureDamageApplier,
@@ -29,14 +30,6 @@ import {
 import { applyDamageToCreature, hitRadiusFor, withinNativeFindRadius } from './collision.ts';
 import { primaryRuleForTypeId } from './primary-rules.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
-
-export const enum CreatureDamageType {
-  SELF_TICK = 0,
-  BULLET = 1,
-  MELEE = 2,
-  FIRE = 4,
-  ION = 7,
-}
 
 export interface ProjectileUpdateOptions {
   readonly worldSize: number;

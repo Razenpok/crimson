@@ -187,12 +187,12 @@ export class QuestResultsView {
     });
     const record = {
       gameModeId: GameMode.QUESTS,
-      scoreXp: outcome.experience,
+      scoreXp: int(outcome.experience),
       survivalElapsedMs: breakdown.finalTimeMs,
       mostUsedWeaponId: outcome.mostUsedWeaponId,
-      creatureKillCount: outcome.killCount,
-      shotsFired: outcome.shotsFired,
-      shotsHit: outcome.shotsHit,
+      creatureKillCount: int(outcome.killCount),
+      shotsFired: int(outcome.shotsFired),
+      shotsHit: int(outcome.shotsHit),
       name: '',
     };
     // The view's state.config is a subset of CrimsonConfig; at runtime it is always

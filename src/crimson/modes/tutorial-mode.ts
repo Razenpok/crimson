@@ -1,7 +1,7 @@
 // Port of crimson/modes/tutorial_mode.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { type ConsoleState } from '@grim/console.ts';
@@ -28,6 +28,7 @@ import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import {
   type TutorialOverlayState,
+  TUTORIAL_PANEL_POS,
   tutorialPromptPanelRect,
   drawTutorialOverlayPanels,
 } from '@crimson/ui/overlays/tutorial-run.ts';
@@ -52,10 +53,6 @@ import type { TutorialState } from '@crimson/tutorial/state.ts';
 const WORLD_SIZE = 1024.0;
 
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
-
-// The panel position used for computing button placement.
-// Must match the constant in tutorial-run.ts.
-const TUTORIAL_PANEL_POS = new Vec2(0.0, 64.0);
 
 // ---------------------------------------------------------------------------
 // TutorialMode
@@ -274,7 +271,7 @@ export class TutorialMode extends BaseGameplayMode {
       this._skipButton.enabled = skipAlpha > 1e-3;
     }
 
-    const resources = this.renderResources.resources as RuntimeResources;
+    const resources = this.renderResources.resources;
     const screenW = wgl.getScreenWidth();
 
     if (stage === 8) {
@@ -327,7 +324,7 @@ export class TutorialMode extends BaseGameplayMode {
       player: this.player,
       violenceDisabled: this._deterministicViolenceDisabled(),
       preserveBugs: this.preserveBugs,
-      resources: this.renderResources.resources as RuntimeResources,
+      resources: this.renderResources.resources,
       screenW: wgl.getScreenWidth(),
       screenH: wgl.getScreenHeight(),
       mouse: this._uiMousePos(),
@@ -419,7 +416,7 @@ export class TutorialMode extends BaseGameplayMode {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
       this._drawTargetHealthBar();
       hudBottom = drawHudOverlay({
-        resources: this.renderResources.resources as RuntimeResources,
+        resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
         alpha: 1.0,
@@ -472,7 +469,7 @@ export class TutorialMode extends BaseGameplayMode {
       },
     );
 
-    const resources = this.renderResources.resources as RuntimeResources;
+    const resources = this.renderResources.resources;
     const tutorial = this.state.tutorial as TutorialState;
     const stage = tutorial != null ? int(tutorial.stageIndex) : 0;
 
@@ -516,7 +513,7 @@ export class TutorialMode extends BaseGameplayMode {
   }
 
   private _drawMenuCursor(): void {
-    const resources = this.renderResources.resources as RuntimeResources;
+    const resources = this.renderResources.resources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),

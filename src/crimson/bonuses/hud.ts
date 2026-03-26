@@ -122,7 +122,7 @@ export function bonusHudUpdate(state: GameplayState, players: PlayerState[], opt
 
   const playerCount = players.length;
 
-  const bonusHud = state.bonusHud as BonusHudState;
+  const bonusHud = state.bonusHud;
 
   for (let slotIndex = 0; slotIndex < bonusHud.slots.length; slotIndex++) {
     const slot = bonusHud.slots[slotIndex];

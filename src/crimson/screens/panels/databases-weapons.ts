@@ -9,23 +9,12 @@ import { type GameState } from '@crimson/game/types.ts';
 import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { buildWeaponAvailability, type WeaponAvailabilityStatus } from '@crimson/weapon-runtime/availability.ts';
 import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
+import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const DIM_COLOR = wgl.makeColor(1, 1, 1, 0.7);
 const MOUSE_BUTTON_LEFT = 0;
-
-// Inline helper — mirrors weapon_usage_slot_for_weapon_id from weapon_usage.py
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = 52;
-
-function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  const id = int(weaponId);
-  if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
-    return id;
-  }
-  return null;
-}
 
 // ---------------------------------------------------------------------------
 // UnlockedWeaponsDatabaseView
@@ -190,7 +179,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
       listHitY <= mouse.y && mouse.y < listHitY + listHitH
     ) {
       const listTextTop = leftTopLeft.y + 130.0 * scale;
-      const row = ((mouse.y - listTextTop) / rowStep) | 0;
+      const row = Math.floor((mouse.y - listTextTop) / rowStep);
       if (row >= 0 && row < rowCount) {
         this._selectedWeaponId = weaponIds[start + row];
         return;
@@ -249,7 +238,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const cellH = tex.height / grid;
     const frame = idx * 2;
     const srcX = (frame % grid) * cellW;
-    const srcY = ((frame / grid) | 0) * cellH;
+    const srcY = Math.floor(frame / grid) * cellH;
     const iconW = cellW * 2.0;
     const iconH = cellH;
     wgl.drawTexturePro(

@@ -337,7 +337,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     if (rowCount > 0 && mouseInList) {
       const rowStep = LRH * scale;
       const listTextTop = leftTopLeft.y + LTY * scale;
-      const row = ((mouse.y - listTextTop) / rowStep) | 0;
+      const row = Math.floor((mouse.y - listTextTop) / rowStep);
       if (row >= 0 && row < rowCount) {
         this._hoveredRowIndex = startFinal + row;
         if (InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT)) {

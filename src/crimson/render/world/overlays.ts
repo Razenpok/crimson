@@ -29,7 +29,7 @@ export function drawAimCircle(
   const fillA = clamp((77 / 255) * alpha, 0, 1);
   const outlineA = clamp((255 * 0.55 / 255) * alpha, 0, 1);
 
-  wgl.endBlendMode();
+  wgl.beginBlendMode(wgl.BlendMode.ALPHA);
 
   const white = wgl.getWhiteTexture();
 

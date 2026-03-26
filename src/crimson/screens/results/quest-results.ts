@@ -71,6 +71,7 @@ const COLOR_UI_ACCENT = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 1.0);
 
 // DOM key codes
 const KEY_ENTER = 13;
+const KEY_KP_ENTER = 335;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const KEY_H = 72;
@@ -225,6 +226,7 @@ export class QuestResultsUi {
     this._deferNameInputUntilControlsReleased = true;
     flushTextInputEvents();
     InputState.wasKeyPressed(KEY_ENTER);
+    InputState.wasKeyPressed(KEY_KP_ENTER);
   }
 
   worldEntityAlpha(): number {

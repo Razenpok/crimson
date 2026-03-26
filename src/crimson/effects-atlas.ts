@@ -85,7 +85,7 @@ export function effectSrcRect(
 
   const frame = e.frame;
   const col = frame % grid;
-  const row = (frame / grid) | 0;
+  const row = Math.floor(frame / grid);
   const cellW = textureWidth / grid;
   const cellH = textureHeight / grid;
   return wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);

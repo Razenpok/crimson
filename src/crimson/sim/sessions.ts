@@ -478,16 +478,12 @@ export class DeterministicSession {
       deferCameraShakeUpdate: this.deferCameraShakeUpdate,
       violenceDisabled: this.violenceDisabled,
     });
-    const creatureCountWorldStep = this.world.creatures.entries.filter(c => c.active).length;
 
     // Build presentation RNG trace
     const presentationRngTrace = new PresentationRngTrace();
     if (recordingRng !== null) {
       presentationRngTrace.drawsTotal = recordingRng.calls;
     }
-
-    // Build terrain FX batch
-    const terrainFxBatch = this.terrainFx.takeBatch();
 
     // Plan presentation step
     const presT0 = performance.now();
@@ -512,6 +508,9 @@ export class DeterministicSession {
     });
     const presT1 = performance.now();
     const presentationPlanMs = presT1 - presT0;
+
+    // Build terrain FX batch (after presentation plan, matching Python)
+    const terrainFxBatch = this.terrainFx.takeBatch();
 
     // Wire up game tune trigger
     if (presentation.triggerGameTune) {
@@ -540,6 +539,9 @@ export class DeterministicSession {
         this.detailPreset,
       ));
     }
+
+    // Creature count captured after post-step hook (matching Python)
+    const creatureCountWorldStep = this.world.creatures.entries.filter(c => c.active).length;
 
     // Finalize post-render lifecycle
     if (this.finalizePostRenderLifecycle) {

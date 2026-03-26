@@ -4,21 +4,15 @@ import { f32 } from '@crimson/math-parity.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { bonusApply } from './apply.ts';
 import { bonusHudUpdate } from './hud.ts';
 import { BonusId } from './ids.ts';
-import { bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
-import { CreatureState } from "@crimson/creatures/runtime.js";
-
-export interface BonusPoolLike {
-  update(
-    dt: number,
-    opts: { state: GameplayState; players: PlayerState[]; creatures: readonly CreatureState[]; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
-  ): BonusPickupEvent[];
-}
+import { BonusPool, bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
 
 const _REFLEX_TIMER_SUBTRACT_BIAS = 4e-9;
 
+/** Allow Telekinetic perk owners to pick up bonuses by aiming at them. */
 export function bonusTelekineticUpdate(
   state: GameplayState,
   players: PlayerState[],
@@ -85,6 +79,7 @@ export function bonusTelekineticUpdate(
       pos: entry.pos,
     });
 
+    // Match the exe: after a telekinetic pickup, reset the hover accumulator.
     player.bonusAimHoverIndex = -1;
     player.bonusAimHoverTimerMs = 0.0;
     break;
@@ -93,6 +88,7 @@ export function bonusTelekineticUpdate(
   return pickups;
 }
 
+/** Advance world bonuses and global timers (subset of `bonusUpdate`). */
 export function bonusUpdate(
   state: GameplayState,
   players: PlayerState[],
@@ -116,7 +112,7 @@ export function bonusUpdate(
     },
   );
 
-  const bonusPool = state.bonusPool as BonusPoolLike;
+  const bonusPool = state.bonusPool;
   const poolPickups = bonusPool.update(
     dt,
     {
@@ -133,6 +129,8 @@ export function bonusUpdate(
   }
 
   if (dt > 0.0) {
+    // Native `bonus_update` decrements Freeze + Double XP here; other global
+    // timers are advanced earlier in the gameplay loop.
     let doubleXp = Number(state.bonuses.doubleExperience);
     if (doubleXp <= 0.0) {
       state.bonuses.doubleExperience = 0.0;
@@ -155,6 +153,7 @@ export function bonusUpdate(
   return pickups;
 }
 
+/** Advance global timers that native decrements before `bonusUpdate`. */
 export function bonusUpdatePrePickupTimers(state: GameplayState, dt: number): void {
   if (dt <= 0.0) {
     return;
@@ -170,6 +169,7 @@ export function bonusUpdatePrePickupTimers(state: GameplayState, dt: number): vo
     const reflexBefore = Number(state.bonuses.reflexBoost);
     let subtract = Number(dt);
     if (0.0 < reflexBefore && reflexBefore < 1.0) {
+      // Native x87 timer math trends slightly lower than straight f32 subtraction in this window.
       subtract += Number(_REFLEX_TIMER_SUBTRACT_BIAS);
     }
     state.bonuses.reflexBoost = Number(f32(Number(reflexBefore) - Number(subtract)));

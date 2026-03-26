@@ -5,7 +5,7 @@ import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
+import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import type { EffectPool, FxQueue, SpriteEffectPool } from '@crimson/effects.ts';
 import type { CreatureStateLike } from '@crimson/effects.ts';
@@ -23,6 +23,21 @@ import type {
   CreatureDamageApplier,
   SecondaryDetonationKillHandler,
 } from '@crimson/projectiles/types.ts';
+import {
+  withinNativeFindRadius,
+  creatureFindNearestForSecondary,
+  applyDamageToCreature,
+} from './collision.ts';
+import {
+  secondaryRuleForTypeId,
+} from './secondary-rules.ts';
+import type {
+  DetonationRule,
+  RocketRule,
+  HomingRocketRule,
+  RocketMinigunRule,
+} from './secondary-rules.ts';
+import { CreatureSpatialHash } from './spatial-hash.ts';
 
 const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
   [
@@ -67,314 +82,6 @@ export interface SecondaryStepCtx {
   readonly onDetonationKill?: SecondaryDetonationKillHandler | null;
 }
 
-interface DetonationRule {
-  readonly tag: 'detonation';
-}
-
-interface RocketRule {
-  readonly tag: 'rocket';
-  readonly baseSpeed: number;
-  readonly accelFactorScale: number;
-  readonly speedCap: number;
-  readonly ttlDecayScale: number;
-  readonly detonationScale: number;
-  readonly damageSpeedMul: number;
-  readonly damageBase: number;
-  readonly extraDecals: number;
-  readonly extraRadius: number;
-  readonly burstScale: number | null;
-  readonly burstMinDetail: number;
-  readonly freezeShardTargetPos: boolean;
-}
-
-interface HomingRocketRule {
-  readonly tag: 'homing_rocket';
-  readonly baseSpeed: number;
-  readonly targetAccel: number;
-  readonly maxVelocity: number;
-  readonly ttlDecayScale: number;
-  readonly detonationScale: number;
-  readonly damageSpeedMul: number;
-  readonly damageBase: number;
-  readonly extraDecals: number;
-  readonly extraRadius: number;
-  readonly freezeShardTargetPos: boolean;
-}
-
-interface RocketMinigunRule {
-  readonly tag: 'rocket_minigun';
-  readonly baseSpeed: number;
-  readonly accelFactorScale: number;
-  readonly speedCap: number;
-  readonly ttlDecayScale: number;
-  readonly detonationScale: number;
-  readonly damageSpeedMul: number;
-  readonly damageBase: number;
-  readonly extraDecals: number;
-  readonly extraRadius: number;
-  readonly freezeShardTargetPos: boolean;
-}
-
-type SecondaryProjectileRule = DetonationRule | RocketRule | HomingRocketRule | RocketMinigunRule;
-
-const DETONATION_RULE: DetonationRule = { tag: 'detonation' };
-
-const ROCKET_RULE: RocketRule = {
-  tag: 'rocket',
-  baseSpeed: 90.0,
-  accelFactorScale: 3.0,
-  speedCap: 500.0,
-  ttlDecayScale: 1.0,
-  detonationScale: 1.0,
-  damageSpeedMul: 50.0,
-  damageBase: 500.0,
-  extraDecals: 0x14,
-  extraRadius: 90.0,
-  burstScale: 0.4,
-  burstMinDetail: 2,
-  freezeShardTargetPos: false,
-};
-
-const HOMING_ROCKET_RULE: HomingRocketRule = {
-  tag: 'homing_rocket',
-  baseSpeed: 190.0,
-  targetAccel: 800.0,
-  maxVelocity: 350.0,
-  ttlDecayScale: 0.5,
-  detonationScale: 0.35,
-  damageSpeedMul: 20.0,
-  damageBase: 80.0,
-  extraDecals: 10,
-  extraRadius: 64.0,
-  freezeShardTargetPos: false,
-};
-
-const ROCKET_MINIGUN_RULE: RocketMinigunRule = {
-  tag: 'rocket_minigun',
-  baseSpeed: 90.0,
-  accelFactorScale: 4.0,
-  speedCap: 600.0,
-  ttlDecayScale: 1.0,
-  detonationScale: 0.25,
-  damageSpeedMul: 20.0,
-  damageBase: 40.0,
-  extraDecals: 3,
-  extraRadius: 44.0,
-  freezeShardTargetPos: true,
-};
-
-const _DEFAULT_ROCKET_RULE: RocketRule = {
-  tag: 'rocket',
-  baseSpeed: 90.0,
-  accelFactorScale: 3.0,
-  speedCap: 500.0,
-  ttlDecayScale: 1.0,
-  detonationScale: 0.5,
-  damageSpeedMul: 0.0,
-  damageBase: 150.0,
-  extraDecals: 0,
-  extraRadius: 0.0,
-  burstScale: null,
-  burstMinDetail: 2,
-  freezeShardTargetPos: false,
-};
-
-const SECONDARY_RULE_BY_TYPE_ID = new Map<SecondaryProjectileTypeId, SecondaryProjectileRule>([
-  [SecondaryProjectileTypeId.DETONATION, DETONATION_RULE],
-  [SecondaryProjectileTypeId.ROCKET, ROCKET_RULE],
-  [SecondaryProjectileTypeId.HOMING_ROCKET, HOMING_ROCKET_RULE],
-  [SecondaryProjectileTypeId.ROCKET_MINIGUN, ROCKET_MINIGUN_RULE],
-]);
-
-function secondaryRuleForTypeId(typeId: SecondaryProjectileTypeId): SecondaryProjectileRule {
-  return SECONDARY_RULE_BY_TYPE_ID.get(typeId) ?? _DEFAULT_ROCKET_RULE;
-}
-
-const _SPATIAL_BUCKET_SIZE = 64.0;
-const _NATIVE_FIND_SIZE_SCALE = 0.14285715;
-const _NATIVE_FIND_BASE_MARGIN = 3.0;
-const _NATIVE_FIND_RADIUS_MARGIN_EPS = 0.001;
-
-function _nativeFindMarginForSize(size: number): number {
-  return size * _NATIVE_FIND_SIZE_SCALE + _NATIVE_FIND_BASE_MARGIN;
-}
-
-class CreatureSpatialHash {
-  private _creatures: CreatureState[];
-  private _isCollidable: (c: CreatureState) => boolean;
-  private _bucketSize: number;
-  private _cells: Map<string, number[]>;
-  private _cellByIndex: (string | null)[];
-  private _maxFindMargin: number;
-
-  constructor(creatures: CreatureState[], isCollidable: (c: CreatureState) => boolean) {
-    this._creatures = creatures;
-    this._isCollidable = isCollidable;
-    this._bucketSize = _SPATIAL_BUCKET_SIZE;
-    this._cells = new Map();
-    this._cellByIndex = new Array(creatures.length).fill(null);
-    this._maxFindMargin = 0.0;
-    this._rebuild();
-  }
-
-  private _rebuild(): void {
-    const cells = new Map<string, number[]>();
-    const cellByIndex: (string | null)[] = new Array(this._creatures.length).fill(null);
-    let maxFindMargin = 0.0;
-
-    for (let idx = 0; idx < this._creatures.length; idx++) {
-      const creature = this._creatures[idx];
-      if (!this._isCollidable(creature)) continue;
-      const cell = this._cellForPos(creature.pos);
-      let bucket = cells.get(cell);
-      if (bucket === undefined) {
-        bucket = [];
-        cells.set(cell, bucket);
-      }
-      bucket.push(idx);
-      cellByIndex[idx] = cell;
-      const creatureFindMargin = _nativeFindMarginForSize(creature.size);
-      if (creatureFindMargin > maxFindMargin) {
-        maxFindMargin = creatureFindMargin;
-      }
-    }
-
-    this._cells = cells;
-    this._cellByIndex = cellByIndex;
-    this._maxFindMargin = maxFindMargin;
-  }
-
-  syncIndex(index: number): void {
-    if (!(index >= 0 && index < this._creatures.length)) return;
-    const creature = this._creatures[index];
-    const previousCell = this._cellByIndex[index];
-    if (!this._isCollidable(creature)) {
-      if (previousCell !== null) {
-        this._removeFromCell(index, previousCell);
-        this._cellByIndex[index] = null;
-      }
-      return;
-    }
-
-    const nextCell = this._cellForPos(creature.pos);
-    if (previousCell === nextCell) return;
-    if (previousCell !== null) {
-      this._removeFromCell(index, previousCell);
-    }
-    let bucket = this._cells.get(nextCell);
-    if (bucket === undefined) {
-      bucket = [];
-      this._cells.set(nextCell, bucket);
-    }
-    bucket.push(index);
-    this._cellByIndex[index] = nextCell;
-
-    const creatureFindMargin = _nativeFindMarginForSize(creature.size);
-    if (creatureFindMargin > this._maxFindMargin) {
-      this._maxFindMargin = creatureFindMargin;
-    }
-  }
-
-  candidateIndices(pos: Vec2, radius: number): number[] {
-    if (this._cells.size === 0) return [];
-    const projCellX = int(Math.floor(pos.x / this._bucketSize));
-    const projCellY = int(Math.floor(pos.y / this._bucketSize));
-    const maxAxisDelta = radius + this._maxFindMargin + _NATIVE_FIND_RADIUS_MARGIN_EPS;
-    const cellSpan = int(Math.ceil(maxAxisDelta / this._bucketSize));
-
-    const candidates: number[] = [];
-    for (let cellY = projCellY - cellSpan; cellY <= projCellY + cellSpan; cellY++) {
-      for (let cellX = projCellX - cellSpan; cellX <= projCellX + cellSpan; cellX++) {
-        const key = `${cellX},${cellY}`;
-        const bucket = this._cells.get(key);
-        if (bucket !== undefined) {
-          for (let i = 0; i < bucket.length; i++) {
-            candidates.push(bucket[i]);
-          }
-        }
-      }
-    }
-
-    if (candidates.length > 1) {
-      candidates.sort((a, b) => a - b);
-    }
-    return candidates;
-  }
-
-  private _cellForPos(pos: Vec2): string {
-    const cellX = int(Math.floor(pos.x / this._bucketSize));
-    const cellY = int(Math.floor(pos.y / this._bucketSize));
-    return `${cellX},${cellY}`;
-  }
-
-  private _removeFromCell(index: number, cell: string): void {
-    const bucket = this._cells.get(cell);
-    if (bucket === undefined) return;
-    const i = bucket.indexOf(index);
-    if (i === -1) return;
-    bucket.splice(i, 1);
-    if (bucket.length === 0) {
-      this._cells.delete(cell);
-    }
-  }
-}
-
-const _COLLISION_NATIVE_FIND_RADIUS_MARGIN_EPS = 0.0;
-
-function _withinNativeFindRadius(origin: Vec2, target: Vec2, radius: number, targetSize: number): boolean {
-  const dx = target.x - origin.x;
-  const dy = target.y - origin.y;
-  const radiusF = radius;
-  const sizeMargin = nativeFindSizeMargin(targetSize);
-  const maxAxisDelta = radiusF + sizeMargin + _COLLISION_NATIVE_FIND_RADIUS_MARGIN_EPS;
-  if (Math.abs(dx) > maxAxisDelta || Math.abs(dy) > maxAxisDelta) {
-    return false;
-  }
-  const margin = Math.sqrt(dx * dx + dy * dy) - radiusF - sizeMargin;
-  return margin < _COLLISION_NATIVE_FIND_RADIUS_MARGIN_EPS;
-}
-
-function _creatureFindNearestForSecondary(
-  creatures: CreatureState[],
-  origin: Vec2,
-  preserveBugs: boolean,
-): number {
-  let bestIdx = preserveBugs ? 0 : -1;
-  let bestDistSq = 1_000_000.0;
-  const maxIndex = Math.min(creatures.length, 0x180);
-  for (let idx = 0; idx < maxIndex; idx++) {
-    const creature = creatures[idx];
-    if (!creature.active) continue;
-    if (!creatureLifecycleIsAlive(creature.lifecycleStage)) continue;
-    const distSq = Vec2.distanceSq(origin, creature.pos);
-    if (distSq < bestDistSq) {
-      bestDistSq = distSq;
-      bestIdx = idx;
-    }
-  }
-  return bestIdx;
-}
-
-function _applyDamageToCreature(
-  creatures: CreatureState[],
-  creatureIndex: number,
-  damage: number,
-  damageType: number,
-  impulse: Vec2,
-  owner: OwnerRef,
-  applyCreatureDamage: CreatureDamageApplier | null,
-): void {
-  if (damage <= 0.0) return;
-  const idx = int(creatureIndex);
-  if (!(idx >= 0 && idx < creatures.length)) return;
-  if (applyCreatureDamage !== null) {
-    applyCreatureDamage(idx, damage, damageType, impulse, owner);
-  } else {
-    creatures[idx].hp -= damage;
-  }
-}
-
-const CREATURE_DAMAGE_TYPE_EXPLOSION = 3;
 
 export class SecondaryProjectilePool {
   private _entries: SecondaryProjectile[];
@@ -452,7 +159,7 @@ export class SecondaryProjectilePool {
     if (rule.tag === 'homing_rocket') {
       if (creatures !== null) {
         const origin = targetHint !== null ? targetHint : pos;
-        entry.targetId = _creatureFindNearestForSecondary(
+        entry.targetId = creatureFindNearestForSecondary(
           creatures,
           origin,
           preserveBugs,
@@ -483,11 +190,11 @@ export class SecondaryProjectilePool {
       owner: OwnerRef,
       impulse: Vec2 = new Vec2(),
     ): void => {
-      _applyDamageToCreature(
+      applyDamageToCreature(
         creatures,
         int(creatureIndex),
         damage,
-        CREATURE_DAMAGE_TYPE_EXPLOSION,
+        CreatureDamageType.EXPLOSION,
         impulse,
         owner,
         this._creatureDamageApplier,
@@ -544,7 +251,7 @@ export class SecondaryProjectilePool {
         const radius = scale * t * 80.0;
         const radiusSq = radius * radius;
         const damage = dt * scale * 700.0;
-        for (const creatureIdx of creatureSpatial.candidateIndices(entry.pos, radius)) {
+        for (const creatureIdx of creatureSpatial.candidateIndices({ pos: entry.pos, radius })) {
           const creature = creatures[int(creatureIdx)];
           if (!_creatureIsCollidable(creature)) continue;
           if (creature.hp <= 0.0) continue;
@@ -594,7 +301,7 @@ export class SecondaryProjectilePool {
       } else if (rule.tag === 'homing_rocket') {
         let targetId = entry.targetId;
         if (!(targetId >= 0 && targetId < creatures.length) || !creatures[targetId].active) {
-          entry.targetId = _creatureFindNearestForSecondary(
+          entry.targetId = creatureFindNearestForSecondary(
             creatures,
             entry.pos,
             runtimeState !== null ? runtimeState.preserveBugs : false,
@@ -637,10 +344,10 @@ export class SecondaryProjectilePool {
       }
 
       let hitIdx: number | null = null;
-      for (const idx of creatureSpatial.candidateIndices(entry.pos, 8.0)) {
+      for (const idx of creatureSpatial.candidateIndices({ pos: entry.pos, radius: 8.0 })) {
         const creature = creatures[int(idx)];
         if (!_creatureIsCollidable(creature)) continue;
-        if (_withinNativeFindRadius(
+        if (withinNativeFindRadius(
           entry.pos,
           creature.pos,
           8.0,

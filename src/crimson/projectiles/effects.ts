@@ -128,7 +128,7 @@ export function _spawnIonHitEffects(
   const half = burst * 32.0;
   let count = int(burst * 5.0);
   if (detail < 3) {
-    count = (count / 2) | 0;
+    count = Math.floor(count / 2);
   }
 
   for (let i = 0; i < Math.max(0, count); i++) {

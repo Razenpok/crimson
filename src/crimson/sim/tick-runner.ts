@@ -162,7 +162,9 @@ export class TickRunner {
       throw new Error('ready tick supply must carry a resolved tick');
     }
     if (int(sourceTick.tickIndex) !== int(expectedTickIndex)) {
-      throw new Error('resolved tick index mismatch');
+      throw new Error(
+        `resolved tick index mismatch: expected ${int(expectedTickIndex)}, got ${int(sourceTick.tickIndex)}`,
+      );
     }
     const dtSeconds = Number(sourceTick.dtSeconds);
     if (dtSeconds <= 0.0) {

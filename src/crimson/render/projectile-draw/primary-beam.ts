@@ -169,7 +169,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
             const cellH = particlesTexture.height / glowGrid;
             const glowFrame = glowAtlas.frame;
             const col = glowFrame % glowGrid;
-            const row = (glowFrame / glowGrid) | 0;
+            const row = Math.floor(glowFrame / glowGrid);
             const src = wgl.makeRectangle(
               cellW * col,
               cellH * row,

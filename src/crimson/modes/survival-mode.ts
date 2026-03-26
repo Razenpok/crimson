@@ -1,7 +1,7 @@
 // Port of crimson/modes/survival_mode.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
 import { type ConsoleState } from '@grim/console.ts';
@@ -593,7 +593,7 @@ export class SurvivalMode extends BaseGameplayMode {
   // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
-    const resources = this.renderResources.resources as RuntimeResources;
+    const resources = this.renderResources.resources;
     const mousePos = this._uiMouse;
     drawMenuCursor(
       getTexture(resources, TextureId.PARTICLES),
@@ -618,7 +618,7 @@ export class SurvivalMode extends BaseGameplayMode {
 
       this._drawTargetHealthBar({ alpha: hudAlpha });
       hudBottom = drawHudOverlay({
-        resources: this.renderResources.resources as RuntimeResources,
+        resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
         alpha: hudAlpha,
@@ -695,7 +695,7 @@ export class SurvivalMode extends BaseGameplayMode {
       this._gameOverUi.draw({
         record: this._gameOverRecord,
         bannerKind: this._gameOverBanner,
-        resources: this.renderResources.resources as RuntimeResources,
+        resources: this.renderResources.resources,
         mouse: this._uiMousePos(),
       });
     }

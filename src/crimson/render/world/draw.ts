@@ -391,7 +391,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawCont
   if (freezeAlpha <= 1e-3) return;
 
   const tint = wgl.makeColor(1, 1, 1, freezeAlpha);
-  wgl.endBlendMode();
+  wgl.beginBlendMode(wgl.BlendMode.ALPHA);
   const creatures = renderCtx.frame.creatures.entries as CreatureState[];
   for (let idx = 0; idx < creatures.length; idx++) {
     const creature = creatures[idx];

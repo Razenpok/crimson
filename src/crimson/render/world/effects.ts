@@ -21,7 +21,7 @@ function srcRectForEffect(
   if (!grid) return null;
   const frame = atlas.frame;
   const col = frame % grid;
-  const row = (frame / grid) | 0;
+  const row = Math.floor(frame / grid);
   const cellW = texWidth / grid;
   const cellH = texHeight / grid;
   return wgl.makeRectangle(cellW * col, cellH * row, Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0));
@@ -131,13 +131,13 @@ export function drawSpriteEffectPool(
   if (!grid) return;
   const atlasFrame = atlas.frame;
   const col = atlasFrame % grid;
-  const row = (atlasFrame / grid) | 0;
+  const row = Math.floor(atlasFrame / grid);
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const src = wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
   const scale = WorldRenderCtx.viewScaleAvg(viewScale);
 
-  wgl.endBlendMode();
+  wgl.beginBlendMode(wgl.BlendMode.ALPHA);
   for (const entry of effects) {
     if (!entry.active) continue;
     const size = entry.scale * scale;
@@ -182,7 +182,7 @@ export function drawEffectPool(
     if (!grid) return null;
     const f = atlas.frame;
     const col = f % grid;
-    const row = (f / grid) | 0;
+    const row = Math.floor(f / grid);
     const cellW = texture.width / grid;
     const cellH = texture.height / grid;
     const src = wgl.makeRectangle(
@@ -215,7 +215,7 @@ export function drawEffectPool(
     wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
   }
 
-  wgl.endBlendMode();
+  wgl.beginBlendMode(wgl.BlendMode.ALPHA);
   for (const entry of effects) {
     if (!entry.flags || entry.age < 0.0) continue;
     if (entry.flags & 0x40) drawEntry(entry);

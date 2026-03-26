@@ -1,18 +1,11 @@
 // Port of crimson/modes/components/perk_prompt_controller.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources } from '@grim/assets.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
-import { type Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import { inputCodeIsDown, inputCodeIsPressed, inputPrimaryJustPressed } from '@crimson/input-codes.ts';
+import type { PerkMenuUiContext } from './perk-menu-controller.ts';
 import { PerkPromptUi, PERK_PROMPT_MAX_TIMER_MS, type UiTextWidthFn } from './perk-prompt-ui.ts';
-
-export interface PerkMenuUiContext {
-  resources: RuntimeResources;
-  mouse: Vec2;
-  screenW?: number;
-}
 
 export class PerkPromptState {
   timerMs = 0.0;

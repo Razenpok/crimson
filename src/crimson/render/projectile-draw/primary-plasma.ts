@@ -35,7 +35,7 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
   const cellH = particlesTexture.height / grid;
   const atlasFrame = atlas.frame;
   const col = atlasFrame % grid;
-  const row = (atlasFrame / grid) | 0;
+  const row = Math.floor(atlasFrame / grid);
   const src = wgl.makeRectangle(
     cellW * col,
     cellH * row,
@@ -63,7 +63,7 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
     // Reconstruct the tail length heuristic used by the native render path.
     let segCount = int(ctx.proj.travelBudget);
     if (segCount < 0) segCount = 0;
-    segCount = (segCount / 5) | 0;
+    segCount = Math.floor(segCount / 5);
     if (segCount > segLimit) segCount = segLimit;
 
     // The stored projectile angle is rotated by +pi/2 vs travel direction.

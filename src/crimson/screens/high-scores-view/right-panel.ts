@@ -136,7 +136,7 @@ function drawDropdown(
       int(widgetPos.y + 15.0 * scale),
       int(widgetW),
       lineH,
-      wgl.makeColor(1, 1, 1, 0.5),
+      wgl.makeColor(1, 1, 1, 128 / 255),
     );
   }
 
@@ -511,7 +511,7 @@ function drawClockGauge(
   const srcPointer = wgl.makeRectangle(0.0, 0.0, pointerTex.width, pointerTex.height);
   wgl.drawTexturePro(tableTex, srcTable, dst, ORIGIN, 0.0, WHITE);
 
-  const seconds = Math.max(0, int(elapsedMs) / 1000) | 0;
+  const seconds = int(Math.max(0, int(elapsedMs) / 1000));
   const rotationDeg = seconds * 6.0;
   const centerX = pos.x + drawW * 0.5;
   const centerY = pos.y + drawH * 0.5;

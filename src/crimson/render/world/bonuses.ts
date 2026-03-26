@@ -16,7 +16,7 @@ function bonusIconSrc(texture: wgl.Texture, iconId: number): wgl.Rectangle {
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
   const col = int(iconId) % grid;
-  const row = (int(iconId) / grid) | 0;
+  const row = Math.floor(int(iconId) / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
@@ -26,7 +26,7 @@ function weaponIconSrc(texture: wgl.Texture, iconIndex: number): wgl.Rectangle {
   const cellH = texture.height / grid;
   const frame = int(iconIndex) * 2;
   const col = frame % grid;
-  const row = (frame / grid) | 0;
+  const row = Math.floor(frame / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 

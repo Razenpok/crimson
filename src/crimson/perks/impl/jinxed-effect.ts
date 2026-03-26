@@ -9,8 +9,8 @@ import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
 import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.ts";
 
-function awardExperienceOnceFromReward(player: PlayerState, reward_value: number): number {
-  const rewardF32 = f32(reward_value);
+function awardExperienceOnceFromReward(player: PlayerState, rewardValue: number): number {
+  const rewardF32 = f32(rewardValue);
   if (rewardF32 <= 0.0) {
     return 0;
   }
@@ -22,17 +22,17 @@ function awardExperienceOnceFromReward(player: PlayerState, reward_value: number
   return int(after - before);
 }
 
-function awardExperienceFromReward(ctx: PerksUpdateEffectsCtx, reward_value: number): number {
+function awardExperienceFromReward(ctx: PerksUpdateEffectsCtx, rewardValue: number): number {
   if (!ctx.players.length) {
     return 0;
   }
   const player = ctx.players[0];
-  let gained = awardExperienceOnceFromReward(player, reward_value);
+  let gained = awardExperienceOnceFromReward(player, rewardValue);
   if (gained <= 0) {
     return 0;
   }
   if (ctx.state.bonuses.doubleExperience > 0.0) {
-    gained += awardExperienceOnceFromReward(player, reward_value);
+    gained += awardExperienceOnceFromReward(player, rewardValue);
   }
   return int(gained);
 }
