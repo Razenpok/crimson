@@ -2,13 +2,9 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
+import { TutorialOverlayState } from '@crimson/tutorial/state.ts';
 
-export interface TutorialOverlayState {
-  promptText: string;
-  promptAlpha: number;
-  hintText: string;
-  hintAlpha: number;
-}
+export type { TutorialOverlayState };
 
 export const TUTORIAL_PANEL_POS = new Vec2(0.0, 64.0);
 const TUTORIAL_PANEL_PADDING = new Vec2(20.0, 8.0);
@@ -72,7 +68,6 @@ function drawRectOutline(
 export function drawTutorialPromptPanel(
   screenW: number,
   text: string,
-  scale: number,
   opts: {
     alpha: number;
     pos: Vec2;
@@ -82,6 +77,7 @@ export function drawTutorialPromptPanel(
   },
 ): void {
   if (opts.alpha <= 1e-3) return;
+  const scale = 1.0;
   const { rect, lines, lineH } = tutorialPromptPanelRect(
     text,
     screenW,
@@ -114,7 +110,6 @@ export function drawTutorialPromptPanel(
 export function drawTutorialOverlayPanels(
   screenW: number,
   overlay: TutorialOverlayState,
-  scale: number,
   opts: {
     drawText: DrawUiText;
     measureTextWidth: MeasureUiTextWidth;
@@ -125,7 +120,6 @@ export function drawTutorialOverlayPanels(
     drawTutorialPromptPanel(
       screenW,
       overlay.promptText,
-      scale,
       {
         alpha: overlay.promptAlpha,
         pos: TUTORIAL_PANEL_POS,
@@ -139,7 +133,6 @@ export function drawTutorialOverlayPanels(
     drawTutorialPromptPanel(
       screenW,
       overlay.hintText,
-      scale,
       {
         alpha: overlay.hintAlpha,
         pos: TUTORIAL_PANEL_POS.offset({ dy: 84.0 }),

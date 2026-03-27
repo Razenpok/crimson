@@ -104,7 +104,7 @@ export function flushDeferredFreezeCorpseFx(state: GameplayState): void {
 }
 
 export function freezeBonusActive(opts: { state: GameplayState }): boolean {
-  return (opts.state.bonuses as { freeze: number }).freeze > 0.0;
+  return opts.state.bonuses.freeze > 0.0;
 }
 
 export function applyFreezePickupFx(opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number }): void {

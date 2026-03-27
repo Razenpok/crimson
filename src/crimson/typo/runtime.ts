@@ -127,7 +127,7 @@ export function typoMidStep(ctx: MidStepContext): void {
       rewardValue: 1.0,
       size,
       contactDamage: 100.0,
-      tint: call.tintRgba.toWgl(),
+      tint: call.tintRgba.toTuple(),
       orbitAngle: null,
       orbitRadius: null,
       rangedProjectileType: null,
@@ -149,7 +149,7 @@ export function typoMidStep(ctx: MidStepContext): void {
       {
         scoreXp: ctx.world.players.length > 0 ? int(ctx.world.players[0].experience) : 0,
         activeMask,
-        dictionaryWords: typo.dictionaryWords.length > 0 ? typo.dictionaryWords : null,
+        dictionaryWords: typo.dictionaryWords,
         highscoreNames: typo.highscoreNames,
       },
     );

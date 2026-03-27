@@ -69,10 +69,6 @@ import {
   QUEST_PANEL_HEIGHT,
 } from './shared.ts';
 
-// ---------------------------------------------------------------------------
-// Key constants
-// ---------------------------------------------------------------------------
-
 const KEY_ESCAPE = 27;
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;
@@ -101,10 +97,6 @@ const FADE_TO_GAME_ACTIONS = new Set([
   'start_tutorial',
   'start_quest',
 ]);
-
-// ---------------------------------------------------------------------------
-// QuestsMenuState — the state consumed by the quests menu
-// ---------------------------------------------------------------------------
 
 export interface QuestsMenuStatus {
   questUnlockIndex: number;
@@ -146,10 +138,6 @@ export interface QuestsMenuState {
   status: QuestsMenuStatus;
   console: { log: { log(msg: string): void } };
 }
-
-// ---------------------------------------------------------------------------
-// QuestsMenuView
-// ---------------------------------------------------------------------------
 
 export class QuestsMenuView {
   private state: QuestsMenuState;
@@ -359,10 +347,6 @@ export class QuestsMenuView {
     this._action = null;
     return action;
   }
-
-  // ---------------------------------------------------------------------------
-  // Private
-  // ---------------------------------------------------------------------------
 
   private _assertOpen(): void {
     if (!this._isOpen) {

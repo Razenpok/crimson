@@ -221,6 +221,7 @@ export function drawEffectPool(
     if (entry.flags & 0x40) drawEntry(entry);
   }
 
+  wgl.endBlendMode();
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   for (const entry of effects) {
     if (!entry.flags || entry.age < 0.0) continue;

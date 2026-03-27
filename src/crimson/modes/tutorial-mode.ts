@@ -65,6 +65,7 @@ export class TutorialMode extends BaseGameplayMode {
   private _playButton: UiButtonState;
   private _repeatButton: UiButtonState;
   private _perkPickPending = false;
+  private _frameInputState: PlayerInput | null = null;
 
   constructor(opts: {
     demoModeActive?: boolean;
@@ -213,6 +214,10 @@ export class TutorialMode extends BaseGameplayMode {
   }
 
   protected _buildLocalInputs(_opts: { dt: number }): PlayerInput[] {
+    const frameInputState = this._frameInputState;
+    if (frameInputState !== null) {
+      return [frameInputState];
+    }
     return [this._buildInput()];
   }
 
@@ -370,22 +375,27 @@ export class TutorialMode extends BaseGameplayMode {
     const perkMenuActive = this._perkMenu.active;
     const dtWorld = (this._paused || perkMenuActive) ? 0.0 : frameDt;
 
+    const inputState = this._buildInput();
     if (dtWorld > 0.0) {
       const session = this._simSession;
       if (session !== null) {
         const elapsedBeforeMs = session.elapsedMs;
         session.detailPreset = this._deterministicDetailPreset();
         session.violenceDisabled = this._deterministicViolenceDisabled();
-
-        this._runDeterministicSessionTicks({
-          dtFrame: dtWorld,
-          session,
-          recorder: this._replayRecorder,
-          onTick: (_tick: DeterministicSessionTick, _tickIndex: number | null) => false,
-          onCheckpoint: (tickIndex: number, tick: DeterministicSessionTick) => {
-            this._recordReplayCheckpointFromTick({ tickIndex, tick });
-          },
-        });
+        this._frameInputState = inputState;
+        try {
+          this._runDeterministicSessionTicks({
+            dtFrame: dtWorld,
+            session,
+            recorder: this._replayRecorder,
+            onTick: (_tick: DeterministicSessionTick, _tickIndex: number | null) => false,
+            onCheckpoint: (tickIndex: number, tick: DeterministicSessionTick) => {
+              this._recordReplayCheckpointFromTick({ tickIndex, tick });
+            },
+          });
+        } finally {
+          this._frameInputState = null;
+        }
 
         if (session.elapsedMs !== elapsedBeforeMs) {
           this._perkPickPending = false;
@@ -460,7 +470,6 @@ export class TutorialMode extends BaseGameplayMode {
     drawTutorialOverlayPanels(
       screenW,
       overlay,
-      1.0,
       {
         drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
           this._drawUiText(text, pos, color, scale),

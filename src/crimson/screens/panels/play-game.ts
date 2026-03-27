@@ -108,20 +108,9 @@ export interface PlayGameStatus {
 }
 
 export interface PlayGamePanelState extends PanelGameState {
-  config: PanelGameState['config'] & {
-    gameplay: {
-      playerCount: number;
-      mode: number;
-    };
-    save?(): void;
-  };
   demoEnabled: boolean;
   debugEnabled: boolean;
   status: PlayGameStatus;
-  console: {
-    log: { log(msg: string): void };
-    cvars: Map<string, { name: string; value: string; valueF: number }>;
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -272,7 +261,7 @@ export class PlayGameMenuView extends PanelMenuView {
   protected override _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        const cfg = this._pgState.config;
+        const cfg = this._pgState.config as typeof this._pgState.config & { save?(): void };
         if (cfg.save) cfg.save();
         this._dirty = false;
       } catch (exc) {

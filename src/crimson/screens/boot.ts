@@ -2,14 +2,10 @@
 
 import * as wgl from '@wgl';
 import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '@grim/assets.ts';
-import { audioPlayMusic, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
+import { audioPlayMusic, audioShutdown, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
 import { queueTrack } from '@grim/music.ts';
 import { InputState } from '@grim/input.ts';
 import { type GameState } from '@crimson/game/types.ts';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 export const SPLASH_ALPHA_SCALE = 2.0;
 export const LOGO_TIME_SCALE = 1.1;
@@ -28,19 +24,11 @@ export const LOGO_REF_OUT_END = 11.0;
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function clamp01(value: number): number {
   if (value < 0.0) return 0.0;
   if (value > 1.0) return 1.0;
   return value;
 }
-
-// ---------------------------------------------------------------------------
-// BootView
-// ---------------------------------------------------------------------------
 
 export class BootView {
   state: GameState;
@@ -173,21 +161,17 @@ export class BootView {
   }
 
   close(): void {
-    // In the Python port, this shuts down audio and unloads resources.
-    // In the WebGL port, the app manages resource lifetimes separately.
-  }
-
-  takeAction(): string | null {
-    return null;
+    // Shut down audio and unload resources (matching Python close())
+    if (this.state.audio !== null) {
+      audioShutdown(this.state.audio);
+      this.state.audio = null;
+    }
+    this.state.resources = null;
   }
 
   isThemeStarted(): boolean {
     return this._themeStarted;
   }
-
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
 
   private _startTheme(): void {
     if (this._themeStarted) return;

@@ -4,6 +4,7 @@ import { InputState } from '@grim/input.ts';
 
 export const INPUT_CODE_UNBOUND = 0x17E;
 const AXIS_DEADZONE = 0.2;
+const _AXIS_DOWN_THRESHOLD = 0.5;
 
 // DirectInput key code → DOM keyCode mapping
 // These map the original game's DirectInput scan codes to browser keyCode values
@@ -104,8 +105,6 @@ const MOUSE_CODE_TO_BUTTON: Record<number, number> = {
   0x104: 4,  // Extra
 };
 
-// --- Edge-tracking pressed state (mirrors Python _PressedState) ---
-
 class PressedState {
   prevDown = new Map<string, boolean>();
   down = new Map<string, boolean>();
@@ -146,8 +145,6 @@ const _pressedState = new PressedState();
 const PRIMARY_EDGE_SENTINEL_PLAYER = -1;
 const PRIMARY_EDGE_SENTINEL_KEY = -1;
 
-// --- Core functions ---
-
 export function inputBeginFrame(): void {
   _pressedState.beginFrame();
 }
@@ -176,7 +173,6 @@ export function inputCodeIsDown(keyCode: number, opts: { playerIndex?: number } 
 
 export function inputCodeIsPressed(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
   const playerIndex = opts.playerIndex ?? 0;
-  if (keyCode === INPUT_CODE_UNBOUND) return false;
 
   // Wheel codes
   if (keyCode === 0x109) return _pressedState.wheelUp;
@@ -219,8 +215,6 @@ export function captureFirstPressedInputCode(
 
   return null;
 }
-
-// --- Name lookup ---
 
 const EXTENDED_NAMES: Record<number, string> = {
   0x109: 'MWheelUp',
@@ -297,8 +291,6 @@ export function inputCodeName(keyCode: number): string {
   }
   return `KEY_${keyCode.toString(16).toUpperCase().padStart(4, '0')}`;
 }
-
-// --- Primary input helpers ---
 
 function _inputPrimaryAnyDown(fireCodes: number[], playerCount: number): boolean {
   if (inputCodeIsDown(0x100, { playerIndex: 0 })) return true;

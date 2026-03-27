@@ -3,7 +3,6 @@
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { type AudioState } from '@grim/audio.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { InputState } from '@grim/input.ts';
@@ -13,6 +12,7 @@ import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
+import { GameState } from '@crimson/game/types.ts';
 
 // ---------------------------------------------------------------------------
 // Menu layout constants (re-exported from the menu module in the Python port)
@@ -91,34 +91,15 @@ export class MenuEntry {
     this.row = row;
     this.y = y;
     this.hoverAmount = 0;
-    this.readyTimerMs = 0x100;
+    this.readyTimerMs = 0;
   }
 }
 
 // ---------------------------------------------------------------------------
-// Minimal GameState interface consumed by panels
+// PanelGameState — alias for the canonical GameState from game/types
 // ---------------------------------------------------------------------------
 
-export interface PanelGameState {
-  config: {
-    display: {
-      width: number;
-      height: number;
-      fxDetail: [boolean, boolean, boolean];
-    };
-    controls: import('../../../grim/config.ts').CrimsonControlsConfig;
-    save?(): void;
-  };
-  audio: AudioState | null;
-  resources: RuntimeResources | null;
-  menuSignLocked: boolean;
-  screenFadeAlpha: number;
-  screenFadeRamp: boolean;
-  pauseBackground: { drawPauseBackground(): void } | null;
-  menuGround: GroundRenderer | null;
-  menuGroundCamera: Vec2 | null;
-  console?: { log: { log(msg: string): void } };
-}
+export type PanelGameState = GameState;
 
 // ---------------------------------------------------------------------------
 // UI element animation — port of MenuView._ui_element_anim
@@ -392,8 +373,6 @@ export class PanelMenuView {
       this._ground = null;
       return;
     }
-    // In the full port, this calls ensureMenuGround(state).
-    // For now, reuse whatever ground the state already has.
     this._ground = this.state.menuGround;
   }
 

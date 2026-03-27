@@ -36,15 +36,7 @@ import {
 } from './base-gameplay-mode.ts';
 import { buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const WORLD_SIZE = 1024.0;
-
-// ---------------------------------------------------------------------------
-// TypoShooterMode
-// ---------------------------------------------------------------------------
 
 export class TypoShooterMode extends BaseGameplayMode {
   constructor(opts: {
@@ -67,10 +59,6 @@ export class TypoShooterMode extends BaseGameplayMode {
     this._simSession = this._newSimSession();
   }
 
-  // ---------------------------------------------------------------------------
-  // Session builder
-  // ---------------------------------------------------------------------------
-
   private _newSimSession(): DeterministicSession {
     const typo = this.state.typo;
     return buildTypoSession({
@@ -85,17 +73,9 @@ export class TypoShooterMode extends BaseGameplayMode {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Player count
-  // ---------------------------------------------------------------------------
-
   protected _runtimePlayerCount(): number {
     return 1;
   }
-
-  // ---------------------------------------------------------------------------
-  // Replay helpers
-  // ---------------------------------------------------------------------------
 
   protected _replayCheckpointElapsedMs(): number {
     return this._sessionElapsedMs();
@@ -119,19 +99,11 @@ export class TypoShooterMode extends BaseGameplayMode {
     return `typo_${stamp}_score${score}`;
   }
 
-  // ---------------------------------------------------------------------------
-  // Typo shot counts
-  // ---------------------------------------------------------------------------
-
   private _typoShotCounts(): [number, number] {
     const typo = this.state.typo;
     if (typo == null) return [0, 0];
     return typoShotCounts(typo);
   }
-
-  // ---------------------------------------------------------------------------
-  // Lifecycle
-  // ---------------------------------------------------------------------------
 
   open(): void {
     super.open();
@@ -160,10 +132,6 @@ export class TypoShooterMode extends BaseGameplayMode {
     super.close();
   }
 
-  // ---------------------------------------------------------------------------
-  // Input handling
-  // ---------------------------------------------------------------------------
-
   protected _handleInput(): void {
     if (this._gameOverActive) {
       if (InputState.wasKeyPressed(27)) { // Escape
@@ -182,10 +150,6 @@ export class TypoShooterMode extends BaseGameplayMode {
       return;
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Typing commands
-  // ---------------------------------------------------------------------------
 
   private _enqueueTypingCommands(): void {
     // Enter / KP Enter → submit
@@ -210,10 +174,6 @@ export class TypoShooterMode extends BaseGameplayMode {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Game over
-  // ---------------------------------------------------------------------------
-
   protected _enterGameOver(): void {
     if (this._gameOverActive) return;
 
@@ -235,18 +195,10 @@ export class TypoShooterMode extends BaseGameplayMode {
     this._saveReplay();
   }
 
-  // ---------------------------------------------------------------------------
-  // Build local inputs
-  // ---------------------------------------------------------------------------
-
   protected _buildLocalInputs(_opts: { dt: number }): PlayerInput[] {
     const aim = this.screenToWorld(this._uiMouse);
     return [buildTypoPlayerInput({ aim, fireRequested: false, reloadRequested: false })];
   }
-
-  // ---------------------------------------------------------------------------
-  // Update
-  // ---------------------------------------------------------------------------
 
   update(dt: number): void {
     this._updateAudio(dt);
@@ -297,10 +249,6 @@ export class TypoShooterMode extends BaseGameplayMode {
     // Death/game-over flow is handled at the start of the next frame so the
     // trooper death animation can play before the UI slides in.
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw
-  // ---------------------------------------------------------------------------
 
   draw(): void {
     const alive = this.player.health > 0.0;
@@ -355,10 +303,6 @@ export class TypoShooterMode extends BaseGameplayMode {
       }
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw helpers
-  // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
     const resources = this.renderResources.resources;

@@ -73,28 +73,10 @@ interface OptionsContentLayout {
 }
 
 // ---------------------------------------------------------------------------
-// State interface consumed by OptionsMenuView
+// State interface consumed by OptionsMenuView — now uses the canonical GameState
 // ---------------------------------------------------------------------------
 
-export interface OptionsPanelState extends PanelGameState {
-  config: PanelGameState['config'] & {
-    audio: {
-      sfxVolume: number;
-      musicVolume: number;
-    };
-    gameplay: {
-      showInfoTexts: boolean;
-    };
-    display: PanelGameState['config']['display'] & {
-      mouseSensitivity: number;
-      detailPreset: number;
-    };
-    save?(): void;
-  };
-  console: {
-    log: { log(msg: string): void };
-  };
-}
+export type OptionsPanelState = PanelGameState;
 
 // ---------------------------------------------------------------------------
 // OptionsMenuView
@@ -166,7 +148,7 @@ export class OptionsMenuView extends PanelMenuView {
     }
 
     if (this._updateSlider('detail', this._sliderDetail, sliderPos.offset({ dy: 87.0 * scale }), rectOn, rectOff, scale)) {
-      const preset = applyDetailPreset(config as unknown as CrimsonConfig, this._sliderDetail.value);
+      const preset = applyDetailPreset(config as CrimsonConfig, this._sliderDetail.value);
       this._sliderDetail.value = preset;
       this._dirty = true;
     }
@@ -209,7 +191,7 @@ export class OptionsMenuView extends PanelMenuView {
   protected override _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        const cfg = this._optState.config;
+        const cfg = this._optState.config as typeof this._optState.config & { save?(): void };
         if (cfg.save) cfg.save();
         this._dirty = false;
       } catch (exc) {

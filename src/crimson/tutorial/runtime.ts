@@ -2,65 +2,18 @@
 
 import { SfxId } from '@grim/sfx-map.ts';
 import { CreatureFlags, SpawnId } from '@crimson/creatures/spawn-ids.ts';
-import { GameplayState, survivalCheckLevelUp } from "@crimson/gameplay.ts";
+import { survivalCheckLevelUp } from "@crimson/gameplay.ts";
 import type { PlayerInput } from '@crimson/sim/input.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { WorldState } from '@crimson/sim/world-state.ts';
 import { TutorialOverlayState, TutorialState } from "./state.ts";
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
 import { Vec2 } from "@grim/geom.js";
 import { BonusId } from "@crimson/bonuses/ids.js";
-import { CrandLike } from "@grim/rand.js";
-
 
 /**
- * Minimal interface for the world object used by tutorial runtime hooks.
- * Avoids a hard dependency on the full WorldState class.
+ * TutorialWorldState is now the canonical WorldState from sim/world-state.
  */
-export interface TutorialWorldState {
-  state: GameplayState & {
-    tutorial: TutorialState;
-    tutorialOverlay: TutorialOverlayState;
-    preserveBugs: boolean;
-    bonusPool: {
-      iterActive(): { pos: Vec2 }[];
-      spawnAt(opts: {
-        pos: Vec2;
-        bonusId: BonusId;
-        durationOverride: number;
-        state: GameplayState;
-        worldWidth: number;
-        worldHeight: number;
-      }): { pos: Vec2 } | null;
-    };
-    sfxQueue: SfxId[];
-    rng: CrandLike;
-    effects: {
-      spawnBurst(opts: {
-        pos: Vec2;
-        count: number;
-        rng: CrandLike;
-        detailPreset: number;
-      }): void;
-    };
-  };
-  players: PlayerState[];
-  creatures: {
-    entries: {
-      active: boolean;
-      hp: number;
-      flags: number;
-      bonusId: BonusId;
-      bonusDurationOverride: number;
-    }[];
-    iterActive(): { pos: Vec2 }[];
-    spawnTemplate(
-      templateId: number,
-      pos: Vec2,
-      heading: number,
-      rng: CrandLike,
-    ): [number[], number | null];
-  };
-}
+export type TutorialWorldState = WorldState;
 
 
 export interface TutorialStepContext {
@@ -154,14 +107,12 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
   }
 
   for (const call of actions.spawnBonuses) {
-    const spawned = state.bonusPool.spawnAt({
-      pos: call.pos,
-      bonusId: call.bonusId,
-      durationOverride: int(call.amount),
-      state: state,
-      worldWidth: +ctx.worldSize,
-      worldHeight: +ctx.worldSize,
-    });
+    const spawned = state.bonusPool.spawnAt(
+      call.pos,
+      call.bonusId,
+      int(call.amount),
+      { state, worldWidth: +ctx.worldSize, worldHeight: +ctx.worldSize },
+    );
     if (spawned !== null) {
       state.effects.spawnBurst({
         pos: spawned.pos,

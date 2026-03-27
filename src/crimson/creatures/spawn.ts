@@ -1011,7 +1011,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
 
   c.heading = f32(f32(rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HEADING }) % 314) * f32(0.01));
 
-  let moveSpeed = f32(f32(f32((xp / 4000) | 0) * f32(0.045)) + f32(0.9));
+  let moveSpeed = f32(f32(f32(Math.floor(xp / 4000)) * f32(0.045)) + f32(0.9));
   if (c.typeId === CreatureTypeId.SPIDER_SP1) {
     c.flags = (c.flags | CreatureFlags.AI7_LINK_TIMER) as CreatureFlags;
     moveSpeed = f32(f32(moveSpeed) * f32(1.3));
@@ -1043,19 +1043,19 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
   let tintB: number;
   const tintA = 1.0;
   if (xp < 50_000) {
-    tintR = 1.0 - 1.0 / (((xp / 1000) | 0) + 10.0);
+    tintR = 1.0 - 1.0 / (Math.floor(xp / 1000) + 10.0);
     tintG = (
       (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_LOW_TINT_G }) % 10) * 0.01
       + 0.9
-      - 1.0 / (((xp / 10000) | 0) + 10.0)
+      - 1.0 / (Math.floor(xp / 10000) + 10.0)
     );
     tintB = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_LOW_TINT_B }) % 10) * 0.01 + 0.7;
   } else if (xp < 100_000) {
-    tintR = 0.9 - 1.0 / (((xp / 1000) | 0) + 10.0);
+    tintR = 0.9 - 1.0 / (Math.floor(xp / 1000) + 10.0);
     tintG = (
       (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_MID_TINT_G }) % 10) * 0.01
       + 0.8
-      - 1.0 / (((xp / 10000) | 0) + 10.0)
+      - 1.0 / (Math.floor(xp / 10000) + 10.0)
     );
     tintB = (
       (xp - 50_000) * 6e-06
@@ -1063,11 +1063,11 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
       + 0.7
     );
   } else {
-    tintR = 1.0 - 1.0 / (((xp / 1000) | 0) + 10.0);
+    tintR = 1.0 - 1.0 / (Math.floor(xp / 1000) + 10.0);
     tintG = (
       (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HIGH_TINT_G }) % 10) * 0.01
       + 0.9
-      - 1.0 / (((xp / 10000) | 0) + 10.0)
+      - 1.0 / (Math.floor(xp / 10000) + 10.0)
     );
     tintB = (
       (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HIGH_TINT_B }) % 10) * 0.01
@@ -1203,7 +1203,7 @@ export function tickSurvivalWaveSpawns(
 
   const spawns: CreatureInit[] = [];
   while (cooldown < 0.0) {
-    let intervalMs = 500 - (int(f32(opts.survivalElapsedMs)) / 1800 | 0);
+    let intervalMs = 500 - Math.floor(int(f32(opts.survivalElapsedMs)) / 1800);
     if (intervalMs < 0) {
       const extra = (1 - intervalMs) >> 1;
       intervalMs += int(extra) * 2;

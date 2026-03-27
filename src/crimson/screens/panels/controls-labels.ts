@@ -1,6 +1,6 @@
 // Port of crimson/screens/panels/controls_labels.py
 
-import { AimScheme, MovementControlType } from '@grim/config.ts';
+import { AimScheme, MovementControlType, type CrimsonControlsConfig } from '@grim/config.ts';
 
 // ---------------------------------------------------------------------------
 // RebindTarget — identifies which config field a rebind row controls
@@ -66,7 +66,7 @@ export function inputSchemeLabel(scheme: MovementControlType): string {
 }
 
 export function controlsMethodLabels(
-  controls: { players: { aimScheme: AimScheme; movement: MovementControlType }[] },
+  controls: CrimsonControlsConfig,
   opts: { playerIndex: number },
 ): [string, string] {
   const player = controls.players[opts.playerIndex];

@@ -4,11 +4,14 @@ import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import type { CrimsonConfig } from '@grim/config.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import { GameState } from '@crimson/game/types.ts';
+import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import type { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
@@ -59,50 +62,14 @@ const ORIGIN = wgl.makeVector2(0, 0);
 // Interfaces
 // ---------------------------------------------------------------------------
 
-export interface QuestFailedOutcome {
-  level: QuestLevel;
-  experience: number;
-  killCount: number;
-  mostUsedWeaponId: number;
-  shotsFired: number;
-  shotsHit: number;
-  baseTimeMs: number;
-  playerHealth: number;
-}
+export type QuestFailedOutcome = QuestRunOutcome;
 
 export interface QuestFailedScoreRecord {
   survivalElapsedMs: number;
   scoreXp: number;
 }
 
-export interface QuestFailedState {
-  config: {
-    display: {
-      width: number;
-      height: number;
-      fxDetail: [boolean, boolean, boolean];
-    };
-    gameplay: {
-      mode: number;
-      hardcore: boolean;
-      questLevel: QuestLevel | null;
-    };
-    profile: { playerName: string };
-    save(): void;
-  };
-  audio: AudioState | null;
-  resources: RuntimeResources | null;
-  preserveBugs: boolean;
-  questOutcome: QuestFailedOutcome | null;
-  questFailRetryCount: number;
-  pendingQuestLevel: QuestLevel | null;
-  pauseBackground: { drawPauseBackground(opts?: { entityAlpha?: number }): void } | null;
-  menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
-  menuGroundCamera: Vec2 | null;
-  screenFadeAlpha: number;
-  screenFadeRamp: boolean;
-  console: { log: { log(msg: string): void } };
-}
+export type QuestFailedState = GameState;
 
 // ---------------------------------------------------------------------------
 // QuestFailedView
@@ -137,7 +104,7 @@ export class QuestFailedView {
     this._introMs = 0.0;
     this._closing = false;
     this._closeAction = null;
-    this._outcome = this.state.questOutcome;
+    this._outcome = this.state.questOutcome as QuestFailedOutcome | null;
     this.state.questOutcome = null;
     this._questTitle = '';
     this._record = null;
@@ -377,7 +344,7 @@ export class QuestFailedView {
     this.state.config.gameplay.mode = GameMode.QUESTS;
     this.state.config.gameplay.questLevel = level;
     try {
-      this.state.config.save();
+      (this.state.config as CrimsonConfig & { save?(): void }).save?.();
     } catch (exc) {
       this.state.console.log.log(`quest failed: failed to save quest selection config: ${exc}`);
     }

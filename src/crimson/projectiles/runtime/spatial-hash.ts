@@ -1,7 +1,7 @@
 // Port of crimson/projectiles/runtime/spatial_hash.py
 
 import { Vec2 } from '@grim/geom.ts';
-import { CreatureStateLike } from '@crimson/effects.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 const _SPATIAL_BUCKET_SIZE = 64.0;
 const _NATIVE_FIND_SIZE_SCALE = 0.14285715;
@@ -17,16 +17,16 @@ function cellKey(cx: number, cy: number): string {
 }
 
 export class CreatureSpatialHash {
-  creatures: readonly CreatureStateLike[];
-  isCollidable: (creature: CreatureStateLike) => boolean;
+  creatures: readonly CreatureState[];
+  isCollidable: (creature: CreatureState) => boolean;
   private _bucketSize: number;
   private _cells: Map<string, number[]>;
   private _cellByIndex: (string | null)[];
   private _maxFindMargin: number;
 
   constructor(
-    creatures: readonly CreatureStateLike[],
-    isCollidable: (creature: CreatureStateLike) => boolean,
+    creatures: readonly CreatureState[],
+    isCollidable: (creature: CreatureState) => boolean,
     bucketSize: number = _SPATIAL_BUCKET_SIZE,
   ) {
     this.creatures = creatures;

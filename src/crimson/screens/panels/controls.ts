@@ -303,8 +303,9 @@ export class ControlsMenuView extends PanelMenuView {
   protected override _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        if (this.state.config.save) {
-          this.state.config.save();
+        const cfg = this.state.config as typeof this.state.config & { save?(): void };
+        if (cfg.save) {
+          cfg.save();
         }
         this._dirty = false;
       } catch (exc) {

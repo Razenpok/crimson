@@ -6,31 +6,18 @@ import { type RuntimeResources } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import {
   MENU_PANEL_WIDTH,
+  PANEL_TIMELINE_START_MS,
+  PANEL_TIMELINE_END_MS,
   type PanelGameState,
   PanelMenuView,
   uiElementAnim,
 } from './base.ts';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const PANEL_TIMELINE_START_MS = 300;
-const PANEL_TIMELINE_END_MS = 0;
-
-// ---------------------------------------------------------------------------
-// Content layout
-// ---------------------------------------------------------------------------
 
 interface ModsContentLayout {
   scale: number;
   basePos: Vec2;
   labelPos: Vec2;
 }
-
-// ---------------------------------------------------------------------------
-// ModsMenuView
-// ---------------------------------------------------------------------------
 
 export class ModsMenuView extends PanelMenuView {
   private _lines: string[] = [];

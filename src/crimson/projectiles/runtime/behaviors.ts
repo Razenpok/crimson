@@ -6,7 +6,8 @@ import type { SfxId } from '@grim/sfx-map.ts';
 import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import { CreatureFlags } from '@crimson/creatures/spawn-ids.ts';
-import type { EffectPool, CreatureStateLike } from '@crimson/effects.ts';
+import type { EffectPool } from '@crimson/effects.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
@@ -25,11 +26,9 @@ import { applyDamageToCreature, hitRadiusFor } from './collision.ts';
 import type { ProjectilePool } from './projectile-pool.ts';
 import { GameplayState } from "@crimson/gameplay.js";
 
-export type CreatureStateForBehavior = CreatureStateLike;
-
 export class ProjectileUpdateCtx {
   pool: ProjectilePool;
-  creatures: readonly CreatureStateLike[];
+  creatures: readonly CreatureState[];
   dt: number;
   ionScale: number;
   detailPreset: number;
@@ -40,7 +39,7 @@ export class ProjectileUpdateCtx {
 
   constructor(
     pool: ProjectilePool,
-    creatures: readonly CreatureStateLike[],
+    creatures: readonly CreatureState[],
     dt: number,
     ionScale: number,
     detailPreset: number,
@@ -85,14 +84,14 @@ export class ProjectileHitInfo {
 
 export class ProjectileHitPerkCtx {
   proj: Projectile;
-  creature: CreatureStateForBehavior;
+  creature: CreatureState;
   rng: CrandLike;
   ownerPerkActive: (owner: OwnerRef, perkIdx: number) => boolean;
   poisonIdx: number;
 
   constructor(
     proj: Projectile,
-    creature: CreatureStateForBehavior,
+    creature: CreatureState,
     rng: CrandLike,
     ownerPerkActive: (owner: OwnerRef, perkIdx: number) => boolean,
     poisonIdx: number,

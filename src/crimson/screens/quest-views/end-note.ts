@@ -6,9 +6,10 @@ import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import { GameState } from '@crimson/game/types.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
@@ -41,44 +42,12 @@ import {
   END_NOTE_PANEL_W,
 } from './shared.ts';
 
-// ---------------------------------------------------------------------------
-// Key constants
-// ---------------------------------------------------------------------------
-
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
-
-export interface EndNoteState {
-  config: {
-    display: {
-      width: number;
-      height: number;
-      fxDetail: [boolean, boolean, boolean];
-    };
-    gameplay: {
-      mode: number;
-      hardcore: boolean;
-    };
-  };
-  audio: AudioState | null;
-  resources: RuntimeResources | null;
-  preserveBugs: boolean;
-  pauseBackground: { drawPauseBackground(opts?: { entityAlpha?: number }): void } | null;
-  menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
-  menuGroundCamera: Vec2 | null;
-  screenFadeAlpha: number;
-  screenFadeRamp: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// EndNoteView
-// ---------------------------------------------------------------------------
+export type EndNoteState = GameState;
 
 export class EndNoteView {
   private state: EndNoteState;
@@ -309,10 +278,6 @@ export class EndNoteView {
     this._action = null;
     return action;
   }
-
-  // ---------------------------------------------------------------------------
-  // Private
-  // ---------------------------------------------------------------------------
 
   private _requireResources(): RuntimeResources {
     if (this.state.resources === null) {

@@ -6,11 +6,6 @@ import type { TerrainFxBatch } from './terrain-fx.ts';
 import { EMPTY_TERRAIN_FX_BATCH, terrainFxBatchIsEmpty } from './terrain-fx.ts';
 import type { WorldEvents } from './world-state.ts';
 import type { TickResult } from './hooks.ts';
-
-// ---------------------------------------------------------------------------
-// SimMetadataSink (Protocol → interface)
-// ---------------------------------------------------------------------------
-
 export interface SimMetadataSink {
   applyStepMetadata(opts: {
     events: WorldEvents;
@@ -19,11 +14,6 @@ export interface SimMetadataSink {
     gameTuneStarted: boolean;
   }): void;
 }
-
-// ---------------------------------------------------------------------------
-// PresentationTickOutput
-// ---------------------------------------------------------------------------
-
 export class PresentationTickOutput {
   readonly tickIndex: number;
   readonly dtSim: number;
@@ -42,11 +32,6 @@ export class PresentationTickOutput {
     this.terrainFx = opts.terrainFx ?? EMPTY_TERRAIN_FX_BATCH;
   }
 }
-
-// ---------------------------------------------------------------------------
-// applySimMetadataTickResult
-// ---------------------------------------------------------------------------
-
 export function applySimMetadataTickResult(opts: {
   simWorld: SimMetadataSink;
   tickResult: TickResult;
@@ -62,11 +47,6 @@ export function applySimMetadataTickResult(opts: {
     terrainFx: step.terrainFx,
   });
 }
-
-// ---------------------------------------------------------------------------
-// applyTickToSim
-// ---------------------------------------------------------------------------
-
 export function applyTickToSim(opts: {
   simWorld: SimMetadataSink;
   step: DeterministicStepResult;
@@ -80,11 +60,6 @@ export function applyTickToSim(opts: {
     gameTuneStarted: gameTuneStarted,
   });
 }
-
-// ---------------------------------------------------------------------------
-// applySimMetadataBatch
-// ---------------------------------------------------------------------------
-
 export function applySimMetadataBatch(opts: {
   simWorld: SimMetadataSink;
   completedResults: readonly TickResult[];
@@ -95,11 +70,6 @@ export function applySimMetadataBatch(opts: {
     applySimMetadataTickResult({ simWorld, tickResult, gameTuneStarted, }),
   );
 }
-
-// ---------------------------------------------------------------------------
-// applyPresentationOutputs
-// ---------------------------------------------------------------------------
-
 export function applyPresentationOutputs(opts: {
   outputs: readonly PresentationTickOutput[];
   syncAudioBridgeState: () => void;

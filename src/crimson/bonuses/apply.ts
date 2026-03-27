@@ -41,10 +41,6 @@ const _BONUS_APPLY_HANDLERS: Map<BonusId, BonusApplyHandler> = new Map([
   [BonusId.NUKE, applyNuke],
 ]);
 
-export function bonusApplyRegisterHandler(bonusId: BonusId, handler: BonusApplyHandler): void {
-  _BONUS_APPLY_HANDLERS.set(bonusId, handler);
-}
-
 /** Apply a bonus to player + global timers (subset of `bonusApply`). */
 export function bonusApply(
   state: GameplayState,

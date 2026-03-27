@@ -63,7 +63,7 @@ export function weaponAssignPlayer(
   const state = opts.state;
   const status = state.status as WeaponAssignStatus | null;
   if (status !== null && !state.demoModeActive) {
-    const usageSlot = weaponUsageSlotForWeaponId(weaponId as number);
+    const usageSlot = weaponUsageSlotForWeaponId(weaponId);
     if (usageSlot !== null) {
       status.incrementWeaponUsageSlot(usageSlot);
     }

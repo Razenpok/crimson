@@ -124,7 +124,7 @@ export function updateJinxed(ctx: PerksUpdateEffectsCtx): void {
     const creature = ctx.creatures[idx];
     creature.hp = -1.0;
     creature.lifecycleStage = creature.lifecycleStage - ctx.dt * 20.0;
-    awardExperienceFromReward(ctx, creature.reward_value);
+    awardExperienceFromReward(ctx, creature.rewardValue);
     ctx.state.sfxQueue.push(SfxId.TROOPER_INPAIN_01);
   }
 }

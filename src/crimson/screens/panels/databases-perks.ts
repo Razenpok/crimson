@@ -16,7 +16,7 @@ import {
 import { buildPerkAvailability } from '@crimson/perks/availability.ts';
 import { perksDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
-import { GameStatus } from "@crimson/gameplay.js";
+import { GameStatus } from "@crimson/gameplay.ts";
 
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;
@@ -25,11 +25,8 @@ const KEY_DOWN = 40;
 const KEY_PAGE_UP = 33;
 const KEY_PAGE_DOWN = 34;
 const KEY_ENTER = 13;
+const KEY_KP_ENTER = 335;
 const MOUSE_BUTTON_LEFT = 0;
-
-// ---------------------------------------------------------------------------
-// UnlockedPerksDatabaseView
-// ---------------------------------------------------------------------------
 
 export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   private static readonly _VISIBLE_ROWS = 10;
@@ -349,7 +346,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
 
     if (
       this._navFocusIndex === 0 &&
-      (InputState.wasKeyPressed(KEY_ENTER))
+      (InputState.wasKeyPressed(KEY_ENTER) || InputState.wasKeyPressed(KEY_KP_ENTER))
     ) {
       if (this.state.audio !== null) {
         audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);

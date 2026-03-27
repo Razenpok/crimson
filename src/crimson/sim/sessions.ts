@@ -331,9 +331,7 @@ export class DeterministicSession {
     const state = this.world.state;
     state.gameMode = this.gameMode;
     state.demoModeActive = this.demoModeActive;
-    // state.status is typed `unknown` (TODO: Phase X — GameStatus); cast to
-    // the narrower union each callee expects.  Currently always null at runtime.
-    prepareWeaponAvailability(state, state.status as Parameters<typeof prepareWeaponAvailability>[1]);
+    prepareWeaponAvailability(state);
     preparePerkAvailability(state);
   }
 

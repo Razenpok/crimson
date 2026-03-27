@@ -7,6 +7,7 @@ import type { CrimsonConfig } from '@grim/config.ts';
 import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
@@ -22,19 +23,7 @@ import { nextQuestLevel, playerNameDefault } from './shared.ts';
 // Interfaces for the state consumed by QuestResultsView
 // ---------------------------------------------------------------------------
 
-export interface QuestRunOutcome {
-  level: QuestLevel;
-  experience: number;
-  killCount: number;
-  mostUsedWeaponId: number;
-  shotsFired: number;
-  shotsHit: number;
-  baseTimeMs: number;
-  playerHealth: number;
-  player2Health: number | null;
-  playerHealthValues: number[];
-  pendingPerkCount: number;
-}
+export type { QuestRunOutcome };
 
 export interface QuestResultsStatus {
   questUnlockIndex: number;
@@ -134,11 +123,11 @@ export class QuestResultsView {
     this._questTitle = quest !== null ? String(quest.title ?? '') : '';
 
     // Resolve unlock weapon name
-    if (quest !== null && quest.unlockWeaponId !== undefined && quest.unlockWeaponId !== null) {
+    if (quest !== null && quest.unlockWeaponId !== undefined && quest.unlockWeaponId !== null && (quest.unlockWeaponId as number) > 0) {
       this._unlockWeaponName = weaponDisplayName(quest.unlockWeaponId, { preserveBugs: this.state.preserveBugs });
     }
-    // Resolve unlock perk name
-    if (quest !== null && quest.unlockPerkId !== undefined && quest.unlockPerkId !== null) {
+    // Resolve unlock perk name — skip the ANTIPERK sentinel (id 0)
+    if (quest !== null && quest.unlockPerkId !== undefined && quest.unlockPerkId !== null && (quest.unlockPerkId as number) !== 0) {
       this._unlockPerkName = perkDisplayName(quest.unlockPerkId, { violenceDisabled: this.state.config.display.violenceDisabled, preserveBugs: this.state.preserveBugs });
     }
 
@@ -289,12 +278,12 @@ export class QuestResultsView {
       return;
     }
 
-    // Fallback when no UI is available
+    // Fallback when no UI is available — draw visible indicator rectangles.
+    // Python uses rl.draw_text; WebGL has no built-in text, so draw colored bars.
     const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
     const subColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1.0);
-    // Simple fallback text (the real QuestResultsUi handles full rendering)
-    wgl.drawRectangle(32, 140, 400, 28, wgl.makeColor(textColor[0], textColor[1], textColor[2], 0));
-    wgl.drawRectangle(32, 180, 400, 18, wgl.makeColor(subColor[0], subColor[1], subColor[2], 0));
+    wgl.drawRectangle(32, 140, 400, 28, textColor);
+    wgl.drawRectangle(32, 180, 400, 18, subColor);
   }
 
   takeAction(): string | null {

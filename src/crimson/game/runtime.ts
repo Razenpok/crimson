@@ -22,10 +22,6 @@ import {
 import { type GameConfig, GameState } from './types.ts';
 import { GameLoopView } from './loop-view.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 export const CRIMSON_PAQ_NAME = 'crimson.paq';
 export const MUSIC_PAQ_NAME = 'music.paq';
 export const SFX_PAQ_NAME = 'sfx.paq';
@@ -36,10 +32,6 @@ export const REQUIRED_RUNTIME_PAQS: readonly string[] = [
   SFX_PAQ_NAME,
 ];
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function parseFloatArg(value: string): number {
   const v = parseFloat(value);
   return Number.isFinite(v) ? v : 0.0;
@@ -49,10 +41,6 @@ function applyDebugConsoleDefaults(console: ConsoleState, debug: boolean): void 
   if (!debug) return;
   console.registerCvar('cv_showFPS', '1');
 }
-
-// ---------------------------------------------------------------------------
-// GameStatus stub — persistence layer (localStorage in WebGL)
-// ---------------------------------------------------------------------------
 
 /** Minimal persistence stub matching fields used by runtime.py. */
 export interface GameStatusPersist {
@@ -117,10 +105,6 @@ export function createGameStatus(): GameStatusPersist {
     },
   };
 }
-
-// ---------------------------------------------------------------------------
-// Console command handlers
-// ---------------------------------------------------------------------------
 
 function bootCommandHandlers(
   state: GameState,
@@ -335,10 +319,6 @@ function bootCommandHandlers(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Core cvar registration (matches grim/console.register_core_cvars)
-// ---------------------------------------------------------------------------
-
 function registerCoreCvars(console: ConsoleState, width: number, height: number): void {
   // Matches Python's register_core_cvars in grim/console.py.
   // cvars already registered in createConsole: cv_silentloads, cv_bodiesFade,
@@ -357,10 +337,6 @@ function registerCoreCvars(console: ConsoleState, width: number, height: number)
   console.registerCvar('v_height', String(height));
 }
 
-// ---------------------------------------------------------------------------
-// Boot command registration
-// ---------------------------------------------------------------------------
-
 function registerBootCommands(
   console: ConsoleState,
   handlers: Record<string, CommandHandler>,
@@ -369,10 +345,6 @@ function registerBootCommands(
     console.registerCommand(name, handler);
   }
 }
-
-// ---------------------------------------------------------------------------
-// runGame — main entry point
-// ---------------------------------------------------------------------------
 
 /**
  * Bootstrap the game: create state, register commands, and return the

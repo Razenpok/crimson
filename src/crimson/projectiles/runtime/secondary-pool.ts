@@ -8,7 +8,7 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import type { EffectPool, FxQueue, SpriteEffectPool } from '@crimson/effects.ts';
-import type { CreatureStateLike } from '@crimson/effects.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { EffectId } from '@crimson/effects-atlas.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
@@ -54,13 +54,6 @@ const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
   ],
 ];
 
-interface CreatureState extends CreatureStateLike {
-  pos: Vec2;
-  active: boolean;
-  hp: number;
-  size: number;
-  lifecycleStage: number;
-}
 
 export interface SecondarySpawnSpec {
   readonly pos: Vec2;

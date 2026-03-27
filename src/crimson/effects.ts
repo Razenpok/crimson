@@ -5,6 +5,7 @@ import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import type { CallerStatic, CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
+import type { CreatureState } from './creatures/runtime.ts';
 import { creatureLifecycleIsCollidable } from './creatures/lifecycle.ts';
 import { EffectId } from './effects-atlas.ts';
 import { f32 } from './math-parity.ts';
@@ -30,20 +31,6 @@ export enum ParticleStyleId {
 }
 
 export type CreatureKillHandler = (creatureIndex: number, owner: OwnerRef) => void;
-
-// Minimal creature interface for particle collision — full type in creatures/runtime.ts
-export interface CreatureStateLike {
-  active: boolean;
-  pos: Vec2;
-  size: number;
-  hp: number;
-  lifecycleStage: number;
-  tint: RGBA;
-  flags: number;
-  plagueInfected: boolean;
-}
-
-// --- Particle ---
 
 export class Particle {
   active = false;
@@ -158,7 +145,7 @@ export class ParticlePool {
   }
 
   update(dt: number, opts?: {
-    creatures?: CreatureStateLike[] | null;
+    creatures?: CreatureState[] | null;
     applyCreatureDamage?: CreatureDamageApplier | null;
     killCreature?: CreatureKillHandler | null;
     fxQueue?: FxQueue | null;
@@ -172,6 +159,9 @@ export class ParticlePool {
     dt = f32(dt);
     const damageApplier = (opts?.applyCreatureDamage ?? null) ?? this._creatureDamageApplier;
 
+    // Native particle `creature_find_in_radius` is hitbox-gated, not HP-gated:
+    // freshly killed creatures (hp<=0, hitbox>5) can still receive same-tick
+    // style-0 damage callbacks.
     const creatureFindInRadius = (pos: Vec2, radius: number): number => {
       if (creatures === null) return -1;
       const maxIndex = Math.min(creatures.length, 0x180);
@@ -235,6 +225,7 @@ export class ParticlePool {
         continue;
       }
 
+      // Random walk drift (native adjusts angle based on `crt_rand`).
       if (entry.renderFlag) {
         let jitterCaller: number = RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_JITTER_ALT;
         if (style === ParticleStyleId.FLAMETHROWER) {
@@ -264,6 +255,7 @@ export class ParticlePool {
       const alpha = clamp(entry.intensity, 0.0, 1.0);
       const shade = 1.0 - Math.max(entry.intensity, 0.0) * 0.95;
       entry.age = alpha;
+      // Native only updates scale_x/scale_y; scale_z stays at its spawn value (1.0).
       entry.scaleX = shade;
       entry.scaleY = shade;
 
@@ -351,8 +343,6 @@ export class ParticlePool {
   }
 }
 
-// --- SpriteEffect ---
-
 export class SpriteEffect {
   active = false;
   color: RGBA = new RGBA(1.0, 1.0, 1.0, 0.0);
@@ -433,8 +423,6 @@ export class SpriteEffectPool {
   }
 }
 
-// --- FxQueue ---
-
 export class FxQueueEntry {
   effectId = 0;
   rotation = 0.0;
@@ -495,7 +483,11 @@ export class FxQueue {
   }
 
   addRandom(opts: { pos: Vec2; rng: CrandLike }): boolean {
+    // Mirrors native `config_violence_disabled` gate in `fx_queue_add_random`.
+    // Nonzero suppresses violence-linked random decals.
     if (this.violenceDisabled !== 0) return false;
+    // Native `fx_queue_add_random` always consumes RNG even when the queue is
+    // full, then lets `fx_queue_add` fail silently.
     const gray = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_GRAY }) & 0xf) * 0.01 + 0.84;
     const w = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_WIDTH }) % 24 - 12) + 30.0;
     const rotation = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_ROTATION }) % 628) * 0.01;
@@ -503,8 +495,6 @@ export class FxQueue {
     return this.add({ effectId, pos: opts.pos, width: w, height: w, rotation, rgba: new RGBA(gray, gray, gray, 1.0) });
   }
 }
-
-// --- FxQueueRotated ---
 
 export class FxQueueRotatedEntry {
   topLeft = new Vec2();
@@ -577,8 +567,6 @@ export class FxQueueRotated {
     return true;
   }
 }
-
-// --- EffectEntry + EffectPool ---
 
 export class EffectEntry {
   pos = new Vec2();

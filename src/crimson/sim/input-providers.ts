@@ -1,29 +1,7 @@
 // Port of crimson/sim/input_providers.py
 
 import { PlayerInput } from './input.ts';
-
-// ---------------------------------------------------------------------------
-// clearInputEdges – inline helper (from local_input.py, not yet ported)
-// Clears one-shot "pressed" flags, preserving held-down state.
-// ---------------------------------------------------------------------------
-
-function clearInputEdges(inputs: readonly PlayerInput[]): PlayerInput[] {
-  return inputs.map(
-    (inp) =>
-      new PlayerInput({
-        move: inp.move,
-        aim: inp.aim,
-        fireDown: inp.fireDown,
-        firePressed: false,
-        reloadPressed: false,
-        moveToCursorPressed: false,
-        moveForwardPressed: inp.moveForwardPressed,
-        moveBackwardPressed: inp.moveBackwardPressed,
-        turnLeftPressed: inp.turnLeftPressed,
-        turnRightPressed: inp.turnRightPressed,
-      }),
-  );
-}
+import { clearInputEdges } from '@crimson/local-input.ts';
 
 // ---------------------------------------------------------------------------
 // Game commands (tagged‑union discriminated by `tag`)

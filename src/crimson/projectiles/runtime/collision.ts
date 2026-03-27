@@ -3,15 +3,13 @@
 import { Vec2 } from '@grim/geom.ts';
 import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
 import { creatureLifecycleIsAlive } from '@crimson/creatures/lifecycle.ts';
-import type { CreatureStateLike } from '@crimson/effects.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
 
-export type CreatureStateForCollision = CreatureStateLike;
-
 const _NATIVE_FIND_RADIUS_MARGIN_EPS = 0.0;
 
-export function hitRadiusFor(creature: CreatureStateForCollision): number {
+export function hitRadiusFor(creature: CreatureState): number {
   return Math.max(0.0, nativeFindSizeMargin(creature.size));
 }
 
@@ -34,7 +32,7 @@ export function withinNativeFindRadius(
 }
 
 export function creatureFindNearestForSecondary(
-  creatures: readonly CreatureStateForCollision[],
+  creatures: readonly CreatureState[],
   origin: Vec2,
   preserveBugs: boolean = false,
 ): number {
@@ -59,7 +57,7 @@ export function creatureFindNearestForSecondary(
 }
 
 export function applyDamageToCreature(
-  creatures: readonly CreatureStateForCollision[],
+  creatures: readonly CreatureState[],
   creatureIndex: number,
   damage: number,
   damageType: number,

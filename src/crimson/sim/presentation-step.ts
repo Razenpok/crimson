@@ -23,9 +23,6 @@ const _BULLET_HIT_SFX: readonly SfxId[] = [
   SfxId.BULLET_HIT_04, SfxId.BULLET_HIT_05, SfxId.BULLET_HIT_06,
 ];
 
-/** Extended GameplayState with the fields used by presentation step. */
-export interface PresentationGameplayState extends GameplayState {}
-
 // --- PresentationStepCommands ---
 
 export class PresentationStepCommands {
@@ -127,7 +124,7 @@ export interface ProjectileDecalPostCtx {
 // --- queue_projectile_decals ---
 
 export function queueProjectileDecals(
-  opts: { state: PresentationGameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hits: ProjectileHit[]; rng: CrandLike; detailPreset: number; violenceDisabled: number },
+  opts: { state: GameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hits: ProjectileHit[]; rng: CrandLike; detailPreset: number; violenceDisabled: number },
 ): void {
   for (const hit of opts.hits) {
     const postCtx = queueProjectileDecalsPreHit({
@@ -140,7 +137,7 @@ export function queueProjectileDecals(
 // --- queue_projectile_decals_pre_hit ---
 
 export function queueProjectileDecalsPreHit(
-  opts: { state: PresentationGameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hit: ProjectileHit; rng: CrandLike; detailPreset: number; violenceDisabled: number },
+  opts: { state: GameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hit: ProjectileHit; rng: CrandLike; detailPreset: number; violenceDisabled: number },
 ): ProjectileDecalPostCtx {
   const freezeActive = freezeBonusActive({ state: opts.state });
   const bloody = opts.players.length > 0 && perkActive(opts.players[0], PerkId.BLOODY_MESS_QUICK_LEARNER);
@@ -246,7 +243,7 @@ export function queueProjectileDecalsPostHit(
 // --- plan_world_presentation_step ---
 
 export function planWorldPresentationStep(opts: {
-  state: PresentationGameplayState;
+  state: GameplayState;
   players: readonly PlayerState[];
   fxQueue: FxQueue;
   hits: ProjectileHit[];

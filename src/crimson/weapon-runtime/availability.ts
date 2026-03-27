@@ -67,7 +67,8 @@ export function buildWeaponAvailability(
   return available;
 }
 
-export function prepareWeaponAvailability(state: GameplayState, status: WeaponAvailabilityStatus | null): void {
+export function prepareWeaponAvailability(state: GameplayState): void {
+  const status: WeaponAvailabilityStatus | null = state.status as WeaponAvailabilityStatus | null;
   const built = buildWeaponAvailability({ status, gameMode: state.gameMode, demoModeActive: state.demoModeActive });
   const weaponAvailable = state.weaponAvailable;
   for (let i = 0; i < built.length && i < weaponAvailable.length; i++) {
@@ -82,8 +83,8 @@ function questLevelEquals(a: QuestLevel | null, major: number, minor: number): b
 
 export function weaponPickRandomAvailable(
   state: GameplayState,
-  status: WeaponAvailabilityStatus | null = null,
 ): WeaponId {
+  const status: WeaponAvailabilityStatus | null = state.status as WeaponAvailabilityStatus | null;
   const weaponAvailable = state.weaponAvailable;
 
   for (let attempt = 0; attempt < 1000; attempt++) {

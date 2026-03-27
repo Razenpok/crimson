@@ -73,20 +73,27 @@ export function drawAimCursor(
   drawCursorGlow(particles, { pos });
 
   if (aim === null) {
-    // Fallback crosshair using thin rectangles (no circle)
     const r = 235 / 255;
     const g = 235 / 255;
     const b = 235 / 255;
     const a = 220 / 255;
+    const color = wgl.makeColor(r, g, b, a);
 
-    // Horizontal left line
-    wgl.drawRectangle(pos.x - 14, pos.y, 8, 1, wgl.makeColor(r, g, b, a));
-    // Horizontal right line
-    wgl.drawRectangle(pos.x + 6, pos.y, 8, 1, wgl.makeColor(r, g, b, a));
-    // Vertical top line
-    wgl.drawRectangle(pos.x, pos.y - 14, 1, 8, wgl.makeColor(r, g, b, a));
-    // Vertical bottom line
-    wgl.drawRectangle(pos.x, pos.y + 6, 1, 8, wgl.makeColor(r, g, b, a));
+    const cx = int(pos.x);
+    const cy = int(pos.y);
+    const radius = 10;
+    const segments = 36;
+    for (let i = 0; i < segments; i++) {
+      const angle = (i / segments) * Math.PI * 2;
+      const x = cx + Math.cos(angle) * radius;
+      const y = cy + Math.sin(angle) * radius;
+      wgl.drawRectangle(x, y, 1, 1, color);
+    }
+
+    wgl.drawRectangle(int(pos.x - 14), int(pos.y), 8, 1, color);
+    wgl.drawRectangle(int(pos.x + 6), int(pos.y), 8, 1, color);
+    wgl.drawRectangle(int(pos.x), int(pos.y - 14), 1, 8, color);
+    wgl.drawRectangle(int(pos.x), int(pos.y + 6), 1, 8, color);
     return;
   }
 

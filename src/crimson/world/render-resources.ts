@@ -2,11 +2,10 @@
 
 import {
   type RuntimeResources,
-  type TextureId,
+  TextureId,
   getTexture,
   runtimeResourcesFor,
 } from '@grim/assets.ts';
-import { TextureId as TId } from '@grim/assets.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { GroundRenderer } from '@grim/terrain-render.ts';
@@ -115,13 +114,13 @@ export class RenderResources {
     const resources = runtimeResourcesFor(this._assetsUrl);
     this._resources = resources;
 
-    const base = getTexture(resources, TId.TER_Q1_BASE);
-    const overlay = getTexture(resources, TId.TER_Q1_OVERLAY);
+    const base = getTexture(resources, TextureId.TER_Q1_BASE);
+    const overlay = getTexture(resources, TextureId.TER_Q1_OVERLAY);
     this.setGroundTextures({ base, overlay, detail: base });
     this.scheduleGroundGeneration({ seed: terrainSeed });
     this.fxTextures = {
-      particles: getTexture(resources, TId.PARTICLES),
-      bodyset: getTexture(resources, TId.BODYSET),
+      particles: getTexture(resources, TextureId.PARTICLES),
+      bodyset: getTexture(resources, TextureId.BODYSET),
     };
   }
 

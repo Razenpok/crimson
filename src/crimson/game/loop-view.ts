@@ -60,20 +60,10 @@ import { DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
 
 import { type GameStatusPersist } from './runtime.ts';
 
-// ---------------------------------------------------------------------------
-// Forward-reference type stubs
-// ---------------------------------------------------------------------------
-
-// TODO: These are the key codes from the original game; adapt to DOM keyCodes
 const KEY_F4 = 115; // DOM keyCode for F4
 const KEY_P = 80;   // DOM keyCode for P
 const KEY_ESCAPE = 27;
 
-// ---------------------------------------------------------------------------
-// GameplayScreen protocol — matches BaseGameplayMode's public surface
-// ---------------------------------------------------------------------------
-
-/** Internal view that receives ctx through draw/update calls. */
 /** Structural type matching BaseGameplayMode's gameplay-relevant methods. */
 interface GameplayScreen extends Screen, PauseBackground {
   closeRequested: boolean;

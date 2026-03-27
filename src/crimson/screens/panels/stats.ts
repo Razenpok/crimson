@@ -186,7 +186,9 @@ export class StatisticsMenuView {
     this._btnPerks = new UiButtonState('Perks', { forceWide: true });
     this._btnCredits = new UiButtonState('Credits', { forceWide: true });
     this._btnBack = new UiButtonState('Back', { forceWide: false });
-    audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
+    if (this.state.audio !== null) {
+      audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
+    }
   }
 
   takeAction(): string | null {
@@ -363,7 +365,7 @@ export class StatisticsMenuView {
 
     // "played for # hours # minutes"
     const font = resources.smallFont;
-    const playtimeMs = (this.state as unknown as { status?: { gameSequenceId?: number } }).status?.gameSequenceId ?? 0;
+    const playtimeMs = (this.state as any).status?.gameSequenceId ?? 0;
     const playtimeText = formatPlaytimeText(playtimeMs, this.state.preserveBugs);
     const playtimePos = panelTopLeft.add(new Vec2(_PLAYTIME_X * scale, _PLAYTIME_Y * scale));
     drawSmallText(font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));

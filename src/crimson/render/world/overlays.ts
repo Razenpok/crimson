@@ -105,7 +105,7 @@ export function drawClockGauge(
   const tableDst = wgl.makeRectangle(pos.x, pos.y, size, size);
   wgl.drawTexturePro(table, tableSrc, tableDst, wgl.makeVector2(0, 0), 0.0, tint);
 
-  const seconds = (ms / 1000) | 0;
+  const seconds = Math.floor(int(ms) / 1000);
   const pointerSrc = wgl.makeRectangle(0, 0, pointer.width, pointer.height);
   const pointerDst = wgl.makeRectangle(pos.x + half, pos.y + half, size, size);
   const origin = wgl.makeVector2(half, half);

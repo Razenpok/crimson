@@ -57,6 +57,10 @@ export class ConsoleLog {
   clear(): void {
     this.lines.length = 0;
   }
+
+  flush(): void {
+    // No-op in WebGL — Python flushes to a log file on disk.
+  }
 }
 
 export interface ConsoleCvar {
@@ -71,6 +75,7 @@ export class ConsoleState {
   cvars = new Map<string, ConsoleCvar>();
   openFlag = false;
   inputEnabled = false;
+  inputReady = false;
   inputBuffer = '';
   inputCaret = 0;
   history: string[] = [];
@@ -80,6 +85,7 @@ export class ConsoleState {
   heightPx = DEFAULT_CONSOLE_HEIGHT;
   echoEnabled = true;
   quitRequested = false;
+  promptString = '> %s';
 
   _slideT = 1.0;
   _offsetY = 0.0;
@@ -96,6 +102,7 @@ export class ConsoleState {
   setOpen(open: boolean): void {
     this.openFlag = open;
     this.inputEnabled = open;
+    this.inputReady = false;
     this.historyIndex = null;
     this._flushInputQueue();
   }
@@ -269,6 +276,23 @@ export class ConsoleState {
     }
   }
 
+  flush(): void {
+    // No-op in WebGL — Python flushes to a log file on disk.
+  }
+
+  drawFpsCounter(): void {
+    const cvar = this.cvars.get('cv_showFPS');
+    if (cvar === undefined || cvar.valueF === 0.0) return;
+    // FPS counter rendering not yet implemented for WebGL
+  }
+
+  handleHotkey(): void {
+    // Grave/tilde key toggles the console
+    if (InputState.wasKeyPressed(192)) {
+      this.toggleOpen();
+    }
+  }
+
   // --- Private helpers ---
 
   private _useMonoFont(): boolean {
@@ -357,18 +381,25 @@ export class ConsoleState {
   }
 
   private _submitInput(): void {
+    this.inputReady = true;
     const line = this.inputBuffer.trim();
     this.inputBuffer = '';
     this.inputCaret = 0;
     this.historyIndex = null;
     if (!line) return;
     if (this.echoEnabled) {
-      this.log.log(`> ${line}`);
+      const prompt = this.promptString;
+      if (prompt.includes('%s')) {
+        this.log.log(prompt.replace('%s', line));
+      } else {
+        this.log.log(`${prompt}${line}`);
+      }
     }
     if (this.history.length === 0 || this.history[this.history.length - 1] !== line) {
       this.history.push(line);
     }
     this.execLine(line);
+    this.inputReady = false;
     this.scrollOffset = 0;
   }
 

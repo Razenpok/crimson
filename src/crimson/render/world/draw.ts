@@ -314,7 +314,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
 
     // Energizer tint
     const energizerTimer = frame.state.bonuses.energizer;
-    if (energizerTimer > 0.0 && creature.max_hp < 500.0) {
+    if (energizerTimer > 0.0 && creature.maxHp < 500.0) {
       let t = energizerTimer;
       if (t >= 1.0) t = 1.0;
       else if (t < 0.0) t = 0.0;
@@ -336,7 +336,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
       ((creature.flags as number) & CreatureFlags.ANIM_PING_PONG) === 0 ||
       ((creature.flags as number) & CreatureFlags.ANIM_LONG_STRIP) !== 0;
 
-    let phase = creature.anim_phase;
+    let phase = creature.animPhase;
     if (longStrip) {
       if (lifecycleStage < 0.0) {
         phase = -1.0;

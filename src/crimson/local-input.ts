@@ -1,5 +1,6 @@
 // Port of crimson/local_input.py
 
+import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import {
   AimScheme,
@@ -595,7 +596,6 @@ export class LocalInputInterpreter {
     config: CrimsonConfig;
     mouseScreen: Vec2;
     screenToWorld: (v: Vec2) => Vec2;
-    screenCenter: Vec2;
     dt: number;
     creatures?: readonly ComputerAimCreature[] | null;
   }): PlayerInput[] {
@@ -604,11 +604,14 @@ export class LocalInputInterpreter {
       config,
       mouseScreen,
       screenToWorld,
-      screenCenter,
       dt,
       creatures = null,
     } = opts;
     const mouseWorld = screenToWorld(mouseScreen);
+    const screenCenter = new Vec2(
+      wgl.getScreenWidth() * 0.5,
+      wgl.getScreenHeight() * 0.5,
+    );
     const out: PlayerInput[] = [];
     for (let idx = 0; idx < players.length; idx++) {
       out.push(

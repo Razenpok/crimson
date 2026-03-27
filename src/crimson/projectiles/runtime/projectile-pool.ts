@@ -5,7 +5,7 @@ import type { CrandLike } from '@grim/rand.ts';
 import type { SfxId } from '@grim/sfx-map.ts';
 import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import type { EffectPool } from '@crimson/effects.ts';
-import type { CreatureStateLike } from '@crimson/effects.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { f32, NATIVE_HALF_PI } from '@crimson/math-parity.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
@@ -46,7 +46,7 @@ export interface ProjectileUpdateOptions {
 
 export interface PrimaryStepCtx {
   readonly dt: number;
-  readonly creatures: readonly CreatureStateLike[];
+  readonly creatures: readonly CreatureState[];
   readonly options: ProjectileUpdateOptions;
 }
 
@@ -209,7 +209,7 @@ export class ProjectilePool {
     const hits: ProjectileHit[] = [];
     const margin = 64.0;
 
-    const _creatureIsCollidable = (creature: CreatureStateLike): boolean => {
+    const _creatureIsCollidable = (creature: CreatureState): boolean => {
       if (!creature.active) {
         return false;
       }
@@ -544,7 +544,7 @@ export class ProjectilePool {
 
   updateDemo(
     dt: number,
-    creatures: readonly CreatureStateLike[],
+    creatures: readonly CreatureState[],
     opts: { worldSize: number; speedByType: Map<number, number>; damageByType: Map<number, number> },
   ): ProjectileHit[] {
     const { worldSize, speedByType, damageByType } = opts;

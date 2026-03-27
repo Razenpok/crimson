@@ -12,11 +12,6 @@ import {
 import type { DeterministicSession } from './sessions.ts';
 import type { GameCommand } from './input-providers.ts';
 import type { PlayerInput } from './input.ts';
-
-// ---------------------------------------------------------------------------
-// TickRunnerConfig
-// ---------------------------------------------------------------------------
-
 export interface TickRunnerConfig {
   readonly traceRng: boolean;
 }
@@ -24,11 +19,6 @@ export interface TickRunnerConfig {
 const DEFAULT_TICK_RUNNER_CONFIG: TickRunnerConfig = {
   traceRng: false,
 };
-
-// ---------------------------------------------------------------------------
-// TickBatchResult
-// ---------------------------------------------------------------------------
-
 export class TickBatchResult {
   ticksCompleted: number;
   batchStatus: InputStatus;
@@ -47,11 +37,6 @@ export class TickBatchResult {
     this.completedResults = opts?.completedResults ?? [];
   }
 }
-
-// ---------------------------------------------------------------------------
-// TickRunner
-// ---------------------------------------------------------------------------
-
 export class TickRunner {
   private readonly _session: DeterministicSession;
   private readonly _inputProvider: InputProvider;

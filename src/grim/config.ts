@@ -1,15 +1,9 @@
 // Port of grim/config.py
 
 import { QuestLevel } from "@crimson/quests/level.js";
+import { GameMode } from "@crimson/game-modes.ts";
 
-export enum GameMode {
-  DEMO = 0,
-  SURVIVAL = 1,
-  RUSH = 2,
-  QUESTS = 3,
-  TYPO = 4,
-  TUTORIAL = 8,
-}
+export { GameMode };
 
 export enum AimScheme {
   UNKNOWN = -1,

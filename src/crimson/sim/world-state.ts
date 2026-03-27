@@ -17,9 +17,6 @@ import {
   CreatureAiMode,
   CreatureFlags,
   CreatureTypeId,
-  buildSpawnPlan,
-  resolveTint,
-  tickSpawnSlot,
 } from '@crimson/creatures/spawn.ts';
 import type { FxQueue, FxQueueRotated } from '@crimson/effects.ts';
 import { GameMode } from '@crimson/game-modes.ts';
@@ -159,10 +156,6 @@ export class WorldState {
     const creatures = new CreaturePool({
       env: spawnEnv,
       effects: state.effects,
-    }, {
-      buildSpawnPlan,
-      resolveTint,
-      tickSpawnSlot,
     });
     return new WorldState({
       spawnEnv,
@@ -749,18 +742,18 @@ export class WorldState {
       if (info === undefined) continue;
 
       const [newPhase] = creatureAnimAdvancePhase(
-        creature.anim_phase,
+        creature.animPhase,
         {
           animRate: info.animRate,
-          moveSpeed: Number(creature.move_speed),
+          moveSpeed: Number(creature.moveSpeed),
           dt,
           size: Number(creature.size),
-          localScale: Number(creature.move_scale),
+          localScale: Number(creature.moveScale),
           flags: creature.flags as CreatureFlags,
-          aiMode: creature.ai_mode as number,
+          aiMode: creature.aiMode as number,
         },
       );
-      creature.anim_phase = newPhase;
+      creature.animPhase = newPhase;
     }
   }
 

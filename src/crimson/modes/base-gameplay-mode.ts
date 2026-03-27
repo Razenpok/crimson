@@ -6,7 +6,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type CrimsonConfig } from '@grim/config.ts';
+import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
 import { type AudioState, audioUpdate, audioStopMusic } from '@grim/audio.ts';
 import { type ConsoleState } from '@grim/console.ts';
 import { type CrandLike } from '@grim/rand.ts';
@@ -82,6 +82,9 @@ interface ReplayRecorder {
 
 interface ReplayCheckpoint {
   tickIndex: number;
+  elapsedMs: number;
+  deaths: readonly CreatureDeath[] | null;
+  events: WorldEvents | null;
 }
 
 // GameStatus stub — persistence module not yet ported
@@ -93,27 +96,15 @@ export interface GameStatus {
 
 interface GameStatusData {}
 
-// ---------------------------------------------------------------------------
-// Helper — debug flag (no console/debug system in WebGL port yet)
-// ---------------------------------------------------------------------------
-
 function debugEnabled(): boolean {
   return false;
 }
-
-// ---------------------------------------------------------------------------
-// _AppliedBatchTick
-// ---------------------------------------------------------------------------
 
 interface AppliedBatchTick {
   tick: DeterministicSessionTick;
   replayTickIndex: number | null;
   frameTickIndex: number | null;
 }
-
-// ---------------------------------------------------------------------------
-// _BatchApplyOutcome
-// ---------------------------------------------------------------------------
 
 interface BatchApplyOutcome {
   readonly ticksApplied: number;
@@ -133,27 +124,15 @@ function emptyBatchOutcome(): BatchApplyOutcome {
   };
 }
 
-// ---------------------------------------------------------------------------
-// _ModeFrameState
-// ---------------------------------------------------------------------------
-
 interface ModeFrameState {
   readonly dt: number;
   readonly dtUiMs: number;
 }
 
-// ---------------------------------------------------------------------------
-// LanStepAction
-// ---------------------------------------------------------------------------
-
 export type LanStepAction = 'continue' | 'stop_before_finalize' | 'stop_after_finalize';
 
 /** Alias for DeterministicSession used in LAN contexts. */
 export type LanSession = DeterministicSession;
-
-// ---------------------------------------------------------------------------
-// _LanRuntimeInputProvider (stub — no LAN in WebGL)
-// ---------------------------------------------------------------------------
 
 class LanRuntimeInputProvider {
   private readonly _captureClockRate: number;
@@ -204,16 +183,8 @@ class LanRuntimeInputProvider {
   setBeforePop(_callback: (() => boolean) | null): void {}
 }
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const LAN_SIM_DETAIL_PRESET = 5;
 const LAN_SIM_VIOLENCE_DISABLED = 0;
-
-// ---------------------------------------------------------------------------
-// BaseGameplayMode
-// ---------------------------------------------------------------------------
 
 export class BaseGameplayMode {
   // -- injected references --
@@ -424,9 +395,6 @@ export class BaseGameplayMode {
     this._tickRunnerLocalClock = null;
   }
 
-  // -----------------------------------------------------------------------
-  // Properties (mirror Python @property accessors)
-  // -----------------------------------------------------------------------
 
   get worldRuntime(): WorldRuntime {
     return this._worldRuntime;
@@ -440,9 +408,6 @@ export class BaseGameplayMode {
     this._worldRuntime.camera = value;
   }
 
-  // -----------------------------------------------------------------------
-  // _syncWorldRuntimeConfig
-  // -----------------------------------------------------------------------
 
   protected _syncWorldRuntimeConfig(): void {
     const runtime = this._worldRuntime;
@@ -457,17 +422,11 @@ export class BaseGameplayMode {
     runtime.rtxMode = this.rtxMode;
   }
 
-  // -----------------------------------------------------------------------
-  // applyTerrainSetup
-  // -----------------------------------------------------------------------
 
   applyTerrainSetup(opts: { terrainSlots: TerrainSlotTriplet; seed: number }): void {
     this.terrainRuntime.applyTerrainSetup({ terrainSlots: opts.terrainSlots, seed: opts.seed });
   }
 
-  // -----------------------------------------------------------------------
-  // _drawWorld
-  // -----------------------------------------------------------------------
 
   protected _drawWorld(opts?: { drawAimIndicators?: boolean; entityAlpha?: number }): void {
     this._worldRuntime.draw({
@@ -476,9 +435,6 @@ export class BaseGameplayMode {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Coordinate conversions
-  // -----------------------------------------------------------------------
 
   worldToScreen(pos: Vec2): Vec2 {
     return this.renderer.worldToScreen(pos);
@@ -488,9 +444,6 @@ export class BaseGameplayMode {
     return this.renderer.screenToWorld(pos);
   }
 
-  // -----------------------------------------------------------------------
-  // _refreshEffectiveStatus
-  // -----------------------------------------------------------------------
 
   protected _refreshEffectiveStatus(opts: { resetLanStatus: boolean }): void {
     if (this._lanEnabled) {
@@ -507,9 +460,6 @@ export class BaseGameplayMode {
     this.state.status = this._statusSim;
   }
 
-  // -----------------------------------------------------------------------
-  // LAN stubs (no-op in WebGL)
-  // -----------------------------------------------------------------------
 
   bindLanRuntime(_runtime: unknown): void {
     // No LAN in WebGL port
@@ -519,9 +469,6 @@ export class BaseGameplayMode {
     // No LAN in WebGL port
   }
 
-  // -----------------------------------------------------------------------
-  // Console helpers
-  // -----------------------------------------------------------------------
 
   protected _cvarFloat(name: string, defaultVal: number = 0.0): number {
     const console_ = this._console;
@@ -546,9 +493,6 @@ export class BaseGameplayMode {
     this.lanLocalPlayerSlotIndex = Math.max(0, Math.min(3, this._lanLocalSlotIndex));
   }
 
-  // -----------------------------------------------------------------------
-  // _configGameModeId
-  // -----------------------------------------------------------------------
 
   protected _configGameModeId(): GameMode {
     try {
@@ -558,9 +502,6 @@ export class BaseGameplayMode {
     }
   }
 
-  // -----------------------------------------------------------------------
-  // _drawTargetHealthBar
-  // -----------------------------------------------------------------------
 
   protected _drawTargetHealthBar(opts?: { alpha?: number }): void {
     const alpha = opts?.alpha ?? 1.0;
@@ -588,7 +529,7 @@ export class BaseGameplayMode {
       const creature = creatures[targetIdx];
       if (!creature.active) continue;
       const hp = Number(creature.hp);
-      const maxHp = Number(creature.max_hp);
+      const maxHp = Number(creature.maxHp);
       if (maxHp <= 0.0) continue;
 
       let ratio = hp / maxHp;
@@ -609,9 +550,6 @@ export class BaseGameplayMode {
     }
   }
 
-  // -----------------------------------------------------------------------
-  // _bindWorld
-  // -----------------------------------------------------------------------
 
   protected _bindWorld(): void {
     this.state = this.simWorld.state;
@@ -624,17 +562,11 @@ export class BaseGameplayMode {
     this.state.status = this._statusSim;
   }
 
-  // -----------------------------------------------------------------------
-  // _anyPlayerAlive
-  // -----------------------------------------------------------------------
 
   protected _anyPlayerAlive(): boolean {
     return this.simWorld.players.some((p) => p.health > 0.0);
   }
 
-  // -----------------------------------------------------------------------
-  // Status bindings
-  // -----------------------------------------------------------------------
 
   get saveStatus(): GameStatus | null {
     return this._statusBase;
@@ -665,9 +597,6 @@ export class BaseGameplayMode {
     this._worldRuntime.rtxMode = mode;
   }
 
-  // -----------------------------------------------------------------------
-  // Audio update
-  // -----------------------------------------------------------------------
 
   protected _updateAudio(dt: number): void {
     if (this.audio !== null) {
@@ -675,9 +604,6 @@ export class BaseGameplayMode {
     }
   }
 
-  // -----------------------------------------------------------------------
-  // UI text helpers
-  // -----------------------------------------------------------------------
 
   protected _uiLineHeight(scale: number = 1.0): number {
     if (this._small !== null) {
@@ -703,9 +629,6 @@ export class BaseGameplayMode {
     drawSmallText(font, text, pos, color);
   }
 
-  // -----------------------------------------------------------------------
-  // Perk menu helpers
-  // -----------------------------------------------------------------------
 
   protected _perkMenuUiContext(): FullPerkMenuUiContext {
     const players = this._worldRuntime.simWorld.players;
@@ -715,8 +638,9 @@ export class BaseGameplayMode {
       mouse: this._uiMousePos(),
       screenW: wgl.getScreenWidth(),
       screenH: wgl.getScreenHeight(),
-      violenceDisabled: 0,
+      violenceDisabled: this.config.display.violenceDisabled,
       preserveBugs: this.state.preserveBugs ?? false,
+      fxDetail: fxDetailEnabled(this.config.display, 0),
     };
   }
 
@@ -752,9 +676,6 @@ export class BaseGameplayMode {
     return this._uiMouse;
   }
 
-  // -----------------------------------------------------------------------
-  // _updateUiMouse
-  // -----------------------------------------------------------------------
 
   protected _updateUiMouse(): void {
     const [mx, my] = InputState.mousePosition();
@@ -766,9 +687,6 @@ export class BaseGameplayMode {
     );
   }
 
-  // -----------------------------------------------------------------------
-  // _tickFrame
-  // -----------------------------------------------------------------------
 
   protected _tickFrame(dt: number, opts?: { clampCursorPulse?: boolean }): [number, number] {
     dt = Number(dt);
@@ -784,9 +702,6 @@ export class BaseGameplayMode {
     return [dt, dtUiMs];
   }
 
-  // -----------------------------------------------------------------------
-  // _beginModeUpdate
-  // -----------------------------------------------------------------------
 
   protected _beginModeUpdate(dt: number): ModeFrameState | null {
     this._updateAudio(dt);
@@ -800,17 +715,11 @@ export class BaseGameplayMode {
     return { dt: frameDt, dtUiMs: frameDtUiMs };
   }
 
-  // -----------------------------------------------------------------------
-  // _handleInput (abstract — must be overridden)
-  // -----------------------------------------------------------------------
 
   protected _handleInput(): void {
     throw new Error('_handleInput() must be implemented by subclass');
   }
 
-  // -----------------------------------------------------------------------
-  // Runtime updates
-  // -----------------------------------------------------------------------
 
   setRuntimeUpdatesPerFrame(value: number): void {
     this._runtimeUpdatesPerFrame = Math.max(0, int(value));
@@ -846,9 +755,6 @@ export class BaseGameplayMode {
     );
   }
 
-  // -----------------------------------------------------------------------
-  // Session timing
-  // -----------------------------------------------------------------------
 
   protected _sessionElapsedMs(): number {
     const session = this._simSession;
@@ -881,9 +787,6 @@ export class BaseGameplayMode {
     return false;
   }
 
-  // -----------------------------------------------------------------------
-  // _recordReplayCheckpoint
-  // -----------------------------------------------------------------------
 
   protected _recordReplayCheckpoint(
     tickIndex: number,
@@ -899,13 +802,15 @@ export class BaseGameplayMode {
     const force = opts?.force ?? false;
     if (!force && (tickIndex % (this._replayCheckpointsSampleRate || 1)) !== 0) return;
     if (this._replayCheckpointsLastTick === tickIndex) return;
-    this._replayCheckpoints.push({ tickIndex });
+    this._replayCheckpoints.push({
+      tickIndex,
+      elapsedMs: this._replayCheckpointElapsedMs(),
+      deaths: opts?.deaths ?? null,
+      events: opts?.events ?? null,
+    });
     this._replayCheckpointsLastTick = tickIndex;
   }
 
-  // -----------------------------------------------------------------------
-  // _saveReplay (stub — no file I/O in WebGL)
-  // -----------------------------------------------------------------------
 
   protected _saveReplay(): void {
     // Replay saving is not applicable in the WebGL port.
@@ -914,9 +819,6 @@ export class BaseGameplayMode {
     this._replayCheckpointsLastTick = null;
   }
 
-  // -----------------------------------------------------------------------
-  // Frame telemetry
-  // -----------------------------------------------------------------------
 
   frameTelemetry(): [number, number, number, number, number, number] {
     return [
@@ -937,9 +839,6 @@ export class BaseGameplayMode {
     this._presentationApplyMs = 0.0;
   }
 
-  // -----------------------------------------------------------------------
-  // LAN runtime stubs
-  // -----------------------------------------------------------------------
 
   setLanRuntime(_opts: {
     enabled: boolean;
@@ -969,9 +868,6 @@ export class BaseGameplayMode {
     // No LAN heartbeat in WebGL
   }
 
-  // -----------------------------------------------------------------------
-  // _drawLanDebugInfo (stub)
-  // -----------------------------------------------------------------------
 
   protected _drawLanDebugInfo(
     _opts: { x: number; y: number; lineH: number },
@@ -979,17 +875,11 @@ export class BaseGameplayMode {
     return _opts.y;
   }
 
-  // -----------------------------------------------------------------------
-  // _drawLanWaitOverlay (stub)
-  // -----------------------------------------------------------------------
 
   protected _drawLanWaitOverlay(): void {
     // No LAN wait overlay in WebGL
   }
 
-  // -----------------------------------------------------------------------
-  // Net replay/snapshot stubs
-  // -----------------------------------------------------------------------
 
   protected _netReplaySnapshotState(): unknown {
     return null;
@@ -1003,9 +893,6 @@ export class BaseGameplayMode {
     throw new Error(`${this.constructor.name}._applyResyncSnapshot() must be implemented`);
   }
 
-  // -----------------------------------------------------------------------
-  // Player config helpers
-  // -----------------------------------------------------------------------
 
   protected _playerNameDefault(): string {
     return String(this.config.profile.playerName || '');
@@ -1025,9 +912,6 @@ export class BaseGameplayMode {
     return this.config.display.violenceDisabled;
   }
 
-  // -----------------------------------------------------------------------
-  // update / draw (abstract)
-  // -----------------------------------------------------------------------
 
   update(dt: number): void {
     throw new Error(`${this.constructor.name}.update() must be implemented by gameplay mode`);
@@ -1037,33 +921,21 @@ export class BaseGameplayMode {
     throw new Error(`${this.constructor.name}.draw() must be implemented by gameplay mode`);
   }
 
-  // -----------------------------------------------------------------------
-  // Debug flag
-  // -----------------------------------------------------------------------
 
   protected get _debugEnabled(): boolean {
     return false;
   }
 
-  // -----------------------------------------------------------------------
-  // Screen size helper
-  // -----------------------------------------------------------------------
 
   protected _screenSize(): [number, number] {
     return [wgl.getScreenWidth(), wgl.getScreenHeight()];
   }
 
-  // -----------------------------------------------------------------------
-  // _shotsFromState helper
-  // -----------------------------------------------------------------------
 
   protected _shotsFromState(playerIndex: number): [number, number] {
     return shotsFromState(this.state, { playerIndex });
   }
 
-  // -----------------------------------------------------------------------
-  // _buildHighscoreRecordForGameOver helper
-  // -----------------------------------------------------------------------
 
   protected _buildHighscoreRecordForGameOver(opts: {
     survivalElapsedMs: number;
@@ -1080,9 +952,6 @@ export class BaseGameplayMode {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Perk prompt/menu stubs (overridden in modes with perk UI)
-  // -----------------------------------------------------------------------
 
   protected _handlePerkMenuInput(_choices: readonly PerkId[], _dtUiMs: number): number | null {
     return null;
@@ -1120,9 +989,6 @@ export class BaseGameplayMode {
 
   protected _drawPerkMenu(_choices: readonly PerkId[]): void {}
 
-  // -----------------------------------------------------------------------
-  // open
-  // -----------------------------------------------------------------------
 
   open(): void {
     this.closeRequested = false;
@@ -1175,9 +1041,6 @@ export class BaseGameplayMode {
     this._lanInitialTerrainReady = false;
   }
 
-  // -----------------------------------------------------------------------
-  // close
-  // -----------------------------------------------------------------------
 
   close(): void {
     this._gameOverUi.close();
@@ -1189,9 +1052,6 @@ export class BaseGameplayMode {
     this._worldRuntime.closeRuntime();
   }
 
-  // -----------------------------------------------------------------------
-  // takeAction
-  // -----------------------------------------------------------------------
 
   takeAction(): string | null {
     const action = this._action;
@@ -1199,9 +1059,6 @@ export class BaseGameplayMode {
     return action;
   }
 
-  // -----------------------------------------------------------------------
-  // Game over
-  // -----------------------------------------------------------------------
 
   protected _enterGameOver(): void {
     throw new Error('_enterGameOver() must be implemented by subclass');
@@ -1237,18 +1094,12 @@ export class BaseGameplayMode {
     }
   }
 
-  // -----------------------------------------------------------------------
-  // World entity alpha
-  // -----------------------------------------------------------------------
 
   protected _worldEntityAlpha(): number {
     if (!this._gameOverActive) return 1.0;
     return Number(this._gameOverUi.worldEntityAlpha());
   }
 
-  // -----------------------------------------------------------------------
-  // drawPauseBackground
-  // -----------------------------------------------------------------------
 
   drawPauseBackground(opts?: { entityAlpha?: number }): void {
     let alpha = opts?.entityAlpha ?? 1.0;
@@ -1260,9 +1111,6 @@ export class BaseGameplayMode {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Ground management
-  // -----------------------------------------------------------------------
 
   stealGroundForMenu(): GroundRenderer | null {
     const ground = this.renderResources.ground;
@@ -1283,9 +1131,6 @@ export class BaseGameplayMode {
     return this.camera;
   }
 
-  // -----------------------------------------------------------------------
-  // Console helpers
-  // -----------------------------------------------------------------------
 
   consoleElapsedMs(): number {
     return Number(this.simWorld.presentationElapsedMs);
@@ -1303,9 +1148,6 @@ export class BaseGameplayMode {
     this.renderResources.ground.scheduleGenerate(terrainSeed);
   }
 
-  // -----------------------------------------------------------------------
-  // _drawScreenFade
-  // -----------------------------------------------------------------------
 
   protected _drawScreenFade(): void {
     let fadeAlpha = 0.0;
@@ -1319,19 +1161,13 @@ export class BaseGameplayMode {
     wgl.drawRectangle(0, 0, screenW, screenH, wgl.makeColor(0, 0, 0, alpha));
   }
 
-  // -----------------------------------------------------------------------
-  // Input building
-  // -----------------------------------------------------------------------
 
   protected _buildLocalInputs(opts: { dt: number }): PlayerInput[] {
-    const screenW = wgl.getScreenWidth();
-    const screenH = wgl.getScreenHeight();
     return this._localInput.buildFrameInputs({
       players: this.simWorld.players,
       config: this.config,
       mouseScreen: this._uiMouse,
       screenToWorld: (pos: Vec2) => this.screenToWorld(pos),
-      screenCenter: new Vec2(screenW * 0.5, screenH * 0.5),
       dt: opts.dt,
       creatures: this.creatures.entries,
     });
@@ -1341,9 +1177,6 @@ export class BaseGameplayMode {
     return clearInputEdges(inputs);
   }
 
-  // -----------------------------------------------------------------------
-  // Tick rate
-  // -----------------------------------------------------------------------
 
   protected static _deterministicTickRate(): number {
     return 60;
@@ -1362,9 +1195,6 @@ export class BaseGameplayMode {
     return 1.0 / this._gameplayTickRate();
   }
 
-  // -----------------------------------------------------------------------
-  // Clock/runner reset
-  // -----------------------------------------------------------------------
 
   protected _resetGameplayFrameClock(): void {
     const clock = this._tickRunnerLocalClock;
@@ -1393,9 +1223,6 @@ export class BaseGameplayMode {
     this._replayCheckpointsLastTick = null;
   }
 
-  // -----------------------------------------------------------------------
-  // LAN capture clock stubs
-  // -----------------------------------------------------------------------
 
   protected _lanCaptureTickDt(): number {
     return this._networkInputProvider.captureTickDt;
@@ -1409,9 +1236,6 @@ export class BaseGameplayMode {
     this._networkInputProvider.resetCaptureClock();
   }
 
-  // -----------------------------------------------------------------------
-  // _buildLanSyncCallbacks (stub)
-  // -----------------------------------------------------------------------
 
   protected _buildLanSyncCallbacks(_opts: {
     runtime: unknown;
@@ -1426,9 +1250,6 @@ export class BaseGameplayMode {
     };
   }
 
-  // -----------------------------------------------------------------------
-  // _ensureTickRunner
-  // -----------------------------------------------------------------------
 
   protected _ensureTickRunner(opts: {
     session: DeterministicSession;
@@ -1493,9 +1314,6 @@ export class BaseGameplayMode {
     return [newRunner, newProvider];
   }
 
-  // -----------------------------------------------------------------------
-  // LAN tick sync stubs
-  // -----------------------------------------------------------------------
 
   protected static _prepareLanTickSync(_opts: {
     tickResult: TickResult;
@@ -1511,9 +1329,6 @@ export class BaseGameplayMode {
     // No LAN sync in WebGL
   }
 
-  // -----------------------------------------------------------------------
-  // _recordReplayCheckpointFromTick
-  // -----------------------------------------------------------------------
 
   protected _recordReplayCheckpointFromTick(opts: {
     tickIndex: number | null;
@@ -1527,9 +1342,6 @@ export class BaseGameplayMode {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // LAN mode stubs (abstract in Python)
-  // -----------------------------------------------------------------------
 
   protected _lanModeName(): 'survival' | 'rush' | 'quests' {
     throw new Error('_lanModeName() must be implemented by subclass');
@@ -1562,9 +1374,6 @@ export class BaseGameplayMode {
 
   protected _lanOnPaused(_dt: number): void {}
 
-  // -----------------------------------------------------------------------
-  // _updateLanMatch (stub)
-  // -----------------------------------------------------------------------
 
   protected _updateLanMatch(_opts: { dt: number; dtUiMs?: number }): void {
     // No LAN in WebGL port
@@ -1592,9 +1401,6 @@ export class BaseGameplayMode {
     return false;
   }
 
-  // -----------------------------------------------------------------------
-  // _syncAudioAndGround
-  // -----------------------------------------------------------------------
 
   protected _syncAudioAndGround(): void {
     this._worldRuntime.syncAudioBridgeState();
@@ -1603,9 +1409,6 @@ export class BaseGameplayMode {
     }
   }
 
-  // -----------------------------------------------------------------------
-  // _applyBatchPresentationOutputs
-  // -----------------------------------------------------------------------
 
   protected _applyBatchPresentationOutputs(opts: {
     outputs: readonly PresentationTickOutput[];
@@ -1642,9 +1445,6 @@ export class BaseGameplayMode {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Post-apply reactions
-  // -----------------------------------------------------------------------
 
   protected _buildTickPostApplyReaction(opts: { tickResult: TickResult }): PostApplyReaction {
     return buildPostApplyReaction({ tickResult: opts.tickResult });
@@ -1660,9 +1460,6 @@ export class BaseGameplayMode {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // _processTickBatchResults
-  // -----------------------------------------------------------------------
 
   protected _processTickBatchResults(opts: {
     batch: TickBatchResult;
@@ -1766,9 +1563,6 @@ export class BaseGameplayMode {
     };
   }
 
-  // -----------------------------------------------------------------------
-  // _runDeterministicSessionTicks
-  // -----------------------------------------------------------------------
 
   protected _runDeterministicSessionTicks(opts: {
     dtFrame: number;

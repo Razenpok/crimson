@@ -7,7 +7,7 @@ import { Crand } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 
 import type { BonusId } from '@crimson/bonuses/ids.ts';
-import type { EffectPool, FxQueue, FxQueueRotated, CreatureStateLike } from '@crimson/effects.ts';
+import type { EffectPool, FxQueue, FxQueueRotated } from '@crimson/effects.ts';
 import {
   NATIVE_HALF_PI,
   NATIVE_PI,
@@ -26,9 +26,9 @@ import { ProjectilePool } from '@crimson/projectiles/runtime/projectile-pool.ts'
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import {
-  awardExperience as _gameplayAwardExperience,
-  awardExperienceFromReward as _gameplayAwardExperienceFromReward,
-  survivalRecordRecentDeath as _gameplaySurvivalRecordRecentDeath,
+  awardExperience,
+  awardExperienceFromReward,
+  survivalRecordRecentDeath as survivalRecordRecentDeath_,
 } from '@crimson/gameplay.ts';
 import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { ftolMsI32 } from '@crimson/sim/timing.ts';
@@ -53,11 +53,7 @@ import {
   type Tint,
   type TintRGBA,
 } from './spawn-ids.ts';
-import { GameplayState } from "@crimson/gameplay.js";
-
-// ---------------------------------------------------------------------------
-// Imports from spawn module
-// ---------------------------------------------------------------------------
+import { GameplayState } from "@crimson/gameplay.ts";
 
 import {
   type SpawnEnv,
@@ -65,46 +61,20 @@ import {
   CreatureInit,
   SpawnSlotInit,
   type SpawnPlan,
+  buildSpawnPlan,
+  resolveTint,
+  tickSpawnSlot,
 } from './spawn.ts';
 
 export type { SpawnEnv, BurstEffect, CreatureInit, SpawnSlotInit, SpawnPlan };
 
-export type BuildSpawnPlanFn = (
-  templateId: SpawnId,
-  pos: Vec2,
-  heading: number,
-  rng: CrandLike,
-  env: SpawnEnv,
-) => SpawnPlan;
-
-export type ResolveTintFn = (tint: Tint | null) => TintRGBA;
-
-export type TickSpawnSlotFn = (slot: SpawnSlotInit, frameDt: number) => SpawnId | null;
-
-// Inject these at construction so the module does not have a hard dep on the spawn file.
-export interface CreaturePoolDeps {
-  buildSpawnPlan: BuildSpawnPlanFn;
-  resolveTint: ResolveTintFn;
-  tickSpawnSlot: TickSpawnSlotFn;
-}
-
-// ---------------------------------------------------------------------------
-// Extended GameplayState — fields used by runtime beyond the minimal interface.
-// ---------------------------------------------------------------------------
-
-export interface CreatureRuntimeGameplayState extends GameplayState {
-  plaguebearerInfectionCount: number;
-  projectiles: ProjectilePool;
-}
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 export const CREATURE_POOL_SIZE = 0x180;
 export const CONTACT_DAMAGE_PERIOD = 0.5;
 
+// Native movement path multiplies by a fixed `30.0` factor (the original
+// `creature_speed_scale` constant in the native simulation loop).
 const CREATURE_SPEED_SCALE = 30.0;
+// Base heading turn rate multiplier (mirrors native `creature_turn_rate_scale`).
 const CREATURE_TURN_RATE_SCALE = NATIVE_TURN_RATE_SCALE;
 
 const CREATURE_DEATH_TIMER_DECAY = 28.0;
@@ -123,14 +93,13 @@ const _CREATURE_CONTACT_SFX: Map<CreatureTypeId, [SfxId, SfxId]> = new Map([
   [CreatureTypeId.SPIDER_SP2, [SfxId.SPIDER_ATTACK_01, SfxId.SPIDER_ATTACK_02]],
 ]);
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function _wrapAngle(angle: number): number {
   return f32((f32(angle) + NATIVE_PI) % NATIVE_TAU - NATIVE_PI);
 }
 
+/** Smoothly approach `target` angle from `current` at the given `rate`,
+ *  choosing the shortest arc (direct vs. wrapped).  Mirrors the native
+ *  `_angle_approach` helper used by the creature heading update. */
 function _angleApproach(current: number, target: number, rate: number, dt: number): number {
   let angle: number = f32(current);
   const targetF: number = f32(target);
@@ -172,12 +141,16 @@ function _angleApproach(current: number, target: number, rate: number, dt: numbe
   return f32(angle - stepDelta);
 }
 
+// Native movement path computes cos/sin in x87 precision, then multiplies
+// dt * move_scale * move_speed * CREATURE_SPEED_SCALE sequentially (each
+// intermediate result kept in float locals, not f32-flushed).
 function _movementDeltaFromHeadingF32(
   heading: number,
   dt: number,
   moveScale: number,
   moveSpeed: number,
 ): Vec2 {
+  // Native keeps these values in float locals (not f32-flushed between steps).
   const radians = f32(heading) - NATIVE_HALF_PI;
 
   let vx = Math.cos(radians);
@@ -213,67 +186,51 @@ function _travelBudgetForTypeId(typeId: ProjectileTemplateId): number {
   return weaponEntryForProjectileTypeId(typeId).travelBudget;
 }
 
-function awardExperience(
-  state: CreatureRuntimeGameplayState,
-  player: PlayerState,
-  xp: number,
-): number {
-  return _gameplayAwardExperience(state, player, xp);
-}
-
-function awardExperienceFromReward(
-  state: CreatureRuntimeGameplayState,
-  player: PlayerState,
-  rewardValue: number,
-): number {
-  return _gameplayAwardExperienceFromReward(state, player, rewardValue);
-}
-
 function survivalRecordRecentDeath(
-  state: CreatureRuntimeGameplayState,
+  state: GameplayState,
   pos: Vec2,
 ): void {
-  _gameplaySurvivalRecordRecentDeath(state, { pos });
+  survivalRecordRecentDeath_(state, { pos });
 }
 
-// ---------------------------------------------------------------------------
-// CreatureState
-// ---------------------------------------------------------------------------
-
-export class CreatureState implements CreatureStateLike {
+export class CreatureState {
   active = false;
   typeId: CreatureTypeId = CreatureTypeId.ZOMBIE;
 
   pos: Vec2 = new Vec2();
   vel: Vec2 = new Vec2();
   heading = 0.0;
-  target_heading = 0.0;
-  force_target = 0;
+  targetHeading = 0.0;
+  forceTarget = 0;
   target: Vec2 = new Vec2();
-  target_player = 0;
-  ai_mode: CreatureAiMode = CreatureAiMode.ORBIT_PLAYER;
+  targetPlayer = 0;
+  aiMode: CreatureAiMode = CreatureAiMode.ORBIT_PLAYER;
   flags: CreatureFlags = 0 as CreatureFlags;
 
-  link_index = -1;
-  target_offset: Vec2 | null = null;
-  orbit_angle = 0.0;
-  orbit_radius = 0.0;
-  phase_seed = 0.0;
-  move_scale = 1.0;
+  linkIndex = -1;
+  targetOffset: Vec2 | null = null;
+  orbitAngle = 0.0;
+  orbitRadius = 0.0;
+  phaseSeed = 0.0;
+  moveScale = 1.0;
 
   hp = 0.0;
-  max_hp = 0.0;
-  move_speed = 1.0;
-  contact_damage = 0.0;
-  attack_cooldown = 0.0;
-  reward_value = 0.0;
+  maxHp = 0.0;
+  moveSpeed = 1.0;
+  contactDamage = 0.0;
+  attackCooldown = 0.0;
+  rewardValue = 0.0;
 
   plagueInfected = false;
   collisionTimer: number = CONTACT_DAMAGE_PERIOD;
+  // lifecycle_stage encodes the creature's alive/dying/dead phase as a float:
+  // positive = alive (CREATURE_LIFECYCLE_ALIVE), decreasing toward zero = dying
+  // animation, negative = corpse fade.  The native code uses a single float
+  // field that transitions through these ranges.
   lifecycleStage: number = CREATURE_LIFECYCLE_ALIVE;
 
   size = 50.0;
-  anim_phase = 0.0;
+  animPhase = 0.0;
   hitFlashTimer = 0.0;
   lastHitOwner: OwnerRef = OwnerRef.fromLocalPlayer(0);
   tint: RGBA = new RGBA();
@@ -289,29 +246,29 @@ export class CreatureState implements CreatureStateLike {
     c.pos = this.pos;
     c.vel = this.vel;
     c.heading = this.heading;
-    c.target_heading = this.target_heading;
-    c.force_target = this.force_target;
+    c.targetHeading = this.targetHeading;
+    c.forceTarget = this.forceTarget;
     c.target = this.target;
-    c.target_player = this.target_player;
-    c.ai_mode = this.ai_mode;
+    c.targetPlayer = this.targetPlayer;
+    c.aiMode = this.aiMode;
     c.flags = this.flags;
-    c.link_index = this.link_index;
-    c.target_offset = this.target_offset;
-    c.orbit_angle = this.orbit_angle;
-    c.orbit_radius = this.orbit_radius;
-    c.phase_seed = this.phase_seed;
-    c.move_scale = this.move_scale;
+    c.linkIndex = this.linkIndex;
+    c.targetOffset = this.targetOffset;
+    c.orbitAngle = this.orbitAngle;
+    c.orbitRadius = this.orbitRadius;
+    c.phaseSeed = this.phaseSeed;
+    c.moveScale = this.moveScale;
     c.hp = this.hp;
-    c.max_hp = this.max_hp;
-    c.move_speed = this.move_speed;
-    c.contact_damage = this.contact_damage;
-    c.attack_cooldown = this.attack_cooldown;
-    c.reward_value = this.reward_value;
+    c.maxHp = this.maxHp;
+    c.moveSpeed = this.moveSpeed;
+    c.contactDamage = this.contactDamage;
+    c.attackCooldown = this.attackCooldown;
+    c.rewardValue = this.rewardValue;
     c.plagueInfected = this.plagueInfected;
     c.collisionTimer = this.collisionTimer;
     c.lifecycleStage = this.lifecycleStage;
     c.size = this.size;
-    c.anim_phase = this.anim_phase;
+    c.animPhase = this.animPhase;
     c.hitFlashTimer = this.hitFlashTimer;
     c.lastHitOwner = this.lastHitOwner;
     c.tint = this.tint;
@@ -321,10 +278,6 @@ export class CreatureState implements CreatureStateLike {
     return c;
   }
 }
-
-// ---------------------------------------------------------------------------
-// CreatureDeath / CreatureUpdateResult / CreatureUpdateOptions
-// ---------------------------------------------------------------------------
 
 export interface CreatureDeath {
   readonly index: number;
@@ -342,7 +295,7 @@ export interface CreatureUpdateResult {
 }
 
 export interface CreatureUpdateOptions {
-  readonly state: CreatureRuntimeGameplayState;
+  readonly state: GameplayState;
   readonly players: PlayerState[];
   readonly rng: CrandLike;
   readonly env: SpawnEnv;
@@ -354,15 +307,11 @@ export interface CreatureUpdateOptions {
   readonly violenceDisabled: number;
 }
 
-// ---------------------------------------------------------------------------
-// Interaction context
-// ---------------------------------------------------------------------------
-
 interface _CreatureInteractionCtx {
   pool: CreaturePool;
   creatureIndex: number;
   creature: CreatureState;
-  state: CreatureRuntimeGameplayState;
+  state: GameplayState;
   players: PlayerState[];
   player: PlayerState;
   dt: number;
@@ -380,10 +329,6 @@ interface _CreatureInteractionCtx {
 }
 
 type _CreatureInteractionStep = (ctx: _CreatureInteractionCtx) => void;
-
-// ---------------------------------------------------------------------------
-// Interaction steps
-// ---------------------------------------------------------------------------
 
 function _creatureInteractionPlaguebearerSpread(ctx: _CreatureInteractionCtx): void {
   if (
@@ -407,7 +352,7 @@ function _creatureInteractionEnergizerEat(ctx: _CreatureInteractionCtx): void {
   );
 
   if (ctx.state.bonuses.energizer <= 0.0) return;
-  if (creature.max_hp >= 380.0) return;
+  if (creature.maxHp >= 380.0) return;
 
   ctx.state.effects.spawnBurst({
     pos: creature.pos,
@@ -448,7 +393,7 @@ function _creatureInteractionContactDamage(ctx: _CreatureInteractionCtx): void {
 
   if (ctx.contactDistSq >= 30.0 * 30.0) return;
   if (ctx.player.health <= 0.0) return;
-  if (creature.attack_cooldown > 0.0) return;
+  if (creature.attackCooldown > 0.0) return;
 
   const options = _CREATURE_CONTACT_SFX.get(creature.typeId);
   if (options !== undefined) {
@@ -535,7 +480,7 @@ function _creatureInteractionContactDamage(ctx: _CreatureInteractionCtx): void {
   playerTakeDamage(
     ctx.state,
     ctx.player,
-    creature.contact_damage,
+    creature.contactDamage,
     { dt: ctx.dt, players: ctx.players, onLethal: onPlayerLethalFinalRevenge },
   );
 
@@ -544,7 +489,7 @@ function _creatureInteractionContactDamage(ctx: _CreatureInteractionCtx): void {
     ctx.fxQueue.addRandom({ pos: ctx.player.pos.add(pushDir.mul(3.0)), rng: ctx.rng });
   }
 
-  creature.attack_cooldown = creature.attack_cooldown + 1.0;
+  creature.attackCooldown = creature.attackCooldown + 1.0;
 
   if (mrMeleeKilled) {
     ctx.skipCreature = true;
@@ -584,10 +529,6 @@ const _CREATURE_INTERACTION_STEPS: readonly _CreatureInteractionStep[] = [
   _creatureInteractionContactKillSmall,
 ];
 
-// ---------------------------------------------------------------------------
-// CreaturePool
-// ---------------------------------------------------------------------------
-
 export class CreaturePool {
   private _entries: CreatureState[];
   spawnSlots: SpawnSlotInit[] = [];
@@ -597,28 +538,21 @@ export class CreaturePool {
   killCount = 0;
   spawnedCount = 0;
   private _updateTick = 0;
-  private _deps: CreaturePoolDeps | null = null;
-
   constructor(opts?: {
     size?: number;
     env?: SpawnEnv | null;
     effects?: EffectPool | null;
-  }, deps: CreaturePoolDeps | null = null) {
+  }) {
     const size = opts?.size ?? CREATURE_POOL_SIZE;
     const env = opts?.env ?? null;
     const effects = opts?.effects ?? null;
     this._entries = Array.from({ length: size }, () => new CreatureState());
     this.env = env;
     this.effects = effects;
-    this._deps = deps;
   }
 
   get entries(): CreatureState[] {
     return this._entries;
-  }
-
-  setDeps(deps: CreaturePoolDeps): void {
-    this._deps = deps;
   }
 
   reset(): void {
@@ -655,6 +589,8 @@ export class CreaturePool {
     }
   }
 
+  // Native `creature_alloc_slot` does not clear `link_index` -- the caller
+  // is responsible for setting it after allocation.
   private _allocSlot(): number | null {
     for (let i = 0; i < this._entries.length; i++) {
       if (!this._entries[i].active) return i;
@@ -673,11 +609,11 @@ export class CreaturePool {
   private _resolveTargetPlayerIndex(creature: CreatureState, players: PlayerState[]): number {
     const playerCount = players.length;
     if (playerCount <= 1) {
-      creature.target_player = 0;
+      creature.targetPlayer = 0;
       return 0;
     }
 
-    let targetPlayer = creature.target_player;
+    let targetPlayer = creature.targetPlayer;
     if (!(targetPlayer >= 0 && targetPlayer < playerCount)) {
       targetPlayer = 0;
     }
@@ -696,7 +632,7 @@ export class CreaturePool {
       if (players[targetPlayer].health <= 0.0) {
         targetPlayer = 1 - targetPlayer;
       }
-      creature.target_player = targetPlayer;
+      creature.targetPlayer = targetPlayer;
       return targetPlayer;
     }
 
@@ -719,7 +655,7 @@ export class CreaturePool {
       }
     }
 
-    creature.target_player = targetPlayer;
+    creature.targetPlayer = targetPlayer;
     return targetPlayer;
   }
 
@@ -764,13 +700,13 @@ export class CreaturePool {
     this._applyInit(entry, init);
 
     if (init.aiTimer !== null) {
-      entry.link_index = init.aiTimer;
+      entry.linkIndex = init.aiTimer;
     } else if (init.aiLinkParent !== null) {
-      entry.link_index = init.aiLinkParent;
+      entry.linkIndex = init.aiLinkParent;
     }
     if (init.spawnSlot !== null) {
       entry.spawnSlotIndex = init.spawnSlot;
-      entry.link_index = init.spawnSlot;
+      entry.linkIndex = init.spawnSlot;
     }
 
     this._entries[idx] = entry;
@@ -844,19 +780,19 @@ export class CreaturePool {
       if (slotPlan !== null) {
         const globalSlot = slotMapping[slotPlan];
         entry.spawnSlotIndex = globalSlot;
-        entry.link_index = globalSlot;
+        entry.linkIndex = globalSlot;
         continue;
       }
 
       const timer = pendingAiTimers[planIdx];
       if (timer !== null) {
-        entry.link_index = timer;
+        entry.linkIndex = timer;
         continue;
       }
 
       const linkPlan = pendingAiLinks[planIdx];
       if (linkPlan !== null) {
-        entry.link_index = mapping[linkPlan];
+        entry.linkIndex = mapping[linkPlan];
       }
     }
 
@@ -895,12 +831,7 @@ export class CreaturePool {
         'CreaturePool.spawnTemplate requires SpawnEnv (set CreaturePool.env or pass env=...)',
       );
     }
-    if (this._deps === null) {
-      throw new Error(
-        'CreaturePool.spawnTemplate requires deps (set via constructor or setDeps)',
-      );
-    }
-    const plan = this._deps.buildSpawnPlan(templateId, pos, heading, rng, spawnEnv);
+    const plan = buildSpawnPlan(templateId, pos, heading, rng, spawnEnv);
     return this.spawnPlan(plan, { rng, detailPreset, effects });
   }
 
@@ -1109,13 +1040,13 @@ export class CreaturePool {
       const player = players[targetPlayer];
       let playerPos = player.pos;
       if (singlePlayerDeadTargetPos !== null && players[0].health <= 0.0) {
-        creature.target_player = 1;
+        creature.targetPlayer = 1;
         playerPos = singlePlayerDeadTargetPos;
       }
 
       const frozenByEvilEyes = evilTargets.has(idx);
       if (frozenByEvilEyes) {
-        creature.force_target = 0;
+        creature.forceTarget = 0;
         continue;
       }
 
@@ -1123,9 +1054,9 @@ export class CreaturePool {
         creature,
         { playerPos, creatures: this._entries, dt },
       );
-      creature.move_scale = ai.move_scale;
-      if (ai.self_damage !== null && ai.self_damage > 0.0) {
-        creature.hp -= ai.self_damage;
+      creature.moveScale = ai.moveScale;
+      if (ai.selfDamage !== null && ai.selfDamage > 0.0) {
+        creature.hp -= ai.selfDamage;
         if (creature.hp <= 0.0) {
           deaths.push(
             this.handleDeath(
@@ -1159,26 +1090,26 @@ export class CreaturePool {
       }
 
       if (
-        (state.bonuses.energizer > 0.0 && creature.max_hp < 500.0) ||
+        (state.bonuses.energizer > 0.0 && creature.maxHp < 500.0) ||
         creature.plagueInfected
       ) {
-        creature.target_heading = headingAddPiF32(creature.target_heading);
+        creature.targetHeading = headingAddPiF32(creature.targetHeading);
       }
 
-      const turnRate = f32(creature.move_speed * CREATURE_TURN_RATE_SCALE);
+      const turnRate = f32(creature.moveSpeed * CREATURE_TURN_RATE_SCALE);
       if (((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) === 0) {
-        if (creature.ai_mode !== CreatureAiMode.HOLD_TIMER) {
+        if (creature.aiMode !== CreatureAiMode.HOLD_TIMER) {
           creature.heading = _angleApproach(
             creature.heading,
-            creature.target_heading,
+            creature.targetHeading,
             turnRate,
             dt,
           );
           const moveDelta = _movementDeltaFromHeadingF32(
             creature.heading,
             dt,
-            creature.move_scale,
-            creature.move_speed,
+            creature.moveScale,
+            creature.moveSpeed,
           );
           creature.vel = moveDelta;
           creature.pos = _advancePosByDeltaF32(creature.pos, moveDelta);
@@ -1193,15 +1124,15 @@ export class CreaturePool {
         } else {
           creature.heading = _angleApproach(
             creature.heading,
-            creature.target_heading,
+            creature.targetHeading,
             turnRate,
             dt,
           );
           const moveDelta = _movementDeltaFromHeadingF32(
             creature.heading,
             dt,
-            creature.move_scale,
-            creature.move_speed,
+            creature.moveScale,
+            creature.moveSpeed,
           );
           creature.vel = moveDelta;
           creature.pos = f32Vec2(
@@ -1223,10 +1154,10 @@ export class CreaturePool {
         this._plaguebearerSpreadInfection(idx);
       }
 
-      if (creature.attack_cooldown <= 0.0) {
-        creature.attack_cooldown = 0.0;
+      if (creature.attackCooldown <= 0.0) {
+        creature.attackCooldown = 0.0;
       } else {
-        creature.attack_cooldown -= dt;
+        creature.attackCooldown -= dt;
       }
 
       if (players.length > 0 && perkActive(players[0], PerkId.RADIOACTIVE)) {
@@ -1246,7 +1177,7 @@ export class CreaturePool {
                 creature.hp = 1.0;
               } else {
                 radioactivePlayer.experience =
-                  int(radioactivePlayer.experience + creature.reward_value);
+                  int(radioactivePlayer.experience + creature.rewardValue);
                 creature.lifecycleStage -= dt;
               }
             }
@@ -1263,7 +1194,7 @@ export class CreaturePool {
           ((CreatureFlags.RANGED_ATTACK_SHOCK as number) |
             (CreatureFlags.RANGED_ATTACK_VARIANT as number))) !== 0
       ) {
-        if (targetDist > 64.0 && creature.attack_cooldown <= 0.0) {
+        if (targetDist > 64.0 && creature.attackCooldown <= 0.0) {
           if ((int(creature.flags)) & (CreatureFlags.RANGED_ATTACK_SHOCK as number)) {
             const typeId = ProjectileTemplateId.PLASMA_RIFLE;
             state.projectiles.spawn({
@@ -1275,14 +1206,14 @@ export class CreaturePool {
               hitsPlayers: true,
             });
             sfx.push(SfxId.SHOCK_FIRE);
-            creature.attack_cooldown += 1.0;
+            creature.attackCooldown += 1.0;
           }
 
           if (
             ((int(creature.flags)) & (CreatureFlags.RANGED_ATTACK_VARIANT as number)) !== 0 &&
-            creature.attack_cooldown <= 0.0
+            creature.attackCooldown <= 0.0
           ) {
-            const projectileType = creature.orbit_radius as ProjectileTemplateId;
+            const projectileType = creature.orbitRadius as ProjectileTemplateId;
             state.projectiles.spawn({
               pos: creature.pos,
               angle: creature.heading,
@@ -1292,11 +1223,11 @@ export class CreaturePool {
               hitsPlayers: true,
             });
             sfx.push(SfxId.PLASMAMINIGUN_FIRE);
-            creature.attack_cooldown =
+            creature.attackCooldown =
               (rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_PLASMAMINIGUN_COOLDOWN }) & 3) *
                 0.1 +
-              creature.orbit_angle +
-              creature.attack_cooldown;
+              creature.orbitAngle +
+              creature.attackCooldown;
           }
         }
       }
@@ -1337,12 +1268,9 @@ export class CreaturePool {
         if (slotIndex !== null && slotIndex >= 0 && slotIndex < this.spawnSlots.length) {
           const slot = this.spawnSlots[slotIndex];
           if (slot.ownerCreature === idx) {
-            if (this._deps === null) {
-              throw new Error('CreaturePool.update requires deps for spawn slot tick');
-            }
-            const childTemplateId = this._deps.tickSpawnSlot(slot, dt);
+            const childTemplateId = tickSpawnSlot(slot, dt);
             if (childTemplateId !== null) {
-              const plan = this._deps.buildSpawnPlan(
+              const plan = buildSpawnPlan(
                 childTemplateId,
                 creature.pos,
                 RANDOM_HEADING_SENTINEL,
@@ -1361,7 +1289,7 @@ export class CreaturePool {
   }
 
   handleDeath(idx: number, opts: {
-    state: CreatureRuntimeGameplayState;
+    state: GameplayState;
     players: PlayerState[];
     rng: CrandLike;
     dt?: number;
@@ -1402,7 +1330,7 @@ export class CreaturePool {
         index: idx,
         pos: creature.pos,
         typeId: creature.typeId,
-        rewardValue: creature.reward_value,
+        rewardValue: creature.rewardValue,
         xpAwarded: 0,
         owner: creature.lastHitOwner,
       };
@@ -1452,25 +1380,25 @@ export class CreaturePool {
       entry.heading = f32(init.heading);
     }
     entry.target = f32Vec2(init.pos);
-    entry.phase_seed = f32(init.phaseSeed);
+    entry.phaseSeed = f32(init.phaseSeed);
     entry.vel = new Vec2();
-    entry.force_target = 0;
+    entry.forceTarget = 0;
 
     entry.flags = init.flags || 0;
-    entry.ai_mode = init.aiMode as CreatureAiMode;
+    entry.aiMode = init.aiMode as CreatureAiMode;
 
     let hp = init.health ?? 0.0;
     if (hp <= 0.0) hp = 1.0;
     entry.hp = f32(hp);
-    entry.max_hp = f32(init.maxHealth ?? hp);
+    entry.maxHp = f32(init.maxHealth ?? hp);
 
-    entry.move_speed = f32(init.moveSpeed ?? 1.0);
-    entry.reward_value = f32(init.rewardValue ?? 0.0);
+    entry.moveSpeed = f32(init.moveSpeed ?? 1.0);
+    entry.rewardValue = f32(init.rewardValue ?? 0.0);
     entry.size = f32(init.size ?? 50.0);
-    entry.contact_damage = f32(init.contactDamage ?? 0.0);
+    entry.contactDamage = f32(init.contactDamage ?? 0.0);
 
-    entry.target_offset = init.targetOffset !== null ? f32Vec2(init.targetOffset) : null;
-    entry.orbit_angle = f32(init.orbitAngle ?? 0.0);
+    entry.targetOffset = init.targetOffset !== null ? f32Vec2(init.targetOffset) : null;
+    entry.orbitAngle = f32(init.orbitAngle ?? 0.0);
     let orbitRadius: number;
     if (init.orbitRadius !== null) {
       orbitRadius = init.orbitRadius;
@@ -1479,36 +1407,23 @@ export class CreaturePool {
     } else {
       orbitRadius = 0.0;
     }
-    entry.orbit_radius = f32(orbitRadius);
+    entry.orbitRadius = f32(orbitRadius);
 
     entry.spawnSlotIndex = null;
-    entry.attack_cooldown = 0.0;
+    entry.attackCooldown = 0.0;
 
     entry.bonusId = init.bonusId;
     entry.bonusDurationOverride =
       init.bonusDurationOverride !== null ? init.bonusDurationOverride : null;
 
-    if (this._deps !== null) {
-      const resolved = this._deps.resolveTint(init.tint);
-      entry.tint = new RGBA(resolved[0], resolved[1], resolved[2], resolved[3]);
-    } else {
-      if (init.tint !== null) {
-        entry.tint = new RGBA(
-          init.tint[0] ?? 1.0,
-          init.tint[1] ?? 1.0,
-          init.tint[2] ?? 1.0,
-          init.tint[3] ?? 1.0,
-        );
-      } else {
-        entry.tint = new RGBA();
-      }
-    }
+    const resolved = resolveTint(init.tint);
+    entry.tint = new RGBA(resolved[0], resolved[1], resolved[2], resolved[3]);
 
     entry.plagueInfected = false;
     entry.collisionTimer = 0.0;
     entry.lifecycleStage = CREATURE_LIFECYCLE_ALIVE;
     entry.hitFlashTimer = 0.0;
-    entry.anim_phase = 0.0;
+    entry.animPhase = 0.0;
     entry.lastHitOwner = OwnerRef.fromLocalPlayer(0);
   }
 
@@ -1623,7 +1538,7 @@ export class CreaturePool {
   private _startDeath(
     idx: number,
     creature: CreatureState,
-    state: CreatureRuntimeGameplayState,
+    state: GameplayState,
     players: PlayerState[],
     rng: CrandLike,
     detailPreset: number = 5,
@@ -1646,14 +1561,14 @@ export class CreaturePool {
         const childIdx = this._allocSlot();
         if (childIdx === null) continue;
         const child = creature.clone();
-        child.phase_seed = rng.rand({ caller: phaseSeedCaller }) & 0xFF;
+        child.phaseSeed = rng.rand({ caller: phaseSeedCaller }) & 0xFF;
         child.heading = _wrapAngle(creature.heading + headingOffset);
-        child.target_heading = child.heading;
-        child.hp = creature.max_hp * 0.25;
-        child.reward_value = child.reward_value * (2.0 / 3.0);
+        child.targetHeading = child.heading;
+        child.hp = creature.maxHp * 0.25;
+        child.rewardValue = child.rewardValue * (2.0 / 3.0);
         child.size = child.size - 8.0;
-        child.move_speed = child.move_speed + 0.1;
-        child.contact_damage = child.contact_damage * 0.7;
+        child.moveSpeed = child.moveSpeed + 0.1;
+        child.contactDamage = child.contactDamage * 0.7;
         child.lifecycleStage = CREATURE_LIFECYCLE_ALIVE;
         this._entries[childIdx] = child;
         this.spawnedCount += 1;
@@ -1674,9 +1589,9 @@ export class CreaturePool {
     let xpAwarded = 0;
     if (killer !== null) {
       if (perkActive(killer, PerkId.BLOODY_MESS_QUICK_LEARNER)) {
-        xpAwarded = awardExperience(state, killer, int(creature.reward_value * 1.3));
+        xpAwarded = awardExperience(state, killer, int(creature.rewardValue * 1.3));
       } else {
-        xpAwarded = awardExperienceFromReward(state, killer, creature.reward_value);
+        xpAwarded = awardExperienceFromReward(state, killer, creature.rewardValue);
       }
     }
 
@@ -1691,7 +1606,7 @@ export class CreaturePool {
       index: idx,
       pos: creature.pos,
       typeId: creature.typeId,
-      rewardValue: creature.reward_value,
+      rewardValue: creature.rewardValue,
       xpAwarded,
       owner: creature.lastHitOwner,
     };

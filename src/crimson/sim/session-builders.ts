@@ -19,11 +19,8 @@ import {
   rushMidStep,
   survivalMidStep,
 } from './sessions.ts';
-
-// Tutorial and Typo runtime imports
-import { TutorialOverlayState, TutorialState, resetTutorialState } from '@crimson/tutorial/state.ts';
+import { resetTutorialState } from '@crimson/tutorial/state.ts';
 import {
-  type TutorialWorldState,
   tutorialBeforeStep,
   tutorialInputTransform,
   tutorialPostStep,
@@ -36,16 +33,8 @@ import {
   typoPostStep,
 } from '@crimson/typo/runtime.ts';
 
-// ---------------------------------------------------------------------------
-// Rush constants
-// ---------------------------------------------------------------------------
-
 export const RUSH_WEAPON_ID = WeaponId.ASSAULT_RIFLE;
 export const RUSH_FORCED_AMMO = 30.0;
-
-// ---------------------------------------------------------------------------
-// enforceRushLoadout
-// ---------------------------------------------------------------------------
 
 export function enforceRushLoadout(world: WorldState): void {
   for (const player of world.players) {
@@ -55,10 +44,6 @@ export function enforceRushLoadout(world: WorldState): void {
     player.weapon.ammo = RUSH_FORCED_AMMO;
   }
 }
-
-// ---------------------------------------------------------------------------
-// Session builders
-// ---------------------------------------------------------------------------
 
 export function buildSurvivalSession(opts: {
   world: WorldState;
@@ -223,10 +208,10 @@ export function buildTutorialSession(opts: {
     violenceDisabled: opts.violenceDisabled,
     gameTuneStarted: opts.gameTuneStarted,
     demoModeActive: opts.demoModeActive,
-    beforeStepHook: () => tutorialBeforeStep(opts.world as unknown as TutorialWorldState),
-    postStepHook: (ctx) => tutorialPostStep({ world: ctx.world as unknown as TutorialWorldState, dtSimMs: ctx.dtSimMs, worldSize: ctx.worldSize, detailPreset: ctx.detailPreset }),
+    beforeStepHook: () => tutorialBeforeStep(opts.world),
+    postStepHook: (ctx) => tutorialPostStep({ world: ctx.world, dtSimMs: ctx.dtSimMs, worldSize: ctx.worldSize, detailPreset: ctx.detailPreset }),
     inputTransform: (inputs: PlayerInput[]) =>
-      tutorialInputTransform(opts.world as unknown as TutorialWorldState, inputs),
+      tutorialInputTransform(opts.world, inputs),
   });
   return session;
 }

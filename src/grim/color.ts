@@ -35,8 +35,17 @@ export class RGBA {
     );
   }
 
+  toTuple(): [number, number, number, number] {
+    return [this.r, this.g, this.b, this.a];
+  }
+
   toWgl(): wgl.Color {
-    return wgl.makeColor(this.r, this.g, this.b, this.a);
+    return wgl.makeColor(
+      clamp(this.r, 0.0, 1.0),
+      clamp(this.g, 0.0, 1.0),
+      clamp(this.b, 0.0, 1.0),
+      clamp(this.a, 0.0, 1.0),
+    );
   }
 
   clamped(): RGBA {
