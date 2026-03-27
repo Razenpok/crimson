@@ -24,7 +24,7 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
     // TODO: Python draws a circle outline via rl.draw_circle_lines here;
     // the fallback below approximates it with a textured quad.
     // Fallback: approximate circle outline with a white-texture quad
-    const radius = Math.max(1.0, detScale * t * 80.0);
+    const radius = Math.max(1.0, detScale * t * 80.0 * scale);
     const size = radius * 2.0;
     const whTex = wgl.getWhiteTexture();
     const sp = ctx.screenPos;

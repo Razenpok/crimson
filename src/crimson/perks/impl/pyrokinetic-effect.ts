@@ -3,7 +3,7 @@
 import { perkActive } from "@crimson/perks/helpers.ts";
 import { PerkId } from "@crimson/perks/ids.ts";
 import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.ts";
 
 export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
@@ -46,7 +46,7 @@ export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.PYROKINETIC,
   effectsSteps: [updatePyrokinetic],
-};
+});

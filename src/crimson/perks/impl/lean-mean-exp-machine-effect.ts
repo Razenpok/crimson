@@ -3,7 +3,7 @@
 import { perkCountGet } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function updateLeanMeanExpMachine(ctx: PerksUpdateEffectsCtx): void {
   ctx.state.leanMeanExpTimer -= ctx.dt;
@@ -23,7 +23,7 @@ function updateLeanMeanExpMachine(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.LEAN_MEAN_EXP_MACHINE,
   effectsSteps: [updateLeanMeanExpMachine],
-};
+});

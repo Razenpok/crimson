@@ -5,7 +5,7 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
 import { adjustPerkCount } from '@crimson/perks/runtime/counts.ts';
 import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyDeathClock(ctx: PerkApplyCtx): void {
   adjustPerkCount(
@@ -44,8 +44,8 @@ function updateDeathClock(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.DEATH_CLOCK,
   applyHandler: applyDeathClock,
   effectsSteps: [updateDeathClock],
-};
+});

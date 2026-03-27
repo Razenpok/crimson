@@ -3,7 +3,7 @@
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyFatalLottery(ctx: PerkApplyCtx): void {
   if (ctx.state.rng.rand({ caller: RngCallerStatic.PERK_APPLY_FATAL_LOTTERY }) & 1) {
@@ -13,7 +13,7 @@ function applyFatalLottery(ctx: PerkApplyCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.FATAL_LOTTERY,
   applyHandler: applyFatalLottery,
-};
+});

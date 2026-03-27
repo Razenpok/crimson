@@ -26,11 +26,27 @@ export type PlayerDeathHook = (opts: {
 
 export type PlayerPerkTickStep = (ctx: PlayerPerkTickCtx) => void;
 
-export interface PerkHooks {
+export class PerkHooks {
   readonly perkId: PerkId;
-  readonly applyHandler?: PerkApplyHandler;
-  readonly worldDtStep?: WorldDtStep;
-  readonly playerTickSteps?: readonly PlayerPerkTickStep[];
-  readonly effectsSteps?: readonly PerksUpdateEffectsStep[];
-  readonly playerDeathHook?: PlayerDeathHook;
+  readonly applyHandler: PerkApplyHandler | null;
+  readonly worldDtStep: WorldDtStep | null;
+  readonly playerTickSteps: readonly PlayerPerkTickStep[];
+  readonly effectsSteps: readonly PerksUpdateEffectsStep[];
+  readonly playerDeathHook: PlayerDeathHook | null;
+
+  constructor(opts: {
+    perkId: PerkId;
+    applyHandler?: PerkApplyHandler | null;
+    worldDtStep?: WorldDtStep | null;
+    playerTickSteps?: readonly PlayerPerkTickStep[];
+    effectsSteps?: readonly PerksUpdateEffectsStep[];
+    playerDeathHook?: PlayerDeathHook | null;
+  }) {
+    this.perkId = opts.perkId;
+    this.applyHandler = opts.applyHandler ?? null;
+    this.worldDtStep = opts.worldDtStep ?? null;
+    this.playerTickSteps = opts.playerTickSteps ?? [];
+    this.effectsSteps = opts.effectsSteps ?? [];
+    this.playerDeathHook = opts.playerDeathHook ?? null;
+  }
 }

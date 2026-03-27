@@ -9,7 +9,7 @@ import { QuestLevel } from "@crimson/quests/level.js";
 import { allQuests } from "@crimson/quests/registry.js";
 import { GameplayState, GameStatus } from "@crimson/gameplay.js";
 
-const _PERK_BASE_AVAILABLE_MAX_ID = PerkId.BONUS_MAGNET as number;
+const _PERK_BASE_AVAILABLE_MAX_ID = PerkId.BONUS_MAGNET;
 const _PERK_ALWAYS_AVAILABLE: readonly PerkId[] = [
   PerkId.MAN_BOMB,
   PerkId.LIVING_FORTRESS,

@@ -1,6 +1,6 @@
 // Port of crimson/creatures/anim.py
 
-import { CreatureAiMode, CreatureFlags } from './spawn-ids';
+import { CreatureAiMode, CreatureFlags } from './spawn-ids.ts';
 
 const _FLAG_ANIM_PING_PONG = int(CreatureFlags.ANIM_PING_PONG);
 const _FLAG_ANIM_LONG_STRIP = int(CreatureFlags.ANIM_LONG_STRIP);

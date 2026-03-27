@@ -27,6 +27,7 @@ export const CREATURE_ASSET = new Map<CreatureTypeId, string>([
   [CreatureTypeId.TROOPER, 'trooper'],
 ]);
 
+// Based on docs/atlas.md (projectile 'type_id' values index the weapon table).
 export const KNOWN_PROJ_FRAMES = new Map<number, [number, number]>([
   [ProjectileTemplateId.PULSE_GUN, [2, 0]],
   [ProjectileTemplateId.SPLITTER_GUN, [4, 3]],
@@ -56,6 +57,7 @@ export const FIRE_BULLETS_TYPES: ReadonlySet<number> = new Set([
   ProjectileTemplateId.FIRE_BULLETS,
 ]);
 
+// "Beam" in the original renderer is really the Ion/Fire streak + chain UV family.
 export const BEAM_TYPES: ReadonlySet<number> = new Set([
   ...ION_TYPES,
   ...FIRE_BULLETS_TYPES,

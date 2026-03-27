@@ -2,8 +2,8 @@
 
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
-import { CreatureFlags } from "@crimson/creatures/spawn-ids.js";
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { CreatureFlags } from "@crimson/creatures/spawn-ids.ts";
 
 function applyLifeline5050(ctx: PerkApplyCtx): void {
   const creatures = ctx.creatures;
@@ -13,7 +13,7 @@ function applyLifeline5050(ctx: PerkApplyCtx): void {
 
   let killToggle = false;
   for (const creature of creatures) {
-    if (killToggle && creature.active && creature.hp <= 500.0 && (creature.flags & CreatureFlags.ANIM_PING_PONG) === 0) {
+    if (killToggle && creature.active && creature.hp <= 500.0 && (int(creature.flags) & CreatureFlags.ANIM_PING_PONG) === 0) {
       creature.active = false;
       ctx.state.effects.spawnBurst({
         pos: creature.pos,
@@ -26,7 +26,7 @@ function applyLifeline5050(ctx: PerkApplyCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.LIFELINE_50_50,
   applyHandler: applyLifeline5050,
-};
+});

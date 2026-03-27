@@ -26,12 +26,12 @@ import { HOOKS as REFLEX_BOOSTED_HOOKS } from '@crimson/perks/impl/reflex-booste
 import { HOOKS as REGENERATION_HOOKS } from '@crimson/perks/impl/regeneration-effect.ts';
 import { HOOKS as THICK_SKINNED_HOOKS } from '@crimson/perks/impl/thick-skinned.ts';
 import type { PerkApplyHandler } from './apply-context.ts';
-import type {
+import {
   PerkHooks,
-  PerksUpdateEffectsStep,
-  PlayerDeathHook,
-  PlayerPerkTickStep,
-  WorldDtStep,
+  type PerksUpdateEffectsStep,
+  type PlayerDeathHook,
+  type PlayerPerkTickStep,
+  type WorldDtStep,
 } from "./hook-types.ts";
 import { updatePlayerBonusTimers } from './player-bonus-timers.ts';
 
@@ -65,24 +65,24 @@ export const PERK_HOOKS_IN_ORDER: readonly PerkHooks[] = [
 
 export const PERK_APPLY_HANDLERS: Map<PerkId, PerkApplyHandler> = new Map(
   PERK_HOOKS_IN_ORDER
-    .filter((hook): hook is PerkHooks & { applyHandler: PerkApplyHandler } => hook.applyHandler !== undefined)
+    .filter((hook): hook is PerkHooks & { applyHandler: PerkApplyHandler } => hook.applyHandler !== null)
     .map((hook) => [hook.perkId, hook.applyHandler]),
 );
 
 export const WORLD_DT_STEPS: readonly WorldDtStep[] =
   PERK_HOOKS_IN_ORDER
-    .filter((hook): hook is PerkHooks & { worldDtStep: WorldDtStep } => hook.worldDtStep !== undefined)
+    .filter((hook): hook is PerkHooks & { worldDtStep: WorldDtStep } => hook.worldDtStep !== null)
     .map((hook) => hook.worldDtStep);
 
 export const PLAYER_DEATH_HOOKS: readonly PlayerDeathHook[] =
   PERK_HOOKS_IN_ORDER
-    .filter((hook): hook is PerkHooks & { playerDeathHook: PlayerDeathHook } => hook.playerDeathHook !== undefined)
+    .filter((hook): hook is PerkHooks & { playerDeathHook: PlayerDeathHook } => hook.playerDeathHook !== null)
     .map((hook) => hook.playerDeathHook);
 
 export const PLAYER_PERK_TICK_STEPS: readonly PlayerPerkTickStep[] =
-  PERK_HOOKS_IN_ORDER.flatMap((hook) => hook.playerTickSteps ?? []);
+  PERK_HOOKS_IN_ORDER.flatMap((hook) => hook.playerTickSteps);
 
 export const PERKS_UPDATE_EFFECT_STEPS: readonly PerksUpdateEffectsStep[] = [
   updatePlayerBonusTimers,
-  ...PERK_HOOKS_IN_ORDER.flatMap((hook) => hook.effectsSteps ?? []),
+  ...PERK_HOOKS_IN_ORDER.flatMap((hook) => hook.effectsSteps),
 ];

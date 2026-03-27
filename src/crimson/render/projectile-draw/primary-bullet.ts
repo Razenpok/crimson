@@ -10,7 +10,7 @@ import type { ProjectileDrawCtx } from './types.ts';
 export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
   const resources = renderer.frame.resources;
-  const typeId = ctx.typeId;
+  const typeId = int(ctx.typeId);
   if (!WorldRenderCtx.isBulletTrailType(typeId)) {
     return false;
   }

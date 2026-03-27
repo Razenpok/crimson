@@ -6,7 +6,7 @@ import { f32 } from "@crimson/math-parity.ts";
 import { perkActive } from "@crimson/perks/helpers.ts";
 import { PerkId } from "@crimson/perks/ids.ts";
 import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.ts";
 
 function awardExperienceOnceFromReward(player: PlayerState, rewardValue: number): number {
@@ -129,7 +129,7 @@ export function updateJinxed(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.JINXED,
   effectsSteps: [updateJinxedTimer, updateJinxed],
-};
+});

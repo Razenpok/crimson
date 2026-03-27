@@ -23,7 +23,7 @@ export interface SpawnEntry {
 
 export type QuestBuilder = (
   ctx: QuestContext,
-  opts: { rng: CrandLike; fullVersion?: boolean },
+  opts: { rng: CrandLike; fullVersion: boolean },
 ) => SpawnEntry[];
 
 export interface QuestDefinition {

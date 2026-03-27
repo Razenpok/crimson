@@ -30,17 +30,17 @@ export class WorldRenderer {
     drawWorld(renderCtx, { drawAimIndicators, entityAlpha });
   }
 
-  cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
+  private cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
     const outW = runtimeW ?? wgl.getScreenWidth();
     const outH = runtimeH ?? wgl.getScreenHeight();
     return viewport.cameraScreenSize({ worldSize: this.worldSize, config: this.config, runtimeW: outW, runtimeH: outH });
   }
 
-  clampCamera(camera: Vec2, screenSize: Vec2): Vec2 {
+  private clampCamera(camera: Vec2, screenSize: Vec2): Vec2 {
     return viewport.clampCamera({ worldSize: this.worldSize, camera, screenSize });
   }
 
-  worldParams(): [Vec2, Vec2] {
+  private worldParams(): [Vec2, Vec2] {
     const outSize = new Vec2(wgl.getScreenWidth(), wgl.getScreenHeight());
     const [camera, viewScale] = viewport.viewTransform({
       worldSize: this.worldSize,

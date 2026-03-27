@@ -40,14 +40,15 @@ const WEAPON_ASSIGN_CLIP_MODIFIERS: readonly WeaponAssignClipModifier[] = [
 ];
 
 export function initDefaultAltWeapon(player: PlayerState): void {
-  const slot = new WeaponSlot(WeaponId.PISTOL);
-  slot.clipSize = 12;
-  slot.ammo = 12.0;
-  slot.reloadActive = false;
-  slot.reloadTimer = 0.0;
-  slot.reloadTimerMax = 1.2;
-  slot.shotCooldown = 0.0;
-  player.altWeapon = slot;
+  player.altWeapon = new WeaponSlot({
+    weaponId: WeaponId.PISTOL,
+    clipSize: 12,
+    ammo: 12.0,
+    reloadActive: false,
+    reloadTimer: 0.0,
+    reloadTimerMax: 1.2,
+    shotCooldown: 0.0,
+  });
 }
 
 export interface WeaponAssignStatus {

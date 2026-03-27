@@ -3,7 +3,7 @@
 import { WeaponId } from '@crimson/weapons.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { weaponPickRandomAvailable } from '@crimson/weapon-runtime/availability.ts';
 import { weaponAssignPlayer } from '@crimson/weapon-runtime/assign.ts';
 
@@ -20,7 +20,7 @@ export function applyRandomWeapon(ctx: PerkApplyCtx): void {
   weaponAssignPlayer(ctx.owner, weaponId, { state: ctx.state });
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.RANDOM_WEAPON,
   applyHandler: applyRandomWeapon,
-};
+});

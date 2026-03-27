@@ -6,7 +6,7 @@ import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
 
 export function tickHotTempered(ctx: PlayerPerkTickCtx): void {
@@ -42,7 +42,7 @@ export function tickHotTempered(ctx: PlayerPerkTickCtx): void {
   ctx.state.perkIntervals.hotTempered = (intervalRoll % 8) + 2.0;
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.HOT_TEMPERED,
   playerTickSteps: [tickHotTempered],
-};
+});

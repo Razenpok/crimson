@@ -37,9 +37,6 @@ export function endPass(_name: string): void {
   _activeSink.onPassDuration(passName, durationMs);
 }
 
-/**
- * Profile a named pass. Call the returned function to end the pass.
- */
 export function profilePass(name: string): () => void {
   beginPass(name);
   return () => endPass(name);

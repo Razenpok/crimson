@@ -3,7 +3,7 @@
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function updateEvilEyesTarget(ctx: PerksUpdateEffectsCtx): void {
   if (ctx.players.length === 0) {
@@ -33,7 +33,7 @@ function updateEvilEyesTarget(ctx: PerksUpdateEffectsCtx): void {
   }
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.EVIL_EYES,
   effectsSteps: [updateEvilEyesTarget],
-};
+});

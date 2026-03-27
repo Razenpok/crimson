@@ -2,14 +2,14 @@
 
 import { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkApplyCtx } from '@crimson/perks/runtime/apply-context.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 function applyGrimDeal(ctx: PerkApplyCtx): void {
   ctx.owner.health = -1.0;
   ctx.owner.experience += int(ctx.owner.experience * 0.18);
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.GRIM_DEAL,
   applyHandler: applyGrimDeal,
-};
+});

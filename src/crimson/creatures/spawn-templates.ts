@@ -1,6 +1,6 @@
 // Port of crimson/creatures/spawn_templates.py
 
-import { CreatureFlags, CreatureTypeId, SpawnId, type Tint } from './spawn-ids';
+import { CreatureFlags, CreatureTypeId, SpawnId, type Tint } from './spawn-ids.ts';
 
 
 export interface SpawnTemplate {

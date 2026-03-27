@@ -8,15 +8,29 @@ export const PERK_COUNT_SIZE = 0x80;
 
 export class WeaponSlot {
   weaponId: WeaponId;
-  clipSize = 0;
-  ammo = 0.0;
-  reloadActive = false;
-  reloadTimer = 0.0;
-  reloadTimerMax = 0.0;
-  shotCooldown = 0.0;
+  clipSize: number;
+  ammo: number;
+  reloadActive: boolean;
+  reloadTimer: number;
+  reloadTimerMax: number;
+  shotCooldown: number;
 
-  constructor(weaponId: WeaponId) {
-    this.weaponId = weaponId;
+  constructor(opts: {
+    weaponId: WeaponId;
+    clipSize?: number;
+    ammo?: number;
+    reloadActive?: boolean;
+    reloadTimer?: number;
+    reloadTimerMax?: number;
+    shotCooldown?: number;
+  }) {
+    this.weaponId = opts.weaponId;
+    this.clipSize = opts.clipSize ?? 0;
+    this.ammo = opts.ammo ?? 0.0;
+    this.reloadActive = opts.reloadActive ?? false;
+    this.reloadTimer = opts.reloadTimer ?? 0.0;
+    this.reloadTimerMax = opts.reloadTimerMax ?? 0.0;
+    this.shotCooldown = opts.shotCooldown ?? 0.0;
   }
 }
 
@@ -69,7 +83,7 @@ export class PlayerState {
   constructor(index: number, pos: Vec2 = new Vec2()) {
     this.index = index;
     this.pos = pos;
-    this.weapon = new WeaponSlot(WeaponId.PISTOL);
+    this.weapon = new WeaponSlot({ weaponId: WeaponId.PISTOL });
     this.perkCounts = new Array(PERK_COUNT_SIZE).fill(0);
   }
 }

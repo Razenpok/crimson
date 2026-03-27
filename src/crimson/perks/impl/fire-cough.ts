@@ -7,7 +7,7 @@ import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
 
 export function tickFireCough(ctx: PlayerPerkTickCtx): void {
@@ -65,7 +65,7 @@ export function tickFireCough(ctx: PlayerPerkTickCtx): void {
   ctx.state.perkIntervals.fireCough = (intervalRoll % 4) + 2.0;
 }
 
-export const HOOKS: PerkHooks = {
+export const HOOKS = new PerkHooks({
   perkId: PerkId.FIRE_CAUGH,
   playerTickSteps: [tickFireCough],
-};
+});

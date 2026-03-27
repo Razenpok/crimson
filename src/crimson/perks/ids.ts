@@ -523,7 +523,7 @@ export function perkDisplayName(
     return QUICK_LEARNER_NAME;
   }
   const entry = PERK_BY_ID.get(perkId);
-  if (!entry) return `perk_${perkId}`;
+  if (!entry) throw new Error(`Unknown perk id: ${perkId}`);
   if (!preserveBugs) {
     const fixed = _PERK_FIXED_NAMES.get(perkId);
     if (fixed !== undefined) return fixed;
@@ -541,7 +541,7 @@ export function perkDisplayDescription(
     return QUICK_LEARNER_DESCRIPTION;
   }
   const entry = PERK_BY_ID.get(perkId);
-  if (!entry) return '';
+  if (!entry) throw new Error(`Unknown perk id: ${perkId}`);
   if (!preserveBugs) {
     const fixed = _PERK_FIXED_DESCRIPTIONS.get(perkId);
     if (fixed !== undefined) return fixed;

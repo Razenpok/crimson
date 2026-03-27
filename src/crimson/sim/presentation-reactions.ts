@@ -28,18 +28,17 @@ export function buildPostApplyReaction(opts: {
 }): PostApplyReaction {
   const { tickResult, questState } = opts;
   if (questState == null) {
-    return {
+    return new PostApplyReaction({
       sfx: Array.from(tickResult.payload.step.postApplySfx),
-      quest: null,
-    };
+    });
   }
-  return {
+  return new PostApplyReaction({
     sfx: Array.from(tickResult.payload.step.postApplySfx),
     quest: {
       playHitSfx: questState.playHitSfx,
       playCompletionMusic: questState.playCompletionMusic,
     },
-  };
+  });
 }
 
 export function applyPostApplyReaction(opts: {
