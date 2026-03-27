@@ -1,6 +1,6 @@
 # Crimsonland 1.9.93 - WebGL port
 
-This is a should-be-faithful TypeScript+WebGL port of the faithful 1.9.93 Crimsonland rewrite: https://github.com/banteg/crimson. Go there, give it a star – the work done there is phenomenal!
+This is a WebGL port of the faithful 1.9.93 Crimsonland rewrite: https://github.com/banteg/crimson. Go there, give it a star – the work done there is phenomenal!
 
 The foundation of this port was done by using Claude Code for translating each Python file one-by-one into TypeScript. Currently, the game works, but there a couple of bugs, and the persistence is not yet implemented. Manual revision and fixes of sources is in progress.
 
