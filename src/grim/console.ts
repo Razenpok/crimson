@@ -41,6 +41,7 @@ const KEY_HOME = 36;
 const KEY_END = 35;
 const KEY_TAB = 9;
 const KEY_LEFT_CONTROL = 17;
+const KEY_RIGHT_CONTROL = 345;
 
 export type CommandHandler = (args: string[]) => void;
 
@@ -147,7 +148,7 @@ export class ConsoleState {
 
     if (!this.openFlag || !this.inputEnabled) return;
 
-    const ctrlDown = InputState.isKeyDown(KEY_LEFT_CONTROL);
+    const ctrlDown = InputState.isKeyDown(KEY_LEFT_CONTROL) || InputState.isKeyDown(KEY_RIGHT_CONTROL);
 
     if (InputState.wasKeyPressed(KEY_UP)) {
       if (ctrlDown) {

@@ -9,7 +9,7 @@ import { allQuests } from "@crimson/quests/registry.js";
 import { GameplayState } from "@crimson/gameplay.js";
 
 export const WEAPON_DROP_ID_COUNT = 0x21; // weapon ids 1..33
-export const WEAPON_AVAILABLE_COUNT = Math.max(...WEAPON_TABLE.map((e) => e.weaponId as number)) + 1;
+export const WEAPON_AVAILABLE_COUNT = Math.max(...WEAPON_TABLE.map((e) => e.weaponId)) + 1;
 
 export interface WeaponAvailabilityStatus {
   readonly questUnlockIndex: number;
@@ -32,7 +32,7 @@ export function buildWeaponAvailability(
     unlockIndexFull = opts.status.questUnlockIndexFull;
   }
 
-  const pistolId = WeaponId.PISTOL as number;
+  const pistolId = WeaponId.PISTOL;
   if (pistolId >= 0 && pistolId < available.length) {
     available[pistolId] = true;
   }
@@ -42,23 +42,22 @@ export function buildWeaponAvailability(
     for (let i = 0; i < Math.min(unlockIndex, quests.length); i++) {
       const quest = quests[i];
       const weaponId = quest.unlockWeaponId;
-      if (weaponId !== null && (weaponId as number) > 0 && (weaponId as number) < available.length) {
-        available[weaponId as number] = true;
+      if (weaponId !== null && weaponId > 0 && weaponId < available.length) {
+        available[weaponId] = true;
       }
     }
   }
 
   if (opts.gameMode === GameMode.SURVIVAL) {
     for (const weaponId of [WeaponId.ASSAULT_RIFLE, WeaponId.SHOTGUN, WeaponId.SUBMACHINE_GUN]) {
-      const id = weaponId as number;
-      if (id >= 0 && id < available.length) {
-        available[id] = true;
+      if (weaponId >= 0 && weaponId < available.length) {
+        available[weaponId] = true;
       }
     }
   }
 
   if (!opts.demoModeActive && unlockIndexFull >= 0x28) {
-    const splitterId = WeaponId.SPLITTER_GUN as number;
+    const splitterId = WeaponId.SPLITTER_GUN;
     if (splitterId >= 0 && splitterId < available.length) {
       available[splitterId] = true;
     }
@@ -93,7 +92,7 @@ export function weaponPickRandomAvailable(
 
     // Bias: used weapons have a 50% chance to reroll once.
     if (status !== null) {
-      const usageSlot = weaponUsageSlotForWeaponId(weaponId as number);
+      const usageSlot = weaponUsageSlotForWeaponId(weaponId);
       if (usageSlot !== null && status.weaponUsageCountSlot(usageSlot) !== 0) {
         if (
           (state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_GATE }) & 1) === 0
@@ -104,10 +103,10 @@ export function weaponPickRandomAvailable(
       }
     }
 
-    if (!((weaponId as number) >= 0 && (weaponId as number) < weaponAvailable.length)) {
+    if (!(weaponId >= 0 && weaponId < weaponAvailable.length)) {
       continue;
     }
-    if (!weaponAvailable[weaponId as number]) {
+    if (!weaponAvailable[weaponId]) {
       continue;
     }
 

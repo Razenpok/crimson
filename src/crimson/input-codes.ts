@@ -295,6 +295,7 @@ export function inputCodeName(keyCode: number): string {
 function _inputPrimaryAnyDown(fireCodes: number[], playerCount: number): boolean {
   if (inputCodeIsDown(0x100, { playerIndex: 0 })) return true;
   const count = Math.max(1, Math.min(4, playerCount));
+  if (fireCodes.length < count) throw new Error('fireCodes length less than count');
   for (let i = 0; i < count; i++) {
     if (inputCodeIsDown(fireCodes[i], { playerIndex: i })) return true;
   }

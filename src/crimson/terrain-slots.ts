@@ -14,7 +14,7 @@ export const Q4_TERRAIN_SLOTS: TerrainSlotTriplet = [6, 7, 6] as const;
 export const DEFAULT_TERRAIN_SLOTS: TerrainSlotTriplet = Q1_TERRAIN_SLOTS;
 
 // Thresholds kept descending to preserve the native chained 1/8 roll order.
-const UNLOCK_TERRAIN_SLOTS: ReadonlyArray<readonly [number, TerrainSlotTriplet, RngCallerStatic]> = [
+export const UNLOCK_TERRAIN_SLOTS: ReadonlyArray<readonly [number, TerrainSlotTriplet, RngCallerStatic]> = [
   [40, Q4_TERRAIN_SLOTS, RngCallerStatic.UNLOCK_TERRAIN_Q4],
   [30, Q3_TERRAIN_SLOTS, RngCallerStatic.UNLOCK_TERRAIN_Q3],
   [20, Q2_TERRAIN_SLOTS, RngCallerStatic.UNLOCK_TERRAIN_Q2],

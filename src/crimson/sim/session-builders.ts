@@ -65,7 +65,7 @@ export function buildSurvivalSession(opts: {
     detailPreset: opts.detailPreset,
     violenceDisabled: opts.violenceDisabled,
     gameTuneStarted: opts.gameTuneStarted,
-    applyWorldDtSteps: opts.applyWorldDtSteps,
+    applyWorldDtSteps: opts.applyWorldDtSteps ?? false,
     finalizePostRenderLifecycle: opts.finalizePostRenderLifecycle,
     midStepHook: (ctx: MidStepContext) => survivalMidStep(ctx, spawnState),
   });
@@ -209,7 +209,7 @@ export function buildTutorialSession(opts: {
     gameTuneStarted: opts.gameTuneStarted,
     demoModeActive: opts.demoModeActive,
     beforeStepHook: () => tutorialBeforeStep(opts.world),
-    postStepHook: (ctx) => tutorialPostStep({ world: ctx.world, dtSimMs: ctx.dtSimMs, worldSize: ctx.worldSize, detailPreset: ctx.detailPreset }),
+    postStepHook: (ctx) => tutorialPostStep({ world: ctx.world, stepResult: ctx.stepResult, dtSimMs: ctx.dtSimMs, worldSize: ctx.worldSize, detailPreset: ctx.detailPreset }),
     inputTransform: (inputs: PlayerInput[]) =>
       tutorialInputTransform(opts.world, inputs),
   });

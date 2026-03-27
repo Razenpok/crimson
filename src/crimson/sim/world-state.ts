@@ -666,7 +666,7 @@ export class WorldState {
     worldSize: number;
     fxQueue: FxQueue;
     deaths: CreatureDeath[];
-    sfx?: SfxId[];
+    sfx: SfxId[];
     keepCorpse?: boolean;
     deathSfx?: SfxId[];
   }): void {

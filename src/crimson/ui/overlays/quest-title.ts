@@ -45,8 +45,8 @@ export function layoutQuestTitleOverlay(
   const titleScale = questTitleBaseScale(int(opts.screenWidth));
   const numberSc = questNumberScale(titleScale);
   const titleWidth = opts.title.length * opts.fontAdvance * titleScale;
-  const centerX = (int(opts.screenWidth) >> 1);
-  const centerY = (int(opts.screenHeight) >> 1);
+  const centerX = Math.floor(int(opts.screenWidth) / 2);
+  const centerY = Math.floor(int(opts.screenHeight) / 2);
   const titlePos = new Vec2(centerX - titleWidth / 2.0, centerY - QUEST_TITLE_Y_OFFSET);
   const numberX =
     titlePos.x -

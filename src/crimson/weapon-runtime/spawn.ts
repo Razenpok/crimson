@@ -44,7 +44,7 @@ function shotsFiredPlayerIndex(
   owner: OwnerRef,
   ownerPlayerIndex: number | null,
 ): number | null {
-  const shotsFired = state.shotsFired as number[];
+  const shotsFired = state.shotsFired;
   if (ownerPlayerIndex !== null) {
     const playerIndex = int(ownerPlayerIndex);
     if (playerIndex >= 0 && playerIndex < shotsFired.length) {
@@ -119,7 +119,7 @@ export function projectileSpawn(
   const owner = opts.owner;
   const ownerPlayerIndex = opts.ownerPlayerIndex ?? null;
   const hitsPlayers = opts.hitsPlayers ?? false;
-  const shotsFired = state.shotsFired as number[];
+  const shotsFired = state.shotsFired;
   let currentTypeId = typeId;
 
   // Mirror `projectile_spawn` (0x00420440) Fire Bullets override.
@@ -131,7 +131,7 @@ export function projectileSpawn(
         owner,
         ownerPlayerIndex,
       );
-      state.shotsFiredTotal = (state.shotsFiredTotal as number) + 1;
+      state.shotsFiredTotal = state.shotsFiredTotal + 1;
       if (playerIndex !== null) {
         shotsFired[playerIndex] += 1;
       }

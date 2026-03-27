@@ -218,7 +218,7 @@ export class GameLoopView implements View {
     const _viewCtx = modeViewContext(state);
 
     // Screen constructors use structural sub-interfaces of GameState.
-    // We cast to `any` where the interface extends PanelGameState or
+    // We widen the type where the interface extends PanelGameState or
     // a specialised state shape that GameState satisfies at runtime
     // once all fields are populated (resources, status, etc.).
     const gs: any = state;

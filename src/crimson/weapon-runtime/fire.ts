@@ -25,7 +25,7 @@ import { resolveFireRecipe } from './fire-recipes.ts';
 import { ownerRefForPlayer, ownerRefForPlayerProjectiles, travelBudgetForTypeId } from './spawn.ts';
 import { GameplayState } from "@crimson/gameplay.js";
 
-export const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((e) => e.weaponId as number)) + 1;
+export const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((e) => e.weaponId)) + 1;
 
 const _NATIVE_FIRE_MUZZLE_SPRITES: Map<number, readonly (readonly [number, number, number])[]> = new Map([
   [WeaponId.PISTOL, [[25.0, 1.0, 0.23], [15.0, 2.0, 0.213]]],
@@ -288,11 +288,11 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   const owner = ownerRefForPlayer(player.index);
   const projectileOwner = ownerRefForPlayerProjectiles(state, player.index);
   let shotCount = 1;
-  const spawnMuzzleAfterProjectile = isFireBullets || _NATIVE_FIRE_MUZZLE_AFTER_PROJECTILE.has(weaponId as number);
+  const spawnMuzzleAfterProjectile = isFireBullets || _NATIVE_FIRE_MUZZLE_AFTER_PROJECTILE.has(weaponId);
   if (!spawnMuzzleAfterProjectile) {
     spawnNativeFireMuzzleSprites(
       state,
-      weaponId as number,
+      weaponId,
       muzzle,
       aimHeading,
       isFireBullets,
@@ -310,7 +310,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
     case 'PrimaryPelletsMode': {
       const typeId = mode.typeId;
       if (typeId === null) {
-        throw new Error(`missing projectile type in recipe for weapon ${weaponId as number}`);
+        throw new Error(`missing projectile type in recipe for weapon ${weaponId}`);
       }
       const pellets = Math.max(0, int(mode.count ?? 0));
       shotCount = pellets;
@@ -434,19 +434,19 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
     }
   }
 
-  const shotsFired = state.shotsFired as number[];
-  const weaponShotsFired = state.weaponShotsFired as number[][];
+  const shotsFired = state.shotsFired;
+  const weaponShotsFired = state.weaponShotsFired;
   if (int(player.index) >= 0 && int(player.index) < shotsFired.length) {
     shotsFired[int(player.index)] += int(shotCount);
-    if ((weaponId as number) >= 0 && (weaponId as number) < WEAPON_COUNT_SIZE) {
-      weaponShotsFired[int(player.index)][weaponId as number] += int(shotCount);
+    if (weaponId >= 0 && weaponId < WEAPON_COUNT_SIZE) {
+      weaponShotsFired[int(player.index)][weaponId] += int(shotCount);
     }
   }
 
   if (spawnMuzzleAfterProjectile) {
     spawnNativeFireMuzzleSprites(
       state,
-      weaponId as number,
+      weaponId,
       muzzle,
       aimHeading,
       isFireBullets,

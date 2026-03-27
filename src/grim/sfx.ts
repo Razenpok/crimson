@@ -3,7 +3,7 @@
 import { SFX_SPECS, SFX_NATIVE_ORDER, type SfxId } from './sfx-map.ts';
 import { fetchPaq } from './paq.ts';
 
-const SFX_PAQ_NAME = 'sfx.paq';
+const SFX_PAK_NAME = 'sfx.paq';
 const DEFAULT_VOICE_COUNT = 4;
 const SFX_RATE_BASE_HZ = 44100;
 const SFX_RATE_MIN_HZ = 22050;
@@ -77,7 +77,7 @@ export function initSfxState(opts: { ready: boolean; enabled: boolean; volume: n
 export async function loadSfxIndex(state: SfxState, audioCtx: AudioContext, assetsUrl: string): Promise<void> {
   if (!state.ready || !state.enabled) return;
 
-  const allEntries = await fetchPaq(`${assetsUrl}/${SFX_PAQ_NAME}`);
+  const allEntries = await fetchPaq(`${assetsUrl}/${SFX_PAK_NAME}`);
 
   // Filter to audio entries only (.ogg, .wav)
   const entries = new Map<string, Uint8Array>();
@@ -97,7 +97,7 @@ export async function loadSfxIndex(state: SfxState, audioCtx: AudioContext, asse
     }
   }
   if (missingEntries.length > 0) {
-    throw new Error(`audio: missing declared sfx assets in ${SFX_PAQ_NAME}: ${missingEntries.sort().join(', ')}`);
+    throw new Error(`audio: missing declared sfx assets in ${SFX_PAK_NAME}: ${missingEntries.sort().join(', ')}`);
   }
 
   const loadedByEntryName = new Map<string, SfxSample>();

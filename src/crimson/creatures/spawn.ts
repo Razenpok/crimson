@@ -896,9 +896,9 @@ function registerTemplate(templateIds: SpawnId[], fn: TemplateFn): void {
  * Note: the original only adds `interval` once (no loop), so large dt can keep the timer negative.
  */
 export function tickSpawnSlot(slot: SpawnSlotInit, frameDt: number): SpawnId | null {
-  const timer = f32(f32(slot.timer));
-  const interval = f32(f32(slot.interval));
-  const dt = f32(f32(frameDt));
+  const timer = f32(slot.timer);
+  const interval = f32(slot.interval);
+  const dt = f32(frameDt);
   const newTimer = f32(timer - dt);
   slot.timer = newTimer;
   if (slot.timer < 0.0) {

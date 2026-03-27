@@ -146,6 +146,7 @@ export class TutorialMode extends BaseGameplayMode {
     this._repeatButton = new UiButtonState('Repeat tutorial', { forceWide: true });
 
     this._perkPickPending = false;
+    this._frameInputState = null;
 
     this.state.perkSelection.pendingCount = 0;
     this.state.perkSelection.choices.length = 0;
@@ -170,6 +171,7 @@ export class TutorialMode extends BaseGameplayMode {
   close(): void {
     this._simSession = null;
     this._replayRecorder = null;
+    this._frameInputState = null;
     super.close();
   }
 
@@ -180,7 +182,7 @@ export class TutorialMode extends BaseGameplayMode {
   private _openPerkMenu(): void {
     this._openPerkMenuUi({
       menu: this._perkMenu,
-      players: this.simWorld.players,
+      players: [this.player],
       gameMode: GameMode.TUTORIAL,
       playerCount: 1,
     });

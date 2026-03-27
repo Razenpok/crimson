@@ -7,13 +7,13 @@ import { AimScheme, MovementControlType, type CrimsonControlsConfig } from '@gri
 // ---------------------------------------------------------------------------
 
 export enum RebindTarget {
-  PLAYER_MOVE_CODES = 0,
-  PLAYER_FIRE_CODE = 1,
-  PLAYER_KEYBOARD_AIM_CODES = 2,
-  PLAYER_AIM_AXIS_CODES = 3,
-  PLAYER_MOVE_AXIS_CODES = 4,
-  GLOBAL_PICK_PERK_CODE = 5,
-  GLOBAL_RELOAD_CODE = 6,
+  PLAYER_MOVE_CODES = 1,
+  PLAYER_FIRE_CODE = 2,
+  PLAYER_KEYBOARD_AIM_CODES = 3,
+  PLAYER_AIM_AXIS_CODES = 4,
+  PLAYER_MOVE_AXIS_CODES = 5,
+  GLOBAL_PICK_PERK_CODE = 6,
+  GLOBAL_RELOAD_CODE = 7,
 }
 
 // ---------------------------------------------------------------------------

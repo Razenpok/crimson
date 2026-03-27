@@ -12,7 +12,6 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { GameState } from '@crimson/game/types.ts';
 import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
-import type { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';

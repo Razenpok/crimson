@@ -20,19 +20,19 @@ const ROCKET_STYLE_BY_TYPE: Map<number, SecondaryRocketStyle> = new Map([
   [SecondaryProjectileTypeId.ROCKET, {
     baseSize: 14.0,
     glowSize: 60.0,
-    glowRgb: [1.0, 1.0, 1.0] as [number, number, number],
+    glowRgb: [1.0, 1.0, 1.0],
     glowAlphaMul: 0.68,
   }],
   [SecondaryProjectileTypeId.HOMING_ROCKET, {
     baseSize: 10.0,
     glowSize: 40.0,
-    glowRgb: [1.0, 1.0, 1.0] as [number, number, number],
+    glowRgb: [1.0, 1.0, 1.0],
     glowAlphaMul: 0.58,
   }],
   [SecondaryProjectileTypeId.ROCKET_MINIGUN, {
     baseSize: 8.0,
     glowSize: 30.0,
-    glowRgb: [0.7, 0.7, 1.0] as [number, number, number],
+    glowRgb: [0.7, 0.7, 1.0],
     glowAlphaMul: 0.158,
   }],
 ]);

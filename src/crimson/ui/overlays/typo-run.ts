@@ -27,6 +27,7 @@ export function drawTypoNameLabels(
     measureTextWidth: MeasureUiTextWidth;
   },
 ): void {
+  if (opts.names.length === 0) return;
   for (let idx = 0; idx < opts.creatures.length; idx++) {
     const creature = opts.creatures[idx];
     if (!creature.active) continue;

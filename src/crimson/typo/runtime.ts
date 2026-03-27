@@ -62,7 +62,7 @@ export function applyTypoCommand(
     if (entered === null) return;
 
     if (targetIdx !== null) {
-      const creature = world.creatures.entries[targetIdx];
+      const creature = world.creatures.entries[int(targetIdx)];
       if (creature.active) {
         typo.pendingFireTarget = new Vec2(
           creature.pos.x,

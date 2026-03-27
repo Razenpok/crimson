@@ -121,6 +121,7 @@ export function drawBonusHoverLabels(
   const frame = renderCtx.frame;
   const font = frame.resources.smallFont;
   if (font === null || font === undefined) return;
+  const textScale = 1.0;
   const screenW = wgl.getScreenWidth();
 
   const shadow = wgl.makeColor(0, 0, 0, (180 / 255) * alpha);

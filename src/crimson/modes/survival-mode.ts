@@ -64,7 +64,6 @@ const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
 // ---------------------------------------------------------------------------
 
 export class SurvivalMode extends BaseGameplayMode {
-  private _perkPromptPendingCount = 0;
   private _perkPrompt = new PerkPromptState();
   private _perkMenu = new PerkMenuController({ onClose: () => this._resetPerkPrompt() });
   private _hudFadeMs: number = PERK_MENU_TRANSITION_MS;
@@ -147,8 +146,7 @@ export class SurvivalMode extends BaseGameplayMode {
   }
 
   private _resetPerkPrompt(): void {
-    this._perkPromptPendingCount = this.state.perkSelection.pendingCount;
-    this._perkPrompt.resetIfPending({ pendingCount: this._perkPromptPendingCount });
+    this._perkPrompt.resetIfPending({ pendingCount: this.state.perkSelection.pendingCount });
   }
 
   private _updatePerkUi(dtUiMs: number, allowInput = true, allowPulse = true): void {
@@ -299,7 +297,6 @@ export class SurvivalMode extends BaseGameplayMode {
   open(): void {
     super.open();
 
-    this._perkPromptPendingCount = 0;
     this._perkPrompt.reset();
     this._perkMenu.reset();
     this._cursorTime = 0.0;
@@ -309,7 +306,6 @@ export class SurvivalMode extends BaseGameplayMode {
     this._lanLastTickIndex = -1;
 
     const status = this.state.status as GameStatus | null;
-    const baseStatus = this.saveStatus;
     const simUnlockIndex = status != null ? (status.questUnlockIndex ?? 0) : 0;
     const questUnlockIndex = int(simUnlockIndex);
 

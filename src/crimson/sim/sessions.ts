@@ -479,9 +479,6 @@ export class DeterministicSession {
 
     // Build presentation RNG trace
     const presentationRngTrace = new PresentationRngTrace();
-    if (recordingRng !== null) {
-      presentationRngTrace.drawsTotal = recordingRng.calls;
-    }
 
     // Plan presentation step
     const presT0 = performance.now();
@@ -506,6 +503,10 @@ export class DeterministicSession {
     });
     const presT1 = performance.now();
     const presentationPlanMs = presT1 - presT0;
+
+    if (recordingRng !== null) {
+      presentationRngTrace.drawsTotal = recordingRng.calls;
+    }
 
     // Build terrain FX batch (after presentation plan, matching Python)
     const terrainFxBatch = this.terrainFx.takeBatch();

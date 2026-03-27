@@ -5,10 +5,9 @@ import { CreatureFlags, SpawnId } from '@crimson/creatures/spawn-ids.ts';
 import { survivalCheckLevelUp } from "@crimson/gameplay.ts";
 import type { PlayerInput } from '@crimson/sim/input.ts';
 import { WorldState } from '@crimson/sim/world-state.ts';
-import { TutorialOverlayState, TutorialState } from "./state.ts";
+import { TutorialOverlayState } from "./state.ts";
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
-import { Vec2 } from "@grim/geom.js";
-import { BonusId } from "@crimson/bonuses/ids.js";
+import { DeterministicStepResult } from "@crimson/sim/step-pipeline.js";
 
 /**
  * TutorialWorldState is now the canonical WorldState from sim/world-state.
@@ -18,6 +17,7 @@ export type TutorialWorldState = WorldState;
 
 export interface TutorialStepContext {
   world: TutorialWorldState;
+  stepResult: DeterministicStepResult;
   dtSimMs: number;
   worldSize: number;
   detailPreset: number;

@@ -641,6 +641,7 @@ export class BaseGameplayMode {
       violenceDisabled: this.config.display.violenceDisabled,
       preserveBugs: this.state.preserveBugs ?? false,
       fxDetail: fxDetailEnabled(this.config.display, 0),
+      playSfx: (id: SfxId) => this.audioBridge.router.playSfx(id),
     };
   }
 

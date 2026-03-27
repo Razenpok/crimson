@@ -30,12 +30,6 @@ import {
 import {
   secondaryRuleForTypeId,
 } from './secondary-rules.ts';
-import type {
-  DetonationRule,
-  RocketRule,
-  HomingRocketRule,
-  RocketMinigunRule,
-} from './secondary-rules.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
 import { GameplayState } from "@crimson/gameplay.js";
 
@@ -106,7 +100,7 @@ export class SecondaryProjectilePool {
   spawnFromSpec(spec: SecondarySpawnSpec): number {
     const pos = spec.pos;
     const angle = spec.angle;
-    const typeId = spec.typeId as SecondaryProjectileTypeId;
+    const typeId = spec.typeId;
     const owner = spec.owner ?? OwnerRef.fromLocalPlayer(0);
     const timeToLive = spec.timeToLive ?? 2.0;
     const targetHint = spec.targetHint ?? null;
@@ -202,7 +196,7 @@ export class SecondaryProjectilePool {
     if (runtimeState !== null) {
       rng = runtimeState.rng;
       freezeActive = runtimeState.bonuses.freeze > 0.0;
-      effects = (runtimeState.effects as EffectPool | null) ?? null;
+      effects = runtimeState.effects ?? null;
       spriteEffects = runtimeState.spriteEffects ?? null;
       sfxQueue = runtimeState.sfxQueue;
     }
@@ -217,7 +211,7 @@ export class SecondaryProjectilePool {
     for (const entry of this._entries) {
       if (!entry.active) continue;
 
-      const rule = secondaryRuleForTypeId(entry.typeId as SecondaryProjectileTypeId);
+      const rule = secondaryRuleForTypeId(entry.typeId);
 
       if (rule.tag === 'detonation') {
         if (runtimeState !== null) {

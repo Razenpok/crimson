@@ -5,7 +5,7 @@ import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type CrimsonConfig } from '@grim/config.ts';
+import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type CrandLike } from '@grim/rand.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
@@ -418,6 +418,7 @@ export class QuestResultsUi {
     if (this._consumeEnter) {
       this._consumeEnter = false;
       InputState.wasKeyPressed(KEY_ENTER);
+      InputState.wasKeyPressed(KEY_KP_ENTER);
     }
 
     if (InputState.wasKeyPressed(KEY_ESCAPE)) {
@@ -469,6 +470,7 @@ export class QuestResultsUi {
       if (this._deferNameInputUntilControlsReleased) {
         flushTextInputEvents();
         InputState.wasKeyPressed(KEY_ENTER);
+        InputState.wasKeyPressed(KEY_KP_ENTER);
         if (!gameplayControlsHeld(this.config)) {
           this._deferNameInputUntilControlsReleased = false;
         }
@@ -494,11 +496,14 @@ export class QuestResultsUi {
       const okW = buttonWidth(resources, this._okButton.label, { scale, forceWide: this._okButton.forceWide });
       const okClicked = buttonUpdate(this._okButton, { pos: okPos, width: okW, dtMs, mouse, click });
 
-      if (okClicked || InputState.wasKeyPressed(KEY_ENTER)) {
+      if (okClicked || InputState.wasKeyPressed(KEY_ENTER) || InputState.wasKeyPressed(KEY_KP_ENTER)) {
         if (this.inputText.trim()) {
           if (playSfx !== null) playSfx(SfxId.UI_TYPEENTER);
           if (!this._saved) {
-            // In WebGL port, actual saving is handled by the caller
+            setPlayerNameInput(this.config.profile, this.inputText);
+            if (typeof (this.config as any).save === 'function') {
+              (this.config as any).save();
+            }
             this._saved = true;
           }
           this.phase = 2;
@@ -638,12 +643,12 @@ export class QuestResultsUi {
       let perkBonusMs = int(this.breakdown.unpickedPerkBonusMs);
       let finalTimeMs = int(this.breakdown.finalTimeMs);
       if (anim !== null && !anim.done) {
-        step = anim.step;
+        step = int(anim.step);
         highlightAlpha = anim.highlightAlpha();
-        baseTimeMs = anim.baseTimeMs;
-        lifeBonusMs = anim.lifeBonusMs;
-        perkBonusMs = anim.unpickedPerkBonusS * 1000;
-        finalTimeMs = anim.finalTimeMs;
+        baseTimeMs = int(anim.baseTimeMs);
+        lifeBonusMs = int(anim.lifeBonusMs);
+        perkBonusMs = int(anim.unpickedPerkBonusS * 1000);
+        finalTimeMs = int(anim.finalTimeMs);
       }
 
       const rowColor = (idx: number, final = false): wgl.Color => {

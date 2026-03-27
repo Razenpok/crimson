@@ -274,7 +274,7 @@ export class ProjectilePool {
       if (!proj.active) {
         continue;
       }
-      const rule = primaryRuleForTypeId(proj.typeId as ProjectileTemplateId);
+      const rule = primaryRuleForTypeId(proj.typeId);
 
       if (proj.lifeTimer <= 0.0) {
         proj.active = false;
@@ -413,7 +413,7 @@ export class ProjectilePool {
           rule.preHit(updateCtx, proj, hitIdx);
 
           const ownerPlayerIndex = proj.owner.playerIndexInBounds(
-            (runtimeState.shotsHit ?? []).length,
+            runtimeState.shotsHit.length,
           );
           if (ownerPlayerIndex !== null && creatureLifecycleIsAlive(creature.lifecycleStage)) {
             const shotsHit: number[] = runtimeState.shotsHit;

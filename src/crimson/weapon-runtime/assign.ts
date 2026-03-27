@@ -86,7 +86,7 @@ export function weaponAssignPlayer(
   player.weapon.shotCooldown = 0.0;
   player.auxTimer = 2.0;
 
-  state.sfxQueue.push(weapon.reloadSound);
+  state.sfxQueue?.push(weapon.reloadSound);
 }
 
 export function mostUsedWeaponIdForPlayer(

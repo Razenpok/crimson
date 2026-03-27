@@ -96,7 +96,6 @@ export class RushMode extends BaseGameplayMode {
     this._resetLanCaptureClock();
 
     const status = this.state.status as GameStatus | null;
-    const baseStatus = this.saveStatus;
     const simUnlockIndex = status != null ? (status.questUnlockIndex ?? 0) : 0;
     const questUnlockIndex = int(simUnlockIndex);
 

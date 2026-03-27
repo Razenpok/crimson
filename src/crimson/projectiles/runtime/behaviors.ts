@@ -210,7 +210,7 @@ export function postHitIonCommon(ctx: ProjectileUpdateCtx, hit: ProjectileHitInf
   spawnIonHitEffects(
     ctx.effects,
     ctx.sfxQueue,
-    hit.proj.typeId as ProjectileTemplateId,
+    hit.proj.typeId,
     hit.proj.pos,
     ctx.rng,
     ctx.detailPreset,
@@ -269,7 +269,7 @@ export function postHitIonRifle(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo
         projId = ctx.pool.spawn({
           pos: originPos,
           angle,
-          typeId: hit.proj.typeId as ProjectileTemplateId,
+          typeId: hit.proj.typeId,
           owner: OwnerRef.fromCreature(hitCreature),
           travelBudget: hit.proj.travelBudget,
         });

@@ -38,7 +38,7 @@ export function drawProjectile(
     proj,
     projIndex: int(projIndex),
     texture,
-    typeId: typeId as number,
+    typeId,
     pos: projPos,
     screenPos: screen,
     life,
@@ -51,9 +51,9 @@ export function drawProjectile(
   const mapping = KNOWN_PROJ_FRAMES.get(typeId);
   if (mapping === undefined) return;
   const [grid, frame] = mapping;
-  const alphaByte = clamp(clamp(life / 0.4, 0.0, 1.0) * alpha, 0.0, 1.0);
+  alpha = clamp(clamp(life / 0.4, 0.0, 1.0) * alpha, 0.0, 1.0);
   const [red, green, blue] = knownProjRgb(typeId);
-  const tint: [number, number, number, number] = [red / 255, green / 255, blue / 255, alphaByte];
+  const tint: [number, number, number, number] = [red / 255, green / 255, blue / 255, alpha];
   renderCtx.drawAtlasSprite(texture, grid, frame, screen, 0.6 * scale, angle, tint);
 }
 

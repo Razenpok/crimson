@@ -22,7 +22,6 @@ import { OwnerRef } from '@crimson/owner-ref.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { playerTakeDamage } from '@crimson/player-damage.ts';
-import { ProjectilePool } from '@crimson/projectiles/runtime/projectile-pool.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import {
@@ -50,8 +49,6 @@ import {
   HAS_SPAWN_SLOT_FLAG,
   RANDOM_HEADING_SENTINEL,
   type SpawnId,
-  type Tint,
-  type TintRGBA,
 } from './spawn-ids.ts';
 import { GameplayState } from "@crimson/gameplay.ts";
 
@@ -81,9 +78,9 @@ const CREATURE_DEATH_TIMER_DECAY = 28.0;
 const CREATURE_CORPSE_FADE_DECAY = 20.0;
 const CREATURE_DEATH_SLIDE_SCALE = 9.0;
 const _TARGET_REEVAL_PERIOD = 0x46;
-const _FLAG_SELF_DAMAGE_TICK = CreatureFlags.SELF_DAMAGE_TICK as number;
-const _FLAG_SELF_DAMAGE_TICK_STRONG = CreatureFlags.SELF_DAMAGE_TICK_STRONG as number;
-const _FLAG_AI7_LINK_TIMER = CreatureFlags.AI7_LINK_TIMER as number;
+const _FLAG_SELF_DAMAGE_TICK = CreatureFlags.SELF_DAMAGE_TICK;
+const _FLAG_SELF_DAMAGE_TICK_STRONG = CreatureFlags.SELF_DAMAGE_TICK_STRONG;
+const _FLAG_AI7_LINK_TIMER = CreatureFlags.AI7_LINK_TIMER;
 
 const _CREATURE_CONTACT_SFX: Map<CreatureTypeId, [SfxId, SfxId]> = new Map([
   [CreatureTypeId.ZOMBIE, [SfxId.ZOMBIE_ATTACK_01, SfxId.ZOMBIE_ATTACK_02]],
@@ -456,10 +453,10 @@ function _creatureInteractionContactDamage(ctx: _CreatureInteractionCtx): void {
   if (ctx.player.shieldTimer <= 0.0) {
     if (perkActive(ctx.player, PerkId.TOXIC_AVENGER)) {
       creature.flags |=
-        (CreatureFlags.SELF_DAMAGE_TICK as number) |
-        (CreatureFlags.SELF_DAMAGE_TICK_STRONG as number);
+        CreatureFlags.SELF_DAMAGE_TICK |
+        CreatureFlags.SELF_DAMAGE_TICK_STRONG;
     } else if (perkActive(ctx.player, PerkId.VEINS_OF_POISON)) {
-      creature.flags |= CreatureFlags.SELF_DAMAGE_TICK as number;
+      creature.flags |= CreatureFlags.SELF_DAMAGE_TICK;
     }
   }
 
@@ -1097,7 +1094,7 @@ export class CreaturePool {
       }
 
       const turnRate = f32(creature.moveSpeed * CREATURE_TURN_RATE_SCALE);
-      if (((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) === 0) {
+      if (((int(creature.flags)) & CreatureFlags.ANIM_PING_PONG) === 0) {
         if (creature.aiMode !== CreatureAiMode.HOLD_TIMER) {
           creature.heading = _angleApproach(
             creature.heading,
@@ -1119,7 +1116,7 @@ export class CreaturePool {
         const maxX = Math.max(radius, worldWidth - radius);
         const maxY = Math.max(radius, worldHeight - radius);
         creature.pos = f32Vec2(creature.pos.clampRect(radius, radius, maxX, maxY));
-        if (((int(creature.flags)) & (CreatureFlags.ANIM_LONG_STRIP as number)) === 0) {
+        if (((int(creature.flags)) & CreatureFlags.ANIM_LONG_STRIP) === 0) {
           creature.vel = new Vec2();
         } else {
           creature.heading = _angleApproach(
@@ -1191,11 +1188,11 @@ export class CreaturePool {
       if (
         !frozenByEvilEyes &&
         ((int(creature.flags)) &
-          ((CreatureFlags.RANGED_ATTACK_SHOCK as number) |
-            (CreatureFlags.RANGED_ATTACK_VARIANT as number))) !== 0
+          (CreatureFlags.RANGED_ATTACK_SHOCK |
+            CreatureFlags.RANGED_ATTACK_VARIANT)) !== 0
       ) {
         if (targetDist > 64.0 && creature.attackCooldown <= 0.0) {
-          if ((int(creature.flags)) & (CreatureFlags.RANGED_ATTACK_SHOCK as number)) {
+          if ((int(creature.flags)) & CreatureFlags.RANGED_ATTACK_SHOCK) {
             const typeId = ProjectileTemplateId.PLASMA_RIFLE;
             state.projectiles.spawn({
               pos: creature.pos,
@@ -1210,7 +1207,7 @@ export class CreaturePool {
           }
 
           if (
-            ((int(creature.flags)) & (CreatureFlags.RANGED_ATTACK_VARIANT as number)) !== 0 &&
+            ((int(creature.flags)) & CreatureFlags.RANGED_ATTACK_VARIANT) !== 0 &&
             creature.attackCooldown <= 0.0
           ) {
             const projectileType = creature.orbitRadius as ProjectileTemplateId;
@@ -1311,7 +1308,7 @@ export class CreaturePool {
     const creature = this._entries[int(idx)];
     survivalRecordRecentDeath(state, creature.pos);
     if (
-      ((int(creature.flags)) & (CreatureFlags.BONUS_ON_DEATH as number)) !== 0 &&
+      ((int(creature.flags)) & CreatureFlags.BONUS_ON_DEATH) !== 0 &&
       creature.bonusId !== null
     ) {
       state.bonusPool.spawnAt(
@@ -1454,8 +1451,8 @@ export class CreaturePool {
     }
 
     const longStrip =
-      ((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) === 0 ||
-      ((int(creature.flags)) & (CreatureFlags.ANIM_LONG_STRIP as number)) !== 0;
+      ((int(creature.flags)) & CreatureFlags.ANIM_PING_PONG) === 0 ||
+      ((int(creature.flags)) & CreatureFlags.ANIM_LONG_STRIP) !== 0;
 
     const newHitbox = f32(hitbox - f32(dtF32 * CREATURE_DEATH_TIMER_DECAY));
     creature.lifecycleStage = f32(newHitbox);
@@ -1497,7 +1494,7 @@ export class CreaturePool {
 
     if (
       violenceDisabled === 0 &&
-      ((int(creature.flags)) & (CreatureFlags.ANIM_PING_PONG as number)) !== 0 &&
+      ((int(creature.flags)) & CreatureFlags.ANIM_PING_PONG) !== 0 &&
       rng !== null &&
       this.effects !== null
     ) {
@@ -1542,15 +1539,15 @@ export class CreaturePool {
     players: PlayerState[],
     rng: CrandLike,
     detailPreset: number = 5,
-    worldWidth: number = 0,
-    worldHeight: number = 0,
+    worldWidth: number,
+    worldHeight: number,
   ): CreatureDeath {
     if (creature.spawnSlotIndex !== null) {
       this._disableSpawnSlot(creature.spawnSlotIndex);
     }
 
     if (
-      ((int(creature.flags)) & (CreatureFlags.SPLIT_ON_DEATH as number)) !== 0 &&
+      ((int(creature.flags)) & CreatureFlags.SPLIT_ON_DEATH) !== 0 &&
       creature.size > 35.0
     ) {
       const splits: [number, number][] = [
