@@ -434,7 +434,7 @@ function _directionFromHeadingNative(heading: number): Vec2 {
   return new Vec2(Math.cos(radians), Math.sin(radians));
 }
 
-function _resolveMoveNodeForUpdate(inputState: PlayerInput, state: GameplayState): MovementControlType {
+function _resolveMoveModeForUpdate(inputState: PlayerInput, state: GameplayState): MovementControlType {
   const moveMode = inputState.moveMode;
   if (moveMode !== null) return moveMode;
   if (state.demoModeActive) return MovementControlType.COMPUTER;
@@ -723,7 +723,7 @@ export function playerUpdate(
     player.auxTimer = Math.max(0.0, player.auxTimer - dt * auxDecay);
   }
 
-  const moveMode = _resolveMoveNodeForUpdate(inputState, state);
+  const moveMode = _resolveMoveModeForUpdate(inputState, state);
   const aimScheme = _resolveAimSchemeForUpdate(inputState, state);
 
   let speedMultiplier = player.speedMultiplier;

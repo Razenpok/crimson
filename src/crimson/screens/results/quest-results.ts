@@ -71,7 +71,7 @@ const COLOR_UI_ACCENT = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 1.0);
 
 // DOM key codes
 const KEY_ENTER = 13;
-const KEY_KP_ENTER = 335;
+const KEY_KP_ENTER = 13; // DOM numpad enter produces the same keyCode as regular enter
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const KEY_H = 72;
@@ -418,7 +418,6 @@ export class QuestResultsUi {
     if (this._consumeEnter) {
       this._consumeEnter = false;
       InputState.wasKeyPressed(KEY_ENTER);
-      InputState.wasKeyPressed(KEY_KP_ENTER);
     }
 
     if (InputState.wasKeyPressed(KEY_ESCAPE)) {
@@ -496,10 +495,13 @@ export class QuestResultsUi {
       const okW = buttonWidth(resources, this._okButton.label, { scale, forceWide: this._okButton.forceWide });
       const okClicked = buttonUpdate(this._okButton, { pos: okPos, width: okW, dtMs, mouse, click });
 
-      if (okClicked || InputState.wasKeyPressed(KEY_ENTER) || InputState.wasKeyPressed(KEY_KP_ENTER)) {
+      if (okClicked || InputState.wasKeyPressed(KEY_ENTER)) {
         if (this.inputText.trim()) {
           if (playSfx !== null) playSfx(SfxId.UI_TYPEENTER);
           if (!this._saved) {
+            // In the WebGL port we don't have file-based highscore tables,
+            // so we set highlightRank based on the pre-computed rank.
+            this.highlightRank = this.rank < TABLE_MAX ? this.rank : null;
             setPlayerNameInput(this.config.profile, this.inputText);
             if (typeof (this.config as any).save === 'function') {
               (this.config as any).save();

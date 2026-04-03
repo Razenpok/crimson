@@ -310,7 +310,7 @@ export class AlienZooKeeperView {
       const y = layout.boardY + row * layout.tileSize;
       if (!mouseInsideRect(mx, my, x, y, layout.tileSize, layout.tileSize)) continue;
 
-      audioPlaySfx(this.state.audio, SfxId.UI_CLINK_01);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_CLINK_01);
 
       if (this._selectedIndex === -1) {
         this._selectedIndex = index;
@@ -345,7 +345,7 @@ export class AlienZooKeeperView {
 
       this._score += 1;
       this._timerMs += _MATCH_TIMER_BONUS_MS;
-      audioPlaySfx(this.state.audio, SfxId.UI_BONUS);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BONUS);
       return;
     }
   }
@@ -381,7 +381,7 @@ export class AlienZooKeeperView {
         this._timerMs -= dtMs;
         if (this._timerMs <= 0) {
           this._timerMs = 0;
-          audioPlaySfx(this.state.audio, SfxId.TROOPER_DIE_01);
+          if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.TROOPER_DIE_01);
         }
       } else if (this._timerMs < 0) {
         this._timerMs = 0;
@@ -392,7 +392,7 @@ export class AlienZooKeeperView {
 
     const interactive = this._timelineMs >= this._timelineMaxMs;
     if (InputState.wasKeyPressed(KEY_ESCAPE) && interactive) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_statistics');
       return;
     }
@@ -412,14 +412,14 @@ export class AlienZooKeeperView {
 
     const resetW = buttonWidth(resources, this._resetButton.label, { scale, forceWide: this._resetButton.forceWide });
     if (buttonUpdate(this._resetButton, { pos: layout.resetPos, width: resetW, dtMs: dtMsF, mouse, click })) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._resetState();
       return;
     }
 
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
     if (buttonUpdate(this._backButton, { pos: layout.backPos, width: backW, dtMs: dtMsF, mouse, click })) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_statistics');
       return;
     }

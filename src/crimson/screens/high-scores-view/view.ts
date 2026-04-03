@@ -297,7 +297,7 @@ export class HighScoresView {
       }
     }
 
-    const rows = this._visibleRows(font);
+    const rows = 10;
     const maxScroll = Math.max(0, this._records.length - rows);
 
     if (enabled) {
@@ -405,7 +405,7 @@ export class HighScoresView {
     if (request === null) return;
     this._records = loadRecords(this.state, request);
     const resources = requireRuntimeResources(this.state);
-    const rows = this._visibleRows(resources.smallFont);
+    const rows = 10;
     this._scrollIndex = Math.max(0, Math.min(this._scrollIndex, Math.max(0, this._records.length - rows)));
   }
 

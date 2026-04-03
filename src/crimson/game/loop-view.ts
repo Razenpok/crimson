@@ -42,8 +42,8 @@ import { AlienZooKeeperView } from '@crimson/screens/panels/alien-zookeeper.ts';
 import { ModsMenuView } from '@crimson/screens/panels/mods.ts';
 import { PanelMenuView } from '@crimson/screens/panels/base.ts';
 
-import { QuestsMenuView } from '@crimson/screens/quest-views/quests-menu.ts';
-import { QuestResultsView } from '@crimson/screens/quest-views/quest-results.ts';
+import { QuestsMenuView, type QuestsMenuState } from '@crimson/screens/quest-views/quests-menu.ts';
+import { QuestResultsView, type QuestResultsState } from '@crimson/screens/quest-views/quest-results.ts';
 import { QuestFailedView } from '@crimson/screens/quest-views/quest-failed.ts';
 import { EndNoteView } from '@crimson/screens/quest-views/end-note.ts';
 
@@ -217,19 +217,22 @@ export class GameLoopView implements View {
 
     const _viewCtx = modeViewContext(state);
 
-    // Screen constructors use structural sub-interfaces of GameState.
-    // We widen the type where the interface extends PanelGameState or
-    // a specialised state shape that GameState satisfies at runtime
-    // once all fields are populated (resources, status, etc.).
-    const gs: any = state;
-    gs.status = status;
+    // Screen constructors use structural sub-interfaces of GameState that
+    // include a `status` field.  We attach the persistent status via a typed
+    // intersection so that each view's structural constraint is satisfied
+    // without resorting to a blanket `as any`.
+    //
+    // Two views (QuestsMenuView, QuestResultsView) have deeper structural
+    // mismatches (e.g. config.save(), assetsDir) that are pre-existing gaps
+    // in the port — they use targeted casts below.
+    const gs = Object.assign(state, { status }) as GameState & { status: GameStatusPersist };
 
     this._frontViews = {
       open_play_game: new PlayGameMenuView(gs),
       // Network session / lobby screens stubbed — LAN excluded from WebGL port
       // open_lan_session: no-op
       // open_lan_lobby: no-op
-      open_quests: new QuestsMenuView(gs),
+      open_quests: new QuestsMenuView(gs as unknown as QuestsMenuState),
       open_pause_menu: new PauseMenuView(gs),
       start_quest: new QuestMode({
         demoModeActive: state.demoEnabled,
@@ -238,7 +241,7 @@ export class GameLoopView implements View {
         audio: state.audio,
         audioRng: state.rng,
       }),
-      quest_results: new QuestResultsView(gs),
+      quest_results: new QuestResultsView(gs as unknown as QuestResultsState),
       quest_failed: new QuestFailedView(gs),
       end_note: new EndNoteView(gs),
       open_high_scores: new HighScoresView(gs),
@@ -1084,10 +1087,10 @@ export class GameLoopView implements View {
       const [mouseX, mouseY] = InputState.mousePosition();
       this._demoTrialOverlayView()?.draw(info, screenW, screenH, mouseX, mouseY);
     }
-    // Console draw is handled by the console's own draw method
-    // which requires ctx — deferred to the caller or the console itself.
-    // state.console.draw(ctx, null, null);
-    // state.console.drawFpsCounter(ctx);
+    const res = this.state.resources;
+    const smallFont = res !== null ? res.smallFont : null;
+    this.state.console.draw(smallFont, null);
+    this.state.console.drawFpsCounter(smallFont);
   }
 
   private _drawWithGamma(): void {
@@ -1097,8 +1100,10 @@ export class GameLoopView implements View {
       return;
     }
 
-    // TODO: When gamma ramp shader is wired up, wrap _drawSceneLayers in
-    // a shader pass. For now, draw without gamma correction.
+    // TODO: Gamma ramp shader is a known missing feature. The GLSL source
+    // (GAMMA_RAMP_VS / GAMMA_RAMP_FS) is defined above but not yet compiled
+    // into a WebGL2 program. Until the shader pipeline is wired up, gamma
+    // correction is skipped and scenes render at gain=1.0.
     this._drawSceneLayers();
   }
 

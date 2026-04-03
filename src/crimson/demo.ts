@@ -583,11 +583,8 @@ export class DemoView {
     const rng = this._runtime.simWorld.state.rng;
     this._setupWorldPlayers([[new Vec2(512.0, 512.0), weaponId]]);
     const quest = questByLevel(new QuestLevel(1, 1));
-    // Native variant 3 calls terrain_generate(&quest_selected_meta), which is the
-    // base of the quest metadata array in this build, so it resolves to quest 1.1.
-    if (quest !== null) {
-      this._applyTerrainSetup({ terrainSlots: quest.terrainSlots });
-    }
+    if (quest === null) throw new Error("quest 1.1 must exist");
+    this._applyTerrainSetup({ terrainSlots: quest.terrainSlots });
     for (let idx = 0; idx < 20; idx++) {
       const x =
         int(rng.rand({ caller: RngCallerStatic.DEMO_SETUP_VARIANT_3_ALIEN_BIG_X }) % 200) + 32;

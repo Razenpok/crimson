@@ -82,7 +82,19 @@ export function createGameStatus(): GameStatusPersist {
     saveIfDirty(): void {
       if (!_dirty) return;
       _dirty = false;
-      // TODO: persist to localStorage
+      try {
+        const data = {
+          gameSequenceId: _gameSequenceId,
+          questUnlockIndex: this.questUnlockIndex,
+          questUnlockIndexFull: this.questUnlockIndexFull,
+          questPlayCounts: Array.from(_questPlayCounts),
+          modePlayCounts: Array.from(_modePlayCounts.entries()),
+          weaponUsageCounts: Array.from(_weaponUsageCounts.entries()),
+        };
+        localStorage.setItem('crimson-game-status', JSON.stringify(data));
+      } catch {
+        // localStorage may be unavailable (private browsing, quota exceeded, etc.)
+      }
     },
     incrementModePlayCountForMode(mode: GameMode): void {
       _modePlayCounts.set(mode, (_modePlayCounts.get(mode) ?? 0) + 1);

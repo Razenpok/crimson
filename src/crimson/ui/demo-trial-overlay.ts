@@ -210,10 +210,7 @@ export class DemoTrialOverlayUi {
 
     // Buttons
     const scale = 1.0;
-    const btnW = buttonWidth(this._resources, this._purchaseButton.label, {
-      scale,
-      forceWide: true,
-    });
+    const btnW = 145.0 * scale;
     const gap = 20.0;
     const rowW = btnW * 2.0 + gap;
     const buttonBasePos = panelPos.offset({ dx: 256.0 - rowW * 0.5, dy: 214.0 });

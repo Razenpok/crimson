@@ -5,7 +5,7 @@ import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type CrimsonConfig } from '@grim/config.ts';
+import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type CrandLike } from '@grim/rand.ts';
 import { GameMode } from '@crimson/game-modes.ts';
@@ -350,9 +350,12 @@ export class GameOverUi {
           if (playSfx !== null) {
             playSfx(SfxId.UI_TYPEENTER);
           }
-          // In WebGL port, saving is handled by the caller
           if (!this._saved) {
             this._saved = true;
+          }
+          setPlayerNameInput(this.config.profile, this.inputText);
+          if (typeof (this.config as any).save === 'function') {
+            (this.config as any).save();
           }
           this.phase = 1;
           return null;

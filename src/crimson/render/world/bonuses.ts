@@ -120,7 +120,6 @@ export function drawBonusHoverLabels(
 
   const frame = renderCtx.frame;
   const font = frame.resources.smallFont;
-  if (font === null || font === undefined) return;
   const textScale = 1.0;
   const screenW = wgl.getScreenWidth();
 
@@ -141,12 +140,21 @@ export function drawBonusHoverLabels(
     let x = aimScreen.x + 16.0;
     const y = aimScreen.y - 7.0;
 
-    const textW = measureSmallTextWidth(font, label);
-    if (x + textW > screenW) {
-      x = Math.max(0.0, screenW - textW);
+    if (font !== null && font !== undefined) {
+      const textW = measureSmallTextWidth(font, label);
+      if (x + textW > screenW) {
+        x = Math.max(0.0, screenW - textW);
+      }
+      drawSmallText(font, label, new Vec2(x + 1.0, y + 1.0), shadow);
+      drawSmallText(font, label, new Vec2(x, y), color);
+    } else {
+      const fontSize = int(18 * textScale);
+      const textW = wgl.measureText(label, fontSize);
+      if (x + textW > screenW) {
+        x = Math.max(0.0, screenW - textW);
+      }
+      wgl.drawText(label, int(x) + 1, int(y) + 1, fontSize, shadow);
+      wgl.drawText(label, int(x), int(y), fontSize, color);
     }
-
-    drawSmallText(font, label, new Vec2(x + 1.0, y + 1.0), shadow);
-    drawSmallText(font, label, new Vec2(x, y), color);
   }
 }

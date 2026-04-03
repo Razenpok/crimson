@@ -143,7 +143,7 @@ export class QuestResultsView {
 
     // Advance quest unlock progression when completing the currently-unlocked quest.
     if (globalIndex >= 0) {
-      const nextUnlock = globalIndex + 1;
+      const nextUnlock = int(globalIndex + 1);
       const hardcore = this.state.config.gameplay.hardcore;
       try {
         if (hardcore) {
@@ -174,15 +174,17 @@ export class QuestResultsView {
       player2Health: outcome.player2Health,
       playerHealthValues: outcome.playerHealthValues,
     });
+    const shotsFired = Math.max(0, int(outcome.shotsFired));
+    const shotsHit = Math.max(0, Math.min(int(outcome.shotsHit), shotsFired));
     const record = {
       gameModeId: GameMode.QUESTS,
       scoreXp: int(outcome.experience),
-      survivalElapsedMs: breakdown.finalTimeMs,
+      survivalElapsedMs: int(breakdown.finalTimeMs),
       mostUsedWeaponId: outcome.mostUsedWeaponId,
       creatureKillCount: int(outcome.killCount),
-      shotsFired: int(outcome.shotsFired),
-      shotsHit: int(outcome.shotsHit),
-      name: '',
+      shotsFired,
+      shotsHit,
+      name: playerNameDefault(this.state.config as unknown as CrimsonConfig),
     };
     // The view's state.config is a subset of CrimsonConfig; at runtime it is always
     // the full CrimsonConfig instance, so the cast is safe.

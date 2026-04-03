@@ -22,6 +22,13 @@ export const CONSOLE_VERSION_OFFSET_X = 210.0;
 export const CONSOLE_VERSION_OFFSET_Y = 18.0;
 export const CONSOLE_BG_COLOR: [number, number, number] = [0.140625, 0.1875, 0.2890625];
 export const CONSOLE_BORDER_COLOR: [number, number, number] = [0.21875, 0.265625, 0.3671875];
+export const CONSOLE_SMALL_SCALE = 1.0;
+export const FPS_COUNTER_X_SHORT = 45.0;
+export const FPS_COUNTER_X_LONG = 51.0;
+export const FPS_COUNTER_Y = 24.0;
+export const FPS_COUNTER_CAP = 400;
+export const FPS_COUNTER_CAP_TEXT = '400+';
+export const FPS_COUNTER_ALPHA = 0.6;
 export const CONSOLE_BORDER_HEIGHT = 4.0;
 export const CONSOLE_PROMPT_MONO = '>';
 export const CONSOLE_PROMPT_SMALL = '>';
@@ -281,10 +288,22 @@ export class ConsoleState {
     // No-op in WebGL — Python flushes to a log file on disk.
   }
 
-  drawFpsCounter(): void {
+  drawFpsCounter(smallFont: SmallFontData | null): void {
     const cvar = this.cvars.get('cv_showFPS');
     if (cvar === undefined || cvar.valueF === 0.0) return;
-    // FPS counter rendering not yet implemented for WebGL
+    if (smallFont === null) return;
+    const fps = Math.max(0, int(wgl.getFps()));
+    let text: string;
+    let posX: number;
+    if (fps < FPS_COUNTER_CAP) {
+      text = String(fps);
+      posX = wgl.getScreenWidth() - FPS_COUNTER_X_SHORT;
+    } else {
+      text = FPS_COUNTER_CAP_TEXT;
+      posX = wgl.getScreenWidth() - FPS_COUNTER_X_LONG;
+    }
+    const posY = wgl.getScreenHeight() - FPS_COUNTER_Y;
+    drawSmallText(smallFont, text, new Vec2(posX, posY), wgl.makeColor(1.0, 1.0, 1.0, FPS_COUNTER_ALPHA));
   }
 
   handleHotkey(): void {
@@ -544,6 +563,18 @@ export function createConsole(): ConsoleState {
   console.registerCvar('cv_silentloads', '1');
   console.registerCvar('cv_bodiesFade', '1');
   console.registerCvar('cv_uiTransparency', '1');
+  console.registerCvar('cv_uiPointFilterPanels', '0');
+  console.registerCvar('cv_enableMousePointAndClickMovement', '0');
+  console.registerCvar('cv_verbose', '0');
+  console.registerCvar('cv_terrainBodiesTransparency', '0');
+  console.registerCvar('cv_uiSmallIndicators', '0');
+  console.registerCvar('cv_aimEnhancementFade', '0.7');
+  console.registerCvar('cv_friendlyFire', '0');
+  console.registerCvar('cv_lanLockstepEnabled', '0');
+  console.registerCvar('cv_lanPlayerRings', '0');
+  console.registerCvar('cv_padAimDistMul', '96');
+  console.registerCvar('v_width', '1024');
+  console.registerCvar('v_height', '768');
   console._slideT = 1.0;
   console._offsetY = -console.heightPx;
   registerCoreCommands(console);

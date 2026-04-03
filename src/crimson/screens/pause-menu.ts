@@ -55,6 +55,7 @@ const KEY_ESCAPE = 27;
 const KEY_ENTER = 13;
 const KEY_TAB = 9;
 const KEY_LEFT_SHIFT = 16;
+const KEY_RIGHT_SHIFT = 345;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
@@ -178,7 +179,7 @@ export class PauseMenuView {
 
     // Tab navigation
     if (InputState.wasKeyPressed(KEY_TAB)) {
-      const reverse = InputState.isKeyDown(KEY_LEFT_SHIFT);
+      const reverse = InputState.isKeyDown(KEY_LEFT_SHIFT) || InputState.isKeyDown(KEY_RIGHT_SHIFT);
       const delta = reverse ? -1 : 1;
       this._selectedIndex = ((this._selectedIndex + delta) % this._menuEntries.length + this._menuEntries.length) % this._menuEntries.length;
       this._focusTimerMs = 1000;

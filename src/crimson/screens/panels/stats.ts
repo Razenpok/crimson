@@ -260,7 +260,7 @@ export class StatisticsMenuView {
     const interactive = this._timelineMs >= this._timelineMaxMs;
 
     if (InputState.wasKeyPressed(KEY_ESCAPE) && interactive) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('back_to_menu');
       return;
     }
@@ -290,29 +290,29 @@ export class StatisticsMenuView {
 
     const buttonBase = panelTopLeft.add(new Vec2(_BUTTON_X * scale, _BUTTON_Y0 * scale));
     if (updateButton(this._btnHighScores, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 0.0 * scale }))) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_high_scores');
       return;
     }
     if (updateButton(this._btnWeapons, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 1.0 * scale }))) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_weapon_database');
       return;
     }
     if (updateButton(this._btnPerks, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 2.0 * scale }))) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_perk_database');
       return;
     }
     if (updateButton(this._btnCredits, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 3.0 * scale }))) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_credits');
       return;
     }
 
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
     if (updateButton(this._btnBack, backPos)) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('back_to_menu');
       return;
     }

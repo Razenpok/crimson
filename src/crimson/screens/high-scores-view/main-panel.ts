@@ -85,7 +85,7 @@ export function drawMainPanel(
     drawSmallText(font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
 
     const arrow = getTexture(resources, TextureId.UI_ARROW);
-    const globalIndex = questLevel.globalIndex;
+    const globalIndex = int(questLevel.globalIndex);
     const unlock = hardcore
       ? int(view.questUnlockIndexFull)
       : int(view.questUnlockIndex);

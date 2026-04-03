@@ -91,6 +91,8 @@ export class GroundRenderer {
 
     try {
       this.renderTarget = wgl.loadRenderTexture(renderW, renderH);
+      wgl.setTextureFilter(this.renderTarget.texture, wgl.TextureFilter.BILINEAR);
+      wgl.setTextureWrap(this.renderTarget.texture, wgl.TextureWrap.CLAMP);
       this.textureFailed = false;
     } catch {
       this.textureFailed = true;

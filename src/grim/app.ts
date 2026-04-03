@@ -55,6 +55,7 @@ export class App {
 
     const dt = Math.min((now - this._lastTime) / 1000.0, 0.1);
     this._lastTime = now;
+    wgl.updateFps(now);
 
     // Handle canvas resize
     const canvas = wgl.getCanvas();

@@ -168,7 +168,7 @@ export class QuestsMenuView {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
-    this._ground = this.state.pauseBackground !== null ? null : (this.state.menuGround ?? null);
+    this._initGround();
     this._action = null;
     this._dirty = false;
     this._stage = Math.max(1, Math.min(5, int(this._stage)));
@@ -184,7 +184,6 @@ export class QuestsMenuView {
 
   close(): void {
     this._isOpen = false;
-    this._ground = null;
     if (this._dirty) {
       try {
         this.state.config.save();
@@ -193,6 +192,7 @@ export class QuestsMenuView {
       }
       this._dirty = false;
     }
+    this._ground = null;
   }
 
   update(dt: number): void {
@@ -201,8 +201,8 @@ export class QuestsMenuView {
     if (this.state.audio !== null) {
       audioUpdate(this.state.audio, dt);
     }
-    if (this.state.menuGround !== null) {
-      this.state.menuGround.processPending();
+    if (this._ground !== null) {
+      this._ground.processPending();
     }
 
     this._cursorPulseTime += Math.min(dt, 0.1) * 1.1;
@@ -323,9 +323,9 @@ export class QuestsMenuView {
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground();
-    } else if (this.state.menuGround !== null) {
+    } else if (this._ground !== null) {
       const camera = this.state.menuGroundCamera ?? new Vec2();
-      this.state.menuGround.draw(camera);
+      this._ground.draw(camera);
     }
 
     drawScreenFade(this.state);
@@ -744,6 +744,14 @@ export class QuestsMenuView {
         tint: WHITE, shadow: fxDetail,
       },
     );
+  }
+
+  private _initGround(): void {
+    if (this.state.pauseBackground !== null) {
+      this._ground = null;
+      return;
+    }
+    this._ground = this.state.menuGround ?? null;
   }
 
   private _beginCloseTransition(action: string): void {

@@ -15,6 +15,7 @@ import { type GameState } from '@crimson/game/types.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
+import { uiElementAnim, signLayoutScale } from './panels/base.ts';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -175,55 +176,9 @@ export class MenuEntry {
   }
 }
 
-// ---------------------------------------------------------------------------
-// UI element animation — port of MenuView._ui_element_anim
-// ---------------------------------------------------------------------------
-
-function uiElementAnim(
-  timelineMs: number,
-  index: number,
-  startMs: number,
-  endMs: number,
-  width: number,
-  directionFlag: number = 0,
-): [number, number] {
-  // Matches ui_element_update: angle lerps pi/2 -> 0 over [end_ms, start_ms].
-  // directionFlag=0 slides from left  (-width -> 0)
-  // directionFlag=1 slides from right (+width -> 0)
-  if (startMs <= endMs || width <= 0.0) {
-    return [0.0, 0.0];
-  }
-  const dirSign = directionFlag ? 1.0 : -1.0;
-  const t = int(timelineMs);
-  if (t < endMs) {
-    const angle = 1.5707964;
-    const offsetX = dirSign * Math.abs(width);
-    return [angle, offsetX];
-  } else if (t < startMs) {
-    const elapsed = t - endMs;
-    const span = startMs - endMs;
-    const p = elapsed / span;
-    const angle = 1.5707964 * (1.0 - p);
-    const offsetX = dirSign * ((1.0 - p) * Math.abs(width));
-    return [angle, offsetX];
-  } else {
-    return [0.0, 0.0];
-  }
-}
-
 function labelAlpha(counterValue: number): number {
   // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
   return 100 + int((counterValue * 155) / 1000);
-}
-
-function signLayoutScale(width: number): [number, number] {
-  if (width <= MENU_SCALE_SMALL_THRESHOLD) {
-    return [MENU_SCALE_SMALL, MENU_SCALE_SHIFT];
-  }
-  if (MENU_SCALE_LARGE_MIN <= width && width <= MENU_SCALE_LARGE_MAX) {
-    return [MENU_SCALE_LARGE, MENU_SCALE_SHIFT];
-  }
-  return [1.0, 0.0];
 }
 
 // ---------------------------------------------------------------------------
@@ -239,7 +194,7 @@ export class MenuView {
   private _focusTimerMs: number = 0;
   private _hoveredIndex: number | null = null;
   private _fullVersion: boolean = false;
-  private _timelineMs: number = 0;
+  _timelineMs: number = 0;
   private _timelineMaxMs: number = 0;
   private _idleMs: number = 0;
   private _lastMousePos: Vec2 = new Vec2();
@@ -445,6 +400,8 @@ export class MenuView {
       return;
     }
     const entry = this._menuEntries[index];
+    this.state.console.log.log(`menu select: ${index} (row ${entry.row})`);
+    this.state.console.log.flush();
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
     }
@@ -544,7 +501,7 @@ export class MenuView {
       const posX = MenuView._menuSlotPosX(entry.slot);
       const posY = entry.y;
       const [angleRad, _slideX] = uiElementAnim(
-        this._timelineMs,
+        this,
         entry.slot + 2,
         MenuView._menuSlotStartMs(entry.slot),
         MenuView._menuSlotEndMs(entry.slot),
@@ -742,7 +699,7 @@ export class MenuView {
     let rotationDeg = 0.0;
     if (!this.state.menuSignLocked) {
       const [angleRad, _slideX] = uiElementAnim(
-        this._timelineMs,
+        this,
         0,
         300,
         0,

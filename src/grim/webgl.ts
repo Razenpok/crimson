@@ -416,6 +416,24 @@ export class WebGLContext {
     gl.deleteTexture(rt.texture.id);
   }
 
+  setTextureFilter(texture: GlTexture, filter: number): void {
+    const gl = this.gl;
+    this.flush();
+    gl.bindTexture(gl.TEXTURE_2D, texture.id);
+    const glFilter = filter === 1 ? gl.LINEAR : gl.NEAREST;
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, glFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, glFilter);
+  }
+
+  setTextureWrap(texture: GlTexture, wrap: number): void {
+    const gl = this.gl;
+    this.flush();
+    gl.bindTexture(gl.TEXTURE_2D, texture.id);
+    const glWrap = wrap === 1 ? gl.CLAMP_TO_EDGE : gl.REPEAT;
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, glWrap);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, glWrap);
+  }
+
   beginRenderTarget(rt: RenderTarget): void {
     this.flush();
     this._rtStack.push(this._currentRT);

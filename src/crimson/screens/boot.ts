@@ -40,7 +40,7 @@ export class BootView {
   private _logoActive: boolean = false;
   private _introStarted: boolean = false;
   private _themeStarted: boolean = false;
-  private _loadingHoldRemaining: number = 0.5;
+  private _loadingHoldRemaining: number = 0.0;
 
   constructor(state: GameState) {
     this.state = state;
@@ -55,7 +55,7 @@ export class BootView {
     this._logoActive = false;
     this._introStarted = false;
     this._themeStarted = false;
-    this._loadingHoldRemaining = 1.0;
+    this._loadingHoldRemaining = 0.0;
     this._loadResources();
   }
 

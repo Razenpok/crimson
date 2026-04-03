@@ -138,6 +138,57 @@ export function resize(width: number, height: number): void { ctx.resize(width, 
 export function getCanvas(): HTMLCanvasElement { return ctx.canvas; }
 export function destroy(): void { ctx.destroy(); }
 
+// Simple FPS counter — tracks the last frame time and returns 1/dt.
+let _lastFrameTime = 0;
+let _currentFps = 0;
+export function updateFps(now: number): void {
+  if (_lastFrameTime > 0) {
+    const dt = (now - _lastFrameTime) * 0.001;
+    _currentFps = dt > 0 ? 1.0 / dt : 0;
+  }
+  _lastFrameTime = now;
+}
+export function getFps(): number { return _currentFps; }
+
+// ---------------------------------------------------------------------------
+// Texture settings — matches rl.set_texture_filter / rl.set_texture_wrap
+// ---------------------------------------------------------------------------
+
+export const enum TextureFilter {
+  POINT = 0,
+  BILINEAR = 1,
+}
+
+export const enum TextureWrap {
+  REPEAT = 0,
+  CLAMP = 1,
+}
+
+export function setTextureFilter(texture: Texture, filter: TextureFilter): void {
+  ctx.setTextureFilter(texture, filter);
+}
+
+export function setTextureWrap(texture: Texture, wrap: TextureWrap): void {
+  ctx.setTextureWrap(texture, wrap);
+}
+
+// ---------------------------------------------------------------------------
+// Text fallback — matches rl.measure_text / rl.draw_text for the no-font path.
+// In the WebGL port the bitmap font is always loaded, so these are rarely hit.
+// They use the 2D canvas measurement API as a rough approximation.
+// ---------------------------------------------------------------------------
+
+export function measureText(text: string, fontSize: number): number {
+  // Approximate: assume ~0.6 em-width per character at the given font size.
+  return text.length * fontSize * 0.6;
+}
+
+export function drawText(text: string, x: number, y: number, fontSize: number, color: Color): void {
+  // Fallback text rendering is a no-op in the WebGL port; the bitmap font
+  // path should always be available.  This stub exists only to keep the
+  // two-branch structure consistent with the Python source.
+}
+
 // ---------------------------------------------------------------------------
 // Blend factor constants — matches rd.* (raylib defines)
 // These are standard WebGL enum values.
