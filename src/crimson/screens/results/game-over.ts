@@ -424,15 +424,15 @@ export class GameOverUi {
     const { pos, record, resources, font, alpha, showWeaponRow, scale, mouse } = opts;
     const dtHover = this._dt * 2.0;
     const labelColor = wgl.makeColor(
-      COLOR_SCORE_LABEL[0], COLOR_SCORE_LABEL[1], COLOR_SCORE_LABEL[2],
+      COLOR_SCORE_LABEL.r, COLOR_SCORE_LABEL.g, COLOR_SCORE_LABEL.b,
       alpha * 0.8,
     );
     const valueColor = wgl.makeColor(
-      COLOR_SCORE_VALUE[0], COLOR_SCORE_VALUE[1], COLOR_SCORE_VALUE[2],
+      COLOR_SCORE_VALUE.r, COLOR_SCORE_VALUE.g, COLOR_SCORE_VALUE.b,
       alpha,
     );
     const hintColor = wgl.makeColor(
-      COLOR_SCORE_LABEL[0], COLOR_SCORE_LABEL[1], COLOR_SCORE_LABEL[2],
+      COLOR_SCORE_LABEL.r, COLOR_SCORE_LABEL.g, COLOR_SCORE_LABEL.b,
       alpha * 0.7,
     );
 
@@ -484,7 +484,7 @@ export class GameOverUi {
       int(cardOrigin.y),
       1,
       int(48.0 * scale),
-      wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], labelColor[3]),
+      wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, labelColor.a),
     );
 
     // Right column: Game time + gauge, or Experience in quest mode.
@@ -582,7 +582,7 @@ export class GameOverUi {
 
     if (this._hoverWeapon > 0.5) {
       const t = (this._hoverWeapon - 0.5) * 2.0;
-      const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
+      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, alpha * t);
       drawSmall(
         font,
         'Most used weapon during the game',
@@ -592,7 +592,7 @@ export class GameOverUi {
     }
     if (this._hoverTime > 0.5) {
       const t = (this._hoverTime - 0.5) * 2.0;
-      const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
+      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, alpha * t);
       drawSmall(
         font,
         'The time the game lasted',
@@ -602,7 +602,7 @@ export class GameOverUi {
     }
     if (this._hoverHitRatio > 0.5) {
       const t = (this._hoverHitRatio - 0.5) * 2.0;
-      const col = wgl.makeColor(labelColor[0], labelColor[1], labelColor[2], alpha * t);
+      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, alpha * t);
       const hitRatioTooltip = this.preserveBugs
         ? 'The % of shot bullets hit the target'
         : 'The % of bullets that hit the target';
@@ -719,7 +719,7 @@ export class GameOverUi {
         int(inputPos.y + 2.0 * scale),
         int(1.0 * scale),
         int(14.0 * scale),
-        wgl.makeColor(caretColor[0], caretColor[1], caretColor[2], caretColor[3]),
+        wgl.makeColor(caretColor.r, caretColor.g, caretColor.b, caretColor.a),
       );
 
       const okPos = formPos.add(new Vec2(170.0 * scale, 32.0 * scale));

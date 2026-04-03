@@ -294,7 +294,7 @@ export class TutorialMode extends BaseGameplayMode {
         },
       );
       const gap = 18.0;
-      const buttonBasePos = new Vec2(rect[0] + 10.0, rect[1] + rect[3] + 10.0);
+      const buttonBasePos = new Vec2(rect.x + 10.0, rect.y + rect.h + 10.0);
       const playW = buttonWidth(resources, this._playButton.label, { scale: 1.0, forceWide: true });
       const repeatW = buttonWidth(resources, this._repeatButton.label, { scale: 1.0, forceWide: true });
 
@@ -496,7 +496,7 @@ export class TutorialMode extends BaseGameplayMode {
         },
       );
       const gap = 18.0;
-      const buttonBasePos = new Vec2(rect[0] + 10.0, rect[1] + rect[3] + 10.0);
+      const buttonBasePos = new Vec2(rect.x + 10.0, rect.y + rect.h + 10.0);
       const playW = buttonWidth(resources, this._playButton.label, { scale: 1.0, forceWide: true });
       const repeatW = buttonWidth(resources, this._repeatButton.label, { scale: 1.0, forceWide: true });
 

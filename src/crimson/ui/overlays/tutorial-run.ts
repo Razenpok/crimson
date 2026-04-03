@@ -88,7 +88,7 @@ export function drawTutorialPromptPanel(
       scale,
     },
   );
-  const [rx, ry, rw, rh] = rect;
+  const { x: rx, y: ry, w: rw, h: rh } = rect;
 
   // Background fill
   wgl.drawRectangle(rx, ry, rw, rh, wgl.makeColor(0, 0, 0, opts.alpha * 0.8));

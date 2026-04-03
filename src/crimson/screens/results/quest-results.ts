@@ -295,7 +295,7 @@ export class QuestResultsUi {
     const colScoreValue = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, alphaF);
     const colRow = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alphaF * 0.7);
     const colLine = wgl.makeColor(
-      COLOR_UI_ACCENT[0], COLOR_UI_ACCENT[1], COLOR_UI_ACCENT[2],
+      COLOR_UI_ACCENT.r, COLOR_UI_ACCENT.g, COLOR_UI_ACCENT.b,
       alphaF * 0.7,
     );
     const iconTint = wgl.makeColor(1.0, 1.0, 1.0, alphaF);
@@ -334,7 +334,7 @@ export class QuestResultsUi {
     wgl.drawRectangle(
       int(sepX), int(y),
       1, int(48.0 * scale),
-      wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
+      wgl.makeColor(colLine.r, colLine.g, colLine.b, colLine.a),
     );
 
     // Horizontal separator
@@ -342,7 +342,7 @@ export class QuestResultsUi {
     wgl.drawRectangle(
       int(x - 12.0 * scale), int(rowTop),
       int(192.0 * scale), 1,
-      wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
+      wgl.makeColor(colLine.r, colLine.g, colLine.b, colLine.a),
     );
     if (!opts.showWeaponRow) return;
 
@@ -373,7 +373,7 @@ export class QuestResultsUi {
     wgl.drawRectangle(
       int(x - 12.0 * scale), int(rowY + 48.0 * scale),
       int(192.0 * scale), 1,
-      wgl.makeColor(colLine[0], colLine[1], colLine[2], colLine[3]),
+      wgl.makeColor(colLine.r, colLine.g, colLine.b, colLine.a),
     );
   }
 
@@ -664,7 +664,7 @@ export class QuestResultsUi {
         }
         let rgb: [number, number, number] = [1.0, 1.0, 1.0];
         if (idx === step) {
-          rgb = [COLOR_GREEN[0], COLOR_GREEN[1], COLOR_GREEN[2]];
+          rgb = [COLOR_GREEN.r, COLOR_GREEN.g, COLOR_GREEN.b];
         }
         return wgl.makeColor(rgb[0], rgb[1], rgb[2], Math.max(0.0, Math.min(1.0, a)));
       };
@@ -693,7 +693,7 @@ export class QuestResultsUi {
       wgl.drawRectangle(
         int(labelX - 4.0 * scale), int(lineY),
         int(168.0 * scale), int(1.0 * scale),
-        wgl.makeColor(lineColor[0], lineColor[1], lineColor[2], lineColor[3]),
+        wgl.makeColor(lineColor.r, lineColor.g, lineColor.b, lineColor.a),
       );
 
       y += 8.0 * scale;
@@ -752,7 +752,7 @@ export class QuestResultsUi {
       wgl.drawRectangle(
         int(caretX), int(inputPos.y + 2.0 * scale),
         int(1.0 * scale), int(14.0 * scale),
-        wgl.makeColor(caretColor[0], caretColor[1], caretColor[2], caretColor[3]),
+        wgl.makeColor(caretColor.r, caretColor.g, caretColor.b, caretColor.a),
       );
 
       const okPos = inputPos.add(new Vec2(170.0 * scale, -8.0 * scale));

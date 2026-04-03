@@ -68,7 +68,7 @@ export function drawCreatureSprite(
     // down-right by ~1px at default sizes.
     const alpha = shadowAlpha !== null
       ? shadowAlpha / 255
-      : clamp(opts.tint[3] * 0.4, 0.0, 1.0);
+      : clamp(opts.tint.a * 0.4, 0.0, 1.0);
     const shadowTint = wgl.makeColor(0, 0, 0, alpha);
     const shadowScale = 1.07;
     const shadowW = width * shadowScale;

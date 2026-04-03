@@ -61,7 +61,7 @@ export class WorldRenderCtx {
     pos: Vec2,
     scale: number,
     rotationRad: number = 0.0,
-    tint: [number, number, number, number] = [1, 1, 1, 1],
+    tint: wgl.Color = wgl.makeColor(1, 1, 1, 1),
   ): void {
     grid = Math.max(1, int(grid));
     frame = Math.max(0, int(frame));
@@ -74,7 +74,7 @@ export class WorldRenderCtx {
     const h = cellH * scale;
     const dst = wgl.makeRectangle(pos.x, pos.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);
-    wgl.drawTexturePro(texture, src, dst, origin, rotationRad * RAD_TO_DEG, tint as wgl.Color);
+    wgl.drawTexturePro(texture, src, dst, origin, rotationRad * RAD_TO_DEG, tint);
   }
 
   withProjection(opts: { camera: Vec2; viewScale: Vec2 }): WorldRenderCtx {

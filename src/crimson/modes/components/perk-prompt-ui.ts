@@ -97,7 +97,7 @@ export class PerkPromptUi {
     const textW = uiTextWidth(label, textScale);
     const x = screenW - PERK_PROMPT_TEXT_MARGIN_X - textW;
     const y = hinge.y + PERK_PROMPT_TEXT_OFFSET_Y;
-    const color = wgl.makeColor(textColor[0], textColor[1], textColor[2], alpha);
+    const color = wgl.makeColor(textColor.r, textColor.g, textColor.b, alpha);
     drawUiText(resources, label, new Vec2(x, y), { scale: textScale, color });
 
     // Bar texture (mirrored via negative src width)

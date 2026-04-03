@@ -53,7 +53,7 @@ export function drawProjectile(
   const [grid, frame] = mapping;
   alpha = clamp(clamp(life / 0.4, 0.0, 1.0) * alpha, 0.0, 1.0);
   const [red, green, blue] = knownProjRgb(typeId);
-  const tint: [number, number, number, number] = [red / 255, green / 255, blue / 255, alpha];
+  const tint = wgl.makeColor(red / 255, green / 255, blue / 255, alpha);
   renderCtx.drawAtlasSprite(texture, grid, frame, screen, 0.6 * scale, angle, tint);
 }
 

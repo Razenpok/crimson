@@ -243,7 +243,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
 
         // Outer strip (softer).
         const outerTint = new RGBA(0.5, 0.6, 1.0, baseAlpha);
-        const [oR, oG, oB, oA] = outerTint.toWgl();
+        const { r: oR, g: oG, b: oB, a: oA } = outerTint.toWgl();
         let sideOffset = side.mul(outerHalf);
         let p0 = ctx.screenPos.sub(sideOffset);
         let p1 = ctx.screenPos.add(sideOffset);
@@ -262,7 +262,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
 
         // Inner strip (brighter).
         const innerTint = new RGBA(0.5, 0.6, 1.0, baseAlpha);
-        const [iR, iG, iB, iA] = innerTint.toWgl();
+        const { r: iR, g: iG, b: iB, a: iA } = innerTint.toWgl();
         sideOffset = side.mul(innerHalf);
         p0 = ctx.screenPos.sub(sideOffset);
         p1 = ctx.screenPos.add(sideOffset);

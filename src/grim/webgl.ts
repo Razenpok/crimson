@@ -582,11 +582,11 @@ export class WebGLContext {
    */
   drawTexturePro(
     texture: GlTexture,
-    srcRect: [number, number, number, number],
-    dstRect: [number, number, number, number],
-    origin: [number, number],
+    srcRect: { x: number; y: number; w: number; h: number },
+    dstRect: { x: number; y: number; w: number; h: number },
+    origin: { x: number; y: number },
     rotation: number,
-    tint: [number, number, number, number],
+    tint: { r: number; g: number; b: number; a: number },
   ): void {
     if (this._currentTexture !== null && this._currentTexture !== texture.id) {
       this.flush();
@@ -596,10 +596,10 @@ export class WebGLContext {
     }
     this._currentTexture = texture.id;
 
-    const [sx, sy, sw, sh] = srcRect;
-    const [dx, dy, dw, dh] = dstRect;
-    const [ox, oy] = origin;
-    const [cr, cg, cb, ca] = tint;
+    const { x: sx, y: sy, w: sw, h: sh } = srcRect;
+    const { x: dx, y: dy, w: dw, h: dh } = dstRect;
+    const { x: ox, y: oy } = origin;
+    const { r: cr, g: cg, b: cb, a: ca } = tint;
 
     // UV coordinates — negative sw/sh flips the texture (raylib convention).
     // Compute UVs from the absolute rect, then swap to achieve the flip.

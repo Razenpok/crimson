@@ -289,13 +289,13 @@ export class GroundRenderer {
       const size = decal.size * invScale * 1.064;
       const x = (decal.topLeft.x - 0.5) * invScale - offset;
       const y = (decal.topLeft.y - 0.5) * invScale - offset;
-      const halfAlpha = int(decal.tint[3] * 0.5 * 255) / 255;
+      const halfAlpha = int(decal.tint.a * 0.5 * 255) / 255;
       wgl.drawTexturePro(
         bodysetTexture, src,
         wgl.makeRectangle(x + size * 0.5, y + size * 0.5, size, size),
         wgl.makeVector2(size * 0.5, size * 0.5),
         (decal.rotationRad - Math.PI * 0.5) * (180 / Math.PI),
-        wgl.makeColor(decal.tint[0], decal.tint[1], decal.tint[2], halfAlpha),
+        wgl.makeColor(decal.tint.r, decal.tint.g, decal.tint.b, halfAlpha),
       );
     }
 

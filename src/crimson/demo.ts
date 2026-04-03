@@ -375,19 +375,19 @@ export class DemoView {
     wgl.beginBlendMode(wgl.BlendMode.ALPHA);
     wgl.beginQuads(backplasma);
     // TL
-    wgl.rlColor4f(c0[0], c0[1], c0[2], c0[3]);
+    wgl.rlColor4f(c0.r, c0.g, c0.b, c0.a);
     wgl.rlTexCoord2f(0.0, 0.0);
     wgl.rlVertex2f(0.0, 0.0);
     // TR
-    wgl.rlColor4f(c1[0], c1[1], c1[2], c1[3]);
+    wgl.rlColor4f(c1.r, c1.g, c1.b, c1.a);
     wgl.rlTexCoord2f(0.5, 0.0);
     wgl.rlVertex2f(screenW, 0.0);
     // BR
-    wgl.rlColor4f(c2[0], c2[1], c2[2], c2[3]);
+    wgl.rlColor4f(c2.r, c2.g, c2.b, c2.a);
     wgl.rlTexCoord2f(0.5, 0.5);
     wgl.rlVertex2f(screenW, screenH);
     // BL
-    wgl.rlColor4f(c3[0], c3[1], c3[2], c3[3]);
+    wgl.rlColor4f(c3.r, c3.g, c3.b, c3.a);
     wgl.rlTexCoord2f(0.0, 0.5);
     wgl.rlVertex2f(0.0, screenH);
     wgl.endQuads();

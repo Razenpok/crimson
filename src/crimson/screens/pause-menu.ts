@@ -404,7 +404,7 @@ export class PauseMenuView {
         drawUiQuadShadow({
           texture: item,
           src: wgl.makeRectangle(0.0, 0.0, itemW, itemH),
-          dst: wgl.makeRectangle(dst[0] + UI_SHADOW_OFFSET, dst[1] + UI_SHADOW_OFFSET, dst[2], dst[3]),
+          dst: wgl.makeRectangle(dst.x + UI_SHADOW_OFFSET, dst.y + UI_SHADOW_OFFSET, dst.w, dst.h),
           origin, rotationDeg,
         });
       }

@@ -224,7 +224,7 @@ function _withAlpha(
   alpha: number,
 ): wgl.Color {
   alpha = Math.max(0.0, Math.min(1.0, alpha));
-  return wgl.makeColor(color[0], color[1], color[2], color[3] * alpha);
+  return wgl.makeColor(color.r, color.g, color.b, color.a * alpha);
 }
 
 function _questPanelSlideX(timeMs: number): number {
@@ -428,7 +428,7 @@ export function drawHudOverlay(
       0.0,
       wgl.makeColor(1.0, 1.0, 1.0, topAlpha),
     );
-    maxY = Math.max(maxY, dst[1] + dst[3]);
+    maxY = Math.max(maxY, dst.y + dst.h);
   }
 
   // -----------------------------------------------------------------------
@@ -477,7 +477,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
   }
 
@@ -533,7 +533,7 @@ export function drawHudOverlay(
           wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
         );
       }
-      maxY = Math.max(maxY, bgDst[1] + bgDst[3]);
+      maxY = Math.max(maxY, bgDst.y + bgDst.h);
     }
   }
 
@@ -574,7 +574,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
   }
 
@@ -631,7 +631,7 @@ export function drawHudOverlay(
           0.0,
           wgl.makeColor(1.0, 1.0, 1.0, barAlpha),
         );
-        maxY = Math.max(maxY, dst[1] + dst[3]);
+        maxY = Math.max(maxY, dst.y + dst.h);
       }
       if (ammoCount > bars) {
         const extra = ammoCount - bars;
@@ -682,7 +682,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, questPanelAlpha),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
 
     // Static progress panel.
@@ -703,7 +703,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, questPanelAlpha),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
 
     // Clock table + pointer inside the sliding panel.
@@ -812,7 +812,7 @@ export function drawHudOverlay(
       0.0,
       wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_PANEL_ALPHA),
     );
-    maxY = Math.max(maxY, dst[1] + dst[3]);
+    maxY = Math.max(maxY, dst.y + dst.h);
   }
 
   if (showXp) {
@@ -877,7 +877,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
     {
       // NOTE: Raylib's draw_texture_pro uses dst.x/y as the rotation origin position;
@@ -963,7 +963,7 @@ export function drawHudOverlay(
           0.0,
           wgl.makeColor(1.0, 1.0, 1.0, bonusPanelAlpha),
         );
-        maxY = Math.max(maxY, dst[1] + dst[3]);
+        maxY = Math.max(maxY, dst.y + dst.h);
       }
 
       // Slot icon.
@@ -984,7 +984,7 @@ export function drawHudOverlay(
           0.0,
           wgl.makeColor(1.0, 1.0, 1.0, alpha),
         );
-        maxY = Math.max(maxY, dst[1] + dst[3]);
+        maxY = Math.max(maxY, dst.y + dst.h);
       }
 
       // Slot timer bars.
@@ -1110,7 +1110,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, panelAlphaVal),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
 
     const iconIndex = _weaponIconIndex(hudPlayer.weapon.weaponId);
@@ -1131,7 +1131,7 @@ export function drawHudOverlay(
         0.0,
         wgl.makeColor(1.0, 1.0, 1.0, panelAlphaVal),
       );
-      maxY = Math.max(maxY, dst[1] + dst[3]);
+      maxY = Math.max(maxY, dst.y + dst.h);
     }
 
     const weaponName = weaponDisplayName(

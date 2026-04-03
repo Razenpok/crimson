@@ -145,9 +145,9 @@ export function drawPlayerTrooperSprite(
   if (renderFrame.players.length > 1) {
     const index = player.index;
     if (index === 0) {
-      overlayTint = wgl.makeColor(77 / 255, 77 / 255, 255 / 255, tint[3]);
+      overlayTint = wgl.makeColor(77 / 255, 77 / 255, 255 / 255, tint.a);
     } else {
-      overlayTint = wgl.makeColor(255 / 255, 140 / 255, 89 / 255, tint[3]);
+      overlayTint = wgl.makeColor(255 / 255, 140 / 255, 89 / 255, tint.a);
     }
   }
 

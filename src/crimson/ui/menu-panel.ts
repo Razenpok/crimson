@@ -29,7 +29,7 @@ export function drawClassicMenuPanel(
   const srcW = Math.max(0.0, texW - inset * 2.0);
   const srcH = Math.max(0.0, texH - inset * 2.0);
 
-  const [dstX, dstY, dstW, dstH] = dst;
+  const { x: dstX, y: dstY, w: dstW, h: dstH } = dst;
 
   const scale = dstW !== 0.0 ? dstW / 510.0 : 1.0;
   const topH = MENU_PANEL_DST_TOP_H * scale;
@@ -40,7 +40,7 @@ export function drawClassicMenuPanel(
 
   function flipSrc(rect: wgl.Rectangle): wgl.Rectangle {
     if (!flipX) return rect;
-    return wgl.makeRectangle(rect[0], rect[1], -rect[2], rect[3]);
+    return wgl.makeRectangle(rect.x, rect.y, -rect.w, rect.h);
   }
 
   if (midH <= 0.0) {
@@ -69,7 +69,7 @@ export function drawClassicMenuPanel(
     for (const [s, d] of slices) {
       drawUiQuadShadow({
         texture, src: s,
-        dst: wgl.makeRectangle(d[0] + UI_SHADOW_OFFSET, d[1] + UI_SHADOW_OFFSET, d[2], d[3]),
+        dst: wgl.makeRectangle(d.x + UI_SHADOW_OFFSET, d.y + UI_SHADOW_OFFSET, d.w, d.h),
         origin, rotationDeg: 0.0,
       });
     }

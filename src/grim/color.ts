@@ -18,7 +18,7 @@ export class RGBA {
 
   static fromRgba(value: RGBA | wgl.Color): RGBA {
     if (value instanceof RGBA) return value;
-    return new RGBA(value[0], value[1], value[2], value[3]);
+    return new RGBA(value.r, value.g, value.b, value.a);
   }
 
   static fromBytes(r: number, g: number, b: number, a: number): RGBA {
