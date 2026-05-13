@@ -27,6 +27,18 @@ const KEY_ENTER = 13;
 const KEY_KP_ENTER = 335;
 const MOUSE_BUTTON_LEFT = 0;
 
+function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
+  const thick = Math.max(1, int(lineThick));
+  const x = int(rect.x);
+  const y = int(rect.y);
+  const w = int(rect.w);
+  const h = int(rect.h);
+  wgl.drawRectangle(x, y, w, thick, color);
+  wgl.drawRectangle(x, y + h - thick, w, thick, color);
+  wgl.drawRectangle(x, y, thick, h, color);
+  wgl.drawRectangle(x + w - thick, y, thick, h, color);
+}
+
 export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   private static readonly _VISIBLE_ROWS = 10;
   private static readonly _LIST_WIDTH = 250.0;
@@ -92,12 +104,15 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const titleText = 'Unlocked Perks Database';
     drawSmallText(font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
     const titleW = measureSmallTextWidth(font, titleText);
-    // 1px outline strip under the title with alpha 0.5
-    wgl.drawRectangle(
-      Math.floor(titlePos.x),
-      Math.floor(titlePos.y + 13.0 * scale),
-      Math.floor(titleW),
-      Math.max(1, Math.floor(1.0 * scale)),
+    // Decompile path draws a 1px outline strip under the title with alpha 0.5.
+    drawRectangleLinesEx(
+      wgl.makeRectangle(
+        titlePos.x,
+        titlePos.y + 13.0 * scale,
+        titleW,
+        Math.max(1.0, 1.0 * scale),
+      ),
+      1.0,
       wgl.makeColor(1, 1, 1, 0.5),
     );
 
@@ -151,17 +166,20 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
       }
       drawSmallText(
         font,
-        this._perkName(perkId, violenceDisabled, preserveBugs),
+        this._perkName(perkId, { violenceDisabled, preserveBugs }),
         listTopLeft.offset({ dx: 0.0, dy: row * rowStep }),
         wgl.makeColor(1, 1, 1, rowAlpha),
       );
     }
 
     if (count > VR) {
-      // Scrollbar: 1px track + draggable thumb
-      const [trackX, trackY, trackH, thumbTop, thumbH, _scrollSpan] = this._scrollbarGeometry(
-        left, scale, count, start,
-      );
+      // Native list draws a 1px scrollbar strip + draggable thumb.
+      const [trackX, trackY, trackH, thumbTop, thumbH, _scrollSpan] = this._scrollbarGeometry({
+        leftTopLeft: left,
+        scale,
+        count,
+        start,
+      });
       wgl.drawRectangle(
         int(Math.round(trackX)),
         int(Math.round(trackY)),
@@ -188,29 +206,32 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const hoveredPerkId = this._hoveredPerkId();
     if (hoveredPerkId === null) return;
     const perkId = hoveredPerkId;
-    const perkName = this._perkName(perkId, violenceDisabled, preserveBugs);
+    const perkName = this._perkName(perkId, { violenceDisabled, preserveBugs });
     const detailAnchor = right.add(new Vec2((34.0 + detailShiftX) * scale, 72.0 * scale));
     const perkNoLabel = preserveBugs ? 'perkno' : 'perk';
     drawSmallText(font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
     const nameW = measureSmallTextWidth(font, perkName);
     const perkNamePos = new Vec2(detailAnchor.x + 128.0 * scale - nameW * 0.5, detailAnchor.y - 22.0 * scale);
     drawSmallText(font, perkName, perkNamePos, textColor);
-    wgl.drawRectangle(
-      Math.floor(perkNamePos.x),
-      Math.floor(perkNamePos.y + 13.0 * scale),
-      Math.floor(nameW),
-      Math.max(1, Math.floor(1.0 * scale)),
+    drawRectangleLinesEx(
+      wgl.makeRectangle(
+        perkNamePos.x,
+        perkNamePos.y + 13.0 * scale,
+        nameW,
+        Math.max(1.0, 1.0 * scale),
+      ),
+      1.0,
       wgl.makeColor(1, 1, 1, 0.5),
     );
 
     let descPos = detailAnchor.add(new Vec2(16.0 * scale, 0.0));
-    const prereqName = this._perkPrereqName(perkId, violenceDisabled, preserveBugs);
+    const prereqName = this._perkPrereqName(perkId, { violenceDisabled, preserveBugs });
     if (prereqName) {
       drawSmallText(font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, 0.8));
       descPos = descPos.offset({ dx: 0.0, dy: 18.0 * scale });
     }
 
-    const wrappedDesc = this._prewrappedPerkDesc(perkId, font, violenceDisabled);
+    const wrappedDesc = this._prewrappedPerkDesc(perkId, font, { violenceDisabled });
     if (wrappedDesc) {
       drawSmallText(font, wrappedDesc, descPos, dimColor);
     }
@@ -283,9 +304,12 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
 
     if (count > VR) {
       const start = Math.max(0, Math.min(maxScroll, int(this._listScrollIndex)));
-      const [trackX, trackY, trackH, thumbTop, thumbH, scrollSpan] = this._scrollbarGeometry(
-        leftTopLeft, scale, count, start,
-      );
+      const [trackX, trackY, trackH, thumbTop, thumbH, scrollSpan] = this._scrollbarGeometry({
+        leftTopLeft,
+        scale,
+        count,
+        start,
+      });
       const thumbX = trackX + 1.0 * scale;
       const thumbW = 8.0 * scale;
       const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -355,25 +379,31 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   }
 
   private _hoveredPerkId(): PerkId | null {
-    if (this._hoveredRowIndex >= 0 && this._hoveredRowIndex < this._perkIds.length) {
-      return this._perkIds[this._hoveredRowIndex];
+    const hoveredRowIndex = int(this._hoveredRowIndex);
+    if (hoveredRowIndex >= 0 && hoveredRowIndex < this._perkIds.length) {
+      return this._perkIds[hoveredRowIndex];
     }
     return null;
   }
 
   private _selectedPerkId(): PerkId | null {
-    if (this._selectedRowIndex >= 0 && this._selectedRowIndex < this._perkIds.length) {
-      return this._perkIds[this._selectedRowIndex];
+    const selectedRowIndex = int(this._selectedRowIndex);
+    if (selectedRowIndex >= 0 && selectedRowIndex < this._perkIds.length) {
+      return this._perkIds[selectedRowIndex];
     }
     return null;
   }
 
-  private _scrollbarGeometry(
-    leftTopLeft: Vec2,
-    scale: number,
-    count: number,
-    start: number,
-  ): [number, number, number, number, number, number] {
+  private _scrollbarGeometry(opts: {
+    leftTopLeft: Vec2;
+    scale: number;
+    count: number;
+    start: number;
+  }): [number, number, number, number, number, number] {
+    const leftTopLeft = opts.leftTopLeft;
+    const scale = opts.scale;
+    const count = opts.count;
+    const start = opts.start;
     const VR = UnlockedPerksDatabaseView._VISIBLE_ROWS;
     const LFX = UnlockedPerksDatabaseView._LIST_FRAME_X;
     const LFY = UnlockedPerksDatabaseView._LIST_FRAME_Y;
@@ -401,7 +431,9 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     return perkIds;
   }
 
-  private _perkName(perkId: PerkId, violenceDisabled: number, preserveBugs: boolean): string {
+  private _perkName(perkId: PerkId, opts: { violenceDisabled?: number; preserveBugs?: boolean } = {}): string {
+    const violenceDisabled = opts.violenceDisabled ?? 0;
+    const preserveBugs = opts.preserveBugs ?? false;
     return perkDisplayName(perkId, { violenceDisabled, preserveBugs });
   }
 
@@ -411,7 +443,9 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     return perkDisplayDescription(perkId, { violenceDisabled, preserveBugs });
   }
 
-  private _perkPrereqName(perkId: PerkId, violenceDisabled: number, preserveBugs: boolean): string | null {
+  private _perkPrereqName(perkId: PerkId, opts: { violenceDisabled?: number; preserveBugs?: boolean } = {}): string | null {
+    const violenceDisabled = opts.violenceDisabled ?? 0;
+    const preserveBugs = opts.preserveBugs ?? false;
     const meta = PERK_BY_ID.get(perkId);
     if (!meta) return null;
     const prereq = meta.prereq;
@@ -427,13 +461,14 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     return this.state.config.display.violenceDisabled;
   }
 
-  private _prewrappedPerkDesc(perkId: PerkId, font: SmallFontData, violenceDisabled: number): string {
+  private _prewrappedPerkDesc(perkId: PerkId, font: SmallFontData, opts: { violenceDisabled: number }): string {
+    const violenceDisabled = opts.violenceDisabled;
     const key = `${perkId as number}:${violenceDisabled}:${this._preserveBugs() ? 1 : 0}`;
     const cached = this._wrappedDescCache.get(key);
     if (cached !== undefined) return cached;
     const desc = this._perkDesc(perkId, { violenceDisabled, preserveBugs: this._preserveBugs() });
     const wrapped = UnlockedPerksDatabaseView._wrapSmallTextNative(
-      font, desc, UnlockedPerksDatabaseView._DESC_WRAP_WIDTH_PX, 1.0,
+      font, desc, UnlockedPerksDatabaseView._DESC_WRAP_WIDTH_PX, { scale: 1.0 },
     );
     this._wrappedDescCache.set(key, wrapped);
     return wrapped;
@@ -443,7 +478,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     font: SmallFontData,
     text: string,
     maxWidthPx: number,
-    _scale: number,
+    _opts: { scale: number },
   ): string {
     const wrapped = Array.from(text);
     if (wrapped.length === 0) return '';
