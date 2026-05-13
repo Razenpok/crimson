@@ -1,6 +1,3 @@
-// WebGL2 context wrapper — replaces grim/raylib_api.py
-// Provides: textured quad batching, blend modes, render-to-texture, immediate-mode quads
-
 export enum BlendMode {
   ALPHA,
   ADDITIVE,
@@ -9,7 +6,6 @@ export enum BlendMode {
   NONE,
 }
 
-// Shader sources
 const SPRITE_VS = `#version 300 es
 precision highp float;
 layout(location=0) in vec2 aPos;
@@ -86,14 +82,12 @@ export interface RenderTarget {
   height: number;
 }
 
-// Per-vertex: 2 pos + 2 uv + 4 color = 8 floats = 32 bytes
 const FLOATS_PER_VERTEX = 8;
 const BYTES_PER_VERTEX = FLOATS_PER_VERTEX * 4;
 const MAX_QUADS = 8192;
 const MAX_VERTICES = MAX_QUADS * 4;
 const MAX_INDICES = MAX_QUADS * 6;
 
-// Color-only vertex: 2 pos + 4 color = 6 floats = 24 bytes
 const COLOR_FLOATS_PER_VERTEX = 6;
 
 function compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
@@ -145,7 +139,6 @@ export class WebGLContext {
   readonly gl: WebGL2RenderingContext;
   readonly canvas: HTMLCanvasElement;
 
-  // Shaders
   private _spriteProgram!: WebGLProgram;
   private _spriteAlphaTestProgram!: WebGLProgram;
   private _colorProgram!: WebGLProgram;
@@ -159,7 +152,6 @@ export class WebGLContext {
   private _colorGammaGainLoc!: WebGLUniformLocation;
   private _gammaGain = 1.0;
 
-  // Batching
   private _vao!: WebGLVertexArrayObject;
   private _vbo!: WebGLBuffer;
   private _ebo!: WebGLBuffer;
@@ -169,14 +161,12 @@ export class WebGLContext {
   private _currentBlend: BlendMode = BlendMode.ALPHA;
   private _useAlphaTest = false;
 
-  // Color-only batching
   private _colorVao!: WebGLVertexArrayObject;
   private _colorVbo!: WebGLBuffer;
   private _colorEbo!: WebGLBuffer;
   private _colorVertexData: Float32Array;
   private _colorQuadCount = 0;
 
-  // Immediate-mode quad building
   private _immVao!: WebGLVertexArrayObject;
   private _immVbo!: WebGLBuffer;
   private _immEbo!: WebGLBuffer;
@@ -186,16 +176,13 @@ export class WebGLContext {
   private _immTexCoord: [number, number] = [0, 0];
   private _immColor: [number, number, number, number] = [1, 1, 1, 1];
 
-  // Viewport state
   private _screenWidth = 0;
   private _screenHeight = 0;
   private _mvp!: Float32Array;
 
-  // Render target stack
   private _rtStack: (RenderTarget | null)[] = [];
   private _currentRT: RenderTarget | null = null;
 
-  // Custom blend
   private _customSrcFactor: number;
   private _customDstFactor: number;
   private _customBlendEq: number;
@@ -203,12 +190,9 @@ export class WebGLContext {
   private _customDstAlpha: number = 0;
   private _customBlendEqAlpha: number = 0;
   private _customSeparate = false;
-  private _colorMask: [boolean, boolean, boolean, boolean] = [true, true, true, true];
 
-  // 1x1 white texture for color-only rendering
   private _whiteTexture!: GlTexture;
 
-  // Scissor
   private _scissorEnabled = false;
 
   constructor(canvas: HTMLCanvasElement) {
@@ -262,7 +246,6 @@ export class WebGLContext {
   private _initBuffers(): void {
     const gl = this.gl;
 
-    // Build index buffer for quads (0,1,2, 2,3,0 pattern)
     const indices = new Uint16Array(MAX_INDICES);
     for (let i = 0; i < MAX_QUADS; i++) {
       const vi = i * 4;
@@ -275,7 +258,6 @@ export class WebGLContext {
       indices[ii + 5] = vi + 0;
     }
 
-    // Sprite VAO
     this._vao = gl.createVertexArray()!;
     gl.bindVertexArray(this._vao);
     this._vbo = gl.createBuffer()!;
@@ -284,17 +266,13 @@ export class WebGLContext {
     this._ebo = gl.createBuffer()!;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ebo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    // aPos
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, BYTES_PER_VERTEX, 0);
-    // aUV
     gl.enableVertexAttribArray(1);
     gl.vertexAttribPointer(1, 2, gl.FLOAT, false, BYTES_PER_VERTEX, 8);
-    // aColor
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2, 4, gl.FLOAT, false, BYTES_PER_VERTEX, 16);
 
-    // Color-only VAO
     this._colorVao = gl.createVertexArray()!;
     gl.bindVertexArray(this._colorVao);
     this._colorVbo = gl.createBuffer()!;
@@ -303,14 +281,11 @@ export class WebGLContext {
     this._colorEbo = gl.createBuffer()!;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._colorEbo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    // aPos
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, COLOR_FLOATS_PER_VERTEX * 4, 0);
-    // aColor
     gl.enableVertexAttribArray(1);
     gl.vertexAttribPointer(1, 4, gl.FLOAT, false, COLOR_FLOATS_PER_VERTEX * 4, 8);
 
-    // Immediate-mode VAO (same layout as sprite, with shared index buffer)
     this._immVao = gl.createVertexArray()!;
     gl.bindVertexArray(this._immVao);
     this._immVbo = gl.createBuffer()!;
@@ -366,8 +341,6 @@ export class WebGLContext {
     this._gammaGain = next;
   }
 
-  // --- Texture management ---
-
   loadTexture(source: ImageBitmap | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas, opts?: {
     clamp?: boolean;
     pointFilter?: boolean;
@@ -398,8 +371,6 @@ export class WebGLContext {
   unloadTexture(texture: GlTexture): void {
     this.gl.deleteTexture(texture.id);
   }
-
-  // --- Render targets ---
 
   createRenderTarget(width: number, height: number): RenderTarget {
     const gl = this.gl;
@@ -463,9 +434,6 @@ export class WebGLContext {
     const gl = this.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, rt.id);
     gl.viewport(0, 0, rt.width, rt.height);
-    // Flip Y for render targets: WebGL FBO textures store Y=0 at the bottom,
-    // so we use a bottom-up projection (top=height, bottom=0) so that the
-    // resulting texture can be sampled with the same UVs as screen-space.
     this._mvp = orthoMatrix(0, rt.width, 0, rt.height);
   }
 
@@ -484,8 +452,6 @@ export class WebGLContext {
       this._mvp = orthoMatrix(0, this._screenWidth, this._screenHeight, 0);
     }
   }
-
-  // --- Blend modes ---
 
   setBlendMode(mode: BlendMode): void {
     if (mode === this._currentBlend) return;
@@ -567,11 +533,8 @@ export class WebGLContext {
 
   setColorMask(r: boolean, g: boolean, b: boolean, a: boolean): void {
     this.flush();
-    this._colorMask = [r, g, b, a];
     this.gl.colorMask(r, g, b, a);
   }
-
-  // --- Scissor ---
 
   setScissor(x: number, y: number, w: number, h: number): void {
     this.flush();
@@ -580,7 +543,6 @@ export class WebGLContext {
       gl.enable(gl.SCISSOR_TEST);
       this._scissorEnabled = true;
     }
-    // WebGL scissor origin is bottom-left
     const canvasH = this._currentRT ? this._currentRT.height : this._screenHeight;
     gl.scissor(x, canvasH - y - h, w, h);
   }
@@ -592,16 +554,6 @@ export class WebGLContext {
     this._scissorEnabled = false;
   }
 
-  // --- Drawing ---
-
-  /**
-   * Draw a textured quad. srcRect and dstRect are in pixels.
-   * srcRect: [x, y, w, h] in texture pixels
-   * dstRect: [x, y, w, h] in screen pixels
-   * origin: [ox, oy] pivot point relative to dstRect top-left
-   * rotation: degrees
-   * tint: [r, g, b, a] normalized 0-1
-   */
   drawTexturePro(
     texture: GlTexture,
     srcRect: { x: number; y: number; w: number; h: number },
@@ -623,8 +575,6 @@ export class WebGLContext {
     const { x: ox, y: oy } = origin;
     const { r: cr, g: cg, b: cb, a: ca } = tint;
 
-    // UV coordinates — negative sw/sh flips the texture (raylib convention).
-    // Compute UVs from the absolute rect, then swap to achieve the flip.
     const absW = sw < 0 ? -sw : sw;
     const absH = sh < 0 ? -sh : sh;
     const uLeft = sx / texture.width;
@@ -636,7 +586,6 @@ export class WebGLContext {
     const v0 = sh < 0 ? vBottom : vTop;
     const v1 = sh < 0 ? vTop : vBottom;
 
-    // Compute corners relative to origin, then rotate and translate
     const rad = rotation * (Math.PI / 180.0);
     const cos = Math.cos(rad);
     const sin = Math.sin(rad);
@@ -644,7 +593,6 @@ export class WebGLContext {
     const cx = dx;
     const cy = dy;
 
-    // Corners before rotation (relative to origin)
     const corners: [number, number][] = [
       [-ox, -oy],
       [dw - ox, -oy],
@@ -674,9 +622,6 @@ export class WebGLContext {
     this._quadCount++;
   }
 
-  /**
-   * Draw a solid-color rectangle.
-   */
   drawRectangle(x: number, y: number, w: number, h: number, r: number, g: number, b: number, a: number): void {
 
     if (this._colorQuadCount >= MAX_QUADS) {
@@ -700,8 +645,6 @@ export class WebGLContext {
 
     this._colorQuadCount++;
   }
-
-  // --- Immediate-mode quad API (for bullet trails etc.) ---
 
   beginQuads(texture: GlTexture): void {
     this.flush();
@@ -762,8 +705,6 @@ export class WebGLContext {
     this._immVertexCount = 0;
   }
 
-  // --- Flush ---
-
   flush(): void {
     this._flushTexturedQuads();
     this._flushColorQuads();
@@ -813,7 +754,6 @@ export class WebGLContext {
 
   get whiteTexture(): GlTexture { return this._whiteTexture; }
 
-  // --- RL_* constants for blend factor compatibility ---
   get RL_SRC_ALPHA(): number { return this.gl.SRC_ALPHA; }
   get RL_ONE_MINUS_SRC_ALPHA(): number { return this.gl.ONE_MINUS_SRC_ALPHA; }
   get RL_ONE(): number { return this.gl.ONE; }
