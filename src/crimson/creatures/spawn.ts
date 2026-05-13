@@ -1162,6 +1162,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
     }
   }
 
+  // Rare health/size boosts (do not recompute contact_damage).
   r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_PURPLE });
   if (r % 1320 < 4) {
     applyTint(c, [0.84, 0.24, 0.89, 1.0]);
@@ -1549,12 +1550,12 @@ export function buildTutorialStage4ClearSpawns(): SpawnTemplateCall[] {
 /**
  * Spawn packs triggered by the stage-5 repeat loop in `tutorial_timeline_update` (0x00408990).
  *
- * `repeatSpawnCount` is the incremented counter value (1..7). When it reaches 8, the tutorial
+ * `repeat_spawn_count` is the incremented counter value (1..7). When it reaches 8, the tutorial
  * transitions instead of spawning more creatures.
  *
  * Note: the original also stores the returned creature pointer from template `0x27` in
  * `tutorial_hint_bonus_ptr` and rewrites its packed bonus args (`link_index` low/high 16-bit fields)
- * depending on `repeatSpawnCount`. This helper only reproduces the `creature_spawn_template` calls.
+ * depending on `repeat_spawn_count`. This helper only reproduces the `creature_spawn_template` calls.
  */
 export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): SpawnTemplateCall[] {
   const n = int(repeatSpawnCount);
