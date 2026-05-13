@@ -84,7 +84,7 @@ function isOrbesVolantesDay(date: Date): boolean {
 
 export function formatPlaytimeText(gameSequenceMs: number, opts: { preserveBugs?: boolean } = {}): string {
   const preserveBugs = opts.preserveBugs ?? false;
-  const totalMinutes = Math.floor(Math.max(0, gameSequenceMs) / 1000 / 60);
+  const totalMinutes = Math.floor(Math.floor(Math.max(0, int(gameSequenceMs)) / 1000) / 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   if (preserveBugs) {
