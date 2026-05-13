@@ -68,6 +68,12 @@ export interface TutorialFrameActions {
 
 
 export function tutorialStage5BonusCarrierConfig(repeatSpawnCount: number): [BonusId, number] | null {
+  // Return the (bonus_id, amount_override) applied to the stage-5 bonus carrier for this repeat count.
+  //
+  // This reproduces the packed bonus-arg writes to `tutorial_hint_bonus_ptr` in `tutorial_timeline_update`.
+  //
+  // - amount_override == -1 means "use the bonus meta default".
+  // - For weapon bonuses, amount_override is the weapon id.
   const n = int(repeatSpawnCount);
   if (n === 1) return [BonusId.SPEED, -1];
   if (n === 2) return [BonusId.WEAPON, 5];
@@ -178,7 +184,6 @@ function tickHint(
 }
 
 
-/** Clone a TutorialState (shallow copy). */
 function cloneState(s: TutorialState): TutorialState {
   const c = new TutorialState();
   c.stageIndex = s.stageIndex;
@@ -201,6 +206,11 @@ export function tickTutorialTimeline(
   stateIn: TutorialState,
   opts: { frameDtMs: number; anyMoveActive: boolean; anyFireActive: boolean; creaturesNoneActive: boolean; bonusPoolEmpty: boolean; perkPendingCount: number; hintBonusDied?: boolean },
 ): [TutorialState, TutorialFrameActions] {
+  // Pure model of the tutorial director (`tutorial_timeline_update` / 0x00408990).
+  //
+  // Notes:
+  // - The returned UI model (prompt/hint text+alpha) reflects the state *before* any stage triggers
+  //   applied by this tick. The returned state reflects the post-trigger values for the next frame.
   const frameDtMs = opts.frameDtMs;
   const anyMoveActive = opts.anyMoveActive;
   const anyFireActive = opts.anyFireActive;
@@ -231,7 +241,6 @@ export function tickTutorialTimeline(
 
   const [hintSpawns, hintText, hintAlphaVal] = tickHint(state, dtMs, hintBonusDied);
 
-  // Base actions — before stage triggers
   const baseForceExperience = stageIndex !== 6 ? 0 : null;
 
   const spawnTemplates: SpawnTemplateCall[] = [...hintSpawns];

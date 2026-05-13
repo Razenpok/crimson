@@ -7,11 +7,8 @@ import type { PlayerInput } from '@crimson/sim/input.ts';
 import { WorldState } from '@crimson/sim/world-state.ts';
 import { TutorialOverlayState } from "./state.ts";
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
-import { DeterministicStepResult } from "@crimson/sim/step-pipeline.js";
+import type { DeterministicStepResult } from '@crimson/sim/step-pipeline.ts';
 
-/**
- * TutorialWorldState is now the canonical WorldState from sim/world-state.
- */
 export type TutorialWorldState = WorldState;
 
 
@@ -57,9 +54,9 @@ export function tutorialInputTransform(
 function tutorialOverlayFromActions(actions: TutorialFrameActions): TutorialOverlayState {
   const overlay = new TutorialOverlayState();
   overlay.promptText = String(actions.promptText);
-  overlay.promptAlpha = +actions.promptAlpha;
+  overlay.promptAlpha = actions.promptAlpha;
   overlay.hintText = String(actions.hintText);
-  overlay.hintAlpha = +actions.hintAlpha;
+  overlay.hintAlpha = actions.hintAlpha;
   return overlay;
 }
 
@@ -95,7 +92,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
 
   const players = ctx.world.players;
   if (players.length > 0) {
-    players[0].health = +actions.forcePlayerHealth;
+    players[0].health = actions.forcePlayerHealth;
     if (actions.forcePlayerExperience !== null) {
       players[0].experience = int(actions.forcePlayerExperience);
       survivalCheckLevelUp(players[0], state.perkSelection);
@@ -111,7 +108,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
       call.pos,
       call.bonusId,
       int(call.amount),
-      { state, worldWidth: +ctx.worldSize, worldHeight: +ctx.worldSize },
+      { state, worldWidth: ctx.worldSize, worldHeight: ctx.worldSize },
     );
     if (spawned !== null) {
       state.effects.spawnBurst({
@@ -127,7 +124,7 @@ export function tutorialPostStep(ctx: TutorialStepContext): void {
     const [mapping, primary] = ctx.world.creatures.spawnTemplate(
       call.templateId,
       call.pos,
-      +call.heading,
+      call.heading,
       state.rng,
     );
     void mapping;
