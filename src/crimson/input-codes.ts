@@ -105,6 +105,64 @@ const MOUSE_CODE_TO_BUTTON: Record<number, number> = {
   0x104: 4,  // Extra
 };
 
+const JOYS_BUTTON_CODES: Record<number, number> = {
+  0x11F: 0,
+  0x120: 1,
+  0x121: 2,
+  0x122: 3,
+  0x123: 12,
+  0x124: 15,
+  0x125: 13,
+  0x126: 14,
+  0x127: 4,
+  0x128: 5,
+  0x129: 6,
+  0x12A: 7,
+  0x131: 12,
+  0x132: 13,
+  0x133: 14,
+  0x134: 15,
+};
+
+const AXIS_CODE_TO_AXIS: Record<number, number> = {
+  0x13F: 0,
+  0x140: 1,
+  // Native Grim maps 0x141 and 0x153 to distinct joystick state fields
+  // (lZ vs lRx in grim_get_config_float @ 0x100071b0), so keep them distinct.
+  // On raylib backends this is approximated with separate right-stick axes.
+  0x141: 3,
+  0x153: 2,
+  0x154: 3,
+  0x155: 5,
+};
+
+const RIM_AXIS_CODES: Record<number, [number, number]> = {
+  0x163: [0, 0],
+  0x164: [1, 0],
+  0x165: [2, 0],
+  0x168: [0, 1],
+  0x169: [1, 1],
+  0x16A: [2, 1],
+};
+
+const RIM_BUTTON_CODES: Record<number, [number, number]> = {
+  0x16D: [0, 0],
+  0x16E: [0, 1],
+  0x16F: [0, 2],
+  0x170: [0, 3],
+  0x171: [0, 4],
+  0x172: [1, 0],
+  0x173: [1, 1],
+  0x174: [1, 2],
+  0x175: [1, 3],
+  0x176: [1, 4],
+  0x177: [2, 0],
+  0x178: [2, 1],
+  0x179: [2, 2],
+  0x17A: [2, 3],
+  0x17B: [2, 4],
+};
+
 class PressedState {
   prevDown = new Map<string, boolean>();
   down = new Map<string, boolean>();
@@ -149,19 +207,75 @@ export function inputBeginFrame(): void {
   _pressedState.beginFrame();
 }
 
-function _digitalDownForPlayer(keyCode: number, playerIndex: number): boolean {
-  if (keyCode === INPUT_CODE_UNBOUND) return false;
+function _playerGamepadIndex(playerIndex: number): number {
+  return Math.max(0, Math.min(3, int(playerIndex)));
+}
 
-  const mouseButton = MOUSE_CODE_TO_BUTTON[keyCode];
+function _gamepadForIndex(gamepadIndex: number): Gamepad | null {
+  if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
+    return null;
+  }
+  return navigator.getGamepads()[int(gamepadIndex)] ?? null;
+}
+
+function _isGamepadAvailable(gamepadIndex: number): boolean {
+  return _gamepadForIndex(int(gamepadIndex)) !== null;
+}
+
+function _axisValueForGamepad(gamepadIndex: number, axis: number): number {
+  const gamepad = _gamepadForIndex(int(gamepadIndex));
+  if (gamepad === null) return 0.0;
+  const value = gamepad.axes[int(axis)] ?? 0.0;
+  if (Math.abs(value) < AXIS_DEADZONE) return 0.0;
+  return Math.max(-1.0, Math.min(1.0, value));
+}
+
+function _axisValueFromCode(keyCode: number, playerIndex: number): number {
+  const code = int(keyCode);
+  const axis = AXIS_CODE_TO_AXIS[code];
+  if (axis !== undefined) {
+    return _axisValueForGamepad(_playerGamepadIndex(playerIndex), axis);
+  }
+  const rimAxis = RIM_AXIS_CODES[code];
+  if (rimAxis !== undefined) {
+    const [rimPlayer, rimAxisId] = rimAxis;
+    return _axisValueForGamepad(rimPlayer, rimAxisId);
+  }
+  return 0.0;
+}
+
+function _gamepadButtonDown(gamepadIndex: number, button: number): boolean {
+  const gamepad = _gamepadForIndex(int(gamepadIndex));
+  if (gamepad === null) return false;
+  return gamepad.buttons[int(button)]?.pressed ?? false;
+}
+
+function _digitalDownForPlayer(keyCode: number, playerIndex: number): boolean {
+  const code = int(keyCode);
+  if (code === INPUT_CODE_UNBOUND) return false;
+
+  const mouseButton = MOUSE_CODE_TO_BUTTON[code];
   if (mouseButton !== undefined) return InputState.isMouseButtonDown(mouseButton);
 
-  if (keyCode < 0x100) {
-    const domKey = DIK_TO_DOM_KEY[keyCode];
+  if (code < 0x100) {
+    const domKey = DIK_TO_DOM_KEY[code];
     if (domKey === undefined) return false;
     return InputState.isKeyDown(domKey);
   }
 
-  // Gamepad buttons not supported in this simplified port
+  const joyButton = JOYS_BUTTON_CODES[code];
+  if (joyButton !== undefined) {
+    const gamepad = _playerGamepadIndex(playerIndex);
+    return _isGamepadAvailable(gamepad) && _gamepadButtonDown(gamepad, joyButton);
+  }
+  const rimButton = RIM_BUTTON_CODES[code];
+  if (rimButton !== undefined) {
+    const [gamepad, button] = rimButton;
+    return _isGamepadAvailable(gamepad) && _gamepadButtonDown(gamepad, button);
+  }
+  if (AXIS_CODE_TO_AXIS[code] !== undefined || RIM_AXIS_CODES[code] !== undefined) {
+    return Math.abs(_axisValueFromCode(code, playerIndex)) >= _AXIS_DOWN_THRESHOLD;
+  }
   return false;
 }
 
@@ -183,8 +297,8 @@ export function inputCodeIsPressed(keyCode: number, opts: { playerIndex?: number
 }
 
 export function inputAxisValue(keyCode: number, opts: { playerIndex?: number } = {}): number {
-  // Gamepad axes not supported in simplified web port
-  return 0.0;
+  const playerIndex = opts.playerIndex ?? 0;
+  return _axisValueFromCode(int(keyCode), int(playerIndex));
 }
 
 export function captureFirstPressedInputCode(
@@ -192,6 +306,10 @@ export function captureFirstPressedInputCode(
 ): number | null {
   const includeKeyboard = opts.includeKeyboard ?? true;
   const includeMouse = opts.includeMouse ?? true;
+  const includeGamepad = opts.includeGamepad ?? true;
+  const includeAxes = opts.includeAxes ?? true;
+  const axisThreshold = opts.axisThreshold ?? 0.5;
+  const playerIdx = int(opts.playerIndex);
   if (includeKeyboard) {
     let key: number;
     while ((key = InputState.getKeyPressed()) > 0) {
@@ -211,6 +329,29 @@ export function captureFirstPressedInputCode(
     const wheel = InputState.mouseWheelDelta();
     if (wheel > 0) return 0x109;
     if (wheel < 0) return 0x10A;
+  }
+
+  if (includeGamepad) {
+    const gamepad = _playerGamepadIndex(playerIdx);
+    if (_isGamepadAvailable(gamepad)) {
+      for (const [codeStr, button] of Object.entries(JOYS_BUTTON_CODES)) {
+        if (_gamepadButtonDown(gamepad, button)) {
+          return Number(codeStr);
+        }
+      }
+    }
+  }
+
+  if (includeAxes) {
+    const gamepad = _playerGamepadIndex(playerIdx);
+    if (_isGamepadAvailable(gamepad)) {
+      for (const [codeStr, axis] of Object.entries(AXIS_CODE_TO_AXIS)) {
+        const value = _axisValueForGamepad(gamepad, axis);
+        if (Math.abs(value) >= axisThreshold) {
+          return Number(codeStr);
+        }
+      }
+    }
   }
 
   return null;
