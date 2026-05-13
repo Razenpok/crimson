@@ -10,5 +10,6 @@ export function debugEnabled(): boolean {
   if (debugOverride !== null) {
     return debugOverride;
   }
-  return false;
+  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+  return env?.CRIMSON_DEBUG === '1';
 }
