@@ -78,12 +78,12 @@ const _AIM_POINT_RADIUS = 60.0;
 const _LOW_HEALTH_BLEED_DIR_OFFSET = 1.5707964 - 0.5;
 const _LOW_HEALTH_BLOODSPILL_SFX: [SfxId, SfxId] = [SfxId.BLOODSPILL_01, SfxId.BLOODSPILL_02];
 
-interface BonusTimers {
-  weaponPowerUp: number;
-  reflexBoost: number;
-  energizer: number;
-  doubleExperience: number;
-  freeze: number;
+class BonusTimers {
+  weaponPowerUp = 0.0;
+  reflexBoost = 0.0;
+  energizer = 0.0;
+  doubleExperience = 0.0;
+  freeze = 0.0;
 }
 
 export class GameplayState {
@@ -145,13 +145,7 @@ export class GameplayState {
     this.spriteEffects = new SpriteEffectPool(undefined, this.rng);
     this.projectiles = new ProjectilePool();
     this.secondaryProjectiles = new SecondaryProjectilePool();
-    this.bonuses = {
-      weaponPowerUp: 0.0,
-      reflexBoost: 0.0,
-      energizer: 0.0,
-      doubleExperience: 0.0,
-      freeze: 0.0,
-    };
+    this.bonuses = new BonusTimers();
     this.perkIntervals = new PerkEffectIntervals();
     this.perkSelection = new PerkSelectionState();
     this.tutorial = new TutorialState();
