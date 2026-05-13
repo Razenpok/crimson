@@ -189,7 +189,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _buildWeaponDatabaseIds(): number[] {
-    const status = ((this.state as any).status as WeaponAvailabilityStatus | null) ?? null;
+    const status: WeaponAvailabilityStatus | null = this.state.status;
     const available = buildWeaponAvailability({
       status,
       gameMode: this.state.config.gameplay.mode,

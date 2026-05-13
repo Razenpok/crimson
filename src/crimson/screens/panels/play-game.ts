@@ -101,16 +101,9 @@ interface PlayerCountWidgetLayout {
 // State interface consumed by PlayGameMenuView
 // ---------------------------------------------------------------------------
 
-export interface PlayGameStatus {
-  questPlayCounts: number[];
-  questUnlockIndex: number;
-  modePlayCountForMode(mode: number): number;
-}
-
 export interface PlayGamePanelState extends PanelGameState {
   demoEnabled: boolean;
   debugEnabled: boolean;
-  status: PlayGameStatus;
 }
 
 // ---------------------------------------------------------------------------

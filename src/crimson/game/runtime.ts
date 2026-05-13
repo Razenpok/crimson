@@ -19,7 +19,7 @@ import {
   demoTrialOverlayInfo,
   formatDemoTrialTime,
 } from '@crimson/demo-trial.ts';
-import { type GameConfig, GameState } from './types.ts';
+import { type GameConfig, type GameStateStatus, GameState } from './types.ts';
 import { GameLoopView } from './loop-view.ts';
 
 export const CRIMSON_PAQ_NAME = 'crimson.paq';
@@ -43,15 +43,18 @@ function applyDebugConsoleDefaults(console: ConsoleState, debug: boolean): void 
 }
 
 /** Minimal persistence stub matching fields used by runtime.py. */
-export interface GameStatusPersist {
+export interface GameStatusPersist extends GameStateStatus {
   gameSequenceId: number;
   questUnlockIndex: number;
   questUnlockIndexFull: number;
   questPlayCounts: number[];
+  modePlayOther: number;
+  unknownTail: Uint8Array;
   saveIfDirty(): void;
   incrementModePlayCountForMode(mode: GameMode): void;
   modePlayCountForMode(mode: number): number;
-  incrementQuestPlayCount(index: number): void;
+  questPlayCount(index: number): number;
+  incrementQuestPlayCount(index: number): number;
   weaponUsageCountSlot(slot: number): number;
   incrementWeaponUsageSlot(slot: number): void;
 }
@@ -76,6 +79,8 @@ export function createGameStatus(): GameStatusPersist {
     },
     questUnlockIndex: 50,
     questUnlockIndexFull: 50,
+    modePlayOther: 0,
+    unknownTail: new Uint8Array(0),
     get questPlayCounts(): number[] {
       return _questPlayCounts;
     },
@@ -103,10 +108,14 @@ export function createGameStatus(): GameStatusPersist {
     modePlayCountForMode(mode: number): number {
       return _modePlayCounts.get(mode) ?? 0;
     },
-    incrementQuestPlayCount(index: number): void {
+    questPlayCount(index: number): number {
+      return _questPlayCounts[index] ?? 0;
+    },
+    incrementQuestPlayCount(index: number): number {
       while (_questPlayCounts.length <= index) _questPlayCounts.push(0);
       _questPlayCounts[index]++;
       _dirty = true;
+      return _questPlayCounts[index];
     },
     weaponUsageCountSlot(slot: number): number {
       return _weaponUsageCounts.get(slot) ?? 0;
@@ -385,6 +394,7 @@ export function runGame(
     assetsUrl: config.assetsUrl,
     rng,
     config: cfg,
+    status,
     console,
     demoEnabled: config.demoEnabled,
     debugEnabled: config.debug,

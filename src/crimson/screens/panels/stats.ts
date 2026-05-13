@@ -365,7 +365,7 @@ export class StatisticsMenuView {
 
     // "played for # hours # minutes"
     const font = resources.smallFont;
-    const playtimeMs = (this.state as any).status?.gameSequenceId ?? 0;
+    const playtimeMs = this.state.status.gameSequenceId;
     const playtimeText = formatPlaytimeText(playtimeMs, this.state.preserveBugs);
     const playtimePos = panelTopLeft.add(new Vec2(_PLAYTIME_X * scale, _PLAYTIME_Y * scale));
     drawSmallText(font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));

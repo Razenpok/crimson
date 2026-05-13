@@ -53,6 +53,22 @@ export interface HighScoresRequest {
   highlightRank: number | null;
 }
 
+export interface GameStateStatus {
+  readonly gameSequenceId: number;
+  questUnlockIndex: number;
+  questUnlockIndexFull: number;
+  questPlayCounts: number[];
+  modePlayOther: number;
+  unknownTail: Uint8Array;
+  saveIfDirty(): void;
+  incrementModePlayCountForMode(mode: GameMode): void;
+  modePlayCountForMode(mode: number): number;
+  questPlayCount(index: number): number;
+  incrementQuestPlayCount(index: number): number;
+  weaponUsageCountSlot(slot: number): number;
+  incrementWeaponUsageSlot(slot: number): void;
+}
+
 // ---------------------------------------------------------------------------
 // Screen — protocol interface
 // ---------------------------------------------------------------------------
@@ -81,6 +97,7 @@ export class GameState {
   assetsUrl: string;
   rng: Crand;
   config: CrimsonConfig;
+  status: GameStateStatus;
   console: ConsoleState;
   demoEnabled: boolean;
   debugEnabled: boolean;
@@ -118,6 +135,7 @@ export class GameState {
     assetsUrl: string;
     rng: Crand;
     config: CrimsonConfig;
+    status: GameStateStatus;
     console: ConsoleState;
     demoEnabled: boolean;
     debugEnabled?: boolean;
@@ -130,6 +148,7 @@ export class GameState {
     this.assetsUrl = init.assetsUrl;
     this.rng = init.rng;
     this.config = init.config;
+    this.status = init.status;
     this.console = init.console;
     this.demoEnabled = init.demoEnabled;
     this.debugEnabled = init.debugEnabled ?? false;

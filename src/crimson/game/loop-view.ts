@@ -217,15 +217,7 @@ export class GameLoopView implements View {
 
     const _viewCtx = modeViewContext(state);
 
-    // Screen constructors use structural sub-interfaces of GameState that
-    // include a `status` field.  We attach the persistent status via a typed
-    // intersection so that each view's structural constraint is satisfied
-    // without resorting to a blanket `as any`.
-    //
-    // Two views (QuestsMenuView, QuestResultsView) have deeper structural
-    // mismatches (e.g. config.save(), assetsDir) that are pre-existing gaps
-    // in the port — they use targeted casts below.
-    const gs = Object.assign(state, { status }) as GameState & { status: GameStatusPersist };
+    const gs = state;
 
     this._frontViews = {
       open_play_game: new PlayGameMenuView(gs),
