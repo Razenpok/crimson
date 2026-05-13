@@ -150,7 +150,7 @@ export class OptionsMenuView extends PanelMenuView {
       this._dirty = true;
     }
 
-    if (this._updateCheckbox(labelPos.offset({ dy: 135.0 * scale }), scale, resources)) {
+    if (this._updateCheckbox(labelPos.offset({ dy: 135.0 * scale }), scale)) {
       config.gameplay.showInfoTexts = this._uiInfoTexts;
       this._dirty = true;
     }
@@ -295,7 +295,8 @@ export class OptionsMenuView extends PanelMenuView {
     return changed;
   }
 
-  private _updateCheckbox(pos: Vec2, scale: number, resources: RuntimeResources): boolean {
+  private _updateCheckbox(pos: Vec2, scale: number): boolean {
+    const resources = requireRuntimeResources(this.state);
     const checkOn = getTexture(resources, TextureId.UI_CHECK_ON);
     const font = resources.smallFont;
     const textScale = 1.0 * scale;
@@ -315,11 +316,11 @@ export class OptionsMenuView extends PanelMenuView {
   }
 
   protected override _drawContents(): void {
-    const resources = requireRuntimeResources(this.state);
-    this._drawOptionsContents(resources);
+    this._drawOptionsContents();
   }
 
-  private _drawOptionsContents(resources: RuntimeResources): void {
+  private _drawOptionsContents(): void {
+    const resources = requireRuntimeResources(this.state);
     const labelsTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const layout = this._contentLayout();
     const basePos = layout.basePos;
