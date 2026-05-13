@@ -76,7 +76,10 @@ export class WorldRuntime {
       audioRng: this.audioRng,
     });
 
-    this.terrainRuntime = new TerrainRuntime(this.worldSize, renderResources);
+    this.terrainRuntime = new TerrainRuntime({
+      worldSize: this.worldSize,
+      renderResources,
+    });
 
     this.camera = new Vec2(-1.0, -1.0);
     this.renderer = new WorldRenderer(

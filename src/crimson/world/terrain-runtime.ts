@@ -5,10 +5,12 @@ import { resolveTerrainSlots } from '@crimson/terrain-slots.ts';
 import type { RenderResources } from './render-resources.ts';
 
 export class TerrainRuntime {
-  constructor(
-    public worldSize: number = 1024,
-    public renderResources: RenderResources = null!
-  ) {
+  worldSize: number;
+  renderResources: RenderResources;
+
+  constructor(opts: { worldSize?: number; renderResources?: RenderResources } = {}) {
+    this.worldSize = opts.worldSize ?? 1024.0;
+    this.renderResources = opts.renderResources ?? null!;
   }
 
   applyTerrainSetup(opts: { terrainSlots: TerrainSlotTriplet; seed: number }): void {
