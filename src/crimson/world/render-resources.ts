@@ -21,7 +21,7 @@ import {
 } from '@crimson/render/terrain-fx.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 import { terrainFxBatchIsEmpty } from '@crimson/sim/terrain-fx.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+import type { GameplayState } from "@crimson/gameplay.ts";
 
 export class RenderResources {
   private _assetsUrl: string;
@@ -40,8 +40,11 @@ export class RenderResources {
   }
 
   get resources(): RuntimeResources {
-    if (this._resources !== null) return this._resources;
-    return runtimeResourcesFor(this._assetsUrl);
+    const resources = this._resources;
+    if (resources === null) {
+      throw new Error('runtime resources must be loaded before use');
+    }
+    return resources;
   }
 
   set resources(value: RuntimeResources | null) {

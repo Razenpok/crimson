@@ -7,7 +7,7 @@ import type { RenderResources } from './render-resources.ts';
 export class TerrainRuntime {
   constructor(
     public worldSize: number = 1024,
-    public renderResources: RenderResources
+    public renderResources: RenderResources = null!
   ) {
   }
 
