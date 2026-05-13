@@ -2,10 +2,6 @@
 
 import { AimScheme, MovementControlType, type CrimsonControlsConfig } from '@grim/config.ts';
 
-// ---------------------------------------------------------------------------
-// RebindTarget — identifies which config field a rebind row controls
-// ---------------------------------------------------------------------------
-
 export enum RebindTarget {
   PLAYER_MOVE_CODES = 1,
   PLAYER_FIRE_CODE = 2,
@@ -15,10 +11,6 @@ export enum RebindTarget {
   GLOBAL_PICK_PERK_CODE = 6,
   GLOBAL_RELOAD_CODE = 7,
 }
-
-// ---------------------------------------------------------------------------
-// RebindRowSpec — one row in the controls rebind list
-// ---------------------------------------------------------------------------
 
 export interface RebindRowSpec {
   readonly label: string;
@@ -36,10 +28,7 @@ export function rebindRow(
   return { label, target, targetIndex, axis };
 }
 
-// ---------------------------------------------------------------------------
-// Label helpers — port of input_configure_for_label (0x00447c90)
-// ---------------------------------------------------------------------------
-
+// Port of `input_configure_for_label` (0x00447c90).
 export function inputConfigureForLabel(configId: AimScheme): string {
   switch (configId) {
     case AimScheme.MOUSE: return 'Mouse';
@@ -52,7 +41,7 @@ export function inputConfigureForLabel(configId: AimScheme): string {
   }
 }
 
-// Port of input_scheme_label (0x00447cf0)
+// Port of `input_scheme_label` (0x00447cf0).
 export function inputSchemeLabel(scheme: MovementControlType): string {
   switch (scheme) {
     case MovementControlType.UNKNOWN: return 'Unknown';
@@ -73,10 +62,6 @@ export function controlsMethodLabels(
   return [inputConfigureForLabel(player.aimScheme), inputSchemeLabel(player.movement)];
 }
 
-// ---------------------------------------------------------------------------
-// Dropdown IDs
-// ---------------------------------------------------------------------------
-
 export function controlsAimMethodDropdownIds(currentAimScheme: AimScheme): AimScheme[] {
   const ids: AimScheme[] = [
     AimScheme.MOUSE,
@@ -92,13 +77,10 @@ export function controlsAimMethodDropdownIds(currentAimScheme: AimScheme): AimSc
   return ids;
 }
 
-// ---------------------------------------------------------------------------
-// Rebind plan — returns (aim_rows, move_rows, misc_rows)
-// ---------------------------------------------------------------------------
-
 export function controlsRebindPlan(
   opts: { aimScheme: AimScheme; moveMode: MovementControlType; playerIndex: number },
 ): [RebindRowSpec[], RebindRowSpec[], RebindRowSpec[]] {
+  // Return (aim_rows, move_rows, misc_rows) for `controls_menu_update`.
   const aimRows: RebindRowSpec[] = [];
   const moveRows: RebindRowSpec[] = [];
   const miscRows: RebindRowSpec[] = [];
@@ -135,7 +117,7 @@ export function controlsRebindPlan(
     moveRows.push(rebindRow('Move to cursor:', RebindTarget.GLOBAL_RELOAD_CODE));
   }
 
-  if (opts.playerIndex === 0) {
+  if (int(opts.playerIndex) === 0) {
     miscRows.push(rebindRow('Level Up:', RebindTarget.GLOBAL_PICK_PERK_CODE));
     if (opts.moveMode !== MovementControlType.MOUSE_POINT_CLICK) {
       miscRows.push(rebindRow('Reload:', RebindTarget.GLOBAL_RELOAD_CODE));
