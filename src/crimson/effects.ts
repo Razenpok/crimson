@@ -85,6 +85,7 @@ export class ParticlePool {
       if (!this._entries[i].active) return i;
     }
     if (this._entries.length === 0) throw new Error('Particle pool has zero entries');
+    // Native: `crt_rand() & 0x7f` (pool size is 0x80).
     return this._rng.rand({ caller }) % this._entries.length;
   }
 
@@ -94,6 +95,8 @@ export class ParticlePool {
     intensity?: number;
     owner?: OwnerRef;
   }): number {
+    // Port of `fx_spawn_particle` (0x00420130).
+
     const intensity = opts.intensity ?? 1.0;
     const owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
     const idx = this._allocSlot(RngCallerStatic.FX_SPAWN_PARTICLE_ALLOC);
@@ -120,6 +123,8 @@ export class ParticlePool {
     angle: number;
     owner?: OwnerRef;
   }): number {
+    // Port of `fx_spawn_particle_slow` (0x00420240).
+
     const owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
     const idx = this._allocSlot(RngCallerStatic.FX_SPAWN_PARTICLE_SLOW_ALLOC);
     const entry = this._entries[idx];
@@ -151,6 +156,14 @@ export class ParticlePool {
     fxQueue?: FxQueue | null;
     spriteEffects?: SpriteEffectPool | null;
   }): number[] {
+    // Advance particles and deactivate expired entries.
+    //
+    // This is a minimal port of the particle loop inside `projectile_update`
+    // (0x00420b90). It captures the per-style decay/movement rules that drive
+    // visual lifetimes and the weapon-driven collision damage.
+    //
+    // Returns indices of particles that were deactivated this tick.
+
     const creatures = opts?.creatures ?? null;
     const killCreature = opts?.killCreature ?? null;
     const fxQueue = opts?.fxQueue ?? null;
@@ -159,9 +172,6 @@ export class ParticlePool {
     dt = f32(dt);
     const damageApplier = (opts?.applyCreatureDamage ?? null) ?? this._creatureDamageApplier;
 
-    // Native particle `creature_find_in_radius` is hitbox-gated, not HP-gated:
-    // freshly killed creatures (hp<=0, hitbox>5) can still receive same-tick
-    // style-0 damage callbacks.
     const creatureFindInRadius = (pos: Vec2, radius: number): number => {
       if (creatures === null) return -1;
       const maxIndex = Math.min(creatures.length, 0x180);
@@ -170,6 +180,9 @@ export class ParticlePool {
       for (let ci = 0; ci < maxIndex; ci++) {
         const creature = creatures[ci];
         if (!creature.active) continue;
+        // Native particle `creature_find_in_radius` is hitbox-gated, not
+        // HP-gated: freshly killed creatures (hp<=0, hitbox>5) can still
+        // receive same-tick style-0 damage callbacks.
         if (!creatureLifecycleIsCollidable(creature.lifecycleStage)) continue;
 
         const size = f32(creature.size);
@@ -255,9 +268,9 @@ export class ParticlePool {
       const alpha = clamp(entry.intensity, 0.0, 1.0);
       const shade = 1.0 - Math.max(entry.intensity, 0.0) * 0.95;
       entry.age = alpha;
-      // Native only updates scale_x/scale_y; scale_z stays at its spawn value (1.0).
       entry.scaleX = shade;
       entry.scaleY = shade;
+      // Native only updates scale_x/scale_y; scale_z stays at its spawn value (1.0).
 
       if (
         style === ParticleStyleId.BUBBLEGUN &&
@@ -375,6 +388,8 @@ export class SpriteEffectPool {
     scale?: number;
     color?: RGBA | null;
   }): number {
+    // Port of `fx_spawn_sprite` (0x0041fbb0).
+
     const scale = opts.scale ?? 1.0;
     const color = opts.color ?? null;
     let idx: number | null = null;
@@ -433,6 +448,8 @@ export class FxQueueEntry {
 }
 
 export class FxQueue {
+  // Per-frame terrain decal queue (`fx_queue` / `fx_queue_add`).
+
   private _entries: FxQueueEntry[];
   private _count = 0;
   private _maxCount: number;
@@ -469,6 +486,8 @@ export class FxQueue {
     rotation: number;
     rgba: RGBA;
   }): boolean {
+    // Port of `fx_queue_add` (0x0041e840).
+
     if (this._count >= this._maxCount) return false;
 
     const entry = this._entries[this._count];
@@ -483,6 +502,8 @@ export class FxQueue {
   }
 
   addRandom(opts: { pos: Vec2; rng: CrandLike }): boolean {
+    // Port of `fx_queue_add_random` (effect ids 3..7 with grayscale tint).
+
     // Mirrors native `config_violence_disabled` gate in `fx_queue_add_random`.
     // Nonzero suppresses violence-linked random decals.
     if (this.violenceDisabled !== 0) return false;
@@ -505,6 +526,8 @@ export class FxQueueRotatedEntry {
 }
 
 export class FxQueueRotated {
+  // Rotated corpse queue (`fx_queue_rotated` / `fx_queue_add_rotated`).
+
   private _entries: FxQueueRotatedEntry[];
   private _count = 0;
   private _maxCount: number;
@@ -544,6 +567,8 @@ export class FxQueueRotated {
     terrainBodiesTransparency?: number;
     terrainTextureFailed?: boolean;
   }): boolean {
+    // Port of `fx_queue_add_rotated` (0x00427840).
+
     const terrainBodiesTransparency = opts.terrainBodiesTransparency ?? 0.0;
     const terrainTextureFailed = opts.terrainTextureFailed ?? false;
     if (terrainTextureFailed) return false;
@@ -585,6 +610,11 @@ export class EffectEntry {
 }
 
 export class EffectPool {
+  // Effect pool (`effect_spawn`, `effects_update`).
+  //
+  // This pool renders transient particle quads and can optionally enqueue decals
+  // into `FxQueue` on expiry (flags bit `0x80`).
+
   private _entries: EffectEntry[];
   private _free: number[];
   private _detailToggle = 0;
@@ -614,6 +644,7 @@ export class EffectPool {
   }
 
   private _allocSlot(detailPreset: number): number | null {
+    // Native: if detail_preset < 3, skip every other spawn attempt.
     if (detailPreset < 3) {
       const skip = this._detailToggle & 1;
       this._detailToggle++;
@@ -672,6 +703,8 @@ export class EffectPool {
   }
 
   update(dt: number, opts?: { fxQueue?: FxQueue | null }): void {
+    // Advance active effects and enqueue terrain decals on expiry.
+
     const fxQueue = opts?.fxQueue ?? null;
     if (dt <= 0.0) return;
 
@@ -698,6 +731,7 @@ export class EffectPool {
       }
 
       if (fxQueue !== null && (flags & 0x80)) {
+        // On expiry, the native code overrides alpha before queuing.
         const alpha = (flags & 0x100) ? 0.35 : 0.8;
         fxQueue.add({
           effectId: entry.effectId,
@@ -719,6 +753,8 @@ export class EffectPool {
     draws: [number, number, number, number];
     detailPreset: number;
   }): void {
+    // Port of the casing spawn in native gameplay fire (`effect_id 0x12`).
+
     const [angleDraw, speedDraw, rotationDraw, rotationStepDraw] = opts.draws;
 
     const angle = opts.aimHeading + (angleDraw & 0x3f) * 0.01;
@@ -743,6 +779,8 @@ export class EffectPool {
     detailPreset: number;
     violenceDisabled: number;
   }): void {
+    // Port of `effect_spawn_blood_splatter` (0x0042eb10).
+
     if (opts.violenceDisabled !== 0) return;
 
     const lifetime = 0.25 - opts.age;
@@ -779,6 +817,8 @@ export class EffectPool {
     scaleStep?: number | null;
     color?: RGBA;
   }): void {
+    // Port of `effect_spawn_burst` (0x0042ef60).
+
     const lifetime = opts.lifetime ?? 0.5;
     const scaleStep = opts.scaleStep ?? null;
     const color = opts.color ?? new RGBA(0.4, 0.5, 1.0, 0.5);
@@ -839,6 +879,8 @@ export class EffectPool {
     lifetime?: number;
     scaleStep?: number;
   }): void {
+    // Ring/halo burst used by bonus pickup effects (`bonus_apply`).
+
     const lifetime = opts.lifetime ?? 0.25;
     const scaleStep = opts.scaleStep ?? 50.0;
     this.spawn({
@@ -854,6 +896,8 @@ export class EffectPool {
     rng: CrandLike;
     detailPreset: number;
   }): void {
+    // Port of `effect_spawn_freeze_shard` (0x0042ec80).
+
     const lifetime = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHARD_LIFETIME }) & 0xf) * 0.01 + 0.2;
     const base = opts.angle + Math.PI;
 
@@ -879,6 +923,8 @@ export class EffectPool {
     rng: CrandLike;
     detailPreset: number;
   }): void {
+    // Port of `effect_spawn_freeze_shatter` (0x0042ee00).
+
     const lifetime = 1.1;
     for (let i = 0; i < 4; i++) {
       const rotation = i * (Math.PI / 2.0) + opts.angle;
@@ -905,6 +951,8 @@ export class EffectPool {
     rng: CrandLike;
     detailPreset: number;
   }): void {
+    // Port of `effect_spawn_explosion_burst` (0x0042f6c0).
+
     // Shockwave ring.
     this.spawn({
       effectId: EffectId.RING, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
@@ -941,6 +989,7 @@ export class EffectPool {
       count = 3 + (opts.detailPreset > 3 ? 1 : 0);
     }
 
+    // Extra shockwave particles.
     for (let i = 0; i < count; i++) {
       const rotation =
         (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_ROTATION }) % 314) * 0.02;
