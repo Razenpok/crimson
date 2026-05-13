@@ -3,7 +3,7 @@
 import type { ConsoleState } from '@grim/console.ts';
 
 export const ASSET_BASE_URL = 'https://paq.crimson.banteg.xyz/v1.9.93';
-export const DEFAULT_PAQ_FILES: readonly string[] = ['crimson.paq', 'music.paq', 'sfx.paq'];
+export const DEFAULT_PAQ_FILES: readonly string[] = Object.freeze(['crimson.paq', 'music.paq', 'sfx.paq']);
 
 export class DownloadResult {
   readonly name: string;
