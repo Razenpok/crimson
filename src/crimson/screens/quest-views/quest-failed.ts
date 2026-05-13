@@ -4,14 +4,14 @@ import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 
 import { TextureId, getTexture } from '@grim/assets.ts';
-import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import { GameState } from '@crimson/game/types.ts';
+import { type GameState } from '@crimson/game/types.ts';
 import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
@@ -56,6 +56,7 @@ const MOUSE_BUTTON_LEFT = 0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
+// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   if (x1 === x2) {
     const y = Math.min(y1, y2);
@@ -70,14 +71,10 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Col
   }
 }
 
-export type QuestFailedOutcome = QuestRunOutcome;
-
-export type QuestFailedState = GameState;
-
 export class QuestFailedView {
-  private state: QuestFailedState;
+  private state: GameState;
   private _ground: GroundRenderer | null = null;
-  private _outcome: QuestFailedOutcome | null = null;
+  private _outcome: QuestRunOutcome | null = null;
   private _record: HighScoreRecord | null = null;
   private _questTitle: string = '';
   private _action: string | null = null;
@@ -89,7 +86,7 @@ export class QuestFailedView {
   private _questListButton: UiButtonState;
   private _mainMenuButton: UiButtonState;
 
-  constructor(state: QuestFailedState) {
+  constructor(state: GameState) {
     this.state = state;
     this._retryButton = new UiButtonState('Play Again', { forceWide: true });
     this._questListButton = new UiButtonState('Play Another', { forceWide: true });
@@ -103,7 +100,7 @@ export class QuestFailedView {
     this._introMs = 0.0;
     this._closing = false;
     this._closeAction = null;
-    this._outcome = this.state.questOutcome as QuestFailedOutcome | null;
+    this._outcome = this.state.questOutcome;
     this.state.questOutcome = null;
     this._questTitle = '';
     this._record = null;
@@ -300,7 +297,7 @@ export class QuestFailedView {
     return 'Quest failed, try again.';
   }
 
-  private _buildScorePreview(outcome: QuestFailedOutcome | null): void {
+  private _buildScorePreview(outcome: QuestRunOutcome | null): void {
     this._record = null;
     if (outcome === null) return;
 
@@ -334,7 +331,7 @@ export class QuestFailedView {
     this.state.config.gameplay.mode = GameMode.QUESTS;
     this.state.config.gameplay.questLevel = level;
     try {
-      (this.state.config as CrimsonConfig & { save?(): void }).save?.();
+      this.state.config.save();
     } catch (exc) {
       this.state.console.log.log(`quest failed: failed to save quest selection config: ${exc}`);
     }
@@ -385,7 +382,7 @@ export class QuestFailedView {
     const scoreLabelW = this._textWidth(scoreLabel, 1.0);
     drawSmallText(font, scoreLabel, scorePos.offset({ dx: 32.0 - scoreLabelW * 0.5 }), labelColor);
 
-    const scoreValue = `${(record.survivalElapsedMs * 0.001).toFixed(2)} secs`;
+    const scoreValue = `${(int(record.survivalElapsedMs) * 0.001).toFixed(2)} secs`;
     const scoreValueW = this._textWidth(scoreValue, 1.0);
     drawSmallText(font, scoreValue, scorePos.add(new Vec2(32.0 - scoreValueW * 0.5, 15.0)), valueColor);
 
@@ -398,7 +395,7 @@ export class QuestFailedView {
     const xpW = this._textWidth(xpValue, 1.0);
     drawSmallText(font, xpValue, col2Pos.add(new Vec2(32.0 - xpW * 0.5, 15.0)), labelColor);
 
-    // Horizontal separator
+    // `FUN_004411c0`: horizontal 192px separator at x-16 after the score row.
     const linePos = scorePos.add(new Vec2(-16.0, 52.0));
     wgl.drawRectangle(
       int(linePos.x), int(linePos.y),
