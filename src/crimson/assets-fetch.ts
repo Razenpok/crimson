@@ -32,6 +32,10 @@ export function downloadMissingPaqs(
 ): readonly DownloadResult[] {
   const baseUrl = opts.baseUrl ?? ASSET_BASE_URL;
   const names = opts.names ?? DEFAULT_PAQ_FILES;
+  if (names.length === 0) {
+    return [];
+  }
+  console.log.log(`assets: missing ${names.join(', ')} (downloading)`);
   const results: DownloadResult[] = [];
   for (const name of names) {
     const url = `${baseUrl}/${name}`;
