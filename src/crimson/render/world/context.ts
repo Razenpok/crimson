@@ -184,9 +184,9 @@ function drawBulletTrail(
   // Gauss has a distinct blue tint; most other bullet trails are neutral gray.
   let headRgb: [number, number, number];
   if (typeId === ProjectileTemplateId.GAUSS_GUN) {
-    headRgb = [51 / 255, 128 / 255, 255 / 255];
+    headRgb = [51 / 255, 128 / 255, 255 / 255]; // (0.2, 0.5, 1.0)
   } else {
-    headRgb = [128 / 255, 128 / 255, 128 / 255];
+    headRgb = [128 / 255, 128 / 255, 128 / 255]; // (0.5, 0.5, 0.5)
   }
   const tailRgb: [number, number, number] = [128 / 255, 128 / 255, 128 / 255];
   const alphaNorm = alpha / 255;
