@@ -7,8 +7,7 @@ import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts
 import { GameMode } from '@crimson/game-modes.ts';
 import { savedNameLabels } from '@grim/config.ts';
 import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
-import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
-import { formatScoreDate } from './shared.ts';
+import { formatElapsedMmSs, formatScoreDate, ordinal } from './shared.ts';
 import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
 import { InputState } from '@grim/input.ts';
 import {
@@ -90,6 +89,7 @@ function savedScoreNames(view: HighScoresView): string[] {
 }
 
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_line`.
   const ix1 = int(x1);
   const iy1 = int(y1);
   const ix2 = int(x2);
@@ -476,10 +476,10 @@ function drawRightPanelLocalScore(
       pos: cardTopLeft.add(new Vec2(HS_LOCAL_CLOCK_X * scale, HS_LOCAL_CLOCK_Y * scale)),
       scale,
     });
-    drawSmallText(font, formatTimeMmSs(elapsedMs), cardTopLeft.add(new Vec2(HS_LOCAL_TIME_VALUE_X * scale, HS_LOCAL_TIME_VALUE_Y * scale)), gameTimeColor);
+    drawSmallText(font, formatElapsedMmSs(elapsedMs), cardTopLeft.add(new Vec2(HS_LOCAL_TIME_VALUE_X * scale, HS_LOCAL_TIME_VALUE_Y * scale)), gameTimeColor);
   }
 
-  drawSmallText(font, `Rank: ${formatOrdinal(idx + 1)}`, cardTopLeft.add(new Vec2(HS_LOCAL_RANK_X * scale, HS_LOCAL_RANK_Y * scale)), textColor);
+  drawSmallText(font, `Rank: ${ordinal(idx + 1)}`, cardTopLeft.add(new Vec2(HS_LOCAL_RANK_X * scale, HS_LOCAL_RANK_Y * scale)), textColor);
 
   const frags = int(entry.creatureKillCount);
   const shotsFired = int(entry.shotsFired);
@@ -589,7 +589,7 @@ function drawWicon(
 function weaponLabelAndIcon(view: HighScoresView, weaponId: number): [string, number | null] {
   const weapon = WEAPON_BY_ID.get(weaponId as WeaponId);
   if (weapon === undefined) {
-    return ['Unknown', null];
+    throw new Error(`unknown weapon id: ${weaponId}`);
   }
   const name = weaponDisplayName(weapon.weaponId, { preserveBugs: view.state.preserveBugs });
   return [name, weapon.iconIndex];
