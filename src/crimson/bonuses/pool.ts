@@ -435,11 +435,11 @@ export class BonusPool {
   }
 }
 
-/** Return the first bonus entry within the aim hover radius, matching the exe scan order. */
 export function bonusFindAimHoverEntry(
   player: PlayerState,
   bonusPool: BonusPool,
 ): [number, BonusEntry] | null {
+  // Return the first bonus entry within the aim hover radius, matching the exe scan order.
   const aimPos = player.aim;
   const radiusSq = BONUS_AIM_HOVER_RADIUS * BONUS_AIM_HOVER_RADIUS;
   const entries = bonusPool.entries;
@@ -453,8 +453,8 @@ export function bonusFindAimHoverEntry(
   return null;
 }
 
-/** Return the classic label text for a bonus entry (`bonus_label_for_entry`). */
 export function bonusLabelForEntry(entry: BonusEntry, opts: { preserveBugs?: boolean } = {}): string {
+  // Return the classic label text for a bonus entry (`bonus_label_for_entry`).
   const preserveBugs = opts.preserveBugs ?? false;
   const bonusId = entry.bonusId;
   if (bonusId === BonusId.WEAPON) {
