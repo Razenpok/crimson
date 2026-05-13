@@ -8,9 +8,6 @@ export type { RenderTarget };
 // ---------------------------------------------------------------------------
 
 export type Brand<K, T extends string> = K & { readonly __brand: T };
-// Kludge for in-progress porting.
-export type Unbrand<T> =
-  T extends Brand<infer K, string> ? K : T;
 
 export type Color = Brand<{ r: number; g: number; b: number; a: number }, 'Color'>;
 export function makeColor(r: number, g: number, b: number, a: number): Color { return { r, g, b, a } as Color; }
