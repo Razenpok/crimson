@@ -89,18 +89,17 @@ export class PerkPromptUi {
     const scale = opts.scale ?? 1.0;
     const screenW = wgl.getScreenWidth();
     const hinge = PerkPromptUi.hinge();
-    // Prompt swings counter-clockwise; WebGL Y-down makes positive rotation clockwise.
+    // Prompt swings counter-clockwise; raylib's Y-down makes positive rotation clockwise.
     const rotDeg = -(1.0 - alpha) * 90.0;
-    const tint = wgl.makeColor(1, 1, 1, alpha);
+    const tint = wgl.makeColor(1, 1, 1, int(255 * alpha) / 255);
 
     const textScale = scale;
     const textW = uiTextWidth(label, textScale);
     const x = screenW - PERK_PROMPT_TEXT_MARGIN_X - textW;
     const y = hinge.y + PERK_PROMPT_TEXT_OFFSET_Y;
-    const color = wgl.makeColor(textColor.r, textColor.g, textColor.b, alpha);
+    const color = wgl.makeColor(textColor.r, textColor.g, textColor.b, int(255 * alpha) / 255);
     drawUiText(resources, label, new Vec2(x, y), { scale: textScale, color });
 
-    // Bar texture (mirrored via negative src width)
     const barTex = getTexture(resources, TextureId.UI_MENU_ITEM);
     const barW = barTex.width * PERK_PROMPT_BAR_SCALE;
     const barH = barTex.height * PERK_PROMPT_BAR_SCALE;
@@ -115,7 +114,6 @@ export class PerkPromptUi {
     const barOrigin = wgl.makeVector2(-barLocalX, -barLocalY);
     wgl.drawTexturePro(barTex, barSrc, barDst, barOrigin, rotDeg, tint);
 
-    // Level-up label texture
     const luTex = getTexture(resources, TextureId.UI_TEXT_LEVEL_UP);
     const luLocalX = PERK_PROMPT_LEVEL_UP_BASE_OFFSET_X * PERK_PROMPT_LEVEL_UP_SCALE + PERK_PROMPT_LEVEL_UP_SHIFT_X;
     const luLocalY = PERK_PROMPT_LEVEL_UP_BASE_OFFSET_Y * PERK_PROMPT_LEVEL_UP_SCALE + PERK_PROMPT_LEVEL_UP_SHIFT_Y;
@@ -123,7 +121,7 @@ export class PerkPromptUi {
     const luH = PERK_PROMPT_LEVEL_UP_BASE_H * PERK_PROMPT_LEVEL_UP_SCALE;
     const pulseAlpha = Math.max(0.0, Math.min(1.0, (100.0 + int(pulse * 155.0 / 1000.0)) / 255.0));
     const labelAlpha = Math.max(0.0, Math.min(1.0, alpha * pulseAlpha));
-    const pulseTint = wgl.makeColor(1, 1, 1, labelAlpha);
+    const pulseTint = wgl.makeColor(1, 1, 1, int(255 * labelAlpha) / 255);
     const luSrc = wgl.makeRectangle(0, 0, luTex.width, luTex.height);
     const luDst = wgl.makeRectangle(hinge.x, hinge.y, luW, luH);
     const luOrigin = wgl.makeVector2(-luLocalX, -luLocalY);
