@@ -22,14 +22,13 @@ import {
   PANEL_TIMELINE_END_MS,
 } from './base.ts';
 import {
+  MENU_LABEL_ROW_PLAY_GAME,
   MENU_LABEL_ROW_HEIGHT,
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
-
-const MENU_LABEL_ROW_PLAY_GAME = 1;
 
 const KEY_ESCAPE = 27;
 const KEY_F1 = 112;

@@ -22,6 +22,7 @@ import {
   PANEL_TIMELINE_END_MS,
 } from './base.ts';
 import {
+  MENU_LABEL_ROW_OPTIONS,
   MENU_LABEL_ROW_HEIGHT,
   MENU_PANEL_WIDTH,
   drawMenuCursorHelper,
@@ -29,8 +30,6 @@ import {
 } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
-
-const MENU_LABEL_ROW_OPTIONS = 2;
 
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;
