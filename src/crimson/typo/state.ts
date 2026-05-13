@@ -1,6 +1,6 @@
 // Port of crimson/typo/state.py
 
-import { Vec2 } from '@grim/geom.ts';
+import type { Vec2 } from '@grim/geom.ts';
 import { CreatureNameTable } from './names.ts';
 import { TypingBuffer } from './typing.ts';
 
@@ -23,8 +23,8 @@ export function resetTypoState(
   typo.typing = new TypingBuffer();
   typo.names = CreatureNameTable.sized(int(opts.creatureCapacity));
   typo.spawnCooldownMs = 0;
-  typo.dictionaryWords = Array.from(dictionaryWords);
-  typo.highscoreNames = Array.from(highscoreNames);
+  typo.dictionaryWords = Array.from(dictionaryWords, (word) => String(word));
+  typo.highscoreNames = Array.from(highscoreNames, (name) => String(name));
   typo.pendingFireTarget = null;
   typo.pendingReload = false;
 }
