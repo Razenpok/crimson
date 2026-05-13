@@ -195,7 +195,6 @@ export class CreatureNameTable {
     }
   }
 
-  // Unused in WebGL port: replay checkpoints excluded
   activeEntries(opts: { activeMask: readonly boolean[] }): Array<[number, string]> {
     const activeMask = opts.activeMask;
     const entries: Array<[number, string]> = [];
