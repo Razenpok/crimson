@@ -87,8 +87,8 @@ export function drawMainPanel(
     const arrow = getTexture(resources, TextureId.UI_ARROW);
     const globalIndex = int(questLevel.globalIndex);
     const unlock = hardcore
-      ? int(view.questUnlockIndexFull)
-      : int(view.questUnlockIndex);
+      ? int(view.state.status.questUnlockIndexFull)
+      : int(view.state.status.questUnlockIndex);
     const maxIndex = Math.max(0, Math.min(49, unlock));
 
     const dstW = arrow.width * scale;

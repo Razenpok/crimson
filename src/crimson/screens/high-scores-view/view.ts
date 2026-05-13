@@ -92,11 +92,6 @@ const KEY_HOME = 36;
 const KEY_END = 35;
 const MOUSE_BUTTON_LEFT = 0;
 
-export interface HighScoresViewStatus {
-  questUnlockIndex: number;
-  questUnlockIndexFull: number;
-}
-
 export class HighScoresView {
   state: GameState;
 
@@ -126,10 +121,6 @@ export class HighScoresView {
   showScoresOpen: boolean = false;
   scoreListOpen: boolean = false;
 
-  // Status (quest unlocks)
-  questUnlockIndex: number = 0;
-  questUnlockIndexFull: number = 0;
-
   constructor(state: GameState) {
     this.state = state;
     this.updateButton = new UiButtonState('Update scores', { forceWide: true });
@@ -145,7 +136,7 @@ export class HighScoresView {
     return this._scrollIndex;
   }
 
-  open(status?: HighScoresViewStatus): void {
+  open(): void {
     const layoutW = this.state.config.display.width;
     this._widescreenYShift = menuWidescreenYShift(layoutW);
     this._action = null;
@@ -165,11 +156,6 @@ export class HighScoresView {
     this.gameModeOpen = false;
     this.showScoresOpen = false;
     this.scoreListOpen = false;
-
-    if (status !== undefined) {
-      this.questUnlockIndex = status.questUnlockIndex;
-      this.questUnlockIndexFull = status.questUnlockIndexFull;
-    }
 
     const request = resolveRequest(this.state);
     this._request = request;
@@ -500,7 +486,7 @@ export class HighScoresView {
       ['Rush', GameMode.RUSH],
       ['Survival', GameMode.SURVIVAL],
     ];
-    if (int(this.questUnlockIndex) >= 0x28) {
+    if (int(this.state.status.questUnlockIndex) >= 0x28) {
       modeItems.push(["Typ'o'Shooter", GameMode.TYPO]);
     }
     const gameModePos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_GAME_MODE_WIDGET_X * scale, HS_RIGHT_GAME_MODE_WIDGET_Y * scale));
@@ -571,8 +557,8 @@ export class HighScoresView {
 
     const globalIndex = level.globalIndex;
     const unlock = this.state.config.gameplay.hardcore
-      ? int(this.questUnlockIndexFull)
-      : int(this.questUnlockIndex);
+      ? int(this.state.status.questUnlockIndexFull)
+      : int(this.state.status.questUnlockIndex);
     const maxIndex = Math.max(0, Math.min(49, unlock));
     const arrow = getTexture(resources, TextureId.UI_ARROW);
 

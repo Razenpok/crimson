@@ -242,7 +242,7 @@ function drawRightPanelQuestOptions(
   const showScoresItems = ['Best of all time', 'Best of month', 'Best of week', 'Best of day'];
   const playerItems = ['1 player', '2 players', '3 players', '4 players'];
   const modeItems: [string, number][] = [['Quests', 3], ['Rush', 2], ['Survival', 1]];
-  if (int(view.questUnlockIndex) >= 0x28) {
+  if (int(view.state.status.questUnlockIndex) >= 0x28) {
     modeItems.push(["Typ'o'Shooter", 4]);
   }
   const names = savedScoreNames(view);
