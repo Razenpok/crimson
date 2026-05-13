@@ -23,7 +23,7 @@ export function applyFinalRevengeOnPlayerDeath(opts: {
   fxQueue: FxQueue | null;
   deaths: CreatureDeath[];
 }): void {
-  /** Apply Final Revenge perk behavior when a player dies. */
+  // Apply Final Revenge perk behavior when a player dies.
 
   const {
     state,
