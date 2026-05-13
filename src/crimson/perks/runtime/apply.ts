@@ -14,7 +14,7 @@ export function perkApply(
   perkId: PerkId,
   opts: { perkState?: PerkSelectionState | null; dt?: number | null; creatures?: readonly CreatureState[] | null } = {},
 ): void {
-  /** Apply immediate perk effects and increment the perk counter. */
+  // Apply immediate perk effects and increment the perk counter.
 
   const perkState = opts.perkState ?? null;
   const dt = opts.dt ?? null;
