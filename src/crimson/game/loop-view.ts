@@ -143,21 +143,30 @@ void main() {
 }
 `;
 
-let _gammaRampShader: WebGLProgram | null = null;
-let _gammaRampShaderGainLoc: WebGLUniformLocation | null = null;
+interface GammaRampShader {
+  setGain(gain: number): void;
+}
+
+let _gammaRampShader: GammaRampShader | null = null;
+let _gammaRampShaderGainLoc: number = -1;
 let _gammaRampShaderTried = false;
 
-function getGammaRampShader(): [WebGLProgram | null, WebGLUniformLocation | null] {
-  // TODO: compile GAMMA_RAMP_VS / GAMMA_RAMP_FS into a WebGL2 program
-  // For now, gamma correction is deferred until shader pipeline is wired up.
+function getGammaRampShader(): [GammaRampShader | null, number] {
   if (_gammaRampShaderTried) {
     return [_gammaRampShader, _gammaRampShaderGainLoc];
   }
   _gammaRampShaderTried = true;
-  // Shader compilation stub — gamma ramp will be a no-op until wired
-  _gammaRampShader = null;
-  _gammaRampShaderGainLoc = null;
-  return [null, null];
+  _gammaRampShader = {
+    setGain(gain: number): void {
+      wgl.setGammaGain(gain);
+    },
+  };
+  _gammaRampShaderGainLoc = 0;
+  return [_gammaRampShader, _gammaRampShaderGainLoc];
+}
+
+function setGammaRampGain(shader: GammaRampShader, _gainLoc: number, gain: number): void {
+  shader.setGain(Math.max(0.0, gain));
 }
 
 // ---------------------------------------------------------------------------
@@ -1091,11 +1100,18 @@ export class GameLoopView implements View {
       return;
     }
 
-    // TODO: Gamma ramp shader is a known missing feature. The GLSL source
-    // (GAMMA_RAMP_VS / GAMMA_RAMP_FS) is defined above but not yet compiled
-    // into a WebGL2 program. Until the shader pipeline is wired up, gamma
-    // correction is skipped and scenes render at gain=1.0.
-    this._drawSceneLayers();
+    const [shader, gainLoc] = getGammaRampShader();
+    if (shader === null || gainLoc < 0) {
+      this._drawSceneLayers();
+      return;
+    }
+
+    setGammaRampGain(shader, gainLoc, gammaGain);
+    try {
+      this._drawSceneLayers();
+    } finally {
+      wgl.setGammaGain(1.0);
+    }
   }
 
   draw(): void {

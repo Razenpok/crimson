@@ -45,6 +45,7 @@ export function getScreenHeight(): number { return ctx.screenHeight; }
 export function clearBackground(color: Color): void {
   ctx.clearBackground(color.r, color.g, color.b, color.a);
 }
+export function setGammaGain(gain: number): void { ctx.setGammaGain(gain); }
 
 // ---------------------------------------------------------------------------
 // Drawing — matches rl.draw_texture_pro / rl.draw_rectangle

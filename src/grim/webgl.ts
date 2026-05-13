@@ -29,9 +29,12 @@ precision highp float;
 in vec2 vUV;
 in vec4 vColor;
 uniform sampler2D uTex;
+uniform float uGammaGain;
 out vec4 fragColor;
 void main() {
-  fragColor = texture(uTex, vUV) * vColor;
+  vec4 texel = texture(uTex, vUV) * vColor;
+  texel.rgb = clamp(texel.rgb * max(uGammaGain, 0.0), 0.0, 1.0);
+  fragColor = texel;
 }`;
 
 const ALPHA_TEST_FS = `#version 300 es
@@ -39,10 +42,12 @@ precision highp float;
 in vec2 vUV;
 in vec4 vColor;
 uniform sampler2D uTex;
+uniform float uGammaGain;
 out vec4 fragColor;
 void main() {
   vec4 texel = texture(uTex, vUV) * vColor;
   if (texel.a <= 0.0156862745) discard;
+  texel.rgb = clamp(texel.rgb * max(uGammaGain, 0.0), 0.0, 1.0);
   fragColor = texel;
 }`;
 
@@ -60,9 +65,12 @@ void main() {
 const COLOR_FS = `#version 300 es
 precision highp float;
 in vec4 vColor;
+uniform float uGammaGain;
 out vec4 fragColor;
 void main() {
-  fragColor = vColor;
+  vec4 color = vColor;
+  color.rgb = clamp(color.rgb * max(uGammaGain, 0.0), 0.0, 1.0);
+  fragColor = color;
 }`;
 
 export interface GlTexture {
@@ -143,9 +151,13 @@ export class WebGLContext {
   private _colorProgram!: WebGLProgram;
   private _spriteMvpLoc!: WebGLUniformLocation;
   private _spriteTexLoc!: WebGLUniformLocation;
+  private _spriteGammaGainLoc!: WebGLUniformLocation;
   private _spriteAtMvpLoc!: WebGLUniformLocation;
   private _spriteAtTexLoc!: WebGLUniformLocation;
+  private _spriteAtGammaGainLoc!: WebGLUniformLocation;
   private _colorMvpLoc!: WebGLUniformLocation;
+  private _colorGammaGainLoc!: WebGLUniformLocation;
+  private _gammaGain = 1.0;
 
   // Batching
   private _vao!: WebGLVertexArrayObject;
@@ -235,13 +247,16 @@ export class WebGLContext {
     this._spriteProgram = createShaderProgram(gl, SPRITE_VS, SPRITE_FS);
     this._spriteMvpLoc = gl.getUniformLocation(this._spriteProgram, 'uMVP')!;
     this._spriteTexLoc = gl.getUniformLocation(this._spriteProgram, 'uTex')!;
+    this._spriteGammaGainLoc = gl.getUniformLocation(this._spriteProgram, 'uGammaGain')!;
 
     this._spriteAlphaTestProgram = createShaderProgram(gl, SPRITE_VS, ALPHA_TEST_FS);
     this._spriteAtMvpLoc = gl.getUniformLocation(this._spriteAlphaTestProgram, 'uMVP')!;
     this._spriteAtTexLoc = gl.getUniformLocation(this._spriteAlphaTestProgram, 'uTex')!;
+    this._spriteAtGammaGainLoc = gl.getUniformLocation(this._spriteAlphaTestProgram, 'uGammaGain')!;
 
     this._colorProgram = createShaderProgram(gl, COLOR_VS, COLOR_FS);
     this._colorMvpLoc = gl.getUniformLocation(this._colorProgram, 'uMVP')!;
+    this._colorGammaGainLoc = gl.getUniformLocation(this._colorProgram, 'uGammaGain')!;
   }
 
   private _initBuffers(): void {
@@ -342,6 +357,13 @@ export class WebGLContext {
     const gl = this.gl;
     gl.clearColor(r, g, b, a);
     gl.clear(gl.COLOR_BUFFER_BIT);
+  }
+
+  setGammaGain(gain: number): void {
+    const next = Math.max(0.0, gain);
+    if (Math.abs(next - this._gammaGain) <= 1e-6) return;
+    this.flush();
+    this._gammaGain = next;
   }
 
   // --- Texture management ---
@@ -724,6 +746,7 @@ export class WebGLContext {
     gl.useProgram(program);
     gl.uniformMatrix4fv(mvpLoc, false, this._mvp);
     gl.uniform1i(texLoc, 0);
+    gl.uniform1f(this._useAlphaTest ? this._spriteAtGammaGainLoc : this._spriteGammaGainLoc, this._gammaGain);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._currentTexture);
@@ -757,6 +780,7 @@ export class WebGLContext {
     gl.useProgram(program);
     gl.uniformMatrix4fv(mvpLoc, false, this._mvp);
     gl.uniform1i(texLoc, 0);
+    gl.uniform1f(this._useAlphaTest ? this._spriteAtGammaGainLoc : this._spriteGammaGainLoc, this._gammaGain);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._currentTexture);
@@ -776,6 +800,7 @@ export class WebGLContext {
     const gl = this.gl;
     gl.useProgram(this._colorProgram);
     gl.uniformMatrix4fv(this._colorMvpLoc, false, this._mvp);
+    gl.uniform1f(this._colorGammaGainLoc, this._gammaGain);
 
     gl.bindVertexArray(this._colorVao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this._colorVbo);
