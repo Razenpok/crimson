@@ -130,7 +130,9 @@ class _BeamFastStampedShader {
     readonly stampQuadLoc: WebGLUniformLocation | null,
     readonly stampOffsetLoc: WebGLUniformLocation | null,
     readonly intensityGainLoc: WebGLUniformLocation | null,
-  ) {}
+  ) {
+    Object.freeze(this);
+  }
 }
 
 let _BEAM_FAST_STAMPED_SHADER_TRIED = false;
