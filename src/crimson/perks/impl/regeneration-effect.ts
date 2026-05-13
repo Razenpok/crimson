@@ -4,7 +4,7 @@ import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
-import { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.js";
+import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
 
 export function updateRegeneration(ctx: PerksUpdateEffectsCtx): void {
   if (!ctx.players.length) {
