@@ -7,21 +7,48 @@ import { BONUS_BY_ID, BonusId } from './ids.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 export class BonusApplyCtx {
-  constructor(
-    public state: GameplayState,
-    public player: PlayerState,
-    public bonusId: BonusId,
-    public amount: number,
-    public originPos: Vec2,
-    public creatures: readonly CreatureState[],
-    public players: PlayerState[],
-    public detailPreset: number,
-    public economistMultiplier: number,
-    public label: string,
-    public iconId: number,
-    public deferFreezeCorpseFx: boolean = false,
-    public freezeCorpseIndices: Set<number> | null = null,
-  ) {
+  state: GameplayState;
+  player: PlayerState;
+  bonusId: BonusId;
+  amount: number;
+  originPos: Vec2;
+  creatures: readonly CreatureState[];
+  players: PlayerState[];
+  detailPreset: number;
+  economistMultiplier: number;
+  label: string;
+  iconId: number;
+  deferFreezeCorpseFx: boolean;
+  freezeCorpseIndices: Set<number> | null;
+
+  constructor(opts: {
+    state: GameplayState;
+    player: PlayerState;
+    bonusId: BonusId;
+    amount: number;
+    originPos: Vec2;
+    creatures: readonly CreatureState[];
+    players: PlayerState[];
+    detailPreset: number;
+    economistMultiplier: number;
+    label: string;
+    iconId: number;
+    deferFreezeCorpseFx?: boolean;
+    freezeCorpseIndices?: Set<number> | null;
+  }) {
+    this.state = opts.state;
+    this.player = opts.player;
+    this.bonusId = opts.bonusId;
+    this.amount = opts.amount;
+    this.originPos = opts.originPos;
+    this.creatures = opts.creatures;
+    this.players = opts.players;
+    this.detailPreset = opts.detailPreset;
+    this.economistMultiplier = opts.economistMultiplier;
+    this.label = opts.label;
+    this.iconId = opts.iconId;
+    this.deferFreezeCorpseFx = opts.deferFreezeCorpseFx ?? false;
+    this.freezeCorpseIndices = opts.freezeCorpseIndices ?? null;
   }
 
   registerGlobal(timerKey: string): void {

@@ -74,21 +74,21 @@ export function bonusApply(
   const economistMultiplier = perkCountGet(player, PerkId.BONUS_ECONOMIST) !== 0 ? 1.5 : 1.0;
   const iconId = meta.iconId !== null ? int(meta.iconId) : -1;
   const label = meta.name;
-  const ctx = new BonusApplyCtx(
+  const ctx = new BonusApplyCtx({
     state,
     player,
     bonusId,
-    int(amount),
-    origin,
+    amount: int(amount),
+    originPos: origin,
     creatures,
     players,
-    int(detailPreset),
+    detailPreset: int(detailPreset),
     economistMultiplier,
     label,
-    int(iconId),
+    iconId: int(iconId),
     deferFreezeCorpseFx,
     freezeCorpseIndices,
-  );
+  });
   const handler = _BONUS_APPLY_HANDLERS.get(bonusId);
   if (handler !== undefined) {
     handler(ctx);
