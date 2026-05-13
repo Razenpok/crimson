@@ -769,7 +769,6 @@ export class QuestResultsUi {
       });
 
     } else {
-      // Phase 2: results/buttons
       const scoreCardPos = contentPos.offset({ dx: QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT * scale });
       let varC12 = panelLayout.topLeft.y + (qualifies ? 96.0 : 108.0) * scale;
       if (!qualifies) {
