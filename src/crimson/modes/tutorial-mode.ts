@@ -236,13 +236,11 @@ export class TutorialMode extends BaseGameplayMode {
     }
 
     const resources = this.renderResources.resources;
-    const screenW = wgl.getScreenWidth();
 
     if (stage === 8) {
       const promptText = overlay != null ? overlay.promptText : '';
       const { rect } = tutorialPromptPanelRect(
         promptText,
-        screenW,
         {
           measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
           measureLineHeight: (scale: number) => this._uiLineHeight(scale),
@@ -404,10 +402,7 @@ export class TutorialMode extends BaseGameplayMode {
   private _drawTutorialPrompts(hudBottom: number): void {
     const overlay = this.state.tutorialOverlay;
 
-    const screenW = wgl.getScreenWidth();
-
     drawTutorialOverlayPanels(
-      screenW,
       overlay,
       {
         drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
@@ -424,7 +419,6 @@ export class TutorialMode extends BaseGameplayMode {
     if (stage === 8) {
       const { rect } = tutorialPromptPanelRect(
         overlay.promptText,
-        screenW,
         {
           measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
           measureLineHeight: (scale: number) => this._uiLineHeight(scale),

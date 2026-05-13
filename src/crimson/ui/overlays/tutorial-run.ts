@@ -19,9 +19,16 @@ export interface TutorialPanelRectResult {
   lineH: number;
 }
 
+function splitLines(text: string): string[] {
+  const lines = text.split(/\r\n|\r|\n/);
+  if (/\r\n|\r|\n/.test(text.slice(-2))) {
+    lines.pop();
+  }
+  return lines;
+}
+
 export function tutorialPromptPanelRect(
   text: string,
-  screenW: number,
   opts: {
     measureTextWidth: MeasureUiTextWidth;
     measureLineHeight: MeasureUiLineHeight;
@@ -29,7 +36,7 @@ export function tutorialPromptPanelRect(
     scale: number;
   },
 ): TutorialPanelRectResult {
-  const lines = text ? text.split('\n') : [''];
+  const lines = text ? splitLines(text) : [''];
   const lineH = opts.measureLineHeight(opts.scale);
   let maxW = 0.0;
   for (const line of lines) {
@@ -39,6 +46,7 @@ export function tutorialPromptPanelRect(
   const padY = TUTORIAL_PANEL_PADDING.y * opts.scale;
   const width = maxW + padX * 2.0;
   const height = lines.length * lineH + padY * 2.0;
+  const screenW = wgl.getScreenWidth();
   const x = (screenW - width) * 0.5;
   const rect = wgl.makeRectangle(x, opts.pos.y, width, height);
   return { rect, lines, lineH };
@@ -54,19 +62,14 @@ function drawRectOutline(
   b: number,
   a: number,
 ): void {
-  const color = wgl.makeColor(r, g, b, a);
-  // Top edge
-  wgl.drawRectangle(x, y, w, 1, color);
-  // Bottom edge
-  wgl.drawRectangle(x, y + h - 1, w, 1, color);
-  // Left edge
-  wgl.drawRectangle(x, y + 1, 1, h - 2, color);
-  // Right edge
-  wgl.drawRectangle(x + w - 1, y + 1, 1, h - 2, color);
+  const color = wgl.makeColor(r, g, b, int(255 * a) / 255);
+  wgl.drawRectangle(int(x), int(y), int(w), 1, color);
+  wgl.drawRectangle(int(x), int(y + h - 1), int(w), 1, color);
+  wgl.drawRectangle(int(x), int(y + 1), 1, int(h - 2), color);
+  wgl.drawRectangle(int(x + w - 1), int(y + 1), 1, int(h - 2), color);
 }
 
 export function drawTutorialPromptPanel(
-  screenW: number,
   text: string,
   opts: {
     alpha: number;
@@ -80,7 +83,6 @@ export function drawTutorialPromptPanel(
   const scale = 1.0;
   const { rect, lines, lineH } = tutorialPromptPanelRect(
     text,
-    screenW,
     {
       measureTextWidth: opts.measureTextWidth,
       measureLineHeight: opts.measureLineHeight,
@@ -90,25 +92,27 @@ export function drawTutorialPromptPanel(
   );
   const { x: rx, y: ry, w: rw, h: rh } = rect;
 
-  // Background fill
-  wgl.drawRectangle(rx, ry, rw, rh, wgl.makeColor(0, 0, 0, opts.alpha * 0.8));
+  wgl.drawRectangle(
+    int(rx),
+    int(ry),
+    int(rw),
+    int(rh),
+    wgl.makeColor(0, 0, 0, int(255 * opts.alpha * 0.8) / 255),
+  );
 
-  // Border outline
   drawRectOutline(rx, ry, rw, rh, 1, 1, 1, opts.alpha);
 
-  // Draw text lines
-  const textAlpha = Math.min(1.0, Math.max(0.0, opts.alpha * 0.9));
+  const textAlpha = int(255 * Math.min(1.0, Math.max(0.0, opts.alpha * 0.9))) / 255;
   const color = wgl.makeColor(1, 1, 1, textAlpha);
   const padX = TUTORIAL_PANEL_PADDING.x * scale;
-  const padY = TUTORIAL_PANEL_PADDING.y * scale;
-  for (let i = 0; i < lines.length; i++) {
-    const linePos = new Vec2(rx + padX, ry + padY + i * lineH);
-    opts.drawText(lines[i], linePos, color, scale);
+  let lineY = ry + TUTORIAL_PANEL_PADDING.y * scale;
+  for (const line of lines) {
+    opts.drawText(line, new Vec2(rx + padX, lineY), color, scale);
+    lineY += lineH;
   }
 }
 
 export function drawTutorialOverlayPanels(
-  screenW: number,
   overlay: TutorialOverlayState,
   opts: {
     drawText: DrawUiText;
@@ -118,7 +122,6 @@ export function drawTutorialOverlayPanels(
 ): void {
   if (overlay.promptText && overlay.promptAlpha > 1e-3) {
     drawTutorialPromptPanel(
-      screenW,
       overlay.promptText,
       {
         alpha: overlay.promptAlpha,
@@ -131,7 +134,6 @@ export function drawTutorialOverlayPanels(
   }
   if (overlay.hintText && overlay.hintAlpha > 1e-3) {
     drawTutorialPromptPanel(
-      screenW,
       overlay.hintText,
       {
         alpha: overlay.hintAlpha,
