@@ -26,7 +26,7 @@ import { drawMenuCursor } from "./ui/cursor.ts";
 import { weaponAssignPlayer } from "./weapon-runtime/assign.ts";
 import { weaponDisplayName, WeaponId } from "./weapons.ts";
 import { WorldRuntime } from "./world/runtime.ts";
-import { StandaloneTickHarness } from "@crimson/world/standalone-tick-harness.js";
+import { StandaloneTickHarness } from "./world/standalone-tick-harness.ts";
 
 export const WORLD_SIZE = 1024.0;
 export const DEMO_VARIANT_COUNT = 6;
@@ -39,7 +39,7 @@ const _DEMO_UPSELL_MESSAGES: readonly string[] = [
   'Want to post your high scores?',
 ];
 
-export const DEMO_PURCHASE_URL = 'https://www.crimsonland.com/';
+export const DEMO_PURCHASE_URL = 'http://buy.crimsonland.com';
 export const DEMO_PURCHASE_SCREEN_LIMIT_MS = 16_000;
 export const DEMO_PURCHASE_INTERSTITIAL_LIMIT_MS = 10_000;
 
@@ -281,7 +281,11 @@ export class DemoView {
 
   private _triggerPurchase(): void {
     this.state.quitRequested = true;
-    window.open(DEMO_PURCHASE_URL);
+    try {
+      window.open(DEMO_PURCHASE_URL);
+    } catch {
+      return;
+    }
   }
 
   private _updatePurchaseScreen(dtMs: number): void {
@@ -358,19 +362,19 @@ export class DemoView {
     //   - UV: 0..0.5 (top-left quarter of the backplasma atlas)
     //   - per-corner color slots, with a sin^2 pulse at bottom-right
 
-    function _to_u8(value: number) {
-      return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255.0
+    function _toU8(value: number): number {
+      return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255.0;
     }
 
-    const c0 = wgl.makeColor(_to_u8(0.0), _to_u8(0.0), _to_u8(0.0), _to_u8(1.0))
-    const c1 = wgl.makeColor(_to_u8(0.0), _to_u8(0.0), _to_u8(0.3), _to_u8(1.0))
+    const c0 = wgl.makeColor(_toU8(0.0), _toU8(0.0), _toU8(0.0), _toU8(1.0));
+    const c1 = wgl.makeColor(_toU8(0.0), _toU8(0.0), _toU8(0.3), _toU8(1.0));
     const c2 = wgl.makeColor(
-      _to_u8(0.0),
-      _to_u8(0.4),
-      _to_u8(pulse * 0.55),
-      _to_u8(pulse),
-    )
-    const c3 = wgl.makeColor(_to_u8(0.0), _to_u8(0.4), _to_u8(0.4), _to_u8(1.0))
+      _toU8(0.0),
+      _toU8(0.4),
+      _toU8(pulse * 0.55),
+      _toU8(pulse),
+    );
+    const c3 = wgl.makeColor(_toU8(0.0), _toU8(0.4), _toU8(0.4), _toU8(1.0));
 
     wgl.beginBlendMode(wgl.BlendMode.ALPHA);
     wgl.beginQuads(backplasma);
@@ -584,6 +588,8 @@ export class DemoView {
     this._setupWorldPlayers([[new Vec2(512.0, 512.0), weaponId]]);
     const quest = questByLevel(new QuestLevel(1, 1));
     if (quest === null) throw new Error("quest 1.1 must exist");
+    // Native variant 3 calls terrain_generate(&quest_selected_meta), which is the
+    // base of the quest metadata array in this build, so it resolves to quest 1.1.
     this._applyTerrainSetup({ terrainSlots: quest.terrainSlots });
     for (let idx = 0; idx < 20; idx++) {
       const x =
@@ -606,8 +612,6 @@ export class DemoView {
       this._drawDemoUpsellOverlay();
       return;
     }
-    const resources = requireRuntimeResources(this.state);
-    const small = resources.smallFont;
     const title = `DEMO MODE  (${this._variantIndex + 1}/${DEMO_VARIANT_COUNT})`;
     const hint = 'Press any key / click to skip';
     const remaining = Math.max(0.0, (this._demoTimeLimitMs - this._questSpawnTimelineMs) / 1000.0);
@@ -615,9 +619,9 @@ export class DemoView {
       (p) => `P${p.index + 1}:${weaponName(p.weapon.weaponId, { preserveBugs: this.state.preserveBugs })}`,
     ).join(', ');
     const detail = `${weapons}  \u2014  next in ${remaining.toFixed(1)}s`;
-    drawSmallText(small, title, new Vec2(16, 12), wgl.makeColor(240 / 255.0, 240 / 255.0, 240 / 255.0, 255 / 255.0));
-    drawSmallText(small, detail, new Vec2(16, 36), wgl.makeColor(180 / 255.0, 180 / 255.0, 190 / 255.0, 255 / 255.0));
-    drawSmallText(small, hint, new Vec2(16, 56), wgl.makeColor(140 / 255.0, 140 / 255.0, 150 / 255.0, 255 / 255.0));
+    wgl.drawText(title, 16, 12, 20, wgl.makeColor(240 / 255.0, 240 / 255.0, 240 / 255.0, 255 / 255.0));
+    wgl.drawText(detail, 16, 36, 16, wgl.makeColor(180 / 255.0, 180 / 255.0, 190 / 255.0, 255 / 255.0));
+    wgl.drawText(hint, 16, 56, 16, wgl.makeColor(140 / 255.0, 140 / 255.0, 150 / 255.0, 255 / 255.0));
   }
 
   private _ensureUpsellFont(): GrimMonoFont {
@@ -659,9 +663,17 @@ export class DemoView {
     const barX = 64.0;
     const barY = var2c + 72.0;
 
-    const bgAlpha = int(Math.round(clamp(alpha * 0.5, 0.0, 1.0) * 255.0));
-    const barAlpha = int(Math.round(clamp(alpha * 0.8, 0.0, 1.0) * 255.0));
-    const txtAlpha = int(Math.round(clamp(alpha, 0.0, 1.0) * 255.0));
+    function pyRound(value: number): number {
+      const floorValue = Math.floor(value);
+      const frac = value - floorValue;
+      if (frac < 0.5) return floorValue;
+      if (frac > 0.5) return floorValue + 1;
+      return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+    }
+
+    const bgAlpha = int(pyRound(clamp(alpha * 0.5, 0.0, 1.0) * 255.0));
+    const barAlpha = int(pyRound(clamp(alpha * 0.8, 0.0, 1.0) * 255.0));
+    const txtAlpha = int(pyRound(clamp(alpha, 0.0, 1.0) * 255.0));
 
     wgl.drawRectangle(
       int(bgX), int(bgY), int(textW + 12.0), 30,
