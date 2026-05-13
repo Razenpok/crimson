@@ -9,27 +9,34 @@ export enum OwnerKind {
 }
 
 export class OwnerRef {
-  constructor(
-    public kind: OwnerKind,
-    public index: number = 0,
-    public localHost: boolean = false
-  ) {
+  readonly kind: OwnerKind;
+  readonly index: number;
+  readonly localHost: boolean;
+
+  constructor(opts: {
+    kind: OwnerKind;
+    index?: number;
+    localHost?: boolean;
+  }) {
+    this.kind = opts.kind;
+    this.index = opts.index ?? 0;
+    this.localHost = opts.localHost ?? false;
   }
 
   static none(): OwnerRef {
-    return new OwnerRef(OwnerKind.NONE);
+    return new OwnerRef({ kind: OwnerKind.NONE });
   }
 
   static fromLocalPlayer(index: number): OwnerRef {
-    return new OwnerRef(OwnerKind.PLAYER, int(index), true);
+    return new OwnerRef({ kind: OwnerKind.PLAYER, index: int(index), localHost: true });
   }
 
   static fromPlayer(index: number): OwnerRef {
-    return new OwnerRef(OwnerKind.PLAYER, int(index), false);
+    return new OwnerRef({ kind: OwnerKind.PLAYER, index: int(index), localHost: false });
   }
 
   static fromCreature(index: number): OwnerRef {
-    return new OwnerRef(OwnerKind.CREATURE, int(index), false);
+    return new OwnerRef({ kind: OwnerKind.CREATURE, index: int(index), localHost: false });
   }
 
   static fromLegacy(ownerId: number): OwnerRef {
