@@ -120,7 +120,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       baseAlpha,
       streakRgb,
     });
-    // If RTX stub returns false, fall back to classic.
+    // If RTX path returns false, fall back to classic.
     if (!drawn) {
       drawBeamBodySprites({
         ctx, origin, direction, dist, start, span, step,

@@ -82,10 +82,6 @@ export interface Screen {
   takeAction?(): string | null;
 }
 
-// ---------------------------------------------------------------------------
-// PauseBackground — structural interface for pause screen rendering
-// ---------------------------------------------------------------------------
-
 export interface PauseBackground {
   drawPauseBackground(opts?: { entityAlpha?: number }): void;
 }
