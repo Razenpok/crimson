@@ -8,21 +8,14 @@ import { INPUT_CODE_UNBOUND, inputCodeIsDown } from '@crimson/input-codes.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 
 const _CONTROL_BIND_SLOTS = 5;
-
-// DirectInput arrow key codes used as single-player alt move codes
 const _SINGLE_PLAYER_ALT_MOVE_CODES: readonly number[] = [0xC8, 0xD0, 0xCB, 0xCD];
 
-// DOM key codes
 const KEY_BACKSPACE = 8;
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;
 const KEY_HOME = 36;
 const KEY_END = 35;
 
-/**
- * Drain the char queue and return any printable characters typed this frame.
- * Characters outside 0x20..0xFF are discarded; space can be excluded.
- */
 export function pollTextInput(maxLen: number, opts: { allowSpace?: boolean } = {}): string {
   const allowSpace = opts.allowSpace ?? true;
   let out = '';
@@ -37,20 +30,12 @@ export function pollTextInput(maxLen: number, opts: { allowSpace?: boolean } = {
   return out;
 }
 
-/**
- * Drain both char and key queues so no stale input leaks into the next frame.
- */
 export function flushTextInputEvents(): void {
-  while (InputState.getCharPressed()) { /* drain */ }
-  while (InputState.getKeyPressed()) { /* drain */ }
+  // Native flows call `grim_flush_input()` before entering high-score name input.
+  while (InputState.getCharPressed()) {}
+  while (InputState.getKeyPressed()) {}
 }
 
-/**
- * Process one frame of name-entry editing: typed characters, backspace,
- * arrow keys, home, and end.
- *
- * Returns the updated [text, caret] pair.
- */
 export function updateNameEntryText(
   text: string,
   caret: number,
@@ -103,11 +88,6 @@ export function updateNameEntryText(
   return [text, caret];
 }
 
-/**
- * Return true if any gameplay control (movement or fire) is currently held
- * for any active player.  Used to detect "player is trying to play" while
- * a text-input overlay is open.
- */
 export function gameplayControlsHeld(config: CrimsonConfig): boolean {
   const playerCount = Math.max(1, Math.min(4, config.gameplay.playerCount));
 
