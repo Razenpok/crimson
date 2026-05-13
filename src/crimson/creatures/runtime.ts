@@ -29,7 +29,7 @@ import {
   awardExperienceFromReward,
   survivalRecordRecentDeath as survivalRecordRecentDeath_,
 } from '@crimson/gameplay.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { ftolMsI32 } from '@crimson/sim/timing.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import { applyFinalRevengeOnPlayerDeath } from '@crimson/perks/impl/final-revenge.ts';
@@ -43,19 +43,15 @@ import {
   creatureLifecycleIsAlive,
 } from './lifecycle.ts';
 import {
-  CreatureAiMode,
-  CreatureFlags,
-  CreatureTypeId,
   HAS_SPAWN_SLOT_FLAG,
   RANDOM_HEADING_SENTINEL,
-  type SpawnId,
-} from './spawn-ids.ts';
-import { GameplayState } from "@crimson/gameplay.ts";
-
-import {
   type SpawnEnv,
   type BurstEffect,
+  CreatureAiMode,
+  CreatureFlags,
   CreatureInit,
+  CreatureTypeId,
+  type SpawnId,
   SpawnSlotInit,
   type SpawnPlan,
   buildSpawnPlan,
@@ -78,9 +74,9 @@ const CREATURE_DEATH_TIMER_DECAY = 28.0;
 const CREATURE_CORPSE_FADE_DECAY = 20.0;
 const CREATURE_DEATH_SLIDE_SCALE = 9.0;
 const _TARGET_REEVAL_PERIOD = 0x46;
-const _FLAG_SELF_DAMAGE_TICK = CreatureFlags.SELF_DAMAGE_TICK;
-const _FLAG_SELF_DAMAGE_TICK_STRONG = CreatureFlags.SELF_DAMAGE_TICK_STRONG;
-const _FLAG_AI7_LINK_TIMER = CreatureFlags.AI7_LINK_TIMER;
+const _FLAG_SELF_DAMAGE_TICK = int(CreatureFlags.SELF_DAMAGE_TICK);
+const _FLAG_SELF_DAMAGE_TICK_STRONG = int(CreatureFlags.SELF_DAMAGE_TICK_STRONG);
+const _FLAG_AI7_LINK_TIMER = int(CreatureFlags.AI7_LINK_TIMER);
 
 const _CREATURE_CONTACT_SFX: Map<CreatureTypeId, [SfxId, SfxId]> = new Map([
   [CreatureTypeId.ZOMBIE, [SfxId.ZOMBIE_ATTACK_01, SfxId.ZOMBIE_ATTACK_02]],
@@ -1259,7 +1255,7 @@ export class CreaturePool {
         dt > 0.0 &&
         state.bonuses.freeze <= 0.0 &&
         !this.captureSpawnEventsAuthoritative &&
-        ((int(creature.flags)) & (HAS_SPAWN_SLOT_FLAG as number)) !== 0
+        ((int(creature.flags)) & int(HAS_SPAWN_SLOT_FLAG)) !== 0
       ) {
         const slotIndex = creature.spawnSlotIndex;
         if (slotIndex !== null && slotIndex >= 0 && slotIndex < this.spawnSlots.length) {
@@ -1374,14 +1370,19 @@ export class CreaturePool {
     entry.typeId = init.typeId !== null ? init.typeId : CreatureTypeId.ZOMBIE;
     entry.pos = f32Vec2(init.pos);
     if (init.heading !== null) {
+      // Native spawn paths write heading but keep target_heading stale from
+      // the recycled slot (capture lifecycle shows added entries retaining
+      // prior target_heading values).
       entry.heading = f32(init.heading);
     }
     entry.target = f32Vec2(init.pos);
     entry.phaseSeed = f32(init.phaseSeed);
+    // Native spawn paths zero velocity and a few per-frame state fields on every
+    // allocation (`creature_spawn`, `survival_spawn_creature`, `creature_spawn_template`).
     entry.vel = new Vec2();
     entry.forceTarget = 0;
 
-    entry.flags = init.flags || 0;
+    entry.flags = init.flags || (0 as CreatureFlags);
     entry.aiMode = init.aiMode as CreatureAiMode;
 
     let hp = init.health ?? 0.0;
