@@ -62,7 +62,19 @@ export class UnsupportedSpawnTemplateError extends ValueError {
 }
 
 
-export interface AlienSpawnerSpec {
+type AlienSpawnerSpecInit = {
+  timer: number;
+  limit: number;
+  interval: number;
+  childTemplateId: SpawnId;
+  size: number;
+  health: number;
+  moveSpeed: number;
+  rewardValue: number;
+  tint: TintRGBA;
+};
+
+export class AlienSpawnerSpec {
   readonly timer: number;
   readonly limit: number;
   readonly interval: number;
@@ -72,10 +84,24 @@ export interface AlienSpawnerSpec {
   readonly moveSpeed: number;
   readonly rewardValue: number;
   readonly tint: TintRGBA;
+
+  constructor(opts: AlienSpawnerSpecInit) {
+    this.timer = opts.timer;
+    this.limit = opts.limit;
+    this.interval = opts.interval;
+    this.childTemplateId = opts.childTemplateId;
+    this.size = opts.size;
+    this.health = opts.health;
+    this.moveSpeed = opts.moveSpeed;
+    this.rewardValue = opts.rewardValue;
+    this.tint = opts.tint;
+    Object.freeze(this);
+  }
 }
 
 
-export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map([
+export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
+  ([
   [SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, {
     timer: 1.0,
     limit: 100,
@@ -164,24 +190,31 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map([
     rewardValue: 800.0,
     tint: [0.9, 0.8, 0.4, 1.0] as TintRGBA,
   }],
-]);
+  ] satisfies readonly (readonly [SpawnId, AlienSpawnerSpecInit])[]).map(
+    ([spawnId, spec]) => [spawnId, new AlienSpawnerSpec(spec)],
+  ),
+);
 
 
-export interface ConstantSpawnSpec {
-  readonly typeId: CreatureTypeId;
-  readonly health: number;
-  readonly moveSpeed: number;
-  readonly rewardValue: number;
-  readonly tint: TintRGBA;
-  readonly size: number;
-  readonly contactDamage: number;
-  readonly flags: CreatureFlags;
-  readonly aiMode: number;
-  readonly orbitAngle: number | null;
-  readonly orbitRadius: number | null;
-  readonly rangedProjectileType: number | null;
-  readonly bonusId: BonusId | null;
-  readonly bonusDurationOverride: number | null;
+export class ConstantSpawnSpec {
+  constructor(
+    public readonly typeId: CreatureTypeId,
+    public readonly health: number,
+    public readonly moveSpeed: number,
+    public readonly rewardValue: number,
+    public readonly tint: TintRGBA,
+    public readonly size: number,
+    public readonly contactDamage: number,
+    public readonly flags: CreatureFlags = 0 as CreatureFlags,
+    public readonly aiMode: number = CreatureAiMode.ORBIT_PLAYER,
+    public readonly orbitAngle: number | null = null,
+    public readonly orbitRadius: number | null = null,
+    public readonly rangedProjectileType: number | null = null,
+    public readonly bonusId: BonusId | null = null,
+    public readonly bonusDurationOverride: number | null = null,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 function constSpec(
@@ -200,24 +233,40 @@ function constSpec(
   bonusId: BonusId | null = null,
   bonusDurationOverride: number | null = null,
 ): ConstantSpawnSpec {
-  return {
-    typeId, health, moveSpeed, rewardValue, tint, size, contactDamage,
-    flags, aiMode, orbitAngle, orbitRadius, rangedProjectileType, bonusId, bonusDurationOverride,
-  };
+  return new ConstantSpawnSpec(
+    typeId,
+    health,
+    moveSpeed,
+    rewardValue,
+    tint,
+    size,
+    contactDamage,
+    flags,
+    aiMode,
+    orbitAngle,
+    orbitRadius,
+    rangedProjectileType,
+    bonusId,
+    bonusDurationOverride,
+  );
 }
 
 
-export interface FormationChildSpec {
-  readonly typeId: CreatureTypeId;
-  readonly health: number;
-  readonly moveSpeed: number;
-  readonly rewardValue: number;
-  readonly size: number;
-  readonly contactDamage: number;
-  readonly tint: TintRGBA;
-  readonly maxHealth: number | null;
-  readonly orbitAngle: number | null;
-  readonly orbitRadius: number | null;
+export class FormationChildSpec {
+  constructor(
+    public readonly typeId: CreatureTypeId,
+    public readonly health: number,
+    public readonly moveSpeed: number,
+    public readonly rewardValue: number,
+    public readonly size: number,
+    public readonly contactDamage: number,
+    public readonly tint: TintRGBA,
+    public readonly maxHealth: number | null = null,
+    public readonly orbitAngle: number | null = null,
+    public readonly orbitRadius: number | null = null,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 function childSpec(
@@ -232,11 +281,32 @@ function childSpec(
   orbitAngle: number | null = null,
   orbitRadius: number | null = null,
 ): FormationChildSpec {
-  return { typeId, health, moveSpeed, rewardValue, size, contactDamage, tint, maxHealth, orbitAngle, orbitRadius };
+  return new FormationChildSpec(
+    typeId,
+    health,
+    moveSpeed,
+    rewardValue,
+    size,
+    contactDamage,
+    tint,
+    maxHealth,
+    orbitAngle,
+    orbitRadius,
+  );
 }
 
 
-export interface GridFormationSpec {
+type GridFormationSpecInit = {
+  parent: ConstantSpawnSpec;
+  childAiMode: number;
+  childSpec: FormationChildSpec;
+  xRange: readonly number[];
+  yRange: readonly number[];
+  applyFallback?: boolean;
+  setParentMaxHealth?: boolean;
+};
+
+export class GridFormationSpec {
   readonly parent: ConstantSpawnSpec;
   readonly childAiMode: number;
   readonly childSpec: FormationChildSpec;
@@ -244,10 +314,33 @@ export interface GridFormationSpec {
   readonly yRange: readonly number[];
   readonly applyFallback: boolean;
   readonly setParentMaxHealth: boolean;
+
+  constructor(opts: GridFormationSpecInit) {
+    this.parent = opts.parent;
+    this.childAiMode = opts.childAiMode;
+    this.childSpec = opts.childSpec;
+    this.xRange = opts.xRange;
+    this.yRange = opts.yRange;
+    this.applyFallback = opts.applyFallback ?? false;
+    this.setParentMaxHealth = opts.setParentMaxHealth ?? true;
+    Object.freeze(this);
+  }
 }
 
 
-export interface RingFormationSpec {
+type RingFormationSpecInit = {
+  parent: ConstantSpawnSpec;
+  childAiMode: number;
+  childSpec: FormationChildSpec;
+  count: number;
+  angleStep: number;
+  radius: number;
+  applyFallback?: boolean;
+  setPosition?: boolean;
+  setParentMaxHealth?: boolean;
+};
+
+export class RingFormationSpec {
   readonly parent: ConstantSpawnSpec;
   readonly childAiMode: number;
   readonly childSpec: FormationChildSpec;
@@ -257,6 +350,19 @@ export interface RingFormationSpec {
   readonly applyFallback: boolean;
   readonly setPosition: boolean;
   readonly setParentMaxHealth: boolean;
+
+  constructor(opts: RingFormationSpecInit) {
+    this.parent = opts.parent;
+    this.childAiMode = opts.childAiMode;
+    this.childSpec = opts.childSpec;
+    this.count = opts.count;
+    this.angleStep = opts.angleStep;
+    this.radius = opts.radius;
+    this.applyFallback = opts.applyFallback ?? false;
+    this.setPosition = opts.setPosition ?? false;
+    this.setParentMaxHealth = opts.setParentMaxHealth ?? true;
+    Object.freeze(this);
+  }
 }
 
 
@@ -362,7 +468,8 @@ export const CONSTANT_SPAWN_TEMPLATES: Map<SpawnId, ConstantSpawnSpec> = new Map
 ]);
 
 
-export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map([
+export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
+  ([
   [SpawnId.FORMATION_GRID_ALIEN_GREEN_14, {
     parent: constSpec(
       CreatureTypeId.ALIEN, 1500.0, 2.0, 600.0, [0.7, 0.8, 0.31, 1.0], 50.0, 40.0,
@@ -433,10 +540,14 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map([
     applyFallback: false,
     setParentMaxHealth: true,
   }],
-]);
+  ] satisfies readonly (readonly [SpawnId, GridFormationSpecInit])[]).map(
+    ([spawnId, spec]) => [spawnId, new GridFormationSpec(spec)],
+  ),
+);
 
 
-export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map([
+export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map(
+  ([
   [SpawnId.FORMATION_RING_ALIEN_8_12, {
     parent: constSpec(
       CreatureTypeId.ALIEN, 200.0, 2.2, 600.0, [0.65, 0.85, 0.97, 1.0], 55.0, 14.0,
@@ -467,7 +578,10 @@ export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map([
     setPosition: true,
     setParentMaxHealth: true,
   }],
-]);
+  ] satisfies readonly (readonly [SpawnId, RingFormationSpecInit])[]).map(
+    ([spawnId, spec]) => [spawnId, new RingFormationSpec(spec)],
+  ),
+);
 
 
 export function spawnIdLabel(spawnId: SpawnId): string {
