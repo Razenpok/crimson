@@ -1026,7 +1026,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
     typeId = 3;
   }
 
-  c.typeId = typeId as CreatureTypeId;
+  c.typeId = typeId;
 
   c.size = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_SIZE }) % 20 + 44);
 
@@ -1034,7 +1034,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
 
   let moveSpeed = f32(f32(f32(Math.floor(xp / 4000)) * f32(0.045)) + f32(0.9));
   if (c.typeId === CreatureTypeId.SPIDER_SP1) {
-    c.flags = (c.flags | CreatureFlags.AI7_LINK_TIMER) as CreatureFlags;
+    c.flags = c.flags | CreatureFlags.AI7_LINK_TIMER;
     moveSpeed = f32(f32(moveSpeed) * f32(1.3));
   }
 
@@ -1418,7 +1418,7 @@ export function buildRushModeSpawnCreature(
   const typeId = opts.typeId;
 
   const c = allocCreature(-1, pos, rng);
-  c.typeId = typeId as CreatureTypeId;
+  c.typeId = typeId;
   c.aiMode = CreatureAiMode.ORBIT_PLAYER;
 
   const elapsedF32 = f32(elapsedMs);
@@ -1483,7 +1483,7 @@ export function tickRushModeSpawns(
 
     c = buildRushModeSpawnCreature(spawnLeft, tint, rng, { typeId: 3, survivalElapsedMs: elapsedMs });
     c.aiMode = CreatureAiMode.ORBIT_PLAYER_WIDE;
-    c.flags = (c.flags | CreatureFlags.AI7_LINK_TIMER) as CreatureFlags;
+    c.flags = c.flags | CreatureFlags.AI7_LINK_TIMER;
     if (c.moveSpeed !== null) {
       c.moveSpeed = f32(c.moveSpeed * 1.4);
     }
@@ -1589,7 +1589,7 @@ function applyTail(
   if (c.typeId === CreatureTypeId.SPIDER_SP1 && !(
     c.flags & (CreatureFlags.RANGED_ATTACK_SHOCK | CreatureFlags.AI7_LINK_TIMER)
   )) {
-    c.flags = (c.flags | CreatureFlags.AI7_LINK_TIMER) as CreatureFlags;
+    c.flags = c.flags | CreatureFlags.AI7_LINK_TIMER;
     c.aiLinkParent = null;
     c.spawnSlot = null;
     c.aiTimer = 0;
@@ -1742,7 +1742,7 @@ function applyRingFormation(ctx: PlanBuilder, spec: RingFormationSpec): void {
 registerTemplate([SpawnId.ZOMBIE_BOSS_SPAWNER_00], (ctx: PlanBuilder): void => {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ZOMBIE;
-  c.flags = (CreatureFlags.ANIM_PING_PONG | CreatureFlags.ANIM_LONG_STRIP) as CreatureFlags;
+  c.flags = CreatureFlags.ANIM_PING_PONG | CreatureFlags.ANIM_LONG_STRIP;
   c.spawnSlot = ctx.addSlot({ owner: 0, timer: 1.0, limit: 812, interval: 0.7, child: SpawnId.ZOMBIE_RANDOM_41 });
   c.size = 64.0;
   c.health = 8500.0;
@@ -2243,7 +2243,7 @@ export function buildSpawnPlan(
           if (constSpawnSpec) {
             applyConstantSpawn(ctx, constSpawnSpec);
           } else {
-            throw new UnsupportedSpawnTemplateError(`unsupported spawn template id: 0x${(templateId as number).toString(16)}`);
+            throw new UnsupportedSpawnTemplateError(`unsupported spawn template id: 0x${int(templateId).toString(16)}`);
           }
         }
       }
