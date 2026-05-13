@@ -16,9 +16,10 @@ export function updateScreenFade(state: GameState, dt: number): void {
   else if (state.screenFadeAlpha > 1.0) state.screenFadeAlpha = 1.0;
 }
 
-export function drawScreenFade(state: Pick<GameState, "screenFadeAlpha">): void {
+export function drawScreenFade(state: GameState): void {
   const alpha = state.screenFadeAlpha;
   if (alpha <= 0.0) return;
   const shade = int(Math.max(0.0, Math.min(1.0, alpha)) * 255.0);
+  // WebGL replacement for raylib's draw_rectangle.
   wgl.drawRectangle(0, 0, int(wgl.getScreenWidth()), int(wgl.getScreenHeight()), wgl.makeColor(0, 0, 0, shade / 255.0));
 }
