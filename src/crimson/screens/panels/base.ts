@@ -51,7 +51,7 @@ const PANEL_BACK_POS_Y = 430.0;
 export const PANEL_TIMELINE_START_MS = 300;
 export const PANEL_TIMELINE_END_MS = 0;
 
-const FADE_TO_GAME_ACTIONS = new Set([
+export const FADE_TO_GAME_ACTIONS = new Set([
   'start_survival',
   'start_rush',
   'start_typo',

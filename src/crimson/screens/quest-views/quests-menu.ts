@@ -3,19 +3,21 @@
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
 
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
 import { debugEnabled } from '@crimson/debug.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { questGamesCounterIndex, questCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import {
   UiButtonState,
   buttonDraw,
@@ -35,8 +37,12 @@ import {
   MENU_SCALE_SMALL_THRESHOLD,
   uiElementAnim,
   signLayoutScale,
+  drawMenuCursorHelper,
+  ensureMenuGround,
+  menuGroundCamera,
 } from '@crimson/screens/menu.ts';
 import {
+  FADE_TO_GAME_ACTIONS,
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';
@@ -94,13 +100,19 @@ const MOUSE_BUTTON_LEFT = 0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
-const FADE_TO_GAME_ACTIONS = new Set([
-  'start_survival',
-  'start_rush',
-  'start_typo',
-  'start_tutorial',
-  'start_quest',
-]);
+function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  if (x1 === x2) {
+    const y = Math.min(y1, y2);
+    const h = Math.abs(y2 - y1) || 1;
+    wgl.drawRectangle(x1, y, 1, h, color);
+    return;
+  }
+  if (y1 === y2) {
+    const x = Math.min(x1, x2);
+    const w = Math.abs(x2 - x1) || 1;
+    wgl.drawRectangle(x, y1, w, 1, color);
+  }
+}
 
 export type QuestsMenuState = GameState;
 
@@ -108,7 +120,7 @@ export class QuestsMenuView {
   private state: QuestsMenuState;
 
   private _isOpen: boolean = false;
-  private _ground: { processPending(): void; draw(camera: Vec2): void } | null = null;
+  private _ground: GroundRenderer | null = null;
   private _backButton: UiButtonState;
 
   private _menuScreenWidth: number = 0;
@@ -133,6 +145,7 @@ export class QuestsMenuView {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
+    // Sign and ground match the main menu/panels.
     this._initGround();
     this._action = null;
     this._dirty = false;
@@ -247,7 +260,7 @@ export class QuestsMenuView {
       return;
     }
 
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const backPos = new Vec2(
       layout.listPos.x + QUEST_BACK_BUTTON_X_OFFSET,
       this._rowsY0(layout) + QUEST_BACK_BUTTON_Y_OFFSET,
@@ -285,12 +298,8 @@ export class QuestsMenuView {
     this._assertOpen();
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
 
-    const pauseBackground = this.state.pauseBackground;
-    if (pauseBackground !== null) {
-      pauseBackground.drawPauseBackground();
-    } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+    if (this._ground !== null) {
+      this._ground.draw(menuGroundCamera(this.state));
     }
 
     drawScreenFade(this.state);
@@ -299,11 +308,11 @@ export class QuestsMenuView {
     this._drawSign();
     this._drawContents();
 
-    const resources = this._requireResources();
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
+    drawMenuCursorHelper(
+      this.state,
+      requireRuntimeResources(this.state),
+      this._cursorPulseTime,
+    );
   }
 
   takeAction(): string | null {
@@ -319,13 +328,6 @@ export class QuestsMenuView {
     }
   }
 
-  private _requireResources(): RuntimeResources {
-    if (this.state.resources === null) {
-      throw new Error('runtime resources are not loaded');
-    }
-    return this.state.resources;
-  }
-
   private _layout(): QuestMenuLayout {
     const [_angleRad, slideX] = uiElementAnim(
       this,
@@ -334,6 +336,9 @@ export class QuestsMenuView {
       PANEL_TIMELINE_END_MS,
       MENU_PANEL_WIDTH,
     );
+    // `sub_447d40` base sums:
+    //   x_sum = <ui_element_x> + <ui_element_offset_x>  (x=-5)
+    //   y_sum = <ui_element_y> + <ui_element_offset_y>  (y=185 + widescreen shift via ui_menu_layout_init)
     const xSum = QUEST_MENU_BASE_X + slideX + QUEST_MENU_PANEL_OFFSET_X;
     const ySum = QUEST_MENU_BASE_Y + MENU_PANEL_OFFSET_Y + this._widescreenYShift;
 
@@ -350,6 +355,7 @@ export class QuestsMenuView {
     const [mx, my] = InputState.mousePosition();
     for (let stage = 1; stage <= 5; stage++) {
       const x = x0 + (stage - 1) * QUEST_STAGE_ICON_STEP;
+      // Hover bounds are fixed 32x32, anchored at (x, title_y) (not icons_y).
       const stageRect = Rect.fromTopLeft(new Vec2(x, titleY), QUEST_STAGE_ICON_SIZE, QUEST_STAGE_ICON_SIZE);
       if (stageRect.contains({ x: mx, y: my })) {
         return stage;
@@ -363,12 +369,13 @@ export class QuestsMenuView {
     if (int(status.questUnlockIndex) < QUEST_HARDCORE_UNLOCK_INDEX) {
       return false;
     }
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const checkOn = getTexture(resources, TextureId.UI_CHECK_ON);
     const config = this.state.config;
     const hardcore = config.gameplay.hardcore;
 
     const font = resources.smallFont;
+    const textScale = 1.0;
     const label = 'Hardcore';
     const labelW = measureSmallTextWidth(font, label);
 
@@ -377,7 +384,7 @@ export class QuestsMenuView {
       layout.listPos.y + QUEST_HARDCORE_CHECKBOX_Y_OFFSET,
     );
     const rectW = checkOn.width + 6.0 + labelW;
-    const rectH = Math.max(checkOn.height, font.cellSize);
+    const rectH = Math.max(checkOn.height, font.cellSize * textScale);
 
     const [mx, my] = InputState.mousePosition();
     const hovered = Rect.fromTopLeft(checkPos, rectW, rectH).contains({ x: mx, y: my });
@@ -406,6 +413,7 @@ export class QuestsMenuView {
   }
 
   private _rowsY0(layout: QuestMenuLayout): number {
+    // `sub_447d40` adds +10 to the list Y after rendering the Hardcore checkbox.
     const status = this.state.status;
     let y0 = layout.listPos.y;
     if (int(status.questUnlockIndex) >= QUEST_HARDCORE_UNLOCK_INDEX) {
@@ -461,10 +469,13 @@ export class QuestsMenuView {
   }
 
   private _questRowColors(hardcore: boolean): [wgl.Color, wgl.Color] {
+    // `sub_447d40` uses different RGB when hardcore is toggled.
     let r: number, g: number, b: number;
     if (hardcore) {
+      // (0.980392, 0.274509, 0.235294, alpha)
       r = 250; g = 70; b = 60;
     } else {
+      // (0.274509, 0.707..., 0.941..., alpha)
       r = 70; g = 180; b = 240;
     }
     const baseColor = wgl.makeColor(r / 255, g / 255, b / 255, 153 / 255);
@@ -473,6 +484,16 @@ export class QuestsMenuView {
   }
 
   private _questCounts(stage: number, row: number): [number, number] | null {
+    // In `sub_447d40`, counts are indexed by (row + stage*10) and split across two
+    // arrays at offsets 0xDC (games) and 0x17C (completed) within game.cfg.
+    //
+    // Stage 5 does not fit cleanly in the saved blob:
+    // - The "games" index range would overlap stage-1 completion counters.
+    // - The "completed" index range reads into trailing fields (mode counters,
+    //   game_sequence_id, and unknown tail bytes), and the last row would run past
+    //   the decoded payload.
+    //
+    // We emulate this layout so the debug `F1` overlay matches the classic build.
     const level = new QuestLevel(int(stage), int(row) + 1);
     const globalIndex = level.globalIndex;
     const status = this.state.status;
@@ -519,7 +540,7 @@ export class QuestsMenuView {
   }
 
   private _drawContents(): void {
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const layout = this._layout();
     const titlePos = layout.titlePos;
     const iconsStartPos = layout.iconsStartPos;
@@ -533,7 +554,7 @@ export class QuestsMenuView {
     const hoveredRow = this._hoveredRow(layout);
     const showCounts = debugEnabled() && InputState.isKeyDown(KEY_F1);
 
-    // Title texture tinted (0.7, 0.7, 0.7, 0.7).
+    // Title texture is tinted by (0.7, 0.7, 0.7, 0.7).
     const titleTex = getTexture(resources, TextureId.UI_TEXT_QUEST);
     const titleTint = wgl.makeColor(179 / 255, 179 / 255, 179 / 255, 179 / 255);
     wgl.drawTexturePro(
@@ -609,11 +630,7 @@ export class QuestsMenuView {
       const titleW = unlocked ? measureSmallTextWidth(font, title) : 0.0;
       if (unlocked) {
         const lineY = y + 13.0;
-        wgl.drawRectangle(
-          int(listPos.x), int(lineY),
-          int(listPos.x + titleW + 32.0) - int(listPos.x), 1,
-          color,
-        );
+        drawLine(int(listPos.x), int(lineY), int(listPos.x + titleW + 32.0), int(lineY), color);
       }
 
       if (showCounts && unlocked) {
@@ -627,6 +644,7 @@ export class QuestsMenuView {
     }
 
     if (showCounts) {
+      // Header is drawn below the list, aligned with the count column.
       const headerX = listPos.x + 96.0;
       const headerY = y0 + QUEST_LIST_ROW_STEP * 10.0 - 2.0;
       drawSmallText(font, '(completed/games)', new Vec2(headerX, headerY), baseColor);
@@ -642,7 +660,6 @@ export class QuestsMenuView {
   }
 
   private _drawSign(): void {
-    const resources = this._requireResources();
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
@@ -666,8 +683,9 @@ export class QuestsMenuView {
       rotationDeg = angleRad * (180.0 / Math.PI);
     }
 
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
@@ -687,7 +705,7 @@ export class QuestsMenuView {
   }
 
   private _drawPanel(): void {
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const [_angleRad, slideX] = uiElementAnim(
       this,
       1,
@@ -695,7 +713,7 @@ export class QuestsMenuView {
       PANEL_TIMELINE_END_MS,
       MENU_PANEL_WIDTH,
     );
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       panelTex,
@@ -712,11 +730,7 @@ export class QuestsMenuView {
   }
 
   private _initGround(): void {
-    if (this.state.pauseBackground !== null) {
-      this._ground = null;
-      return;
-    }
-    this._ground = this.state.menuGround ?? null;
+    this._ground = ensureMenuGround(this.state);
   }
 
   private _beginCloseTransition(action: string): void {
