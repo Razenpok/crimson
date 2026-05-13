@@ -57,12 +57,7 @@ export function tickQuestCompletionTransition(
     creaturesNoneActive: boolean;
     spawnTableEmpty: boolean;
   },
-): {
-  completionTransitionMs: number;
-  completed: boolean;
-  playHitSfx: boolean;
-  playCompletionMusic: boolean;
-} {
+): [number, boolean, boolean, boolean] {
   // Advance quest completion transition timer.
   // The quest-mode update loop waits for a short delay after the quest is "idle complete"
   // (no active creatures + no remaining spawn table entries) before transitioning to the
@@ -74,19 +69,19 @@ export function tickQuestCompletionTransition(
   if (opts.creaturesNoneActive && opts.spawnTableEmpty) {
     if (timerMs < 0.0) {
       // Native quest_mode_update seeds the timer with the frame delta.
-      return { completionTransitionMs: dtMs, completed: false, playHitSfx: false, playCompletionMusic: false };
+      return [dtMs, false, false, false];
     }
     if (QUEST_COMPLETION_HIT_SFX_START_MS < timerMs && timerMs < QUEST_COMPLETION_HIT_SFX_END_MS) {
       // Match the native snap-forward after the quest-hit stinger.
-      return { completionTransitionMs: QUEST_COMPLETION_HIT_SFX_END_MS + dtMs, completed: false, playHitSfx: true, playCompletionMusic: false };
+      return [QUEST_COMPLETION_HIT_SFX_END_MS + dtMs, false, true, false];
     }
     if (QUEST_COMPLETION_MUSIC_START_MS < timerMs && timerMs < QUEST_COMPLETION_MUSIC_END_MS) {
       // Match the native snap-forward before the completion music fade-in.
-      return { completionTransitionMs: QUEST_COMPLETION_MUSIC_END_MS + dtMs, completed: false, playHitSfx: false, playCompletionMusic: true };
+      return [QUEST_COMPLETION_MUSIC_END_MS + dtMs, false, false, true];
     }
     const completed = timerMs > QUEST_COMPLETION_TRANSITION_MS;
-    return { completionTransitionMs: timerMs + dtMs, completed, playHitSfx: false, playCompletionMusic: false };
+    return [timerMs + dtMs, completed, false, false];
   }
 
-  return { completionTransitionMs: -1.0, completed: false, playHitSfx: false, playCompletionMusic: false };
+  return [-1.0, false, false, false];
 }

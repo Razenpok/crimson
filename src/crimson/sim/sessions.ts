@@ -210,7 +210,12 @@ export function questPostStep(ctx: PostStepContext, spawn: QuestSpawnState): voi
   const anyAliveAfter = ctx.world.players.some((player) => player.health > 0.0);
 
   if (anyAliveAfter) {
-    const completionResult = tickQuestCompletionTransition(
+    const [
+      completionTransitionMs,
+      completed,
+      playHitSfx,
+      playCompletionMusic,
+    ] = tickQuestCompletionTransition(
       spawn.completionTransitionMs,
       dtMs,
       {
@@ -218,10 +223,10 @@ export function questPostStep(ctx: PostStepContext, spawn: QuestSpawnState): voi
         spawnTableEmpty: spawnTableEmptyNow,
       },
     );
-    spawn.completionTransitionMs = completionResult.completionTransitionMs;
-    spawn.completed = completionResult.completed;
-    spawn.playHitSfx = completionResult.playHitSfx;
-    spawn.playCompletionMusic = completionResult.playCompletionMusic;
+    spawn.completionTransitionMs = completionTransitionMs;
+    spawn.completed = completed;
+    spawn.playHitSfx = playHitSfx;
+    spawn.playCompletionMusic = playCompletionMusic;
   } else {
     spawn.completionTransitionMs = -1.0;
     spawn.completed = false;
