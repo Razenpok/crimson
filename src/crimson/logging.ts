@@ -47,12 +47,15 @@ function _pathJoin(...parts: string[]): string {
   const cleaned = parts.map((part, idx) => {
     const text = String(part);
     if (idx === 0) {
-      return text.replace(/\/+$/g, '');
+      return text === '/' ? '/' : text.replace(/\/+$/g, '');
     }
     return text.replace(/^\/+|\/+$/g, '');
   }).filter((part) => part.length > 0);
   if (cleaned.length === 0) {
     return '';
+  }
+  if (cleaned[0] === '/') {
+    return `/${cleaned.slice(1).join('/')}`;
   }
   return cleaned.join('/');
 }
