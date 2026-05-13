@@ -44,10 +44,6 @@ import {
   GameplayState,
 } from "@crimson/gameplay.ts";
 
-// ---------------------------------------------------------------------------
-// WorldEvents
-// ---------------------------------------------------------------------------
-
 export interface WorldEvents {
   readonly hits: ProjectileHit[];
   readonly deaths: CreatureDeath[];
@@ -75,16 +71,8 @@ function createWorldEvents(opts: {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Cached manifest references
-// ---------------------------------------------------------------------------
-
 const _WORLD_DT_STEPS = WORLD_DT_STEPS;
 const _PLAYER_DEATH_HOOKS = PLAYER_DEATH_HOOKS;
-
-// ---------------------------------------------------------------------------
-// CreatureDamageApplier type alias
-// ---------------------------------------------------------------------------
 
 type CreatureDamageApplier = (
   creatureIndex: number,
@@ -93,10 +81,6 @@ type CreatureDamageApplier = (
   knockback: Vec2,
   owner: OwnerRef,
 ) => void;
-
-// ---------------------------------------------------------------------------
-// WorldState
-// ---------------------------------------------------------------------------
 
 export interface WorldStateStepOpts {
   readonly applyWorldDtSteps?: boolean;
@@ -165,10 +149,6 @@ export class WorldState {
     });
   }
 
-  // -------------------------------------------------------------------------
-  // step() — main simulation tick
-  // -------------------------------------------------------------------------
-
   step(dt: number, opts: WorldStateStepOpts): WorldEvents {
     const {
       applyWorldDtSteps = true,
@@ -193,17 +173,14 @@ export class WorldState {
     fxQueue.violenceDisabled = int(violenceDisabled);
     this.state.playerDeathHookSkipIndices.clear();
 
-    // Apply world-dt perk steps (e.g. reflex-boost time scale)
     if (applyWorldDtSteps) {
       for (const step of _WORLD_DT_STEPS) {
         dt = Number(step({ dt, players: this.players }));
       }
     }
 
-    // Normalize input frame to match player count
     const normalizedInputs = normalizeInputFrame(inputs, { playerCount: this.players.length }).asList();
 
-    // Snapshot previous positions & health
     const prevPositions: [number, number][] = this.players.map(
       (player) => [player.pos.x, player.pos.y] as [number, number],
     );
@@ -220,13 +197,10 @@ export class WorldState {
       }
     }
 
-    // Perks update effects
     perksUpdateEffects(this.state, this.players, dt, { creatures: creatureEntries, fxQueue });
 
-    // effects_update runs early in the native frame loop, before creature/projectile updates
+    // `effects_update` runs early in the native frame loop, before creature/projectile updates.
     this.state.effects.update(dt, { fxQueue });
-
-    // --- Creature update ---
 
     const _applyProjectileDamageToPlayer = (playerIndex: number, damage: number): void => {
       const idx = int(playerIndex);
@@ -252,8 +226,6 @@ export class WorldState {
     let triggerGameTune = false;
     const hitSfx: SfxId[] = [];
     let hitAudioGameTuneStarted = gameTuneStarted;
-
-    // --- Projectile damage applier ---
 
     const _applyProjectileDamageToCreature: CreatureDamageApplier = (
       creatureIndex: number,
@@ -298,15 +270,14 @@ export class WorldState {
 
     const prevCreatureDamageAppliers = this._setCreatureDamageAppliers(_applyProjectileDamageToCreature);
 
-    // --- Secondary detonation kill handler ---
-
     const _onSecondaryDetonationKill = (creatureIndex: number): void => {
       const idx = int(creatureIndex);
       if (!(idx >= 0 && idx < creatureEntries.length) || Number(creatureEntries[idx].hp) > 0.0) {
         return;
       }
       // Native detonation follow-up re-enters creature death handling but does
-      // not run a second death-SFX random pick.
+      // not run a second death-SFX random pick (`creature_apply_damage` only
+      // does that on the original killing hit).
       this._recordCreatureDeath({
         creatureIndex: idx,
         dt: Number(dt),
@@ -317,8 +288,6 @@ export class WorldState {
         sfx,
       });
     };
-
-    // --- Projectile hit handlers ---
 
     const _onProjectileHitPre = (hit: ProjectileHit): ProjectileDecalPostCtx => {
       return this._prepareProjectileHitPresentation(hit, {
@@ -351,8 +320,6 @@ export class WorldState {
       }
     };
 
-    // --- Primary projectile step ---
-
     const hits: ProjectileHit[] = this.state.projectiles.step({
       dt: Number(dt),
       creatures: creatureEntries,
@@ -369,8 +336,6 @@ export class WorldState {
       },
     });
 
-    // --- Secondary projectile step ---
-
     this.state.secondaryProjectiles.step({
       dt: Number(dt),
       creatures: creatureEntries,
@@ -380,8 +345,6 @@ export class WorldState {
       onDetonationKill: _onSecondaryDetonationKill,
     });
 
-    // --- Post-damage player death hooks ---
-
     this._runPostDamagePlayerDeathHooks({
       prevHealth,
       dt: Number(dt),
@@ -390,8 +353,6 @@ export class WorldState {
       fxQueue,
       deaths,
     });
-
-    // --- Particle kill handler (no corpse) ---
 
     const _killCreatureNoCorpse = (creatureIndex: number, owner: OwnerRef): void => {
       const idx = int(creatureIndex);
@@ -412,8 +373,6 @@ export class WorldState {
       });
     };
 
-    // --- Particle & sprite effect updates ---
-
     this.state.particles.update(dt, {
       creatures: creatureEntries,
       killCreature: _killCreatureNoCorpse,
@@ -422,8 +381,6 @@ export class WorldState {
     });
 
     this.state.spriteEffects.update(dt);
-
-    // --- Player update ---
 
     const reloadActiveAny = normalizedInputs.some(
       (entry) => Boolean(entry.reloadDown) || Boolean(entry.reloadPressed),
@@ -467,27 +424,20 @@ export class WorldState {
 
     dt = Number(playerDt);
 
-    // --- Animation advancement ---
-
     if (dt > 0.0) {
       this._advanceCreatureAnim(dt);
       this._advancePlayerAnim(dt, prevPositions);
     }
 
-    // --- Mid-step hook ---
-
     if (midStepHook !== null) {
       midStepHook();
     }
-
-    // --- Camera shake ---
 
     if (!deferCameraShake) {
       cameraShakeUpdate(this.state, dt);
     }
 
-    // --- Survival progression / perk level-up ---
-    // Native level-up/perk-pending check runs before bonus_update in
+    // Native level-up/perk-pending check runs before `bonus_update` in
     // gameplay_update_and_render. Keep the same ordering so XP awarded from
     // bonus-side kill paths (e.g. freeze cleanup) levels on the next tick.
 
@@ -495,11 +445,8 @@ export class WorldState {
       survivalProgressionUpdate(this.state, this.players);
     }
 
-    // Native latches timeScaleActive late (post mode update, pre bonus decrement);
-    // next-frame dt uses it.
+    // Native latches `time_scale_active` late (post mode update, pre bonus decrement); next-frame dt uses it.
     this.state.timeScaleActive = Number(this.state.bonuses.reflexBoost) > 0.0;
-
-    // --- Bonus update ---
 
     bonusUpdatePrePickupTimers(this.state, dt);
 
@@ -522,14 +469,12 @@ export class WorldState {
 
     survivalEnforceRewardWeaponGuard(this.state, this.players);
 
-    // --- Flush SFX queue ---
-
     if (this.state.sfxQueue.length > 0) {
       sfx.push(...this.state.sfxQueue);
       this.state.sfxQueue.length = 0;
     }
 
-    // Player-damage VO RNG work lives inside player_take_damage for native
+    // Player-damage VO RNG work lives inside `player_take_damage` for native
     // ordering parity (VO draw before heading-jitter draw).
 
     this.state.playerDeathHookSkipIndices.clear();
@@ -544,10 +489,6 @@ export class WorldState {
       hitSfx,
     });
   }
-
-  // -------------------------------------------------------------------------
-  // _setCreatureDamageAppliers / _restoreCreatureDamageAppliers
-  // -------------------------------------------------------------------------
 
   private _setCreatureDamageAppliers(
     applier: CreatureDamageApplier | null,
@@ -593,10 +534,6 @@ export class WorldState {
     ] = previous;
   }
 
-  // -------------------------------------------------------------------------
-  // _runPlayerDeathHooks
-  // -------------------------------------------------------------------------
-
   private _runPlayerDeathHooks(opts: {
     player: PlayerState;
     dt: number;
@@ -619,10 +556,6 @@ export class WorldState {
       });
     }
   }
-
-  // -------------------------------------------------------------------------
-  // _runPostDamagePlayerDeathHooks
-  // -------------------------------------------------------------------------
 
   private _runPostDamagePlayerDeathHooks(opts: {
     prevHealth: number[];
@@ -655,10 +588,6 @@ export class WorldState {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // _recordCreatureDeath
-  // -------------------------------------------------------------------------
-
   private _recordCreatureDeath(opts: {
     creatureIndex: number;
     dt: number;
@@ -687,10 +616,6 @@ export class WorldState {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // _prepareProjectileHitPresentation
-  // -------------------------------------------------------------------------
-
   private _prepareProjectileHitPresentation(
     hit: ProjectileHit,
     opts: {
@@ -710,10 +635,6 @@ export class WorldState {
     });
   }
 
-  // -------------------------------------------------------------------------
-  // _finalizeProjectileHitPresentation
-  // -------------------------------------------------------------------------
-
   private _finalizeProjectileHitPresentation(opts: {
     postCtx: ProjectileDecalPostCtx;
     fxQueue: FxQueue;
@@ -724,10 +645,6 @@ export class WorldState {
       rng: this.state.rng,
     });
   }
-
-  // -------------------------------------------------------------------------
-  // _advanceCreatureAnim
-  // -------------------------------------------------------------------------
 
   private _advanceCreatureAnim(dt: number): void {
     if (Number(this.state.bonuses.freeze) > 0.0) return;
@@ -756,10 +673,6 @@ export class WorldState {
       creature.animPhase = newPhase;
     }
   }
-
-  // -------------------------------------------------------------------------
-  // _advancePlayerAnim
-  // -------------------------------------------------------------------------
 
   private _advancePlayerAnim(dt: number, prevPositions: [number, number][]): void {
     const info = CREATURE_ANIM.get(CreatureTypeId.TROOPER);
