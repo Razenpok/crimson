@@ -1,5 +1,20 @@
 // Port of crimson/weapons.py
 
+// Weapon definitions for the rewrite runtime.
+//
+// Weapon ids use native 1-based values (e.g. `weapon_id=1` for Pistol).
+// Projectile `type_id` values route projectile behavior and template lookups.
+// By native design they reuse the same numeric ids as `WeaponId` for default
+// cases, with explicit overrides for remapped templates and non-primary paths
+// (particle/secondary pools).
+//
+// Use `projectile_type_id_for_weapon_id` for the primary projectile `type_id`.
+// Weapons that use particle or secondary projectile pools raise `ValueError`.
+//
+// Reference material:
+// - `docs/re/static/reference/weapon-table.md`
+// - `docs/re/static/reference/weapon-id-map.md`
+
 import { SfxId } from '@grim/sfx-map.ts';
 import { ProjectileTemplateId } from './projectiles/types.ts';
 
@@ -166,6 +181,9 @@ export function weaponDisplayName(weaponId: WeaponId, opts: { preserveBugs?: boo
 }
 
 export const PROJECTILE_TEMPLATE_OVERRIDES: Map<WeaponId, readonly ProjectileTemplateId[]> = new Map([
+  // Derived from native `player_fire_weapon` behavior.
+  // Omitted keys use the native default `type_id == weapon_id`.
+  // Empty tuples are explicit non-primary projectile paths.
   [WeaponId.SAWED_OFF_SHOTGUN, [ProjectileTemplateId.SHOTGUN]],
   [WeaponId.MEAN_MINIGUN, [ProjectileTemplateId.PISTOL]],
   [WeaponId.FLAMETHROWER, []],
@@ -184,12 +202,15 @@ export const PROJECTILE_TEMPLATE_OVERRIDES: Map<WeaponId, readonly ProjectileTem
 ]);
 
 export function weaponEntryForProjectileTypeId(typeId: ProjectileTemplateId): Weapon {
+  // Native `projectile_spawn` indexes weapon metadata by projectile type id.
+  // The type id is the weapon id used as the projectile stats template.
   const entry = WEAPON_BY_ID.get(typeId as number as WeaponId);
   if (!entry) throw new Error(`No weapon entry for projectile type id: ${typeId}`);
   return entry;
 }
 
 export function projectileTypeIdForWeaponId(weaponId: WeaponId): ProjectileTemplateId {
+  // Return the primary projectile type for a weapon that uses the main pool.
   const typeIds = PROJECTILE_TEMPLATE_OVERRIDES.get(weaponId);
   if (typeIds !== undefined) {
     if (typeIds.length === 0) {
@@ -197,7 +218,6 @@ export function projectileTypeIdForWeaponId(weaponId: WeaponId): ProjectileTempl
     }
     return typeIds[0];
   }
-  // Check if the weapon id is a valid ProjectileTemplateId.
   if (ProjectileTemplateId[weaponId as number] !== undefined) {
     return weaponId as number as ProjectileTemplateId;
   }

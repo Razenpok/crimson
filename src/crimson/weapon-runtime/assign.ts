@@ -2,12 +2,11 @@
 
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { WeaponSlot } from '@crimson/sim/state-types.ts';
 import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import type { Weapon } from '@crimson/weapons.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
-import type { GameplayState } from "@crimson/gameplay.js";
 
 export function weaponEntry(weaponId: WeaponId): Weapon {
   const entry = WEAPON_BY_ID.get(weaponId);
@@ -40,6 +39,7 @@ const WEAPON_ASSIGN_CLIP_MODIFIERS: readonly WeaponAssignClipModifier[] = [
 ];
 
 export function initDefaultAltWeapon(player: PlayerState): void {
+  // Initialize native reset-time alternate weapon slot state.
   player.altWeapon = new WeaponSlot({
     weaponId: WeaponId.PISTOL,
     clipSize: 12,
@@ -56,6 +56,7 @@ export function weaponAssignPlayer(
   weaponId: WeaponId,
   opts: { state: GameplayState },
 ): void {
+  // Assign weapon and reset per-weapon runtime state (ammo/cooldowns).
   const state = opts.state;
   const status = state.status;
   if (status !== null && !state.demoModeActive) {
@@ -82,13 +83,14 @@ export function weaponAssignPlayer(
   player.weapon.shotCooldown = 0.0;
   player.auxTimer = 2.0;
 
-  state.sfxQueue?.push(weapon.reloadSound);
+  state.sfxQueue.push(weapon.reloadSound);
 }
 
 export function mostUsedWeaponIdForPlayer(
   state: GameplayState,
   opts: { playerIndex: number; fallbackWeaponId: WeaponId },
 ): WeaponId {
+  // Return a weapon id for the player's most-used weapon.
   const idx = int(opts.playerIndex);
   const weaponShotsFired = state.weaponShotsFired;
   if (idx >= 0 && idx < weaponShotsFired.length) {
@@ -110,6 +112,7 @@ export function mostUsedWeaponIdForPlayer(
 }
 
 export function playerSwapAltWeapon(player: PlayerState): boolean {
+  // Swap primary and alternate weapon runtime blocks (Alternate Weapon perk).
   if (player.altWeapon === null) {
     return false;
   }
@@ -120,6 +123,7 @@ export function playerSwapAltWeapon(player: PlayerState): boolean {
 }
 
 export function playerStartReload(player: PlayerState, state: GameplayState): void {
+  // Start or refresh a reload timer (`player_start_reload` @ 0x00413430).
   if (
     player.weapon.reloadActive &&
     (perkActive(player, PerkId.AMMUNITION_WITHIN) || perkActive(player, PerkId.REGRESSION_BULLETS))

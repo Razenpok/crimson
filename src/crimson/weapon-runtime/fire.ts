@@ -11,7 +11,7 @@ import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projec
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { PlayerInput } from '@crimson/sim/input.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { WEAPON_TABLE, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
 import { playerStartReload, weaponEntry } from './assign.ts';
 import type {
@@ -23,7 +23,6 @@ import type {
 } from './fire-recipes.ts';
 import { resolveFireRecipe } from './fire-recipes.ts';
 import { ownerRefForPlayer, ownerRefForPlayerProjectiles, travelBudgetForTypeId } from './spawn.ts';
-import { GameplayState } from "@crimson/gameplay.js";
 
 export const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((e) => e.weaponId)) + 1;
 
@@ -117,6 +116,8 @@ function nativeShotAngleWithJitter(
   spreadHeat: number,
   rng: CrandLike,
 ): number {
+  // Native gameplay fire owns two exact `player_update` draw sites for the
+  // disc-spread direction and magnitude before the later projectile work.
   const aimDx = f32(aim.x - playerPos.x);
   const aimDy = f32(aim.y - playerPos.y);
   const distSq = f32(f32(aimDx * aimDx) + f32(aimDy * aimDy));
@@ -254,6 +255,8 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   const muzzle = player.pos.add(Vec2.fromHeading(aimHeading).rotated(-0.150915).mul(16.0));
   const weaponFlags = int(weapon.flags ?? 0);
   if (weaponFlags & 0x1) {
+    // Native gameplay fire uses four exact `player_update` RNG sites for
+    // the casing effect before the later shot-angle jitter work.
     const shellCasingDraws: [number, number, number, number] = [
       state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_ANGLE }),
       state.rng.rand({ caller: RngCallerStatic.PLAYER_UPDATE_CASING_SPEED }),

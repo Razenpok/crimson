@@ -4,9 +4,10 @@ import { GameMode } from '@crimson/game-modes.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
-import { QuestLevel } from "@crimson/quests/level.js";
-import { allQuests } from "@crimson/quests/registry.js";
-import type { GameStatus, GameplayState } from "@crimson/gameplay.js";
+import { QuestLevel } from '@crimson/quests/level.ts';
+import { allQuests } from '@crimson/quests/index.ts';
+import type { GameStatus } from '@crimson/gameplay.ts';
+import type { GameplayState } from '@crimson/sim/state-types.ts';
 
 export const WEAPON_DROP_ID_COUNT = 0x21; // weapon ids 1..33
 export const WEAPON_AVAILABLE_COUNT = Math.max(...WEAPON_TABLE.map((e) => e.weaponId)) + 1;
@@ -64,9 +65,7 @@ export function prepareWeaponAvailability(state: GameplayState): void {
   const status = state.status;
   const built = buildWeaponAvailability({ status, gameMode: state.gameMode, demoModeActive: state.demoModeActive });
   const weaponAvailable = state.weaponAvailable;
-  for (let i = 0; i < built.length && i < weaponAvailable.length; i++) {
-    weaponAvailable[i] = built[i];
-  }
+  weaponAvailable.splice(0, weaponAvailable.length, ...built);
 }
 
 function questLevelEquals(a: QuestLevel | null, major: number, minor: number): boolean {
@@ -77,6 +76,9 @@ function questLevelEquals(a: QuestLevel | null, major: number, minor: number): b
 export function weaponPickRandomAvailable(
   state: GameplayState,
 ): WeaponId {
+  // Select a random available weapon id.
+  //
+  // Port of `weapon_pick_random_available` (0x00452cd0).
   const status = state.status;
   const weaponAvailable = state.weaponAvailable;
 
