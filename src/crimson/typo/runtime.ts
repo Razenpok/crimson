@@ -11,7 +11,8 @@ import {
   TypoBackspaceCommand,
   TypoSubmitCommand,
 } from '@crimson/sim/input-providers.ts';
-import type { WorldState, MidStepContext, PostStepContext } from '@crimson/sim/sessions.ts';
+import type { MidStepContext, PostStepContext } from '@crimson/sim/sessions.ts';
+import type { WorldState } from '@crimson/sim/world-state.ts';
 import { enforceTypoPlayerFrame } from './player.ts';
 import { tickTypoSpawns } from './spawns.ts';
 
@@ -76,7 +77,7 @@ export function applyTypoCommand(
       typo.pendingReload = true;
     }
   } else {
-    throw new Error(`unhandled Typ-o command: ${(command as { tag: string }).tag}`);
+    throw new Error(`unhandled Typ-o command: ${(command as object).constructor.name}`);
   }
 }
 
@@ -107,7 +108,10 @@ export function typoMidStep(ctx: MidStepContext): void {
     let flags = 0;
     let moveSpeed = 1.7;
 
-    if (call.typeId === CreatureTypeId.SPIDER_SP1 || call.typeId === CreatureTypeId.SPIDER_SP2) {
+    if (
+      int(call.typeId) === int(CreatureTypeId.SPIDER_SP1) ||
+      int(call.typeId) === int(CreatureTypeId.SPIDER_SP2)
+    ) {
       flags |= CreatureFlags.AI7_LINK_TIMER;
       moveSpeed *= 1.2;
       size *= 0.8;

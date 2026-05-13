@@ -2,8 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import { PlayerInput } from '@crimson/sim/input.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
-import type { GameplayState } from '@crimson/gameplay.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { weaponAssignPlayer } from '@crimson/weapon-runtime/assign.ts';
 import { WeaponId } from '@crimson/weapons.ts';
 
