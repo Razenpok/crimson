@@ -30,13 +30,30 @@ function postHitNone(_ctx: ProjectileUpdateCtx, _hit: ProjectileHitInfo): void {
   return;
 }
 
-export interface PrimaryProjectileRule {
+export class PrimaryProjectileRule {
   readonly linger: LingerHandler;
   readonly preHit: PreHitHandler;
   readonly postHit: PostHitHandler;
   readonly stopOnHit: boolean;
   readonly emitDefaultFreezeShard: boolean;
   readonly resetShockChainOnLinger: boolean;
+
+  constructor(opts: {
+    linger: LingerHandler;
+    preHit?: PreHitHandler;
+    postHit?: PostHitHandler;
+    stopOnHit?: boolean;
+    emitDefaultFreezeShard?: boolean;
+    resetShockChainOnLinger?: boolean;
+  }) {
+    this.linger = opts.linger;
+    this.preHit = opts.preHit ?? preHitNone;
+    this.postHit = opts.postHit ?? postHitNone;
+    this.stopOnHit = opts.stopOnHit ?? true;
+    this.emitDefaultFreezeShard = opts.emitDefaultFreezeShard ?? true;
+    this.resetShockChainOnLinger = opts.resetShockChainOnLinger ?? false;
+    Object.freeze(this);
+  }
 }
 
 function rule(
@@ -47,7 +64,14 @@ function rule(
   emitDefaultFreezeShard: boolean = true,
   resetShockChainOnLinger: boolean = false,
 ): PrimaryProjectileRule {
-  return { linger, preHit, postHit, stopOnHit, emitDefaultFreezeShard, resetShockChainOnLinger };
+  return new PrimaryProjectileRule({
+    linger,
+    preHit,
+    postHit,
+    stopOnHit,
+    emitDefaultFreezeShard,
+    resetShockChainOnLinger,
+  });
 }
 
 const _DEFAULT_RULE: PrimaryProjectileRule = rule(lingerDefault);
