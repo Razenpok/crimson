@@ -5,13 +5,16 @@ import { Vec2 } from '@grim/geom.ts';
 export const UI_BASE_WIDTH = 640.0;
 export const UI_BASE_HEIGHT = 480.0;
 
-export interface DropdownLayoutBase {
-  readonly pos: Vec2;
-  readonly width: number;
-  readonly headerH: number;
-  readonly rowH: number;
-  readonly rowsY0: number;
-  readonly fullH: number;
+export class DropdownLayoutBase {
+  constructor(
+    public readonly pos: Vec2,
+    public readonly width: number,
+    public readonly headerH: number,
+    public readonly rowH: number,
+    public readonly rowsY0: number,
+    public readonly fullH: number,
+  ) {
+  }
 }
 
 export function uiScale(screenW: number, screenH: number): number {
