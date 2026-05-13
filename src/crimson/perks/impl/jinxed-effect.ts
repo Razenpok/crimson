@@ -1,13 +1,13 @@
 // Port of crimson/perks/impl/jinxed_effect.py
 
-import { SfxId } from "@grim/sfx-map.ts";
-import type { PlayerState } from "@crimson/sim/state-types.ts";
-import { f32 } from "@crimson/math-parity.ts";
-import { perkActive } from "@crimson/perks/helpers.ts";
-import { PerkId } from "@crimson/perks/ids.ts";
-import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
+import { SfxId } from '@grim/sfx-map.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import { f32 } from '@crimson/math-parity.ts';
+import { perkActive } from '@crimson/perks/helpers.ts';
+import { PerkId } from '@crimson/perks/ids.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
-import type { PerksUpdateEffectsCtx } from "@crimson/perks/runtime/effects-context.ts";
+import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
 
 function awardExperienceOnceFromReward(player: PlayerState, rewardValue: number): number {
   const rewardF32 = f32(rewardValue);
