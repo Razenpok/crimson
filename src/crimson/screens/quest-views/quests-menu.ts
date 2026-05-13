@@ -8,6 +8,7 @@ import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
+import { debugEnabled } from '@crimson/debug.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
@@ -206,7 +207,7 @@ export class QuestsMenuView {
     }
 
     // Debug: unlock all quests
-    if (this.state.debugEnabled && InputState.wasKeyPressed(KEY_F5)) {
+    if (debugEnabled() && InputState.wasKeyPressed(KEY_F5)) {
       const unlock = 49;
       if (int(status.questUnlockIndex) < unlock) {
         status.questUnlockIndex = unlock;
@@ -530,7 +531,7 @@ export class QuestsMenuView {
 
     const hoveredStage = this._hoveredStage(layout);
     const hoveredRow = this._hoveredRow(layout);
-    const showCounts = this.state.debugEnabled && InputState.isKeyDown(KEY_F1);
+    const showCounts = debugEnabled() && InputState.isKeyDown(KEY_F1);
 
     // Title texture tinted (0.7, 0.7, 0.7, 0.7).
     const titleTex = getTexture(resources, TextureId.UI_TEXT_QUEST);

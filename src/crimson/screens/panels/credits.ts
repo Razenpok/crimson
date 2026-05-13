@@ -9,6 +9,7 @@ import { SfxId } from "@grim/sfx-map.ts";
 import { fxDetailEnabled } from "@grim/config.ts";
 import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
+import { debugEnabled } from "@crimson/debug.ts";
 import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
 import { drawMenuCursor } from "@crimson/ui/cursor.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
@@ -496,7 +497,7 @@ export class CreditsView {
   }
 
   private _secretButtonVisible(): boolean {
-    return this._secretUnlock || this.state.debugEnabled;
+    return this._secretUnlock || debugEnabled();
   }
 
   update(dt: number): void {
