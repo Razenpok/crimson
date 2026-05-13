@@ -3,8 +3,6 @@
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import {
-  AimScheme,
-  MovementControlType,
   type CrimsonConfig,
   type CrimsonPlayerControls,
 } from '@grim/config.ts';
@@ -16,12 +14,12 @@ import {
 import { PlayerInput } from './sim/input.ts';
 import type { PlayerState } from './sim/state-types.ts';
 import { _AIM_KEYBOARD_TURN_RATE, _AIM_JOYSTICK_TURN_RATE } from './aim-constants';
+import { AimScheme } from './aim-schemes.ts';
+import { MovementControlType } from './movement-controls.ts';
 
-// ---------------------------------------------------------------------------
-// Module-level constants
-// ---------------------------------------------------------------------------
 const _AIM_RADIUS_KEYBOARD = 60.0;
 const _AIM_RADIUS_PAD_BASE = 42.0;
+// Native uses `cv_padAimDistMul` (default 96).
 const _AIM_RADIUS_PAD_SCALE = 96.0;
 const _POINT_CLICK_STOP_RADIUS = 20.0;
 const _COMPUTER_TARGET_SWITCH_HYSTERESIS = 64.0;
@@ -38,27 +36,17 @@ const _ALT_MOVE_KEY_RIGHT = 0xcd;
 const _AIM_POV_LEFT_CODE = 0x133;
 const _AIM_POV_RIGHT_CODE = 0x134;
 
-// ---------------------------------------------------------------------------
-// Per-player state (mutable across frames)
-// ---------------------------------------------------------------------------
 class PerPlayerInputState {
   aimHeading = 0.0;
   moveTarget = new Vec2(-1.0, -1.0);
   computerTargetCreatureIndex = -1;
 }
 
-// ---------------------------------------------------------------------------
-// Protocol-like interface for computer-aim creatures
-// ---------------------------------------------------------------------------
-export interface ComputerAimCreature {
+interface ComputerAimCreature {
   active: boolean;
   hp: number;
   pos: Vec2;
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function isFiniteNum(v: number): boolean {
   return Number.isFinite(v);
@@ -84,7 +72,7 @@ function resolveStaticMoveVector(
   moveLeft: boolean,
   moveRight: boolean,
 ): Vec2 {
-  /** Mirror native move-mode 2 key precedence from player_update. */
+  // Mirror native move-mode 2 key precedence from `player_update`.
   let move = new Vec2();
   if (moveLeft) move = new Vec2(-1.0, 0.0);
   if (moveRight) move = new Vec2(1.0, 0.0);
@@ -147,9 +135,6 @@ function aimPovRightActive(
   return inputCodeIsDown(_AIM_POV_RIGHT_CODE, { playerIndex: povIndex });
 }
 
-// ---------------------------------------------------------------------------
-// Public helper: clear edge-triggered flags between frames
-// ---------------------------------------------------------------------------
 export function clearInputEdges(inputs: readonly PlayerInput[]): PlayerInput[] {
   return inputs.map(
     (inp) =>
@@ -168,9 +153,6 @@ export function clearInputEdges(inputs: readonly PlayerInput[]): PlayerInput[] {
   );
 }
 
-// ---------------------------------------------------------------------------
-// LocalInputInterpreter
-// ---------------------------------------------------------------------------
 export class LocalInputInterpreter {
   private _states: PerPlayerInputState[];
   private _preserveBugs: boolean;
@@ -338,9 +320,6 @@ export class LocalInputInterpreter {
       moveModeType === MovementControlType.COMPUTER ||
       aimScheme === AimScheme.COMPUTER;
 
-    // -----------------------------------------------------------------------
-    // Movement
-    // -----------------------------------------------------------------------
     if (computerMoveActive) {
       if (creatures && creatures.length > 0) {
         computerTargetIndex = this._selectComputerTarget(
@@ -452,7 +431,6 @@ export class LocalInputInterpreter {
         moveRightPressed,
       );
     } else {
-      // Default / unknown movement type
       moveVec = new Vec2(
         (inputCodeIsDown(turnRightKey, { playerIndex: idx }) ? 1.0 : 0.0) -
           (inputCodeIsDown(turnLeftKey, { playerIndex: idx }) ? 1.0 : 0.0),
@@ -461,9 +439,6 @@ export class LocalInputInterpreter {
       );
     }
 
-    // -----------------------------------------------------------------------
-    // Aim
-    // -----------------------------------------------------------------------
     let heading = state.aimHeading;
     if (!isFiniteNum(heading)) {
       heading = player.aimHeading;
@@ -556,16 +531,12 @@ export class LocalInputInterpreter {
       }
     }
 
-    // Final heading from aim delta
     const finalDelta = aim.sub(player.pos);
     if (finalDelta.lengthSq() > 1e-9) {
       heading = finalDelta.toHeading();
     }
     state.aimHeading = heading;
 
-    // -----------------------------------------------------------------------
-    // Fire / reload
-    // -----------------------------------------------------------------------
     let fireDown = inputCodeIsDown(fireKey, { playerIndex: idx });
     const firePressed = inputCodeIsPressed(fireKey, { playerIndex: idx });
     if (aimScheme === AimScheme.COMPUTER && computerAutoFire) {
