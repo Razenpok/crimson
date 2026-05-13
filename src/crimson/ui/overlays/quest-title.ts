@@ -27,11 +27,18 @@ const QUEST_NUMBER_FIXED_OFFSET = 4.0;
 // Game Y formula: y = title_y + number_scale * (23.36 - 16.0) = title_y + number_scale * 7.36
 const QUEST_NUMBER_Y_MULTIPLIER = 7.36;
 
-export interface QuestTitleOverlayLayout {
+export class QuestTitleOverlayLayout {
   readonly titlePos: Vec2;
   readonly titleScale: number;
   readonly numberPos: Vec2;
   readonly numberScale: number;
+
+  constructor(opts: { titlePos: Vec2; titleScale: number; numberPos: Vec2; numberScale: number }) {
+    this.titlePos = opts.titlePos;
+    this.titleScale = opts.titleScale;
+    this.numberPos = opts.numberPos;
+    this.numberScale = opts.numberScale;
+  }
 }
 
 export function questTitleBaseScale(screenWidth: number): number {
@@ -66,12 +73,12 @@ export function layoutQuestTitleOverlay(
     numberSc * QUEST_NUMBER_BASE_GAP -
     QUEST_NUMBER_FIXED_OFFSET;
   const numberY = titlePos.y + numberSc * QUEST_NUMBER_Y_MULTIPLIER;
-  return {
+  return new QuestTitleOverlayLayout({
     titlePos,
     titleScale,
     numberPos: new Vec2(numberX, numberY),
     numberScale: numberSc,
-  };
+  });
 }
 
 export function drawQuestTitleOverlay(
