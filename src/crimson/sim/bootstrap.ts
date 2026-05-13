@@ -10,8 +10,7 @@ const TERRAIN_DENSITY_BASE = 800;
 const TERRAIN_DENSITY_OVERLAY = 0x23;
 const TERRAIN_DENSITY_DETAIL = 0x0F;
 const TERRAIN_DENSITY_SHIFT = 19;
-// rotation, then position draws (see terrain renderer parity notes)
-const TERRAIN_RAND_DRAWS_PER_STAMP = 3;
+const TERRAIN_RAND_DRAWS_PER_STAMP = 3; // rotation, then position draws (see terrain renderer parity notes)
 
 export function terrainStampingDraws(opts: { width: number; height: number }): number {
   // Return the number of `rand()` draws consumed by the procedural terrain stamps.
@@ -25,9 +24,13 @@ export function terrainStampingDraws(opts: { width: number; height: number }): n
   return stamps * TERRAIN_RAND_DRAWS_PER_STAMP;
 }
 
-export interface TerrainSetup {
-  readonly terrainSlots: TerrainSlotTriplet;
-  readonly terrainSeed: number;
+export class TerrainSetup {
+  constructor(
+    public readonly terrainSlots: TerrainSlotTriplet,
+    public readonly terrainSeed: number,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 function advanceRandomTerrainPreludeRng(rng: CrandLike): void {
@@ -54,7 +57,7 @@ export function advanceUnlockTerrain(
   const terrainSlots = chooseUnlockTerrainSlots({ unlockIndex: opts.unlockIndex, rng });
   const terrainSeed = rng.state;
   advanceTerrainStampingRng(rng, opts.width, opts.height);
-  return { terrainSlots, terrainSeed };
+  return new TerrainSetup(terrainSlots, terrainSeed);
 }
 
 export function advanceExplicitTerrain(
@@ -64,5 +67,5 @@ export function advanceExplicitTerrain(
   // Advance RNG through explicit terrain generation when slots are fixed.
   const terrainSeed = rng.state;
   advanceTerrainStampingRng(rng, opts.width, opts.height);
-  return { terrainSlots: opts.terrainSlots, terrainSeed };
+  return new TerrainSetup(opts.terrainSlots, terrainSeed);
 }

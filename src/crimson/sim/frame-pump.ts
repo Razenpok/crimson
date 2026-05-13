@@ -29,6 +29,7 @@ export class TickFrameAdvance {
     this.frameIndex = opts.frameIndex;
     this.nextTickIndex = opts.nextTickIndex;
     this.ticksRequested = opts.ticksRequested;
+    Object.freeze(this);
   }
 }
 
