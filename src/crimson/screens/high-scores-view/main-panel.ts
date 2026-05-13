@@ -54,6 +54,7 @@ export function drawMainPanel(
 
   let titleX = 269.0;
   if (modeId === GameMode.SURVIVAL) {
+    // state_14:High scores - Survival title at x=168 (panel left_x0 is -98).
     titleX = 266.0;
   }
 
