@@ -361,8 +361,12 @@ function _creatureInteractionPlaguebearerSpread(ctx: _CreatureInteractionCtx): v
 
 function _creatureInteractionEnergizerEat(ctx: _CreatureInteractionCtx): void {
   const creature = ctx.creature;
+  // Decompile parity (`creature_update_all`, 0x00426220): reuse the same
+  // creature->target-player distance scalar for eat/contact branches.
   if (ctx.contactDistSq >= 20.0 * 20.0) return;
 
+  // Native stores `vel` as per-tick delta (not per-second). It applies movement
+  // as `pos += vel`, so reverting the just-applied movement subtracts `vel`.
   creature.pos = creature.pos.sub(creature.vel).clampRect(
     0.0,
     0.0,
@@ -370,6 +374,8 @@ function _creatureInteractionEnergizerEat(ctx: _CreatureInteractionCtx): void {
     ctx.worldHeight,
   );
 
+  // Native reverts the just-applied movement whenever a creature gets within
+  // 20 units of the target player, regardless of Energizer.
   if (ctx.state.bonuses.energizer <= 0.0) return;
   if (creature.maxHp >= 380.0) return;
 
@@ -414,6 +420,8 @@ function _creatureInteractionContactDamage(ctx: _CreatureInteractionCtx): void {
   if (ctx.player.health <= 0.0) return;
   if (creature.attackCooldown > 0.0) return;
 
+  // Native contact-damage path consumes one `crt_rand()` draw for attack SFX
+  // (creature_type_table[*].sfx_bank_b[rand & 1]) before applying damage.
   const options = _CREATURE_CONTACT_SFX.get(creature.typeId);
   if (options !== undefined) {
     ctx.sfx.push(
