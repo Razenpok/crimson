@@ -36,10 +36,7 @@ import {
   inputSchemeLabel,
 } from './controls-labels.ts';
 
-// ---------------------------------------------------------------------------
-// Layout constants — measured from ui_render_trace_oracle_1024x768.json
-// ---------------------------------------------------------------------------
-
+// Measured from ui_render_trace_oracle_1024x768.json (state_3:Configure for:, timeline=300).
 const CONTROLS_LEFT_PANEL_POS_X = -165.0;
 const CONTROLS_LEFT_PANEL_POS_Y = 200.0;
 const CONTROLS_RIGHT_PANEL_POS_X = 590.0;
@@ -61,10 +58,6 @@ const KEY_BACKSPACE = 8;
 const KEY_DELETE = 46;
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
-
-// ---------------------------------------------------------------------------
-// Binding helpers
-// ---------------------------------------------------------------------------
 
 function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; controls: CrimsonControlsConfig }): number {
   const playerIndex = opts.playerIndex;
@@ -139,10 +132,6 @@ function defaultRowBindingCode(opts: { playerIndex: number; row: RebindRowSpec }
   return rowBindingCode(opts.row, { playerIndex: opts.playerIndex, controls });
 }
 
-// ---------------------------------------------------------------------------
-// Layout position helpers (width-dependent nudges)
-// ---------------------------------------------------------------------------
-
 function controlsLeftPanelPosX(screenWidth: number): number {
   if (int(screenWidth) <= 640) {
     return CONTROLS_LEFT_PANEL_POS_X - 18.0;
@@ -166,10 +155,6 @@ function controlsRightPanelPosY(screenWidth: number): number {
   return CONTROLS_RIGHT_PANEL_POS_Y;
 }
 
-// ---------------------------------------------------------------------------
-// Dropdown layout
-// ---------------------------------------------------------------------------
-
 interface ControlsDropdownLayout extends DropdownLayoutBase {
   readonly arrowPos: Vec2;
   readonly arrowSize: Vec2;
@@ -177,20 +162,12 @@ interface ControlsDropdownLayout extends DropdownLayoutBase {
   readonly textScale: number;
 }
 
-// ---------------------------------------------------------------------------
-// Rebind row layout
-// ---------------------------------------------------------------------------
-
 interface RebindRowLayout {
   readonly row: RebindRowSpec;
   readonly rowY: number;
   readonly valuePos: Vec2;
   readonly valueRect: Rect;
 }
-
-// ---------------------------------------------------------------------------
-// Capture helper — simplified for WebGL (no gamepad axes)
-// ---------------------------------------------------------------------------
 
 function captureFirstPressedInputCode(
   _playerIndex: number,
@@ -200,16 +177,13 @@ function captureFirstPressedInputCode(
   _includeAxes: boolean,
   _axisThreshold: number,
 ): number | null {
-  // Check keyboard keys
   if (includeKeyboard) {
     const pressed = InputState.firstKeyPressed();
     if (pressed !== null) {
-      // Convert DOM keyCode back to DIK code for storage
       const domToDik = domKeyToDik(pressed);
       if (domToDik !== null) return domToDik;
     }
   }
-  // Check mouse buttons
   if (includeMouse) {
     for (let btn = 0; btn < 5; btn++) {
       if (InputState.wasMouseButtonPressed(btn)) {
@@ -221,7 +195,6 @@ function captureFirstPressedInputCode(
   return null;
 }
 
-// DOM keyCode -> DIK scan code reverse mapping
 function domKeyToDik(domKey: number): number | null {
   const map: Record<number, number> = {
     27: 0x01, 49: 0x02, 50: 0x03, 51: 0x04, 52: 0x05, 53: 0x06, 54: 0x07,
@@ -236,17 +209,12 @@ function domKeyToDik(domKey: number): number | null {
     118: 0x41, 119: 0x42, 120: 0x43, 121: 0x44, 122: 0x57, 123: 0x58,
     38: 0xC8, 33: 0xC9, 37: 0xCB, 39: 0xCD, 40: 0xD0, 34: 0xD1, 45: 0xD2,
     46: 0xD3, 35: 0xCF, 36: 0xC7,
-    // Numpad keys
     96: 0x52, 97: 0x4F, 98: 0x50, 99: 0x51, 100: 0x4B, 101: 0x4C,
     102: 0x4D, 103: 0x47, 104: 0x48, 105: 0x49, 106: 0x37, 107: 0x4E,
     109: 0x4A, 110: 0x53, 111: 0x35, 144: 0x45,
   };
   return map[domKey] ?? null;
 }
-
-// ---------------------------------------------------------------------------
-// ControlsMenuView
-// ---------------------------------------------------------------------------
 
 export class ControlsMenuView extends PanelMenuView {
   private _configPlayer: number = 1;
@@ -317,10 +285,6 @@ export class ControlsMenuView extends PanelMenuView {
     super._beginCloseTransition(action);
   }
 
-  // -----------------------------------------------------------------------
-  // Helpers
-  // -----------------------------------------------------------------------
-
   private _requireResources(): RuntimeResources {
     return requireRuntimeResources(this.state);
   }
@@ -366,10 +330,6 @@ export class ControlsMenuView extends PanelMenuView {
     setRowBindingCode(row, int(code), playerIndex, this.state.config.controls);
   }
 
-  // -----------------------------------------------------------------------
-  // Panel top-left helpers
-  // -----------------------------------------------------------------------
-
   private _leftPanelTopLeft(panelScale: number): Vec2 {
     const panelW = MENU_PANEL_WIDTH * panelScale;
     const [, slideX] = uiElementAnim(
@@ -399,10 +359,6 @@ export class ControlsMenuView extends PanelMenuView {
       controlsRightPanelPosY(sw) + this._widescreenYShift,
     ).add(this._panelOffset.mul(panelScale));
   }
-
-  // -----------------------------------------------------------------------
-  // Direction arrow checkbox
-  // -----------------------------------------------------------------------
 
   private _directionArrowEnabled(): boolean {
     return this.state.config.controls.players[this._currentPlayerIndex()].showDirectionArrow;
@@ -454,10 +410,6 @@ export class ControlsMenuView extends PanelMenuView {
     return false;
   }
 
-  // -----------------------------------------------------------------------
-  // Rebind sections + row collection
-  // -----------------------------------------------------------------------
-
   private _rebindSections(
     playerIndex: number,
     aimScheme: AimScheme,
@@ -499,10 +451,6 @@ export class ControlsMenuView extends PanelMenuView {
     }
     return rows;
   }
-
-  // -----------------------------------------------------------------------
-  // Rebind capture update
-  // -----------------------------------------------------------------------
 
   private _updateRebindCapture(rightTopLeft: Vec2, panelScale: number, font: SmallFontData): boolean {
     const playerIdx = this._currentPlayerIndex();
@@ -578,10 +526,6 @@ export class ControlsMenuView extends PanelMenuView {
     return false;
   }
 
-  // -----------------------------------------------------------------------
-  // Player mode setters
-  // -----------------------------------------------------------------------
-
   private _setPlayerMoveMode(playerIndex: number, moveMode: MovementControlType): void {
     this.state.config.controls.players[playerIndex].movement = moveMode;
   }
@@ -601,10 +545,6 @@ export class ControlsMenuView extends PanelMenuView {
     }
     return items;
   }
-
-  // -----------------------------------------------------------------------
-  // Dropdown layout
-  // -----------------------------------------------------------------------
 
   private _dropdownLayout(
     opts: { pos: Vec2; items: string[]; scale: number; font: SmallFontData },
@@ -636,10 +576,6 @@ export class ControlsMenuView extends PanelMenuView {
       textScale,
     };
   }
-
-  // -----------------------------------------------------------------------
-  // Dropdown update
-  // -----------------------------------------------------------------------
 
   private _updateDropdown(
     layout: ControlsDropdownLayout,
@@ -679,10 +615,6 @@ export class ControlsMenuView extends PanelMenuView {
 
     return [isOpen, null, false];
   }
-
-  // -----------------------------------------------------------------------
-  // Method dropdowns update
-  // -----------------------------------------------------------------------
 
   private _updateMethodDropdowns(leftTopLeft: Vec2, panelScale: number, font: SmallFontData): boolean {
     const config = this.state.config;
@@ -754,10 +686,6 @@ export class ControlsMenuView extends PanelMenuView {
     return false;
   }
 
-  // -----------------------------------------------------------------------
-  // Panel drawing — two panels (left + right)
-  // -----------------------------------------------------------------------
-
   protected override _drawPanel(): void {
     const resources = requireRuntimeResources(this.state);
     const fxDetail = this.state.config.display.fxDetail[0];
@@ -765,7 +693,7 @@ export class ControlsMenuView extends PanelMenuView {
     const panelW = MENU_PANEL_WIDTH * panelScale;
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
 
-    // Left (controls options) panel: standard 254px height
+    // Left (controls options) panel: standard 254px height => a single quad.
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const leftH = MENU_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(panel, {
@@ -773,21 +701,19 @@ export class ControlsMenuView extends PanelMenuView {
       tint: WHITE, shadow: !!fxDetail,
     });
 
-    // Right (configured bindings) panel: tall 378px panel rendered as 3 vertical slices
+    // Right (configured bindings) panel: tall 378px panel rendered as 3 vertical slices.
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
     const rightH = CONTROLS_RIGHT_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(panel, {
       dst: wgl.makeRectangle(rightTopLeft.x, rightTopLeft.y, panelW, rightH),
+      // Original ui_element_slot_40 sets direction_flag=1, which mirrors panel UVs.
       tint: WHITE, shadow: !!fxDetail, flipX: true,
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Contents drawing
-  // -----------------------------------------------------------------------
-
   protected override _drawContents(): void {
     const resources = requireRuntimeResources(this.state);
+    // Positions are expressed relative to the panel top-left corners and scaled with the panel scale.
     const [panelScale] = this._menuItemScale(0);
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
@@ -826,7 +752,7 @@ export class ControlsMenuView extends PanelMenuView {
       items: playerItems, scale: panelScale, font,
     });
 
-    // --- Left panel: "Configure for" + method selectors ---
+    // --- Left panel: "Configure for" + method selectors (state_3 in trace) ---
     const textControls = getTexture(resources, TextureId.UI_TEXT_CONTROLS);
     wgl.drawTexturePro(
       textControls,
@@ -858,7 +784,6 @@ export class ControlsMenuView extends PanelMenuView {
       textColorFull,
     );
 
-    // Checkbox
     const checkTex = this._directionArrowEnabled()
       ? getTexture(resources, TextureId.UI_CHECK_ON)
       : getTexture(resources, TextureId.UI_CHECK_OFF);
@@ -883,7 +808,6 @@ export class ControlsMenuView extends PanelMenuView {
       wgl.makeColor(1, 1, 1, checkboxAlpha),
     );
 
-    // Dropdowns — closed ones first, then open (so open lists draw on top)
     type DropdownTuple = [boolean, ControlsDropdownLayout, string[], number, boolean];
     const dropdowns: DropdownTuple[] = [
       [
@@ -903,6 +827,7 @@ export class ControlsMenuView extends PanelMenuView {
       if (isOpen) continue;
       this._drawDropdown(layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
     }
+    // Active list must render last so overlapping widgets don't occlude open options.
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (!isOpen) continue;
       this._drawDropdown(layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
@@ -986,7 +911,6 @@ export class ControlsMenuView extends PanelMenuView {
       y = rowY + 8.0 * panelScale;
     }
 
-    // Rebind hint
     if (rebindActive && (this._rebindPlayerIndex ?? -1) === playerIdx) {
       const hintPos = new Vec2(
         rightTopLeft.x + 48.0 * panelScale,
@@ -999,10 +923,6 @@ export class ControlsMenuView extends PanelMenuView {
       );
     }
   }
-
-  // -----------------------------------------------------------------------
-  // Dropdown drawing
-  // -----------------------------------------------------------------------
 
   private _drawDropdown(
     layout: ControlsDropdownLayout,
@@ -1022,13 +942,11 @@ export class ControlsMenuView extends PanelMenuView {
 
     const widgetH = isOpen ? layout.fullH : layout.headerH;
 
-    // Outer border (white)
     wgl.drawRectangle(
       int(layout.pos.x), int(layout.pos.y),
       int(layout.width), int(widgetH),
       wgl.makeColor(1, 1, 1, 1),
     );
-    // Inner fill (black)
     const innerW = Math.max(0, int(layout.width) - 2);
     const innerH = Math.max(0, int(widgetH) - 2);
     wgl.drawRectangle(
