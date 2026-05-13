@@ -15,7 +15,7 @@ import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { CreatureState } from './runtime.ts';
 import { CreatureDamageType } from './damage-types.ts';
 import { CREATURE_LIFECYCLE_ALIVE } from './lifecycle.ts';
-import { CreatureFlags, CreatureTypeId } from './spawn-ids.ts';
+import { CreatureFlags, CreatureTypeId } from './spawn.ts';
 
 function anyPlayerHasPerk(players: readonly PlayerState[], perkId: PerkId): boolean {
   for (const player of players) {
