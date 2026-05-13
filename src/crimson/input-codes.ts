@@ -6,103 +6,99 @@ export const INPUT_CODE_UNBOUND = 0x17E;
 const AXIS_DEADZONE = 0.2;
 const _AXIS_DOWN_THRESHOLD = 0.5;
 
-// DirectInput key code → DOM keyCode mapping
-// These map the original game's DirectInput scan codes to browser keyCode values
 const DIK_TO_DOM_KEY: Record<number, number> = {
-  0x01: 27,   // Escape
-  0x02: 49,   // 1
-  0x03: 50,   // 2
-  0x04: 51,   // 3
-  0x05: 52,   // 4
-  0x06: 53,   // 5
-  0x07: 54,   // 6
-  0x08: 55,   // 7
-  0x09: 56,   // 8
-  0x0A: 57,   // 9
-  0x0B: 48,   // 0
-  0x0C: 189,  // -
-  0x0D: 187,  // =
-  0x0E: 8,    // Backspace
-  0x0F: 9,    // Tab
-  0x10: 81,   // Q
-  0x11: 87,   // W
-  0x12: 69,   // E
-  0x13: 82,   // R
-  0x14: 84,   // T
-  0x15: 89,   // Y
-  0x16: 85,   // U
-  0x17: 73,   // I
-  0x18: 79,   // O
-  0x19: 80,   // P
-  0x1A: 219,  // [
-  0x1B: 221,  // ]
-  0x1C: 13,   // Enter
-  0x1D: 17,   // Left Control
-  0x1E: 65,   // A
-  0x1F: 83,   // S
-  0x20: 68,   // D
-  0x21: 70,   // F
-  0x22: 71,   // G
-  0x23: 72,   // H
-  0x24: 74,   // J
-  0x25: 75,   // K
-  0x26: 76,   // L
-  0x27: 186,  // ;
-  0x28: 222,  // '
-  0x29: 192,  // `
-  0x2A: 16,   // Left Shift
-  0x2B: 220,  // backslash
-  0x2C: 90,   // Z
-  0x2D: 88,   // X
-  0x2E: 67,   // C
-  0x2F: 86,   // V
-  0x30: 66,   // B
-  0x31: 78,   // N
-  0x32: 77,   // M
-  0x33: 188,  // ,
-  0x34: 190,  // .
-  0x35: 191,  // /
-  0x36: 16,   // Right Shift (same keyCode as left)
-  0x38: 18,   // Left Alt
-  0x39: 32,   // Space
-  0x3B: 112,  // F1
-  0x3C: 113,  // F2
-  0x3D: 114,  // F3
-  0x3E: 115,  // F4
-  0x3F: 116,  // F5
-  0x40: 117,  // F6
-  0x41: 118,  // F7
-  0x42: 119,  // F8
-  0x43: 120,  // F9
-  0x44: 121,  // F10
-  0x57: 122,  // F11
-  0x58: 123,  // F12
-  0x9D: 17,   // Right Control
-  0xC8: 38,   // Up
-  0xC9: 33,   // PageUp
-  0xCB: 37,   // Left
-  0xCD: 39,   // Right
-  0xD0: 40,   // Down
-  0xD1: 34,   // PageDown
-  0xD2: 45,   // Insert
-  0xD3: 46,   // Delete
-  0xCF: 35,   // End
-  0xC7: 36,   // Home
+  0x01: 27,
+  0x02: 49,
+  0x03: 50,
+  0x04: 51,
+  0x05: 52,
+  0x06: 53,
+  0x07: 54,
+  0x08: 55,
+  0x09: 56,
+  0x0A: 57,
+  0x0B: 48,
+  0x0C: 189,
+  0x0D: 187,
+  0x0E: 8,
+  0x0F: 9,
+  0x10: 81,
+  0x11: 87,
+  0x12: 69,
+  0x13: 82,
+  0x14: 84,
+  0x15: 89,
+  0x16: 85,
+  0x17: 73,
+  0x18: 79,
+  0x19: 80,
+  0x1A: 219,
+  0x1B: 221,
+  0x1C: 13,
+  0x1D: 17,
+  0x1E: 65,
+  0x1F: 83,
+  0x20: 68,
+  0x21: 70,
+  0x22: 71,
+  0x23: 72,
+  0x24: 74,
+  0x25: 75,
+  0x26: 76,
+  0x27: 186,
+  0x28: 222,
+  0x29: 192,
+  0x2A: 16,
+  0x2B: 220,
+  0x2C: 90,
+  0x2D: 88,
+  0x2E: 67,
+  0x2F: 86,
+  0x30: 66,
+  0x31: 78,
+  0x32: 77,
+  0x33: 188,
+  0x34: 190,
+  0x35: 191,
+  0x36: 16,
+  0x38: 18,
+  0x39: 32,
+  0x3B: 112,
+  0x3C: 113,
+  0x3D: 114,
+  0x3E: 115,
+  0x3F: 116,
+  0x40: 117,
+  0x41: 118,
+  0x42: 119,
+  0x43: 120,
+  0x44: 121,
+  0x57: 122,
+  0x58: 123,
+  0x9D: 17,
+  0xC8: 38,
+  0xC9: 33,
+  0xCB: 37,
+  0xCD: 39,
+  0xD0: 40,
+  0xD1: 34,
+  0xD2: 45,
+  0xD3: 46,
+  0xCF: 35,
+  0xC7: 36,
 };
 
-// Reverse map: DOM keyCode → DIK code (for capture_first_pressed_input_code)
 const DOM_KEY_TO_DIK: Record<number, number> = {};
 for (const [dik, dom] of Object.entries(DIK_TO_DOM_KEY)) {
   DOM_KEY_TO_DIK[dom] = Number(dik);
 }
 
-// Mouse button codes
 const MOUSE_CODE_TO_BUTTON: Record<number, number> = {
-  0x100: 0,  // Left
-  0x101: 2,  // Right
-  0x102: 1,  // Middle
-  0x103: 3,  // Side
-  0x104: 4,  // Extra
+  0x100: 0,
+  0x101: 2,
+  0x102: 1,
+  0x103: 3,
+  0x104: 4,
 };
 
 const JOYS_BUTTON_CODES: Record<number, number> = {
