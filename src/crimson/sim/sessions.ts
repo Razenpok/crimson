@@ -52,10 +52,12 @@ export class DeterministicSessionTick {
 }
 
 // ---------------------------------------------------------------------------
-// Mid-/post-step hook system
+// Mid-/post-step hook system (spawn strategies)
 // ---------------------------------------------------------------------------
 
 export class MidStepContext {
+  // Context passed to mid-step spawn hooks during deterministic stepping.
+
   readonly world: WorldState;
   readonly elapsedBeforeMs: number;
   readonly dtSimMs: number;
@@ -74,12 +76,15 @@ export class MidStepContext {
     this.dtSimMs = dtSimMs;
     this.dtRawMs = dtRawMs;
     this.worldSize = worldSize;
+    Object.freeze(this);
   }
 }
 
 export type MidStepHook = (ctx: MidStepContext) => void;
 
 export class PostStepContext {
+  // Context passed to post-step hooks during deterministic stepping.
+
   readonly world: WorldState;
   readonly stepResult: DeterministicStepResult;
   readonly dtSimMs: number;
@@ -98,14 +103,11 @@ export class PostStepContext {
     this.dtSimMs = dtSimMs;
     this.worldSize = worldSize;
     this.detailPreset = detailPreset;
+    Object.freeze(this);
   }
 }
 
 export type PostStepHook = (ctx: PostStepContext) => void;
-
-// ---------------------------------------------------------------------------
-// Spawn state classes
-// ---------------------------------------------------------------------------
 
 export class SurvivalSpawnState {
   stage = 0;
@@ -125,10 +127,6 @@ export class QuestSpawnState {
   playHitSfx = false;
   playCompletionMusic = false;
 }
-
-// ---------------------------------------------------------------------------
-// Mode-specific step functions
-// ---------------------------------------------------------------------------
 
 export function survivalMidStep(ctx: MidStepContext, spawn: SurvivalSpawnState): void {
   const state = ctx.world.state;
@@ -235,10 +233,6 @@ export function questPostStep(ctx: PostStepContext, spawn: QuestSpawnState): voi
   }
 }
 
-// ---------------------------------------------------------------------------
-// rushInputTransform
-// ---------------------------------------------------------------------------
-
 export function rushInputTransform(inputs: PlayerInput[]): PlayerInput[] {
   return inputs.map((inp) =>
     inp.reloadPressed ? new PlayerInput({
@@ -260,7 +254,7 @@ export function rushInputTransform(inputs: PlayerInput[]): PlayerInput[] {
 }
 
 // ---------------------------------------------------------------------------
-// _sessionTiming (private helper)
+// Shared timing helper
 // ---------------------------------------------------------------------------
 
 function sessionTiming(
