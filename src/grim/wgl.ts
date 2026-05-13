@@ -1,9 +1,9 @@
 // Port of grim/raylib_api.py
 
-import { type WebGLContext, type RenderTarget, BlendMode } from "@grim/webgl.js";
+import { type WebGLContext, type RenderTarget, type ShaderQuadVertex, BlendMode } from "@grim/webgl.js";
 
 export { BlendMode };
-export type { RenderTarget };
+export type { RenderTarget, ShaderQuadVertex };
 
 export type Brand<K, T extends string> = K & { readonly __brand: T };
 
@@ -73,6 +73,32 @@ export function endQuads(): void { ctx.endQuads(); }
 export function rlTexCoord2f(u: number, v: number): void { ctx.texCoord2f(u, v); }
 export function rlColor4f(r: number, g: number, b: number, a: number): void { ctx.color4f(r, g, b, a); }
 export function rlVertex2f(x: number, y: number): void { ctx.vertex2f(x, y); }
+export function createShaderProgram(vsSource: string, fsSource: string): WebGLProgram {
+  return ctx.createShaderProgram(vsSource, fsSource);
+}
+export function getShaderLocation(program: WebGLProgram, name: string): WebGLUniformLocation | null {
+  return ctx.getShaderLocation(program, name);
+}
+export function setShaderFloat(program: WebGLProgram, location: WebGLUniformLocation | null, value: number): void {
+  ctx.setShaderFloat(program, location, value);
+}
+export function setShaderVec4(
+  program: WebGLProgram,
+  location: WebGLUniformLocation | null,
+  x: number,
+  y: number,
+  z: number,
+  w: number,
+): void {
+  ctx.setShaderVec4(program, location, x, y, z, w);
+}
+export function drawShaderQuad(
+  program: WebGLProgram,
+  mvpLocation: WebGLUniformLocation | null,
+  vertices: readonly ShaderQuadVertex[],
+): void {
+  ctx.drawShaderQuad(program, mvpLocation, vertices);
+}
 
 export function beginTextureMode(rt: RenderTarget): void { ctx.beginRenderTarget(rt); }
 export function endTextureMode(): void { ctx.endRenderTarget(); }

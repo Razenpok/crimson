@@ -91,6 +91,19 @@ const MAX_VERTICES = MAX_QUADS * 4;
 const MAX_INDICES = MAX_QUADS * 6;
 
 const COLOR_FLOATS_PER_VERTEX = 6;
+const CUSTOM_FLOATS_PER_VERTEX = 9;
+
+export interface ShaderQuadVertex {
+  x: number;
+  y: number;
+  z: number;
+  u: number;
+  v: number;
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
 
 function compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
   const shader = gl.createShader(type)!;
@@ -178,6 +191,11 @@ export class WebGLContext {
   private _immTexCoord: [number, number] = [0, 0];
   private _immColor: [number, number, number, number] = [1, 1, 1, 1];
 
+  private _customVao!: WebGLVertexArrayObject;
+  private _customVbo!: WebGLBuffer;
+  private _customEbo!: WebGLBuffer;
+  private _customVertexData: Float32Array;
+
   private _screenWidth = 0;
   private _screenHeight = 0;
   private _mvp!: Float32Array;
@@ -215,6 +233,7 @@ export class WebGLContext {
     this._vertexData = new Float32Array(MAX_VERTICES * FLOATS_PER_VERTEX);
     this._colorVertexData = new Float32Array(MAX_VERTICES * COLOR_FLOATS_PER_VERTEX);
     this._immVertexData = new Float32Array(MAX_VERTICES * FLOATS_PER_VERTEX);
+    this._customVertexData = new Float32Array(4 * CUSTOM_FLOATS_PER_VERTEX);
 
     this._initShaders();
     this._initBuffers();
@@ -302,6 +321,21 @@ export class WebGLContext {
     gl.vertexAttribPointer(1, 2, gl.FLOAT, false, BYTES_PER_VERTEX, 8);
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2, 4, gl.FLOAT, false, BYTES_PER_VERTEX, 16);
+
+    this._customVao = gl.createVertexArray()!;
+    gl.bindVertexArray(this._customVao);
+    this._customVbo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this._customVbo);
+    gl.bufferData(gl.ARRAY_BUFFER, this._customVertexData.byteLength, gl.DYNAMIC_DRAW);
+    this._customEbo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._customEbo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 2, 3, 0]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, CUSTOM_FLOATS_PER_VERTEX * 4, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, CUSTOM_FLOATS_PER_VERTEX * 4, 12);
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2, 4, gl.FLOAT, false, CUSTOM_FLOATS_PER_VERTEX * 4, 20);
 
     gl.bindVertexArray(null);
   }
@@ -707,6 +741,68 @@ export class WebGLContext {
     this._immVertexCount = 0;
   }
 
+  createShaderProgram(vsSource: string, fsSource: string): WebGLProgram {
+    this.flush();
+    return createShaderProgram(this.gl, vsSource, fsSource);
+  }
+
+  getShaderLocation(program: WebGLProgram, name: string): WebGLUniformLocation | null {
+    return this.gl.getUniformLocation(program, name);
+  }
+
+  setShaderFloat(program: WebGLProgram, location: WebGLUniformLocation | null, value: number): void {
+    if (location === null) return;
+    const gl = this.gl;
+    gl.useProgram(program);
+    gl.uniform1f(location, value);
+  }
+
+  setShaderVec4(
+    program: WebGLProgram,
+    location: WebGLUniformLocation | null,
+    x: number,
+    y: number,
+    z: number,
+    w: number,
+  ): void {
+    if (location === null) return;
+    const gl = this.gl;
+    gl.useProgram(program);
+    gl.uniform4f(location, x, y, z, w);
+  }
+
+  drawShaderQuad(program: WebGLProgram, mvpLocation: WebGLUniformLocation | null, vertices: readonly ShaderQuadVertex[]): void {
+    if (vertices.length !== 4) return;
+    this.flush();
+
+    const gl = this.gl;
+    gl.useProgram(program);
+    if (mvpLocation !== null) {
+      gl.uniformMatrix4fv(mvpLocation, false, this._mvp);
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const vertex = vertices[i];
+      const off = i * CUSTOM_FLOATS_PER_VERTEX;
+      this._customVertexData[off + 0] = vertex.x;
+      this._customVertexData[off + 1] = vertex.y;
+      this._customVertexData[off + 2] = vertex.z;
+      this._customVertexData[off + 3] = vertex.u;
+      this._customVertexData[off + 4] = vertex.v;
+      this._customVertexData[off + 5] = vertex.r;
+      this._customVertexData[off + 6] = vertex.g;
+      this._customVertexData[off + 7] = vertex.b;
+      this._customVertexData[off + 8] = vertex.a;
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindVertexArray(this._customVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this._customVbo);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, this._customVertexData);
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    gl.bindVertexArray(null);
+  }
+
   flush(): void {
     this._flushTexturedQuads();
     this._flushColorQuads();
@@ -777,9 +873,12 @@ export class WebGLContext {
     gl.deleteBuffer(this._colorEbo);
     gl.deleteBuffer(this._immVbo);
     gl.deleteBuffer(this._immEbo);
+    gl.deleteBuffer(this._customVbo);
+    gl.deleteBuffer(this._customEbo);
     gl.deleteVertexArray(this._vao);
     gl.deleteVertexArray(this._colorVao);
     gl.deleteVertexArray(this._immVao);
+    gl.deleteVertexArray(this._customVao);
     gl.deleteTexture(this._whiteTexture.id);
   }
 }
