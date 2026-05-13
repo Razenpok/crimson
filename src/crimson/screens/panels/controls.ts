@@ -152,7 +152,7 @@ function controlsLeftPanelPosX(screenWidth: number): number {
 
 function controlsRightPanelPosX(screenWidth: number): number {
   const w = int(screenWidth);
-  let x = (w - 434) as number;
+  let x = w - 434;
   if (w <= 640) {
     x += 80.0;
   }
@@ -322,9 +322,7 @@ export class ControlsMenuView extends PanelMenuView {
   // -----------------------------------------------------------------------
 
   private _requireResources(): RuntimeResources {
-    // In the full port this comes from require_runtime_resources(state).
-    // Here we assume the state carries resources; callers must ensure this.
-    return this.state.resources as RuntimeResources;
+    return requireRuntimeResources(this.state);
   }
 
   private _currentPlayerIndex(): number {

@@ -7,7 +7,7 @@ import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioSetSfxVolume, audioSetMusicVolume } from '@grim/audio.ts';
-import { type CrimsonConfig, applyDetailPreset } from '@grim/config.ts';
+import { applyDetailPreset } from '@grim/config.ts';
 import {
   UiButtonState,
   buttonDraw,
@@ -137,7 +137,7 @@ export class OptionsMenuView extends PanelMenuView {
     }
 
     if (this._updateSlider('detail', this._sliderDetail, sliderPos.offset({ dy: 87.0 * scale }), rectOn, rectOff, scale)) {
-      const preset = applyDetailPreset(config as CrimsonConfig, this._sliderDetail.value);
+      const preset = applyDetailPreset(config, this._sliderDetail.value);
       this._sliderDetail.value = preset;
       this._dirty = true;
     }
