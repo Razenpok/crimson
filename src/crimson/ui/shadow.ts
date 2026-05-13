@@ -19,21 +19,21 @@ export function drawUiQuadShadow(opts: {
   // NOTE: raylib/rlgl tracks custom blend factors as state; some backends
   // only apply them when switching the blend mode.
   wgl.rlSetBlendFactorsSeparate(
-    0 /* gl.ZERO */,
-    0x0303 /* gl.ONE_MINUS_SRC_ALPHA */,
-    0x8006 /* gl.FUNC_ADD */,
-    0 /* gl.ZERO */,
-    1 /* gl.ONE */,
-    0x8006 /* gl.FUNC_ADD */,
+    wgl.RL_ZERO,
+    wgl.RL_ONE_MINUS_SRC_ALPHA,
+    wgl.RL_FUNC_ADD,
+    wgl.RL_ZERO,
+    wgl.RL_ONE,
+    wgl.RL_FUNC_ADD,
   );
   wgl.beginBlendMode(wgl.BlendMode.CUSTOM);
   wgl.rlSetBlendFactorsSeparate(
-    0 /* gl.ZERO */,
-    0x0303 /* gl.ONE_MINUS_SRC_ALPHA */,
-    0x8006 /* gl.FUNC_ADD */,
-    0 /* gl.ZERO */,
-    1 /* gl.ONE */,
-    0x8006 /* gl.FUNC_ADD */,
+    wgl.RL_ZERO,
+    wgl.RL_ONE_MINUS_SRC_ALPHA,
+    wgl.RL_FUNC_ADD,
+    wgl.RL_ZERO,
+    wgl.RL_ONE,
+    wgl.RL_FUNC_ADD,
   );
   wgl.drawTexturePro(opts.texture, opts.src, opts.dst, opts.origin, opts.rotationDeg, UI_SHADOW_TINT);
   wgl.endBlendMode();
