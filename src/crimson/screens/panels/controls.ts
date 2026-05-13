@@ -267,9 +267,9 @@ export class ControlsMenuView extends PanelMenuView {
     this._rebindSkipFrames = 0;
   }
 
-  private _startRebindCapture(row: RebindRowSpec, playerIndex: number): void {
-    this._rebindRow = row;
-    this._rebindPlayerIndex = Math.max(0, Math.min(3, int(playerIndex)));
+  private _startRebindCapture(opts: { row: RebindRowSpec; playerIndex: number }): void {
+    this._rebindRow = opts.row;
+    this._rebindPlayerIndex = Math.max(0, Math.min(3, int(opts.playerIndex)));
     this._moveMethodOpen = false;
     this._aimMethodOpen = false;
     this._playerProfileOpen = false;
@@ -282,12 +282,12 @@ export class ControlsMenuView extends PanelMenuView {
     return '<press input>';
   }
 
-  private _bindingDefaultCode(playerIndex: number, row: RebindRowSpec): number {
-    return defaultRowBindingCode({ playerIndex, row });
+  private _bindingDefaultCode(opts: { playerIndex: number; row: RebindRowSpec }): number {
+    return defaultRowBindingCode({ playerIndex: opts.playerIndex, row: opts.row });
   }
 
-  private _bindingCode(playerIndex: number, row: RebindRowSpec): number {
-    return rowBindingCode(row, { playerIndex, controls: this.state.config.controls });
+  private _bindingCode(opts: { playerIndex: number; row: RebindRowSpec }): number {
+    return rowBindingCode(opts.row, { playerIndex: opts.playerIndex, controls: this.state.config.controls });
   }
 
   private _setBindingCode(opts: { playerIndex: number; row: RebindRowSpec; code: number }): void {
@@ -402,7 +402,7 @@ export class ControlsMenuView extends PanelMenuView {
     for (const [, sectionRows] of sections) {
       let rowY = y + 18.0 * panelScale;
       for (const row of sectionRows) {
-        const keyCode = int(this._bindingCode(playerIndex, row));
+        const keyCode = int(this._bindingCode({ playerIndex, row }));
         const valueText = inputCodeName(keyCode);
         const valuePos = new Vec2(rightTopLeft.x + 180.0 * panelScale, rowY);
         const valueW = Math.max(60.0 * panelScale, measureSmallTextWidth(font, valueText));
@@ -440,7 +440,7 @@ export class ControlsMenuView extends PanelMenuView {
         this._setBindingCode({
           playerIndex: activePlayer,
           row: activeRow,
-          code: this._bindingDefaultCode(activePlayer, activeRow),
+          code: this._bindingDefaultCode({ playerIndex: activePlayer, row: activeRow }),
         });
         this._dirty = true;
         this._clearRebindCapture();
@@ -487,7 +487,7 @@ export class ControlsMenuView extends PanelMenuView {
     const mouse = new Vec2(mx, my);
     for (const row of rows) {
       if (row.valueRect.contains(mouse)) {
-        this._startRebindCapture(row.row, playerIdx);
+        this._startRebindCapture({ row: row.row, playerIndex: playerIdx });
         return true;
       }
     }
@@ -852,7 +852,7 @@ export class ControlsMenuView extends PanelMenuView {
 
         const valueText = activeRow
           ? ControlsMenuView._capturePromptForBinding(rowLayout.row)
-          : inputCodeName(this._bindingCode(playerIdx, rowLayout.row));
+          : inputCodeName(this._bindingCode({ playerIndex: playerIdx, row: rowLayout.row }));
         const valuePos = rowLayout.valuePos;
 
         drawSmallText(
