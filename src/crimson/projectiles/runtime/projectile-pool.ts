@@ -40,8 +40,8 @@ export interface ProjectileUpdateOptions {
   readonly applyPlayerDamage: (playerIndex: number, damage: number) => void;
   readonly ionAoeScale?: number;
   readonly detailPreset?: number;
-  readonly onHit?: ((hit: ProjectileHit) => unknown) | null;
-  readonly onHitPost?: ((hit: ProjectileHit, ctx: unknown) => void) | null;
+  readonly onHit?: ((hit: ProjectileHit) => object) | null;
+  readonly onHitPost?: ((hit: ProjectileHit, ctx: object) => void) | null;
 }
 
 export interface PrimaryStepCtx {

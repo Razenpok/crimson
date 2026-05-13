@@ -328,7 +328,7 @@ export class WorldState {
       });
     };
 
-    const _onProjectileHitPost = (_hit: ProjectileHit, postCtx: unknown): void => {
+    const _onProjectileHitPost = (_hit: ProjectileHit, postCtx: object): void => {
       this._finalizeProjectileHitPresentation({
         postCtx: postCtx as ProjectileDecalPostCtx,
         fxQueue,
