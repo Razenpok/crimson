@@ -7,6 +7,7 @@ import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioUpdate } from '@grim/audio.ts';
+import { debugEnabled } from '@crimson/debug.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import {
   UiButtonState,
@@ -496,7 +497,7 @@ export class PlayGameMenuView extends PanelMenuView {
 
     const [entries, yStep, yStart, yEnd] = this._modeEntries();
     let y = basePos.y + yStart * scale;
-    const showCounts = this.state.debugEnabled && InputState.isKeyDown(KEY_F1);
+    const showCounts = debugEnabled() && InputState.isKeyDown(KEY_F1);
 
     if (showCounts) {
       drawSmallText(

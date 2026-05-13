@@ -12,6 +12,7 @@ import { Crand } from '@grim/rand.ts';
 import { loadMusicTrack, queueTrack } from '@grim/music.ts';
 
 import { GameMode } from '@crimson/game-modes.ts';
+import { setDebugEnabled } from '@crimson/debug.ts';
 import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
   DEMO_QUEST_GRACE_TIME_MS,
@@ -377,6 +378,9 @@ function registerBootCommands(
 export function runGame(
   config: GameConfig,
 ): { view: GameLoopView; state: GameState } {
+  if (config.debug) {
+    setDebugEnabled(true);
+  }
   const cfg = defaultCrimsonConfig();
   const width = config.width ?? cfg.display.width;
   const height = config.height ?? cfg.display.height;
