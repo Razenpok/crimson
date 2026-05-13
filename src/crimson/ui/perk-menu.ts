@@ -7,10 +7,16 @@ import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { clamp } from '@grim/math.ts';
 import { menuWidescreenYShift } from './layout.ts';
 
+// Perk selection screen panel uses ui_element-style timeline animation:
+// - fully hidden until end_ms
+// - slides in over (end_ms..start_ms)
+// - fully visible at start_ms
 export const PERK_MENU_ANIM_START_MS = 400.0;
 export const PERK_MENU_ANIM_END_MS = 100.0;
 export const PERK_MENU_TRANSITION_MS = PERK_MENU_ANIM_START_MS;
 
+// Layout offsets from the classic game (perk selection screen), derived from
+// `perk_selection_screen_update` (see analysis/ghidra + BN).
 const MENU_PANEL_ANCHOR_X = 224.0;
 const MENU_PANEL_ANCHOR_Y = 40.0;
 const MENU_TITLE_X = 54.0;
@@ -32,6 +38,10 @@ const MENU_BUTTON_Y = 276.0;
 const MENU_DESC_RIGHT_X = 480.0;
 
 export class PerkMenuLayout {
+  // Coordinates live in the original 640x480 UI space.
+  // Capture (1024x768) shows the perk menu panel uses the 3-slice variant:
+  //   open bbox (-108,119) -> (402,497)
+  // which corresponds to ui_element pos (-45,110) + geom (-63,-81) and size 510x378.
   panelPos: Vec2 = new Vec2(-108.0, 29.0);
   panelSize: Vec2 = new Vec2(510.0, 378.0);
 }
@@ -89,6 +99,7 @@ export function perkMenuComputeLayout(
   if (choiceCount > 5) {
     descPos = descPos.offset({ dy: -MENU_DESC_Y_EXTRA_TIGHTEN * scale });
   }
+  // Keep the description within the monitor screen area and above the button.
   const descRight = panel.x + MENU_DESC_RIGHT_X * scale;
   const cancelPos = anchorPos.offset({ dx: MENU_BUTTON_X * scale, dy: MENU_BUTTON_Y * scale });
   const descSize = new Vec2(
@@ -116,6 +127,10 @@ export function uiElementSlideX(
     directionFlag?: number;
   },
 ): number {
+  // Slide offset helper matching ui_element_update semantics (see MenuView._ui_element_anim).
+  //
+  // direction_flag=0: slide from left  (-width -> 0)
+  // direction_flag=1: slide from right (+width -> 0)
   const { startMs, endMs, directionFlag } = opts;
   let width = opts.width;
   if (startMs <= endMs || width <= 0.0) return 0.0;
@@ -132,7 +147,7 @@ export function uiElementSlideX(
   } else {
     slide = 0.0;
   }
-  return (directionFlag ? 1 : 0) ? slide : -slide;
+  return int(directionFlag ?? 0) ? slide : -slide;
 }
 
 export function perkMenuPanelSlideX(tMs: number, opts: { width: number }): number {
@@ -165,7 +180,9 @@ export function wrapUiText(
   opts: { maxWidth: number; scale: number },
 ): string[] {
   const lines: string[] = [];
-  const rawLines = text.split('\n');
+  const rawLines = text.match(/[^\r\n]*(?:\r\n|\r|\n|$)/g)
+    ?.map((line) => line.replace(/\r\n|\r|\n$/, ''))
+    .filter((line, index, array) => !(index === array.length - 1 && line === '')) ?? [];
   const parts = rawLines.length > 0 ? rawLines : [''];
   for (const raw of parts) {
     const para = raw.trim();
@@ -205,7 +222,7 @@ export function drawWrappedUiTextInRect(
   }
 }
 
-const MENU_ITEM_RGB: [number, number, number] = [0x46, 0xB4, 0xF0];
+const MENU_ITEM_RGB: [number, number, number] = [0x46, 0xB4, 0xF0]; // from ui_menu_item_update: rgb(70, 180, 240)
 const MENU_ITEM_ALPHA_IDLE = 0.6;
 const MENU_ITEM_ALPHA_HOVER = 1.0;
 
@@ -230,11 +247,12 @@ export function drawMenuItem(
   drawUiText(resources, label, opts.pos, { scale: opts.scale, color });
   const width = _uiTextWidth(resources, label, opts.scale);
   const lineY = opts.pos.y + 13.0 * opts.scale;
-  // draw_line as a 1px rectangle
+  const lineX0 = int(opts.pos.x);
+  const lineX1 = int(opts.pos.x + width);
   wgl.drawRectangle(
-    int(opts.pos.x),
+    lineX0,
     int(lineY),
-    int(width),
+    lineX1 - lineX0,
     1,
     wgl.makeColor(r / 255, g / 255, b / 255, alpha),
   );
@@ -246,8 +264,8 @@ export class UiButtonState {
   enabled: boolean;
   hovered: boolean;
   activated: boolean;
-  hoverT: number;
-  pressT: number;
+  hoverT: number; // 0..1000
+  pressT: number; // 0..1000
   alpha: number;
   forceWide: boolean;
 
@@ -293,6 +311,7 @@ export function buttonWidth(
 }
 
 export function buttonHitRect(opts: { pos: Vec2; width: number }): Rect {
+  // Mirrors ui_button_update: y is offset by +2, hit height is 0x1c (28).
   return Rect.fromTopLeft(opts.pos.offset({ dy: 2.0 }), opts.width, 28.0);
 }
 
@@ -330,6 +349,10 @@ export function buttonDraw(
   const texture = opts.width > 120.0 * opts.scale ? buttonMd : buttonSm;
 
   if (state.hoverT > 0) {
+    // ui_button_update: highlight fill uses a hover-scaled alpha and click-biased blue tint.
+    // - base: (0.5, 0.5, 0.7)
+    // - click_anim: +0.0005 / +0.0007, clamped to 1.0 (towards white)
+    // - alpha: hover_anim * 0.001 * button.alpha
     let r = 0.5;
     let g = 0.5;
     let b = 0.7;
@@ -340,10 +363,10 @@ export function buttonDraw(
       b = Math.min(1.0, 0.7 + clickT * 0.0007);
     }
     const a = state.hoverT * 0.001 * state.alpha;
-    const hlR = r;
-    const hlG = g;
-    const hlB = b;
-    const hlA = clamp(a, 0.0, 1.0);
+    const hlR = int(255 * r) / 255;
+    const hlG = int(255 * g) / 255;
+    const hlB = int(255 * b) / 255;
+    const hlA = int(255 * clamp(a, 0.0, 1.0)) / 255;
     wgl.drawRectangle(
       int(opts.pos.x + 12.0 * opts.scale),
       int(opts.pos.y + 5.0 * opts.scale),
@@ -353,14 +376,14 @@ export function buttonDraw(
     );
   }
 
-  const plateAlpha = clamp(state.alpha, 0.0, 1.0);
+  const plateAlpha = int(255 * clamp(state.alpha, 0.0, 1.0)) / 255;
   const plateTint = wgl.makeColor(1.0, 1.0, 1.0, plateAlpha);
   const src = wgl.makeRectangle(0.0, 0.0, texture.width, texture.height);
   const dst = wgl.makeRectangle(opts.pos.x, opts.pos.y, opts.width, 32.0 * opts.scale);
   wgl.drawTexturePro(texture, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, plateTint);
 
   const textA = state.hovered ? state.alpha : state.alpha * 0.7;
-  const textTint = wgl.makeColor(1.0, 1.0, 1.0, clamp(textA, 0.0, 1.0));
+  const textTint = wgl.makeColor(1.0, 1.0, 1.0, int(255 * clamp(textA, 0.0, 1.0)) / 255);
   const textW = _uiTextWidth(resources, state.label, opts.scale);
   const textPos = new Vec2(
     opts.pos.x + opts.width * 0.5 - textW * 0.5 + 1.0 * opts.scale,
@@ -375,7 +398,7 @@ export function cursorDraw(
 ): void {
   const tex = getTexture(resources, TextureId.UI_CURSOR);
   const alpha = opts.alpha ?? 1.0;
-  const a = clamp(alpha, 0.0, 1.0);
+  const a = int(255 * clamp(alpha, 0.0, 1.0)) / 255;
   const tint = wgl.makeColor(1.0, 1.0, 1.0, a);
   const size = 32.0 * opts.scale;
   const src = wgl.makeRectangle(0.0, 0.0, tex.width, tex.height);
