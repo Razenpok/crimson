@@ -8,10 +8,12 @@ import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
 function circleSegmentsFilled(radius: number): number {
+  // grim_draw_circle_filled (grim.dll): segments = trunc(radius * 0.125 + 12.0)
   return Math.max(3, int(radius * 0.125 + 12.0));
 }
 
 function circleSegmentsOutline(radius: number): number {
+  // grim_draw_circle_outline (grim.dll): segments = trunc(radius * 0.2 + 14.0)
   return Math.max(3, int(radius * 0.2 + 14.0));
 }
 
@@ -26,14 +28,16 @@ export function drawAimCircle(
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
-  const fillA = clamp((77 / 255) * alpha, 0, 1);
+  const fillA = clamp((77 / 255) * alpha, 0, 1); // ui_render_aim_indicators: rgba(0,0,0.1,0.3)
   const outlineA = clamp((255 * 0.55 / 255) * alpha, 0, 1);
 
   wgl.beginBlendMode(wgl.BlendMode.ALPHA);
 
   const white = wgl.getWhiteTexture();
 
-  // Filled circle via degenerate quads (triangle fan)
+  // The original uses a triangle fan (polygons). Raylib provides circle
+  // primitives that still use triangles internally, but allow higher
+  // segment counts for a smoother result when scaled.
   const fillSegs = Math.max(circleSegmentsFilled(radius), 64, int(radius));
   const step = (Math.PI * 2) / fillSegs;
 
@@ -44,10 +48,6 @@ export function drawAimCircle(
   for (let i = 0; i < fillSegs; i++) {
     const a0 = i * step;
     const a1 = (i + 1) * step;
-    // Degenerate quad: v0=center, v1=center, v2=circ[i], v3=circ[i+1]
-    // Index pattern 0,1,2, 2,3,0 gives triangles:
-    //   (center, center, circ[i]) = degenerate
-    //   (circ[i], circ[i+1], center) = visible
     wgl.rlVertex2f(center.x, center.y);
     wgl.rlVertex2f(center.x, center.y);
     wgl.rlVertex2f(center.x + Math.cos(a0) * radius, center.y + Math.sin(a0) * radius);
@@ -55,8 +55,10 @@ export function drawAimCircle(
   }
   wgl.endQuads();
 
-  // Outline ring (2px thick) via quad strip
   const outlineSegs = Math.max(circleSegmentsOutline(radius), fillSegs);
+  // grim_draw_circle_outline draws a 2px-thick ring (outer radius = r + 2).
+  // The exe binds bulletTrail, but that texture is white; the visual intent is
+  // a subtle white outline around the filled spread circle.
   const outStep = (Math.PI * 2) / outlineSegs;
   const innerR = radius;
   const outerR = radius + 2.0;
