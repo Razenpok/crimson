@@ -66,6 +66,9 @@ function _pathJoin(...parts: string[]): string {
   const cleaned = parts.map((part, idx) => {
     const text = String(part);
     if (idx === 0) {
+      if (text === '.') {
+        return '';
+      }
       return text === '/' ? '/' : text.replace(/\/+$/g, '');
     }
     return text.replace(/^\/+|\/+$/g, '');
