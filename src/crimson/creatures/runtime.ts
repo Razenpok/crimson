@@ -1,5 +1,14 @@
 // Port of crimson/creatures/runtime.py
 
+// Creature realtime simulation glue.
+//
+// This module materializes pure spawn plans (`creatures.spawn`) into a fixed-size
+// runtime pool and advances creatures each frame using the AI helpers.
+//
+// It is intentionally minimal: the goal is to unblock a playable Survival loop,
+// not to perfectly match every edge case in `creature_update_all`.
+// See: `docs/creatures/update.md`.
+
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
@@ -64,12 +73,17 @@ export type { SpawnEnv, BurstEffect, CreatureInit, SpawnSlotInit, SpawnPlan };
 export const CREATURE_POOL_SIZE = 0x180;
 export const CONTACT_DAMAGE_PERIOD = 0.5;
 
-// Native movement path multiplies by a fixed `30.0` factor (the original
-// `creature_speed_scale` constant in the native simulation loop).
+// Native movement path multiplies by a fixed `30.0` factor in `creature_update_all`.
 const CREATURE_SPEED_SCALE = 30.0;
-// Base heading turn rate multiplier (mirrors native `creature_turn_rate_scale`).
+
+// Base heading turn rate multiplier (angle_approach clamps by frame_dt internally).
 const CREATURE_TURN_RATE_SCALE = NATIVE_TURN_RATE_SCALE;
 
+// Native uses lifecycle_stage as a lifecycle sentinel:
+// - 16.0 means "alive" (normal AI/movement/anim update)
+// - once HP <= 0 it ramps down quickly and drives death slide + corpse decal timing.
+// - final deactivation (`lifecycle_stage < -10.0`) happens during render (creature_render_type),
+//   not during creature_update_all.
 const CREATURE_DEATH_TIMER_DECAY = 28.0;
 const CREATURE_CORPSE_FADE_DECAY = 20.0;
 const CREATURE_DEATH_SLIDE_SCALE = 9.0;
