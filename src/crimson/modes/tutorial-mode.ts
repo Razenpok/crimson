@@ -42,7 +42,7 @@ import {
 import {
   BaseGameplayMode,
 } from './base-gameplay-mode.ts';
-import { PerkMenuController, type PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
+import { PerkMenuController, PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
 
 const WORLD_SIZE = 1024.0;
 
@@ -278,13 +278,13 @@ export class TutorialMode extends BaseGameplayMode {
   }
 
   private _fullPerkMenuUiContext(): FullPerkMenuUiContext {
-    return {
+    return new FullPerkMenuUiContext({
       player: this.player,
       violenceDisabled: this._deterministicViolenceDisabled(),
       preserveBugs: this.preserveBugs,
       resources: this.renderResources.resources,
       mouse: this._uiMousePos(),
-    };
+    });
   }
 
   update(dt: number): void {

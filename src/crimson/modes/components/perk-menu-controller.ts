@@ -3,7 +3,7 @@
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
+import { measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { clamp } from '@grim/math.ts';
 import { InputState } from '@grim/input.ts';
 import { SfxId } from '@grim/sfx-map.ts';
@@ -31,14 +31,33 @@ export type OnCloseFn = () => void;
 const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
 
-export interface PerkMenuUiContext {
-  player: PlayerState;
-  violenceDisabled: number;
-  preserveBugs: boolean;
-  resources: RuntimeResources;
-  mouse: Vec2;
-  fxDetail?: boolean;
-  playSfx?: PlaySfxFn | null;
+export class PerkMenuUiContext {
+  readonly player: PlayerState;
+  readonly violenceDisabled: number;
+  readonly preserveBugs: boolean;
+  readonly resources: RuntimeResources;
+  readonly mouse: Vec2;
+  readonly fxDetail: boolean;
+  readonly playSfx: PlaySfxFn | null;
+
+  constructor(opts: {
+    player: PlayerState;
+    violenceDisabled: number;
+    preserveBugs: boolean;
+    resources: RuntimeResources;
+    mouse: Vec2;
+    fxDetail?: boolean;
+    playSfx?: PlaySfxFn | null;
+  }) {
+    this.player = opts.player;
+    this.violenceDisabled = opts.violenceDisabled;
+    this.preserveBugs = opts.preserveBugs;
+    this.resources = opts.resources;
+    this.mouse = opts.mouse;
+    this.fxDetail = opts.fxDetail ?? false;
+    this.playSfx = opts.playSfx ?? null;
+    Object.freeze(this);
+  }
 }
 
 export class PerkMenuController {

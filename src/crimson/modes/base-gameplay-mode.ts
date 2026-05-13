@@ -55,7 +55,7 @@ import { TickBatchResult, TickRunner } from '@crimson/sim/tick-runner.ts';
 import type { WorldEvents } from '@crimson/sim/world-state.ts';
 import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
 import { shotsFromState, buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
-import type { PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
+import { PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
 import { drawTargetHealthBar, HudState } from '@crimson/ui/hud.ts';
 import type { HighScoreRecord } from '@crimson/screens/results/game-over.ts';
 import { GameOverUi } from '@crimson/screens/results/game-over.ts';
@@ -641,7 +641,7 @@ export class BaseGameplayMode {
   }
 
   protected _perkMenuUiContext(): FullPerkMenuUiContext {
-    return {
+    return new FullPerkMenuUiContext({
       player: this.player,
       resources: this.renderResources.resources,
       mouse: this._uiMousePos(),
@@ -649,7 +649,7 @@ export class BaseGameplayMode {
       preserveBugs: this.state.preserveBugs ?? false,
       fxDetail: fxDetailEnabled(this.config.display, 0),
       playSfx: this._perkMenuPlaySfx(),
-    };
+    });
   }
 
   protected _openPerkMenuUi(opts: {
