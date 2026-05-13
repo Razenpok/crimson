@@ -18,6 +18,7 @@ export class EffectAtlasEntry {
     this.effectId = effectId;
     this.sizeCode = sizeCode;
     this.frame = frame;
+    Object.freeze(this);
   }
 
   get grid(): number {
@@ -29,6 +30,7 @@ function entry(effectId: number, sizeCode: number, frame: number): EffectAtlasEn
   return new EffectAtlasEntry(effectId, sizeCode, frame);
 }
 
+// Extracted from `effect_id_table` (`size_code`, `frame`) (see `docs/structs/effects.md`).
 export const EFFECT_ID_ATLAS_TABLE: readonly EffectAtlasEntry[] = [
   entry(0x00, 0x80, 0x02),
   entry(0x01, 0x80, 0x03),
