@@ -15,6 +15,7 @@ import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { InputState } from '@grim/input.ts';
 import { inputBeginFrame } from '@crimson/input-codes.ts';
 
+import { debugEnabled } from '@crimson/debug.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { type RtxRenderMode, cycleRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import { type Screen, type GameState, type PauseBackground } from './types.ts';
@@ -204,12 +205,10 @@ export class GameLoopView implements View {
   private _quitAfterDemo = false;
   private _screenshotRequested = false;
   private _runtimeUpdatesPerFrame = 0;
-  private _debugEnabled = false;
 
   constructor(state: GameState, status: GameStatusPersist) {
     this.state = state;
     this._status = status;
-    this._debugEnabled = state.debugEnabled;
 
     this._boot = new BootView(state);
     this._demo = new DemoView(state);
@@ -431,10 +430,10 @@ export class GameLoopView implements View {
     }
 
     // Debug hotkeys
-    if (this._debugEnabled && !con.openFlag && InputState.wasKeyPressed(KEY_F4)) {
+    if (debugEnabled() && !con.openFlag && InputState.wasKeyPressed(KEY_F4)) {
       this._setRtxMode(cycleRtxRenderMode(this.state.rtxMode), 'debug hotkey F4');
     }
-    if (this._debugEnabled && !con.openFlag && InputState.wasKeyPressed(KEY_P)) {
+    if (debugEnabled() && !con.openFlag && InputState.wasKeyPressed(KEY_P)) {
       this._screenshotRequested = true;
     }
 
