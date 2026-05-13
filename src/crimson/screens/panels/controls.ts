@@ -13,7 +13,7 @@ import {
   fxDetailEnabled,
 } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { type DropdownLayoutBase } from '@crimson/ui/layout.ts';
+import { DropdownLayoutBase } from '@crimson/ui/layout.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
@@ -185,18 +185,49 @@ function controlsRightPanelPosY(screenWidth: number): number {
   return CONTROLS_RIGHT_PANEL_POS_Y;
 }
 
-interface ControlsDropdownLayout extends DropdownLayoutBase {
+class ControlsDropdownLayout extends DropdownLayoutBase {
   readonly arrowPos: Vec2;
   readonly arrowSize: Vec2;
   readonly textPos: Vec2;
   readonly textScale: number;
+
+  constructor(opts: {
+    pos: Vec2;
+    width: number;
+    headerH: number;
+    rowH: number;
+    rowsY0: number;
+    fullH: number;
+    arrowPos: Vec2;
+    arrowSize: Vec2;
+    textPos: Vec2;
+    textScale: number;
+  }) {
+    super(opts.pos, opts.width, opts.headerH, opts.rowH, opts.rowsY0, opts.fullH);
+    this.arrowPos = opts.arrowPos;
+    this.arrowSize = opts.arrowSize;
+    this.textPos = opts.textPos;
+    this.textScale = opts.textScale;
+  }
 }
 
-interface RebindRowLayout {
+class RebindRowLayout {
   readonly row: RebindRowSpec;
   readonly rowY: number;
   readonly valuePos: Vec2;
   readonly valueRect: Rect;
+
+  constructor(opts: {
+    row: RebindRowSpec;
+    rowY: number;
+    valuePos: Vec2;
+    valueRect: Rect;
+  }) {
+    this.row = opts.row;
+    this.rowY = opts.rowY;
+    this.valuePos = opts.valuePos;
+    this.valueRect = opts.valueRect;
+  }
 }
 
 export class ControlsMenuView extends PanelMenuView {
@@ -450,7 +481,12 @@ export class ControlsMenuView extends PanelMenuView {
           valueW + 4.0 * panelScale,
           14.0 * panelScale,
         );
-        rows.push({ row, rowY, valuePos, valueRect });
+        rows.push(new RebindRowLayout({
+          row,
+          rowY,
+          valuePos,
+          valueRect,
+        }));
         rowY += 16.0 * panelScale;
       }
       y = rowY + 8.0 * panelScale;
@@ -579,7 +615,7 @@ export class ControlsMenuView extends PanelMenuView {
     const rowH = 16.0 * scale;
     const fullH = (items.length * 16.0 + 24.0) * scale;
     const arrow = 16.0 * scale;
-    return {
+    return new ControlsDropdownLayout({
       pos,
       width,
       headerH: headerH,
@@ -590,7 +626,7 @@ export class ControlsMenuView extends PanelMenuView {
       arrowSize: new Vec2(arrow, arrow),
       textPos: pos.add(new Vec2(4.0 * scale, 1.0 * scale)),
       textScale,
-    };
+    });
   }
 
   private _updateDropdown(
