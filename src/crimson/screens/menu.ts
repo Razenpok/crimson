@@ -538,14 +538,14 @@ export class MenuView {
           rotationDeg,
         });
       }
-      MenuView._drawUiQuad(
-        item,
-        wgl.makeRectangle(0.0, 0.0, itemW, itemH),
+      MenuView._drawUiQuad({
+        texture: item,
+        src: wgl.makeRectangle(0.0, 0.0, itemW, itemH),
         dst,
         origin,
         rotationDeg,
-        WHITE,
-      );
+        tint: WHITE,
+      });
       let counterValue = entry.hoverAmount;
       if (idx === this._selectedIndex && this._focusTimerMs > 0) {
         counterValue = this._focusTimerMs;
@@ -568,7 +568,14 @@ export class MenuView {
         MENU_LABEL_HEIGHT * itemScale,
       );
       const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
-      MenuView._drawUiQuad(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
+      MenuView._drawUiQuad({
+        texture: labelTex,
+        src,
+        dst: labelDst,
+        origin: labelOrigin,
+        rotationDeg,
+        tint,
+      });
       if (this._menuEntryEnabled(entry)) {
         let glowAlpha = alpha;
         if (0 <= entry.readyTimerMs && entry.readyTimerMs < 0x100) {
@@ -576,10 +583,14 @@ export class MenuView {
         }
         const glowAlphaNorm = glowAlpha / 255;
         wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
-        MenuView._drawUiQuad(
-          labelTex, src, labelDst, labelOrigin, rotationDeg,
-          wgl.makeColor(1, 1, 1, glowAlphaNorm),
-        );
+        MenuView._drawUiQuad({
+          texture: labelTex,
+          src,
+          dst: labelDst,
+          origin: labelOrigin,
+          rotationDeg,
+          tint: wgl.makeColor(1, 1, 1, glowAlphaNorm),
+        });
         wgl.endBlendMode();
       }
     }
@@ -711,14 +722,16 @@ export class MenuView {
   }
 
   private static _drawUiQuad(
-    texture: wgl.Texture,
-    src: wgl.Rectangle,
-    dst: wgl.Rectangle,
-    origin: wgl.Vector2,
-    rotationDeg: number,
-    tint: wgl.Color,
+    opts: {
+      texture: wgl.Texture;
+      src: wgl.Rectangle;
+      dst: wgl.Rectangle;
+      origin: wgl.Vector2;
+      rotationDeg: number;
+      tint: wgl.Color;
+    },
   ): void {
-    wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
+    wgl.drawTexturePro(opts.texture, opts.src, opts.dst, opts.origin, opts.rotationDeg, opts.tint);
   }
 
   private static _drawUiQuadShadow(opts: {
@@ -768,13 +781,14 @@ export class MenuView {
         rotationDeg,
       });
     }
-    MenuView._drawUiQuad(
-      sign, signSrc,
-      wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
-      signOrigin,
+    MenuView._drawUiQuad({
+      texture: sign,
+      src: signSrc,
+      dst: wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
+      origin: signOrigin,
       rotationDeg,
-      WHITE,
-    );
+      tint: WHITE,
+    });
   }
 
   static _signLayoutScale(width: number): [number, number] {
