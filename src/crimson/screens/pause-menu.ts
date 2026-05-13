@@ -16,12 +16,17 @@ import { drawScreenFade } from './transitions.ts';
 import {
   MENU_LABEL_WIDTH,
   MENU_LABEL_HEIGHT,
+  MENU_LABEL_BASE_X,
+  MENU_LABEL_BASE_Y,
   MENU_LABEL_ROW_HEIGHT,
   MENU_LABEL_ROW_BACK,
+  MENU_LABEL_ROW_OPTIONS,
+  MENU_LABEL_ROW_QUIT,
   MENU_LABEL_OFFSET_X,
   MENU_LABEL_OFFSET_Y,
   MENU_ITEM_OFFSET_X,
   MENU_ITEM_OFFSET_Y,
+  MENU_LABEL_STEP,
   MENU_SCALE_SMALL_THRESHOLD,
   MENU_SIGN_WIDTH,
   MENU_SIGN_HEIGHT,
@@ -36,20 +41,7 @@ import {
   signLayoutScale,
 } from './menu.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 export const PAUSE_MENU_TO_MAIN_MENU_FADE_MS = 500;
-
-// Menu label rows
-const MENU_LABEL_ROW_OPTIONS = 2;
-const MENU_LABEL_ROW_QUIT = 6;
-
-// Menu layout constants (from Python menu.py)
-const MENU_LABEL_BASE_X = -60.0;
-const MENU_LABEL_BASE_Y = 210.0;
-const MENU_LABEL_STEP = 60.0;
 
 const KEY_ESCAPE = 27;
 const KEY_ENTER = 13;
@@ -60,12 +52,8 @@ const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-// ---------------------------------------------------------------------------
-// Helpers — mirror MenuView static methods from Python menu.py
-// ---------------------------------------------------------------------------
-
 function menuSlotPosX(slot: number): number {
-  // ui_menu_layout_init: subtract 20 per slot
+  // ui_menu_layout_init: subtract 20, 40, ... from later menu items
   return MENU_LABEL_BASE_X - slot * 20;
 }
 
@@ -78,10 +66,6 @@ function menuSlotEndMs(slot: number): number {
   // ui_menu_layout_init: end_time_ms is the fully-hidden time.
   return (slot + 2) * 100;
 }
-
-// ---------------------------------------------------------------------------
-// PauseMenuView
-// ---------------------------------------------------------------------------
 
 export class PauseMenuView {
   state: GameState;
@@ -219,9 +203,9 @@ export class PauseMenuView {
   draw(): void {
     this._assertOpen();
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
-    const pauseBackground = this.state.pauseBackground as { drawPauseBackground(entityAlpha?: number): void } | null;
+    const pauseBackground = this._pauseBackground();
     if (pauseBackground != null) {
-      pauseBackground.drawPauseBackground(this._pauseBackgroundEntityAlpha());
+      pauseBackground.drawPauseBackground({ entityAlpha: this._pauseBackgroundEntityAlpha() });
     }
 
     drawScreenFade(this.state);
@@ -243,14 +227,14 @@ export class PauseMenuView {
     return action;
   }
 
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
-
   private _assertOpen(): void {
     if (!this._isOpen) {
       throw new Error('PauseMenuView must be opened before use');
     }
+  }
+
+  private _pauseBackground() {
+    return this.state.pauseBackground;
   }
 
   private _pauseBackgroundEntityAlpha(): number {
