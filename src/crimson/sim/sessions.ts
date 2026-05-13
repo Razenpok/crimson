@@ -14,9 +14,6 @@ import { normalizeInputFrame } from './input-frame.ts';
 import type {
   GameCommand,
   PerkPickCommand,
-
-
-
 } from './input-providers.ts';
 import { planWorldPresentationStep } from './presentation-step.ts';
 import {
@@ -35,7 +32,7 @@ import type { WorldState } from './world-state.ts';
 export type { WorldState };
 
 // ---------------------------------------------------------------------------
-// DeterministicSessionTick
+// Tick result types
 // ---------------------------------------------------------------------------
 
 export class DeterministicSessionTick {
@@ -55,7 +52,7 @@ export class DeterministicSessionTick {
 }
 
 // ---------------------------------------------------------------------------
-// MidStepContext / PostStepContext
+// Mid-/post-step hook system
 // ---------------------------------------------------------------------------
 
 export class MidStepContext {
@@ -251,6 +248,7 @@ function sessionTiming(
   state: { timeScaleActive: boolean; bonuses: { reflexBoost: number } },
   dt: number,
 ): FrameTiming {
+  // Compute frame timing from world state. Used by all session types.
   return FrameTiming.compute(dt, {
     timeScaleActiveEntry: Boolean(state.timeScaleActive),
     timeScaleFactor: timeScaleReflexBoostFactor({
@@ -262,7 +260,7 @@ function sessionTiming(
 }
 
 // ---------------------------------------------------------------------------
-// DeterministicSession
+// Unified deterministic session (replaces Survival/Rush/Tutorial/Typo/WorldTick)
 // ---------------------------------------------------------------------------
 
 export interface DeterministicSessionOpts {
@@ -286,11 +284,16 @@ export interface DeterministicSessionOpts {
 }
 
 export class DeterministicSession {
+  // Core state
   world: WorldState;
   worldSize: number;
   damageScaleByType: Map<number, number>;
+
+  // Mode identity
   gameMode: GameMode;
   perkProgressionEnabled: boolean;
+
+  // Sim config
   detailPreset: number;
   violenceDisabled: number;
   gameTuneStarted: boolean;
@@ -299,8 +302,12 @@ export class DeterministicSession {
   deferCameraShakeUpdate: boolean;
   finalizePostRenderLifecycle: boolean;
   elapsedUsesRawDt: boolean;
+
+  // Mutable timing
   elapsedMs: number;
   terrainFx: TerrainFxScratch;
+
+  // Optional hooks (provided by modes / callers)
   midStepHook: MidStepHook | null;
   postStepHook: PostStepHook | null;
   beforeStepHook: (() => void) | null;
@@ -327,7 +334,6 @@ export class DeterministicSession {
     this.beforeStepHook = opts.beforeStepHook ?? null;
     this.inputTransform = opts.inputTransform ?? null;
 
-    // __post_init__ logic
     const state = this.world.state;
     state.gameMode = this.gameMode;
     state.demoModeActive = this.demoModeActive;
@@ -355,7 +361,6 @@ export class DeterministicSession {
       this.beforeStepHook();
     }
 
-    // Process commands
     const postApplySfx: SfxId[] = [];
     if (commands !== null) {
       for (const cmd of commands) {
@@ -393,18 +398,17 @@ export class DeterministicSession {
           case 'typo_backspace':
           case 'typo_submit': {
             if (this.gameMode !== GameMode.TYPO) {
-              throw new Error(`Typ-o command in non-Typo session: ${cmd.tag}`);
+              throw new Error(`Typ-o command in non-Typo session: ${cmd.constructor.name}`);
             }
             applyTypoCommand(this.world, cmd);
             break;
           }
           default:
-            throw new Error(`unhandled command type: ${(cmd as { tag: string }).tag}`);
+            throw new Error(`unhandled command type: ${(cmd as object).constructor.name}`);
         }
       }
     }
 
-    // Apply input transform
     let tickInputs = inputs;
     if (tickInputs !== null && this.inputTransform !== null) {
       tickInputs = this.inputTransform(tickInputs);
@@ -415,7 +419,6 @@ export class DeterministicSession {
     const dtRawMs = timing.dtMsI32;
     const elapsedBeforeMs = this.elapsedMs;
 
-    // Build mid-step hook closure
     let hook: (() => void) | null = null;
     if (this.midStepHook !== null) {
       const ctx = new MidStepContext(
@@ -429,11 +432,9 @@ export class DeterministicSession {
       hook = () => mid(ctx);
     }
 
-    // Terrain FX queues
     const fxQueue = this.terrainFx.decals;
     const fxQueueRotated = this.terrainFx.corpses;
 
-    // RNG trace setup
     let presentationRng: CrandLike;
     let recordingRng: RecordingCrand | null = null;
     if (traceRng) {
@@ -443,23 +444,19 @@ export class DeterministicSession {
       presentationRng = state.rng;
     }
 
-    // Normalize inputs
     const normalizedInputs = normalizeInputFrame(
       tickInputs,
       { playerCount: this.world.players.length },
     ).asList();
 
-    // Set state fields
     state.gameMode = this.gameMode;
     state.demoModeActive = this.demoModeActive;
 
-    // Capture previous audio state for presentation step
     const prevAudio: [number, boolean, number][] = this.world.players.map(
       (player) => [player.shotSeq, player.weapon.reloadActive, player.weapon.reloadTimer],
     );
     const prevPerkPending = this.world.state.perkSelection.pendingCount;
 
-    // --- World step ---
     const events = this.world.step(timing.dtSim, {
       inputs: normalizedInputs,
       fxQueue,
@@ -474,13 +471,12 @@ export class DeterministicSession {
       dtPlayerLocal: timing.dtPlayerLocal,
       applyWorldDtSteps: this.applyWorldDtSteps,
       deferCameraShakeUpdate: this.deferCameraShakeUpdate,
+      deferFreezeCorpseFx: false,
       violenceDisabled: this.violenceDisabled,
     });
 
-    // Build presentation RNG trace
     const presentationRngTrace = new PresentationRngTrace();
 
-    // Plan presentation step
     const presT0 = performance.now();
     const presentation = planWorldPresentationStep({
       state: this.world.state,
@@ -508,15 +504,8 @@ export class DeterministicSession {
       presentationRngTrace.drawsTotal = recordingRng.calls;
     }
 
-    // Build terrain FX batch (after presentation plan, matching Python)
     const terrainFxBatch = this.terrainFx.takeBatch();
 
-    // Wire up game tune trigger
-    if (presentation.triggerGameTune) {
-      this.gameTuneStarted = true;
-    }
-
-    // Build step result
     const step = new DeterministicStepResult(
       timing.dtSim,
       timing,
@@ -528,7 +517,10 @@ export class DeterministicSession {
       postApplySfx.length > 0 ? postApplySfx : [],
     );
 
-    // Post-step hook
+    if (step.presentation.triggerGameTune) {
+      this.gameTuneStarted = true;
+    }
+
     if (this.postStepHook !== null) {
       this.postStepHook(new PostStepContext(
         this.world,
@@ -539,20 +531,14 @@ export class DeterministicSession {
       ));
     }
 
-    // Creature count captured after post-step hook (matching Python)
     const creatureCountWorldStep = this.world.creatures.entries.filter(c => c.active).length;
 
-    // Finalize post-render lifecycle
     if (this.finalizePostRenderLifecycle) {
       this.world.creatures.finalizePostRenderLifecycle();
     }
 
-    // Update elapsed time
-    if (this.elapsedUsesRawDt) {
-      this.elapsedMs += dtRawMs;
-    } else {
-      this.elapsedMs += dtSimMs;
-    }
+    const dtElapsed = this.elapsedUsesRawDt ? dtRawMs : dtSimMs;
+    this.elapsedMs = elapsedBeforeMs + dtElapsed;
 
     return new DeterministicSessionTick(step, this.elapsedMs, creatureCountWorldStep);
   }
