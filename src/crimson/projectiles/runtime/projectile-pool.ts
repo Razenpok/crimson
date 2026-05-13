@@ -121,6 +121,8 @@ export class ProjectilePool {
     const entry = this._entries[index];
 
     entry.active = true;
+    // Native projectile spawn writes angle/pos as float32 fields; keep those
+    // stores narrowed so next-tick movement uses the same precision.
     const angleF32 = f32(angle);
     const posF32 = new Vec2(f32(pos.x), f32(pos.y));
     entry.angle = angleF32;
@@ -237,6 +239,8 @@ export class ProjectilePool {
     };
 
     const _projectileDamageAmountF32 = (dist: number, damageScale: number): number => {
+      // `projectile_update` computes this from float locals (`fVar11/fVar23`),
+      // so keep the damage path rounded through float32.
       let distF32 = f32(dist);
       if (distF32 < 50.0) {
         distF32 = 50.0;
@@ -278,6 +282,9 @@ export class ProjectilePool {
 
       if (proj.lifeTimer <= 0.0) {
         proj.active = false;
+        // Native `projectile_update` clears the active flag but still
+        // runs this tick's life_timer branch, so expired ion projectiles
+        // can apply one final linger AoE pass.
       }
 
       if (proj.lifeTimer < 0.4) {
@@ -303,6 +310,10 @@ export class ProjectilePool {
         steps *= 2;
       }
 
+      // Decompile parity (`projectile_update`, 0x00420b90):
+      //   local_cc += (float)(cos(angle - pi/2) * frame_dt * 20.0f) * speed_scale * 3.0f
+      //   local_c8 += (float)(sin(angle - pi/2) * frame_dt * 20.0f) * speed_scale * 3.0f
+      // Keep the float32 cast before `* speed_scale * 3.0`.
       const headingRadians = proj.angle - NATIVE_HALF_PI;
       const dirX = Math.cos(headingRadians);
       const dirY = Math.sin(headingRadians);
@@ -349,12 +360,17 @@ export class ProjectilePool {
           const ownerCollision =
             hitIdx !== null && ownerCreatureIdx !== null && hitIdx === ownerCreatureIdx;
           if (ownerCollision) {
+            // Native `creature_find_in_radius` does not skip owner id during
+            // search; owner hits are discarded after the first match instead of
+            // continuing to a later candidate in the same tick.
             hitIdx = null;
           }
 
           if (hitIdx === null) {
             let canHitPlayers = true;
             if (projIndex === runtimeState.shockChainProjectileId) {
+              // Native skips `player_find_in_radius` for the currently tracked
+              // shock-chain projectile slot in this branch.
               canHitPlayers = false;
             }
 
@@ -460,6 +476,8 @@ export class ProjectilePool {
           if (damageAmount > 0.0 && creature.hp > 0.0) {
             const remaining = proj.damagePool - 1.0;
             proj.damagePool = remaining;
+            // Native `projectile_update` writes both impulse components from the
+            // same cosine term (`cos(angle - pi/2) * speed_scale`).
             const impulseAxis = f32(Math.cos(proj.angle - NATIVE_HALF_PI) * proj.speedScale);
             const impulse = new Vec2(impulseAxis, impulseAxis);
             const damageType = _damageTypeFor();
@@ -497,6 +515,11 @@ export class ProjectilePool {
             effects !== null &&
             rule.emitDefaultFreezeShard
           ) {
+            // Native `projectile_update` has separate freeze-hit ownership for
+            // primary and secondary projectiles. This branch is the default
+            // primary-projectile single-shard path (`crt_rand` @ 0x4215fa ->
+            // caller_static 0x4215ff). Secondary rocket-style `% 612` shard
+            // loops live in the secondary projectile update path instead.
             let shardAngle = proj.angle - NATIVE_HALF_PI;
             shardAngle +=
               (rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_DEFAULT_FREEZE_SHARD_ANGLE }) % 100) * 0.01;
@@ -509,6 +532,8 @@ export class ProjectilePool {
           }
 
           if (proj.damagePool === 1.0) {
+            // Native clears damage_pool to 0.0 whenever it's exactly 1.0
+            // in this branch, even if life_timer is already 0.25.
             const lifeBefore = proj.lifeTimer;
             proj.damagePool = 0.0;
             if (lifeBefore !== 0.25) {
