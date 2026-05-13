@@ -2,7 +2,6 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import { type RuntimeResources } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import {
@@ -52,13 +51,14 @@ export class ModsMenuView extends PanelMenuView {
   }
 
   private _buildLines(): string[] {
-    // In WebGL, there is no filesystem access, so we always show
-    // a placeholder message explaining mods are not available.
+    // WebGL has no filesystem access for state.baseDir / "mods".
     return [
       'No mod DLLs found.',
       '',
-      'Mod loading is not available',
-      'in the WebGL version.',
+      'Expected location:',
+      '  mods',
+      '',
+      'Mod loading is not implemented yet.',
     ];
   }
 
