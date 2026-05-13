@@ -41,10 +41,8 @@ import {
 
 import {
   BaseGameplayMode,
-  type GameStatus,
 } from './base-gameplay-mode.ts';
 import { PerkMenuController, type PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
-import type { TutorialState } from '@crimson/tutorial/state.ts';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -119,8 +117,7 @@ export class TutorialMode extends BaseGameplayMode {
   // ---------------------------------------------------------------------------
 
   protected _replayClaimedStatsComplete(): boolean {
-    const tutorial = this.state.tutorial as TutorialState;
-    return tutorial != null && int(tutorial.stageIndex) >= 8;
+    return int(this.state.tutorial.stageIndex) >= 8;
   }
 
   protected _replayClaimedStatsElapsedMs(): number {
@@ -152,7 +149,7 @@ export class TutorialMode extends BaseGameplayMode {
     this.state.perkSelection.choices.length = 0;
     this.state.perkSelection.choicesDirty = true;
 
-    const status = this.state.status as GameStatus | null;
+    const status = this.state.status;
     const questUnlockIndex = status !== null ? int(status.questUnlockIndex) : 0;
 
     const terrain = advanceUnlockTerrain(
@@ -261,10 +258,10 @@ export class TutorialMode extends BaseGameplayMode {
   // ---------------------------------------------------------------------------
 
   private _updatePromptButtons(dtMs: number, mouse: Vec2, click: boolean): void {
-    const tutorial = this.state.tutorial as TutorialState;
-    const overlay = this.state.tutorialOverlay as TutorialOverlayState | null;
-    const stage = tutorial != null ? int(tutorial.stageIndex) : 0;
-    const promptAlpha = overlay != null ? overlay.promptAlpha : 0.0;
+    const tutorial = this.state.tutorial;
+    const overlay = this.state.tutorialOverlay;
+    const stage = int(tutorial.stageIndex);
+    const promptAlpha = overlay.promptAlpha;
 
     if (stage === 8) {
       this._playButton.alpha = promptAlpha;
@@ -272,7 +269,7 @@ export class TutorialMode extends BaseGameplayMode {
       this._playButton.enabled = promptAlpha > 1e-3;
       this._repeatButton.enabled = promptAlpha > 1e-3;
     } else {
-      const stageTimerMs = tutorial != null ? (tutorial.stageTimerMs ?? 0) : 0;
+      const stageTimerMs = tutorial.stageTimerMs ?? 0;
       const skipAlpha = clamp((stageTimerMs - 1000) * 0.001, 0.0, 1.0);
       this._skipButton.alpha = skipAlpha;
       this._skipButton.enabled = skipAlpha > 1e-3;
@@ -355,8 +352,7 @@ export class TutorialMode extends BaseGameplayMode {
       this.simWorld.players,
       this.state.perkSelection,
     );
-    const tutorial = this.state.tutorial as TutorialState;
-    const stageIndex = tutorial != null ? int(tutorial.stageIndex) : 0;
+    const stageIndex = int(this.state.tutorial.stageIndex);
 
     if (stageIndex === 6 && perkPending && !this._perkMenu.active && !this._perkPickPending) {
       this._openPerkMenu();
@@ -464,8 +460,7 @@ export class TutorialMode extends BaseGameplayMode {
   // ---------------------------------------------------------------------------
 
   private _drawTutorialPrompts(hudBottom: number): void {
-    const overlay = this.state.tutorialOverlay as TutorialOverlayState | null;
-    if (overlay == null) return;
+    const overlay = this.state.tutorialOverlay;
 
     const screenW = wgl.getScreenWidth();
 
@@ -481,8 +476,8 @@ export class TutorialMode extends BaseGameplayMode {
     );
 
     const resources = this.renderResources.resources;
-    const tutorial = this.state.tutorial as TutorialState;
-    const stage = tutorial != null ? int(tutorial.stageIndex) : 0;
+    const tutorial = this.state.tutorial;
+    const stage = int(tutorial.stageIndex);
 
     if (stage === 8) {
       const { rect } = tutorialPromptPanelRect(
