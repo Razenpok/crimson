@@ -85,10 +85,11 @@ function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; control
 function setRowBindingCode(
   row: RebindRowSpec,
   value: number,
-  playerIndex: number,
-  controls: CrimsonControlsConfig,
+  opts: { playerIndex: number; controls: CrimsonControlsConfig },
 ): void {
   const code = int(value);
+  const playerIndex = opts.playerIndex;
+  const controls = opts.controls;
   const pc = controls.players[playerIndex];
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
@@ -289,8 +290,11 @@ export class ControlsMenuView extends PanelMenuView {
     return rowBindingCode(row, { playerIndex, controls: this.state.config.controls });
   }
 
-  private _setBindingCode(playerIndex: number, row: RebindRowSpec, code: number): void {
-    setRowBindingCode(row, int(code), playerIndex, this.state.config.controls);
+  private _setBindingCode(opts: { playerIndex: number; row: RebindRowSpec; code: number }): void {
+    setRowBindingCode(opts.row, int(opts.code), {
+      playerIndex: opts.playerIndex,
+      controls: this.state.config.controls,
+    });
   }
 
   private _leftPanelTopLeft(panelScale: number): Vec2 {
@@ -433,17 +437,18 @@ export class ControlsMenuView extends PanelMenuView {
       }
 
       if (InputState.wasKeyPressed(KEY_BACKSPACE)) {
-        this._setBindingCode(
-          activePlayer, activeRow,
-          this._bindingDefaultCode(activePlayer, activeRow),
-        );
+        this._setBindingCode({
+          playerIndex: activePlayer,
+          row: activeRow,
+          code: this._bindingDefaultCode(activePlayer, activeRow),
+        });
         this._dirty = true;
         this._clearRebindCapture();
         return true;
       }
 
       if (InputState.wasKeyPressed(KEY_DELETE)) {
-        this._setBindingCode(activePlayer, activeRow, INPUT_CODE_UNBOUND);
+        this._setBindingCode({ playerIndex: activePlayer, row: activeRow, code: INPUT_CODE_UNBOUND });
         this._dirty = true;
         this._clearRebindCapture();
         return true;
@@ -464,7 +469,7 @@ export class ControlsMenuView extends PanelMenuView {
         axisThreshold: 0.5,
       });
       if (captured !== null) {
-        this._setBindingCode(activePlayer, activeRow, int(captured));
+        this._setBindingCode({ playerIndex: activePlayer, row: activeRow, code: int(captured) });
         this._dirty = true;
         this._clearRebindCapture();
       }
