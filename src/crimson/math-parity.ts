@@ -12,16 +12,16 @@ function f32FromBits(bits: number): number {
   return _f32buf[0];
 }
 
-export function f32(value: number): number {
-  _f32buf[0] = value;
-  return _f32buf[0];
-}
-
 // Native movement/heading code uses these exact float32 literals.
 export const NATIVE_PI = f32FromBits(0x40490FDB);
 export const NATIVE_HALF_PI = f32FromBits(0x3FC90FDB);
 export const NATIVE_TAU = f32FromBits(0x40C90FDB);
 export const NATIVE_TURN_RATE_SCALE = f32FromBits(0x3FAAAAAB);
+
+export function f32(value: number): number {
+  _f32buf[0] = value;
+  return _f32buf[0];
+}
 
 const _NATIVE_LEFT_AXIS_HEADING_POS = f32(NATIVE_TAU - NATIVE_HALF_PI);
 const _NATIVE_LEFT_AXIS_HEADING_EPS = 1e-6;
