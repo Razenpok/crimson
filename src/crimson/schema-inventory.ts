@@ -141,6 +141,19 @@ function _sortJsonKeys(value: unknown): unknown {
   return value;
 }
 
+function _ensureAsciiJson(text: string): string {
+  let out = '';
+  for (let idx = 0; idx < text.length; idx++) {
+    const code = text.charCodeAt(idx);
+    if (code <= 0x7F) {
+      out += text[idx];
+    } else {
+      out += `\\u${code.toString(16).padStart(4, '0')}`;
+    }
+  }
+  return out;
+}
+
 export function inventoryAsJson(opts: { summary: InventorySummary; structs: StructClass[] }): string {
   const payload = {
     total_structs: int(opts.summary.totalStructs),
@@ -166,7 +179,7 @@ export function inventoryAsJson(opts: { summary: InventorySummary; structs: Stru
       lineno: int(item.lineno),
     })),
   };
-  return JSON.stringify(_sortJsonKeys(payload), null, 2);
+  return _ensureAsciiJson(JSON.stringify(_sortJsonKeys(payload), null, 2));
 }
 
 export const __schemaInventoryInternals = {
