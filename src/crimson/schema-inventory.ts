@@ -19,6 +19,7 @@ export class StructClass {
     this.module = opts.module;
     this.path = opts.path;
     this.lineno = opts.lineno;
+    Object.freeze(this);
   }
 }
 
@@ -35,6 +36,7 @@ export class InventorySummary {
     this.totalStructs = opts.totalStructs;
     this.countsByBucket = opts.countsByBucket;
     this.duplicateNames = opts.duplicateNames;
+    Object.freeze(this);
   }
 }
 
