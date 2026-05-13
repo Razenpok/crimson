@@ -52,6 +52,7 @@ function colorFromRgba(r: number, g: number, b: number, a: number): wgl.Color {
 }
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_circle`.
   const segments = Math.max(24, int(radius * 1.5 + 0.5));
   const step = (Math.PI * 2.0) / segments;
   const white = wgl.getWhiteTexture();
@@ -69,7 +70,7 @@ function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void 
   wgl.endQuads();
 }
 
-export interface WorldDrawContext {
+export class WorldDrawContext {
   readonly camera: Vec2;
   readonly viewScale: Vec2;
   readonly scale: number;
@@ -79,6 +80,29 @@ export interface WorldDrawContext {
   readonly monsterVision: boolean;
   readonly monsterVisionSrc: wgl.Rectangle | null;
   readonly poisonSrc: wgl.Rectangle | null;
+
+  constructor(opts: {
+    camera?: Vec2;
+    viewScale?: Vec2;
+    scale?: number;
+    entityAlpha?: number;
+    trooperTexture?: wgl.Texture | null;
+    particlesTexture?: wgl.Texture | null;
+    monsterVision?: boolean;
+    monsterVisionSrc?: wgl.Rectangle | null;
+    poisonSrc?: wgl.Rectangle | null;
+  } = {}) {
+    this.camera = opts.camera ?? new Vec2();
+    this.viewScale = opts.viewScale ?? new Vec2(1.0, 1.0);
+    this.scale = opts.scale ?? 1.0;
+    this.entityAlpha = opts.entityAlpha ?? 1.0;
+    this.trooperTexture = opts.trooperTexture ?? null;
+    this.particlesTexture = opts.particlesTexture ?? null;
+    this.monsterVision = opts.monsterVision ?? false;
+    this.monsterVisionSrc = opts.monsterVisionSrc ?? null;
+    this.poisonSrc = opts.poisonSrc ?? null;
+    Object.freeze(this);
+  }
 }
 
 export function drawWorld(
@@ -185,7 +209,7 @@ function buildDrawContext(
   // (monster vision, shadow, poison aura).
   const poisonSrc = effectSrcRectFromTexture(particlesTexture, EffectId.AURA);
 
-  return {
+  return new WorldDrawContext({
     camera,
     viewScale,
     scale,
@@ -195,7 +219,7 @@ function buildDrawContext(
     monsterVision,
     monsterVisionSrc,
     poisonSrc,
-  };
+  });
 }
 
 function drawPlayer(
