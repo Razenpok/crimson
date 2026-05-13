@@ -183,10 +183,3 @@ export function inventoryAsJson(opts: { summary: InventorySummary; structs: Stru
   };
   return _ensureAsciiJson(JSON.stringify(_sortJsonKeys(payload), null, 2));
 }
-
-export const __schemaInventoryInternals = {
-  moduleNameForPath: _moduleNameForPath,
-  resolveImportModule: _resolveImportModule,
-  resolveSymbol: _resolveSymbol,
-  bucketForPath: _bucketForPath,
-};
