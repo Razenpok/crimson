@@ -73,7 +73,7 @@ const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
   return ids.sort((a, b) => a - b);
 })();
 
-export interface QuestRunOutcome {
+export class QuestRunOutcome {
   readonly kind: 'completed' | 'failed';
   readonly level: QuestLevel;
   readonly baseTimeMs: number;
@@ -87,6 +87,37 @@ export interface QuestRunOutcome {
   readonly shotsHit: number;
   readonly mostUsedWeaponId: WeaponId;
   readonly playerHealthValues: readonly number[];
+
+  constructor(opts: {
+    kind: 'completed' | 'failed';
+    level: QuestLevel;
+    baseTimeMs: number;
+    playerHealth: number;
+    player2Health: number | null;
+    pendingPerkCount: number;
+    experience: number;
+    killCount: number;
+    weaponId: WeaponId;
+    shotsFired: number;
+    shotsHit: number;
+    mostUsedWeaponId: WeaponId;
+    playerHealthValues?: readonly number[];
+  }) {
+    this.kind = opts.kind;
+    this.level = opts.level;
+    this.baseTimeMs = opts.baseTimeMs;
+    this.playerHealth = opts.playerHealth;
+    this.player2Health = opts.player2Health;
+    this.pendingPerkCount = opts.pendingPerkCount;
+    this.experience = opts.experience;
+    this.killCount = opts.killCount;
+    this.weaponId = opts.weaponId;
+    this.shotsFired = opts.shotsFired;
+    this.shotsHit = opts.shotsHit;
+    this.mostUsedWeaponId = opts.mostUsedWeaponId;
+    this.playerHealthValues = opts.playerHealthValues ?? [];
+    Object.freeze(this);
+  }
 }
 
 export class QuestMode extends BaseGameplayMode {
@@ -301,6 +332,12 @@ export class QuestMode extends BaseGameplayMode {
     const kind = this._outcome !== null ? this._outcome.kind : 'quest';
     const baseTimeMs = int(this._questSpawnState.spawnTimelineMs);
     return `quest_${level}_${stamp}_${kind}_t${baseTimeMs}`;
+  }
+
+  protected _replaySkipSaveWhenEmpty(opts: { recorder: { tickIndex: number } }): boolean {
+    // Avoid emitting empty replays/checkpoint sidecars (usually indicates a
+    // test harness calling failure/complete helpers without ticking).
+    return int(opts.recorder.tickIndex) <= 0;
   }
 
   protected _lanModeName(): 'survival' | 'rush' | 'quests' {
@@ -567,7 +604,7 @@ export class QuestMode extends BaseGameplayMode {
     );
     const healthValues = this.simWorld.players.map((p) => p.health);
     const player2Health = healthValues.length >= 2 ? healthValues[1] : null;
-    this._outcome = {
+    this._outcome = new QuestRunOutcome({
       kind: 'completed',
       level: this._questLevel,
       baseTimeMs: int(this._questSpawnState.spawnTimelineMs),
@@ -581,7 +618,7 @@ export class QuestMode extends BaseGameplayMode {
       shotsFired: fired,
       shotsHit: hit,
       mostUsedWeaponId: mostUsed,
-    };
+    });
   }
 
   private _closeFailedRun(): void {
@@ -596,7 +633,7 @@ export class QuestMode extends BaseGameplayMode {
       );
       const healthValues = this.simWorld.players.map((p) => p.health);
       const player2Health = healthValues.length >= 2 ? healthValues[1] : null;
-      this._outcome = {
+      this._outcome = new QuestRunOutcome({
         kind: 'failed',
         level: this._questLevel,
         baseTimeMs: int(this._questSpawnState.spawnTimelineMs),
@@ -610,7 +647,7 @@ export class QuestMode extends BaseGameplayMode {
         shotsFired: fired,
         shotsHit: hit,
         mostUsedWeaponId: mostUsed,
-      };
+      });
     }
     this._saveReplay();
     this.closeRequested = true;
