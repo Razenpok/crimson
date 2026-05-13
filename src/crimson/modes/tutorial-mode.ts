@@ -138,7 +138,7 @@ export class TutorialMode extends BaseGameplayMode {
     this.player.pos = new Vec2(this.worldSize * 0.5, this.worldSize * 0.5);
     weaponAssignPlayer(this.player, WeaponId.PISTOL, { state: this.state });
     this._simSession = this._newSimSession();
-    this._replayRecorder = null; // WebGL: no file-based replay recording
+    this._replayRecorder = null;
   }
 
   close(): void {
@@ -193,16 +193,16 @@ export class TutorialMode extends BaseGameplayMode {
   }
 
   protected _handleInput(): void {
-    if (this._perkMenu.open && InputState.wasKeyPressed(27)) { // Escape
+    if (this._perkMenu.open && InputState.wasKeyPressed(27)) {
       this._perkMenu.close();
       return;
     }
 
-    if (InputState.wasKeyPressed(9)) { // Tab
+    if (InputState.wasKeyPressed(9)) {
       this._paused = !this._paused;
     }
 
-    if (InputState.wasKeyPressed(27)) { // Escape
+    if (InputState.wasKeyPressed(27)) {
       this._action = 'open_pause_menu';
       return;
     }
