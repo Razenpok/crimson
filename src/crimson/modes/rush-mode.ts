@@ -99,18 +99,18 @@ export class RushMode extends BaseGameplayMode {
 
   protected _handleInput(): void {
     if (this._gameOverActive) {
-      if (InputState.wasKeyPressed(27)) { // Escape
+      if (InputState.wasKeyPressed(27)) {
         this._action = 'back_to_menu';
         this.closeRequested = true;
       }
       return;
     }
 
-    if (!this._lanEnabled && InputState.wasKeyPressed(9)) { // Tab
+    if (!this._lanEnabled && InputState.wasKeyPressed(9)) {
       this._paused = !this._paused;
     }
 
-    if (InputState.wasKeyPressed(27)) { // Escape
+    if (InputState.wasKeyPressed(27)) {
       this._action = 'open_pause_menu';
       return;
     }
@@ -305,7 +305,7 @@ export class RushMode extends BaseGameplayMode {
       const line = this._uiLineHeight();
 
       this._drawUiText(
-        `rush: t=${(this._sessionElapsedMs() / 1000.0).toFixed(1)}s`,
+        `rush: t=${(this._sessionElapsedMs() / 1000.0).toFixed(1).padStart(6, ' ')}s`,
         new Vec2(x, y),
         UI_TEXT_COLOR,
       );
