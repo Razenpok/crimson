@@ -280,20 +280,21 @@ function _digitalDownForPlayer(keyCode: number, playerIndex: number): boolean {
 }
 
 export function inputCodeIsDown(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
-  const playerIndex = opts.playerIndex ?? 0;
-  const down = _digitalDownForPlayer(keyCode, playerIndex);
-  return _pressedState.markDown({ playerIndex, keyCode, isDown: down });
+  const code = int(keyCode);
+  const playerIndex = int(opts.playerIndex ?? 0);
+  const down = _digitalDownForPlayer(code, playerIndex);
+  return _pressedState.markDown({ playerIndex, keyCode: code, isDown: down });
 }
 
 export function inputCodeIsPressed(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
-  const playerIndex = opts.playerIndex ?? 0;
+  const code = int(keyCode);
+  const playerIndex = int(opts.playerIndex ?? 0);
 
-  // Wheel codes
-  if (keyCode === 0x109) return _pressedState.wheelUp;
-  if (keyCode === 0x10A) return _pressedState.wheelDown;
+  if (code === 0x109) return _pressedState.wheelUp;
+  if (code === 0x10A) return _pressedState.wheelDown;
 
-  const down = _digitalDownForPlayer(keyCode, playerIndex);
-  return _pressedState.isPressed({ playerIndex, keyCode, isDown: down });
+  const down = _digitalDownForPlayer(code, playerIndex);
+  return _pressedState.isPressed({ playerIndex, keyCode: code, isDown: down });
 }
 
 export function inputAxisValue(keyCode: number, opts: { playerIndex?: number } = {}): number {
@@ -414,31 +415,35 @@ const KEY_NAMES: Record<number, string> = {
 };
 
 export function inputCodeName(keyCode: number): string {
-  if (keyCode === INPUT_CODE_UNBOUND) return 'unbound';
-  if (keyCode === 0x100) return 'Mouse1';
-  if (keyCode === 0x101) return 'Mouse2';
-  if (keyCode === 0x102) return 'Mouse3';
-  if (keyCode === 0x103) return 'Mouse4';
-  if (keyCode === 0x104) return 'Mouse5';
+  const code = int(keyCode);
+  if (code === INPUT_CODE_UNBOUND) return 'unbound';
+  if (code === 0x100) return 'Mouse1';
+  if (code === 0x101) return 'Mouse2';
+  if (code === 0x102) return 'Mouse3';
+  if (code === 0x103) return 'Mouse4';
+  if (code === 0x104) return 'Mouse5';
 
-  const extName = EXTENDED_NAMES[keyCode];
+  const extName = EXTENDED_NAMES[code];
   if (extName) return extName;
-  if (keyCode > 0x163) return 'RawInput ?';
+  if (code > 0x163) return 'RawInput ?';
 
-  if (keyCode < 0x100) {
-    const name = KEY_NAMES[keyCode];
+  if (code < 0x100) {
+    const name = KEY_NAMES[code];
     if (name) return name;
-    return `DIK_${keyCode.toString(16).toUpperCase().padStart(2, '0')}`;
+    return `DIK_${code.toString(16).toUpperCase().padStart(2, '0')}`;
   }
-  return `KEY_${keyCode.toString(16).toUpperCase().padStart(4, '0')}`;
+  return `KEY_${code.toString(16).toUpperCase().padStart(4, '0')}`;
 }
 
 function _inputPrimaryAnyDown(fireCodes: number[], playerCount: number): boolean {
   if (inputCodeIsDown(0x100, { playerIndex: 0 })) return true;
-  const count = Math.max(1, Math.min(4, playerCount));
-  if (fireCodes.length < count) throw new Error('fireCodes length less than count');
-  for (let i = 0; i < count; i++) {
-    if (inputCodeIsDown(fireCodes[i], { playerIndex: i })) return true;
+  const count = Math.max(1, Math.min(4, int(playerCount)));
+  if (fireCodes.length < count) {
+    throw new Error(`fire_codes must provide at least ${count} entries, got ${fireCodes.length}`);
+  }
+  for (let playerIndex = 0; playerIndex < count; playerIndex++) {
+    const fireKey = int(fireCodes[playerIndex]);
+    if (inputCodeIsDown(fireKey, { playerIndex })) return true;
   }
   return false;
 }
