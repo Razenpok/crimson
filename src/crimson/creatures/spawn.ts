@@ -1857,6 +1857,8 @@ registerTemplate([SpawnId.FORMATION_CHAIN_LIZARD_4_11], (ctx: PlanBuilder): void
   parent.size = 69.0;
   parent.contactDamage = 150.0;
 
+  // Spawns a linked chain of 4 children (link points to previous). The original also sets
+  // the base creature's link_index to the last child after the loop.
   const cSpec = childSpec(
     CreatureTypeId.LIZARD, 60.0, 2.4, 60.0, 50.0, 14.0, [0.6, 0.6, 0.31, 1.0],
   );
