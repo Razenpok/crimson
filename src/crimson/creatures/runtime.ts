@@ -208,9 +208,11 @@ function survivalRecordRecentDeath(
 }
 
 export class CreatureState {
+  // Core identity/alive flags.
   active = false;
   typeId: CreatureTypeId = CreatureTypeId.ZOMBIE;
 
+  // Movement / AI.
   pos: Vec2 = new Vec2();
   vel: Vec2 = new Vec2();
   heading = 0.0;
@@ -221,6 +223,9 @@ export class CreatureState {
   aiMode: CreatureAiMode = CreatureAiMode.ORBIT_PLAYER;
   flags: CreatureFlags = 0 as CreatureFlags;
 
+  // Native `creature_alloc_slot` does not clear `link_index`; many spawn paths
+  // leave it untouched (notably survival_spawn_creature AI7 spiders), so stale
+  // values can affect early AI7 timer phase.
   linkIndex = -1;
   targetOffset: Vec2 | null = null;
   orbitAngle = 0.0;
@@ -228,6 +233,7 @@ export class CreatureState {
   phaseSeed = 0.0;
   moveScale = 1.0;
 
+  // Combat / timers.
   hp = 0.0;
   maxHp = 0.0;
   moveSpeed = 1.0;
@@ -235,20 +241,19 @@ export class CreatureState {
   attackCooldown = 0.0;
   rewardValue = 0.0;
 
+  // Plaguebearer infection state (native: `collision_flag` byte).
   plagueInfected = false;
   collisionTimer: number = CONTACT_DAMAGE_PERIOD;
-  // lifecycle_stage encodes the creature's alive/dying/dead phase as a float:
-  // positive = alive (CREATURE_LIFECYCLE_ALIVE), decreasing toward zero = dying
-  // animation, negative = corpse fade.  The native code uses a single float
-  // field that transitions through these ranges.
   lifecycleStage: number = CREATURE_LIFECYCLE_ALIVE;
 
+  // Presentation.
   size = 50.0;
   animPhase = 0.0;
   hitFlashTimer = 0.0;
   lastHitOwner: OwnerRef = OwnerRef.fromLocalPlayer(0);
   tint: RGBA = new RGBA();
 
+  // Rewrite-only helpers (not in native struct, but derived from spawn plans).
   spawnSlotIndex: number | null = null;
   bonusId: BonusId | null = null;
   bonusDurationOverride: number | null = null;
