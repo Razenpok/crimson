@@ -3,6 +3,7 @@
 import { Vec2 } from '@grim/geom.ts';
 import { WeaponId } from '@crimson/weapons.ts';
 import type { BonusId } from '@crimson/bonuses/ids.ts';
+import type { GameplayState as GameplayStateType } from '@crimson/gameplay.ts';
 
 export const PERK_COUNT_SIZE = 0x80;
 
@@ -94,3 +95,5 @@ export interface BonusPickupEvent {
   readonly amount: number;
   readonly pos: Vec2;
 }
+
+export type GameplayState = GameplayStateType;

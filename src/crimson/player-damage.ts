@@ -5,8 +5,7 @@ import { f32 } from './math-parity.ts';
 import { PerkId } from './perks/ids.ts';
 import { perkActive } from './perks/helpers.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
-import type { PlayerState } from './sim/state-types.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+import type { GameplayState, PlayerState } from './sim/state-types.ts';
 
 const _PLAYER_PAIN_SFX: readonly SfxId[] = [
   SfxId.TROOPER_INPAIN_01,
@@ -92,7 +91,7 @@ export function playerTakeDamage(
       state.sfxQueue.push(_PLAYER_DEATH_SFX[state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_DEATH_SFX }) & 1]);
     } else if (onLethal !== null) {
       onLethal();
-      state.playerDeathHookSkipIndices.add(player.index);
+      state.playerDeathHookSkipIndices.add(int(player.index));
     }
   }
 
