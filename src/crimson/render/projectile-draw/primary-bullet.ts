@@ -19,7 +19,12 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
   const alphaByte = int(clamp(lifeAlpha * ctx.alpha, 0.0, 255.0) + 0.5);
   let drawn = false;
 
-  const bulletTrail = getTexture(resources, TextureId.BULLET_TRAIL);
+  let bulletTrail: wgl.Texture | null;
+  try {
+    bulletTrail = getTexture(resources, TextureId.BULLET_TRAIL);
+  } catch {
+    bulletTrail = null;
+  }
   if (bulletTrail !== null) {
     const origin = projOrigin(ctx.proj, ctx.pos);
     const originScreen = renderer.worldToScreen(origin);
@@ -30,7 +35,12 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
     );
   }
 
-  const bullet = getTexture(resources, TextureId.BULLET_I);
+  let bullet: wgl.Texture | null;
+  try {
+    bullet = getTexture(resources, TextureId.BULLET_I);
+  } catch {
+    bullet = null;
+  }
   if (bullet !== null && ctx.life >= 0.39) {
     const size = WorldRenderCtx.bulletSpriteSize(typeId, ctx.scale);
     const src = wgl.makeRectangle(0.0, 0.0, bullet.width, bullet.height);

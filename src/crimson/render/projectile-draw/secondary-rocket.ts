@@ -85,7 +85,7 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
   };
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
-  // Large bloom around the rocket.
+  // Large bloom around the rocket (effect_id=0x0D).
   drawRocketFx({ size: 140.0, offset: 5.0, rgba: new RGBA(1.0, 1.0, 1.0, alpha * 0.48) });
 
   const [glowR, glowG, glowB] = style.glowRgb;
@@ -94,7 +94,7 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
 }
 
 export function drawSecondaryRocket(ctx: SecondaryProjectileDrawCtx): boolean {
-  const style = ROCKET_STYLE_BY_TYPE.get(ctx.projType);
+  const style = ROCKET_STYLE_BY_TYPE.get(int(ctx.projType));
   if (style === undefined) return false;
 
   const renderer = ctx.renderer;
@@ -120,13 +120,12 @@ export function drawSecondaryRocket(ctx: SecondaryProjectileDrawCtx): boolean {
 }
 
 export function drawSecondaryType4Fallback(ctx: SecondaryProjectileDrawCtx): boolean {
-  if (ctx.projType !== SecondaryProjectileTypeId.ROCKET_MINIGUN) return false;
-  // Native draws a filled purple circle. Approximate with a white-texture quad.
+  if (int(ctx.projType) !== SecondaryProjectileTypeId.ROCKET_MINIGUN) return false;
   const scale = ctx.scale;
   const radius = Math.max(1.0, 12.0 * scale);
   const size = radius * 2.0;
   const sp = ctx.screenPos;
-  const tint = wgl.makeColor(200 / 255, 120 / 255, 1.0, ctx.alpha);
+  const tint = wgl.makeColor(200 / 255, 120 / 255, 1.0, int(255 * ctx.alpha + 0.5) / 255);
   wgl.drawTexturePro(wgl.getWhiteTexture(), wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
   return true;
 }

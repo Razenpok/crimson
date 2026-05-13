@@ -52,12 +52,12 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
   const renderFrame = renderer.frame;
   const resources = renderFrame.resources;
-  const typeId = ctx.typeId;
+  const typeId = int(ctx.typeId);
   const texture = ctx.texture;
   if (!BEAM_TYPES.has(typeId)) return false;
   if (texture === null) return false;
 
-  // Ion weapons and Fire Bullets use the projs.png streak effect.
+  // Ion weapons and Fire Bullets use the projs.png streak effect (and Ion adds chain arcs on impact).
   let grid = 4;
   let atlasFrame = 2;
 
@@ -69,7 +69,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
   const [direction, dist] = beam.normalizedWithLength();
   if (dist <= 1e-6) return true;
 
-  // Ion Gun Master increases the chain effect thickness and reach.
+  // In the native renderer, Ion Gun Master increases the chain effect thickness and reach.
   let perkScale = 1.0;
   for (const player of renderFrame.players) {
     if (perkActive(player, PerkId.ION_GUN_MASTER)) {
@@ -109,7 +109,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
   if (renderFrame.rtxMode === RtxRenderMode.RTX) {
-    const drawn = drawBeamFastStampedBody({
+    drawBeamFastStampedBody({
       originScreen: renderer.worldToScreen(origin),
       headScreen: ctx.screenPos,
       startDistUnits: start,
@@ -120,13 +120,6 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       baseAlpha,
       streakRgb,
     });
-    // If RTX path returns false, fall back to classic.
-    if (!drawn) {
-      drawBeamBodySprites({
-        ctx, origin, direction, dist, start, span, step,
-        baseAlpha, streakRgb, texture, grid, frame: atlasFrame, spriteScale,
-      });
-    }
   } else {
     drawBeamBodySprites({
       ctx, origin, direction, dist, start, span, step,
@@ -135,9 +128,8 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
   }
 
   if (life >= 0.4) {
-    let headDrawn = false;
     if (renderFrame.rtxMode === RtxRenderMode.RTX) {
-      headDrawn = drawBeamFastStampedHead({
+      drawBeamFastStampedHead({
         centerScreen: ctx.screenPos,
         rotationRad: ctx.angle,
         effectScale,
@@ -146,8 +138,7 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
         headRgb,
         isFire: isFireBullets,
       });
-    }
-    if (!headDrawn) {
+    } else {
       const headTint = new RGBA(headRgb[0], headRgb[1], headRgb[2], baseAlpha).toWgl();
       renderer.drawAtlasSprite(texture, grid, atlasFrame, ctx.screenPos, spriteScale, ctx.angle, headTint);
     }
@@ -186,11 +177,10 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       }
     }
   } else {
-    // Native draws a small blue "core" at the head during the fade stage.
+    // Native draws a small blue "core" at the head during the fade stage (life_timer < 0.4).
     const coreRgb: [number, number, number] = [0.5, 0.6, 1.0];
-    let coreDrawn = false;
     if (renderFrame.rtxMode === RtxRenderMode.RTX) {
-      coreDrawn = drawBeamFastStampedHead({
+      drawBeamFastStampedHead({
         centerScreen: ctx.screenPos,
         rotationRad: ctx.angle,
         effectScale,
@@ -199,17 +189,16 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
         headRgb: coreRgb,
         isFire: isFireBullets,
       });
-    }
-    if (!coreDrawn) {
+    } else {
       const coreTint = new RGBA(coreRgb[0], coreRgb[1], coreRgb[2], baseAlpha).toWgl();
       renderer.drawAtlasSprite(texture, grid, atlasFrame, ctx.screenPos, ctx.scale, ctx.angle, coreTint);
     }
 
     if (isIon) {
-      // Native: chain reach is derived from the streak scale.
+      // Native: chain reach is derived from the streak scale (`fVar29 * perk_scale * 40.0`).
       const radius = effectScale * perkScale * 40.0;
 
-      // Iterate creatures in pool order for chain targets.
+      // Native iterates via creature_find_in_radius(pos, radius, start_index) in pool order.
       const targets: Array<{ pos: Vec2; size: number }> = [];
       const entries = renderFrame.creatures.entries;
       for (let i = 1; i < entries.length; i++) {
@@ -223,7 +212,8 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
         }
       }
 
-      // Native uses beam effect scale for strip thickness.
+      // Native uses beam effect scale for strip thickness (10x inner, 14x outer),
+      // independent of Ion Gun Master. Perk scaling only affects chain reach.
       const innerHalf = 10.0 * effectScale * ctx.scale;
       const outerHalf = 14.0 * effectScale * ctx.scale;
       const u = 0.625;

@@ -14,7 +14,7 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
   const renderFrame = renderer.frame;
   const resources = renderFrame.resources;
-  const typeId = ctx.typeId;
+  const typeId = int(ctx.typeId);
   if (!PLASMA_PARTICLE_TYPES.has(typeId)) {
     return false;
   }

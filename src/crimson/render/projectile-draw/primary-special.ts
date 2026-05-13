@@ -11,12 +11,15 @@ import type { ProjectileDrawCtx } from './types.ts';
 
 function beginDarkenSrcZeroBlend(): void {
   // Native projectile_render switches Plague Spreader to D3D8 SRC=ZERO / DST=INVSRCALPHA.
-  // Alpha channel: SRC=ZERO, DST=ONE (preserve destination alpha).
   wgl.rlSetBlendFactorsSeparate(
     wgl.RL_ZERO, wgl.RL_ONE_MINUS_SRC_ALPHA, wgl.RL_FUNC_ADD,
     wgl.RL_ZERO, wgl.RL_ONE, wgl.RL_FUNC_ADD,
   );
   wgl.beginBlendMode(wgl.BlendMode.CUSTOM);
+  wgl.rlSetBlendFactorsSeparate(
+    wgl.RL_ZERO, wgl.RL_ONE_MINUS_SRC_ALPHA, wgl.RL_FUNC_ADD,
+    wgl.RL_ZERO, wgl.RL_ONE, wgl.RL_FUNC_ADD,
+  );
 }
 
 export function drawPulseGun(ctx: ProjectileDrawCtx): boolean {
@@ -65,7 +68,7 @@ export function drawPulseGun(ctx: ProjectileDrawCtx): boolean {
 
 export function drawSplitterOrBlade(ctx: ProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
-  const typeId = ctx.typeId;
+  const typeId = int(ctx.typeId);
   if (typeId !== ProjectileTemplateId.SPLITTER_GUN && typeId !== ProjectileTemplateId.BLADE_GUN) {
     return false;
   }
@@ -90,7 +93,7 @@ export function drawSplitterOrBlade(ctx: ProjectileDrawCtx): boolean {
   let rotationRad = ctx.angle;
   let rgb: [number, number, number] = [1.0, 1.0, 1.0];
   if (typeId === ProjectileTemplateId.BLADE_GUN) {
-    rotationRad = ctx.projIndex * 0.1 - renderer.frame.elapsedMs * 0.1;
+    rotationRad = int(ctx.projIndex) * 0.1 - renderer.frame.elapsedMs * 0.1;
     rgb = [0.8, 0.8, 0.8];
   }
 
@@ -111,7 +114,6 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
 
   const alpha = ctx.alpha;
   const life = ctx.life;
-
 
   if (life >= 0.4) {
     const tint = new RGBA(1.0, 1.0, 1.0, alpha).toWgl();
@@ -134,7 +136,7 @@ export function drawPlagueSpreader(ctx: ProjectileDrawCtx): boolean {
       const offset = Vec2.fromHeading(ctx.angle + Math.PI).mul(15.0);
       drawPlagueQuad({ pos: ctx.pos.add(offset), size: 60.0 });
 
-      const phase = ctx.projIndex + renderer.frame.elapsedMs * 0.01;
+      const phase = int(ctx.projIndex) + renderer.frame.elapsedMs * 0.01;
       const cosPhase = Math.cos(phase);
       const sinPhase = Math.sin(phase);
       drawPlagueQuad({

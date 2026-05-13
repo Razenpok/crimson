@@ -37,7 +37,7 @@ function drawCircleLines(x: number, y: number, radius: number, color: wgl.Color)
 
 export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
-  if (ctx.projType !== 3) return false;
+  if (int(ctx.projType) !== 3) return false;
 
   // Secondary projectile detonation visuals (secondary_projectile_update + render).
   const t = clamp(ctx.proj.detonationT, 0.0, 1.0);
@@ -47,7 +47,12 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
 
   const scale = ctx.scale;
 
-  const particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
+  let particlesTexture: wgl.Texture | null;
+  try {
+    particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
+  } catch {
+    particlesTexture = null;
+  }
   if (particlesTexture === null) {
     const radius = detScale * t * 80.0;
     const alphaByte = int(clamp((1.0 - t) * 180.0 * ctx.alpha, 0.0, 255.0) + 0.5);
