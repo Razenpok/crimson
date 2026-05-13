@@ -706,6 +706,8 @@ function spawnRingChildren(
     child.aiMode = opts.aiMode;
     child.aiLinkParent = linkParent;
     const angle = i * opts.angleStep;
+    // Keep template authoring math simple here; runtime init quantizes
+    // `target_offset`/`pos` through float32 (`CreaturePool._apply_init`).
     child.targetOffset = Vec2.fromAngle(angle).mul(opts.radius);
     if (setPosition) {
       child.pos = pos.add(child.targetOffset ?? new Vec2());
@@ -817,15 +819,18 @@ class PlanBuilder {
     rng: CrandLike,
     env: SpawnEnv,
   ): [PlanBuilder, number] {
+    // creature_alloc_slot() for the base creature.
     const creatures: CreatureInit[] = [allocCreature(templateId, pos, rng)];
     const spawnSlots: SpawnSlotInit[] = [];
     const effects: BurstEffect[] = [];
 
+    // `heading == RANDOM_HEADING_SENTINEL` uses a randomized heading.
     let finalHeading = heading;
     if (finalHeading === RANDOM_HEADING_SENTINEL) {
       finalHeading = (rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_RANDOM_HEADING }) % 628) * 0.01;
     }
 
+    // Base initialization always consumes one rand() for a transient heading value.
     creatures[0].heading = (rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_BASE_HEADING }) % 314) * 0.01;
 
     return [
@@ -949,7 +954,12 @@ function allocCreature(
   pos: Vec2,
   rng: CrandLike,
 ): CreatureInit {
+  // creature_alloc_slot():
+  // - clears flags
+  // - seeds phase_seed = float(crt_rand() & 0x17f)
   const phaseSeed = rng.rand({ caller: RngCallerStatic.CREATURE_ALLOC_SLOT_PHASE_SEED }) & 0x17F;
+  // Native `creature_alloc_slot` does not clear heading; some template child paths
+  // intentionally keep stale heading from the recycled slot.
   return new CreatureInit(templateId, pos, null, phaseSeed);
 }
 
@@ -1013,6 +1023,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
     if (r10 < 5) {
       typeId = 2;
     } else {
+      // Decompiled as a sign-bit trick, but in practice this is a parity pick.
       typeId = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_PARITY_PICK }) & 1) + 3;
     }
   } else if (xp < 50000) {
@@ -1033,16 +1044,20 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
     }
   }
 
+  // Rare override: forces spider_sp1 when (rand() & 0x1f) == 2.
   if ((rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_OVERRIDE }) & 0x1F) === 2) {
     typeId = 3;
   }
 
   c.typeId = typeId;
 
+  // size = rand() % 20 + 44
   c.size = (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_SIZE }) % 20 + 44);
 
+  // heading = (rand() % 314) * 0.01
   c.heading = f32(f32(rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_HEADING }) % 314) * f32(0.01));
 
+  // Native computes in float32; preserve rounding so derived speeds match capture.
   let moveSpeed = f32(f32(f32(Math.floor(xp / 4000)) * f32(0.045)) + f32(0.9));
   if (c.typeId === CreatureTypeId.SPIDER_SP1) {
     c.flags = c.flags | CreatureFlags.AI7_LINK_TIMER;
@@ -1070,6 +1085,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
   c.health = health;
   c.rewardValue = 0.0;
 
+  // Tint based on player_experience thresholds.
   let tintR: number;
   let tintG: number;
   let tintB: number;
@@ -1113,8 +1129,10 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
 
   c.tint = [tintR, tintG, tintB, tintA];
 
+  // contact_damage = size * 0.0952381
   c.contactDamage = (c.size ?? 0.0) * (2.0 / 21.0);
 
+  // reward_value is always 0.0 at this point in the original.
   c.rewardValue = (
     (c.health ?? 0.0) * 0.4
     + (c.contactDamage ?? 0.0) * 0.8
@@ -1122,6 +1140,7 @@ export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { pl
     + (rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_REWARD_BONUS }) % 10 + 10)
   );
 
+  // Rare stat overrides (color-coded variants).
   let r = rng.rand({ caller: RngCallerStatic.SURVIVAL_SPAWN_CREATURE_RARE_RED });
   if (r % 180 < 2) {
     applyTint(c, [0.9, 0.4, 0.4, 1.0]);
