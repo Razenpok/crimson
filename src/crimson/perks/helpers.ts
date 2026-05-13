@@ -4,7 +4,7 @@ import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { PerkId } from './ids.ts';
 
 export function perkCountGet(player: PlayerState, perkId: PerkId): number {
-  const idx = perkId as number;
+  const idx = int(perkId);
   if (idx < 0) return 0;
   if (idx >= player.perkCounts.length) return 0;
   return int(player.perkCounts[idx]);
