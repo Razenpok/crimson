@@ -43,7 +43,6 @@ function applyDebugConsoleDefaults(console: ConsoleState, debug: boolean): void 
   console.registerCvar('cv_showFPS', '1');
 }
 
-/** Minimal persistence stub matching fields used by runtime.py. */
 export interface GameStatusPersist extends GameStateStatus {
   gameSequenceId: number;
   questUnlockIndex: number;
@@ -60,13 +59,51 @@ export interface GameStatusPersist extends GameStateStatus {
   incrementWeaponUsageSlot(slot: number): void;
 }
 
-/** In-memory status (no file I/O). */
 export function createGameStatus(): GameStatusPersist {
   let _gameSequenceId = 0;
   let _dirty = false;
   const _modePlayCounts = new Map<number, number>();
   const _weaponUsageCounts = new Map<number, number>();
   const _questPlayCounts: number[] = [];
+  let _questUnlockIndex = 50;
+  let _questUnlockIndexFull = 50;
+
+  try {
+    const raw = localStorage.getItem('crimson-game-status');
+    if (raw !== null) {
+      const data = JSON.parse(raw) as {
+        gameSequenceId?: number;
+        questUnlockIndex?: number;
+        questUnlockIndexFull?: number;
+        questPlayCounts?: number[];
+        modePlayCounts?: [number, number][];
+        weaponUsageCounts?: [number, number][];
+      };
+      _gameSequenceId = int(data.gameSequenceId ?? 0);
+      _questUnlockIndex = int(data.questUnlockIndex ?? 50);
+      _questUnlockIndexFull = int(data.questUnlockIndexFull ?? 50);
+      if (Array.isArray(data.questPlayCounts)) {
+        _questPlayCounts.push(...data.questPlayCounts.map((v) => int(v)));
+      }
+      if (Array.isArray(data.modePlayCounts)) {
+        for (const [mode, count] of data.modePlayCounts) {
+          _modePlayCounts.set(int(mode), int(count));
+        }
+      }
+      if (Array.isArray(data.weaponUsageCounts)) {
+        for (const [slot, count] of data.weaponUsageCounts) {
+          _weaponUsageCounts.set(int(slot), int(count));
+        }
+      }
+    }
+  } catch {
+    _gameSequenceId = 0;
+    _questUnlockIndex = 50;
+    _questUnlockIndexFull = 50;
+    _questPlayCounts.length = 0;
+    _modePlayCounts.clear();
+    _weaponUsageCounts.clear();
+  }
 
   return {
     get gameSequenceId(): number {
@@ -78,8 +115,26 @@ export function createGameStatus(): GameStatusPersist {
         _dirty = true;
       }
     },
-    questUnlockIndex: 50,
-    questUnlockIndexFull: 50,
+    get questUnlockIndex(): number {
+      return _questUnlockIndex;
+    },
+    set questUnlockIndex(v: number) {
+      const next = int(v);
+      if (next !== _questUnlockIndex) {
+        _questUnlockIndex = next;
+        _dirty = true;
+      }
+    },
+    get questUnlockIndexFull(): number {
+      return _questUnlockIndexFull;
+    },
+    set questUnlockIndexFull(v: number) {
+      const next = int(v);
+      if (next !== _questUnlockIndexFull) {
+        _questUnlockIndexFull = next;
+        _dirty = true;
+      }
+    },
     modePlayOther: 0,
     unknownTail: new Uint8Array(0),
     get questPlayCounts(): number[] {
@@ -91,8 +146,8 @@ export function createGameStatus(): GameStatusPersist {
       try {
         const data = {
           gameSequenceId: _gameSequenceId,
-          questUnlockIndex: this.questUnlockIndex,
-          questUnlockIndexFull: this.questUnlockIndexFull,
+          questUnlockIndex: _questUnlockIndex,
+          questUnlockIndexFull: _questUnlockIndexFull,
           questPlayCounts: Array.from(_questPlayCounts),
           modePlayCounts: Array.from(_modePlayCounts.entries()),
           weaponUsageCounts: Array.from(_weaponUsageCounts.entries()),
@@ -153,21 +208,15 @@ function bootCommandHandlers(
     const relPath = `music/${args[0]}`;
     const audio = state.audio;
     if (!audio || !audio.audioContext) {
-      con.log.log(`snd_addGameTune: audio not initialised`);
       return;
     }
-    loadMusicTrack(audio.music, audio.audioContext, state.assetsUrl, relPath)
+    loadMusicTrack(audio.music, audio.audioContext, state.assetsUrl, relPath, { console: con })
       .then((result) => {
         if (result) {
           const [key, trackId] = result;
+          void trackId;
           queueTrack(audio.music, key);
-          con.log.log(`snd_addGameTune: loaded '${key}' (id=${trackId})`);
-        } else {
-          con.log.log(`snd_addGameTune: failed to load '${relPath}'`);
         }
-      })
-      .catch((err) => {
-        con.log.log(`snd_addGameTune: error loading '${relPath}': ${err}`);
       });
   }
 
