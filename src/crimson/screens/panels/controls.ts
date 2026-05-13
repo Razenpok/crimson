@@ -230,9 +230,7 @@ export class ControlsMenuView extends PanelMenuView {
         this.state.config.save();
         this._dirty = false;
       } catch (exc) {
-        if (this.state.console) {
-          this.state.console.log.log(`config: save failed: ${exc}`);
-        }
+        this.state.console.log.log(`config: save failed: ${exc}`);
       }
     }
     super._beginCloseTransition(action);

@@ -599,7 +599,7 @@ export class MenuView {
 
   private _otherGamesEnabled(): boolean {
     // Original game checks a config string via grim_get_config_var(100).
-    // Not implemented in WebGL port.
+    // WebGL has no config-var environment bridge.
     return false;
   }
 
