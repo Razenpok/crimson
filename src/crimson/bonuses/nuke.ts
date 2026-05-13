@@ -6,7 +6,7 @@ import { OwnerRef } from '@crimson/owner-ref.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { ownerRefForPlayer, projectileSpawn } from '@crimson/weapon-runtime/spawn.ts';
-import type { BonusApplyCtx } from "./apply-context.js";
+import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyNuke(ctx: BonusApplyCtx): void {
   // `bonus_apply` (crimsonland.exe @ 0x00409890) starts screen shake via:

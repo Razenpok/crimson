@@ -4,7 +4,7 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { ownerRefForPlayer, spawnProjectileRing } from '@crimson/weapon-runtime/spawn.ts';
-import type { BonusApplyCtx } from "./apply-context.js";
+import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyFireblast(ctx: BonusApplyCtx): void {
   const origin = ctx.originPos;

@@ -6,7 +6,7 @@ import { creatureLifecycleIsAlive } from '@crimson/creatures/lifecycle.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { ownerRefForPlayer, projectileSpawn } from '@crimson/weapon-runtime/spawn.ts';
-import type { BonusApplyCtx } from "./apply-context.js";
+import type { BonusApplyCtx } from './apply-context.ts';
 
 export function applyShockChain(ctx: BonusApplyCtx): void {
   const creatures = ctx.creatures;

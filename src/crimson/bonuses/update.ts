@@ -3,13 +3,12 @@
 import { f32 } from '@crimson/math-parity.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
-import type { BonusPickupEvent, PlayerState } from '@crimson/sim/state-types.ts';
+import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { bonusApply } from './apply.ts';
 import { bonusHudUpdate } from './hud.ts';
 import { BonusId } from './ids.ts';
 import { bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
-import { GameplayState } from "@crimson/gameplay.js";
 
 const _REFLEX_TIMER_SUBTRACT_BIAS = 4e-9;
 
@@ -29,7 +28,7 @@ export function bonusTelekineticUpdate(
   }
 
   const pickups: BonusPickupEvent[] = [];
-  const dtMs = Number(dt) * 1000.0;
+  const dtMs = dt * 1000.0;
 
   for (const player of players) {
     if (player.health <= 0.0) {
@@ -67,7 +66,7 @@ export function bonusTelekineticUpdate(
         players,
         amount: int(entry.amount),
         detailPreset: int(detailPreset),
-        deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+        deferFreezeCorpseFx,
         freezeCorpseIndices,
       },
     );
@@ -108,7 +107,7 @@ export function bonusUpdate(
     {
       creatures,
       detailPreset: int(detailPreset),
-      deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+      deferFreezeCorpseFx,
       freezeCorpseIndices,
     },
   );
@@ -132,18 +131,18 @@ export function bonusUpdate(
   if (dt > 0.0) {
     // Native `bonus_update` decrements Freeze + Double XP here; other global
     // timers are advanced earlier in the gameplay loop.
-    let doubleXp = Number(state.bonuses.doubleExperience);
+    const doubleXp = state.bonuses.doubleExperience;
     if (doubleXp <= 0.0) {
       state.bonuses.doubleExperience = 0.0;
     } else {
-      state.bonuses.doubleExperience = Number(f32(Number(doubleXp) - Number(dt)));
+      state.bonuses.doubleExperience = f32(doubleXp - dt);
     }
 
-    let freeze = Number(state.bonuses.freeze);
+    const freeze = state.bonuses.freeze;
     if (freeze <= 0.0) {
       state.bonuses.freeze = 0.0;
     } else {
-      state.bonuses.freeze = Number(f32(Number(freeze) - Number(dt)));
+      state.bonuses.freeze = f32(freeze - dt);
     }
   }
 
@@ -160,19 +159,19 @@ export function bonusUpdatePrePickupTimers(state: GameplayState, dt: number): vo
     return;
   }
 
-  if (Number(state.bonuses.weaponPowerUp) > 0.0) {
-    state.bonuses.weaponPowerUp = Number(f32(Number(state.bonuses.weaponPowerUp) - Number(dt)));
+  if (state.bonuses.weaponPowerUp > 0.0) {
+    state.bonuses.weaponPowerUp = f32(state.bonuses.weaponPowerUp - dt);
   }
-  if (Number(state.bonuses.energizer) > 0.0) {
-    state.bonuses.energizer = Number(f32(Number(state.bonuses.energizer) - Number(dt)));
+  if (state.bonuses.energizer > 0.0) {
+    state.bonuses.energizer = f32(state.bonuses.energizer - dt);
   }
-  if (Number(state.bonuses.reflexBoost) > 0.0) {
-    const reflexBefore = Number(state.bonuses.reflexBoost);
-    let subtract = Number(dt);
+  if (state.bonuses.reflexBoost > 0.0) {
+    const reflexBefore = state.bonuses.reflexBoost;
+    let subtract = dt;
     if (0.0 < reflexBefore && reflexBefore < 1.0) {
       // Native x87 timer math trends slightly lower than straight f32 subtraction in this window.
-      subtract += Number(_REFLEX_TIMER_SUBTRACT_BIAS);
+      subtract += _REFLEX_TIMER_SUBTRACT_BIAS;
     }
-    state.bonuses.reflexBoost = Number(f32(Number(reflexBefore) - Number(subtract)));
+    state.bonuses.reflexBoost = f32(reflexBefore - subtract);
   }
 }
