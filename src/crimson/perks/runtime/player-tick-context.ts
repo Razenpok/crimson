@@ -13,14 +13,17 @@ export type ProjectileSpawnFn = (
 export type OwnerRefForPlayerFn = (playerIndex: number) => OwnerRef;
 export type OwnerRefForPlayerProjectilesFn = (state: GameplayState, playerIndex: number) => OwnerRef;
 
-export interface PlayerPerkTickCtx {
-    state: GameplayState;
-    player: PlayerState;
-    playerPosBeforeMove: Vec2;
-    players: PlayerState[] | null;
-    dt: number;
-    stationary: boolean;
-    ownerRefForPlayer: OwnerRefForPlayerFn;
-    ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn;
-    projectileSpawn: ProjectileSpawnFn;
+export class PlayerPerkTickCtx {
+  constructor(
+    public state: GameplayState,
+    public player: PlayerState,
+    public playerPosBeforeMove: Vec2,
+    public players: PlayerState[] | null,
+    public dt: number,
+    public stationary: boolean,
+    public ownerRefForPlayer: OwnerRefForPlayerFn,
+    public ownerRefForPlayerProjectiles: OwnerRefForPlayerProjectilesFn,
+    public projectileSpawn: ProjectileSpawnFn,
+  ) {
+  }
 }
