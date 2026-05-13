@@ -4,7 +4,6 @@ import { GameMode } from '@crimson/game-modes.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
-import { QuestLevel } from '@crimson/quests/level.ts';
 import { allQuests } from '@crimson/quests/index.ts';
 import type { GameStatus } from '@crimson/gameplay.ts';
 import type { GameplayState } from '@crimson/sim/state-types.ts';
@@ -68,11 +67,6 @@ export function prepareWeaponAvailability(state: GameplayState): void {
   weaponAvailable.splice(0, weaponAvailable.length, ...built);
 }
 
-function questLevelEquals(a: QuestLevel | null, major: number, minor: number): boolean {
-  if (a === null) return false;
-  return a.major === major && a.minor === minor;
-}
-
 export function weaponPickRandomAvailable(
   state: GameplayState,
 ): WeaponId {
@@ -109,7 +103,9 @@ export function weaponPickRandomAvailable(
     // Quest 5-10 special-case: suppress Ion Cannon.
     if (
       state.gameMode === GameMode.QUESTS &&
-      questLevelEquals(state.questLevel, 5, 10) &&
+      state.questLevel !== null &&
+      state.questLevel.major === 5 &&
+      state.questLevel.minor === 10 &&
       weaponId === WeaponId.ION_CANNON
     ) {
       continue;
