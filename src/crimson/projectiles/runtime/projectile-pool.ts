@@ -23,8 +23,9 @@ import {
 } from '@crimson/projectiles/types.ts';
 import {
   PROJECTILE_HIT_PERK_HOOKS,
+  ProjectileHitInfo,
   ProjectileUpdateCtx,
-  type ProjectileHitPerkCtx,
+  ProjectileHitPerkCtx,
 } from './behaviors.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
 import { applyDamageToCreature, hitRadiusFor, withinNativeFindRadius } from './collision.ts';
@@ -292,8 +293,8 @@ export class ProjectilePool {
       return CreatureDamageType.BULLET;
     };
 
-    const updateCtx = new ProjectileUpdateCtx(
-      this,
+    const updateCtx = new ProjectileUpdateCtx({
+      pool: this,
       creatures,
       dt,
       ionScale,
@@ -302,7 +303,7 @@ export class ProjectilePool {
       runtimeState,
       effects,
       sfxQueue,
-    );
+    });
 
     const _resetShockChainIfOwner = (index: number): void => {
       if (runtimeState.shockChainProjectileId !== index) {
@@ -454,13 +455,13 @@ export class ProjectilePool {
           const typeId = proj.typeId;
           const creature = creatures[hitIdx];
 
-          const perkCtx: ProjectileHitPerkCtx = {
+          const perkCtx = new ProjectileHitPerkCtx({
             proj,
             creature,
             rng,
             ownerPerkActive: _ownerPerkActive,
             poisonIdx,
-          };
+          });
           for (const hook of PROJECTILE_HIT_PERK_HOOKS) {
             hook(perkCtx);
           }
@@ -500,13 +501,13 @@ export class ProjectilePool {
 
           rule.postHit(
             updateCtx,
-            {
+            new ProjectileHitInfo({
               projIndex,
               proj,
               hitIdx,
               move,
               target,
-            },
+            }),
           );
 
           const damageScale = _damageScale(typeId);

@@ -5,7 +5,7 @@ import type { CrandLike } from '@grim/rand.ts';
 import type { SfxId } from '@grim/sfx-map.ts';
 import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
-import { CreatureFlags } from '@crimson/creatures/spawn-ids.ts';
+import { CreatureFlags } from '@crimson/creatures/spawn.ts';
 import type { EffectPool } from '@crimson/effects.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { f32 } from '@crimson/math-parity.ts';
@@ -37,26 +37,26 @@ export class ProjectileUpdateCtx {
   effects: EffectPool | null;
   sfxQueue: SfxId[] | null;
 
-  constructor(
-    pool: ProjectilePool,
-    creatures: readonly CreatureState[],
-    dt: number,
-    ionScale: number,
-    detailPreset: number,
-    rng: CrandLike,
-    runtimeState: GameplayState | null,
-    effects: EffectPool | null,
-    sfxQueue: SfxId[] | null,
-  ) {
-    this.pool = pool;
-    this.creatures = creatures;
-    this.dt = dt;
-    this.ionScale = ionScale;
-    this.detailPreset = detailPreset;
-    this.rng = rng;
-    this.runtimeState = runtimeState;
-    this.effects = effects;
-    this.sfxQueue = sfxQueue;
+  constructor(opts: {
+    pool: ProjectilePool;
+    creatures: readonly CreatureState[];
+    dt: number;
+    ionScale: number;
+    detailPreset: number;
+    rng: CrandLike;
+    runtimeState: GameplayState | null;
+    effects: EffectPool | null;
+    sfxQueue: SfxId[] | null;
+  }) {
+    this.pool = opts.pool;
+    this.creatures = opts.creatures;
+    this.dt = opts.dt;
+    this.ionScale = opts.ionScale;
+    this.detailPreset = opts.detailPreset;
+    this.rng = opts.rng;
+    this.runtimeState = opts.runtimeState;
+    this.effects = opts.effects;
+    this.sfxQueue = opts.sfxQueue;
   }
 }
 
@@ -67,18 +67,18 @@ export class ProjectileHitInfo {
   move: Vec2;
   target: Vec2;
 
-  constructor(
-    projIndex: number,
-    proj: Projectile,
-    hitIdx: number,
-    move: Vec2,
-    target: Vec2,
-  ) {
-    this.projIndex = projIndex;
-    this.proj = proj;
-    this.hitIdx = hitIdx;
-    this.move = move;
-    this.target = target;
+  constructor(opts: {
+    projIndex: number;
+    proj: Projectile;
+    hitIdx: number;
+    move: Vec2;
+    target: Vec2;
+  }) {
+    this.projIndex = opts.projIndex;
+    this.proj = opts.proj;
+    this.hitIdx = opts.hitIdx;
+    this.move = opts.move;
+    this.target = opts.target;
   }
 }
 
@@ -89,18 +89,18 @@ export class ProjectileHitPerkCtx {
   ownerPerkActive: (owner: OwnerRef, perkIdx: number) => boolean;
   poisonIdx: number;
 
-  constructor(
-    proj: Projectile,
-    creature: CreatureState,
-    rng: CrandLike,
-    ownerPerkActive: (owner: OwnerRef, perkIdx: number) => boolean,
-    poisonIdx: number,
-  ) {
-    this.proj = proj;
-    this.creature = creature;
-    this.rng = rng;
-    this.ownerPerkActive = ownerPerkActive;
-    this.poisonIdx = poisonIdx;
+  constructor(opts: {
+    proj: Projectile;
+    creature: CreatureState;
+    rng: CrandLike;
+    ownerPerkActive: (owner: OwnerRef, perkIdx: number) => boolean;
+    poisonIdx: number;
+  }) {
+    this.proj = opts.proj;
+    this.creature = opts.creature;
+    this.rng = opts.rng;
+    this.ownerPerkActive = opts.ownerPerkActive;
+    this.poisonIdx = opts.poisonIdx;
   }
 }
 
@@ -137,10 +137,13 @@ const CREATURE_DAMAGE_TYPE_BULLET = CreatureDamageType.BULLET as number;
 function lingerIonAoe(
   ctx: ProjectileUpdateCtx,
   proj: Projectile,
-  lifeDecayScale: number,
-  damagePerSecond: number,
-  baseRadius: number,
+  opts: {
+    lifeDecayScale: number;
+    damagePerSecond: number;
+    baseRadius: number;
+  },
 ): void {
+  const { lifeDecayScale, damagePerSecond, baseRadius } = opts;
   proj.lifeTimer = lifeTimerSubF32(proj.lifeTimer, ctx.dt * lifeDecayScale);
   const damage = ctx.dt * damagePerSecond;
   const radius = ctx.ionScale * baseRadius;
@@ -169,15 +172,15 @@ function lingerIonAoe(
 }
 
 export function lingerIonMinigun(ctx: ProjectileUpdateCtx, proj: Projectile): void {
-  lingerIonAoe(ctx, proj, 1.0, 40.0, 60.0);
+  lingerIonAoe(ctx, proj, { lifeDecayScale: 1.0, damagePerSecond: 40.0, baseRadius: 60.0 });
 }
 
 export function lingerIonRifle(ctx: ProjectileUpdateCtx, proj: Projectile): void {
-  lingerIonAoe(ctx, proj, 1.0, 100.0, 88.0);
+  lingerIonAoe(ctx, proj, { lifeDecayScale: 1.0, damagePerSecond: 100.0, baseRadius: 88.0 });
 }
 
 export function lingerIonCannon(ctx: ProjectileUpdateCtx, proj: Projectile): void {
-  lingerIonAoe(ctx, proj, 0.7, 300.0, 128.0);
+  lingerIonAoe(ctx, proj, { lifeDecayScale: 0.7, damagePerSecond: 300.0, baseRadius: 128.0 });
 }
 
 export function preHitSplitter(ctx: ProjectileUpdateCtx, proj: Projectile, hitIdx: number): void {
