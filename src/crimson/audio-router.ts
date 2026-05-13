@@ -87,7 +87,11 @@ export class AudioRouter {
     }
   }
 
-  private _hitSfxForType(typeId: number, _beamTypes: ReadonlySet<number>, rng: CrandLike): SfxId {
+  private _hitSfxForType(
+    typeId: number,
+    opts: { beamTypes: ReadonlySet<number>; rng: CrandLike },
+  ): SfxId {
+    const { rng } = opts;
     const entry = weaponEntryForProjectileTypeId(typeId);
     const ammoClass = entry.ammoClass;
     if (ammoClass === 4) return SfxId.SHOCK_HIT_01;
@@ -110,7 +114,7 @@ export class AudioRouter {
         continue;
       }
       const typeId = int(hits[idx].typeId);
-      this.playSfx(this._hitSfxForType(typeId, beamTypes, rng));
+      this.playSfx(this._hitSfxForType(typeId, { beamTypes, rng }));
     }
   }
 }
