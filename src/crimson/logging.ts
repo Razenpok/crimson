@@ -22,7 +22,26 @@ export function resolveLogLevel(value: string | number): number {
 
 function _repr(value: string | number): string {
   if (typeof value === 'string') {
-    return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+    let escaped = '';
+    for (const ch of value) {
+      const code = ch.charCodeAt(0);
+      if (ch === '\\') {
+        escaped += '\\\\';
+      } else if (ch === "'") {
+        escaped += "\\'";
+      } else if (ch === '\n') {
+        escaped += '\\n';
+      } else if (ch === '\r') {
+        escaped += '\\r';
+      } else if (ch === '\t') {
+        escaped += '\\t';
+      } else if (code < 0x20 || code === 0x7F) {
+        escaped += `\\x${code.toString(16).padStart(2, '0')}`;
+      } else {
+        escaped += ch;
+      }
+    }
+    return `'${escaped}'`;
   }
   return String(value);
 }
