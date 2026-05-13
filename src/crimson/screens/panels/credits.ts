@@ -2,7 +2,7 @@
 
 import * as wgl from "@wgl";
 import { Vec2 } from "@grim/geom.ts";
-import { getTexture, type RuntimeResources, TextureId } from "@grim/assets.ts";
+import { getTexture, TextureId } from "@grim/assets.ts";
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
 import { audioPlaySfx, audioUpdate } from "@grim/audio.ts";
 import { SfxId } from "@grim/sfx-map.ts";
@@ -11,7 +11,6 @@ import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
 import { debugEnabled } from "@crimson/debug.ts";
 import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
-import { drawMenuCursor } from "@crimson/ui/cursor.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
 import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
 import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "@crimson/ui/perk-menu.ts";
@@ -30,21 +29,20 @@ import {
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
+  drawMenuCursorHelper,
+  ensureMenuGround,
+  menuGroundCamera,
   signLayoutScale,
   uiElementAnim,
 } from "@crimson/screens/menu.ts";
+import { PANEL_TIMELINE_END_MS, PANEL_TIMELINE_START_MS } from "./base.ts";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const PANEL_TIMELINE_START_MS = 300;
-const PANEL_TIMELINE_END_MS = 0;
-
+// Measured from ui_render_trace_oracle_1024x768.json (state_17:credits, timeline=300).
 const CREDITS_PANEL_POS_X = -119.0;
 const CREDITS_PANEL_POS_Y = 185.0;
 const CREDITS_PANEL_HEIGHT = 378.0;
 
+// Child layout inside the panel (relative to panel top-left).
 const _TITLE_X = 202.0;
 const _TITLE_Y = 46.0;
 
@@ -78,15 +76,14 @@ const _CREDITS_SECRET_LINES: readonly string[] = [
   '(4 bits for index) <- OOOPS I meant FIVE!',
   '(4 bits for index)',
 ];
+if (_CREDITS_SECRET_LINES.length !== _CREDITS_SECRET_LINE_COUNT) {
+  throw new Error('credits secret line count mismatch');
+}
 
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-
-// ---------------------------------------------------------------------------
-// CreditsLine
-// ---------------------------------------------------------------------------
 
 interface CreditsLine {
   text: string;
@@ -96,10 +93,6 @@ interface CreditsLine {
 function makeCreditsLine(text: string = '', flags: number = 0): CreditsLine {
   return { text, flags };
 }
-
-// ---------------------------------------------------------------------------
-// Build credits table
-// ---------------------------------------------------------------------------
 
 function creditsBuildLines(): { lines: CreditsLine[]; lineMaxIndex: number; secretLineBaseIndex: number } {
   const lines: CreditsLine[] = [];
@@ -222,10 +215,6 @@ function creditsBuildLines(): { lines: CreditsLine[]; lineMaxIndex: number; secr
   return { lines, lineMaxIndex, secretLineBaseIndex };
 }
 
-// ---------------------------------------------------------------------------
-// Helper functions
-// ---------------------------------------------------------------------------
-
 function creditsLineClearFlag(lines: CreditsLine[], index: number): boolean {
   while (index >= 0) {
     if (lines[index].flags & _FLAG_CLICKED) {
@@ -253,33 +242,6 @@ function creditsUnlockSecretLines(lines: CreditsLine[], baseIndex: number): void
     line.text = _CREDITS_SECRET_LINES[offset];
   }
 }
-
-// ---------------------------------------------------------------------------
-// Line color helper
-// ---------------------------------------------------------------------------
-
-function lineColor(flags: number, alpha: number): wgl.Color {
-  let r: number, g: number, b: number;
-  if ((flags & _FLAG_CLICKED) === 0) {
-    if ((flags & _FLAG_HEADING) === 0) {
-      r = 0.4; g = 0.5; b = 0.7;
-    } else {
-      r = 1.0; g = 1.0; b = 1.0;
-    }
-  } else {
-    if ((flags & _FLAG_HEADING) === 0) {
-      r = 0.4; g = 0.7; b = 0.7;
-    } else {
-      r = 0.9; g = 1.0; b = 0.9;
-    }
-  }
-  const a = Math.max(0.0, Math.min(1.0, alpha));
-  return wgl.makeColor(r, g, b, a);
-}
-
-// ---------------------------------------------------------------------------
-// CreditsView
-// ---------------------------------------------------------------------------
 
 export class CreditsView {
   state: GameState;
@@ -316,7 +278,7 @@ export class CreditsView {
   open(): void {
     const layoutW = this.state.config.display.width;
     this._widescreenYShift = menuWidescreenYShift(layoutW);
-    this._ground = this.state.pauseBackground !== null ? null : this.state.menuGround;
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
     this._cursorPulseTime = 0.0;
     this._timelineMs = 0;
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;
@@ -377,14 +339,16 @@ export class CreditsView {
     this._closeAction = action;
   }
 
-  private _panelTopLeft(scale: number): Vec2 {
+  private _panelTopLeft(opts: { scale: number }): Vec2 {
+    const scale = opts.scale;
     return new Vec2(
       CREDITS_PANEL_POS_X + MENU_PANEL_OFFSET_X * scale,
       CREDITS_PANEL_POS_Y + this._widescreenYShift + MENU_PANEL_OFFSET_Y * scale,
     );
   }
 
-  private static _scrollFractionPx(scrollTimeS: number, scale: number): number {
+  private static _scrollFractionPx(scrollTimeS: number, opts: { scale: number }): number {
+    const scale = opts.scale;
     let frac = scrollTimeS * (_TEXT_LINE_HEIGHT * scale);
     const lineH = _TEXT_LINE_HEIGHT * scale;
     while (frac > lineH) {
@@ -407,7 +371,8 @@ export class CreditsView {
     }
   }
 
-  private _panelSlideX(scale: number): number {
+  private _panelSlideX(opts: { scale: number }): number {
+    const scale = opts.scale;
     const panelW = MENU_PANEL_WIDTH * scale;
     const [_angleRad, slideX] = uiElementAnim(
       this,
@@ -421,18 +386,46 @@ export class CreditsView {
   }
 
   private static _mouseInsideRect(
-    mx: number, my: number,
-    x: number, y: number, w: number, h: number,
+    mouse: { x: number; y: number },
+    opts: { x: number; y: number; w: number; h: number },
   ): boolean {
-    return (x <= mx && mx <= (x + w)) && (y <= my && my <= (y + h));
+    const x = opts.x;
+    const y = opts.y;
+    const w = opts.w;
+    const h = opts.h;
+    return (x <= mouse.x && mouse.x <= (x + w)) && (y <= mouse.y && mouse.y <= (y + h));
   }
 
-  private _lineAlpha(
-    y: number,
-    baseY: number,
-    visibleCount: number,
-    scale: number,
-  ): number {
+  private static _lineColor(flags: number, opts: { alpha: number }): wgl.Color {
+    const alpha = opts.alpha;
+    let r: number, g: number, b: number;
+    if ((flags & _FLAG_CLICKED) === 0) {
+      if ((flags & _FLAG_HEADING) === 0) {
+        r = 0.4; g = 0.5; b = 0.7;
+      } else {
+        r = 1.0; g = 1.0; b = 1.0;
+      }
+    } else {
+      if ((flags & _FLAG_HEADING) === 0) {
+        r = 0.4; g = 0.7; b = 0.7;
+      } else {
+        r = 0.9; g = 1.0; b = 0.9;
+      }
+    }
+    const a = Math.max(0.0, Math.min(1.0, alpha));
+    return wgl.makeColor(r, g, b, a);
+  }
+
+  private _lineAlpha(opts: {
+    y: number;
+    baseY: number;
+    visibleCount: number;
+    scale: number;
+  }): number {
+    const y = opts.y;
+    const baseY = opts.baseY;
+    const visibleCount = opts.visibleCount;
+    const scale = opts.scale;
     const fadePx = _TEXT_FADE_PX * scale;
     const top = baseY + (8.0 * scale);
     let alpha = 1.0;
@@ -449,19 +442,23 @@ export class CreditsView {
     return alpha;
   }
 
-  private _updateLineClicks(
-    panelTopLeft: Vec2,
-    scale: number,
-    font: SmallFontData,
-    mx: number,
-    my: number,
-    click: boolean,
-  ): void {
+  private _updateLineClicks(opts: {
+    panelTopLeft: Vec2;
+    scale: number;
+    font: SmallFontData;
+    mouse: { x: number; y: number };
+    click: boolean;
+  }): void {
+    const panelTopLeft = opts.panelTopLeft;
+    const scale = opts.scale;
+    const font = opts.font;
+    const mouse = opts.mouse;
+    const click = opts.click;
     const visibleCount = this._scrollLineEndIndex - this._scrollLineStartIndex;
     if (visibleCount <= 0 || !click) return;
 
     const baseY = panelTopLeft.y + (_TEXT_BASE_Y * scale);
-    const fracPx = CreditsView._scrollFractionPx(this._scrollTimeS, scale);
+    const fracPx = CreditsView._scrollFractionPx(this._scrollTimeS, { scale });
     const centerX = panelTopLeft.x + ((_TEXT_ANCHOR_X + _TEXT_CENTER_OFFSET_X) * scale);
 
     for (let row = 0; row < visibleCount; row++) {
@@ -471,7 +468,7 @@ export class CreditsView {
       const textW = measureSmallTextWidth(font, line.text);
       const x = centerX - (textW * 0.5);
       const y = baseY + (row * (_TEXT_LINE_HEIGHT * scale)) - fracPx;
-      if (!CreditsView._mouseInsideRect(mx, my, x, y, textW, _TEXT_RECT_H * scale)) {
+      if (!CreditsView._mouseInsideRect(mouse, { x, y, w: textW, h: _TEXT_RECT_H * scale })) {
         continue;
       }
 
@@ -539,17 +536,23 @@ export class CreditsView {
     if (!interactive) return;
 
     const scale = this.state.config.display.width < 641 ? 0.9 : 1.0;
-    const slideX = this._panelSlideX(scale);
-    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX });
+    const slideX = this._panelSlideX({ scale });
+    const panelTopLeft = this._panelTopLeft({ scale }).offset({ dx: slideX });
     const resources = requireRuntimeResources(this.state);
     const [mx, my] = InputState.mousePosition();
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-    this._updateLineClicks(panelTopLeft, scale, resources.smallFont, mx, my, click);
+    const mouse = { x: mx, y: my };
+    this._updateLineClicks({
+      panelTopLeft,
+      scale,
+      font: resources.smallFont,
+      mouse,
+      click,
+    });
     this._updateSecretUnlock();
 
     const dtMsF = dtClamped * 1000.0;
-    const mouse = { x: mx, y: my };
 
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
@@ -578,8 +581,7 @@ export class CreditsView {
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
 
     drawScreenFade(this.state);
@@ -587,8 +589,8 @@ export class CreditsView {
     const resources = requireRuntimeResources(this.state);
 
     const scale = this.state.config.display.width < 641 ? 0.9 : 1.0;
-    const slideX = this._panelSlideX(scale);
-    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX });
+    const slideX = this._panelSlideX({ scale });
+    const panelTopLeft = this._panelTopLeft({ scale }).offset({ dx: slideX });
 
     const panelW = MENU_PANEL_WIDTH * scale;
     const panelH = CREDITS_PANEL_HEIGHT * scale;
@@ -604,7 +606,7 @@ export class CreditsView {
     const visibleCount = this._scrollLineEndIndex - this._scrollLineStartIndex;
     if (visibleCount > 0) {
       const baseY = panelTopLeft.y + (_TEXT_BASE_Y * scale);
-      const fracPx = CreditsView._scrollFractionPx(this._scrollTimeS, scale);
+      const fracPx = CreditsView._scrollFractionPx(this._scrollTimeS, { scale });
       const centerX = panelTopLeft.x + ((_TEXT_ANCHOR_X + _TEXT_CENTER_OFFSET_X) * scale);
 
       for (let row = 0; row < visibleCount; row++) {
@@ -612,8 +614,8 @@ export class CreditsView {
         if (index < 0 || index >= this._lines.length) continue;
         const line = this._lines[index];
         const y = baseY + (row * (_TEXT_LINE_HEIGHT * scale)) - fracPx;
-        const alpha = this._lineAlpha(y, baseY, visibleCount, scale);
-        const color = lineColor(line.flags, alpha);
+        const alpha = this._lineAlpha({ y, baseY, visibleCount, scale });
+        const color = CreditsView._lineColor(line.flags, { alpha });
         const textW = measureSmallTextWidth(font, line.text);
         drawSmallText(font, line.text, new Vec2(centerX - (textW * 0.5), y), color);
       }
@@ -629,11 +631,12 @@ export class CreditsView {
       buttonDraw(resources, this._secretButton, { pos: secretPos, width: secretW, scale });
     }
 
-    this._drawSign(resources);
-    this._drawMenuCursor(resources);
+    this._drawSign();
+    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
-  private _drawSign(resources: RuntimeResources): void {
+  private _drawSign(): void {
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(int(screenW));
@@ -664,10 +667,4 @@ export class CreditsView {
     );
   }
 
-  private _drawMenuCursor(resources: RuntimeResources): void {
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
-  }
 }
