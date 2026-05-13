@@ -148,7 +148,7 @@ export class TickRunner {
     }
     if (int(sourceTick.tickIndex) !== int(expectedTickIndex)) {
       throw new Error(
-        `resolved tick index mismatch: expected ${int(expectedTickIndex)}, got ${int(sourceTick.tickIndex)}`,
+        `resolved tick index mismatch: expected=${int(expectedTickIndex)} got=${int(sourceTick.tickIndex)}`,
       );
     }
     const dtSeconds = Number(sourceTick.dtSeconds);
