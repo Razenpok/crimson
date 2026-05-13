@@ -12,10 +12,12 @@ import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.t
 import type { BonusApplyCtx } from './apply-context.ts';
 
 export class DeferredFreezeCorpseFx {
-  constructor(
-    public readonly pos: Vec2,
-    public readonly detailPreset: number,
-  ) {
+  readonly pos: Vec2;
+  readonly detailPreset: number;
+
+  constructor(opts: { pos: Vec2; detailPreset: number }) {
+    this.pos = opts.pos;
+    this.detailPreset = opts.detailPreset;
   }
 }
 
@@ -48,7 +50,10 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
       const pos = creature.pos;
       if (allowShatterFx && deferCorpseFx) {
         ctx.state.deferredFreezeCorpseFx.push(
-          new DeferredFreezeCorpseFx(new Vec2(pos.x, pos.y), int(ctx.detailPreset)),
+          new DeferredFreezeCorpseFx({
+            pos: new Vec2(pos.x, pos.y),
+            detailPreset: int(ctx.detailPreset),
+          }),
         );
       } else if (allowShatterFx) {
         for (let j = 0; j < 8; j++) {

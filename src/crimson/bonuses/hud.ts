@@ -19,7 +19,6 @@ export class TimerRef {
     this.kind = kind;
     this.key = key;
     this.playerIndex = playerIndex;
-    Object.freeze(this);
   }
 }
 
