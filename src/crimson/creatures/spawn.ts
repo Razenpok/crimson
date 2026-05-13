@@ -1,5 +1,18 @@
 // Port of crimson/creatures/spawn.py
 
+// Creature spawning helpers.
+//
+// This module combines:
+// - a spawn-id labeling index (direct `type_id`/`flags` assignments extracted from
+//   `creature_spawn_template`, `FUN_00430af0`)
+// - a partial 1:1 rewrite of `creature_spawn_template` as a pure plan builder
+//
+// Note: in the original game, `creature_spawn_template` is an algorithm (formations,
+// spawn slots, tail modifiers), so the spawn-id index here is only used for labeling
+// and debug UIs.
+//
+// See also: `docs/creatures/spawn_plan.md` (porting model / invariants).
+
 import { Vec2 } from '@grim/geom.ts';
 import { CrandLike } from '@grim/rand.ts';
 import { BonusId } from '@crimson/bonuses/ids.ts';
@@ -31,7 +44,15 @@ export {
 };
 
 
-export class UnsupportedSpawnTemplateError extends Error {
+class ValueError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValueError';
+  }
+}
+
+
+export class UnsupportedSpawnTemplateError extends ValueError {
   constructor(message: string) {
     super(message);
     this.name = 'UnsupportedSpawnTemplateError';
