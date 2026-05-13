@@ -35,8 +35,8 @@ export function buildPostApplyReaction(opts: {
   return new PostApplyReaction({
     sfx: Array.from(tickResult.payload.step.postApplySfx),
     quest: {
-      playHitSfx: questState.playHitSfx,
-      playCompletionMusic: questState.playCompletionMusic,
+      playHitSfx: Boolean(questState.playHitSfx),
+      playCompletionMusic: Boolean(questState.playCompletionMusic),
     },
   });
 }
@@ -53,12 +53,12 @@ export function applyPostApplyReaction(opts: {
     for (const sfx of reaction.sfx) {
       playSfx(sfx);
     }
-    if (quest?.playHitSfx) {
+    if (quest !== null && Boolean(quest.playHitSfx)) {
       playSfx(SfxId.QUESTHIT);
     }
   }
 
-  if (quest?.playCompletionMusic) {
-    playCompletionMusic?.();
+  if (quest !== null && Boolean(quest.playCompletionMusic) && playCompletionMusic != null) {
+    playCompletionMusic();
   }
 }
