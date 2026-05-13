@@ -45,14 +45,12 @@ export class DemoTrialOverlayInfo {
   }
 }
 
-/**
- * Advance demo timers by `dtMs` (ms), returning updated values.
- *
- * This mirrors the classic behavior where:
- *   - global playtime accumulates until it hits `DEMO_TOTAL_PLAY_TIME_MS`, then clamps
- *   - once global time is exhausted, a quest-only grace timer becomes active
- *   - timers do not advance while the demo trial overlay is shown
- */
+// Advance demo timers by `dt_ms` (ms), returning updated values.
+//
+// This mirrors the classic behavior where:
+//   - global playtime accumulates until it hits `DEMO_TOTAL_PLAY_TIME_MS`, then clamps
+//   - once global time is exhausted, a quest-only grace timer becomes active
+//   - timers do not advance while the demo trial overlay is shown
 export function tickDemoTrialTimers(opts: {
   demoBuild: boolean;
   gameModeId: GameMode;
@@ -101,15 +99,13 @@ export function tickDemoTrialTimers(opts: {
   return [int(usedMs), int(graceMs)];
 }
 
-/**
- * Compute demo trial overlay status.
- *
- * Modeled after `demo_trial_overlay_render` (0x004047c0) call sites and time formatting.
- *
- * Notes:
- *   - `globalPlaytimeMs` maps to `game_status_blob.game_sequence_id` (ms).
- *   - `questGraceElapsedMs` maps to `demo_trial_elapsed_ms` (ms) once activated.
- */
+// Compute demo trial overlay status.
+//
+// Modeled after `demo_trial_overlay_render` (0x004047c0) call sites and time formatting.
+//
+// Notes:
+//   - `global_playtime_ms` maps to `game_status_blob.game_sequence_id` (ms).
+//   - `quest_grace_elapsed_ms` maps to `demo_trial_elapsed_ms` (ms) once activated.
 export function demoTrialOverlayInfo(opts: {
   demoBuild: boolean;
   gameModeId: GameMode;
