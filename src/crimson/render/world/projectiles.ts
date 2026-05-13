@@ -15,6 +15,7 @@ import { ProjectileDrawCtx, SecondaryProjectileDrawCtx } from '@crimson/render/p
 import { WorldRenderCtx } from './context.ts';
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_circle`.
   const segments = Math.max(24, int(radius * 1.5 + 0.5));
   const step = (Math.PI * 2.0) / segments;
   const white = wgl.getWhiteTexture();
