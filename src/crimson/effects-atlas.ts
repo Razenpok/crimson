@@ -18,7 +18,6 @@ export class EffectAtlasEntry {
     this.effectId = effectId;
     this.sizeCode = sizeCode;
     this.frame = frame;
-    Object.freeze(this);
   }
 
   get grid(): number {
