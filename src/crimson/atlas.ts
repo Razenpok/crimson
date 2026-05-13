@@ -10,7 +10,7 @@
 // - FUN_0042e120 uses the selected UV grid to build quad UVs by frame index.
 //
 // This module replicates the atlas cutting: given a grid size and frame index,
-// compute UVs or pixel rects.
+// compute UVs or crop subimages.
 
 const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
   0x80: 2,
@@ -19,7 +19,7 @@ const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
   0x10: 16,
 };
 
-// DAT_004755f0 table (index -> [cell_code, group_id]) extracted from crimsonland.exe
+// DAT_004755f0 table (index -> (cell_code, group_id)) extracted from crimsonland.exe
 const SPRITE_TABLE: readonly (readonly [number, number])[] = [
   [0x80, 0x2],
   [0x80, 0x3],
@@ -53,9 +53,6 @@ export function gridSizeForIndex(index: number) {
   return gridSizeFromCode(code);
 }
 
-/**
- * Compute UV coordinates for a frame within an NxN atlas grid.
- */
 export function uvForIndex(grid: number, index: number): [u0: number, v0: number, u1: number, v1: number] {
   const row = Math.floor(index / grid);
   const col = index % grid;
@@ -67,10 +64,6 @@ export function uvForIndex(grid: number, index: number): [u0: number, v0: number
   return [u0, v0, u1, v1];
 }
 
-/**
- * Compute pixel rectangle for a frame within an NxN atlas grid.
- * Returns [x0, y0, x1, y1] (top-left to bottom-right).
- */
 export function rectForIndex(
   width: number,
   height: number,
@@ -84,4 +77,21 @@ export function rectForIndex(
   const x0 = col * cellW;
   const y0 = row * cellH;
   return [x0, y0, x0 + cellW, y0 + cellH];
+}
+
+// PIL Image.crop is not available in the WebGL runtime.
+export function sliceIndex(_image: unknown, _grid: number, _index: number): never {
+  throw new Error('PIL Image.crop is not available in the WebGL runtime');
+}
+
+export function sliceGrid(image: unknown, grid: number): never[] {
+  const frames: never[] = [];
+  for (let idx = 0; idx < grid * grid; idx++) {
+    frames.push(sliceIndex(image, grid, idx));
+  }
+  return frames;
+}
+
+export function sliceByIndices(image: unknown, grid: number, indices: Iterable<number>): never[] {
+  return Array.from(indices, (idx) => sliceIndex(image, grid, idx));
 }
