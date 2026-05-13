@@ -1,6 +1,6 @@
 // Port of crimson/perks/runtime/effects_context.py
 
-import { Vec2 } from '@grim/geom.ts';
+import type { Vec2 } from '@grim/geom.ts';
 import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
@@ -11,10 +11,9 @@ export function creatureFindInRadius(
   creatures: readonly CreatureState[],
   opts: { pos: Vec2; radius: number; startIndex: number },
 ): number {
-  /** Find the first active creature intersecting an aim radius.
-   *
-   * Port of `creature_find_in_radius` (0x004206a0).
-   */
+  // Find the first active creature intersecting an aim radius.
+  //
+  // Port of `creature_find_in_radius` (0x004206a0).
 
   let startIndex = Math.max(0, int(opts.startIndex));
   const maxIndex = Math.min(creatures.length, 0x180);
@@ -22,13 +21,15 @@ export function creatureFindInRadius(
     return -1;
   }
 
+  const radius = opts.radius;
+
   for (let idx = startIndex; idx < maxIndex; idx++) {
     const creature = creatures[idx];
     if (!creature.active) {
       continue;
     }
 
-    const dist = creature.pos.sub(opts.pos).length() - opts.radius;
+    const dist = creature.pos.sub(opts.pos).length() - radius;
     const threshold = nativeFindSizeMargin(creature.size);
     if (threshold < dist) {
       continue;
