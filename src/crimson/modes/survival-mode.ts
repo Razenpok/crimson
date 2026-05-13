@@ -17,7 +17,6 @@ import {
   DeterministicSession,
   type DeterministicSessionTick,
   SurvivalSpawnState,
-
 } from '@crimson/sim/sessions.ts';
 import { buildSurvivalSession } from '@crimson/sim/session-builders.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
@@ -38,16 +37,12 @@ import { PerkMenuController } from './components/perk-menu-controller.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { PerkPromptState } from './components/perk-prompt-controller.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const WORLD_SIZE = 1024.0;
 
 const UI_TEXT_SCALE = 1.0;
 const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
-const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
+const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.5) / 255);
 const UI_ERROR_COLOR = wgl.makeColor(240 / 255, 80 / 255, 80 / 255, 1.0);
 
 const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
@@ -57,10 +52,6 @@ const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
   }
   return ids.sort((a, b) => a - b);
 })();
-
-// ---------------------------------------------------------------------------
-// SurvivalMode
-// ---------------------------------------------------------------------------
 
 export class SurvivalMode extends BaseGameplayMode {
   private _perkPrompt = new PerkPromptState();
@@ -91,10 +82,6 @@ export class SurvivalMode extends BaseGameplayMode {
     this._simSession = this._newSimSession();
   }
 
-  // ---------------------------------------------------------------------------
-  // Session builder
-  // ---------------------------------------------------------------------------
-
   private _newSimSession(): DeterministicSession {
     const [session, spawnState] = buildSurvivalSession({
       world: this.simWorld.worldState,
@@ -108,10 +95,6 @@ export class SurvivalMode extends BaseGameplayMode {
     this._spawnState = spawnState;
     return session;
   }
-
-  // ---------------------------------------------------------------------------
-  // Replay helpers
-  // ---------------------------------------------------------------------------
 
   protected _replayCheckpointElapsedMs(): number {
     return this._sessionElapsedMs();
@@ -130,10 +113,6 @@ export class SurvivalMode extends BaseGameplayMode {
     const score = int(this.player.experience);
     return `survival_${stamp}_score${score}`;
   }
-
-  // ---------------------------------------------------------------------------
-  // Perk UI
-  // ---------------------------------------------------------------------------
 
   private _tryOpenPerkMenu(): void {
     this._openPerkMenuUi({
@@ -185,10 +164,6 @@ export class SurvivalMode extends BaseGameplayMode {
     }
     this._tickPerkMenuTimeline(dtUiMs);
   }
-
-  // ---------------------------------------------------------------------------
-  // Perk prompt overrides
-  // ---------------------------------------------------------------------------
 
   protected _pollPerkOpenRequest(opts: {
     pendingCount: number;
@@ -258,13 +233,11 @@ export class SurvivalMode extends BaseGameplayMode {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Text wrapping utility
-  // ---------------------------------------------------------------------------
-
   private _wrapUiText(text: string, maxWidth: number, scale: number = UI_TEXT_SCALE): string[] {
     const lines: string[] = [];
-    const rawLines = text.split('\n');
+    const rawLines = text.match(/[^\r\n]*(?:\r\n|\r|\n|$)/g)
+      ?.map((line) => line.replace(/\r\n|\r|\n$/, ''))
+      .filter((line, index, array) => !(index === array.length - 1 && line === '')) ?? [];
     if (rawLines.length === 0) rawLines.push('');
     for (const raw of rawLines) {
       const para = raw.trim();
@@ -288,10 +261,6 @@ export class SurvivalMode extends BaseGameplayMode {
     }
     return lines;
   }
-
-  // ---------------------------------------------------------------------------
-  // Lifecycle
-  // ---------------------------------------------------------------------------
 
   open(): void {
     super.open();
@@ -324,10 +293,6 @@ export class SurvivalMode extends BaseGameplayMode {
     this._lanLastTickIndex = -1;
     super.close();
   }
-
-  // ---------------------------------------------------------------------------
-  // Input handling
-  // ---------------------------------------------------------------------------
 
   protected _handleInput(): void {
     if (this._gameOverActive) {
@@ -389,10 +354,6 @@ export class SurvivalMode extends BaseGameplayMode {
     weaponAssignPlayer(this.player, weaponId, { state: this.state });
   }
 
-  // ---------------------------------------------------------------------------
-  // Death / game over
-  // ---------------------------------------------------------------------------
-
   private _deathTransitionReady(): boolean {
     let deadPlayers = 0;
     for (const player of this.simWorld.players) {
@@ -419,10 +380,6 @@ export class SurvivalMode extends BaseGameplayMode {
     this._perkMenu.close();
     this._saveReplay();
   }
-
-  // ---------------------------------------------------------------------------
-  // LAN helpers
-  // ---------------------------------------------------------------------------
 
   protected _lanModeName(): 'survival' | 'rush' | 'quests' {
     return 'survival';
@@ -498,10 +455,6 @@ export class SurvivalMode extends BaseGameplayMode {
     return 'continue';
   }
 
-  // ---------------------------------------------------------------------------
-  // Resync snapshot
-  // ---------------------------------------------------------------------------
-
   protected _applyResyncSnapshot(snapshot: unknown): void {
     const rs = snapshot as {
       elapsedMs: number;
@@ -514,10 +467,6 @@ export class SurvivalMode extends BaseGameplayMode {
     this._spawnState.stage = rs.stage;
     this._spawnState.spawnCooldownMs = rs.spawnCooldownMs;
   }
-
-  // ---------------------------------------------------------------------------
-  // Update
-  // ---------------------------------------------------------------------------
 
   update(dt: number): void {
     const frame = this._beginModeUpdate(dt);
@@ -582,10 +531,6 @@ export class SurvivalMode extends BaseGameplayMode {
       onCheckpoint,
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw
-  // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
     const resources = this.renderResources.resources;
