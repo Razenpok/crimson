@@ -14,6 +14,9 @@ export enum AimScheme {
 export function aimSchemeFromValue(
   value: number,
 ): AimScheme {
+  if (!Number.isFinite(value)) {
+    return AimScheme.UNKNOWN;
+  }
   switch (int(value)) {
     case AimScheme.MOUSE:
       return AimScheme.MOUSE;
