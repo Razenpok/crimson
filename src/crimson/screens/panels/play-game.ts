@@ -29,29 +29,13 @@ import {
 } from '@crimson/screens/menu.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
 
-// ---------------------------------------------------------------------------
-// Label row indices for the UI_ITEM_TEXTS sprite sheet
-// ---------------------------------------------------------------------------
-
 const MENU_LABEL_ROW_PLAY_GAME = 1;
-
-// ---------------------------------------------------------------------------
-// Key constants
-// ---------------------------------------------------------------------------
 
 const KEY_ESCAPE = 27;
 const KEY_F1 = 112;
 const MOUSE_BUTTON_LEFT = 0;
 
-// ---------------------------------------------------------------------------
-// Color helpers
-// ---------------------------------------------------------------------------
-
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-
-// ---------------------------------------------------------------------------
-// PlayGameModeEntry
-// ---------------------------------------------------------------------------
 
 interface PlayGameModeEntry {
   key: string;
@@ -73,19 +57,11 @@ function modeEntry(
   return { key, label, tooltip, action, gameMode, showCount };
 }
 
-// ---------------------------------------------------------------------------
-// PlayGameContentLayout
-// ---------------------------------------------------------------------------
-
 interface PlayGameContentLayout {
   scale: number;
   basePos: Vec2;
   dropPos: Vec2;
 }
-
-// ---------------------------------------------------------------------------
-// PlayerCountWidgetLayout
-// ---------------------------------------------------------------------------
 
 interface PlayerCountWidgetLayout {
   pos: Vec2;
