@@ -17,6 +17,7 @@ export class FrameTiming {
     public readonly zeroGateActive: boolean,
     public readonly dtSim: number,
   ) {
+    Object.freeze(this);
   }
 
   get dtMsI32(): number {

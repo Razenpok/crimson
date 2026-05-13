@@ -33,6 +33,7 @@ export class PlayerInput {
     this.moveBackwardPressed = defined(opts?.moveBackwardPressed, null);
     this.turnLeftPressed = defined(opts?.turnLeftPressed, null);
     this.turnRightPressed = defined(opts?.turnRightPressed, null);
+    Object.freeze(this);
   }
 
   replace(overrides: Partial<PlayerInput>): PlayerInput {

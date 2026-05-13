@@ -8,6 +8,7 @@ export class InputFrame {
   constructor(
     public readonly players: readonly PlayerInput[]
   ) {
+    Object.freeze(this);
   }
 
   asList(): PlayerInput[] {

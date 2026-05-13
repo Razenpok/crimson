@@ -3,19 +3,23 @@
 import { CreatureTypeId } from '@crimson/creatures/spawn-ids.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 
-export interface CreatureAnimInfo {
-  readonly base: number;
-  readonly animRate: number;
-  readonly mirror: boolean;
+export class CreatureAnimInfo {
+  constructor(
+    public readonly base: number,
+    public readonly animRate: number,
+    public readonly mirror: boolean,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 export const CREATURE_ANIM = new Map<CreatureTypeId, CreatureAnimInfo>([
-  [CreatureTypeId.ZOMBIE, { base: 0x20, animRate: 1.2, mirror: false }],
-  [CreatureTypeId.LIZARD, { base: 0x10, animRate: 1.6, mirror: true }],
-  [CreatureTypeId.ALIEN, { base: 0x20, animRate: 1.35, mirror: false }],
-  [CreatureTypeId.SPIDER_SP1, { base: 0x10, animRate: 1.5, mirror: true }],
-  [CreatureTypeId.SPIDER_SP2, { base: 0x10, animRate: 1.5, mirror: true }],
-  [CreatureTypeId.TROOPER, { base: 0x00, animRate: 1.0, mirror: false }],
+  [CreatureTypeId.ZOMBIE, new CreatureAnimInfo(0x20, 1.2, false)],
+  [CreatureTypeId.LIZARD, new CreatureAnimInfo(0x10, 1.6, true)],
+  [CreatureTypeId.ALIEN, new CreatureAnimInfo(0x20, 1.35, false)],
+  [CreatureTypeId.SPIDER_SP1, new CreatureAnimInfo(0x10, 1.5, true)],
+  [CreatureTypeId.SPIDER_SP2, new CreatureAnimInfo(0x10, 1.5, true)],
+  [CreatureTypeId.TROOPER, new CreatureAnimInfo(0x00, 1.0, false)],
 ]);
 
 export const CREATURE_ASSET = new Map<CreatureTypeId, string>([
