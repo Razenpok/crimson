@@ -530,7 +530,7 @@ export class MenuView {
       const origin = wgl.makeVector2(-offsetX, -offsetY);
       const rotationDeg = angleRad * (180.0 / Math.PI);
       if (fxDetail) {
-        drawUiQuadShadow({
+        MenuView._drawUiQuadShadow({
           texture: item,
           src: wgl.makeRectangle(0.0, 0.0, itemW, itemH),
           dst: wgl.makeRectangle(dst.x + UI_SHADOW_OFFSET, dst.y + UI_SHADOW_OFFSET, dst.w, dst.h),
@@ -538,7 +538,7 @@ export class MenuView {
           rotationDeg,
         });
       }
-      wgl.drawTexturePro(
+      MenuView._drawUiQuad(
         item,
         wgl.makeRectangle(0.0, 0.0, itemW, itemH),
         dst,
@@ -568,7 +568,7 @@ export class MenuView {
         MENU_LABEL_HEIGHT * itemScale,
       );
       const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
-      wgl.drawTexturePro(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
+      MenuView._drawUiQuad(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
       if (this._menuEntryEnabled(entry)) {
         let glowAlpha = alpha;
         if (0 <= entry.readyTimerMs && entry.readyTimerMs < 0x100) {
@@ -576,7 +576,7 @@ export class MenuView {
         }
         const glowAlphaNorm = glowAlpha / 255;
         wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
-        wgl.drawTexturePro(
+        MenuView._drawUiQuad(
           labelTex, src, labelDst, labelOrigin, rotationDeg,
           wgl.makeColor(1, 1, 1, glowAlphaNorm),
         );
@@ -710,6 +710,27 @@ export class MenuView {
     return maxMs;
   }
 
+  private static _drawUiQuad(
+    texture: wgl.Texture,
+    src: wgl.Rectangle,
+    dst: wgl.Rectangle,
+    origin: wgl.Vector2,
+    rotationDeg: number,
+    tint: wgl.Color,
+  ): void {
+    wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
+  }
+
+  private static _drawUiQuadShadow(opts: {
+    texture: wgl.Texture;
+    src: wgl.Rectangle;
+    dst: wgl.Rectangle;
+    origin: wgl.Vector2;
+    rotationDeg: number;
+  }): void {
+    drawUiQuadShadow(opts);
+  }
+
   private _drawMenuSign(resources: RuntimeResources): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = MenuView._signLayoutScale(int(screenW));
@@ -739,7 +760,7 @@ export class MenuView {
     const signOrigin = wgl.makeVector2(-signOffsetX, -signOffsetY);
 
     if (fxDetail) {
-      drawUiQuadShadow({
+      MenuView._drawUiQuadShadow({
         texture: sign,
         src: signSrc,
         dst: wgl.makeRectangle(signPos.x + UI_SHADOW_OFFSET, signPos.y + UI_SHADOW_OFFSET, signW, signH),
@@ -747,7 +768,7 @@ export class MenuView {
         rotationDeg,
       });
     }
-    wgl.drawTexturePro(
+    MenuView._drawUiQuad(
       sign, signSrc,
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin,
