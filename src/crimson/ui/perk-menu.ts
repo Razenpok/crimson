@@ -42,11 +42,16 @@ export class PerkMenuLayout {
   // Capture (1024x768) shows the perk menu panel uses the 3-slice variant:
   //   open bbox (-108,119) -> (402,497)
   // which corresponds to ui_element pos (-45,110) + geom (-63,-81) and size 510x378.
-  panelPos: Vec2 = new Vec2(-108.0, 29.0);
-  panelSize: Vec2 = new Vec2(510.0, 378.0);
+  panelPos: Vec2;
+  panelSize: Vec2;
+
+  constructor(opts: { panelPos?: Vec2; panelSize?: Vec2 } = {}) {
+    this.panelPos = opts.panelPos ?? new Vec2(-108.0, 29.0);
+    this.panelSize = opts.panelSize ?? new Vec2(510.0, 378.0);
+  }
 }
 
-export interface PerkMenuComputedLayout {
+export class PerkMenuComputedLayout {
   panel: Rect;
   title: Rect;
   sponsorPos: Vec2;
@@ -54,6 +59,24 @@ export interface PerkMenuComputedLayout {
   listStepY: number;
   desc: Rect;
   cancelPos: Vec2;
+
+  constructor(opts: {
+    panel: Rect;
+    title: Rect;
+    sponsorPos: Vec2;
+    listPos: Vec2;
+    listStepY: number;
+    desc: Rect;
+    cancelPos: Vec2;
+  }) {
+    this.panel = opts.panel;
+    this.title = opts.title;
+    this.sponsorPos = opts.sponsorPos;
+    this.listPos = opts.listPos;
+    this.listStepY = opts.listStepY;
+    this.desc = opts.desc;
+    this.cancelPos = opts.cancelPos;
+  }
 }
 
 export function perkMenuComputeLayout(
@@ -107,7 +130,7 @@ export function perkMenuComputeLayout(
     Math.max(0.0, cancelPos.y - 12.0 * scale - descPos.y),
   );
   const desc = Rect.fromPosSize(descPos, descSize);
-  return {
+  return new PerkMenuComputedLayout({
     panel,
     title,
     sponsorPos,
@@ -115,7 +138,7 @@ export function perkMenuComputeLayout(
     listStepY: listStepY * scale,
     desc,
     cancelPos,
-  };
+  });
 }
 
 export function uiElementSlideX(
