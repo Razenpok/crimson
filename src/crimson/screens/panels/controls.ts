@@ -19,12 +19,14 @@ import { mouseInsideRectWithPadding } from './hit-test.ts';
 import { INPUT_CODE_UNBOUND, inputCodeName } from '@crimson/input-codes.ts';
 import {
   PanelMenuView,
-  MENU_PANEL_WIDTH,
-  MENU_PANEL_HEIGHT,
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
-  uiElementAnim,
 } from './base.ts';
+import {
+  MENU_PANEL_WIDTH,
+  MENU_PANEL_HEIGHT,
+  uiElementAnim,
+} from '@crimson/screens/menu.ts';
 import {
   type RebindRowSpec,
   RebindTarget,

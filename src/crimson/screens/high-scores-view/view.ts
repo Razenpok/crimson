@@ -21,8 +21,6 @@ import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
 import {
-  uiElementAnim,
-  signLayoutScale,
   MENU_PANEL_WIDTH,
   MENU_PANEL_OFFSET_X,
   MENU_PANEL_OFFSET_Y,
@@ -34,6 +32,10 @@ import {
   MENU_SIGN_POS_X_PAD,
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
+  signLayoutScale,
+  uiElementAnim,
+} from '@crimson/screens/menu.ts';
+import {
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';

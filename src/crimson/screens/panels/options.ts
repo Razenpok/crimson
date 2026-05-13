@@ -18,12 +18,14 @@ import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import {
   PanelMenuView,
-  MENU_LABEL_ROW_HEIGHT,
-  MENU_PANEL_WIDTH,
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
-  uiElementAnim,
 } from './base.ts';
+import {
+  MENU_LABEL_ROW_HEIGHT,
+  MENU_PANEL_WIDTH,
+  uiElementAnim,
+} from '@crimson/screens/menu.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
 
 // ---------------------------------------------------------------------------

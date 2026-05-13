@@ -24,8 +24,6 @@ import {
 import {
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
-  PANEL_TIMELINE_START_MS,
-  PANEL_TIMELINE_END_MS,
   MENU_SIGN_WIDTH,
   MENU_SIGN_HEIGHT,
   MENU_SIGN_OFFSET_X,
@@ -36,6 +34,10 @@ import {
   MENU_SCALE_SMALL_THRESHOLD,
   uiElementAnim,
   signLayoutScale,
+} from '@crimson/screens/menu.ts';
+import {
+  PANEL_TIMELINE_START_MS,
+  PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';

@@ -31,7 +31,7 @@ import {
   MENU_SIGN_WIDTH,
   signLayoutScale,
   uiElementAnim,
-} from "./base.ts";
+} from "@crimson/screens/menu.ts";
 
 // ---------------------------------------------------------------------------
 // Constants

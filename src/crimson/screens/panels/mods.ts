@@ -6,12 +6,14 @@ import { drawSmallText } from '@grim/fonts/small.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import {
-  MENU_PANEL_WIDTH,
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
   PanelMenuView,
-  uiElementAnim,
 } from './base.ts';
+import {
+  MENU_PANEL_WIDTH,
+  uiElementAnim,
+} from '@crimson/screens/menu.ts';
 
 interface ModsContentLayout {
   scale: number;

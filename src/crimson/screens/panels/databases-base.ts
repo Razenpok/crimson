@@ -19,6 +19,10 @@ import { fxDetailEnabled } from "@grim/config.ts";
 import { hsLeftPanelPosX, hsRightPanelPosX, } from "@crimson/screens/high-scores-layout.ts";
 import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import {
+  PANEL_TIMELINE_END_MS,
+  PANEL_TIMELINE_START_MS,
+} from "./base.ts";
+import {
   MENU_PANEL_OFFSET_X,
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
@@ -30,11 +34,9 @@ import {
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
-  PANEL_TIMELINE_END_MS,
-  PANEL_TIMELINE_START_MS,
   signLayoutScale,
   uiElementAnim,
-} from "./base.ts";
+} from "@crimson/screens/menu.ts";
 
 // ---------------------------------------------------------------------------
 // Shared panel layout (state_14/15/16): tall left panel + short right panel

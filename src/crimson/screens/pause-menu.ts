@@ -34,7 +34,7 @@ import {
   uiElementAnim,
   labelAlpha,
   signLayoutScale,
-} from './panels/base.ts';
+} from './menu.ts';
 
 // ---------------------------------------------------------------------------
 // Constants
