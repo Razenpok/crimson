@@ -330,11 +330,10 @@ export enum RngCallerStatic {
   WEAPON_PICK_RANDOM_AVAILABLE_PICK = 0x00452CD6,
   WEAPON_PICK_RANDOM_AVAILABLE_REROLL_GATE = 0x00452CF1,
   WEAPON_PICK_RANDOM_AVAILABLE_REROLL_PICK = 0x00452CFA,
-  // Synthetic caller IDs — high range so they can't be mistaken for native addresses
+  // Synthetic caller ids reserve the high range so they cannot be
+  // mistaken for native return addresses from the main executable.
   REWRITE_JINXED_ACCIDENT_TARGET_PICK = 0xF1000001,
-  // Unused in WebGL port: replay driver excluded
   REPLAY_DRIVER_INTER_TICK_DRAW_BY_TICK = 0xF1000004,
-  // Unused in WebGL port: replay driver excluded
   REPLAY_DRIVER_INTER_TICK_DRAW = 0xF1000005,
   REWRITE_STATS_MENU_EASTER_ROLL = 0xF1000006,
   REWRITE_STATS_MENU_EASTER_TEXT_X = 0xF1000007,
