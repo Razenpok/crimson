@@ -108,7 +108,7 @@ export function spawnEntry(
   };
 }
 
-export function spawnAt(
+export function spawn(
   point: Vec2,
   opts: {
     heading?: number;
@@ -118,4 +118,16 @@ export function spawnAt(
   },
 ): SpawnEntry {
   return spawnEntry(point, opts);
+}
+
+export function spawnAt(
+  point: Vec2,
+  opts: {
+    heading?: number;
+    spawnId: SpawnId;
+    triggerMs: number;
+    count: number;
+  },
+): SpawnEntry {
+  return spawn(point, opts);
 }

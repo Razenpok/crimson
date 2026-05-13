@@ -1,5 +1,7 @@
 // Port of crimson/quests/level.py
 
+import { questByLevel } from './registry.ts';
+
 export const QUEST_STAGE_COUNT = 5;
 export const QUESTS_PER_STAGE = 10;
 export const QUEST_COUNT = QUEST_STAGE_COUNT * QUESTS_PER_STAGE;
@@ -49,7 +51,7 @@ export class QuestLevel {
     return (this.major - 1) * QUESTS_PER_STAGE + (this.minor - 1);
   }
 
-  title(questByLevel: (level: QuestLevel) => { title: string } | null): string {
+  get title(): string {
     const quest = questByLevel(this);
     if (quest === null) {
       throw new Error(`unknown quest level: ${this.text}`);

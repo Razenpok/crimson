@@ -18,7 +18,7 @@ export function applyHardcoreSpawnTableAdjustment(entries: SpawnEntry[]): SpawnE
   const adjusted: SpawnEntry[] = [];
   for (const entry of entries) {
     const spawnId = entry.spawnId;
-    let count = entry.count;
+    let count = int(entry.count);
     if (count > 1 && spawnId !== SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C) {
       if (spawnId === SpawnId.ALIEN_CONST_RED_FAST_2B) {
         count += 2;
@@ -40,6 +40,7 @@ export function buildQuestSpawnTable(
     fullVersion?: boolean;
   },
 ): readonly SpawnEntry[] {
+  // Build the quest spawn script from the active startup RNG state.
   const builderRng = opts?.rng ?? new Crand();
   const fullVersion = opts?.fullVersion ?? true;
   let entries = quest.builder(ctx, { rng: builderRng, fullVersion });

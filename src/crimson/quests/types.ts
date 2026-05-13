@@ -5,7 +5,7 @@ import type { CrandLike } from '@grim/rand.ts';
 import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
 import type { WeaponId } from '@crimson/weapons.ts';
 import type { QuestLevel } from './level.ts';
-import { TerrainSlotTriplet } from "@crimson/terrain-slots.js";
+import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
 
 export interface QuestContext {
   readonly width: number;
