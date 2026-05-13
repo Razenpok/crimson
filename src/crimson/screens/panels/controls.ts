@@ -16,7 +16,7 @@ import { type DropdownLayoutBase } from '@crimson/ui/layout.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
-import { INPUT_CODE_UNBOUND, inputCodeName } from '@crimson/input-codes.ts';
+import { INPUT_CODE_UNBOUND, captureFirstPressedInputCode, inputCodeName } from '@crimson/input-codes.ts';
 import {
   PanelMenuView,
   PANEL_TIMELINE_START_MS,
@@ -167,53 +167,6 @@ interface RebindRowLayout {
   readonly rowY: number;
   readonly valuePos: Vec2;
   readonly valueRect: Rect;
-}
-
-function captureFirstPressedInputCode(
-  _playerIndex: number,
-  includeKeyboard: boolean,
-  includeMouse: boolean,
-  _includeGamepad: boolean,
-  _includeAxes: boolean,
-  _axisThreshold: number,
-): number | null {
-  if (includeKeyboard) {
-    const pressed = InputState.firstKeyPressed();
-    if (pressed !== null) {
-      const domToDik = domKeyToDik(pressed);
-      if (domToDik !== null) return domToDik;
-    }
-  }
-  if (includeMouse) {
-    for (let btn = 0; btn < 5; btn++) {
-      if (InputState.wasMouseButtonPressed(btn)) {
-        return 0x100 + btn;
-      }
-    }
-  }
-  // Gamepad/axes not supported in WebGL port
-  return null;
-}
-
-function domKeyToDik(domKey: number): number | null {
-  const map: Record<number, number> = {
-    27: 0x01, 49: 0x02, 50: 0x03, 51: 0x04, 52: 0x05, 53: 0x06, 54: 0x07,
-    55: 0x08, 56: 0x09, 57: 0x0A, 48: 0x0B, 189: 0x0C, 187: 0x0D, 8: 0x0E,
-    9: 0x0F, 81: 0x10, 87: 0x11, 69: 0x12, 82: 0x13, 84: 0x14, 89: 0x15,
-    85: 0x16, 73: 0x17, 79: 0x18, 80: 0x19, 219: 0x1A, 221: 0x1B, 13: 0x1C,
-    17: 0x1D, 65: 0x1E, 83: 0x1F, 68: 0x20, 70: 0x21, 71: 0x22, 72: 0x23,
-    74: 0x24, 75: 0x25, 76: 0x26, 186: 0x27, 222: 0x28, 192: 0x29, 16: 0x2A,
-    220: 0x2B, 90: 0x2C, 88: 0x2D, 67: 0x2E, 86: 0x2F, 66: 0x30, 78: 0x31,
-    77: 0x32, 188: 0x33, 190: 0x34, 191: 0x35, 18: 0x38, 32: 0x39,
-    112: 0x3B, 113: 0x3C, 114: 0x3D, 115: 0x3E, 116: 0x3F, 117: 0x40,
-    118: 0x41, 119: 0x42, 120: 0x43, 121: 0x44, 122: 0x57, 123: 0x58,
-    38: 0xC8, 33: 0xC9, 37: 0xCB, 39: 0xCD, 40: 0xD0, 34: 0xD1, 45: 0xD2,
-    46: 0xD3, 35: 0xCF, 36: 0xC7,
-    96: 0x52, 97: 0x4F, 98: 0x50, 99: 0x51, 100: 0x4B, 101: 0x4C,
-    102: 0x4D, 103: 0x47, 104: 0x48, 105: 0x49, 106: 0x37, 107: 0x4E,
-    109: 0x4A, 110: 0x53, 111: 0x35, 144: 0x45,
-  };
-  return map[domKey] ?? null;
 }
 
 export class ControlsMenuView extends PanelMenuView {
@@ -488,14 +441,14 @@ export class ControlsMenuView extends PanelMenuView {
       }
 
       const axisOnly = activeRow.axis;
-      const captured = captureFirstPressedInputCode(
-        activePlayer,
-        !axisOnly,    // includeKeyboard
-        !axisOnly,    // includeMouse
-        !axisOnly,    // includeGamepad
-        axisOnly,     // includeAxes
-        0.5,          // axisThreshold
-      );
+      const captured = captureFirstPressedInputCode({
+        playerIndex: activePlayer,
+        includeKeyboard: !axisOnly,
+        includeMouse: !axisOnly,
+        includeGamepad: !axisOnly,
+        includeAxes: axisOnly,
+        axisThreshold: 0.5,
+      });
       if (captured !== null) {
         this._setBindingCode(activePlayer, activeRow, int(captured));
         this._dirty = true;
