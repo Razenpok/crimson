@@ -504,12 +504,12 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     for (const mode of entries) {
-      this._drawModeButton(mode, new Vec2(basePos.x, y), scale, resources, font);
+      this._drawModeButton(mode, new Vec2(basePos.x, y), scale, { resources, font });
       if (showCounts && mode.showCount) {
         this._drawModeCount(
           mode.key,
           new Vec2(basePos.x + 158.0 * scale, y + 8.0 * scale),
-          textScale, textColor, font,
+          textScale, textColor, { font },
         );
       }
       y += yStep * scale;
@@ -517,7 +517,7 @@ export class PlayGameMenuView extends PanelMenuView {
 
     // `sub_44ed80`: the list widget is drawn before tooltips, so tooltips can overlay it.
     this._drawPlayerCount(layout.dropPos, scale, { resources, font });
-    this._drawTooltips(entries, basePos, yEnd, scale, font);
+    this._drawTooltips(entries, basePos, yEnd, scale, { font });
   }
 
   private _drawPlayerCount(
@@ -602,9 +602,9 @@ export class PlayGameMenuView extends PanelMenuView {
     mode: PlayGameModeEntry,
     pos: Vec2,
     scale: number,
-    resources: RuntimeResources,
-    _font: SmallFontData,
+    opts: { resources: RuntimeResources; font: SmallFontData },
   ): void {
+    const resources = opts.resources;
     const state = this._modeButtonState(mode);
     const width = buttonWidth(resources, state.label, { scale, forceWide: state.forceWide });
     buttonDraw(resources, state, { pos, width, scale });
@@ -615,8 +615,9 @@ export class PlayGameMenuView extends PanelMenuView {
     pos: Vec2,
     _scale: number,
     color: wgl.Color,
-    font: SmallFontData,
+    opts: { font: SmallFontData },
   ): void {
+    const font = opts.font;
     const status = this.state.status;
     let count: number;
     if (key === 'quests') {
@@ -638,8 +639,9 @@ export class PlayGameMenuView extends PanelMenuView {
     basePos: Vec2,
     yEnd: number,
     scale: number,
-    font: SmallFontData,
+    opts: { font: SmallFontData },
   ): void {
+    const font = opts.font;
     // `sub_44ed80` draws these below the mode list based on per-button hover timers.
     const tooltipX = basePos.x - 55.0 * scale;
     const tooltipY = basePos.y + (yEnd + 16.0) * scale;
