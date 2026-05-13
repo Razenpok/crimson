@@ -1,7 +1,7 @@
 // Port of crimson/screens/boot.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources } from '@grim/assets.ts';
+import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources, unloadResources, unregisterRuntimeResources } from '@grim/assets.ts';
 import { audioPlayMusic, audioShutdown, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
 import { queueTrack } from '@grim/music.ts';
 import { InputState } from '@grim/input.ts';
@@ -77,7 +77,7 @@ export class BootView {
         ? loadRuntimeResources(state.assetsUrl)
         : Promise.resolve(state.resources),
       state.audio === null
-        ? initAudioState(state.config, state.assetsUrl)
+        ? initAudioState(state.config, state.assetsUrl, state.console)
         : Promise.resolve(state.audio),
     ]).then(([resources, audio]) => {
       state.resources = resources;
@@ -137,7 +137,6 @@ export class BootView {
       return;
     }
     if (!this._introStarted && this.state.audio !== null) {
-      this.state.audio.music.activeTrack = 'intro';
       audioPlayMusic(this.state.audio, 'intro');
       this._introStarted = true;
     }
@@ -176,6 +175,10 @@ export class BootView {
       audioShutdown(this.state.audio);
       this.state.audio = null;
     }
+    if (this.state.resources !== null) {
+      unregisterRuntimeResources(this.state.resources.assetsUrl);
+      unloadResources(this.state.resources);
+    }
     this.state.resources = null;
   }
 
@@ -188,7 +191,6 @@ export class BootView {
     if (this.state.audio !== null) {
       audioStopMusic(this.state.audio);
       const theme = this.state.demoEnabled ? 'crimsonquest' : 'crimson_theme';
-      this.state.audio.music.activeTrack = theme;
       audioPlayMusic(this.state.audio, theme);
     }
     this._themeStarted = true;
