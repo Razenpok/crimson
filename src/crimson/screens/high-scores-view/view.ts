@@ -11,7 +11,7 @@ import { InputState } from '@grim/input.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
-import { HighScoreDateMode } from '@grim/config.ts';
+import { fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { UiButtonState, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
@@ -32,6 +32,8 @@ import {
   MENU_SIGN_POS_X_PAD,
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
+  ensureMenuGround,
+  menuGroundCamera,
   signLayoutScale,
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
@@ -94,6 +96,25 @@ const KEY_HOME = 36;
 const KEY_END = 35;
 const MOUSE_BUTTON_LEFT = 0;
 
+function gameModeFromId(modeRaw: number): GameMode {
+  switch (int(modeRaw)) {
+    case GameMode.DEMO:
+      return GameMode.DEMO;
+    case GameMode.SURVIVAL:
+      return GameMode.SURVIVAL;
+    case GameMode.RUSH:
+      return GameMode.RUSH;
+    case GameMode.QUESTS:
+      return GameMode.QUESTS;
+    case GameMode.TYPO:
+      return GameMode.TYPO;
+    case GameMode.TUTORIAL:
+      return GameMode.TUTORIAL;
+    default:
+      return GameMode.DEMO;
+  }
+}
+
 export class HighScoresView {
   state: GameState;
 
@@ -142,7 +163,7 @@ export class HighScoresView {
     const layoutW = this.state.config.display.width;
     this._widescreenYShift = menuWidescreenYShift(layoutW);
     this._action = null;
-    this._ground = this.state.menuGround;
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
     this._cursorPulseTime = 0.0;
     this._timelineMs = 0;
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;
@@ -320,7 +341,9 @@ export class HighScoresView {
       try {
         this.state.config.save();
         this._dirty = false;
-      } catch (_) { /* config save failed — will retry next close */ }
+      } catch (exc) {
+        this.state.console.log.log(`config: save failed: ${exc}`);
+      }
     }
     if (this._closing) return;
     if (FADE_TO_GAME_ACTIONS.has(action)) {
@@ -391,7 +414,6 @@ export class HighScoresView {
     const request = this._request;
     if (request === null) return;
     this._records = loadRecords(this.state, request);
-    const resources = requireRuntimeResources(this.state);
     const rows = 10;
     this._scrollIndex = Math.max(0, Math.min(this._scrollIndex, Math.max(0, this._records.length - rows)));
   }
@@ -409,7 +431,10 @@ export class HighScoresView {
     const smallWidthShiftX = hsRightOptionsXShift(this.state.config.display.width);
     const shiftedRightTopLeft = rightTopLeft.add(new Vec2(smallWidthShiftX * scale, 0.0));
 
-    // Checkbox: "Show internet scores"
+    // Widgets are only shown in the "options" right panel (not the local-score detail panel).
+    // We don't explicitly track which right panel is active; hit tests are enough.
+
+    // Checkbox: "Show internet scores" (config.score_load_gate).
     if (!dropdownBlocked) {
       const checkTex = this.state.config.profile.showInternetScores
         ? getTexture(resources, TextureId.UI_CHECK_ON)
@@ -433,7 +458,7 @@ export class HighScoresView {
       }
     }
 
-    // Dropdown: show scores date filter
+    // Dropdown: show scores date filter (config.highscore_date_mode).
     const showScoresItems = ['Best of all time', 'Best of month', 'Best of week', 'Best of day'];
     const showScoresPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_SHOW_SCORES_WIDGET_X * scale, HS_RIGHT_SHOW_SCORES_WIDGET_Y * scale));
     const showScoresLayout = this._dropdownLayout({ pos: showScoresPos, width: HS_RIGHT_SHOW_SCORES_WIDGET_W * scale, itemCount: showScoresItems.length, scale });
@@ -444,7 +469,7 @@ export class HighScoresView {
       showScoresLayout, showScoresItems.length, this.showScoresOpen, showScoresEnabled, scale,
     );
     if (selected !== null) {
-      this.state.config.profile.scoreDateMode = selected as HighScoreDateMode;
+      this.state.config.profile.scoreDateMode = selected;
       this._dirty = true;
       this._reloadRecords();
     }
@@ -457,7 +482,7 @@ export class HighScoresView {
       return true;
     }
 
-    // Dropdown: player count
+    // Dropdown: player count (config.player_count).
     const playerItems = ['1 player', '2 players', '3 players', '4 players'];
     const playerPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_PLAYER_COUNT_WIDGET_X * scale, HS_RIGHT_PLAYER_COUNT_WIDGET_Y * scale));
     const playerLayout = this._dropdownLayout({ pos: playerPos, width: HS_RIGHT_PLAYER_COUNT_WIDGET_W * scale, itemCount: playerItems.length, scale });
@@ -482,7 +507,8 @@ export class HighScoresView {
       return true;
     }
 
-    // Dropdown: game mode
+    // Dropdown: game mode (config.game_mode / request.game_mode_id).
+    // Typ-o shooter entry is unlocked at quest_unlock_index>=40 in the native.
     const modeItems: [string, GameMode][] = [
       ['Quests', GameMode.QUESTS],
       ['Rush', GameMode.RUSH],
@@ -505,6 +531,7 @@ export class HighScoresView {
         this.state.config.gameplay.playerCount = 1;
       } else if (modeId === GameMode.QUESTS) {
         if (request.questLevel === null) {
+          // Ensure quest selection exists when switching into quests.
           request.questLevel = this.state.config.gameplay.questLevel ?? new QuestLevel(1, 1);
         }
       }
@@ -520,9 +547,10 @@ export class HighScoresView {
       return true;
     }
 
-    // Dropdown: selected score list (profile slots)
+    // Dropdown: selected score list (profile slots). We currently expose the selection
+    // but do not emulate the full native add/delete flow.
     const scoreListEnabled = !(this.playerCountOpen || this.gameModeOpen || this.showScoresOpen);
-    const names = this.state.config.profile.savedNames.slice(0, Math.max(1, this.state.config.profile.savedNameCount));
+    const names = savedNameLabels(this.state.config.profile);
     const scoreListPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_SCORE_LIST_WIDGET_X * scale, HS_RIGHT_SCORE_LIST_WIDGET_Y * scale));
     const scoreListLayout = this._dropdownLayout({ pos: scoreListPos, width: HS_RIGHT_SCORE_LIST_WIDGET_W * scale, itemCount: names.length, scale });
     [this.scoreListOpen, selected, consumed] = this._updateDropdown(
@@ -557,7 +585,8 @@ export class HighScoresView {
     const level = request.questLevel;
     if (level === null) return false;
 
-    const globalIndex = level.globalIndex;
+    // Clamp to a sane range.
+    const globalIndex = int(level.globalIndex);
     const unlock = this.state.config.gameplay.hardcore
       ? int(this.state.status.questUnlockIndexFull)
       : int(this.state.status.questUnlockIndex);
@@ -565,7 +594,7 @@ export class HighScoresView {
     const arrow = getTexture(resources, TextureId.UI_ARROW);
 
     const [mx, my] = InputState.mousePosition();
-    const mouse = { x: mx, y: my };
+    const mouse = new Vec2(mx, my);
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
     const arrowW = arrow.width * scale;
     const arrowH = arrow.height * scale;
@@ -576,7 +605,7 @@ export class HighScoresView {
     const nextRect = Rect.fromTopLeft(nextPos, arrowW, arrowH);
 
     const setLevel = (index: number): void => {
-      index = Math.max(0, Math.min(maxIndex, index));
+      index = Math.max(0, Math.min(maxIndex, int(index)));
       const newLevel = QuestLevel.fromGlobalIndex(index);
       request.questLevel = newLevel;
       this.state.config.gameplay.questLevel = newLevel;
@@ -603,8 +632,7 @@ export class HighScoresView {
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground({ entityAlpha: this._worldEntityAlpha() });
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
     drawScreenFade(this.state);
 
@@ -615,14 +643,14 @@ export class HighScoresView {
     if (request !== null) {
       modeId = request.gameModeId;
     } else {
-      modeId = this.state.config.gameplay.mode ?? GameMode.DEMO;
+      modeId = gameModeFromId(this.state.config.gameplay.mode);
     }
     const questMajor = (request !== null && request.questLevel !== null) ? request.questLevel.major : 0;
     const questMinor = (request !== null && request.questLevel !== null) ? request.questLevel.minor : 0;
 
     const screenWidth = this.state.config.display.width;
     const scale = 1.0;
-    const fxDetail = this.state.config.display.fxDetail[0] ?? false;
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panelW = MENU_PANEL_WIDTH * scale;
 
     const [, leftSlideX] = uiElementAnim(this, 1, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 0);
@@ -683,7 +711,7 @@ export class HighScoresView {
     const offsetX = MENU_SIGN_OFFSET_X * signScale + shiftX;
     const offsetY = MENU_SIGN_OFFSET_Y * signScale;
     const rotationDeg = 0.0;
-    const fxDetail = this.state.config.display.fxDetail[0] ?? false;
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
     const signOrigin = wgl.makeVector2(-offsetX, -offsetY);
 
@@ -723,7 +751,7 @@ export class HighScoresView {
     const rowStep = font.cellSize;
     const tableTop = 188.0 + rowStep;
     const reservedBottom = 96.0;
-    const screenH = this.state.config.display.height;
+    const screenH = wgl.getScreenHeight();
     const available = Math.max(0.0, screenH - tableTop - reservedBottom);
     return Math.max(1, Math.floor(available / rowStep));
   }
