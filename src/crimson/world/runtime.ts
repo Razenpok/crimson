@@ -15,6 +15,7 @@ import { SimWorldState } from './sim-world-state.ts';
 import { TerrainRuntime } from './terrain-runtime.ts';
 
 export class WorldRuntime {
+  // Composition container owning the 4 world components and shared lifecycle methods.
   worldSize: number;
   demoModeActive: boolean;
   questFailRetryCount: number;
@@ -89,7 +90,7 @@ export class WorldRuntime {
   }
 
   // ------------------------------------------------------------------
-  // Shared lifecycle methods
+  // Shared lifecycle methods (extracted from 4 identical implementations)
   // ------------------------------------------------------------------
 
   syncWorldSize(): void {
