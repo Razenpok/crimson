@@ -14,6 +14,7 @@ import {
   buttonUpdate,
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import {
   PanelMenuView,
   type PanelGameState,
@@ -325,7 +326,8 @@ export class OptionsMenuView extends PanelMenuView {
     return false;
   }
 
-  protected override _drawContents(resources: RuntimeResources): void {
+  protected override _drawContents(): void {
+    const resources = requireRuntimeResources(this.state);
     this._drawOptionsContents(resources);
   }
 

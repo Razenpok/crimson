@@ -4,6 +4,7 @@ import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import {
   MENU_PANEL_WIDTH,
   PANEL_TIMELINE_START_MS,
@@ -61,7 +62,8 @@ export class ModsMenuView extends PanelMenuView {
     ];
   }
 
-  protected _drawContents(resources: RuntimeResources): void {
+  protected _drawContents(): void {
+    const resources = requireRuntimeResources(this.state);
     const layout = this._contentLayout();
     const basePos = layout.basePos;
     const labelPos = layout.labelPos;

@@ -13,6 +13,7 @@ import {
 } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { type DropdownLayoutBase } from '@crimson/ui/layout.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
 import { INPUT_CODE_UNBOUND, inputCodeName } from '@crimson/input-codes.ts';
 import {
@@ -757,7 +758,8 @@ export class ControlsMenuView extends PanelMenuView {
   // Panel drawing — two panels (left + right)
   // -----------------------------------------------------------------------
 
-  protected override _drawPanel(resources: RuntimeResources): void {
+  protected override _drawPanel(): void {
+    const resources = requireRuntimeResources(this.state);
     const fxDetail = this.state.config.display.fxDetail[0];
     const [panelScale] = this._menuItemScale(0);
     const panelW = MENU_PANEL_WIDTH * panelScale;
@@ -784,7 +786,8 @@ export class ControlsMenuView extends PanelMenuView {
   // Contents drawing
   // -----------------------------------------------------------------------
 
-  protected override _drawContents(resources: RuntimeResources): void {
+  protected override _drawContents(): void {
+    const resources = requireRuntimeResources(this.state);
     const [panelScale] = this._menuItemScale(0);
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const rightTopLeft = this._rightPanelTopLeft(panelScale);

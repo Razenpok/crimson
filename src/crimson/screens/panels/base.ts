@@ -242,10 +242,10 @@ export class PanelMenuView {
       throw new Error('PanelMenuView entry must be initialized before draw()');
     }
 
-    this._drawPanel(resources);
+    this._drawPanel();
     this._drawEntry(resources, entry);
     this._drawSign(resources);
-    this._drawContents(resources);
+    this._drawContents();
     this._drawMenuCursor(resources);
   }
 
@@ -256,8 +256,8 @@ export class PanelMenuView {
     return action;
   }
 
-  protected _drawContents(resources: RuntimeResources): void {
-    this._drawTitleText(resources);
+  protected _drawContents(): void {
+    this._drawTitleText();
   }
 
   protected _assertOpen(): void {
@@ -266,8 +266,7 @@ export class PanelMenuView {
     }
   }
 
-  private _drawTitleText(resources: RuntimeResources): void {
-    void resources;
+  private _drawTitleText(): void {
     const x = 32;
     let y = 140;
     const titleColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1);
@@ -317,7 +316,8 @@ export class PanelMenuView {
     drawScreenFade(this.state);
   }
 
-  protected _drawPanel(resources: RuntimeResources): void {
+  protected _drawPanel(): void {
+    const resources = requireRuntimeResources(this.state);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     const [_angleRad, slideX] = uiElementAnim(
       this,
