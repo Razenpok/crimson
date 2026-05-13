@@ -3,19 +3,22 @@
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import type { CrimsonConfig } from '@grim/config.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { GameState } from '@crimson/game/types.ts';
 import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
+import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { drawMenuCursorHelper, ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
   UiButtonState,
   buttonDraw,
@@ -42,12 +45,8 @@ import {
   QUEST_FAILED_PANEL_W,
   QUEST_FAILED_SCORE_X_OFFSET,
   QUEST_FAILED_SCORE_Y_OFFSET,
-
+  playerNameDefault,
 } from './shared.ts';
-
-// ---------------------------------------------------------------------------
-// Key constants
-// ---------------------------------------------------------------------------
 
 const KEY_ESCAPE = 27;
 const KEY_ENTER = 13;
@@ -57,28 +56,29 @@ const MOUSE_BUTTON_LEFT = 0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
+function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  if (x1 === x2) {
+    const y = Math.min(y1, y2);
+    const h = Math.abs(y2 - y1) || 1;
+    wgl.drawRectangle(x1, y, 1, h, color);
+    return;
+  }
+  if (y1 === y2) {
+    const x = Math.min(x1, x2);
+    const w = Math.abs(x2 - x1) || 1;
+    wgl.drawRectangle(x, y1, w, 1, color);
+  }
+}
 
 export type QuestFailedOutcome = QuestRunOutcome;
 
-export interface QuestFailedScoreRecord {
-  survivalElapsedMs: number;
-  scoreXp: number;
-}
-
 export type QuestFailedState = GameState;
-
-// ---------------------------------------------------------------------------
-// QuestFailedView
-// ---------------------------------------------------------------------------
 
 export class QuestFailedView {
   private state: QuestFailedState;
-  private _ground: { processPending(): void; draw(camera: Vec2): void } | null = null;
+  private _ground: GroundRenderer | null = null;
   private _outcome: QuestFailedOutcome | null = null;
-  private _record: QuestFailedScoreRecord | null = null;
+  private _record: HighScoreRecord | null = null;
   private _questTitle: string = '';
   private _action: string | null = null;
   private _cursorPulseTime: number = 0.0;
@@ -98,7 +98,7 @@ export class QuestFailedView {
 
   open(): void {
     this._action = null;
-    this._ground = this.state.pauseBackground !== null ? null : (this.state.menuGround ?? null);
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
     this._cursorPulseTime = 0.0;
     this._introMs = 0.0;
     this._closing = false;
@@ -169,7 +169,7 @@ export class QuestFailedView {
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
 
     let buttonPos = panelTopLeft.add(new Vec2(
       QUEST_FAILED_BUTTON_X_OFFSET * scale,
@@ -203,22 +203,20 @@ export class QuestFailedView {
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground({ entityAlpha: this._worldEntityAlpha() });
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
     drawScreenFade(this.state);
 
     const panelTopLeft = this._panelTopLeft();
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     drawClassicMenuPanel(
       panelTex,
       { dst: wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, QUEST_FAILED_PANEL_W, QUEST_FAILED_PANEL_H),
         tint: WHITE, shadow: fxDetail },
     );
 
-    // Reaper banner
     const reaperTex = getTexture(resources, TextureId.UI_TEXT_REAPER);
     const bannerPos = panelTopLeft.add(new Vec2(QUEST_FAILED_BANNER_X_OFFSET, QUEST_FAILED_BANNER_Y_OFFSET));
     wgl.drawTexturePro(
@@ -228,16 +226,13 @@ export class QuestFailedView {
       ORIGIN, 0.0, WHITE,
     );
 
-    // Failure message
     const font = resources.smallFont;
     const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
     const msgPos = panelTopLeft.add(new Vec2(QUEST_FAILED_MESSAGE_X_OFFSET, QUEST_FAILED_MESSAGE_Y_OFFSET));
     drawSmallText(font, this._failureMessage(), msgPos, textColor);
 
-    // Score preview
     this._drawScorePreview(font, panelTopLeft);
 
-    // Buttons
     const scale = 1.0;
     let buttonPos = panelTopLeft.add(new Vec2(QUEST_FAILED_BUTTON_X_OFFSET, QUEST_FAILED_BUTTON_Y_OFFSET));
 
@@ -252,11 +247,7 @@ export class QuestFailedView {
     const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainMenuW, scale });
 
-    // Menu cursor
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
+    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
   takeAction(): string | null {
@@ -265,19 +256,8 @@ export class QuestFailedView {
     return action;
   }
 
-  // ---------------------------------------------------------------------------
-  // Private
-  // ---------------------------------------------------------------------------
-
-  private _requireResources(): RuntimeResources {
-    if (this.state.resources === null) {
-      throw new Error('runtime resources are not loaded');
-    }
-    return this.state.resources;
-  }
-
   private _panelOrigin(): Vec2 {
-    const screenW = this.state.config.display.width;
+    const screenW = wgl.getScreenWidth();
     const widescreenShiftY = menuWidescreenYShift(screenW);
     return new Vec2(
       QUEST_FAILED_PANEL_GEOM_X0 + QUEST_FAILED_PANEL_POS_X,
@@ -325,12 +305,23 @@ export class QuestFailedView {
     if (outcome === null) return;
 
     const level = outcome.level;
+    const major = level.major;
+    const minor = level.minor;
     const elapsed = Math.max(1, int(outcome.baseTimeMs));
-    const xp = int(outcome.experience);
+    const fired = Math.max(0, int(outcome.shotsFired));
+    const hit = Math.max(0, Math.min(int(outcome.shotsHit), fired));
 
     this._record = {
+      name: playerNameDefault(this.state.config) || 'Player',
+      gameModeId: GameMode.QUESTS,
+      questStageMajor: major,
+      questStageMinor: minor,
       survivalElapsedMs: elapsed,
-      scoreXp: xp,
+      scoreXp: int(outcome.experience),
+      creatureKillCount: int(outcome.killCount),
+      mostUsedWeaponId: outcome.mostUsedWeaponId,
+      shotsFired: fired,
+      shotsHit: hit,
     };
   }
 
@@ -375,8 +366,8 @@ export class QuestFailedView {
     this._closeAction = action;
   }
 
-  private _textWidth(text: string): number {
-    return measureSmallTextWidth(this._requireResources().smallFont, text);
+  private _textWidth(text: string, _scale: number): number {
+    return measureSmallTextWidth(requireRuntimeResources(this.state).smallFont, text);
   }
 
   private _drawScorePreview(font: SmallFontData, panelTopLeft: Vec2): void {
@@ -387,29 +378,24 @@ export class QuestFailedView {
 
     const labelColor = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 0.8);
     const valueColor = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
+    // `ui_text_input_render`: data_4965f8/5fc/600 = (149,175,198)/255.
     const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 0.7);
 
     const scoreLabel = 'Score';
-    const scoreLabelW = this._textWidth(scoreLabel);
+    const scoreLabelW = this._textWidth(scoreLabel, 1.0);
     drawSmallText(font, scoreLabel, scorePos.offset({ dx: 32.0 - scoreLabelW * 0.5 }), labelColor);
 
     const scoreValue = `${(record.survivalElapsedMs * 0.001).toFixed(2)} secs`;
-    const scoreValueW = this._textWidth(scoreValue);
+    const scoreValueW = this._textWidth(scoreValue, 1.0);
     drawSmallText(font, scoreValue, scorePos.add(new Vec2(32.0 - scoreValueW * 0.5, 15.0)), valueColor);
 
-    // Vertical separator
     const sepPos = scorePos.offset({ dx: 80.0 });
-    wgl.drawRectangle(
-      int(sepPos.x), int(sepPos.y),
-      1, 48,
-      separatorColor,
-    );
+    drawLine(int(sepPos.x), int(sepPos.y), int(sepPos.x), int(sepPos.y + 48.0), separatorColor);
 
-    // Experience column
     const col2Pos = scorePos.offset({ dx: 96.0 });
     drawSmallText(font, 'Experience', col2Pos, valueColor);
     const xpValue = `${record.scoreXp}`;
-    const xpW = this._textWidth(xpValue);
+    const xpW = this._textWidth(xpValue, 1.0);
     drawSmallText(font, xpValue, col2Pos.add(new Vec2(32.0 - xpW * 0.5, 15.0)), labelColor);
 
     // Horizontal separator
