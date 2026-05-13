@@ -9,9 +9,7 @@ function applyAmmoManiac(ctx: PerkApplyCtx): void {
   if (ctx.players.length > 1) {
     for (let i = 1; i < ctx.players.length; i++) {
       const player = ctx.players[i];
-      for (let j = 0; j < ctx.owner.perkCounts.length; j++) {
-        player.perkCounts[j] = ctx.owner.perkCounts[j];
-      }
+      player.perkCounts.splice(0, player.perkCounts.length, ...ctx.owner.perkCounts);
     }
   }
   for (const player of ctx.players) {
