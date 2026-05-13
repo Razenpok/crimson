@@ -14,7 +14,6 @@ import {
   DeterministicSession,
   type DeterministicSessionTick,
   RushSpawnState,
-
 } from '@crimson/sim/sessions.ts';
 import { buildRushSession, enforceRushLoadout } from '@crimson/sim/session-builders.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
@@ -28,20 +27,12 @@ import {
   type LanStepAction,
 } from './base-gameplay-mode.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const WORLD_SIZE = 1024.0;
 
 const UI_TEXT_SCALE = 1.0;
 const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
 const UI_ERROR_COLOR = wgl.makeColor(240 / 255, 80 / 255, 80 / 255, 1.0);
-
-// ---------------------------------------------------------------------------
-// RushMode
-// ---------------------------------------------------------------------------
 
 export class RushMode extends BaseGameplayMode {
   private _spawnState = new RushSpawnState();
@@ -67,10 +58,6 @@ export class RushMode extends BaseGameplayMode {
     this._simSession = this._newSimSession();
   }
 
-  // ---------------------------------------------------------------------------
-  // Session builder
-  // ---------------------------------------------------------------------------
-
   private _newSimSession(): DeterministicSession {
     const [session, spawnState] = buildRushSession({
       world: this.simWorld.worldState,
@@ -84,10 +71,6 @@ export class RushMode extends BaseGameplayMode {
     this._spawnState = spawnState;
     return session;
   }
-
-  // ---------------------------------------------------------------------------
-  // Lifecycle
-  // ---------------------------------------------------------------------------
 
   open(): void {
     super.open();
@@ -114,10 +97,6 @@ export class RushMode extends BaseGameplayMode {
     super.close();
   }
 
-  // ---------------------------------------------------------------------------
-  // Input handling
-  // ---------------------------------------------------------------------------
-
   protected _handleInput(): void {
     if (this._gameOverActive) {
       if (InputState.wasKeyPressed(27)) { // Escape
@@ -137,10 +116,6 @@ export class RushMode extends BaseGameplayMode {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Game over
-  // ---------------------------------------------------------------------------
-
   protected _enterGameOver(): void {
     if (this._gameOverActive) return;
 
@@ -156,10 +131,6 @@ export class RushMode extends BaseGameplayMode {
     this._gameOverActive = true;
     this._saveReplay();
   }
-
-  // ---------------------------------------------------------------------------
-  // Replay helpers
-  // ---------------------------------------------------------------------------
 
   protected _replayCheckpointElapsedMs(): number {
     return this._sessionElapsedMs();
@@ -178,10 +149,6 @@ export class RushMode extends BaseGameplayMode {
     const kills = int(this.creatures.killCount);
     return `rush_${stamp}_kills${kills}`;
   }
-
-  // ---------------------------------------------------------------------------
-  // LAN helpers
-  // ---------------------------------------------------------------------------
 
   protected _lanModeName(): 'survival' | 'rush' | 'quests' {
     return 'rush';
@@ -226,10 +193,6 @@ export class RushMode extends BaseGameplayMode {
     return 'continue';
   }
 
-  // ---------------------------------------------------------------------------
-  // Resync snapshot
-  // ---------------------------------------------------------------------------
-
   protected _applyResyncSnapshot(snapshot: unknown): void {
     const rs = snapshot as {
       elapsedMs: number;
@@ -242,10 +205,6 @@ export class RushMode extends BaseGameplayMode {
     this._spawnState.spawnCooldownMs = rs.spawnCooldownMs;
     this.creatures.killCount = rs.killCount;
   }
-
-  // ---------------------------------------------------------------------------
-  // Update
-  // ---------------------------------------------------------------------------
 
   update(dt: number): void {
     const frame = this._beginModeUpdate(dt);
@@ -297,10 +256,6 @@ export class RushMode extends BaseGameplayMode {
       onCheckpoint,
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw
-  // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
     const resources = this.renderResources.resources;
