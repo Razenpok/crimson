@@ -5,7 +5,7 @@ import { GameMode } from "@crimson/game-modes.js";
 import { FrameContext, LocalInputProvider } from "@crimson/sim/input-providers.js";
 import { PlayerInput } from "@crimson/sim/input.js";
 import { DeterministicSession } from "@crimson/sim/sessions.js";
-import { TickBatchResult, TickRunner } from "@crimson/sim/tick-runner.js";
+import { TickBatchResult, TickRunner, TickRunnerConfig } from "@crimson/sim/tick-runner.js";
 import { FixedStepClock } from "@crimson/sim/clock.js";
 import { applyPresentationOutputs, applySimMetadataBatch } from "@crimson/sim/batch-apply.js";
 import {
@@ -93,7 +93,7 @@ export class StandaloneTickHarness {
     const runner = new TickRunner({
       session,
       inputProvider: provider,
-      config: { traceRng: false },
+      config: new TickRunnerConfig(),
     });
 
     this._session = session;
