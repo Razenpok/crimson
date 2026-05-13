@@ -1,7 +1,4 @@
 // Port of crimson/game/runtime.py
-//
-// WebGL adaptation: no faulthandler, no file-based crash log, no PAQ download,
-// no webbrowser.open, no raylib config flags.
 
 import * as wgl from '@wgl';
 import { defaultCrimsonConfig } from '@grim/config.ts';
@@ -152,7 +149,6 @@ export function createGameStatus(): GameStatusPersist {
         };
         localStorage.setItem('crimson-game-status', JSON.stringify(data));
       } catch {
-        // localStorage may be unavailable (private browsing, quota exceeded, etc.)
       }
     },
     incrementModePlayCountForMode(mode: GameMode): void {
@@ -312,11 +308,9 @@ function bootCommandHandlers(
 
   function cmdDemoTrialInfo(_args: string[]): void {
     const modeRaw = state.config.gameplay.mode;
-    let modeId: GameMode;
-    if (Object.values(GameMode).includes(modeRaw as GameMode)) {
-      modeId = modeRaw as GameMode;
-    } else {
-      modeId = GameMode.DEMO;
+    let modeId = GameMode.DEMO;
+    if (Object.values(GameMode).includes(modeRaw)) {
+      modeId = modeRaw;
     }
     let questLevel = null;
     if (modeId === GameMode.QUESTS) {
@@ -412,13 +406,6 @@ function registerBootCommands(
   }
 }
 
-/**
- * Bootstrap the game: create state, register commands, and return the
- * GameLoopView ready for the engine App to drive.
- *
- * In the browser build this is synchronous; asset loading happens inside the
- * boot screen asynchronously via fetch().
- */
 export function runGame(
   config: GameConfig,
 ): { view: GameLoopView; state: GameState } {
