@@ -135,6 +135,7 @@ export class SurvivalMode extends BaseGameplayMode {
       this.state.perkSelection,
     );
 
+    this._perkPrompt.beginFrame();
     if (this._perkMenu.open && allowInput) {
       const choiceIndex = this._handlePerkMenuInput(choices, dtUiMs);
       if (choiceIndex !== null) {
@@ -172,7 +173,6 @@ export class SurvivalMode extends BaseGameplayMode {
     paused: boolean;
     menuActive: boolean;
   }): boolean {
-    this._perkPrompt.beginFrame();
     return this._perkPrompt.pollOpenRequest({
       ctx: this._perkMenuUiContext(),
       config: this.config,
@@ -296,14 +296,14 @@ export class SurvivalMode extends BaseGameplayMode {
 
   protected _handleInput(): void {
     if (this._gameOverActive) {
-      if (InputState.wasKeyPressed(27)) { // Escape
+      if (InputState.wasKeyPressed(27)) {
         this._action = 'back_to_menu';
         this.closeRequested = true;
       }
       return;
     }
 
-    if (this._perkMenu.open && InputState.wasKeyPressed(27)) { // Escape
+    if (this._perkMenu.open && InputState.wasKeyPressed(27)) {
       if (this._lanEnabled && this._lanRole === 'join') {
         return;
       }
@@ -312,33 +312,33 @@ export class SurvivalMode extends BaseGameplayMode {
       return;
     }
 
-    if (!this._lanEnabled && InputState.wasKeyPressed(9)) { // Tab
+    if (!this._lanEnabled && InputState.wasKeyPressed(9)) {
       this._paused = !this._paused;
     }
 
     if (this._debugEnabled && !this._perkMenu.open) {
-      if (InputState.wasKeyPressed(113)) { // F2
+      if (InputState.wasKeyPressed(113)) {
         this.state.debugGodMode = !this.state.debugGodMode;
         this.audioBridge.router.playSfx?.(SfxId.UI_BUTTONCLICK);
       }
-      if (InputState.wasKeyPressed(114)) { // F3
+      if (InputState.wasKeyPressed(114)) {
         this.state.perkSelection.pendingCount += 1;
         this.state.perkSelection.choicesDirty = true;
         this.audioBridge.router.playSfx?.(SfxId.UI_LEVELUP);
       }
-      if (InputState.wasKeyPressed(219)) { // [
+      if (InputState.wasKeyPressed(219)) {
         this._debugCycleWeapon(-1);
       }
-      if (InputState.wasKeyPressed(221)) { // ]
+      if (InputState.wasKeyPressed(221)) {
         this._debugCycleWeapon(1);
       }
-      if (InputState.wasKeyPressed(88)) { // X
+      if (InputState.wasKeyPressed(88)) {
         this.player.experience += 5000;
         survivalCheckLevelUp(this.player, this.state.perkSelection);
       }
     }
 
-    if (InputState.wasKeyPressed(27)) { // Escape
+    if (InputState.wasKeyPressed(27)) {
       this._action = 'open_pause_menu';
       return;
     }
@@ -350,7 +350,7 @@ export class SurvivalMode extends BaseGameplayMode {
     const current = this.player.weapon.weaponId;
     let idx = weaponIds.indexOf(current);
     if (idx < 0) idx = 0;
-    const weaponId = weaponIds[((idx + delta) % weaponIds.length + weaponIds.length) % weaponIds.length];
+    const weaponId = weaponIds[((idx + int(delta)) % weaponIds.length + weaponIds.length) % weaponIds.length];
     weaponAssignPlayer(this.player, weaponId, { state: this.state });
   }
 
@@ -579,13 +579,14 @@ export class SurvivalMode extends BaseGameplayMode {
     }
 
     if (this._debugEnabled && !this._gameOverActive && !perkMenuActive) {
+      // Minimal debug text.
       const x = 18.0;
       const y = Math.max(18.0, hudBottom + 10.0);
       const line = this._uiLineHeight();
       const elapsedMs = this._sessionElapsedMs();
 
       this._drawUiText(
-        `survival: t=${(elapsedMs / 1000.0).toFixed(1)}s  stage=${int(this._spawnState.stage)}`,
+        `survival: t=${(elapsedMs / 1000.0).toFixed(1).padStart(6, ' ')}s  stage=${int(this._spawnState.stage)}`,
         new Vec2(x, y),
         UI_TEXT_COLOR,
       );
