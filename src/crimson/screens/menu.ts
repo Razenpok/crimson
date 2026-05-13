@@ -15,7 +15,6 @@ import { type GameState } from '@crimson/game/types.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
-import { uiElementAnim, signLayoutScale } from './panels/base.ts';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -176,9 +175,60 @@ export class MenuEntry {
   }
 }
 
-function labelAlpha(counterValue: number): number {
+export function labelAlpha(counterValue: number): number {
   // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
   return 100 + Math.floor((counterValue * 155) / 1000);
+}
+
+interface TimelineView {
+  _timelineMs: number;
+}
+
+export function uiElementAnim(
+  view: TimelineView,
+  index: number,
+  startMs: number,
+  endMs: number,
+  width: number,
+  directionFlag: number = 0,
+): [number, number] {
+  // Matches ui_element_update: angle lerps pi/2 -> 0 over [end_ms, start_ms].
+  // direction_flag=0 slides from left  (-width -> 0)
+  // direction_flag=1 slides from right (+width -> 0)
+  if (startMs <= endMs || width <= 0.0) {
+    return [0.0, 0.0];
+  }
+  const dirSign = int(directionFlag) ? 1.0 : -1.0;
+  const t = int(view._timelineMs);
+  let angle: number;
+  let offsetX: number;
+  if (t < endMs) {
+    angle = 1.5707964;
+    offsetX = dirSign * Math.abs(width);
+  } else if (t < startMs) {
+    const elapsed = t - endMs;
+    const span = startMs - endMs;
+    const p = elapsed / span;
+    angle = 1.5707964 * (1.0 - p);
+    offsetX = dirSign * ((1.0 - p) * Math.abs(width));
+  } else {
+    angle = 0.0;
+    offsetX = 0.0;
+  }
+  if (index === 0) {
+    angle = -Math.abs(angle);
+  }
+  return [angle, offsetX];
+}
+
+export function signLayoutScale(width: number): [number, number] {
+  if (width <= MENU_SCALE_SMALL_THRESHOLD) {
+    return [MENU_SCALE_SMALL, MENU_SCALE_SHIFT];
+  }
+  if (MENU_SCALE_LARGE_MIN <= width && width <= MENU_SCALE_LARGE_MAX) {
+    return [MENU_SCALE_LARGE, MENU_SCALE_SHIFT];
+  }
+  return [1.0, 0.0];
 }
 
 // ---------------------------------------------------------------------------

@@ -5,50 +5,69 @@ import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
 import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
-import { drawSmallText } from '@grim/fonts/small.ts';
 import { GameState } from '@crimson/game/types.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import {
+  MENU_ITEM_OFFSET_X,
+  MENU_ITEM_OFFSET_Y,
+  MENU_LABEL_HEIGHT,
+  MENU_LABEL_OFFSET_X,
+  MENU_LABEL_OFFSET_Y,
+  MENU_LABEL_ROW_BACK,
+  MENU_LABEL_ROW_HEIGHT,
+  MENU_LABEL_WIDTH,
+  MENU_PANEL_HEIGHT,
+  MENU_PANEL_OFFSET_X,
+  MENU_PANEL_OFFSET_Y,
+  MENU_PANEL_WIDTH,
+  MENU_SCALE_SMALL_THRESHOLD,
+  MENU_SIGN_HEIGHT,
+  MENU_SIGN_OFFSET_X,
+  MENU_SIGN_OFFSET_Y,
+  MENU_SIGN_POS_X_PAD,
+  MENU_SIGN_POS_Y,
+  MENU_SIGN_POS_Y_SMALL,
+  MENU_SIGN_WIDTH,
+  MenuEntry,
+  ensureMenuGround,
+  labelAlpha,
+  menuGroundCamera,
+  signLayoutScale,
+  uiElementAnim,
+} from '@crimson/screens/menu.ts';
 
-// ---------------------------------------------------------------------------
-// Menu layout constants (re-exported from the menu module in the Python port)
-// ---------------------------------------------------------------------------
-
-export const MENU_LABEL_WIDTH = 122.0;
-export const MENU_LABEL_HEIGHT = 28.0;
-export const MENU_LABEL_ROW_HEIGHT = 32.0;
-export const MENU_LABEL_ROW_BACK = 7;
-
-export const MENU_LABEL_OFFSET_X = 271.0;
-export const MENU_LABEL_OFFSET_Y = -37.0;
-
-export const MENU_ITEM_OFFSET_X = -71.0;
-export const MENU_ITEM_OFFSET_Y = -59.0;
-
-export const MENU_PANEL_WIDTH = 510.0;
-export const MENU_PANEL_HEIGHT = 254.0;
-export const MENU_PANEL_OFFSET_X = 21.0;
-export const MENU_PANEL_OFFSET_Y = -81.0;
-
-export const MENU_SCALE_SMALL_THRESHOLD = 640;
-export const MENU_SCALE_LARGE_MIN = 801;
-export const MENU_SCALE_LARGE_MAX = 1024;
-export const MENU_SCALE_SMALL = 0.8;
-export const MENU_SCALE_LARGE = 1.2;
-export const MENU_SCALE_SHIFT = 10.0;
-
-export const MENU_SIGN_WIDTH = 571.44;
-export const MENU_SIGN_HEIGHT = 141.36;
-export const MENU_SIGN_OFFSET_X = -576.44;
-export const MENU_SIGN_OFFSET_Y = -61.0;
-export const MENU_SIGN_POS_Y = 70.0;
-export const MENU_SIGN_POS_Y_SMALL = 60.0;
-export const MENU_SIGN_POS_X_PAD = 4.0;
+export {
+  MENU_ITEM_OFFSET_X,
+  MENU_ITEM_OFFSET_Y,
+  MENU_LABEL_HEIGHT,
+  MENU_LABEL_OFFSET_X,
+  MENU_LABEL_OFFSET_Y,
+  MENU_LABEL_ROW_BACK,
+  MENU_LABEL_ROW_HEIGHT,
+  MENU_LABEL_WIDTH,
+  MENU_PANEL_HEIGHT,
+  MENU_PANEL_OFFSET_X,
+  MENU_PANEL_OFFSET_Y,
+  MENU_PANEL_WIDTH,
+  MENU_SCALE_SMALL_THRESHOLD,
+  MENU_SIGN_HEIGHT,
+  MENU_SIGN_OFFSET_X,
+  MENU_SIGN_OFFSET_Y,
+  MENU_SIGN_POS_X_PAD,
+  MENU_SIGN_POS_Y,
+  MENU_SIGN_POS_Y_SMALL,
+  MENU_SIGN_WIDTH,
+  MenuEntry,
+  labelAlpha,
+  signLayoutScale,
+  uiElementAnim,
+};
 
 // ---------------------------------------------------------------------------
 // Panel-specific constants
@@ -77,85 +96,10 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
 // ---------------------------------------------------------------------------
-// MenuEntry — one interactive menu button slot
-// ---------------------------------------------------------------------------
-
-export class MenuEntry {
-  slot: number;
-  row: number;
-  y: number;
-  hoverAmount: number;
-  readyTimerMs: number;
-
-  constructor(slot: number, row: number, y: number) {
-    this.slot = slot;
-    this.row = row;
-    this.y = y;
-    this.hoverAmount = 0;
-    this.readyTimerMs = 0;
-  }
-}
-
-// ---------------------------------------------------------------------------
 // PanelGameState — alias for the canonical GameState from game/types
 // ---------------------------------------------------------------------------
 
 export type PanelGameState = GameState;
-
-// ---------------------------------------------------------------------------
-// UI element animation — port of MenuView._ui_element_anim
-// ---------------------------------------------------------------------------
-
-interface TimelineView {
-  _timelineMs: number;
-}
-
-function uiElementAnim(
-  view: TimelineView,
-  index: number,
-  startMs: number,
-  endMs: number,
-  width: number,
-  directionFlag: number = 0,
-): [number, number] {
-  // Matches ui_element_update: angle lerps pi/2 -> 0 over [end_ms, start_ms].
-  // directionFlag=0 slides from left  (-width -> 0)
-  // directionFlag=1 slides from right (+width -> 0)
-  if (startMs <= endMs || width <= 0.0) {
-    return [0.0, 0.0];
-  }
-  const dirSign = directionFlag ? 1.0 : -1.0;
-  const t = int(view._timelineMs);
-  if (t < endMs) {
-    const angle = 1.5707964;
-    const offsetX = dirSign * Math.abs(width);
-    return [angle, offsetX];
-  } else if (t < startMs) {
-    const elapsed = t - endMs;
-    const span = startMs - endMs;
-    const p = elapsed / span;
-    const angle = 1.5707964 * (1.0 - p);
-    const offsetX = dirSign * ((1.0 - p) * Math.abs(width));
-    return [angle, offsetX];
-  } else {
-    return [0.0, 0.0];
-  }
-}
-
-function labelAlpha(counterValue: number): number {
-  // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
-  return 100 + Math.floor((counterValue * 155) / 1000);
-}
-
-function signLayoutScale(width: number): [number, number] {
-  if (width <= MENU_SCALE_SMALL_THRESHOLD) {
-    return [MENU_SCALE_SMALL, MENU_SCALE_SHIFT];
-  }
-  if (MENU_SCALE_LARGE_MIN <= width && width <= MENU_SCALE_LARGE_MAX) {
-    return [MENU_SCALE_LARGE, MENU_SCALE_SHIFT];
-  }
-  return [1.0, 0.0];
-}
 
 // ---------------------------------------------------------------------------
 // PanelMenuView
@@ -216,7 +160,7 @@ export class PanelMenuView {
   open(): void {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
-    this._widescreenYShift = menuWidescreenYShift(layoutW);
+    this._widescreenYShift = (layoutW * 0.0015625 * 150.0) - 150.0;
     this._entry = new MenuEntry(0, MENU_LABEL_ROW_BACK, this._backPos.y);
     this._hovered = false;
     this._timelineMs = 0;
@@ -347,15 +291,15 @@ export class PanelMenuView {
   }
 
   private _drawTitleText(resources: RuntimeResources): void {
-    const font = resources.smallFont;
+    void resources;
     const x = 32;
     let y = 140;
     const titleColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1);
-    drawSmallText(font, this._title, new Vec2(x, y), titleColor);
+    wgl.drawText(this._title, x, y, 28, titleColor);
     y += 34;
     const bodyColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1);
     for (const line of this._bodyLines) {
-      drawSmallText(font, line, new Vec2(x, y), bodyColor);
+      wgl.drawText(line, x, y, 18, bodyColor);
       y += 22;
     }
   }
@@ -378,7 +322,7 @@ export class PanelMenuView {
       this._ground = null;
       return;
     }
-    this._ground = this.state.menuGround;
+    this._ground = ensureMenuGround(this.state);
   }
 
   private _drawBackground(): void {
@@ -389,8 +333,7 @@ export class PanelMenuView {
       return;
     }
     if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
   }
 
@@ -415,7 +358,7 @@ export class PanelMenuView {
       this._panelPos.y + this._widescreenYShift,
     ).add(this._panelOffset.mul(itemScale));
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, panelH);
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
   }
 
@@ -437,7 +380,7 @@ export class PanelMenuView {
     const offsetY = MENU_ITEM_OFFSET_Y * itemScale - localYShift;
     const dst = wgl.makeRectangle(pos.x, pos.y, itemW * itemScale, itemH * itemScale);
     const origin = wgl.makeVector2(-offsetX, -offsetY);
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
 
     if (fxDetail) {
       drawUiQuadShadow({
@@ -500,7 +443,7 @@ export class PanelMenuView {
     const rotationDeg = 0.0;
 
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
     const signOrigin = wgl.makeVector2(-signOffsetX, -signOffsetY);
 
@@ -582,6 +525,3 @@ export class PanelMenuView {
     return Rect.fromPosSize(topLeft, br);
   }
 }
-
-// Re-export the animation helper so subclasses / sibling modules can use it.
-export { uiElementAnim, labelAlpha, signLayoutScale };
