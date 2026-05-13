@@ -10,8 +10,8 @@ import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
 import { perkApply } from './runtime/apply.ts';
 import type { PerkSelectionState } from './state.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
-import { QuestLevel } from "@crimson/quests/level.js";
-import { GameplayState } from "@crimson/gameplay.js";
+import { QuestLevel } from '@crimson/quests/level.ts';
+import type { GameplayState } from '@crimson/sim/state-types.ts';
 
 export const PERK_ID_MAX: number = (() => {
   let maxId = 0;
@@ -59,6 +59,9 @@ export function perkSelectRandom(
   player: PlayerState,
   opts: { gameMode: GameMode; playerCount: number },
 ): PerkId {
+  // Randomly select an eligible perk id.
+  //
+  // Port of `perk_select_random` (0x0042fbd0).
   for (let i = 0; i < 1000; i++) {
     const perkId = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
     if (!(perkId >= 0 && perkId < state.perkAvailable.length)) {
@@ -117,7 +120,7 @@ export function perkGenerateChoices(
   const offerableMask = perkOfferableMask(state, player, { gameMode, playerCount });
   const playerPerkCounts = player.perkCounts;
   const playerWeaponId = player.weapon.weaponId;
-  const deathClockActive = playerPerkCounts[PerkId.DEATH_CLOCK] > 0;
+  const deathClockActive = int(playerPerkCounts[PerkId.DEATH_CLOCK]) > 0;
   const flamethrowerId = WeaponId.FLAMETHROWER;
 
   let pyromaniacAllowed = playerWeaponId === flamethrowerId;
@@ -338,7 +341,7 @@ export function perkSelectionPick(
   }
   const perkId = choices[idx];
   perkApply(state, players, perkId, { perkState, dt, creatures });
-  console.assert(int(perkState.pendingCount) > 0, 'pendingCount must be > 0 after perkApply');
+  console.assert(int(perkState.pendingCount) > 0, 'picked perk must leave a pending perk to resolve');
   perkState.pendingCount -= 1;
   perkState.choicesDirty = true;
   if (refreshChoices) {
