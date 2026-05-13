@@ -13,11 +13,10 @@ export const Q3_TERRAIN_SLOTS: TerrainSlotTriplet = [4, 5, 4] as const;
 export const Q4_TERRAIN_SLOTS: TerrainSlotTriplet = [6, 7, 6] as const;
 export const DEFAULT_TERRAIN_SLOTS: TerrainSlotTriplet = Q1_TERRAIN_SLOTS;
 
-// Thresholds kept descending to preserve the native chained 1/8 roll order.
-export const UNLOCK_TERRAIN_SLOTS: ReadonlyArray<readonly [number, TerrainSlotTriplet, RngCallerStatic]> = [
-  [40, Q4_TERRAIN_SLOTS, RngCallerStatic.UNLOCK_TERRAIN_Q4],
-  [30, Q3_TERRAIN_SLOTS, RngCallerStatic.UNLOCK_TERRAIN_Q3],
-  [20, Q2_TERRAIN_SLOTS, RngCallerStatic.UNLOCK_TERRAIN_Q2],
+export const UNLOCK_TERRAIN_SLOTS: ReadonlyArray<readonly [number, TerrainSlotTriplet]> = [
+  [40, Q4_TERRAIN_SLOTS],
+  [30, Q3_TERRAIN_SLOTS],
+  [20, Q2_TERRAIN_SLOTS],
 ];
 
 const _TEXTURE_ID_BY_TERRAIN_SLOT: Record<number, TextureId> = {
@@ -62,7 +61,16 @@ export function resolveTerrainSlots<T>(
 export function chooseUnlockTerrainSlots(opts: { unlockIndex: number; rng: CrandLike }): TerrainSlotTriplet {
   const unlockIndex = opts.unlockIndex;
   const rng = opts.rng;
-  for (const [threshold, slots, caller] of UNLOCK_TERRAIN_SLOTS) {
+  // Keep the thresholds descending to preserve the native chained 1/8 roll order.
+  for (const [threshold, slots] of UNLOCK_TERRAIN_SLOTS) {
+    let caller: RngCallerStatic | null = null;
+    if (threshold === 40) {
+      caller = RngCallerStatic.UNLOCK_TERRAIN_Q4;
+    } else if (threshold === 30) {
+      caller = RngCallerStatic.UNLOCK_TERRAIN_Q3;
+    } else if (threshold === 20) {
+      caller = RngCallerStatic.UNLOCK_TERRAIN_Q2;
+    }
     if (unlockIndex >= threshold && (rng.rand({ caller }) & 7) === 3) {
       return slots;
     }
