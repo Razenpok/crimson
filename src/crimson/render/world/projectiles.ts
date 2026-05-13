@@ -11,8 +11,7 @@ import type { Projectile, SecondaryProjectile } from '@crimson/projectiles/types
 import { knownProjRgb } from '@crimson/render/projectile-render-registry.ts';
 import { drawProjectileFromRegistry } from '@crimson/render/projectile-draw/primary-dispatch.ts';
 import { drawSecondaryProjectileFromRegistry } from '@crimson/render/projectile-draw/secondary-dispatch.ts';
-import type { ProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
-import type { SecondaryProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
+import { ProjectileDrawCtx, SecondaryProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
 import { WorldRenderCtx } from './context.ts';
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
@@ -51,7 +50,7 @@ export function drawProjectile(
   const life = proj.lifeTimer;
   const angle = proj.angle;
 
-  const registryCtx: ProjectileDrawCtx = {
+  const registryCtx = new ProjectileDrawCtx({
     renderer: projectileRenderCtx,
     proj,
     projIndex: int(projIndex),
@@ -63,7 +62,7 @@ export function drawProjectile(
     angle,
     scale,
     alpha,
-  };
+  });
   if (drawProjectileFromRegistry(registryCtx)) return;
 
   const mapping = KNOWN_PROJ_FRAMES.get(typeId);
@@ -172,7 +171,7 @@ export function drawSecondaryProjectile(
   const projType = proj.typeId;
   const angle = proj.angle;
 
-  const registryCtx: SecondaryProjectileDrawCtx = {
+  const registryCtx = new SecondaryProjectileDrawCtx({
     renderer: projectileRenderCtx,
     proj,
     projType,
@@ -180,7 +179,7 @@ export function drawSecondaryProjectile(
     angle,
     scale,
     alpha,
-  };
+  });
   if (drawSecondaryProjectileFromRegistry(registryCtx)) return;
 
   const r = Math.max(1.0, 4.0 * scale);

@@ -2,4 +2,4 @@
 
 export { drawProjectileFromRegistry } from './primary-dispatch.ts';
 export { drawSecondaryProjectileFromRegistry } from './secondary-dispatch.ts';
-export type { ProjectileDrawCtx, SecondaryProjectileDrawCtx } from './types.ts';
+export { ProjectileDrawCtx, SecondaryProjectileDrawCtx } from './types.ts';
