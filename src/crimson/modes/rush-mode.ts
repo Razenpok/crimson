@@ -19,7 +19,7 @@ import { buildRushSession, enforceRushLoadout } from '@crimson/sim/session-build
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
+import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 
 import {
   BaseGameplayMode,
@@ -279,7 +279,7 @@ export class RushMode extends BaseGameplayMode {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
 
       this._drawTargetHealthBar();
-      hudBottom = drawHudOverlay({
+      hudBottom = drawHudOverlay(new HudRenderContext({
         resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
@@ -290,7 +290,7 @@ export class RushMode extends BaseGameplayMode {
         showTime: hudFlags.showTime,
         showQuestHud: hudFlags.showQuestHud,
         smallIndicators: this._hudSmallIndicators(),
-      }, {
+      }), {
         player: this.player,
         players: this.simWorld.players,
         bonusHud: this.state.bonusHud,

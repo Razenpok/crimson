@@ -25,7 +25,7 @@ import { WeaponId, WEAPON_BY_ID } from '@crimson/weapons.ts';
 import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
 
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
+import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import { PERK_MENU_TRANSITION_MS } from '@crimson/ui/perk-menu.ts';
 
 import {
@@ -557,7 +557,7 @@ export class SurvivalMode extends BaseGameplayMode {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
 
       this._drawTargetHealthBar({ alpha: hudAlpha });
-      hudBottom = drawHudOverlay({
+      hudBottom = drawHudOverlay(new HudRenderContext({
         resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
@@ -568,7 +568,7 @@ export class SurvivalMode extends BaseGameplayMode {
         showTime: hudFlags.showTime,
         showQuestHud: hudFlags.showQuestHud,
         smallIndicators: this._hudSmallIndicators(),
-      }, {
+      }), {
         player: this.player,
         players: this.simWorld.players,
         bonusHud: this.state.bonusHud,

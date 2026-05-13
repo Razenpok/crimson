@@ -25,7 +25,7 @@ import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
 
 import { PlayerInput } from '@crimson/sim/input.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
+import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import {
   type TutorialOverlayState,
   TUTORIAL_PANEL_POS,
@@ -367,7 +367,7 @@ export class TutorialMode extends BaseGameplayMode {
     if (!perkMenuActive) {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
       this._drawTargetHealthBar();
-      hudBottom = drawHudOverlay({
+      hudBottom = drawHudOverlay(new HudRenderContext({
         resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
@@ -378,7 +378,7 @@ export class TutorialMode extends BaseGameplayMode {
         showTime: hudFlags.showTime,
         showQuestHud: hudFlags.showQuestHud,
         smallIndicators: this._hudSmallIndicators(),
-      }, {
+      }), {
         player: this.player,
         players: this.simWorld.players,
         bonusHud: this.state.bonusHud,

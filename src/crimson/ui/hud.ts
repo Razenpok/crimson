@@ -55,15 +55,33 @@ const HUD_BONUS_PANEL_OFFSET_Y = -11.0;
 const HUD_XP_BAR_RGBA = new RGBA(0.1, 0.3, 0.6, 1.0);
 const HUD_QUEST_LEFT_Y_SHIFT = 80.0;
 
-export interface HudRenderFlags {
+export interface SmallFontLike {
+  readonly cellSize: number;
+}
+
+export class HudRenderFlags {
   readonly showHealth: boolean;
   readonly showWeapon: boolean;
   readonly showXp: boolean;
   readonly showTime: boolean;
   readonly showQuestHud: boolean;
+
+  constructor(opts: {
+    showHealth: boolean;
+    showWeapon: boolean;
+    showXp: boolean;
+    showTime: boolean;
+    showQuestHud: boolean;
+  }) {
+    this.showHealth = opts.showHealth;
+    this.showWeapon = opts.showWeapon;
+    this.showXp = opts.showXp;
+    this.showTime = opts.showTime;
+    this.showQuestHud = opts.showQuestHud;
+  }
 }
 
-export interface HudRenderContext {
+export class HudRenderContext {
   readonly resources: RuntimeResources;
   readonly state: HudState;
   readonly font: SmallFontData | null;
@@ -74,11 +92,40 @@ export interface HudRenderContext {
   readonly showTime: boolean;
   readonly showQuestHud: boolean;
   readonly smallIndicators: boolean;
+
+  constructor(opts: {
+    resources: RuntimeResources;
+    state: HudState;
+    font?: SmallFontData | null;
+    alpha?: number;
+    showHealth?: boolean;
+    showWeapon?: boolean;
+    showXp?: boolean;
+    showTime?: boolean;
+    showQuestHud?: boolean;
+    smallIndicators?: boolean;
+  }) {
+    this.resources = opts.resources;
+    this.state = opts.state;
+    this.font = opts.font ?? null;
+    this.alpha = opts.alpha ?? 1.0;
+    this.showHealth = opts.showHealth ?? true;
+    this.showWeapon = opts.showWeapon ?? true;
+    this.showXp = opts.showXp ?? true;
+    this.showTime = opts.showTime ?? false;
+    this.showQuestHud = opts.showQuestHud ?? false;
+    this.smallIndicators = opts.smallIndicators ?? false;
+  }
 }
 
 export class HudState {
-  survivalXpSmoothed = 0;
-  preserveBugs = false;
+  survivalXpSmoothed: number;
+  preserveBugs: boolean;
+
+  constructor(opts: { survivalXpSmoothed?: number; preserveBugs?: boolean } = {}) {
+    this.survivalXpSmoothed = opts.survivalXpSmoothed ?? 0;
+    this.preserveBugs = opts.preserveBugs ?? false;
+  }
 
   smoothXp(target: number, frameDtMs: number): number {
     target = int(target);
@@ -92,7 +139,7 @@ export class HudState {
       return smoothed;
     }
 
-    let step = Math.max(1, int(frameDtMs) >> 1);
+    let step = Math.max(1, Math.floor(int(frameDtMs) / 2));
     const diff = Math.abs(smoothed - target);
     if (diff > 1000) {
       step *= Math.floor(diff / 100);
@@ -115,55 +162,62 @@ export class HudState {
   }
 }
 
-export interface HudLayout {
+export class HudLayout {
   readonly scale: number;
   readonly textScale: number;
   readonly lineH: number;
   readonly hudYShift: number;
+
+  constructor(opts: { scale: number; textScale: number; lineH: number; hudYShift: number }) {
+    this.scale = opts.scale;
+    this.textScale = opts.textScale;
+    this.lineH = opts.lineH;
+    this.hudYShift = opts.hudYShift;
+  }
 }
 
 export function hudFlagsForGameMode(gameModeId: GameMode): HudRenderFlags {
   switch (gameModeId) {
     case GameMode.QUESTS:
-      return {
+      return new HudRenderFlags({
         showHealth: true,
         showWeapon: true,
         showXp: true,
         showTime: false,
         showQuestHud: true,
-      };
+      });
     case GameMode.SURVIVAL:
-      return {
+      return new HudRenderFlags({
         showHealth: true,
         showWeapon: true,
         showXp: true,
         showTime: false,
         showQuestHud: false,
-      };
+      });
     case GameMode.RUSH:
-      return {
+      return new HudRenderFlags({
         showHealth: true,
         showWeapon: false,
         showXp: false,
         showTime: true,
         showQuestHud: false,
-      };
+      });
     case GameMode.TYPO:
-      return {
+      return new HudRenderFlags({
         showHealth: true,
         showWeapon: false,
         showXp: true,
         showTime: true,
         showQuestHud: false,
-      };
+      });
     default:
-      return {
+      return new HudRenderFlags({
         showHealth: false,
         showWeapon: false,
         showXp: false,
         showTime: false,
         showQuestHud: false,
-      };
+      });
   }
 }
 
@@ -177,13 +231,13 @@ export function hudUiScale(screenW: number, screenH: number): number {
 export function hudLayout(
   screenW: number,
   screenH: number,
-  opts: { font: SmallFontData | null; showQuestHud: boolean },
+  opts: { font: SmallFontLike | null; showQuestHud: boolean },
 ): HudLayout {
   const scale = hudUiScale(screenW, screenH);
   const textScale = 1.0 * scale;
   const lineH = opts.font !== null ? opts.font.cellSize * textScale : 18.0 * textScale;
   const hudYShift = opts.showQuestHud ? HUD_QUEST_LEFT_Y_SHIFT : 0.0;
-  return { scale, textScale, lineH, hudYShift };
+  return new HudLayout({ scale, textScale, lineH, hudYShift });
 }
 
 function _drawText(
@@ -282,7 +336,7 @@ export function drawTargetHealthBar(
 
 function _weaponIconIndex(weaponId: number): number | null {
   const entry = WEAPON_BY_ID.get(weaponId as WeaponId);
-  if (!entry) return null;
+  if (entry === undefined) throw new Error(`unknown weapon id: ${weaponId}`);
   const iconIndex = int(entry.iconIndex);
   if (iconIndex < 0 || iconIndex > 31) return null;
   return iconIndex;
@@ -290,7 +344,7 @@ function _weaponIconIndex(weaponId: number): number | null {
 
 function _weaponAmmoClass(weaponId: number): number {
   const entry = WEAPON_BY_ID.get(weaponId as WeaponId);
-  if (!entry) return 0;
+  if (entry === undefined) throw new Error(`unknown weapon id: ${weaponId}`);
   const value = entry.ammoClass;
   return value !== null ? int(value) : 0;
 }

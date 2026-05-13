@@ -26,7 +26,7 @@ import { typoShotCounts } from '@crimson/typo/state.ts';
 import { buildTypoPlayerInput } from '@crimson/typo/player.ts';
 import { PlayerInput } from '@crimson/sim/input.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
+import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import { drawTypingBox, drawTypoNameLabels } from '@crimson/ui/overlays/typo-run.ts';
 
 import {
@@ -263,7 +263,7 @@ export class TypoShooterMode extends BaseGameplayMode {
     if (showGameplayUi) {
       const hudFlags = hudFlagsForGameMode(this._configGameModeId());
       this._drawTargetHealthBar();
-      drawHudOverlay({
+      drawHudOverlay(new HudRenderContext({
         resources: this.renderResources.resources,
         state: this._hudState,
         font: this._small,
@@ -274,7 +274,7 @@ export class TypoShooterMode extends BaseGameplayMode {
         showTime: hudFlags.showTime,
         showQuestHud: hudFlags.showQuestHud,
         smallIndicators: this._hudSmallIndicators(),
-      }, {
+      }), {
         player: this.player,
         players: this.simWorld.players,
         bonusHud: this.state.bonusHud,
