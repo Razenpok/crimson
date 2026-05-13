@@ -64,10 +64,6 @@ export class QuestLevel {
     return this.major === other.major && this.minor === other.minor;
   }
 
-  get key(): string {
-    return `${this.major}.${this.minor}`;
-  }
-
   toString(): string {
     return this.text;
   }

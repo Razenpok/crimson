@@ -28,7 +28,7 @@ export function registerQuest(opts: {
       unlockWeaponId: opts.unlockWeaponId ?? null,
       terrainSlots: opts.terrainSlots ?? terrainSlotsForQuest(questLevel),
     };
-    const key = quest.level.key;
+    const key = quest.level.text;
     const existing = _QUESTS.get(key);
     if (existing !== undefined) {
       throw new Error(
@@ -53,5 +53,5 @@ export function allQuests() {
 }
 
 export function questByLevel(level: QuestLevel): QuestDefinition | null {
-  return _QUESTS.get(level.key) ?? null;
+  return _QUESTS.get(level.text) ?? null;
 }
