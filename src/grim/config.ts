@@ -91,6 +91,7 @@ export interface CrimsonConfig {
   gameplay: CrimsonGameplayConfig;
   profile: CrimsonProfileConfig;
   controls: CrimsonControlsConfig;
+  save(): void;
 }
 
 const _DEFAULT_PLAYER_CONTROL_TEMPLATES: CrimsonPlayerControls[] = [
@@ -184,6 +185,9 @@ export function defaultCrimsonConfig(): CrimsonConfig {
       ],
       pickPerkCode: 0x101,
       reloadCode: 0x102,
+    },
+    save(): void {
+      // WebGL has no file-backed crimson.cfg path; keep the Python method as a no-op.
     },
   };
 }

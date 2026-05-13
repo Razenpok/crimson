@@ -503,9 +503,7 @@ export class QuestResultsUi {
             // so we set highlightRank based on the pre-computed rank.
             this.highlightRank = this.rank < TABLE_MAX ? this.rank : null;
             setPlayerNameInput(this.config.profile, this.inputText);
-            if (typeof (this.config as any).save === 'function') {
-              (this.config as any).save();
-            }
+            this.config.save();
             this._saved = true;
           }
           this.phase = 2;

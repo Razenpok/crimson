@@ -330,8 +330,7 @@ export class HighScoresView {
   private _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        const cfg = this.state.config as unknown as { save?(): void };
-        if (cfg.save) cfg.save();
+        this.state.config.save();
         this._dirty = false;
       } catch (_) { /* config save failed — will retry next close */ }
     }

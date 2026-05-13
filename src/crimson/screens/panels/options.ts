@@ -191,8 +191,7 @@ export class OptionsMenuView extends PanelMenuView {
   protected override _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        const cfg = this._optState.config as typeof this._optState.config & { save?(): void };
-        if (cfg.save) cfg.save();
+        this._optState.config.save();
         this._dirty = false;
       } catch (exc) {
         this._optState.console.log.log(`config: save failed: ${exc}`);

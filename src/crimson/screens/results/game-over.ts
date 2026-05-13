@@ -354,9 +354,7 @@ export class GameOverUi {
             this._saved = true;
           }
           setPlayerNameInput(this.config.profile, this.inputText);
-          if (typeof (this.config as any).save === 'function') {
-            (this.config as any).save();
-          }
+          this.config.save();
           this.phase = 1;
           return null;
         }
