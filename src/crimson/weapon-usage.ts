@@ -13,7 +13,7 @@ const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = WEAPON_USAGE_SLOT_COUNT - 1;
 export type WeaponUsageCounts = readonly number[];
 export const ZERO_WEAPON_USAGE_COUNTS: WeaponUsageCounts = Array.from({ length: WEAPON_USAGE_SLOT_COUNT }, () => 0);
 
-export function normalizeWeaponUsageCounts(values: unknown): WeaponUsageCounts {
+export function normalizeWeaponUsageCounts(values: object): WeaponUsageCounts {
   if (!Array.isArray(values)) {
     return ZERO_WEAPON_USAGE_COUNTS;
   }
@@ -30,6 +30,7 @@ export function normalizeWeaponUsageCounts(values: unknown): WeaponUsageCounts {
 }
 
 export function weaponUsageSlotForWeaponId(weaponId: number): number | null {
+  // Map a weapon id to save-status usage slot, or `None` if untracked.
   const id = int(weaponId);
   if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
     return id;
