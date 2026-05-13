@@ -392,10 +392,15 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _rebindSections(
-    playerIndex: number,
-    aimScheme: AimScheme,
-    moveMode: MovementControlType,
+    opts: {
+      playerIndex: number;
+      aimScheme: AimScheme;
+      moveMode: MovementControlType;
+    },
   ): [string, RebindRowSpec[]][] {
+    const playerIndex = opts.playerIndex;
+    const aimScheme = opts.aimScheme;
+    const moveMode = opts.moveMode;
     const [aimRows, moveRows, miscRows] = controlsRebindPlan({ aimScheme, moveMode, playerIndex });
     const sections: [string, RebindRowSpec[]][] = [['Aiming', aimRows], ['Moving', moveRows]];
     if (miscRows.length > 0) {
@@ -405,12 +410,19 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _collectRebindRows(
-    rightTopLeft: Vec2,
-    panelScale: number,
-    playerIndex: number,
-    sections: [string, RebindRowSpec[]][],
-    font: SmallFontData,
+    opts: {
+      rightTopLeft: Vec2;
+      panelScale: number;
+      playerIndex: number;
+      sections: [string, RebindRowSpec[]][];
+      font: SmallFontData;
+    },
   ): RebindRowLayout[] {
+    const rightTopLeft = opts.rightTopLeft;
+    const panelScale = opts.panelScale;
+    const playerIndex = opts.playerIndex;
+    const sections = opts.sections;
+    const font = opts.font;
     const rows: RebindRowLayout[] = [];
     let y = rightTopLeft.y + 64.0 * panelScale;
     for (const [, sectionRows] of sections) {
@@ -441,8 +453,14 @@ export class ControlsMenuView extends PanelMenuView {
     const playerControls = this.state.config.controls.players[playerIdx];
     const aimScheme = playerControls.aimScheme;
     const moveMode = playerControls.movement;
-    const sections = this._rebindSections(playerIdx, aimScheme, moveMode);
-    const rows = this._collectRebindRows(rightTopLeft, panelScale, playerIdx, sections, font);
+    const sections = this._rebindSections({ playerIndex: playerIdx, aimScheme, moveMode });
+    const rows = this._collectRebindRows({
+      rightTopLeft,
+      panelScale,
+      playerIndex: playerIdx,
+      sections,
+      font,
+    });
 
     if (this._rebindActive()) {
       const activeRow = this._rebindRow!;
@@ -852,8 +870,14 @@ export class ControlsMenuView extends PanelMenuView {
       wgl.makeColor(1, 1, 1, 204 / 255),
     );
 
-    const sections = this._rebindSections(playerIdx, aimScheme, moveMode);
-    const rows = this._collectRebindRows(rightTopLeft, panelScale, playerIdx, sections, font);
+    const sections = this._rebindSections({ playerIndex: playerIdx, aimScheme, moveMode });
+    const rows = this._collectRebindRows({
+      rightTopLeft,
+      panelScale,
+      playerIndex: playerIdx,
+      sections,
+      font,
+    });
     let rowIter = 0;
     const [mx, my] = InputState.mousePosition();
     const mouse = new Vec2(mx, my);
