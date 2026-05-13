@@ -174,7 +174,7 @@ export class PlayGameMenuView extends PanelMenuView {
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
 
-    const consumedClick = this._updatePlayerCount(layout.dropPos, scale, font);
+    const consumedClick = this._updatePlayerCount(layout.dropPos, scale, { font });
     if (consumedClick) return;
 
     const [mx, my] = InputState.mousePosition();
@@ -424,7 +424,8 @@ export class PlayGameMenuView extends PanelMenuView {
     };
   }
 
-  private _updatePlayerCount(pos: Vec2, scale: number, font: SmallFontData): boolean {
+  private _updatePlayerCount(pos: Vec2, scale: number, opts: { font: SmallFontData }): boolean {
+    const font = opts.font;
     const config = this.state.config;
     const layout = this._playerCountWidgetLayout(pos, scale, { font });
 
@@ -515,16 +516,17 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     // `sub_44ed80`: the list widget is drawn before tooltips, so tooltips can overlay it.
-    this._drawPlayerCount(layout.dropPos, scale, resources, font);
+    this._drawPlayerCount(layout.dropPos, scale, { resources, font });
     this._drawTooltips(entries, basePos, yEnd, scale, font);
   }
 
   private _drawPlayerCount(
     pos: Vec2,
     scale: number,
-    resources: RuntimeResources,
-    font: SmallFontData,
+    opts: { resources: RuntimeResources; font: SmallFontData },
   ): void {
+    const resources = opts.resources;
+    const font = opts.font;
     const dropOn = getTexture(resources, TextureId.UI_DROP_ON);
     const dropOff = getTexture(resources, TextureId.UI_DROP_OFF);
     const layout = this._playerCountWidgetLayout(pos, scale, { font });
