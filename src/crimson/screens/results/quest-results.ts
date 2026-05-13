@@ -7,7 +7,7 @@ import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts
 import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import { type CrandLike } from '@grim/rand.ts';
+import { Crand, type CrandLike } from '@grim/rand.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import {
   type QuestFinalTime,
@@ -38,10 +38,16 @@ import {
   rankIndex,
 } from './game-over.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
+// `quest_results_screen_update` base layout (Crimsonland classic UI panel).
+// Values are derived from `ui_menu_assets_init` + `ui_menu_layout_init` and how
+// the quest results screen composes `ui_menuPanel` geometry:
+//   panel_left = geom_x0 + pos_x + slide_x
+//   panel_top  = geom_y0 + pos_y
+//
+// Where:
+// - pos_x/pos_y are `ui_element_t` position fields set to (-45, 110)
+// - geom_x0/geom_y0 are the first vertex coordinates of the `ui_menuPanel` geo,
+//   after `ui_menu_assets_init` transforms it into an 8-vertex 3-slice panel.
 const QUEST_RESULTS_PANEL_POS_X = -45.0;
 const QUEST_RESULTS_PANEL_POS_Y = 110.0;
 const QUEST_RESULTS_PANEL_GEOM_X0 = -63.0;
@@ -53,6 +59,10 @@ const QUEST_RESULTS_PANEL_H = 378.0;
 const TEXTURE_TOP_BANNER_W = 256.0;
 const TEXTURE_TOP_BANNER_H = 64.0;
 
+// `quest_results_screen_update` uses the classic UI element sums for positioning:
+//   content_x = (pos_x + offset_x + slide_x) + 180.0 + 40.0
+//   banner_x  = content_x - 18.0
+//   score_x   = content_x + 30.0
 const QUEST_RESULTS_CONTENT_X = 220.0;
 const QUEST_RESULTS_BANNER_X_FROM_CONTENT = -18.0;
 const QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT = 30.0;
@@ -60,6 +70,9 @@ const QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT = 30.0;
 const INPUT_BOX_W = 166.0;
 const INPUT_BOX_H = 18.0;
 
+// Capture (1024x768) shows the quest results panel uses the same ui_element
+// timeline pattern as other screens: fully hidden until 100ms, then slides in
+// over 300ms (end=100, start=400).
 const PANEL_SLIDE_START_MS = 400.0;
 const PANEL_SLIDE_END_MS = 100.0;
 
@@ -67,6 +80,8 @@ const COLOR_TEXT = wgl.makeColor(1.0, 1.0, 1.0, 1.0);
 const COLOR_TEXT_MUTED = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
 const COLOR_TEXT_SUBTLE = wgl.makeColor(1.0, 1.0, 1.0, 0.7);
 const COLOR_GREEN = wgl.makeColor(25 / 255, 200 / 255, 25 / 255, 1.0);
+// `sub_41e070` initializes DAT_004965f8..600 to this blue tint (149,175,198),
+// reused by quest/game-over captions and score-card separator outlines.
 const COLOR_UI_ACCENT = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 1.0);
 
 // DOM key codes
@@ -78,17 +93,13 @@ const KEY_H = 72;
 const KEY_N = 78;
 const MOUSE_BUTTON_LEFT = 0;
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function weaponIconSrc(
   texture: wgl.Texture,
   weaponIdNative: number,
 ): wgl.Rectangle | null {
   const weaponId = weaponIdNative as WeaponId;
   const entry = WEAPON_BY_ID.get(weaponId);
-  if (!entry) return null;
+  if (entry === undefined) throw new Error(`Unknown weapon id: ${weaponIdNative}`);
   const iconIndex = entry.iconIndex;
   if (iconIndex < 0 || iconIndex > 31) return null;
   const grid = 8;
@@ -98,6 +109,22 @@ function weaponIconSrc(
   const col = frame % grid;
   const row = Math.floor(frame / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
+}
+
+function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  const ix1 = int(x1);
+  const iy1 = int(y1);
+  const ix2 = int(x2);
+  const iy2 = int(y2);
+  if (iy1 === iy2) {
+    wgl.drawRectangle(Math.min(ix1, ix2), iy1, Math.abs(ix2 - ix1), 1, color);
+    return;
+  }
+  if (ix1 === ix2) {
+    wgl.drawRectangle(ix1, Math.min(iy1, iy2), 1, Math.abs(iy2 - iy1), color);
+    return;
+  }
+  wgl.drawRectangle(ix1, iy1, ix2 - ix1, iy2 - iy1, color);
 }
 
 interface QuestResultsPanelLayout {
@@ -117,10 +144,6 @@ function drawSmall(
 ): void {
   drawSmallText(font, text, pos, color);
 }
-
-// ---------------------------------------------------------------------------
-// QuestResultsUi
-// ---------------------------------------------------------------------------
 
 export class QuestResultsUi {
   config: CrimsonConfig;
@@ -151,7 +174,6 @@ export class QuestResultsUi {
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;
 
-  // Buttons
   private _okButton = new UiButtonState('OK', { forceWide: false });
   private _playNextButton = new UiButtonState('Play Next', { forceWide: true });
   private _playAgainButton = new UiButtonState('Play Again', { forceWide: true });
@@ -229,6 +251,16 @@ export class QuestResultsUi {
     InputState.wasKeyPressed(KEY_KP_ENTER);
   }
 
+  private _textWidth(font: SmallFontData, text: string, scale: number): number {
+    void scale;
+    return measureSmallTextWidth(font, text);
+  }
+
+  private _drawSmall(font: SmallFontData, text: string, pos: Vec2, scale: number, color: wgl.Color): void {
+    void scale;
+    drawSmallText(font, text, pos, color);
+  }
+
   worldEntityAlpha(): number {
     if (!this._closing) return 1.0;
     const tMs = this._introMs;
@@ -243,6 +275,7 @@ export class QuestResultsUi {
   }
 
   private _panelLayout(opts: { screenW: number; scale: number }): QuestResultsPanelLayout {
+    // Match MenuView._ui_element_anim offset math (linear, with a 100ms hold hidden).
     const screenW = opts.screenW;
     const scale = opts.scale;
     const tMs = this._introMs;
@@ -320,7 +353,8 @@ export class QuestResultsUi {
       colLabel,
     );
 
-    // Experience column
+    // Native path: FUN_00441220 sets current color from DAT_004ccca8 just before
+    // drawing "Experience", so it uses the accent-blue tint (alpha*0.7).
     drawSmall(font, 'Experience', new Vec2(rightLabelX, y), colLine);
     const xpValueW = textWidth(font, xpValue);
     drawSmall(
@@ -329,21 +363,12 @@ export class QuestResultsUi {
       colLabel,
     );
 
-    // Vertical separator
+    // Native vertical separator drawn via FUN_00441220 from x+84, height 48.
     const sepX = x + 84.0 * scale;
-    wgl.drawRectangle(
-      int(sepX), int(y),
-      1, int(48.0 * scale),
-      wgl.makeColor(colLine.r, colLine.g, colLine.b, colLine.a),
-    );
+    drawLine(int(sepX), int(y), int(sepX), int(y + 48.0 * scale), colLine);
 
-    // Horizontal separator
     const rowTop = y + 52.0 * scale;
-    wgl.drawRectangle(
-      int(x - 12.0 * scale), int(rowTop),
-      int(192.0 * scale), 1,
-      wgl.makeColor(colLine.r, colLine.g, colLine.b, colLine.a),
-    );
+    drawLine(int(x - 12.0 * scale), int(rowTop), int(x + 180.0 * scale), int(rowTop), colLine);
     if (!opts.showWeaponRow) return;
 
     const rowY = rowTop;
@@ -369,11 +394,10 @@ export class QuestResultsUi {
     const hitText = `Hit %: ${ratio}%`;
     drawSmall(font, hitText, new Vec2(x + 114.0 * scale, rowY + 15.0 * scale), colRow);
 
-    // Bottom horizontal separator
-    wgl.drawRectangle(
+    drawLine(
       int(x - 12.0 * scale), int(rowY + 48.0 * scale),
-      int(192.0 * scale), 1,
-      wgl.makeColor(colLine.r, colLine.g, colLine.b, colLine.a),
+      int(x + 180.0 * scale), int(rowY + 48.0 * scale),
+      colLine,
     );
   }
 
@@ -476,7 +500,7 @@ export class QuestResultsUi {
         return null;
       }
       const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
-      const rng = opts.rng ?? { rand(_caller: number) { return 0; } } as CrandLike;
+      const rng = opts.rng ?? new Crand(0);
       const [newText, newCaret] = updateNameEntryText(
         this.inputText,
         this.inputCaret,
@@ -499,8 +523,6 @@ export class QuestResultsUi {
         if (this.inputText.trim()) {
           if (playSfx !== null) playSfx(SfxId.UI_TYPEENTER);
           if (!this._saved) {
-            // In the WebGL port we don't have file-based highscore tables,
-            // so we set highlightRank based on the pre-computed rank.
             this.highlightRank = this.rank < TABLE_MAX ? this.rank : null;
             setPlayerNameInput(this.config.profile, this.inputText);
             this.config.save();
@@ -685,9 +707,9 @@ export class QuestResultsUi {
       drawSmall(font, perkValue, new Vec2(valueX, y), rowColor(2));
       y += 20.0 * scale;
 
-      // Final time underline
+      // Final time underline + row (matches the extra quad draw in native).
       const lineY = y + 1.0 * scale;
-      const lineColor = rowColor(3, true);
+      const lineColor = wgl.makeColor(1.0, 1.0, 1.0, rowColor(3, true).a);
       wgl.drawRectangle(
         int(labelX - 4.0 * scale), int(lineY),
         int(168.0 * scale), int(1.0 * scale),
@@ -708,7 +730,6 @@ export class QuestResultsUi {
       );
 
       const inputPos = contentPos.offset({ dy: 150.0 * scale });
-      // Input box outline
       wgl.drawRectangle(
         int(inputPos.x), int(inputPos.y),
         int(INPUT_BOX_W * scale), 1,
@@ -729,7 +750,6 @@ export class QuestResultsUi {
         1, int(INPUT_BOX_H * scale),
         wgl.makeColor(1, 1, 1, 1),
       );
-      // Input box fill
       wgl.drawRectangle(
         int(inputPos.x + 1.0 * scale), int(inputPos.y + 1.0 * scale),
         int((INPUT_BOX_W - 2.0) * scale), int((INPUT_BOX_H - 2.0) * scale),
@@ -740,7 +760,6 @@ export class QuestResultsUi {
         inputPos.add(new Vec2(4.0 * scale, 2.0 * scale)),
         { scale: 1.0 * scale, color: COLOR_TEXT_MUTED },
       );
-      // Caret
       let caretAlpha = 1.0;
       if (Math.sin(performance.now() * 0.004) > 0.0) {
         caretAlpha = 0.4;
@@ -757,7 +776,7 @@ export class QuestResultsUi {
       const okW = buttonWidth(resources, this._okButton.label, { scale, forceWide: this._okButton.forceWide });
       buttonDraw(resources, this._okButton, { pos: okPos, width: okW, scale });
 
-      // Score card during name entry
+      // Native phase 1 still renders the quest score card while entering the name.
       const scoreCardPos = inputPos.add(new Vec2(26.0 * scale, 46.0 * scale));
       this._drawNameEntryStats({
         pos: scoreCardPos,
@@ -790,7 +809,7 @@ export class QuestResultsUi {
         font,
       });
 
-      // Unlock lines
+      // Unlock lines (their presence shifts the buttons down in native).
       let varC14 = varC12 + 84.0 * scale;
       if (this.unlockWeaponName) {
         drawSmall(
