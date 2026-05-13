@@ -30,9 +30,13 @@ export interface CreatureAIStateLike {
   forceTarget: number;
 }
 
-export interface CreatureAIUpdate {
-  readonly moveScale: number;
-  readonly selfDamage: number | null;
+export class CreatureAIUpdate {
+  constructor(
+    public readonly moveScale: number,
+    public readonly selfDamage: number | null = null,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 export function creatureAi7TickLinkTimer(
@@ -211,5 +215,5 @@ export function creatureAiUpdateTarget(
   const dx = f32(creature.target.x - creature.pos.x);
   const dy = f32(creature.target.y - creature.pos.y);
   creature.targetHeading = headingFromDeltaF32({ dx, dy });
-  return { moveScale: f32(moveScale), selfDamage };
+  return new CreatureAIUpdate(f32(moveScale), selfDamage);
 }
