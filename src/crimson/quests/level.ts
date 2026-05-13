@@ -6,6 +6,9 @@ export const QUEST_STAGE_COUNT = 5;
 export const QUESTS_PER_STAGE = 10;
 export const QUEST_COUNT = QUEST_STAGE_COUNT * QUESTS_PER_STAGE;
 
+export type QuestStageMajor = number;
+export type QuestStageMinor = number;
+
 export class QuestLevel {
   constructor(
     public readonly major: number,
