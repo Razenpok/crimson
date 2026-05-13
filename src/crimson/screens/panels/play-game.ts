@@ -172,7 +172,7 @@ export class PlayGameMenuView extends PanelMenuView {
     const layout = this._contentLayout();
     const scale = layout.scale;
     const basePos = layout.basePos;
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
 
     const consumedClick = this._updatePlayerCount(layout.dropPos, scale, font);
@@ -223,10 +223,6 @@ export class PlayGameMenuView extends PanelMenuView {
       }
     }
     super._beginCloseTransition(action);
-  }
-
-  private _requireResources(): RuntimeResources {
-    return requireRuntimeResources(this.state);
   }
 
   private _contentLayout(): PlayGameContentLayout {
