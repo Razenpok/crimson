@@ -1,11 +1,3 @@
-// Port of crimson/game/loop_view.py
-//
-// Manages screen transitions, demo mode, console overlay, gamma ramp shader,
-// demo trial overlay, and the overall game flow.
-//
-// Networking (LAN lobby, lockstep, rollback, network sessions) is excluded;
-// network-related paths are inert in the WebGL port.
-
 import * as wgl from '@wgl';
 import { type View, ViewContext } from '@grim/view.ts';
 import { Vec2 } from '@grim/geom.ts';
@@ -61,11 +53,10 @@ import { DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
 
 import { type GameStatusPersist } from './runtime.ts';
 
-const KEY_F4 = 115; // DOM keyCode for F4
-const KEY_P = 80;   // DOM keyCode for P
+const KEY_F4 = 115;
+const KEY_P = 80;
 const KEY_ESCAPE = 27;
 
-/** Structural type matching BaseGameplayMode's gameplay-relevant methods. */
 interface GameplayScreen extends Screen, PauseBackground {
   closeRequested: boolean;
   defaultGameModeId: GameMode;
@@ -100,10 +91,6 @@ interface GameplayScreen extends Screen, PauseBackground {
   consumeOutcome?(): QuestRunOutcome | null;
   startRun?(level: QuestLevel, status: GameStatus | null): void;
 }
-
-// ---------------------------------------------------------------------------
-// Gamma ramp shader (WebGL2)
-// ---------------------------------------------------------------------------
 
 const GAMMA_RAMP_VS = `#version 300 es
 precision highp float;
@@ -169,13 +156,8 @@ function setGammaRampGain(shader: GammaRampShader, _gainLoc: number, gain: numbe
   shader.setGain(Math.max(0.0, gain));
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function modeViewContext(state: GameState): ViewContext {
   const preserveBugs = state.preserveBugs;
-  // Network multiplayer would force preserveBugs=false; not applicable in WebGL.
   return new ViewContext(state.assetsUrl, preserveBugs);
 }
 
@@ -189,10 +171,6 @@ function isGameplayScreen(view: Screen | null): view is GameplayScreen {
     'defaultGameModeId' in view
   );
 }
-
-// ---------------------------------------------------------------------------
-// GameLoopView
-// ---------------------------------------------------------------------------
 
 export class GameLoopView implements View {
   readonly state: GameState;
@@ -223,13 +201,10 @@ export class GameLoopView implements View {
     this._demo = new DemoView(state);
     this._menu = new MenuView(state);
 
-    const _viewCtx = modeViewContext(state);
-
     const gs = state;
 
     this._frontViews = {
       open_play_game: new PlayGameMenuView(gs),
-      // LAN excluded from WebGL port.
       open_quests: new QuestsMenuView(gs),
       open_pause_menu: new PauseMenuView(gs),
       start_quest: new QuestMode({
@@ -288,14 +263,8 @@ export class GameLoopView implements View {
     this._active = this._boot;
   }
 
-  // -----------------------------------------------------------------------
-  // Demo trial overlay
-  // -----------------------------------------------------------------------
-
   private _demoTrialOverlayView(): DemoTrialOverlayUi | null {
     if (this._demoTrialOverlay === null) {
-      // DemoTrialOverlayUi requires RuntimeResources; defer creation until
-      // resources are loaded.  If resources are still null, return null.
       const resources = this.state.resources;
       if (resources === null) {
         return null;
@@ -305,50 +274,32 @@ export class GameLoopView implements View {
     return this._demoTrialOverlay;
   }
 
-  // -----------------------------------------------------------------------
-  // View protocol
-  // -----------------------------------------------------------------------
-
   open(): void {
-    // Hide the native cursor (CSS cursor: none on canvas)
     this._boot.open();
   }
 
-  // Unused in WebGL port: desktop-only (window management / file save)
   shouldClose(): boolean {
     return this.state.quitRequested;
   }
 
-  // Unused in WebGL port: desktop-only (window management / file save)
   consumeScreenshotRequest(): boolean {
     const requested = this._screenshotRequested;
     this._screenshotRequested = false;
     return requested;
   }
 
-  // -----------------------------------------------------------------------
-  // LAN placeholders — networking excluded from WebGL port
-  // -----------------------------------------------------------------------
-
-  /** LAN UI enabled cvar check. */
   private _lanUiEnabled(): boolean {
     const cvar = this.state.console.cvars.get('cv_lanLockstepEnabled');
     if (cvar === undefined) return true;
     return cvar.valueF !== 0;
   }
 
-  /** Auto LAN start for browser builds. */
   private _autoLanStartAction(): string | null {
     return null;
   }
 
-  /**
-   * Resolve LAN-related actions for the WebGL port.
-   * Non-LAN actions pass through unmodified.
-   */
   private _resolveLanAction(action: string): string | null {
     if (action === 'open_lan_session') {
-      // LAN UI is excluded; treat as open_play_game fallback
       return 'open_play_game';
     }
 
@@ -359,23 +310,16 @@ export class GameLoopView implements View {
     };
     const mapped = lanModeActions[action];
     if (mapped !== undefined) {
-      // Strip LAN prefix and run as local mode
       return mapped;
     }
 
-    // Non-LAN actions pass through
     return action;
   }
 
-  /** Network runtime tick for browser builds. */
   private _tickNetworkRuntime(): void {
     this._runtimeUpdatesPerFrame = 0;
     this.state.runtimeUpdatesPerFrame = 0;
   }
-
-  // -----------------------------------------------------------------------
-  // Frame telemetry
-  // -----------------------------------------------------------------------
 
   private _clearStateFrameTelemetry(): void {
     this.state.inputStallCount = 0;
@@ -406,16 +350,10 @@ export class GameLoopView implements View {
     this.state.presentationApplyMs = presentationApplyMs;
   }
 
-  // -----------------------------------------------------------------------
-  // Update
-  // -----------------------------------------------------------------------
-
   update(dt: number): void {
-    // Flush edge-triggered state from the previous frame (keys pressed, etc.)
     inputBeginFrame();
 
     const con = this.state.console;
-    // Console hotkey (backtick/tilde)
     if (InputState.wasKeyPressed(192)) {
       con.toggleOpen();
     }
@@ -434,7 +372,6 @@ export class GameLoopView implements View {
       gameplay.setRuntimeUpdatesPerFrame(int(this._runtimeUpdatesPerFrame));
     }
 
-    // Debug hotkeys
     if (debugEnabled() && !con.openFlag && InputState.wasKeyPressed(KEY_F4)) {
       this._setRtxMode(cycleRtxRenderMode(this.state.rtxMode), 'debug hotkey F4');
     }
@@ -442,7 +379,6 @@ export class GameLoopView implements View {
       this._screenshotRequested = true;
     }
 
-    // If console is open, only process quit and return
     if (con.openFlag) {
       if (con.quitRequested) {
         this.state.quitRequested = true;
@@ -463,7 +399,6 @@ export class GameLoopView implements View {
     this._active.update(dt);
     this._syncGameplayFrameTelemetryToState();
 
-    // Process front-active screen actions
     if (this._frontActive !== null) {
       const fa = this._frontActive;
       const gp = this._gameplayScreen(fa);
@@ -477,7 +412,6 @@ export class GameLoopView implements View {
         if (action === null) return;
       }
 
-      // back_to_menu
       if (action === 'back_to_menu') {
         this._captureGameplayGroundForMenu();
         this.state.pauseBackground = null;
@@ -492,7 +426,6 @@ export class GameLoopView implements View {
         return;
       }
 
-      // back_to_previous
       if (action === 'back_to_previous') {
         if (this._frontStack.length > 0) {
           fa.close();
@@ -516,13 +449,11 @@ export class GameLoopView implements View {
         return;
       }
 
-      // open_pause_menu
       if (action === 'open_pause_menu') {
         const pauseView = this._frontViews['open_pause_menu'] ?? null;
         if (pauseView === null) return;
 
         if (gp !== null) {
-          // Gameplay is active — push it onto stack and show pause
           this.state.pauseBackground = gp;
           this._frontStack.push(fa);
           pauseView.open();
@@ -531,15 +462,14 @@ export class GameLoopView implements View {
           return;
         }
         if (this.state.pauseBackground !== null) {
-          // Non-gameplay screen with a gameplay on the stack — show pause
           this._frontStack.push(fa);
           pauseView.open();
           this._frontActive = pauseView;
           this._active = pauseView;
           return;
         }
-        // Options panel uses open_pause_menu as back_action
-        // When no game is running, treat it like back_to_menu
+        // Options panel uses open_pause_menu as back_action; when no game is
+        // running, treat it like back_to_menu.
         this._frontActive!.close();
         this._frontActive = null;
         while (this._frontStack.length > 0) {
@@ -551,12 +481,13 @@ export class GameLoopView implements View {
         return;
       }
 
-      // Mode start actions — bump statistics counter
       if (
         action === 'start_survival' ||
         action === 'start_rush' ||
         action === 'start_typo'
       ) {
+        // Temporary: bump the counter on mode start so the Play Game overlay (F1)
+        // and Statistics screen reflect activity.
         const modeMap: Record<string, GameMode> = {
           start_survival: GameMode.SURVIVAL,
           start_rush: GameMode.RUSH,
@@ -568,11 +499,9 @@ export class GameLoopView implements View {
         }
       }
 
-      // Generic front view transition
       if (action !== null) {
         const view = this._frontViews[action] ?? null;
         if (view !== null) {
-          // Determine stack behavior
           if (
             action === 'open_high_scores' ||
             action === 'open_weapon_database' ||
@@ -616,7 +545,6 @@ export class GameLoopView implements View {
       }
     }
 
-    // Menu active — process menu actions
     if (this._menuActive) {
       let action: string | null = this._menu.takeAction();
       if (action === null) {
@@ -667,7 +595,6 @@ export class GameLoopView implements View {
       }
     }
 
-    // Auto-transition: boot -> demo (if demo build)
     if (
       !this._demoActive &&
       !this._menuActive &&
@@ -684,7 +611,6 @@ export class GameLoopView implements View {
       }
     }
 
-    // Demo finished -> menu
     if (this._demoActive && !this._menuActive && this._demo !== null && this._demo.isFinished()) {
       this._demo.close();
       this._demoActive = false;
@@ -700,7 +626,6 @@ export class GameLoopView implements View {
       return;
     }
 
-    // Boot finished, no demo -> menu
     if (
       !this._demoActive &&
       !this._menuActive &&
@@ -712,28 +637,21 @@ export class GameLoopView implements View {
       this._menuActive = true;
     }
 
-    // Console quit
     if (con.quitRequested) {
       this.state.quitRequested = true;
       con.quitRequested = false;
     }
   }
 
-  // -----------------------------------------------------------------------
-  // Statistics / playtime
-  // -----------------------------------------------------------------------
-
   private _tickStatisticsPlaytime(dt: number): void {
+    // Native `_game_sequence_id` advances on gameplay frames only (state 9)
+    // and is used by the Statistics "played for ... hours ... minutes" row.
     if (this.state.demoEnabled) return;
     if (this._gameplayScreen(this._frontActive) === null) return;
     const deltaMs = int(dt * 1000.0);
     if (deltaMs <= 0) return;
     this._status.gameSequenceId = int(this._status.gameSequenceId + deltaMs);
   }
-
-  // -----------------------------------------------------------------------
-  // Console sync
-  // -----------------------------------------------------------------------
 
   private _syncConsoleElapsedMs(): void {
     const views: Screen[] = [];
@@ -776,10 +694,6 @@ export class GameLoopView implements View {
       }
     }
   }
-
-  // -----------------------------------------------------------------------
-  // Demo trial overlay
-  // -----------------------------------------------------------------------
 
   private _updateDemoTrialOverlay(dt: number): boolean {
     if (!this.state.demoEnabled) return false;
@@ -872,19 +786,11 @@ export class GameLoopView implements View {
     return true;
   }
 
-  // -----------------------------------------------------------------------
-  // Gameplay screen detection
-  // -----------------------------------------------------------------------
-
   private _gameplayScreen(view: Screen | null): GameplayScreen | null {
     if (view === null) return null;
     if (isGameplayScreen(view)) return view;
     return null;
   }
-
-  // -----------------------------------------------------------------------
-  // Front view management
-  // -----------------------------------------------------------------------
 
   private _openFrontView(action: string, view: Screen): void {
     const gameplay = this._gameplayScreen(view);
@@ -897,9 +803,10 @@ export class GameLoopView implements View {
   }
 
   private _maybeAdoptMenuGround(_action: string): void {
-    // Native game always regenerates terrain on gameplay start;
-    // menu terrain should carry back to menu but not into gameplay.
-    // No-op: terrain management is handled in _openGameplayScreen.
+    // Native `game_state_set(9)` always calls `gameplay_reset_state()`, which
+    // runs `terrain_generate_random()`. Menu terrain should carry back to menu,
+    // but entering a fresh gameplay run must regenerate terrain instead of
+    // reusing the captured menu render target.
   }
 
   private _openGameplayScreen(gameplay: GameplayScreen): void {
@@ -913,7 +820,8 @@ export class GameLoopView implements View {
     }
 
     if (this.state.audio !== null) {
-      // Original game: entering gameplay cuts the menu theme
+      // Original game: entering gameplay cuts the menu theme; in-game tunes
+      // start later on the first creature hit.
       audioStopMusic(this.state.audio);
     }
 
@@ -930,7 +838,6 @@ export class GameLoopView implements View {
     }
   }
 
-  /** Configure LAN runtime on a gameplay screen. */
   private _configureLanRuntime(gameplay: GameplayScreen): void {
     gameplay.setLanRuntime({
       enabled: false,
@@ -988,10 +895,6 @@ export class GameLoopView implements View {
     return 'back_to_menu';
   }
 
-  // -----------------------------------------------------------------------
-  // RTX mode sync
-  // -----------------------------------------------------------------------
-
   private _setRtxMode(mode: RtxRenderMode, source: string): void {
     if (mode === this.state.rtxMode) return;
     this.state.rtxMode = mode;
@@ -1012,10 +915,6 @@ export class GameLoopView implements View {
       }
     }
   }
-
-  // -----------------------------------------------------------------------
-  // Menu ground capture
-  // -----------------------------------------------------------------------
 
   private _stealGroundFromView(view: Screen | null): GroundRenderer | null {
     const gameplay = this._gameplayScreen(view);
@@ -1039,8 +938,6 @@ export class GameLoopView implements View {
       this.state.menuGroundCamera = camera;
       return;
     }
-    // In WebGL, render target cleanup is handled by the GL context;
-    // no explicit unload_render_texture needed.
     this.state.menuGround = ground;
     this.state.menuGroundCamera = camera;
   }
@@ -1068,10 +965,6 @@ export class GameLoopView implements View {
     if (ground === null) return;
     this._replaceMenuGround(ground, camera);
   }
-
-  // -----------------------------------------------------------------------
-  // Draw
-  // -----------------------------------------------------------------------
 
   private _drawSceneLayers(): void {
     this._active.draw();
@@ -1113,10 +1006,6 @@ export class GameLoopView implements View {
     this._drawWithGamma();
   }
 
-  // -----------------------------------------------------------------------
-  // Close / cleanup
-  // -----------------------------------------------------------------------
-
   close(): void {
     if (this._menuActive) {
       this._menu.close();
@@ -1134,11 +1023,8 @@ export class GameLoopView implements View {
     if (overlay !== null) {
       overlay.close();
     }
-    // Menu ground render target cleanup — handled by GL context in WebGL
     this.state.menuGround = null;
     this.state.menuGroundCamera = null;
     this._boot.close();
-    // Console cleanup
-    // state.console.close() — no explicit close needed in WebGL
   }
 }
