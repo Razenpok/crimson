@@ -22,23 +22,57 @@ export class TickResult {
   }
 }
 
-export interface LanFrameSample {
+export class LanFrameSample {
   readonly frameTickIndex: number;
   readonly frameInputs: readonly (readonly number[])[];
   readonly commands: readonly GameCommand[];
+
+  constructor(opts: {
+    frameTickIndex: number;
+    frameInputs: readonly (readonly number[])[];
+    commands?: readonly GameCommand[];
+  }) {
+    this.frameTickIndex = opts.frameTickIndex;
+    this.frameInputs = opts.frameInputs;
+    this.commands = opts.commands ?? [];
+    Object.freeze(this);
+  }
 }
 
-export interface LanTickSync {
+export class LanTickSync {
   readonly frameTickIndex: number;
   readonly frameInputs: readonly (readonly number[])[];
+
+  constructor(opts: {
+    frameTickIndex: number;
+    frameInputs: readonly (readonly number[])[];
+  }) {
+    this.frameTickIndex = opts.frameTickIndex;
+    this.frameInputs = opts.frameInputs;
+    Object.freeze(this);
+  }
 }
 
-export interface LanSyncCallbacks {
+export class LanSyncCallbacks {
   readonly role: string;
-  takeFrameSample: (tickIndex: number) => LanFrameSample | null;
-  broadcastTickFrame?: ((
+  readonly takeFrameSample: (tickIndex: number) => LanFrameSample | null;
+  readonly broadcastTickFrame: ((
     tickIndex: number,
     frameInputs: readonly (readonly number[])[],
     commands: readonly GameCommand[],
   ) => void) | null;
+
+  constructor(opts: {
+    role: string;
+    takeFrameSample: (tickIndex: number) => LanFrameSample | null;
+    broadcastTickFrame?: ((
+      tickIndex: number,
+      frameInputs: readonly (readonly number[])[],
+      commands: readonly GameCommand[],
+    ) => void) | null;
+  }) {
+    this.role = opts.role;
+    this.takeFrameSample = opts.takeFrameSample;
+    this.broadcastTickFrame = opts.broadcastTickFrame ?? null;
+  }
 }
