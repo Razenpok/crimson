@@ -14,6 +14,47 @@ function clamp01(value: number): number {
   return value;
 }
 
+function drawCircleLines(x: number, y: number, radius: number, color: wgl.Color): void {
+  const innerR = Math.max(0.0, radius - 0.5);
+  const outerR = radius + 0.5;
+  const segments = 36;
+  const step = (Math.PI * 2.0) / segments;
+  const white = wgl.getWhiteTexture();
+
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(color.r, color.g, color.b, color.a);
+  for (let i = 0; i < segments; i++) {
+    const a0 = i * step;
+    const a1 = (i + 1) * step;
+    const cos0 = Math.cos(a0);
+    const sin0 = Math.sin(a0);
+    const cos1 = Math.cos(a1);
+    const sin1 = Math.sin(a1);
+    wgl.rlVertex2f(x + cos0 * innerR, y + sin0 * innerR);
+    wgl.rlVertex2f(x + cos0 * outerR, y + sin0 * outerR);
+    wgl.rlVertex2f(x + cos1 * outerR, y + sin1 * outerR);
+    wgl.rlVertex2f(x + cos1 * innerR, y + sin1 * innerR);
+  }
+  wgl.endQuads();
+}
+
+function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  const ix1 = int(x1);
+  const iy1 = int(y1);
+  const ix2 = int(x2);
+  const iy2 = int(y2);
+  if (iy1 === iy2) {
+    wgl.drawRectangle(Math.min(ix1, ix2), iy1, Math.abs(ix2 - ix1), 1, color);
+    return;
+  }
+  if (ix1 === ix2) {
+    wgl.drawRectangle(ix1, Math.min(iy1, iy2), 1, Math.abs(iy2 - iy1), color);
+    return;
+  }
+  wgl.drawRectangle(ix1, iy1, ix2 - ix1, iy2 - iy1, color);
+}
+
 export function drawCursorGlow(
   particles: wgl.Texture | null,
   opts: {
@@ -79,21 +120,11 @@ export function drawAimCursor(
     const a = 220 / 255;
     const color = wgl.makeColor(r, g, b, a);
 
-    const cx = int(pos.x);
-    const cy = int(pos.y);
-    const radius = 10;
-    const segments = 36;
-    for (let i = 0; i < segments; i++) {
-      const angle = (i / segments) * Math.PI * 2;
-      const x = cx + Math.cos(angle) * radius;
-      const y = cy + Math.sin(angle) * radius;
-      wgl.drawRectangle(x, y, 1, 1, color);
-    }
-
-    wgl.drawRectangle(int(pos.x - 14), int(pos.y), 8, 1, color);
-    wgl.drawRectangle(int(pos.x + 6), int(pos.y), 8, 1, color);
-    wgl.drawRectangle(int(pos.x), int(pos.y - 14), 1, 8, color);
-    wgl.drawRectangle(int(pos.x), int(pos.y + 6), 1, 8, color);
+    drawCircleLines(int(pos.x), int(pos.y), 10, color);
+    drawLine(int(pos.x - 14.0), int(pos.y), int(pos.x - 6.0), int(pos.y), color);
+    drawLine(int(pos.x + 6.0), int(pos.y), int(pos.x + 14.0), int(pos.y), color);
+    drawLine(int(pos.x), int(pos.y - 14.0), int(pos.x), int(pos.y - 6.0), color);
+    drawLine(int(pos.x), int(pos.y + 6.0), int(pos.x), int(pos.y + 14.0), color);
     return;
   }
 
