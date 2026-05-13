@@ -190,11 +190,7 @@ export class PlayGameMenuView extends PanelMenuView {
         mode,
         new Vec2(basePos.x, y),
         scale,
-        resources,
-        dtMs,
-        mouse,
-        click,
-        buttonEnabled,
+        { resources, dtMs, mouse, click, enabled: buttonEnabled },
       );
       this._updateTooltipTimer(mode.key, hovered, dtMs);
       if (clicked) {
@@ -359,12 +355,19 @@ export class PlayGameMenuView extends PanelMenuView {
     mode: PlayGameModeEntry,
     pos: Vec2,
     scale: number,
-    resources: RuntimeResources,
-    dtMs: number,
-    mouse: { x: number; y: number },
-    click: boolean,
-    enabled: boolean,
+    opts: {
+      resources: RuntimeResources;
+      dtMs: number;
+      mouse: { x: number; y: number };
+      click: boolean;
+      enabled: boolean;
+    },
   ): [boolean, boolean] {
+    const resources = opts.resources;
+    const dtMs = opts.dtMs;
+    const mouse = opts.mouse;
+    const click = opts.click;
+    const enabled = opts.enabled;
     const state = this._modeButtonState(mode);
     state.enabled = enabled;
     const width = buttonWidth(resources, state.label, { scale, forceWide: state.forceWide });
