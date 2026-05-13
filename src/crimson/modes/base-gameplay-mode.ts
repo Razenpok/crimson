@@ -207,10 +207,6 @@ export class BaseGameplayMode {
   terrainRuntime: TerrainRuntime;
   renderer: WorldRenderer;
 
-  lanPlayerRingsEnabled = false;
-  lanLocalAimIndicatorsOnly = false;
-  lanLocalPlayerSlotIndex = 0;
-
   protected _gameOverActive = false;
   protected _gameOverRecord: HighScoreRecord | null = null;
   protected _gameOverBanner = 'reaper';
@@ -389,6 +385,30 @@ export class BaseGameplayMode {
 
   protected _setCameraVec(value: Vec2): void {
     this._worldRuntime.camera = value;
+  }
+
+  get lanPlayerRingsEnabled(): boolean {
+    return Boolean(this._worldRuntime.lanPlayerRingsEnabled);
+  }
+
+  set lanPlayerRingsEnabled(value: boolean) {
+    this._worldRuntime.lanPlayerRingsEnabled = Boolean(value);
+  }
+
+  get lanLocalAimIndicatorsOnly(): boolean {
+    return Boolean(this._worldRuntime.lanLocalAimIndicatorsOnly);
+  }
+
+  set lanLocalAimIndicatorsOnly(value: boolean) {
+    this._worldRuntime.lanLocalAimIndicatorsOnly = Boolean(value);
+  }
+
+  get lanLocalPlayerSlotIndex(): number {
+    return int(this._worldRuntime.lanLocalPlayerSlotIndex);
+  }
+
+  set lanLocalPlayerSlotIndex(value: number) {
+    this._worldRuntime.lanLocalPlayerSlotIndex = int(value);
   }
 
 
@@ -616,16 +636,19 @@ export class BaseGameplayMode {
   }
 
 
+  protected _perkMenuPlaySfx(): ((id: SfxId) => void) | null {
+    return (id: SfxId) => this.audioBridge.router.playSfx(id);
+  }
+
   protected _perkMenuUiContext(): FullPerkMenuUiContext {
-    const players = this._worldRuntime.simWorld.players;
     return {
-      player: players[0],
+      player: this.player,
       resources: this.renderResources.resources,
       mouse: this._uiMousePos(),
       violenceDisabled: this.config.display.violenceDisabled,
       preserveBugs: this.state.preserveBugs ?? false,
       fxDetail: fxDetailEnabled(this.config.display, 0),
-      playSfx: (id: SfxId) => this.audioBridge.router.playSfx(id),
+      playSfx: this._perkMenuPlaySfx(),
     };
   }
 
@@ -638,6 +661,7 @@ export class BaseGameplayMode {
     // If menu is already active, do nothing
     if (opts.menu.active) return;
 
+    const perkCtx = this._perkMenuUiContext();
     const recorder = this._replayRecorder;
     if (recorder !== null) {
       this._recordReplayCheckpoint(Math.max(0, recorder.tickIndex - 1), { force: true });
@@ -653,7 +677,7 @@ export class BaseGameplayMode {
       throw new Error('perk menu open requires prepared perk choices');
     }
 
-    opts.menu.openMenu?.({ playSfx: (sfx) => this.audioBridge.router.playSfx(sfx) });
+    opts.menu.openMenu?.({ playSfx: perkCtx.playSfx });
     this.enqueueInputCommand(new PerkMenuOpenCommand(0));
   }
 
