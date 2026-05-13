@@ -44,31 +44,29 @@ import {
   GameplayState,
 } from "@crimson/gameplay.ts";
 
-export interface WorldEvents {
-  readonly hits: ProjectileHit[];
-  readonly deaths: CreatureDeath[];
-  readonly pickups: BonusPickupEvent[];
-  readonly sfx: SfxId[];
-  readonly triggerGameTune: boolean;
-  readonly hitSfx: SfxId[];
-}
-
-function createWorldEvents(opts: {
+export class WorldEvents {
   hits: ProjectileHit[];
   deaths: CreatureDeath[];
   pickups: BonusPickupEvent[];
   sfx: SfxId[];
-  triggerGameTune?: boolean;
-  hitSfx?: SfxId[];
-}): WorldEvents {
-  return {
-    hits: opts.hits,
-    deaths: opts.deaths,
-    pickups: opts.pickups,
-    sfx: opts.sfx,
-    triggerGameTune: opts.triggerGameTune ?? false,
-    hitSfx: opts.hitSfx ?? [],
-  };
+  triggerGameTune: boolean;
+  hitSfx: SfxId[];
+
+  constructor(opts: {
+    hits: ProjectileHit[];
+    deaths: CreatureDeath[];
+    pickups: BonusPickupEvent[];
+    sfx: SfxId[];
+    triggerGameTune?: boolean;
+    hitSfx?: SfxId[];
+  }) {
+    this.hits = opts.hits;
+    this.deaths = opts.deaths;
+    this.pickups = opts.pickups;
+    this.sfx = opts.sfx;
+    this.triggerGameTune = opts.triggerGameTune ?? false;
+    this.hitSfx = opts.hitSfx ?? [];
+  }
 }
 
 const _WORLD_DT_STEPS = WORLD_DT_STEPS;
@@ -480,7 +478,7 @@ export class WorldState {
     this.state.playerDeathHookSkipIndices.clear();
     this._restoreCreatureDamageAppliers(prevCreatureDamageAppliers);
 
-    return createWorldEvents({
+    return new WorldEvents({
       hits,
       deaths,
       pickups,
