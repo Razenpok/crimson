@@ -1,5 +1,7 @@
 // Port of crimson/bonuses/freeze.py
 
+// Freeze bonus behavior shared by sim, apply, and presentation steps.
+
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { SfxId } from '@grim/sfx-map.ts';
@@ -36,6 +38,8 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
       if (creature.hp > 0.0) {
         continue;
       }
+      // Native excludes corpses already below the despawn hitbox threshold
+      // from Freeze FX random work in `bonus_apply`.
       if (creature.lifecycleStage < CREATURE_CORPSE_DESPAWN_LIFECYCLE) {
         creature.active = false;
         continue;
@@ -102,10 +106,12 @@ export function flushDeferredFreezeCorpseFx(state: GameplayState): void {
 }
 
 export function freezeBonusActive(opts: { state: GameplayState }): boolean {
+  // Return whether Freeze timer is currently active.
   return opts.state.bonuses.freeze > 0.0;
 }
 
 export function applyFreezePickupFx(opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number }): void {
+  // Spawn the freeze-tinted ring used by Freeze bonus pickups.
   opts.state.effects.spawnRing({
     pos: opts.pickup.pos,
     detailPreset: int(opts.detailPreset),
