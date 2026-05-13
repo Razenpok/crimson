@@ -3,11 +3,11 @@
 export const APP_NAME = 'banteg/crimsonland';
 
 function _expandUser(path: string, env: Record<string, string | undefined> | undefined): string {
+  const home = env?.HOME ?? env?.USERPROFILE;
   if (path === '~') {
-    return env?.HOME ?? path;
+    return home ?? path;
   }
   if (path.startsWith('~/')) {
-    const home = env?.HOME;
     if (home !== undefined) {
       return `${home}${path.slice(1)}`;
     }
