@@ -4,11 +4,19 @@ import { Vec2 } from '@grim/geom.ts';
 import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
 import type { SpawnEntry } from './types.ts';
 
-export interface EdgePoints {
+export class EdgePoints {
   readonly left: Vec2;
   readonly right: Vec2;
   readonly top: Vec2;
   readonly bottom: Vec2;
+
+  constructor(opts: { left: Vec2; right: Vec2; top: Vec2; bottom: Vec2 }) {
+    this.left = opts.left;
+    this.right = opts.right;
+    this.top = opts.top;
+    this.bottom = opts.bottom;
+    Object.freeze(this);
+  }
 }
 
 export function centerPoint(width: number, height?: number): Vec2 {
@@ -23,12 +31,12 @@ export function edgeMidpoints(width: number, height?: number, offset: number = 6
     height = width;
   }
   const center = centerPoint(width, height);
-  return {
+  return new EdgePoints({
     left: new Vec2(-offset, center.y),
     right: new Vec2(width + offset, center.y),
     top: new Vec2(center.x, -offset),
     bottom: new Vec2(center.x, height + offset),
-  };
+  });
 }
 
 export function cornerPoints(width: number, height?: number, offset: number = 64.0): [Vec2, Vec2, Vec2, Vec2] {
