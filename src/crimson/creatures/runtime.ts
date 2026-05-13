@@ -539,6 +539,17 @@ function _creatureInteractionPlaguebearerContactFlag(ctx: _CreatureInteractionCt
 }
 
 function _creatureInteractionContactKillSmall(ctx: _CreatureInteractionCtx): void {
+  /** Kill small creatures that make contact, matching native `creature_update_all`.
+   *
+   * Native logic (see decompile around 0x004276d6) sets `health = 0.0` and
+   * decrements lifecycle_stage by frame_dt whenever:
+   * - distance to the target player is < 30.0, and
+   * - creature `size` is <= 30.0.
+   *
+   * This path does not call `creature_handle_death`, so it intentionally skips XP
+   * awards + bonus spawns. The corpse staging still increments kill_count later.
+   */
+
   const creature = ctx.creature;
   if (!creatureLifecycleIsAlive(creature.lifecycleStage)) return;
   if (ctx.contactDistSq >= 30.0 * 30.0) return;
@@ -597,6 +608,8 @@ export class CreaturePool {
   }
 
   _plaguebearerSpreadInfection(originIndex: number): void {
+    /** Port of `FUN_00425d80` (infects nearby creatures when Plaguebearer is active). */
+
     if (!(originIndex >= 0 && originIndex < this._entries.length)) return;
     const origin = this._entries[originIndex];
     if (!origin.active) return;
@@ -616,8 +629,6 @@ export class CreaturePool {
     }
   }
 
-  // Native `creature_alloc_slot` does not clear `link_index` -- the caller
-  // is responsible for setting it after allocation.
   private _allocSlot(): number | null {
     for (let i = 0; i < this._entries.length; i++) {
       if (!this._entries[i].active) return i;
@@ -645,6 +656,8 @@ export class CreaturePool {
       targetPlayer = 0;
     }
 
+    // Native 2-player behavior: periodically switch to P2 if alive and closer,
+    // and always flip when the current target dies.
     if (playerCount === 2) {
       if ((this._updateTick % _TARGET_REEVAL_PERIOD) !== 0) {
         const other = 1 - targetPlayer;
@@ -663,6 +676,8 @@ export class CreaturePool {
       return targetPlayer;
     }
 
+    // 3/4-player extension: keep deterministic nearest-alive targeting with the
+    // same periodic refresh/dead-target refresh policy as native 2-player mode.
     const needsRefresh =
       (this._updateTick % _TARGET_REEVAL_PERIOD) !== 0 ||
       players[targetPlayer].health <= 0.0;
@@ -712,6 +727,8 @@ export class CreaturePool {
     const distNew = Vec2.distanceSq(player.pos, creature.pos);
     let currentOrigin = player.pos;
     if (preserveBugs && playerIndex !== 0 && players.length > 0) {
+      // Native compares player 2 auto-target replacement against player 1's
+      // coordinates here, which can block closer replacements for player 2.
       currentOrigin = players[0].pos;
     }
     const distCurrent = Vec2.distanceSq(currentOrigin, current.pos);
@@ -721,17 +738,23 @@ export class CreaturePool {
   }
 
   spawnInit(init: CreatureInit): number | null {
+    /** Materialize a single `CreatureInit` into the runtime pool. */
+
     const idx = this._allocSlot();
     if (idx === null) return null;
+    // Reuse the allocated slot so fields that native spawn paths do not touch
+    // (e.g. link_index for survival AI7 spiders) retain stale values.
     const entry = this._entries[idx];
     this._applyInit(entry, init);
 
+    // Direct init does not have plan-local indices; preserve any raw linkage.
     if (init.aiTimer !== null) {
       entry.linkIndex = init.aiTimer;
     } else if (init.aiLinkParent !== null) {
       entry.linkIndex = init.aiLinkParent;
     }
     if (init.spawnSlot !== null) {
+      // Plan-local slot ids must be remapped by `spawn_plan`; keep explicit.
       entry.spawnSlotIndex = init.spawnSlot;
       entry.linkIndex = init.spawnSlot;
     }
@@ -760,6 +783,12 @@ export class CreaturePool {
     const rng = opts?.rng ?? null;
     const detailPreset = opts?.detailPreset ?? 5;
     const effects = opts?.effects ?? null;
+    /** Materialize a pure `SpawnPlan` into the runtime pool.
+     *
+     * Returns:
+     *   (plan_index_to_pool_index, primary_pool_index_or_none)
+     */
+
     if (this._freeSlotCount() < plan.creatures.length) {
       return [[], null];
     }
@@ -769,9 +798,11 @@ export class CreaturePool {
     const pendingAiTimers: (number | null)[] = [];
     const pendingSpawnSlots: (number | null)[] = [];
 
+    // 1) Allocate pool slots for every creature.
     for (const init of plan.creatures) {
       const poolIdx = this._allocSlot();
       if (poolIdx === null) return [[], null];
+      // Reuse the allocated slot so untouched fields keep native-like stale state.
       const entry = this._entries[poolIdx];
       this._applyInit(entry, init);
       this._entries[poolIdx] = entry;
@@ -783,6 +814,7 @@ export class CreaturePool {
       pendingSpawnSlots.push(init.spawnSlot);
     }
 
+    // 2) Allocate and remap spawn slots.
     const slotMapping: number[] = [];
     for (const slot of plan.spawnSlots) {
       const ownerPlan = slot.ownerCreature;
@@ -799,6 +831,7 @@ export class CreaturePool {
       slotMapping.push(this.spawnSlots.length - 1);
     }
 
+    // 3) Patch link indices now that we have global indices.
     for (let planIdx = 0; planIdx < mapping.length; planIdx++) {
       const poolIdx = mapping[planIdx];
       const entry = this._entries[poolIdx];
@@ -849,6 +882,8 @@ export class CreaturePool {
       effects?: EffectPool | null;
     },
   ): [number[], number | null] {
+    /** Build a spawn plan and materialize it into the pool. */
+
     const env = opts?.env ?? null;
     const detailPreset = opts?.detailPreset ?? 5;
     const effects = opts?.effects ?? null;
@@ -863,6 +898,13 @@ export class CreaturePool {
   }
 
   update(dt: number, opts: { options: CreatureUpdateOptions }): CreatureUpdateResult {
+    /** Advance the creature runtime pool by `dt` seconds.
+     *
+     * Notes:
+     * - Death side effects should be initiated by damage call sites.
+     * - This is not a full port of `creature_update_all`; it targets the Survival subset.
+     */
+
     dt = f32(dt);
     const options = opts.options;
     const state = options.state;
@@ -891,11 +933,15 @@ export class CreaturePool {
     const evilTargets: Set<number> = new Set();
     if (players.length > 0) {
       if (state.preserveBugs) {
+        // Native `creature_update_all` reads one global
+        // `evil_eyes_target_creature` slot (player-0 storage), even in
+        // multiplayer runs.
         if (perkActive(players[0], PerkId.EVIL_EYES)) {
           const evilTarget = players[0].evilEyesTargetCreature;
           if (evilTarget >= 0) evilTargets.add(evilTarget);
         }
       } else {
+        // Bug-fixed path: apply all alive Evil Eyes owners.
         for (const player of players) {
           if (player.health <= 0.0) continue;
           if (!perkActive(player, PerkId.EVIL_EYES)) continue;
@@ -905,6 +951,10 @@ export class CreaturePool {
       }
     }
 
+    // Movement + AI. Dead creatures keep updating (death slide + corpse decals)
+    // even when `players` is empty so debug views remain deterministic.
+    // Native AI7 timer math uses `frame_dt_ms` integer slots with ftol-style
+    // truncation semantics.
     const dtMs = dt > 0.0 ? ftolMsI32(dt) : 0;
 
     const _applySelfDamageTick = (creatureIndex: number, creature: CreatureState): boolean => {
@@ -963,10 +1013,14 @@ export class CreaturePool {
         creature.hitFlashTimer = f32(creature.hitFlashTimer - dt);
       }
 
+      // Native `creature_update_all` gates the full per-creature body under
+      // freeze; only bookkeeping outside this branch still advances.
       if (state.bonuses.freeze > 0.0) continue;
 
       if (!creatureLifecycleIsAlive(creature.lifecycleStage) || creature.hp <= 0.0) {
         _applySelfDamageTick(idx, creature);
+        // Native still ticks AI7 link-timer state (and its RNG draws) for
+        // dead creatures inside `creature_update_all`.
         if (
           dt > 0.0 &&
           state.bonuses.freeze <= 0.0 &&
@@ -995,6 +1049,8 @@ export class CreaturePool {
       if (dt <= 0.0 || players.length === 0) continue;
 
       const poisonKilled = _applySelfDamageTick(idx, creature);
+      // Native order runs AI7 link timer update after periodic self-damage
+      // and before any live-branch kill handling/retargeting.
       creatureAi7TickLinkTimer(creature, { dtMs, rng });
       if (poisonKilled) {
         if (creature.active) {
@@ -1035,6 +1091,8 @@ export class CreaturePool {
                 },
               ),
             );
+            // Native plague-kill path consumes one rand draw for
+            // creature attack SFX bank-b selection after death side effects.
             const contactSfxOptions = _CREATURE_CONTACT_SFX.get(creature.typeId);
             if (contactSfxOptions !== undefined) {
               const sfxIndex =
@@ -1050,11 +1108,14 @@ export class CreaturePool {
           if (plagueKilled) {
             // Native keeps executing the current live-branch body after
             // `creature_handle_death` in this timer-wrap kill path.
+            // Do not run `_tick_dead` immediately here.
           }
         }
       }
 
       const targetPlayer = this._resolveTargetPlayerIndex(creature, players);
+      // Native only updates player auto-target feedback inside the
+      // `creature_update_tick % 0x46 != 0` retarget cadence block.
       if ((this._updateTick % _TARGET_REEVAL_PERIOD) !== 0) {
         this._updatePlayerAutoTarget(
           players,
@@ -1073,6 +1134,9 @@ export class CreaturePool {
 
       const frozenByEvilEyes = evilTargets.has(idx);
       if (frozenByEvilEyes) {
+        // Native branch (`creature_update_all`, around 0x0042665f): when the
+        // current creature is the Evil Eyes target, the update path jumps to
+        // the loop tail before cooldown/interaction/ranged logic.
         creature.forceTarget = 0;
         continue;
       }
