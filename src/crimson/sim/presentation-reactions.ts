@@ -4,7 +4,16 @@ import { SfxId } from '@grim/sfx-map.ts';
 import type { TickResult } from './hooks.ts';
 import type { QuestSpawnState } from './sessions.ts';
 
-export interface QuestPresentationReaction {
+export class QuestPresentationReaction {
+  constructor(opts: {
+    playHitSfx?: boolean;
+    playCompletionMusic?: boolean;
+  } = {}) {
+    this.playHitSfx = opts.playHitSfx ?? false;
+    this.playCompletionMusic = opts.playCompletionMusic ?? false;
+    Object.freeze(this);
+  }
+
   readonly playHitSfx: boolean;
   readonly playCompletionMusic: boolean;
 }
@@ -19,6 +28,7 @@ export class PostApplyReaction {
   } = {}) {
     this.sfx = opts.sfx ?? [];
     this.quest = opts.quest ?? null;
+    Object.freeze(this);
   }
 }
 
@@ -34,10 +44,10 @@ export function buildPostApplyReaction(opts: {
   }
   return new PostApplyReaction({
     sfx: Array.from(tickResult.payload.step.postApplySfx),
-    quest: {
+    quest: new QuestPresentationReaction({
       playHitSfx: Boolean(questState.playHitSfx),
       playCompletionMusic: Boolean(questState.playCompletionMusic),
-    },
+    }),
   });
 }
 
