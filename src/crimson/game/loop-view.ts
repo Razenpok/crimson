@@ -30,8 +30,10 @@ import { PlayGameMenuView } from '@crimson/screens/panels/play-game.ts';
 import { OptionsMenuView } from '@crimson/screens/panels/options.ts';
 import { ControlsMenuView } from '@crimson/screens/panels/controls.ts';
 import { StatisticsMenuView } from '@crimson/screens/panels/stats.ts';
-import { UnlockedWeaponsDatabaseView } from '@crimson/screens/panels/databases-weapons.ts';
-import { UnlockedPerksDatabaseView } from '@crimson/screens/panels/databases-perks.ts';
+import {
+  UnlockedPerksDatabaseView,
+  UnlockedWeaponsDatabaseView,
+} from '@crimson/screens/panels/databases.ts';
 import { CreditsView } from '@crimson/screens/panels/credits.ts';
 import { AlienZooKeeperView } from '@crimson/screens/panels/alien-zookeeper.ts';
 import { ModsMenuView } from '@crimson/screens/panels/mods.ts';
