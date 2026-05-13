@@ -627,8 +627,6 @@ export class BaseGameplayMode {
       player: players[0],
       resources: this.renderResources.resources,
       mouse: this._uiMousePos(),
-      screenW: wgl.getScreenWidth(),
-      screenH: wgl.getScreenHeight(),
       violenceDisabled: this.config.display.violenceDisabled,
       preserveBugs: this.state.preserveBugs ?? false,
       fxDetail: fxDetailEnabled(this.config.display, 0),

@@ -285,8 +285,6 @@ export class TutorialMode extends BaseGameplayMode {
       violenceDisabled: this._deterministicViolenceDisabled(),
       preserveBugs: this.preserveBugs,
       resources: this.renderResources.resources,
-      screenW: wgl.getScreenWidth(),
-      screenH: wgl.getScreenHeight(),
       mouse: this._uiMousePos(),
     };
   }

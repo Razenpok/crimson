@@ -36,8 +36,6 @@ export interface PerkMenuUiContext {
   violenceDisabled: number;
   preserveBugs: boolean;
   resources: RuntimeResources;
-  screenW: number;
-  screenH: number;
   mouse: Vec2;
   fxDetail?: boolean;
   playSfx?: PlaySfxFn | null;
@@ -210,17 +208,15 @@ export class PerkMenuController {
       this._selectedIndex = 0;
     }
 
-    // Keyboard navigation: Arrow Down
     if (InputState.wasKeyPressed(40)) {
       this._selectedIndex = (this._selectedIndex + 1) % choices.length;
     }
-    // Keyboard navigation: Arrow Up
     if (InputState.wasKeyPressed(38)) {
       this._selectedIndex = (this._selectedIndex - 1 + choices.length) % choices.length;
     }
 
-    const screenW = ctx.screenW;
-    const screenH = ctx.screenH;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
     const origin = uiOrigin(screenW, screenH, scale);
     const slideX = perkMenuPanelSlideX(this._timelineMs, { width: this._layout.panelSize.x });
@@ -303,8 +299,8 @@ export class PerkMenuController {
       this._selectedIndex = 0;
     }
 
-    const screenW = ctx.screenW;
-    const screenH = ctx.screenH;
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
     const origin = uiOrigin(screenW, screenH, scale);
     const slideX = perkMenuPanelSlideX(this._timelineMs, { width: this._layout.panelSize.x });
@@ -321,7 +317,6 @@ export class PerkMenuController {
       panelSlideX: slideX,
     });
 
-    // Draw panel background
     const panelTex = getTexture(ctx.resources, TextureId.UI_MENU_PANEL);
     const panelDst = wgl.makeRectangle(
       computed.panel.x,
@@ -331,7 +326,6 @@ export class PerkMenuController {
     );
     drawClassicMenuPanel(panelTex, { dst: panelDst, shadow: ctx.fxDetail ?? false });
 
-    // Draw title texture
     const titleTex = getTexture(ctx.resources, TextureId.UI_TEXT_PICK_A_PERK);
     const titleSrc = wgl.makeRectangle(0.0, 0.0, titleTex.width, titleTex.height);
     const titleDst = wgl.makeRectangle(
@@ -342,7 +336,6 @@ export class PerkMenuController {
     );
     wgl.drawTexturePro(titleTex, titleSrc, titleDst, wgl.makeVector2(0.0, 0.0), 0.0, wgl.makeColor(1, 1, 1, 1));
 
-    // Sponsor text
     let sponsor: string | null = null;
     if (masterOwned) {
       sponsor = 'extra perks sponsored by the Perk Master';
@@ -356,7 +349,6 @@ export class PerkMenuController {
       });
     }
 
-    // Draw perk choice list
     const preserveBugs = ctx.preserveBugs;
     for (let idx = 0; idx < choices.length; idx++) {
       const perkId = choices[idx];
@@ -367,7 +359,6 @@ export class PerkMenuController {
       drawMenuItem(ctx.resources, label, { pos: itemPos, scale, hovered });
     }
 
-    // Draw selected perk description
     const selected = choices[this._selectedIndex];
     const desc = this._prewrappedPerkDesc(selected, ctx.resources.smallFont, {
       violenceDisabled: ctx.violenceDisabled,
@@ -378,7 +369,6 @@ export class PerkMenuController {
       color: UI_TEXT_COLOR,
     });
 
-    // Draw cancel button
     const cancelW = buttonWidth(ctx.resources, this._cancelButton.label, {
       scale,
       forceWide: this._cancelButton.forceWide,
