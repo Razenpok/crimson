@@ -7,9 +7,13 @@ import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
 
+// Keep strict native boundary semantics for collision acceptance.
 const _NATIVE_FIND_RADIUS_MARGIN_EPS = 0.0;
 
 export function hitRadiusFor(creature: CreatureState): number {
+  // Approximate `creature_find_in_radius`/`creatures_apply_radius_damage` sizing.
+  //
+  // The native code compares `distance - radius < creature.size * 0.14285715 + 3.0`.
   return Math.max(0.0, nativeFindSizeMargin(creature.size));
 }
 
@@ -19,15 +23,23 @@ export function withinNativeFindRadius(
   radius: number,
   targetSize: number,
 ): boolean {
+  // Mirror native `creature_find_in_radius` / `player_find_in_radius` predicate.
+  //
+  // Native uses:
+  //   sqrt(dx*dx + dy*dy) - radius < size * 0.14285715 + 3.0
   const dx = target.x - origin.x;
   const dy = target.y - origin.y;
   const radiusF = radius;
   const sizeMargin = nativeFindSizeMargin(targetSize);
   const maxAxisDelta = radiusF + sizeMargin + _NATIVE_FIND_RADIUS_MARGIN_EPS;
+  // Fast reject for the common case where either axis already exceeds the
+  // maximal accepted Euclidean radius.
   if (Math.abs(dx) > maxAxisDelta || Math.abs(dy) > maxAxisDelta) {
     return false;
   }
   const margin = Math.sqrt(dx * dx + dy * dy) - radiusF - sizeMargin;
+  // Native compares against zero; keep strict threshold to avoid rewrite-only
+  // near-edge hits that can cascade into RNG/XP timing drift.
   return margin < _NATIVE_FIND_RADIUS_MARGIN_EPS;
 }
 
@@ -36,6 +48,7 @@ export function creatureFindNearestForSecondary(
   origin: Vec2,
   preserveBugs: boolean = false,
 ): number {
+  // Port of `creature_find_nearest(origin, -1, 0.0)` for homing secondary targets.
   let bestIdx = preserveBugs ? 0 : -1;
   let bestDistSq = 1_000_000.0;
   const maxIndex = Math.min(creatures.length, 0x180);

@@ -22,9 +22,9 @@ import {
   Projectile,
   ProjectileTemplateId,
 } from '@crimson/projectiles/types.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 import { applyDamageToCreature, hitRadiusFor } from './collision.ts';
 import type { ProjectilePool } from './projectile-pool.ts';
-import { GameplayState } from "@crimson/gameplay.js";
 
 export class ProjectileUpdateCtx {
   pool: ProjectilePool;
@@ -187,6 +187,8 @@ export function preHitSplitter(ctx: ProjectileUpdateCtx, proj: Projectile, hitId
     ctx.rng,
     ctx.detailPreset,
   );
+  // Native player-hit checks key off non-player ownership; creature-owned splitters
+  // always satisfy this, so they can hit players even when the parent was local-owned.
   const splitHitsPlayers = true;
   ctx.pool.spawn({
     pos: proj.pos,

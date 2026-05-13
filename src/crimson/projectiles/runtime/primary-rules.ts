@@ -52,7 +52,7 @@ function rule(
 
 const _DEFAULT_RULE: PrimaryProjectileRule = rule(lingerDefault);
 
-const PRIMARY_PROJECTILE_RULE_BY_TYPE_ID: Map<ProjectileTemplateId, PrimaryProjectileRule> = new Map([
+export const PRIMARY_PROJECTILE_RULE_BY_TYPE_ID: Map<ProjectileTemplateId, PrimaryProjectileRule> = new Map([
   [ProjectileTemplateId.GAUSS_GUN, rule(
     lingerGaussGun,
     preHitNone,

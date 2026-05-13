@@ -7,6 +7,8 @@ export const MAIN_PROJECTILE_POOL_SIZE = 0x60;
 export const SECONDARY_PROJECTILE_POOL_SIZE = 0x40;
 
 export enum ProjectileTemplateId {
+  // Values are projectile type ids (not weapon ids). Based on the decompile
+  // for `player_fire_weapon` and `projectile_update`.
   PISTOL = 0x01,
   ASSAULT_RIFLE = 0x02,
   SHOTGUN = 0x03,

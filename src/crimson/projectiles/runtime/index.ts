@@ -3,6 +3,7 @@
 
 export { withinNativeFindRadius } from './collision.ts';
 export {
+  PRIMARY_PROJECTILE_RULE_BY_TYPE_ID,
   type PrimaryProjectileRule,
   primaryRuleForTypeId,
 } from './primary-rules.ts';

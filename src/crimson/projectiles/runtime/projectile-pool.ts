@@ -26,10 +26,10 @@ import {
   ProjectileUpdateCtx,
   type ProjectileHitPerkCtx,
 } from './behaviors.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 import { applyDamageToCreature, hitRadiusFor, withinNativeFindRadius } from './collision.ts';
 import { primaryRuleForTypeId } from './primary-rules.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
-import { GameplayState } from "@crimson/gameplay.js";
 
 export interface ProjectileUpdateOptions {
   readonly worldSize: number;
@@ -153,6 +153,9 @@ export class ProjectilePool {
   }
 
   step(ctx: PrimaryStepCtx): ProjectileHit[] {
+    // Update the main projectile pool.
+    //
+    // Modeled after `projectile_update` (0x00420b90) for the subset used by demo/state-9 work.
     const dt = f32(ctx.dt);
     const creatures = ctx.creatures;
     const options = ctx.options;
@@ -572,6 +575,8 @@ export class ProjectilePool {
     creatures: readonly CreatureState[],
     opts: { worldSize: number; speedByType: Map<number, number>; damageByType: Map<number, number> },
   ): ProjectileHit[] {
+    // Update a small projectile subset for the demo view.
+
     const { worldSize, speedByType, damageByType } = opts;
     if (dt <= 0.0) {
       return [];

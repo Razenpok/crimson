@@ -20,10 +20,13 @@ export function _spawnShrinkifierHitEffects(
   rng: CrandLike,
   detailPreset: number,
 ): void {
+  // Port of `effect_spawn_shrinkifier_hit` (0x0042f080).
+
   if (effects === null) return;
 
   const detail = int(detailPreset);
 
+  // Core pulse (effect_id=1).
   effects.spawn({
     effectId: EffectId.RING,
     pos,
@@ -42,6 +45,7 @@ export function _spawnShrinkifierHitEffects(
   });
 
   const count = detail < 3 ? 2 : 4;
+  // Debris puffs (effect_id=0), detail-scaled count.
   for (let i = 0; i < count; i++) {
     const rotation = (rng.rand({ caller: RngCallerStatic.SHRINKIFIER_HIT_ROTATION }) & 0x7F) * 0.049087387;
     const velocity = new Vec2(
@@ -106,6 +110,7 @@ export function _spawnIonHitEffects(
 
   const detail = int(detailPreset);
 
+  // Port of `FUN_0042f270(pos, ring_scale, ring_strength)`: ring burst (effect_id=1).
   effects.spawn({
     effectId: EffectId.RING,
     pos,
@@ -123,9 +128,11 @@ export function _spawnIonHitEffects(
     detailPreset: detail,
   });
 
+  // Port of `FUN_0042f540(pos, burst_scale)`: burst cloud (effect_id=0).
   const burst = burstScale * 0.8;
   const lifetime = Math.min(burst * 0.7, 1.1);
   const half = burst * 32.0;
+  // Native loop count is `__ftol(scale * 5.0)` after the local `scale *= 0.8`.
   let count = int(burst * 5.0);
   if (detail < 3) {
     count = Math.floor(count / 2);
@@ -163,6 +170,14 @@ export function _spawnPlasmaCannonHitEffects(
   pos: Vec2,
   detailPreset: number,
 ): void {
+  // Port of `projectile_update` Plasma Cannon hit extras.
+  //
+  // Native does:
+  // - `sfx_play_panned(sfx_explosion_medium)`
+  // - `sfx_play_panned(sfx_shockwave)`
+  // - `FUN_0042f330(pos, 1.5, 1.0)`
+  // - `FUN_0042f330(pos, 1.0, 1.0)`
+
   if (effects === null) return;
 
   if (sfxQueue !== null) {
@@ -201,6 +216,8 @@ export function _spawnSplitterHitEffects(
   rng: CrandLike,
   detailPreset: number,
 ): void {
+  // Port of `FUN_0042f3f0(pos, 26.0, 3)` from the Splitter Gun hit branch.
+
   if (effects === null) return;
 
   const detail = int(detailPreset);

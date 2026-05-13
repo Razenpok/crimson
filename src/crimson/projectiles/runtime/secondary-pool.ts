@@ -30,8 +30,8 @@ import {
 import {
   secondaryRuleForTypeId,
 } from './secondary-rules.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
-import { GameplayState } from "@crimson/gameplay.js";
 
 const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
   [
@@ -132,6 +132,7 @@ export class SecondaryProjectilePool {
 
     const rule = secondaryRuleForTypeId(typeId);
     if (rule.tag === 'detonation') {
+      // Detonation uses explicit timer/scale fields now.
       entry.detonationT = 0.0;
       entry.detonationScale = timeToLive;
       entry.speed = f32(timeToLive);
@@ -144,6 +145,8 @@ export class SecondaryProjectilePool {
     }
 
     if (rule.tag === 'homing_rocket') {
+      // Native `fx_spawn_secondary_projectile` seeds seeker target_id at spawn via
+      // `creature_find_nearest(&player_aim_x, -1, 0.0)`.
       if (creatures !== null) {
         const origin = targetHint !== null ? targetHint : pos;
         entry.targetId = creatureFindNearestForSecondary(
@@ -162,6 +165,7 @@ export class SecondaryProjectilePool {
   }
 
   step(ctx: SecondaryStepCtx): void {
+    // Update the secondary projectile pool subset (types 1/2/4 + detonation type 3).
     const dt = ctx.dt;
     const creatures = ctx.creatures;
     const runtimeState = ctx.runtimeState ?? null;
@@ -255,6 +259,8 @@ export class SecondaryProjectilePool {
             );
             creatureSpatial.syncIndex(int(creatureIdx));
             if (onDetonationKill !== null && hpBefore > 0.0 && creature.hp <= 0.0) {
+              // Native detonation AoE does an extra two random decals and a
+              // second `creature_handle_death` call after the killing hit.
               if (fxQueue !== null) {
                 fxQueue.addRandom({ pos: creature.pos, rng });
                 fxQueue.addRandom({ pos: creature.pos, rng });
@@ -270,8 +276,10 @@ export class SecondaryProjectilePool {
         continue;
       }
 
+      // Move.
       entry.pos = entry.pos.add(entry.vel.mul(dt));
 
+      // Update velocity + countdown.
       const speedMag = entry.vel.length();
       if (rule.tag === 'rocket') {
         if (speedMag < rule.speedCap) {
@@ -286,6 +294,7 @@ export class SecondaryProjectilePool {
         }
         entry.speed = f32(entry.speed - dt * rule.ttlDecayScale);
       } else if (rule.tag === 'homing_rocket') {
+        // Type 2: homing projectile.
         let targetId = entry.targetId;
         if (!(targetId >= 0 && targetId < creatures.length) || !creatures[targetId].active) {
           entry.targetId = creatureFindNearestForSecondary(
@@ -313,6 +322,7 @@ export class SecondaryProjectilePool {
         entry.speed = f32(entry.speed - dt * rule.ttlDecayScale);
       }
 
+      // Rocket smoke trail (`trail_timer` in crimsonland.exe).
       const trailDecay = f32((Math.abs(entry.vel.x) + Math.abs(entry.vel.y)) * dt * 0.01);
       entry.trailTimer = f32(entry.trailTimer - trailDecay);
       if (entry.trailTimer < 0.0) {
@@ -330,6 +340,7 @@ export class SecondaryProjectilePool {
         entry.trailTimer = f32(0.06);
       }
 
+      // projectile_update uses creature_find_in_radius(..., 8.0, ...)
       let hitIdx: number | null = null;
       for (const idx of creatureSpatial.candidateIndices({ pos: entry.pos, radius: 8.0 })) {
         const creature = creatures[int(idx)];
@@ -428,6 +439,8 @@ export class SecondaryProjectilePool {
           });
         }
 
+        // Native `projectile_update` applies hit visuals before
+        // `creature_apply_damage` for secondary projectiles.
         const damage = entry.speed * damageSpeedMul + damageBase;
         _applySecondaryDamage(
           hitIdx,
@@ -443,6 +456,7 @@ export class SecondaryProjectilePool {
         entry.detonationScale = detScale;
         entry.trailTimer = 0.0;
 
+        // Extra debris/scorch decals (or freeze shards) on detonation.
         if (freezeActive) {
           if (effects !== null) {
             let shardPos = entry.pos;
