@@ -75,16 +75,6 @@ interface OptionsContentLayout {
   sliderPos: Vec2;
 }
 
-// ---------------------------------------------------------------------------
-// State interface consumed by OptionsMenuView — now uses the canonical GameState
-// ---------------------------------------------------------------------------
-
-export type OptionsPanelState = GameState;
-
-// ---------------------------------------------------------------------------
-// OptionsMenuView
-// ---------------------------------------------------------------------------
-
 export class OptionsMenuView extends PanelMenuView {
   private static readonly _LABELS = [
     'Sound volume:',
@@ -102,15 +92,11 @@ export class OptionsMenuView extends PanelMenuView {
   private _activeSlider: string | null = null;
   private _dirty: boolean = false;
 
-  constructor(state: OptionsPanelState) {
+  constructor(state: GameState) {
     super(state, {
       title: 'Options',
       backAction: 'open_pause_menu',
     });
-  }
-
-  private get _optState(): OptionsPanelState {
-    return this.state as OptionsPanelState;
   }
 
   override open(): void {
@@ -127,7 +113,7 @@ export class OptionsMenuView extends PanelMenuView {
     const entry = this._entry;
     if (entry === null || !this._entryEnabled(entry)) return;
 
-    const config = this._optState.config;
+    const config = this.state.config;
     const layout = this._contentLayout();
     const basePos = layout.basePos;
     const labelPos = layout.labelPos;
@@ -140,13 +126,13 @@ export class OptionsMenuView extends PanelMenuView {
 
     if (this._updateSlider('sfx', this._sliderSfx, sliderPos.offset({ dy: 47.0 * scale }), rectOn, rectOff, scale)) {
       config.audio.sfxVolume = this._sliderSfx.value * 0.1;
-      audioSetSfxVolume(this._optState.audio, config.audio.sfxVolume);
+      audioSetSfxVolume(this.state.audio, config.audio.sfxVolume);
       this._dirty = true;
     }
 
     if (this._updateSlider('music', this._sliderMusic, sliderPos.offset({ dy: 67.0 * scale }), rectOn, rectOff, scale)) {
       config.audio.musicVolume = this._sliderMusic.value * 0.1;
-      audioSetMusicVolume(this._optState.audio, config.audio.musicVolume);
+      audioSetMusicVolume(this.state.audio, config.audio.musicVolume);
       this._dirty = true;
     }
 
@@ -194,21 +180,21 @@ export class OptionsMenuView extends PanelMenuView {
   protected override _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        this._optState.config.save();
+        this.state.config.save();
         this._dirty = false;
       } catch (exc) {
-        this._optState.console.log.log(`config: save failed: ${exc}`);
+        this.state.console.log.log(`config: save failed: ${exc}`);
       }
     }
     super._beginCloseTransition(action);
   }
 
   private _requireResources(): RuntimeResources {
-    return this._optState.resources as RuntimeResources;
+    return requireRuntimeResources(this.state);
   }
 
   private _syncFromConfig(): void {
-    const config = this._optState.config;
+    const config = this.state.config;
     this._uiInfoTexts = config.gameplay.showInfoTexts;
 
     const sfxVolume = config.audio.sfxVolume;

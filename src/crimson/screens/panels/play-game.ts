@@ -100,16 +100,6 @@ interface PlayerCountWidgetLayout {
   textScale: number;
 }
 
-// ---------------------------------------------------------------------------
-// State interface consumed by PlayGameMenuView
-// ---------------------------------------------------------------------------
-
-export type PlayGamePanelState = GameState;
-
-// ---------------------------------------------------------------------------
-// PlayGameMenuView
-// ---------------------------------------------------------------------------
-
 export class PlayGameMenuView extends PanelMenuView {
   /**
    * Play Game mode select panel.
@@ -124,17 +114,13 @@ export class PlayGameMenuView extends PanelMenuView {
   private _tooltipMs: Map<string, number> = new Map();
   private _modeButtons: Map<string, UiButtonState> = new Map();
 
-  constructor(state: PlayGamePanelState) {
+  constructor(state: GameState) {
     super(state, {
       title: 'Play Game',
       panelOffset: new Vec2(-63.0, MENU_PANEL_OFFSET_Y),
       panelHeight: 278.0,
       backPos: new Vec2(-55.0, 462.0),
     });
-  }
-
-  private get _pgState(): PlayGamePanelState {
-    return this.state as PlayGamePanelState;
   }
 
   override open(): void {
@@ -147,7 +133,7 @@ export class PlayGameMenuView extends PanelMenuView {
 
   override update(dt: number): void {
     this._assertOpen();
-    const pgState = this._pgState;
+    const pgState = this.state;
 
     if (pgState.audio !== null) {
       audioUpdate(pgState.audio, dt);
@@ -254,19 +240,17 @@ export class PlayGameMenuView extends PanelMenuView {
   protected override _beginCloseTransition(action: string): void {
     if (this._dirty) {
       try {
-        this._pgState.config.save();
+        this.state.config.save();
         this._dirty = false;
       } catch (exc) {
-        this._pgState.console.log.log(`config: save failed: ${exc}`);
+        this.state.console.log.log(`config: save failed: ${exc}`);
       }
     }
     super._beginCloseTransition(action);
   }
 
   private _requireResources(): RuntimeResources {
-    // In production, this would call require_runtime_resources(state).
-    // We assume resources are always available when panels are active.
-    return this._pgState.resources as RuntimeResources;
+    return requireRuntimeResources(this.state);
   }
 
   private _contentLayout(): PlayGameContentLayout {
@@ -294,7 +278,7 @@ export class PlayGameMenuView extends PanelMenuView {
   }
 
   private _questsTotalPlayed(): number {
-    const counts = this._pgState.status.questPlayCounts;
+    const counts = this.state.status.questPlayCounts;
     if (!counts || counts.length === 0) return 0;
     // `sub_44ed80` sums 40 ints from game_status_blob+0x104..0x1a4.
     // Our `quest_play_counts` array starts at blob+0xd8, so this is indices 11..50.
@@ -306,14 +290,14 @@ export class PlayGameMenuView extends PanelMenuView {
   }
 
   private _lanLockstepEnabled(): boolean {
-    const cvar = this._pgState.console.cvars.get('cv_lanLockstepEnabled');
+    const cvar = this.state.console.cvars.get('cv_lanLockstepEnabled');
     if (cvar === undefined) return true;
     return !!cvar.valueF;
   }
 
   private _modeEntries(): [PlayGameModeEntry[], number, number, number] {
-    const config = this._pgState.config;
-    const status = this._pgState.status;
+    const config = this.state.config;
+    const status = this.state.status;
 
     // Clamp to a valid range; older configs in the repo can contain 0 here,
     // which would incorrectly hide the Tutorial entry (it is gated on == 1).
@@ -323,7 +307,7 @@ export class PlayGameMenuView extends PanelMenuView {
       playerCount = PlayGameMenuView._PLAYER_COUNT_LABELS.length;
     }
     const questUnlock = int(status.questUnlockIndex);
-    const fullVersion = !this._pgState.demoEnabled;
+    const fullVersion = !this.state.demoEnabled;
 
     const questsTotal = this._questsTotalPlayed();
     const rushTotal = int(status.modePlayCountForMode(GameMode.RUSH));
@@ -419,7 +403,7 @@ export class PlayGameMenuView extends PanelMenuView {
 
   private _activateMode(mode: PlayGameModeEntry): void {
     if (mode.gameMode !== null) {
-      this._pgState.config.gameplay.mode = mode.gameMode;
+      this.state.config.gameplay.mode = mode.gameMode;
       this._dirty = true;
     }
     this._beginCloseTransition(mode.action);
@@ -472,7 +456,7 @@ export class PlayGameMenuView extends PanelMenuView {
   }
 
   private _updatePlayerCount(pos: Vec2, scale: number, font: SmallFontData): boolean {
-    const config = this._pgState.config;
+    const config = this.state.config;
     const layout = this._playerCountWidgetLayout(pos, scale, { font });
 
     const [mx, my] = InputState.mousePosition();
@@ -539,7 +523,7 @@ export class PlayGameMenuView extends PanelMenuView {
 
     const [entries, yStep, yStart, yEnd] = this._modeEntries();
     let y = basePos.y + yStart * scale;
-    const showCounts = this._pgState.debugEnabled && InputState.isKeyDown(KEY_F1);
+    const showCounts = this.state.debugEnabled && InputState.isKeyDown(KEY_F1);
 
     if (showCounts) {
       drawSmallText(
@@ -615,7 +599,7 @@ export class PlayGameMenuView extends PanelMenuView {
       wgl.makeVector2(0.0, 0.0), 0.0, WHITE,
     );
 
-    let playerCount = this._pgState.config.gameplay.playerCount;
+    let playerCount = this.state.config.gameplay.playerCount;
     if (playerCount < 1) playerCount = 1;
     if (playerCount > PlayGameMenuView._PLAYER_COUNT_LABELS.length) {
       playerCount = PlayGameMenuView._PLAYER_COUNT_LABELS.length;
@@ -662,7 +646,7 @@ export class PlayGameMenuView extends PanelMenuView {
     color: wgl.Color,
     font: SmallFontData,
   ): void {
-    const status = this._pgState.status;
+    const status = this.state.status;
     let count: number;
     if (key === 'quests') {
       count = this._questsTotalPlayed();
