@@ -133,6 +133,10 @@ function defaultRowBindingCode(opts: { playerIndex: number; row: RebindRowSpec }
 }
 
 function controlsLeftPanelPosX(screenWidth: number): number {
+  // Left controls panel X in panel-pos space.
+  //
+  // Native `ui_menu_layout_init` nudges the controls left panel 18px further left
+  // at 640-wide layouts.
   if (int(screenWidth) <= 640) {
     return CONTROLS_LEFT_PANEL_POS_X - 18.0;
   }
@@ -140,6 +144,14 @@ function controlsLeftPanelPosX(screenWidth: number): number {
 }
 
 function controlsRightPanelPosX(screenWidth: number): number {
+  // Right controls panel X in panel-pos space.
+  //
+  // Native `ui_menu_layout_init` uses:
+  //   slot40_pos_x = screen_width - 350  (+80 at <=640)
+  //
+  // Our panel-pos abstraction differs by a fixed -84 offset from that slot-space,
+  // so this becomes:
+  //   x = screen_width - 434  (+80 at <=640).
   const w = int(screenWidth);
   let x = w - 434;
   if (w <= 640) {
@@ -149,6 +161,10 @@ function controlsRightPanelPosX(screenWidth: number): number {
 }
 
 function controlsRightPanelPosY(screenWidth: number): number {
+  // Right controls panel Y in panel-pos space.
+  //
+  // Native slot40 y moves from 200 to 186 at <=640. In panel-pos coordinates this
+  // is 110 -> 96.
   if (int(screenWidth) <= 640) {
     return CONTROLS_RIGHT_PANEL_POS_Y - 14.0;
   }
