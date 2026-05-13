@@ -112,13 +112,13 @@ export function summarizeInventory(opts: { structs: StructClass[] }): InventoryS
     byName.set(item.className, existing);
   }
   const countsByBucket = Object.fromEntries(
-    Array.from(counts.entries()).sort((a, b) => (b[1] - a[1]) || a[0].localeCompare(b[0])),
+    Array.from(counts.entries()).sort((a, b) => (b[1] - a[1]) || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)),
   );
   const duplicateNames: Record<string, StructClass[]> = {};
-  for (const [name, items] of Array.from(byName.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [name, items] of Array.from(byName.entries()).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)) {
     if (items.length > 1) {
       duplicateNames[name] = [...items].sort((a, b) => {
-        const pathCmp = a.path.localeCompare(b.path);
+        const pathCmp = a.path < b.path ? -1 : a.path > b.path ? 1 : 0;
         if (pathCmp !== 0) return pathCmp;
         return a.lineno - b.lineno;
       });
