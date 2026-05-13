@@ -12,6 +12,7 @@ import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { GameState } from '@crimson/game/types.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import {
   MENU_ITEM_OFFSET_X,
@@ -69,10 +70,6 @@ export {
   uiElementAnim,
 };
 
-// ---------------------------------------------------------------------------
-// Panel-specific constants
-// ---------------------------------------------------------------------------
-
 const PANEL_POS_X = -45.0;
 const PANEL_POS_Y = 210.0;
 const PANEL_BACK_POS_X = -55.0;
@@ -93,17 +90,8 @@ const KEY_ENTER = 13;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-const ORIGIN = wgl.makeVector2(0, 0);
-
-// ---------------------------------------------------------------------------
-// PanelGameState — alias for the canonical GameState from game/types
-// ---------------------------------------------------------------------------
 
 export type PanelGameState = GameState;
-
-// ---------------------------------------------------------------------------
-// PanelMenuView
-// ---------------------------------------------------------------------------
 
 export class PanelMenuView {
   state: PanelGameState;
@@ -118,7 +106,6 @@ export class PanelMenuView {
   protected _backAction: string;
 
   protected _ground: GroundRenderer | null = null;
-  private _cachedResources: RuntimeResources | null = null;
   protected _entry: MenuEntry | null = null;
   protected _hovered: boolean = false;
   protected _menuScreenWidth: number = 0;
@@ -244,12 +231,9 @@ export class PanelMenuView {
     }
   }
 
-  draw(resources: RuntimeResources | null = this.state.resources): void {
+  draw(): void {
     this._assertOpen();
-    if (resources === null) {
-      throw new Error('PanelMenuView.draw() requires resources (none provided and state.resources is null)');
-    }
-    this._cachedResources = resources;
+    const resources = requireRuntimeResources(this.state);
     this._drawBackground();
     this._drawScreenFade();
 
@@ -272,17 +256,9 @@ export class PanelMenuView {
     return action;
   }
 
-  // ---------------------------------------------------------------------------
-  // Protected — subclasses may override
-  // ---------------------------------------------------------------------------
-
   protected _drawContents(resources: RuntimeResources): void {
     this._drawTitleText(resources);
   }
-
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
 
   protected _assertOpen(): void {
     if (!this._isOpen) {
@@ -488,10 +464,7 @@ export class PanelMenuView {
   }
 
   private _menuItemBounds(entry: MenuEntry): Rect {
-    const resources = this._cachedResources ?? this.state.resources;
-    if (resources === null) {
-      throw new Error('PanelMenuView._menuItemBounds() requires resources');
-    }
+    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const itemW = item.width;
     const itemH = item.height;
