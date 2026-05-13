@@ -19,6 +19,6 @@ export function updateScreenFade(state: GameState, dt: number): void {
 export function drawScreenFade(state: Pick<GameState, "screenFadeAlpha">): void {
   const alpha = state.screenFadeAlpha;
   if (alpha <= 0.0) return;
-  const shade = Math.max(0, Math.min(1, alpha));
-  wgl.drawRectangle(0, 0, wgl.getScreenWidth(), wgl.getScreenHeight(), wgl.makeColor(0, 0, 0, shade));
+  const shade = int(Math.max(0.0, Math.min(1.0, alpha)) * 255.0);
+  wgl.drawRectangle(0, 0, int(wgl.getScreenWidth()), int(wgl.getScreenHeight()), wgl.makeColor(0, 0, 0, shade / 255.0));
 }

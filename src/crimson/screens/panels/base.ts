@@ -13,6 +13,7 @@ import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { GameState } from '@crimson/game/types.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 
 // ---------------------------------------------------------------------------
 // Menu layout constants (re-exported from the menu module in the Python port)
@@ -200,7 +201,11 @@ export class PanelMenuView {
   ) {
     this.state = state;
     this._title = opts.title;
-    this._bodyLines = (opts.body ?? '').split('\n');
+    const body = opts.body ?? '';
+    this._bodyLines = body === '' ? [] : body.split(/\r\n|\r|\n/);
+    if (body.endsWith('\n') || body.endsWith('\r')) {
+      this._bodyLines.pop();
+    }
     this._panelPos = opts.panelPos ?? new Vec2(PANEL_POS_X, PANEL_POS_Y);
     this._panelOffset = opts.panelOffset ?? new Vec2(MENU_PANEL_OFFSET_X, MENU_PANEL_OFFSET_Y);
     this._panelHeight = opts.panelHeight ?? MENU_PANEL_HEIGHT;
@@ -390,15 +395,7 @@ export class PanelMenuView {
   }
 
   private _drawScreenFade(): void {
-    // Port of _draw_screen_fade: draws a fullscreen fade overlay.
-    // The actual implementation depends on the transitions module;
-    // stub here with alpha overlay when fade is active.
-    const alpha = this.state.screenFadeAlpha;
-    if (alpha > 0.0) {
-      const w = this.state.config.display.width;
-      const h = this.state.config.display.height;
-      wgl.drawRectangle(0, 0, w, h, wgl.makeColor(0, 0, 0, alpha));
-    }
+    drawScreenFade(this.state);
   }
 
   protected _drawPanel(resources: RuntimeResources): void {
@@ -548,17 +545,13 @@ export class PanelMenuView {
   }
 
   private _menuItemBounds(entry: MenuEntry): Rect {
-    // Use actual UI_MENU_ITEM texture dimensions when available,
-    // falling back to reasonable defaults.
-    let itemW = 400;
-    let itemH = 90;
-    if (this._cachedResources !== null) {
-      try {
-        const tex = getTexture(this._cachedResources, TextureId.UI_MENU_ITEM);
-        itemW = tex.width;
-        itemH = tex.height;
-      } catch { /* use defaults */ }
+    const resources = this._cachedResources ?? this.state.resources;
+    if (resources === null) {
+      throw new Error('PanelMenuView._menuItemBounds() requires resources');
     }
+    const item = getTexture(resources, TextureId.UI_MENU_ITEM);
+    const itemW = item.width;
+    const itemH = item.height;
     const [itemScale, localYShift] = this._menuItemScale(entry.slot);
     const offsetMin = new Vec2(
       MENU_ITEM_OFFSET_X * itemScale,
