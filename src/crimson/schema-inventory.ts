@@ -39,9 +39,11 @@ export class InventorySummary {
 }
 
 function _moduleNameForPath(opts: { sourceRoot: string; pyPath: string }): string {
-  let rel = opts.pyPath.startsWith(opts.sourceRoot)
-    ? opts.pyPath.slice(opts.sourceRoot.length).replace(/^\/+/, '')
-    : opts.pyPath;
+  const sourceRoot = opts.sourceRoot.replace(/\/+$/g, '');
+  if (!(opts.pyPath === sourceRoot || opts.pyPath.startsWith(`${sourceRoot}/`))) {
+    throw new Error(`${opts.pyPath} is not in the subpath of ${opts.sourceRoot}`);
+  }
+  const rel = opts.pyPath.slice(sourceRoot.length).replace(/^\/+/, '');
   const parts = rel.split('/').filter((part) => part.length > 0);
   if (parts.length > 0 && parts[parts.length - 1].endsWith('.py')) {
     parts[parts.length - 1] = parts[parts.length - 1].slice(0, -3);
