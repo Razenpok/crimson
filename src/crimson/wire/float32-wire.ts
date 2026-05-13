@@ -2,28 +2,35 @@
 
 import { f32 } from '@crimson/math-parity.ts';
 
+function _fieldLabel(field: string | null = null): string {
+  if (field && String(field).trim()) {
+    return String(field);
+  }
+  return 'value';
+}
+
 export function wireF32(value: number, opts: { field?: string } = {}): number {
+  const label = _fieldLabel(opts.field ?? null);
   const narrowed = f32(value);
   if (!Number.isFinite(narrowed)) {
-    throw new Error(`${opts.field ?? 'value'} must be finite`);
+    throw new Error(`${label} must be finite`);
   }
   return narrowed;
 }
 
-// Unused in WebGL port: networking/rollback excluded
 export function wireF32Opt(value: number | null, opts: { field?: string } = {}): number | null {
   if (value === null) return null;
   return wireF32(value, opts);
 }
 
-// Unused in WebGL port: networking/rollback excluded
 export function assertWireF32(value: number, opts: { field?: string } = {}): number {
+  const label = _fieldLabel(opts.field ?? null);
   if (!Number.isFinite(value)) {
-    throw new Error(`${opts.field ?? 'value'} must be finite`);
+    throw new Error(`${label} must be finite`);
   }
   const narrowed = f32(value);
   if (value !== narrowed) {
-    throw new Error(`${opts.field ?? 'value'} must be f32-canonical`);
+    throw new Error(`${label} must be f32-canonical`);
   }
   return value;
 }
