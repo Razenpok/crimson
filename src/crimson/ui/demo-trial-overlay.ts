@@ -10,6 +10,7 @@ import { DemoTrialOverlayInfo } from '@crimson/demo-trial.ts';
 import { UiButtonState, buttonDraw, buttonUpdate, buttonWidth } from './perk-menu.ts';
 import { drawMenuCursor } from './cursor.ts';
 
+export const DEMO_PURCHASE_URL = 'http://buy.crimsonland.com';
 const _DEMO_HEADER_TEXT = "You've been playing the Demo version of";
 const _QUEST_COMPLETED_TEXT =
   "You've completed all Quest mode levels available in the Demo version.";
@@ -86,10 +87,6 @@ function _overlayBodyLines(info: DemoTrialOverlayInfo): BodyLine[] {
   ];
 }
 
-function _panelXY(screenW: number, screenH: number): Vec2 {
-  return new Vec2(screenW * 0.5 - 256.0, screenH * 0.5 - 128.0);
-}
-
 export class DemoTrialOverlayUi {
   private readonly _resources: RuntimeResources;
   private _cursorPulseTime: number = 0.0;
@@ -106,6 +103,10 @@ export class DemoTrialOverlayUi {
     this._cursorPulseTime = 0.0;
   }
 
+  private static _panelXY(opts: { screenW: number; screenH: number }): Vec2 {
+    return new Vec2(opts.screenW * 0.5 - 256.0, opts.screenH * 0.5 - 128.0);
+  }
+
   update(
     dtMs: number,
   ): string | null {
@@ -120,7 +121,7 @@ export class DemoTrialOverlayUi {
     const mouse = { x: mx, y: my };
     const click = InputState.wasMouseButtonPressed(0);
 
-    const panelPos = _panelXY(screenW, screenH);
+    const panelPos = DemoTrialOverlayUi._panelXY({ screenW, screenH });
     const scale = 1.0;
     const btnW = buttonWidth(this._resources, this._purchaseButton.label, {
       scale,
@@ -157,7 +158,7 @@ export class DemoTrialOverlayUi {
 
     const screenW = wgl.getScreenWidth();
     const screenH = wgl.getScreenHeight();
-    const panelPos = _panelXY(screenW, screenH);
+    const panelPos = DemoTrialOverlayUi._panelXY({ screenW, screenH });
     const px = int(panelPos.x);
     const py = int(panelPos.y);
     const pw = 512;

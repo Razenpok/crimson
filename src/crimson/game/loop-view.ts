@@ -49,8 +49,7 @@ import { RushMode } from '@crimson/modes/rush-mode.ts';
 import { TypoShooterMode } from '@crimson/modes/typo-mode.ts';
 import { TutorialMode } from '@crimson/modes/tutorial-mode.ts';
 
-import { DEMO_PURCHASE_URL } from '@crimson/demo.ts';
-import { DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
+import { DEMO_PURCHASE_URL, DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
 
 import { type GameStatusPersist } from './runtime.ts';
 
