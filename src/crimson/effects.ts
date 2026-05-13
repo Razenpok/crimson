@@ -238,8 +238,8 @@ export class ParticlePool {
         continue;
       }
 
-      // Random walk drift (native adjusts angle based on `crt_rand`).
       if (entry.renderFlag) {
+        // Random walk drift (native adjusts angle based on `crt_rand`).
         let jitterCaller: number = RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_JITTER_ALT;
         if (style === ParticleStyleId.FLAMETHROWER) {
           jitterCaller = RngCallerStatic.PROJECTILE_UPDATE_PARTICLE_JITTER_FLAMETHROWER;
@@ -294,12 +294,14 @@ export class ParticlePool {
             entry.pos = creature.pos;
             entry.vel = new Vec2();
           } else {
-            entry.angle = entry.angle % (Math.PI * 2);
-            const hitAngle = new Vec2(
+            const tau = Math.PI * 2;
+            entry.angle = ((entry.angle % tau) + tau) % tau;
+            let hitAngle = new Vec2(
               entry.pos.x - entry.vel.x * dt - creature.pos.x,
               entry.pos.y - entry.vel.y * dt - creature.pos.y,
-            ).toAngle() % (Math.PI * 2);
-            const deflectStep = Math.PI * 2 * 0.2;
+            ).toAngle();
+            hitAngle = ((hitAngle % tau) + tau) % tau;
+            const deflectStep = tau * 0.2;
             if (entry.angle <= hitAngle) {
               entry.angle = f32(entry.angle + deflectStep);
             } else {
@@ -453,13 +455,16 @@ export class FxQueue {
   private _entries: FxQueueEntry[];
   private _count = 0;
   private _maxCount: number;
-  violenceDisabled = 0;
+  violenceDisabled: number;
 
   constructor(capacity: number = FX_QUEUE_CAPACITY, maxCount: number = FX_QUEUE_MAX_COUNT) {
     capacity = Math.max(0, capacity);
     maxCount = Math.max(0, Math.min(maxCount, capacity));
     this._entries = Array.from({ length: capacity }, () => new FxQueueEntry());
     this._maxCount = maxCount;
+    // Mirrors native `config_violence_disabled` gate in `fx_queue_add_random`.
+    // Nonzero suppresses violence-linked random decals.
+    this.violenceDisabled = 0;
   }
 
   get entries(): FxQueueEntry[] {
@@ -504,8 +509,6 @@ export class FxQueue {
   addRandom(opts: { pos: Vec2; rng: CrandLike }): boolean {
     // Port of `fx_queue_add_random` (effect ids 3..7 with grayscale tint).
 
-    // Mirrors native `config_violence_disabled` gate in `fx_queue_add_random`.
-    // Nonzero suppresses violence-linked random decals.
     if (this.violenceDisabled !== 0) return false;
     // Native `fx_queue_add_random` always consumes RNG even when the queue is
     // full, then lets `fx_queue_add` fail silently.
