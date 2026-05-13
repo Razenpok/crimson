@@ -732,7 +732,7 @@ export class WebGLContext {
     gl.bindBuffer(gl.ARRAY_BUFFER, this._immVbo);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, this._immVertexData.subarray(0, this._immVertexCount * FLOATS_PER_VERTEX));
 
-    const quadCount = (this._immVertexCount / 4) | 0;
+    const quadCount = int(this._immVertexCount / 4);
     gl.drawElements(gl.TRIANGLES, quadCount * 6, gl.UNSIGNED_SHORT, 0);
 
     gl.bindVertexArray(null);
