@@ -14,16 +14,16 @@ export class ViewAudioBootstrap {
   audio: AudioState | null;
   audioRng: Crand;
 
-  constructor(
-    config: CrimsonConfig | null,
-    console: ConsoleState | null,
-    audio: AudioState | null,
-    audioRng: Crand,
-  ) {
-    this.config = config;
-    this.console = console;
-    this.audio = audio;
-    this.audioRng = audioRng;
+  constructor(opts: {
+    config: CrimsonConfig | null;
+    console: ConsoleState | null;
+    audio: AudioState | null;
+    audioRng: Crand;
+  }) {
+    this.config = opts.config;
+    this.console = opts.console;
+    this.audio = opts.audio;
+    this.audioRng = opts.audioRng;
   }
 }
 
@@ -35,7 +35,7 @@ export async function initViewAudio(assetsDir: string, opts: { seed?: number } =
   try {
     config = ensureCrimsonCfg(runtimeDir);
   } catch {
-    return new ViewAudioBootstrap(null, null, null, audioRng);
+    return new ViewAudioBootstrap({ config: null, console: null, audio: null, audioRng });
   }
 
   const console = new ConsoleState({
@@ -52,8 +52,8 @@ export async function initViewAudio(assetsDir: string, opts: { seed?: number } =
 
   try {
     const audio = await initAudioState(config, assetsDir, console);
-    return new ViewAudioBootstrap(config, console, audio, audioRng);
+    return new ViewAudioBootstrap({ config, console, audio, audioRng });
   } catch {
-    return new ViewAudioBootstrap(config, console, null, audioRng);
+    return new ViewAudioBootstrap({ config, console, audio: null, audioRng });
   }
 }
