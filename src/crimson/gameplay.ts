@@ -1,11 +1,6 @@
 // Port of crimson/gameplay.py
-//
-// Every function from the Python source is ported line-by-line, preserving
-// float32 determinism via f32(), identical control flow, and native-parity
-// heading/movement math.
 
 import { Vec2 } from '@grim/geom.ts';
-import { AimScheme, MovementControlType } from '@grim/config.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
@@ -31,8 +26,8 @@ import { RngCallerStatic } from './rng-caller-static.ts';
 import type { PlayerInput } from './sim/input.ts';
 import { PERK_COUNT_SIZE, type PlayerState } from './sim/state-types.ts';
 import { ftolMsI32 } from './sim/timing.ts';
-import { WeaponId } from './weapons.ts';
-import { WEAPON_COUNT_SIZE, fireWeapon } from './weapon-runtime/fire.ts';
+import { WEAPON_TABLE, WeaponId } from './weapons.ts';
+import { fireWeapon } from './weapon-runtime/fire.ts';
 import {
   ownerRefForPlayer,
   ownerRefForPlayerProjectiles,
@@ -45,13 +40,10 @@ import {
   weaponAssignPlayer,
   weaponEntry,
 } from './weapon-runtime/assign.ts';
-import { _AIM_JOYSTICK_TURN_RATE, _AIM_KEYBOARD_TURN_RATE } from './aim-constants';
-import { QuestLevel } from "@crimson/quests/level.js";
-
-// ---------------------------------------------------------------------------
-// GameStatus — local interface to avoid circular dependency with
-// base-gameplay-mode.ts (which re-imports GameplayState via state-types).
-// ---------------------------------------------------------------------------
+import { _AIM_JOYSTICK_TURN_RATE, _AIM_KEYBOARD_TURN_RATE } from './aim-constants.ts';
+import { AimScheme } from './aim-schemes.ts';
+import { MovementControlType } from './movement-controls.ts';
+import { QuestLevel } from './quests/level.ts';
 
 export interface GameStatus {
   gameSequenceId: number;
@@ -69,9 +61,7 @@ export interface GameStatus {
   incrementWeaponUsageSlot(slot: number): void;
 }
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((entry) => int(entry.weaponId))) + 1;
 
 const _RELOAD_PRELOAD_UNDERFLOW_EPS = 1e-7;
 const _RELATIVE_MOVE_HEADING_NONE = -1.0;
@@ -87,10 +77,6 @@ const _RELATIVE_MOVE_TURN_ALIGN_SCALE = f32(7.957747);
 const _AIM_POINT_RADIUS = 60.0;
 const _LOW_HEALTH_BLEED_DIR_OFFSET = 1.5707964 - 0.5;
 const _LOW_HEALTH_BLOODSPILL_SFX: [SfxId, SfxId] = [SfxId.BLOODSPILL_01, SfxId.BLOODSPILL_02];
-
-// ---------------------------------------------------------------------------
-// GameplayState class
-// ---------------------------------------------------------------------------
 
 interface BonusTimers {
   weaponPowerUp: number;
@@ -187,23 +173,19 @@ export class GameplayState {
   }
 }
 
-// ---------------------------------------------------------------------------
-// buildGameplayState
-// ---------------------------------------------------------------------------
-
 export function buildGameplayState(): GameplayState {
   return new GameplayState();
 }
-
-// ---------------------------------------------------------------------------
-// playerFrameDtAfterRoundtrip
-// ---------------------------------------------------------------------------
 
 export function playerFrameDtAfterRoundtrip(opts: {
   dt: number;
   timeScaleActive: boolean;
   reflexBoostTimer: number;
 }): number {
+  // Mirror `player_update` frame_dt round-trip under Reflex Boost.
+  //
+  // Native scales frame_dt for movement (`* 0.6 / _time_scale_factor`) and then
+  // restores it with `* _time_scale_factor * 1.6666666` before returning.
   const dtF32 = f32(opts.dt);
   if (!opts.timeScaleActive || dtF32 <= 0.0) {
     return dtF32;
@@ -223,11 +205,8 @@ export function playerFrameDtAfterRoundtrip(opts: {
   return roundtripDt;
 }
 
-// ---------------------------------------------------------------------------
-// awardExperience / awardExperienceFromReward / helpers
-// ---------------------------------------------------------------------------
-
 export function awardExperience(state: GameplayState, player: PlayerState, amount: number): number {
+  // Grant XP while honoring active bonus multipliers.
   let xp = int(amount);
   if (xp <= 0) return 0;
   if (state.bonuses.doubleExperience > 0.0) {
@@ -238,6 +217,7 @@ export function awardExperience(state: GameplayState, player: PlayerState, amoun
 }
 
 function _awardExperienceOnceFromReward(player: PlayerState, rewardValue: number): number {
+  // Mirror native `__ftol(player_xp + reward_value)` accumulation for one award.
   const rewardF32 = f32(rewardValue);
   if (rewardF32 <= 0.0) return 0;
 
@@ -253,6 +233,7 @@ export function awardExperienceFromReward(
   player: PlayerState,
   rewardValue: number,
 ): number {
+  // Grant kill XP from floating reward values with native float32 store semantics.
   let gained = _awardExperienceOnceFromReward(player, rewardValue);
   if (gained <= 0) return 0;
   if (state.bonuses.doubleExperience > 0.0) {
@@ -261,16 +242,16 @@ export function awardExperienceFromReward(
   return int(gained);
 }
 
-// ---------------------------------------------------------------------------
-// Survival level/progression
-// ---------------------------------------------------------------------------
-
 export function survivalLevelThreshold(level: number): number {
+  // Return the XP threshold for advancing past the given level.
   level = Math.max(1, int(level));
   return int(1000.0 + Math.pow(level, 1.8) * 1000.0);
 }
 
 export function survivalCheckLevelUp(player: PlayerState, perkState: PerkSelectionState): number {
+  // Advance survival levels if XP exceeds thresholds, returning number of level-ups.
+  // Native progression advances at most one level per update tick even when
+  // XP jumps across multiple thresholds in a single frame.
   if (player.experience > survivalLevelThreshold(player.level)) {
     player.level += 1;
     perkState.pendingCount += 1;
@@ -284,17 +265,15 @@ export function survivalProgressionUpdate(
   state: GameplayState,
   players: PlayerState[],
 ): void {
+  // Advance survival level/perk progression.
   if (players.length === 0) return;
   survivalCheckLevelUp(players[0], state.perkSelection);
 }
 
-// ---------------------------------------------------------------------------
-// Survival death tracking / weapon handouts
-// ---------------------------------------------------------------------------
-
 const _SURVIVAL_RECENT_DEATH_CENTROID_SCALE = 0.33333334;
 
 export function survivalRecordRecentDeath(state: GameplayState, opts: { pos: Vec2 }): void {
+  // Track Survival recent-death samples used by one-off weapon handout gating.
   let recentCount = int(state.survivalRecentDeathCount);
   if (recentCount >= 6) return;
 
@@ -315,6 +294,7 @@ export function survivalUpdateWeaponHandouts(
   players: PlayerState[],
   opts: { survivalElapsedMs: number },
 ): void {
+  // Apply native `survival_update` one-off Survival weapon handout checks.
   if (players.length !== 1) return;
   const player = players[0];
 
@@ -361,6 +341,7 @@ export function survivalEnforceRewardWeaponGuard(
   state: GameplayState,
   players: readonly PlayerState[],
 ): void {
+  // Revoke temporary Survival handout weapons when guard id mismatches.
   const guardId = state.survivalRewardWeaponGuardId;
   for (const player of players) {
     const weaponId = player.weapon.weaponId;
@@ -372,10 +353,6 @@ export function survivalEnforceRewardWeaponGuard(
     }
   }
 }
-
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
 
 function _distanceF32Xy(ax: number, ay: number, bx: number, by: number): number {
   const dx = f32(ax - bx);
@@ -390,6 +367,7 @@ function _playerApplyMoveWithSpawnAvoidance(
   spawnSlots: readonly SpawnSlotInit[] | null,
   creatures: readonly CreatureState[] | null,
 ): void {
+  // Port of native `player_apply_move_with_spawn_avoidance` (0x0041e290).
   let dx = delta.x;
   let dy = delta.y;
   if (perkActive(player, PerkId.ALTERNATE_WEAPON)) {
@@ -440,6 +418,9 @@ function _playerApplyMoveWithSpawnAvoidance(
 }
 
 function _directionFromHeadingNative(heading: number): Vec2 {
+  // Native uses `fcos/fsin(heading - 1.5707964f)` (float32 half-pi literal),
+  // but this path keeps x87-style precision for trig and rounds at downstream
+  // float32 storage boundaries (delta/aim writes), not inside this helper.
   const radians = heading - NATIVE_HALF_PI;
   return new Vec2(Math.cos(radians), Math.sin(radians));
 }
@@ -526,6 +507,8 @@ function _playerAimPointFromHeading(
 }
 
 function _aimHeadingFromAimPointNative(playerPos: Vec2, aimPos: Vec2): number {
+  // `player_update` (0x004136b0): aim_heading = (float)(fpatan(pos_y-aim_y, pos_x-aim_x) - 1.5707964)
+  // Keep atan2 wide and narrow once at store to mirror x87-style rounding.
   const dy = playerPos.y - aimPos.y;
   const dx = playerPos.x - aimPos.x;
   return f32(Math.atan2(dy, dx) - NATIVE_HALF_PI);
@@ -575,10 +558,6 @@ function _playerUpdateAimByScheme(opts: {
   }
 }
 
-// ---------------------------------------------------------------------------
-// _normalizeHeadingAngle
-// ---------------------------------------------------------------------------
-
 function _normalizeHeadingAngle(value: number): number {
   const tau = NATIVE_TAU;
   let angle = f32(value);
@@ -591,15 +570,15 @@ function _normalizeHeadingAngle(value: number): number {
   return angle;
 }
 
-// ---------------------------------------------------------------------------
-// _playerHeadingApproachTargetWithDelta / _playerHeadingApproachTarget
-// ---------------------------------------------------------------------------
-
 function _playerHeadingApproachTargetWithDelta(
   player: PlayerState,
   targetHeading: number,
   dt: number,
 ): [number, number] {
+  // Native `player_heading_approach_target`: ease heading and return (diff, turn_delta).
+  // Native runs this through float32 temporaries (`var_8`/`edx_1`) before the
+  // direct-vs-wrapped compare and turn-sign branch. That quantization matters
+  // near opposite-heading ties.
   let heading = f32(_normalizeHeadingAngle(player.heading));
   player.heading = heading;
   const target = f32(targetHeading);
@@ -612,6 +591,9 @@ function _playerHeadingApproachTargetWithDelta(
   const wrapped = f32(Math.abs(f32(NATIVE_TAU - high + low)));
   const diff = direct >= wrapped ? wrapped : direct;
 
+  // Native computes `player_heading_turn_delta = frame_dt * diff * 5.0` via
+  // float32 temporaries/spills. Quantize `frame_dt * diff` to float32 before
+  // applying the `* 5.0` to match x87 store boundaries.
   const dtF32 = f32(dt);
   const scaled = f32(dtF32 * diff);
   let turnDelta: number;
@@ -642,10 +624,6 @@ function _playerHeadingApproachTarget(
   return diff;
 }
 
-// ---------------------------------------------------------------------------
-// playerUpdate
-// ---------------------------------------------------------------------------
-
 export function playerUpdate(
   player: PlayerState,
   inputState: PlayerInput,
@@ -661,6 +639,7 @@ export function playerUpdate(
     reloadActiveAny?: boolean | null;
   },
 ): void {
+  // Port of `player_update` (0x004136b0) for the rewrite runtime.
   const detailPreset = opts?.detailPreset ?? 5;
   const worldSize = opts?.worldSize ?? 1024.0;
   const players = opts?.players ?? null;
@@ -679,7 +658,9 @@ export function playerUpdate(
     return;
   }
 
-  // Low-health warning pulse.
+  // Native low-health warning pulse (`player_update` @ 0x004136b0): once
+  // `player_take_damage` has armed `low_health_timer` (!= 100.0), count down
+  // while HP < 20 and emit a 3x blood splatter + bloodspill SFX burst.
   if (player.lowHealthTimer !== 100.0 && player.health < 20.0) {
     const nextLowHealthTimer = f32(player.lowHealthTimer - dt);
     player.lowHealthTimer = nextLowHealthTimer;
@@ -749,6 +730,8 @@ export function playerUpdate(
       timeScaleFactor = f32((1.0 - reflexF32) * 0.7 + 0.3);
     }
     if (timeScaleFactor > 0.0) {
+      // Native computes `frame_dt = (0.6 / _time_scale_factor) * frame_dt`
+      // and stores back to float before movement/heading logic.
       movementDt = f32((0.6 / timeScaleFactor) * movementDt);
     }
   }
@@ -911,13 +894,16 @@ export function playerUpdate(
       }
     }
   } else {
-    // Demo/autoplay
+    // Demo/autoplay uses very small analog magnitudes to represent turn-in-place and
+    // heading alignment slowdown; don't apply a deadzone there.
     const movingInput = rawMag > (state.demoModeActive ? 0.0 : 0.2);
 
     let turnAlignmentScale = 1.0;
     if (movingInput) {
       const inv = rawMag > 1e-9 ? 1.0 / rawMag : 0.0;
       move = rawMove.mul(inv);
+      // Native normalizes this heading into [0, 2pi] before calling
+      // `player_heading_approach_target` (see ghidra @ 0x00413fxx).
       const targetHeading = _normalizeHeadingAngle(move.toHeading());
       const angleDiff = _playerHeadingApproachTarget(player, targetHeading, movementDt);
       move = _directionFromHeadingNative(player.heading);
@@ -939,6 +925,8 @@ export function playerUpdate(
 
   let moveDelta: Vec2;
   if (moveDeltaOverride === null) {
+    // Native movement stores through float32 velocity/delta slots before writing
+    // player position; mirror those store boundaries for replay parity.
     const moveStep = f32(speed * movementDt);
     moveDelta = new Vec2(
       f32(move.x * moveStep),
@@ -960,6 +948,7 @@ export function playerUpdate(
   moveDelta = player.pos.sub(prevPos);
   const reloadStationary = Math.abs(moveDelta.x) <= 1e-9 && Math.abs(moveDelta.y) <= 1e-9;
   if (!reloadStationary) {
+    // Native clears these post-perk-tick timers after movement when position changed.
     player.manBombTimer = 0.0;
     player.livingFortressTimer = 0.0;
   }
@@ -977,18 +966,27 @@ export function playerUpdate(
     const anxiousNext = f32(player.weapon.reloadTimer - 0.05);
     player.weapon.reloadTimer = anxiousNext;
     if (anxiousNext <= 0.0) {
+      // Native restarts the tail of the reload at `frame_dt * 0.8` when
+      // Anxious Loader overcuts the timer.
       player.weapon.reloadTimer = f32(dt * 0.8);
     }
   }
 
   const reloadTimerNow = f32(player.weapon.reloadTimer);
   const dtF32 = f32(dt);
+  // Native preloads ammo one frame before reload timer underflows using the
+  // unscaled `frame_dt` (before Stationary Reloader scale is applied). That
+  // can miss reload completion when Stationary Reloader is active, leaving the
+  // clip empty and causing a one-shot reload loop (fixed by default).
   let preloadDt = dtF32;
   if (!state.preserveBugs) {
     preloadDt = f32(reloadScale * dtF32);
   }
 
   const reloadPreloadUnderflow = f32(reloadTimerNow - preloadDt);
+  // Native can complete reload and fire on the same frame when held fire
+  // meets an almost-zero reload boundary. Treat near-zero underflow as
+  // completion for fire-held ticks to avoid a spurious empty-shot reload loop.
   const preloadCrossed = reloadPreloadUnderflow < -_RELOAD_PRELOAD_UNDERFLOW_EPS;
   const preloadFireBoundary =
     inputState.fireDown && reloadPreloadUnderflow <= _RELOAD_PRELOAD_UNDERFLOW_EPS;
@@ -1058,7 +1056,9 @@ export function playerUpdate(
     demoModeActive: state.demoModeActive,
   });
 
-  // Spread cooldown after perk timers/movement but before weapon fire.
+  // Native cools spread after perk timers/movement but before weapon fire.
+  // Keeping this below `apply_player_perk_ticks` preserves Fire Cough spread
+  // sampling order while still applying cooldown before `player_fire_weapon`.
   if (perkActive(player, PerkId.SHARPSHOOTER)) {
     player.spreadHeat = 0.02;
   } else {
@@ -1068,6 +1068,8 @@ export function playerUpdate(
   const fireGateOpenPreReload =
     player.weapon.shotCooldown <= 0.0 && player.weapon.reloadTimer === 0.0;
 
+  // Native clears `reload_active` whenever the cooldown/timer gates are open,
+  // even if ammo is empty and perk firing paths can still proceed.
   if (fireGateOpenPreReload) {
     player.weapon.reloadActive = false;
   }
@@ -1103,6 +1105,8 @@ export function playerUpdate(
     }
   }
 
+  // Native computes the fire gate (`shot_cooldown <= 0 && reload_timer == 0`)
+  // before alt-weapon swap mutates cooldown; preserve same-tick fire eligibility.
   const forcePreSwapFireGate =
     swappedAltWeapon && fireGateOpenPreReload && inputState.fireDown;
   if (forcePreSwapFireGate) {
