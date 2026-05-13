@@ -234,9 +234,13 @@ export class ControlsMenuView extends PanelMenuView {
     if (!clickConsumed) {
       clickConsumed = this._updateRebindCapture({ rightTopLeft, panelScale, font });
     }
-    if (!clickConsumed && this._updateDirectionArrowCheckbox(
-      leftTopLeft, panelScale, this._checkboxEnabled(), resources, font,
-    )) {
+    if (!clickConsumed && this._updateDirectionArrowCheckbox({
+      leftTopLeft,
+      panelScale,
+      enabled: this._checkboxEnabled(),
+      resources,
+      font,
+    })) {
       this._dirty = true;
     }
   }
@@ -340,12 +344,19 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _checkboxHovered(
-    leftTopLeft: Vec2,
-    panelScale: number,
-    enabled: boolean,
-    resources: RuntimeResources,
-    font: SmallFontData,
+    opts: {
+      leftTopLeft: Vec2;
+      panelScale: number;
+      enabled: boolean;
+      resources: RuntimeResources;
+      font: SmallFontData;
+    },
   ): boolean {
+    const leftTopLeft = opts.leftTopLeft;
+    const panelScale = opts.panelScale;
+    const enabled = opts.enabled;
+    const resources = opts.resources;
+    const font = opts.font;
     if (!enabled) return false;
     const checkOn = getTexture(resources, TextureId.UI_CHECK_ON);
     const textScale = 1.0 * panelScale;
@@ -362,14 +373,17 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _updateDirectionArrowCheckbox(
-    leftTopLeft: Vec2,
-    panelScale: number,
-    enabled: boolean,
-    resources: RuntimeResources,
-    font: SmallFontData,
+    opts: {
+      leftTopLeft: Vec2;
+      panelScale: number;
+      enabled: boolean;
+      resources: RuntimeResources;
+      font: SmallFontData;
+    },
   ): boolean {
+    const enabled = opts.enabled;
     if (!enabled) return false;
-    const hovered = this._checkboxHovered(leftTopLeft, panelScale, enabled, resources, font);
+    const hovered = this._checkboxHovered(opts);
     if (hovered && InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
       this._setDirectionArrowEnabled(!this._directionArrowEnabled());
       return true;
@@ -772,9 +786,13 @@ export class ControlsMenuView extends PanelMenuView {
       ),
       ORIGIN, 0.0, WHITE,
     );
-    const checkboxHovered = this._checkboxHovered(
-      leftTopLeft, panelScale, this._checkboxEnabled(), resources, font,
-    );
+    const checkboxHovered = this._checkboxHovered({
+      leftTopLeft,
+      panelScale,
+      enabled: this._checkboxEnabled(),
+      resources,
+      font,
+    });
     const checkboxAlpha = checkboxHovered ? 1.0 : 178 / 255;
     drawSmallText(
       font,'Show direction arrow',
