@@ -1,20 +1,23 @@
 // Port of crimson/screens/quest_views/quest_results.py
 
 import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
+import { GroundRenderer } from '@grim/terrain-render.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import { f32 } from '@crimson/math-parity.ts';
 import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { computeQuestFinalTime } from '@crimson/quests/results.ts';
-import { weaponDisplayName } from '@crimson/weapons.ts';
-import { perkDisplayName } from '@crimson/perks/ids.ts';
+import { WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
+import { PERK_BY_ID, PerkId, perkDisplayName } from '@crimson/perks/ids.ts';
+import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { QuestResultsUi as QuestResultsUiImpl } from '@crimson/screens/results/quest-results.ts';
+import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
 import type { GameState } from '@crimson/game/types.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
 
@@ -22,13 +25,9 @@ export type { QuestRunOutcome };
 
 export type QuestResultsState = GameState;
 
-// ---------------------------------------------------------------------------
-// QuestResultsView
-// ---------------------------------------------------------------------------
-
 export class QuestResultsView {
   private state: QuestResultsState;
-  private _ground: { processPending(): void; draw(camera: Vec2): void } | null = null;
+  private _ground: GroundRenderer | null = null;
   private _questLevel: QuestLevel | null = null;
   private _questTitle: string = '';
   private _unlockWeaponName: string = '';
@@ -42,7 +41,7 @@ export class QuestResultsView {
 
   open(): void {
     this._action = null;
-    this._ground = this.state.pauseBackground !== null ? null : (this.state.menuGround ?? null);
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
     this.state.questFailRetryCount = 0;
     const outcome = this.state.questOutcome;
     this.state.questOutcome = null;
@@ -55,26 +54,79 @@ export class QuestResultsView {
 
     const level = outcome.level;
     this._questLevel = level;
+    const major = level.major;
+    const minor = level.minor;
 
     const quest = questByLevel(level);
-    this._questTitle = quest !== null ? String(quest.title ?? '') : '';
 
-    // Resolve unlock weapon name
-    if (quest !== null && quest.unlockWeaponId !== undefined && quest.unlockWeaponId !== null && (quest.unlockWeaponId as number) > 0) {
-      this._unlockWeaponName = weaponDisplayName(quest.unlockWeaponId, { preserveBugs: this.state.preserveBugs });
-    }
-    // Resolve unlock perk name — skip the ANTIPERK sentinel (id 0)
-    if (quest !== null && quest.unlockPerkId !== undefined && quest.unlockPerkId !== null && (quest.unlockPerkId as number) !== 0) {
-      this._unlockPerkName = perkDisplayName(quest.unlockPerkId, { violenceDisabled: this.state.config.display.violenceDisabled, preserveBugs: this.state.preserveBugs });
+    this._questTitle = quest !== null ? String(quest.title || '') : '';
+    if (quest !== null) {
+      const weaponIdNative = quest.unlockWeaponId !== null ? int(quest.unlockWeaponId) : 0;
+      if (weaponIdNative > 0) {
+        this._unlockWeaponName = weaponDisplayName(
+          weaponIdNative as WeaponId,
+          { preserveBugs: Boolean(this.state.preserveBugs) },
+        );
+      }
+
+      const perkIdNative = quest.unlockPerkId !== null ? int(quest.unlockPerkId) : 0;
+      if (perkIdNative !== int(PerkId.ANTIPERK)) {
+        const perkId = perkIdNative as PerkId;
+        const perkEntry = PERK_BY_ID.get(perkId);
+        if (perkEntry !== undefined && perkEntry.name) {
+          const violenceDisabled = this.state.config.display.violenceDisabled;
+          this._unlockPerkName = perkDisplayName(
+            perkId,
+            { violenceDisabled, preserveBugs: Boolean(this.state.preserveBugs) },
+          );
+        } else {
+          this._unlockPerkName = `perk_${perkIdNative}`;
+        }
+      }
     }
 
-    const globalIndex = level.globalIndex;
+    const record: HighScoreRecord = {
+      gameModeId: GameMode.QUESTS,
+      questStageMajor: int(major),
+      questStageMinor: int(minor),
+      scoreXp: int(outcome.experience),
+      survivalElapsedMs: 0,
+      mostUsedWeaponId: outcome.mostUsedWeaponId,
+      creatureKillCount: int(outcome.killCount),
+      shotsFired: 0,
+      shotsHit: 0,
+      name: '',
+    };
+    const fired = Math.max(0, int(outcome.shotsFired));
+    const hit = Math.max(0, Math.min(int(outcome.shotsHit), fired));
+    record.shotsFired = fired;
+    record.shotsHit = hit;
+
+    let playerHealthValues = outcome.playerHealthValues.map((v) => f32(v));
+    if (playerHealthValues.length === 0) {
+      playerHealthValues = [f32(outcome.playerHealth)];
+      if (outcome.player2Health !== null) {
+        playerHealthValues = playerHealthValues.concat([f32(outcome.player2Health)]);
+      }
+    }
+    const breakdown = computeQuestFinalTime({
+      baseTimeMs: int(outcome.baseTimeMs),
+      playerHealth: f32(outcome.playerHealth),
+      player2Health: outcome.player2Health !== null ? f32(outcome.player2Health) : null,
+      playerHealthValues,
+      pendingPerkCount: int(outcome.pendingPerkCount),
+    });
+    record.survivalElapsedMs = int(breakdown.finalTimeMs);
+    const defaultName = playerNameDefault(this.state.config) || 'Player';
+    record.name = defaultName;
+
+    const globalIndex = int(level.globalIndex);
     const completedIdx = trackedQuestCompletedCounterIndex(level);
     if (completedIdx !== null) {
       try {
         this.state.status.incrementQuestPlayCount(completedIdx);
       } catch (exc) {
-        this._logNonfatal('failed to increment quest play count', exc);
+        this._logNonfatal('failed to increment quest play count', String(exc));
       }
     }
 
@@ -93,48 +145,26 @@ export class QuestResultsView {
           }
         }
       } catch (exc) {
-        this._logNonfatal('failed to update quest unlock progression', exc);
+        this._logNonfatal('failed to update quest unlock progression', String(exc));
       }
     }
 
     try {
       this.state.status.saveIfDirty();
     } catch (exc) {
-      this._logNonfatal('failed to save status', exc);
+      this._logNonfatal('failed to save status', String(exc));
     }
 
-    // Instantiate the actual QuestResultsUi from the results module.
-    const breakdown = computeQuestFinalTime({
-      baseTimeMs: outcome.baseTimeMs,
-      playerHealth: outcome.playerHealth,
-      pendingPerkCount: outcome.pendingPerkCount,
-      player2Health: outcome.player2Health,
-      playerHealthValues: outcome.playerHealthValues,
-    });
-    const shotsFired = Math.max(0, int(outcome.shotsFired));
-    const shotsHit = Math.max(0, Math.min(int(outcome.shotsHit), shotsFired));
-    const record = {
-      gameModeId: GameMode.QUESTS,
-      questStageMajor: int(level.major),
-      questStageMinor: int(level.minor),
-      scoreXp: int(outcome.experience),
-      survivalElapsedMs: int(breakdown.finalTimeMs),
-      mostUsedWeaponId: outcome.mostUsedWeaponId,
-      creatureKillCount: int(outcome.killCount),
-      shotsFired,
-      shotsHit,
-      name: playerNameDefault(this.state.config),
-    };
     const ui = new QuestResultsUiImpl(this.state.config);
-    ui.preserveBugs = this.state.preserveBugs;
+    ui.preserveBugs = Boolean(this.state.preserveBugs);
     ui.open({
       record,
       breakdown,
       questLevel: level,
-      questTitle: this._questTitle,
-      unlockWeaponName: this._unlockWeaponName,
-      unlockPerkName: this._unlockPerkName,
-      playerNameDefault: playerNameDefault(this.state.config),
+      questTitle: String(this._questTitle || ''),
+      unlockWeaponName: String(this._unlockWeaponName || ''),
+      unlockPerkName: String(this._unlockPerkName || ''),
+      playerNameDefault: defaultName,
     });
     this._ui = ui;
   }
@@ -210,8 +240,7 @@ export class QuestResultsView {
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground({ entityAlpha: bgAlpha });
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
     drawScreenFade(this.state);
     if (ui !== null) {
@@ -235,10 +264,6 @@ export class QuestResultsView {
     return action;
   }
 
-  // ---------------------------------------------------------------------------
-  // Private
-  // ---------------------------------------------------------------------------
-
   private _openHighScoresList(): void {
     let highlightRank: number | null = null;
     if (this._ui !== null) {
@@ -260,11 +285,11 @@ export class QuestResultsView {
     try {
       this.state.config.save();
     } catch (exc) {
-      this._logNonfatal('failed to save quest selection config', exc);
+      this._logNonfatal('failed to save quest selection config', String(exc));
     }
   }
 
-  private _logNonfatal(message: string, exc: unknown): void {
+  private _logNonfatal(message: string, exc: Error | string): void {
     this.state.console.log.log(`quest results: ${message}: ${exc}`);
   }
 }
