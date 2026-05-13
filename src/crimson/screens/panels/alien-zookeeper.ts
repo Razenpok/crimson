@@ -486,7 +486,7 @@ export class AlienZooKeeperView {
 
     // Selection highlight
     if (this._selectedIndex >= 0) {
-      const selRow = (this._selectedIndex / _BOARD_SIDE) | 0;
+      const selRow = Math.floor(this._selectedIndex / _BOARD_SIDE);
       const selCol = this._selectedIndex % _BOARD_SIDE;
       const selX = layout.boardX + selCol * layout.tileSize + (4.0 * scale);
       const selY = layout.boardY + selRow * layout.tileSize + (4.0 * scale);

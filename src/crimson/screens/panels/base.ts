@@ -143,7 +143,7 @@ function uiElementAnim(
 
 function labelAlpha(counterValue: number): number {
   // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
-  return 100 + (((counterValue * 155) / 1000) | 0);
+  return 100 + Math.floor((counterValue * 155) / 1000);
 }
 
 function signLayoutScale(width: number): [number, number] {

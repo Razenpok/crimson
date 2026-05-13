@@ -178,7 +178,7 @@ export class MenuEntry {
 
 function labelAlpha(counterValue: number): number {
   // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
-  return 100 + int((counterValue * 155) / 1000);
+  return 100 + Math.floor((counterValue * 155) / 1000);
 }
 
 // ---------------------------------------------------------------------------
