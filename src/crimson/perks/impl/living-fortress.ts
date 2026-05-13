@@ -3,7 +3,7 @@
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
-import type { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.ts";
+import type { PlayerPerkTickCtx } from '@crimson/perks/runtime/player-tick-context.ts';
 
 export function tickLivingFortress(ctx: PlayerPerkTickCtx): void {
   if (perkActive(ctx.player, PerkId.LIVING_FORTRESS)) {
