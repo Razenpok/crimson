@@ -3,9 +3,7 @@
 import { PlayerInput } from './input.ts';
 import { clearInputEdges } from '@crimson/local-input.ts';
 
-// ---------------------------------------------------------------------------
-// Game commands (tagged‑union discriminated by `tag`)
-// ---------------------------------------------------------------------------
+type TypoChar = string;
 
 export class PerkMenuOpenCommand {
   readonly tag = 'perk_menu_open' as const;
@@ -24,7 +22,7 @@ export class TypoCharCommand {
   readonly tag = 'typo_char' as const;
   constructor(
     readonly playerIndex: number,
-    readonly ch: string,
+    readonly ch: TypoChar,
   ) {}
 }
 
@@ -44,10 +42,6 @@ export type GameCommand =
   | TypoCharCommand
   | TypoBackspaceCommand
   | TypoSubmitCommand;
-
-// ---------------------------------------------------------------------------
-// FrameContext
-// ---------------------------------------------------------------------------
 
 export class FrameContext {
   readonly dtSeconds: number;
@@ -74,19 +68,11 @@ export class FrameContext {
   }
 }
 
-// ---------------------------------------------------------------------------
-// InputStatus
-// ---------------------------------------------------------------------------
-
 export enum InputStatus {
   READY = 'ready',
   STALLED = 'stalled',
   EOS = 'eos',
 }
-
-// ---------------------------------------------------------------------------
-// ResolvedTick
-// ---------------------------------------------------------------------------
 
 export class ResolvedTick {
   readonly tickIndex: number;
@@ -107,10 +93,6 @@ export class ResolvedTick {
   }
 }
 
-// ---------------------------------------------------------------------------
-// TickSupply
-// ---------------------------------------------------------------------------
-
 export class TickSupply {
   readonly status: InputStatus;
   readonly tick: ResolvedTick | null;
@@ -121,10 +103,6 @@ export class TickSupply {
   }
 }
 
-// ---------------------------------------------------------------------------
-// InputProvider interface (Protocol → interface)
-// ---------------------------------------------------------------------------
-
 export interface InputProvider {
   beginFrame(frameCtx: FrameContext): void;
   pullTick(tickIndex: number, defaultDtSeconds: number): TickSupply;
@@ -132,16 +110,9 @@ export interface InputProvider {
   submitCommand(command: GameCommand): void;
 }
 
-// ---------------------------------------------------------------------------
-// LocalInputBuilder type alias
-// ---------------------------------------------------------------------------
-
 export type LocalInputBuilder = (ctx: FrameContext) => readonly PlayerInput[];
 
-// ---------------------------------------------------------------------------
-// LocalInputProvider
-// ---------------------------------------------------------------------------
-
+// Adapter over local input polling.
 export class LocalInputProvider implements InputProvider {
   private readonly _playerCount: number;
   private readonly _buildInputs: LocalInputBuilder;
