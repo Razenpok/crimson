@@ -9,32 +9,45 @@ import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/
 import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import type { SecondaryProjectileDrawCtx } from './types.ts';
 
-export interface SecondaryRocketStyle {
+export class SecondaryRocketStyle {
   readonly baseSize: number;
   readonly glowSize: number;
   readonly glowRgb: [number, number, number];
   readonly glowAlphaMul: number;
+
+  constructor(opts: {
+    baseSize: number;
+    glowSize: number;
+    glowRgb: [number, number, number];
+    glowAlphaMul: number;
+  }) {
+    this.baseSize = opts.baseSize;
+    this.glowSize = opts.glowSize;
+    this.glowRgb = opts.glowRgb;
+    this.glowAlphaMul = opts.glowAlphaMul;
+    Object.freeze(this);
+  }
 }
 
 const ROCKET_STYLE_BY_TYPE: Map<number, SecondaryRocketStyle> = new Map([
-  [SecondaryProjectileTypeId.ROCKET, {
+  [SecondaryProjectileTypeId.ROCKET, new SecondaryRocketStyle({
     baseSize: 14.0,
     glowSize: 60.0,
     glowRgb: [1.0, 1.0, 1.0],
     glowAlphaMul: 0.68,
-  }],
-  [SecondaryProjectileTypeId.HOMING_ROCKET, {
+  })],
+  [SecondaryProjectileTypeId.HOMING_ROCKET, new SecondaryRocketStyle({
     baseSize: 10.0,
     glowSize: 40.0,
     glowRgb: [1.0, 1.0, 1.0],
     glowAlphaMul: 0.58,
-  }],
-  [SecondaryProjectileTypeId.ROCKET_MINIGUN, {
+  })],
+  [SecondaryProjectileTypeId.ROCKET_MINIGUN, new SecondaryRocketStyle({
     baseSize: 8.0,
     glowSize: 30.0,
     glowRgb: [0.7, 0.7, 1.0],
     glowAlphaMul: 0.158,
-  }],
+  })],
 ]);
 
 function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: SecondaryRocketStyle): void {
@@ -126,6 +139,7 @@ export function drawSecondaryType4Fallback(ctx: SecondaryProjectileDrawCtx): boo
   const size = radius * 2.0;
   const sp = ctx.screenPos;
   const tint = wgl.makeColor(200 / 255, 120 / 255, 1.0, int(255 * ctx.alpha + 0.5) / 255);
+  // WebGL replacement for raylib's `draw_circle` fallback.
   wgl.drawTexturePro(wgl.getWhiteTexture(), wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
   return true;
 }
