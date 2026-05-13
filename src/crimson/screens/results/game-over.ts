@@ -102,9 +102,8 @@ const COLOR_TEXT_MUTED = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
 const COLOR_SCORE_LABEL = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 1.0);
 const COLOR_SCORE_VALUE = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
 
-// DOM key codes
 const KEY_ENTER = 13;
-const KEY_NUMPAD_ENTER = 13; // Same in DOM
+const KEY_NUMPAD_ENTER = 13;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const MOUSE_BUTTON_LEFT = 0;
@@ -127,6 +126,7 @@ function weaponIconSrc(
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
+// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   const ix1 = int(x1);
   const iy1 = int(y1);
@@ -143,9 +143,14 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Col
   wgl.drawRectangle(ix1, iy1, ix2 - ix1, iy2 - iy1, color);
 }
 
-interface GameOverPanelLayout {
-  panel: Rect;
-  topLeft: Vec2;
+class GameOverPanelLayout {
+  readonly panel: Rect;
+  readonly topLeft: Vec2;
+
+  constructor(opts: { panel: Rect; topLeft: Vec2 }) {
+    this.panel = opts.panel;
+    this.topLeft = opts.topLeft;
+  }
 }
 
 function drawTextureCentered(
@@ -282,7 +287,7 @@ export class GameOverUi {
     const topLeftY = panelPosY - panelOriginY;
     const topLeft = new Vec2(topLeftX, topLeftY);
     const panel = Rect.fromTopLeft(topLeft, GAME_OVER_PANEL_W * opts.scale, GAME_OVER_PANEL_H * opts.scale);
-    return { panel, topLeft };
+    return new GameOverPanelLayout({ panel, topLeft });
   }
 
   private _beginCloseTransition(action: string): void {
