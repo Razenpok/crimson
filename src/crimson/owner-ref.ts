@@ -21,15 +21,15 @@ export class OwnerRef {
   }
 
   static fromLocalPlayer(index: number): OwnerRef {
-    return new OwnerRef(OwnerKind.PLAYER, index, true);
+    return new OwnerRef(OwnerKind.PLAYER, int(index), true);
   }
 
   static fromPlayer(index: number): OwnerRef {
-    return new OwnerRef(OwnerKind.PLAYER, index, false);
+    return new OwnerRef(OwnerKind.PLAYER, int(index), false);
   }
 
   static fromCreature(index: number): OwnerRef {
-    return new OwnerRef(OwnerKind.CREATURE, index, false);
+    return new OwnerRef(OwnerKind.CREATURE, int(index), false);
   }
 
   static fromLegacy(ownerId: number): OwnerRef {
@@ -45,9 +45,9 @@ export class OwnerRef {
 
   toLegacy(): number {
     if (this.kind === OwnerKind.NONE) return 0;
-    if (this.kind === OwnerKind.CREATURE) return this.index;
-    if (this.localHost && this.index === 0) return LOCAL_PLAYER_OWNER_ID;
-    return -1 - this.index;
+    if (this.kind === OwnerKind.CREATURE) return int(this.index);
+    if (this.localHost && int(this.index) === 0) return int(LOCAL_PLAYER_OWNER_ID);
+    return -1 - int(this.index);
   }
 
   isPlayer(): boolean {
@@ -56,25 +56,25 @@ export class OwnerRef {
 
   playerIndex(): number | null {
     if (this.kind !== OwnerKind.PLAYER) return null;
-    return this.index;
+    return int(this.index);
   }
 
   playerIndexInBounds(playerCount: number): number | null {
     const idx = this.playerIndex();
     if (idx === null) return null;
-    if (idx >= 0 && idx < playerCount) return idx;
+    if (idx >= 0 && idx < int(playerCount)) return int(idx);
     return null;
   }
 
   creatureIndex(): number | null {
     if (this.kind !== OwnerKind.CREATURE) return null;
-    return this.index;
+    return int(this.index);
   }
 
   creatureIndexInBounds(creatureCount: number): number | null {
     const idx = this.creatureIndex();
     if (idx === null) return null;
-    if (idx >= 0 && idx < creatureCount) return idx;
+    if (idx >= 0 && idx < int(creatureCount)) return int(idx);
     return null;
   }
 }
