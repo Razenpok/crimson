@@ -33,7 +33,6 @@ export class SpawnTemplate {
         this.tint = opts.tint ?? null;
         this.size = opts.size ?? null;
         this.moveSpeed = opts.moveSpeed ?? null;
-        Object.freeze(this);
     }
 }
 
