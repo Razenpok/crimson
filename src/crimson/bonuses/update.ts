@@ -88,7 +88,7 @@ export function bonusTelekineticUpdate(
   return pickups;
 }
 
-/** Advance world bonuses and global timers (subset of `bonusUpdate`). */
+/** Advance world bonuses and global timers (subset of `bonus_update`). */
 export function bonusUpdate(
   state: GameplayState,
   players: PlayerState[],
@@ -120,7 +120,7 @@ export function bonusUpdate(
       players,
       creatures,
       detailPreset: int(detailPreset),
-      deferFreezeCorpseFx: Boolean(deferFreezeCorpseFx),
+      deferFreezeCorpseFx,
       freezeCorpseIndices,
     },
   );
