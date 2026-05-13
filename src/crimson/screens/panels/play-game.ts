@@ -410,7 +410,7 @@ export class PlayGameMenuView extends PanelMenuView {
   }
 
   private _updateTooltipTimer(key: string, hovered: boolean, dtMs: number): void {
-    let value = this._tooltipMs.get(key) ?? 0;
+    let value = int(this._tooltipMs.get(key) ?? 0);
     if (hovered) {
       value += dtMs * 6;
     } else {
@@ -682,7 +682,7 @@ export class PlayGameMenuView extends PanelMenuView {
     };
 
     for (const mode of entries) {
-      const ms = this._tooltipMs.get(mode.key) ?? 0;
+      const ms = int(this._tooltipMs.get(mode.key) ?? 0);
       if (ms <= 0) continue;
       const alphaF = Math.min(1.0, ms * 0.0009);
       const alpha = int(255 * alphaF);
