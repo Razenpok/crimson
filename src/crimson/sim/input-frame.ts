@@ -1,5 +1,7 @@
 // Port of crimson/sim/input_frame.py
 
+// Deterministic per-tick player input frame normalization.
+
 import { PlayerInput } from './input.ts';
 
 export class InputFrame {

@@ -50,7 +50,7 @@ export class FrameTiming {
     const factor = f32(opts.timeScaleFactor);
     if (active && (!Number.isFinite(factor) || factor <= 0.0)) {
       throw new Error(
-        "time_scale_factor must be finite and > 0 when active",
+        `time_scale_factor must be finite and > 0 when active, got ${opts.timeScaleFactor}`,
       );
     }
     let dtSim = dtF32;
