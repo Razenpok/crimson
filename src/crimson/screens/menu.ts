@@ -9,7 +9,6 @@ import { fxDetailEnabled } from '@grim/config.ts';
 import { InputState } from '@grim/input.ts';
 import { GroundRenderer } from '@grim/terrain-render.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
@@ -202,13 +201,7 @@ export function uiElementAnim(
 }
 
 export function signLayoutScale(width: number): [number, number] {
-  if (width <= MENU_SCALE_SMALL_THRESHOLD) {
-    return [MENU_SCALE_SMALL, MENU_SCALE_SHIFT];
-  }
-  if (MENU_SCALE_LARGE_MIN <= width && width <= MENU_SCALE_LARGE_MAX) {
-    return [MENU_SCALE_LARGE, MENU_SCALE_SHIFT];
-  }
-  return [1.0, 0.0];
+  return MenuView._signLayoutScale(width);
 }
 
 export class MenuView {
@@ -239,7 +232,7 @@ export class MenuView {
   open(): void {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
-    this._widescreenYShift = menuWidescreenYShift(layoutW);
+    this._widescreenYShift = MenuView._menuWidescreenYShift(layoutW);
     // Shareware gating is controlled by the --demo flag (see GameState.demo_enabled),
     // not by a persisted config byte.
     this._fullVersion = !this.state.demoEnabled;
@@ -648,6 +641,11 @@ export class MenuView {
     return this._timelineMs >= MenuView._menuSlotStartMs(entry.slot);
   }
 
+  private static _menuWidescreenYShift(screenW: number): number {
+    // ((screen_width / 640.0) * 150.0) - 150.0
+    return (screenW * 0.0015625 * 150.0) - 150.0;
+  }
+
   private _menuItemScale(slot: number): [number, number] {
     if (this._menuScreenWidth < 641) {
       return [0.9, slot * 11.0];
@@ -714,7 +712,7 @@ export class MenuView {
 
   private _drawMenuSign(resources: RuntimeResources): void {
     const screenW = this.state.config.display.width;
-    const [scale, shiftX] = signLayoutScale(int(screenW));
+    const [scale, shiftX] = MenuView._signLayoutScale(int(screenW));
     const signPos = new Vec2(
       screenW + MENU_SIGN_POS_X_PAD,
       screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL,
@@ -756,5 +754,15 @@ export class MenuView {
       rotationDeg,
       WHITE,
     );
+  }
+
+  static _signLayoutScale(width: number): [number, number] {
+    if (width <= MENU_SCALE_SMALL_THRESHOLD) {
+      return [MENU_SCALE_SMALL, MENU_SCALE_SHIFT];
+    }
+    if (MENU_SCALE_LARGE_MIN <= width && width <= MENU_SCALE_LARGE_MAX) {
+      return [MENU_SCALE_LARGE, MENU_SCALE_SHIFT];
+    }
+    return [1.0, 0.0];
   }
 }
