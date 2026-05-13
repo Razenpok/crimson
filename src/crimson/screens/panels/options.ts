@@ -49,11 +49,18 @@ export class SliderState {
   }
 }
 
-interface OptionsContentLayout {
-  scale: number;
-  basePos: Vec2;
-  labelPos: Vec2;
-  sliderPos: Vec2;
+class OptionsContentLayout {
+  readonly scale: number;
+  readonly basePos: Vec2;
+  readonly labelPos: Vec2;
+  readonly sliderPos: Vec2;
+
+  constructor(opts: { scale: number; basePos: Vec2; labelPos: Vec2; sliderPos: Vec2 }) {
+    this.scale = opts.scale;
+    this.basePos = opts.basePos;
+    this.labelPos = opts.labelPos;
+    this.sliderPos = opts.sliderPos;
+  }
 }
 
 export class OptionsMenuView extends PanelMenuView {
@@ -238,7 +245,12 @@ export class OptionsMenuView extends PanelMenuView {
     // `sub_4475d0`: title label is anchored at panel_top + 40.
     const labelPos = basePos.offset({ dx: 8.0 * panelScale });
     const sliderPos = labelPos.offset({ dx: 130.0 * panelScale });
-    return { basePos, labelPos, sliderPos, scale: panelScale };
+    return new OptionsContentLayout({
+      basePos,
+      labelPos,
+      sliderPos,
+      scale: panelScale,
+    });
   }
 
   private _updateSlider(
