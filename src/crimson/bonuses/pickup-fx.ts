@@ -1,5 +1,7 @@
 // Port of crimson/bonuses/pickup_fx.py
 
+// Bonus pickup presentation hook registry.
+
 import { RGBA } from '@grim/color.ts';
 import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
 import { applyFreezePickupFx } from './freeze.ts';
