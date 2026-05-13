@@ -6,17 +6,15 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { CREATURE_CORPSE_DESPAWN_LIFECYCLE } from '@crimson/creatures/lifecycle.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { BonusPickupEvent } from '@crimson/sim/state-types.ts';
-import type { BonusApplyCtx } from "./apply-context.js";
-import { GameplayState } from "@crimson/gameplay.js";
+import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
+import type { BonusApplyCtx } from './apply-context.ts';
 
-export interface DeferredFreezeCorpseFx {
-  readonly pos: Vec2;
-  readonly detailPreset: number;
-}
-
-export function makeDeferredFreezeCorpseFx(pos: Vec2, detailPreset: number): DeferredFreezeCorpseFx {
-  return { pos: new Vec2(pos.x, pos.y), detailPreset: int(detailPreset) };
+export class DeferredFreezeCorpseFx {
+  constructor(
+    public readonly pos: Vec2,
+    public readonly detailPreset: number,
+  ) {
+  }
 }
 
 export function applyFreeze(ctx: BonusApplyCtx): void {
@@ -46,7 +44,7 @@ export function applyFreeze(ctx: BonusApplyCtx): void {
       const pos = creature.pos;
       if (allowShatterFx && deferCorpseFx) {
         ctx.state.deferredFreezeCorpseFx.push(
-          makeDeferredFreezeCorpseFx(pos, int(ctx.detailPreset)),
+          new DeferredFreezeCorpseFx(new Vec2(pos.x, pos.y), int(ctx.detailPreset)),
         );
       } else if (allowShatterFx) {
         for (let j = 0; j < 8; j++) {
