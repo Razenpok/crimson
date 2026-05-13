@@ -14,10 +14,6 @@ export const HS_RIGHT_PANEL_POS_X = 609.0;
 export const HS_RIGHT_PANEL_POS_Y = 200.0;
 export const HS_RIGHT_PANEL_HEIGHT = 254.0;
 
-// ---------------------------------------------------------------------------
-// Panel position functions
-// ---------------------------------------------------------------------------
-
 /**
  * Return left-panel base X for state 14/15/16.
  *
@@ -106,10 +102,7 @@ export function perksDbRightDetailXShift(screenWidth: number): number {
   return 0.0;
 }
 
-// ---------------------------------------------------------------------------
-// Buttons inside the left panel (relative to the left panel top-left)
-// ---------------------------------------------------------------------------
-
+// Buttons inside the left panel (relative to the left panel top-left).
 export const HS_BUTTON_X = 234.0;  // x0=136 at 1024x768
 export const HS_BUTTON_Y0 = 268.0;  // y0=462
 export const HS_BUTTON_STEP_Y = 33.0;
@@ -117,38 +110,26 @@ export const HS_BUTTON_STEP_Y = 33.0;
 export const HS_BACK_BUTTON_X = 400.0;  // x0=302
 export const HS_BACK_BUTTON_Y = 301.0;  // y0=495
 
-// ---------------------------------------------------------------------------
-// Underline under "High scores - ..." title
-// ---------------------------------------------------------------------------
-
+// Underline under "High scores - ..." title.
 // state_14 quests: [171,249]..[294,250], survival: [168,249]..[297,250]
 export const HS_TITLE_UNDERLINE_X = 269.0;
 export const HS_TITLE_UNDERLINE_Y = 55.0;
 export const HS_TITLE_UNDERLINE_W = 123.0;
 
-// ---------------------------------------------------------------------------
-// Left score-list frame (white border + black fill)
-// ---------------------------------------------------------------------------
-
+// Left score-list frame (white border + black fill).
 // state_14: [112,295]..[362,459] and inner [113,296]..[361,458]
 export const HS_SCORE_FRAME_X = 210.0;
 export const HS_SCORE_FRAME_Y = 101.0;
 export const HS_SCORE_FRAME_W = 250.0;
 export const HS_SCORE_FRAME_H = 164.0;
 
-// ---------------------------------------------------------------------------
-// Quest-mode high score selector arrow (left panel)
-// ---------------------------------------------------------------------------
-
+// Quest-mode high score selector arrow (left panel).
 // state_14:High scores - Quests: ui_arrow.jaz bbox [351,256]..[383,272]
 // left panel top-left at 1024x768 is (-98,194).
 export const HS_QUEST_ARROW_X = 449.0;
 export const HS_QUEST_ARROW_Y = 62.0;
 
-// ---------------------------------------------------------------------------
-// Right panel (Quests): options + dropdown widgets
-// ---------------------------------------------------------------------------
-
+// Right panel (Quests): options + dropdown widgets.
 // right panel top-left at 1024x768 is (630,209).
 export const HS_RIGHT_CHECK_X = 44.0;  // ui_checkOn bbox [674,253]..[690,269]
 export const HS_RIGHT_CHECK_Y = 44.0;
@@ -164,10 +145,7 @@ export const HS_RIGHT_SHOW_SCORES_Y = 106.0;
 export const HS_RIGHT_SCORE_LIST_X = 44.0;  // "Selected score list:" at (674,359)
 export const HS_RIGHT_SCORE_LIST_Y = 150.0;
 
-// ---------------------------------------------------------------------------
-// Closed dropdown widgets (borders + value text + arrow icon)
-// ---------------------------------------------------------------------------
-
+// Closed dropdown widgets (borders + value text + arrow icon).
 export const HS_RIGHT_PLAYER_COUNT_WIDGET_X = 46.0;  // x=676
 export const HS_RIGHT_PLAYER_COUNT_WIDGET_Y = 78.0;  // y=287
 export const HS_RIGHT_PLAYER_COUNT_WIDGET_W = 102.0;
@@ -200,10 +178,7 @@ export const HS_RIGHT_SCORE_LIST_VALUE_Y = 165.0;
 export const HS_RIGHT_SCORE_LIST_DROP_X = 201.0;  // ui_dropOff bbox [831,373]..[847,389]
 export const HS_RIGHT_SCORE_LIST_DROP_Y = 164.0;
 
-// ---------------------------------------------------------------------------
-// Right panel (Survival): local score details + weapon icon
-// ---------------------------------------------------------------------------
-
+// Right panel (Survival): local score details + weapon icon.
 export const HS_LOCAL_NAME_X = 78.0;  // "banteg" at (708,253)
 export const HS_LOCAL_NAME_Y = 44.0;
 export const HS_LOCAL_LABEL_X = 78.0;  // "Local score" at (708,267)

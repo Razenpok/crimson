@@ -47,7 +47,7 @@ export function resolveRequest(state: GameState): HighScoresRequest {
 }
 
 function passesDateFilter(entry: HighScoreRecord, dateMode: number, now: Date): boolean {
-  // Native `config_highscore_date_mode` values:
+  // Native `config_highscore_date_mode` values (see highscore_screen_update):
   //   0 = Best of all time (no filter)
   //   1 = Best of month
   //   2 = Best of week
