@@ -30,18 +30,18 @@ export class DemoTrialOverlayInfo {
   readonly remainingLabel: string;
   readonly showRemainingLine: boolean;
 
-  constructor(
-    visible: boolean,
-    kind: DemoTrialOverlayKind,
-    remainingMs: number,
-    remainingLabel: string,
-    showRemainingLine: boolean,
-  ) {
-    this.visible = visible;
-    this.kind = kind;
-    this.remainingMs = remainingMs;
-    this.remainingLabel = remainingLabel;
-    this.showRemainingLine = showRemainingLine;
+  constructor(opts: {
+    visible: boolean;
+    kind: DemoTrialOverlayKind;
+    remainingMs: number;
+    remainingLabel: string;
+    showRemainingLine: boolean;
+  }) {
+    this.visible = opts.visible;
+    this.kind = opts.kind;
+    this.remainingMs = opts.remainingMs;
+    this.remainingLabel = opts.remainingLabel;
+    this.showRemainingLine = opts.showRemainingLine;
   }
 }
 
@@ -116,11 +116,11 @@ export function demoTrialOverlayInfo(opts: {
   const { demoBuild, gameModeId, questLevel } = opts;
 
   if (!demoBuild) {
-    return new DemoTrialOverlayInfo(false, 'none', 0, formatDemoTrialTime(0), false);
+    return new DemoTrialOverlayInfo({ visible: false, kind: 'none', remainingMs: 0, remainingLabel: formatDemoTrialTime(0), showRemainingLine: false });
   }
 
   if (gameModeId === GameMode.TUTORIAL) {
-    return new DemoTrialOverlayInfo(false, 'none', 0, formatDemoTrialTime(0), false);
+    return new DemoTrialOverlayInfo({ visible: false, kind: 'none', remainingMs: 0, remainingLabel: formatDemoTrialTime(0), showRemainingLine: false });
   }
 
   const usedMs = Math.max(0, int(opts.globalPlaytimeMs));
@@ -136,58 +136,58 @@ export function demoTrialOverlayInfo(opts: {
 
   if (graceMs > 0) {
     if (graceRemainingMs <= 0) {
-      return new DemoTrialOverlayInfo(true, 'time_up', 0, formatDemoTrialTime(0), false);
+      return new DemoTrialOverlayInfo({ visible: true, kind: 'time_up', remainingMs: 0, remainingLabel: formatDemoTrialTime(0), showRemainingLine: false });
     }
     if (tierLocked) {
-      return new DemoTrialOverlayInfo(
-        true,
-        'quest_tier_limit',
-        int(graceRemainingMs),
-        formatDemoTrialTime(graceRemainingMs),
-        false,
-      );
+      return new DemoTrialOverlayInfo({
+        visible: true,
+        kind: 'quest_tier_limit',
+        remainingMs: int(graceRemainingMs),
+        remainingLabel: formatDemoTrialTime(graceRemainingMs),
+        showRemainingLine: false,
+      });
     }
     // During the quest-only grace period, the classic demo blocks other modes
     // and points the player back to Quests.
     if (gameModeId !== GameMode.QUESTS) {
-      return new DemoTrialOverlayInfo(
-        true,
-        'quest_grace_left',
-        int(graceRemainingMs),
-        formatDemoTrialTime(graceRemainingMs),
-        false,
-      );
+      return new DemoTrialOverlayInfo({
+        visible: true,
+        kind: 'quest_grace_left',
+        remainingMs: int(graceRemainingMs),
+        remainingLabel: formatDemoTrialTime(graceRemainingMs),
+        showRemainingLine: false,
+      });
     }
-    return new DemoTrialOverlayInfo(
-      false,
-      'none',
-      int(graceRemainingMs),
-      formatDemoTrialTime(graceRemainingMs),
-      false,
-    );
+    return new DemoTrialOverlayInfo({
+      visible: false,
+      kind: 'none',
+      remainingMs: int(graceRemainingMs),
+      remainingLabel: formatDemoTrialTime(graceRemainingMs),
+      showRemainingLine: false,
+    });
   }
 
   if (globalRemainingMs <= 0) {
-    return new DemoTrialOverlayInfo(true, 'time_up', 0, formatDemoTrialTime(0), false);
+    return new DemoTrialOverlayInfo({ visible: true, kind: 'time_up', remainingMs: 0, remainingLabel: formatDemoTrialTime(0), showRemainingLine: false });
   }
 
   // Demo tier gating: the classic demo lets you play stage 1 quests only; once
   // the player reaches stage > 1, it shows the upsell overlay even if time remains.
   if (tierLocked) {
-    return new DemoTrialOverlayInfo(
-      true,
-      'quest_tier_limit',
-      int(globalRemainingMs),
-      formatDemoTrialTime(globalRemainingMs),
-      true,
-    );
+    return new DemoTrialOverlayInfo({
+      visible: true,
+      kind: 'quest_tier_limit',
+      remainingMs: int(globalRemainingMs),
+      remainingLabel: formatDemoTrialTime(globalRemainingMs),
+      showRemainingLine: true,
+    });
   }
 
-  return new DemoTrialOverlayInfo(
-    false,
-    'none',
-    int(globalRemainingMs),
-    formatDemoTrialTime(globalRemainingMs),
-    false,
-  );
+  return new DemoTrialOverlayInfo({
+    visible: false,
+    kind: 'none',
+    remainingMs: int(globalRemainingMs),
+    remainingLabel: formatDemoTrialTime(globalRemainingMs),
+    showRemainingLine: false,
+  });
 }
