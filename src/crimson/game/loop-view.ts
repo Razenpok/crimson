@@ -42,7 +42,7 @@ import { AlienZooKeeperView } from '@crimson/screens/panels/alien-zookeeper.ts';
 import { ModsMenuView } from '@crimson/screens/panels/mods.ts';
 import { PanelMenuView } from '@crimson/screens/panels/base.ts';
 
-import { QuestsMenuView, type QuestsMenuState } from '@crimson/screens/quest-views/quests-menu.ts';
+import { QuestsMenuView } from '@crimson/screens/quest-views/quests-menu.ts';
 import { QuestResultsView } from '@crimson/screens/quest-views/quest-results.ts';
 import { QuestFailedView } from '@crimson/screens/quest-views/quest-failed.ts';
 import { EndNoteView } from '@crimson/screens/quest-views/end-note.ts';
@@ -224,7 +224,7 @@ export class GameLoopView implements View {
       // Network session / lobby screens stubbed — LAN excluded from WebGL port
       // open_lan_session: no-op
       // open_lan_lobby: no-op
-      open_quests: new QuestsMenuView(gs as unknown as QuestsMenuState),
+      open_quests: new QuestsMenuView(gs),
       open_pause_menu: new PauseMenuView(gs),
       start_quest: new QuestMode({
         demoModeActive: state.demoEnabled,

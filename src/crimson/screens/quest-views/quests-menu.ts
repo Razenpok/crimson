@@ -6,7 +6,7 @@ import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
@@ -39,6 +39,7 @@ import {
 } from '@crimson/screens/panels/base.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import type { GameState } from '@crimson/game/types.ts';
 import type { QuestMenuLayout } from './shared.ts';
 import {
   QUEST_MENU_BASE_X,
@@ -98,46 +99,7 @@ const FADE_TO_GAME_ACTIONS = new Set([
   'start_quest',
 ]);
 
-export interface QuestsMenuStatus {
-  questUnlockIndex: number;
-  questUnlockIndexFull: number;
-  questPlayCount(index: number): number;
-  incrementQuestPlayCount(index: number): void;
-  modePlayCountForMode(mode: GameMode): number;
-  modePlayOther: number;
-  gameSequenceId: number;
-  unknownTail: Uint8Array;
-  saveIfDirty(): void;
-}
-
-export interface QuestsMenuState {
-  config: {
-    display: {
-      width: number;
-      height: number;
-      fxDetail: [boolean, boolean, boolean];
-    };
-    gameplay: {
-      mode: number;
-      hardcore: boolean;
-      questLevel: QuestLevel | null;
-    };
-    save(): void;
-  };
-  audio: AudioState | null;
-  resources: RuntimeResources | null;
-  menuSignLocked: boolean;
-  menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
-  menuGroundCamera: Vec2 | null;
-  screenFadeAlpha: number;
-  screenFadeRamp: boolean;
-  pauseBackground: { drawPauseBackground(): void } | null;
-  demoEnabled: boolean;
-  debugEnabled: boolean;
-  pendingQuestLevel: QuestLevel | null;
-  status: QuestsMenuStatus;
-  console: { log: { log(msg: string): void } };
-}
+export type QuestsMenuState = GameState;
 
 export class QuestsMenuView {
   private state: QuestsMenuState;
