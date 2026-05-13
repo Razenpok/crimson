@@ -100,7 +100,7 @@ export class OptionsMenuView extends PanelMenuView {
     const sliderPos = layout.sliderPos;
     const scale = layout.scale;
 
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const rectOn = getTexture(resources, TextureId.UI_RECT_ON);
     const rectOff = getTexture(resources, TextureId.UI_RECT_OFF);
 
@@ -167,10 +167,6 @@ export class OptionsMenuView extends PanelMenuView {
       }
     }
     super._beginCloseTransition(action);
-  }
-
-  private _requireResources(): RuntimeResources {
-    return requireRuntimeResources(this.state);
   }
 
   private _syncFromConfig(): void {
