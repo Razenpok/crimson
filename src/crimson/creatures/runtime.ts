@@ -1199,6 +1199,9 @@ export class CreaturePool {
         }
       }
 
+      // Decompile parity (`creature_update_all`, 0x00426220): compute
+      // creature->target-player distance once, then reuse that value for
+      // ranged attacks and all contact/eat checks in this creature tick.
       const targetDistSq = Vec2.distanceSq(creature.pos, player.pos);
       const targetDist = Math.sqrt(targetDistSq);
 
@@ -1208,6 +1211,8 @@ export class CreaturePool {
           (CreatureFlags.RANGED_ATTACK_SHOCK |
             CreatureFlags.RANGED_ATTACK_VARIANT)) !== 0
       ) {
+        // Ported from creature_update_all (see `analysis/ghidra/raw/crimsonland.exe_decompiled.c`
+        // around the 0x004276xx ranged-fire branch).
         if (targetDist > 64.0 && creature.attackCooldown <= 0.0) {
           if ((int(creature.flags)) & CreatureFlags.RANGED_ATTACK_SHOCK) {
             const typeId = ProjectileTemplateId.PLASMA_RIFLE;
@@ -1227,7 +1232,7 @@ export class CreaturePool {
             ((int(creature.flags)) & CreatureFlags.RANGED_ATTACK_VARIANT) !== 0 &&
             creature.attackCooldown <= 0.0
           ) {
-            const projectileType = creature.orbitRadius as ProjectileTemplateId;
+            const projectileType = creature.orbitRadius;
             state.projectiles.spawn({
               pos: creature.pos,
               angle: creature.heading,
@@ -1404,7 +1409,7 @@ export class CreaturePool {
     entry.forceTarget = 0;
 
     entry.flags = init.flags || (0 as CreatureFlags);
-    entry.aiMode = init.aiMode as CreatureAiMode;
+    entry.aiMode = init.aiMode;
 
     let hp = init.health ?? 0.0;
     if (hp <= 0.0) hp = 1.0;
@@ -1496,9 +1501,11 @@ export class CreaturePool {
       return;
     }
 
+    // lifecycle_stage just crossed <= 0: bake a persistent corpse decal into the ground.
     if (violenceDisabled === 0 && fxQueueRotated !== null) {
       const corpseSize = Math.max(1.0, creature.size);
-      const corpseTypeId = longStrip ? (creature.typeId as number) : 7;
+      // Native uses a special fallback corpse id for ping-pong strip creatures.
+      const corpseTypeId = longStrip ? int(creature.typeId) : 7;
       const ok = fxQueueRotated.add({
         topLeft: new Vec2(creature.pos.x - corpseSize * 0.5, creature.pos.y - corpseSize * 0.5),
         rgba: creature.tint,
