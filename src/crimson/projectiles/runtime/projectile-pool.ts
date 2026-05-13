@@ -17,8 +17,8 @@ import {
   MAIN_PROJECTILE_POOL_SIZE,
   type CreatureDamageApplier,
   Projectile,
-  type ProjectileCollisionProfile,
-  type ProjectileHit,
+  ProjectileCollisionProfile,
+  ProjectileHit,
   ProjectileTemplateId,
 } from '@crimson/projectiles/types.ts';
 import {
@@ -86,19 +86,19 @@ export class PrimaryStepCtx {
   }
 }
 
-const _DEFAULT_PROJECTILE_COLLISION_PROFILE: ProjectileCollisionProfile = {
+const _DEFAULT_PROJECTILE_COLLISION_PROFILE = new ProjectileCollisionProfile({
   hitRadius: 1.0,
   initialDamagePool: 1.0,
-};
+});
 
 const _PROJECTILE_COLLISION_PROFILE_BY_TYPE_ID: Map<ProjectileTemplateId, ProjectileCollisionProfile> = new Map([
-  [ProjectileTemplateId.ION_MINIGUN, { hitRadius: 3.0, initialDamagePool: 1.0 }],
-  [ProjectileTemplateId.ION_RIFLE, { hitRadius: 5.0, initialDamagePool: 1.0 }],
-  [ProjectileTemplateId.ION_CANNON, { hitRadius: 10.0, initialDamagePool: 1.0 }],
-  [ProjectileTemplateId.PLASMA_CANNON, { hitRadius: 10.0, initialDamagePool: 1.0 }],
-  [ProjectileTemplateId.GAUSS_GUN, { hitRadius: 1.0, initialDamagePool: 300.0 }],
-  [ProjectileTemplateId.FIRE_BULLETS, { hitRadius: 1.0, initialDamagePool: 240.0 }],
-  [ProjectileTemplateId.BLADE_GUN, { hitRadius: 1.0, initialDamagePool: 50.0 }],
+  [ProjectileTemplateId.ION_MINIGUN, new ProjectileCollisionProfile({ hitRadius: 3.0, initialDamagePool: 1.0 })],
+  [ProjectileTemplateId.ION_RIFLE, new ProjectileCollisionProfile({ hitRadius: 5.0, initialDamagePool: 1.0 })],
+  [ProjectileTemplateId.ION_CANNON, new ProjectileCollisionProfile({ hitRadius: 10.0, initialDamagePool: 1.0 })],
+  [ProjectileTemplateId.PLASMA_CANNON, new ProjectileCollisionProfile({ hitRadius: 10.0, initialDamagePool: 1.0 })],
+  [ProjectileTemplateId.GAUSS_GUN, new ProjectileCollisionProfile({ hitRadius: 1.0, initialDamagePool: 300.0 })],
+  [ProjectileTemplateId.FIRE_BULLETS, new ProjectileCollisionProfile({ hitRadius: 1.0, initialDamagePool: 240.0 })],
+  [ProjectileTemplateId.BLADE_GUN, new ProjectileCollisionProfile({ hitRadius: 1.0, initialDamagePool: 50.0 })],
 ]);
 
 export function projectileCollisionProfile(typeId: ProjectileTemplateId): ProjectileCollisionProfile {
@@ -476,12 +476,12 @@ export class ProjectilePool {
           }
 
           const target = creature.pos;
-          const hit: ProjectileHit = {
+          const hit = new ProjectileHit({
             typeId,
             origin: proj.origin,
             hit: proj.pos,
             target,
-          };
+          });
           hits.push(hit);
           const hitCtx = onHit !== null ? onHit(hit) : null;
 
@@ -695,12 +695,12 @@ export class ProjectilePool {
       }
 
       const creature = creatures[hitIdx];
-      hits.push({
+      hits.push(new ProjectileHit({
         typeId: proj.typeId,
         origin: proj.origin,
         hit: proj.pos,
         target: creature.pos,
-      });
+      }));
 
       creatures[hitIdx].hp -= damageByType.get(proj.typeId) ?? 10.0;
 

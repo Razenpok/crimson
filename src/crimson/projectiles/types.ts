@@ -48,45 +48,123 @@ export type CreatureDamageApplier = (
 
 export type SecondaryDetonationKillHandler = (creatureIndex: number) => void;
 
-export interface ProjectileCollisionProfile {
+export class ProjectileCollisionProfile {
   readonly hitRadius: number;
   readonly initialDamagePool: number;
+
+  constructor(opts: {
+    hitRadius: number;
+    initialDamagePool: number;
+  }) {
+    this.hitRadius = opts.hitRadius;
+    this.initialDamagePool = opts.initialDamagePool;
+  }
 }
 
-export interface ProjectileHit {
+export class ProjectileHit {
   readonly typeId: ProjectileTemplateId;
   readonly origin: Vec2;
   readonly hit: Vec2;
   readonly target: Vec2;
+
+  constructor(opts: {
+    typeId: ProjectileTemplateId;
+    origin: Vec2;
+    hit: Vec2;
+    target: Vec2;
+  }) {
+    this.typeId = opts.typeId;
+    this.origin = opts.origin;
+    this.hit = opts.hit;
+    this.target = opts.target;
+  }
 }
 
 export class Projectile {
-  active = false;
-  angle = 0.0;
-  pos = new Vec2();
-  origin = new Vec2();
-  vel = new Vec2();
-  typeId: ProjectileTemplateId = ProjectileTemplateId.PISTOL;
-  lifeTimer = 0.0;
-  reserved = 0.0;
-  speedScale = 1.0;
-  damagePool = 1.0;
-  hitRadius = 1.0;
-  travelBudget = 0.0;
-  owner: OwnerRef = OwnerRef.none();
-  hitsPlayers = false;
+  active: boolean;
+  angle: number;
+  pos: Vec2;
+  origin: Vec2;
+  vel: Vec2;
+  typeId: ProjectileTemplateId;
+  lifeTimer: number;
+  reserved: number;
+  speedScale: number;
+  damagePool: number;
+  hitRadius: number;
+  travelBudget: number;
+  owner: OwnerRef;
+  hitsPlayers: boolean;
+
+  constructor(opts: {
+    active?: boolean;
+    angle?: number;
+    pos?: Vec2;
+    origin?: Vec2;
+    vel?: Vec2;
+    typeId?: ProjectileTemplateId;
+    lifeTimer?: number;
+    reserved?: number;
+    speedScale?: number;
+    damagePool?: number;
+    hitRadius?: number;
+    travelBudget?: number;
+    owner?: OwnerRef;
+    hitsPlayers?: boolean;
+  } = {}) {
+    this.active = opts.active ?? false;
+    this.angle = opts.angle ?? 0.0;
+    this.pos = opts.pos ?? new Vec2();
+    this.origin = opts.origin ?? new Vec2();
+    this.vel = opts.vel ?? new Vec2();
+    this.typeId = opts.typeId ?? ProjectileTemplateId.PISTOL;
+    this.lifeTimer = opts.lifeTimer ?? 0.0;
+    this.reserved = opts.reserved ?? 0.0;
+    this.speedScale = opts.speedScale ?? 1.0;
+    this.damagePool = opts.damagePool ?? 1.0;
+    this.hitRadius = opts.hitRadius ?? 1.0;
+    this.travelBudget = opts.travelBudget ?? 0.0;
+    this.owner = opts.owner ?? OwnerRef.none();
+    this.hitsPlayers = opts.hitsPlayers ?? false;
+  }
 }
 
 export class SecondaryProjectile {
-  active = false;
-  angle = 0.0;
-  speed = 0.0;
-  pos = new Vec2();
-  vel = new Vec2();
-  detonationT = 0.0;
-  detonationScale = 1.0;
-  typeId: SecondaryProjectileTypeId = SecondaryProjectileTypeId.NONE;
-  owner: OwnerRef = OwnerRef.fromLocalPlayer(0);
-  trailTimer = 0.0;
-  targetId = -1;
+  active: boolean;
+  angle: number;
+  speed: number;
+  pos: Vec2;
+  vel: Vec2;
+  detonationT: number;
+  detonationScale: number;
+  typeId: SecondaryProjectileTypeId;
+  owner: OwnerRef;
+  trailTimer: number;
+  targetId: number;
+
+  constructor(opts: {
+    active?: boolean;
+    angle?: number;
+    speed?: number;
+    pos?: Vec2;
+    vel?: Vec2;
+    detonationT?: number;
+    detonationScale?: number;
+    typeId?: SecondaryProjectileTypeId;
+    owner?: OwnerRef;
+    trailTimer?: number;
+    targetId?: number;
+  } = {}) {
+    this.active = opts.active ?? false;
+    this.angle = opts.angle ?? 0.0;
+    this.speed = opts.speed ?? 0.0;
+    this.pos = opts.pos ?? new Vec2();
+    this.vel = opts.vel ?? new Vec2();
+    this.detonationT = opts.detonationT ?? 0.0;
+    this.detonationScale = opts.detonationScale ?? 1.0;
+    this.typeId = opts.typeId ?? SecondaryProjectileTypeId.NONE;
+    this.owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
+    this.trailTimer = opts.trailTimer ?? 0.0;
+    this.targetId = opts.targetId ?? -1;
+  }
 }
