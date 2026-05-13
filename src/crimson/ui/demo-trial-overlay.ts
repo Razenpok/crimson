@@ -2,6 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
 import { clamp } from '@grim/math.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
@@ -107,18 +108,17 @@ export class DemoTrialOverlayUi {
 
   update(
     dtMs: number,
-    screenW: number,
-    screenH: number,
-    mouseX: number,
-    mouseY: number,
-    click: boolean,
   ): string | null {
     const dt = Math.max(0, int(dtMs));
     this._cursorPulseTime += dt * 0.001 * 1.1;
+    const [mouseX, mouseY] = InputState.mousePosition();
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
 
     const mx = clamp(mouseX, 0.0, Math.max(0.0, screenW - 1.0));
     const my = clamp(mouseY, 0.0, Math.max(0.0, screenH - 1.0));
     const mouse = { x: mx, y: my };
+    const click = InputState.wasMouseButtonPressed(0);
 
     const panelPos = _panelXY(screenW, screenH);
     const scale = 1.0;
@@ -152,34 +152,29 @@ export class DemoTrialOverlayUi {
 
   draw(
     info: DemoTrialOverlayInfo,
-    screenW: number,
-    screenH: number,
-    mouseX: number,
-    mouseY: number,
   ): void {
     if (!info.visible) return;
 
+    const screenW = wgl.getScreenWidth();
+    const screenH = wgl.getScreenHeight();
     const panelPos = _panelXY(screenW, screenH);
     const px = int(panelPos.x);
     const py = int(panelPos.y);
     const pw = 512;
     const ph = 256;
 
-    // Panel background
     wgl.drawRectangle(px, py, pw, ph, wgl.makeColor(18 / 255, 18 / 255, 22 / 255, 230 / 255));
 
-    // Panel border (4 thin rectangles)
     const bR = 1.0;
     const bG = 1.0;
     const bB = 1.0;
     const bA = 1.0;
     const borderColor = wgl.makeColor(bR, bG, bB, bA);
-    wgl.drawRectangle(px, py, pw, 1, borderColor);           // top
-    wgl.drawRectangle(px, py + ph - 1, pw, 1, borderColor);  // bottom
-    wgl.drawRectangle(px, py, 1, ph, borderColor);            // left
-    wgl.drawRectangle(px + pw - 1, py, 1, ph, borderColor);   // right
+    wgl.drawRectangle(px, py, pw, 1, borderColor);
+    wgl.drawRectangle(px, py + ph - 1, pw, 1, borderColor);
+    wgl.drawRectangle(px, py, 1, ph, borderColor);
+    wgl.drawRectangle(px + pw - 1, py, 1, ph, borderColor);
 
-    // Logo
     const logo = getTexture(this._resources, TextureId.CL_LOGO);
     const logoSrc = wgl.makeRectangle(0, 0, logo.width, logo.height);
     const logoDst = wgl.makeRectangle(
@@ -190,7 +185,6 @@ export class DemoTrialOverlayUi {
     );
     wgl.drawTexturePro(logo, logoSrc, logoDst, wgl.makeVector2(0, 0), 0, wgl.makeColor(1, 1, 1, 1));
 
-    // Header text
     const font = this._resources.smallFont;
     const headerColor = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
     drawSmallText(
@@ -200,7 +194,6 @@ export class DemoTrialOverlayUi {
       headerColor,
     );
 
-    // Body lines
     const bodyColor = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
     const bodyX = panelPos.x + 26.0;
     const bodyLines = _overlayBodyLines(info);
@@ -208,7 +201,6 @@ export class DemoTrialOverlayUi {
       drawSmallText(font, line, new Vec2(bodyX, panelPos.y + yOffset), bodyColor);
     }
 
-    // Buttons
     const scale = 1.0;
     const btnW = 145.0 * scale;
     const gap = 20.0;
@@ -226,9 +218,9 @@ export class DemoTrialOverlayUi {
       scale,
     });
 
-    // Cursor
-    const particlesTex = this._resources.textures.get(TextureId.PARTICLES) ?? null;
-    const cursorTex = this._resources.textures.get(TextureId.UI_CURSOR) ?? null;
+    const [mouseX, mouseY] = InputState.mousePosition();
+    const particlesTex = getTexture(this._resources, TextureId.PARTICLES);
+    const cursorTex = getTexture(this._resources, TextureId.UI_CURSOR);
     drawMenuCursor(
       particlesTex,
       cursorTex,

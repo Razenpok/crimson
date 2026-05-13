@@ -719,11 +719,7 @@ export class GameLoopView implements View {
 
     const overlayView = this._demoTrialOverlayView();
     if (overlayView === null) return false;
-    const [mouseX, mouseY] = InputState.mousePosition();
-    const click = InputState.wasMouseButtonPressed(0);
-    const screenW = wgl.getScreenWidth() || 1024;
-    const screenH = wgl.getScreenHeight() || 768;
-    const action = overlayView.update(dtMs, screenW, screenH, mouseX, mouseY, click);
+    const action = overlayView.update(dtMs);
     if (action === 'purchase') {
       this.state.quitRequested = true;
       try {
@@ -936,10 +932,7 @@ export class GameLoopView implements View {
     this._active.draw();
     const info = this._demoTrialInfo;
     if (info !== null && info.visible) {
-      const screenW = wgl.getScreenWidth() || 1024;
-      const screenH = wgl.getScreenHeight() || 768;
-      const [mouseX, mouseY] = InputState.mousePosition();
-      this._demoTrialOverlayView()?.draw(info, screenW, screenH, mouseX, mouseY);
+      this._demoTrialOverlayView()?.draw(info);
     }
     const res = this.state.resources;
     const smallFont = res !== null ? res.smallFont : null;
