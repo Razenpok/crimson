@@ -74,7 +74,8 @@ export class BonusPool {
   private _sentinel: BonusEntry;
   private _creatureDamageApplier: CreatureDamageApplier | null = null;
 
-  constructor(size: number = BONUS_POOL_SIZE) {
+  constructor(opts: { size?: number } = {}) {
+    const size = opts.size ?? BONUS_POOL_SIZE;
     this._entries = Array.from({ length: int(size) }, () => new BonusEntry());
     // Native bonus code uses a writable sentinel entry when allocation/spacing
     // checks fail. Some callers still mutate it, which affects RNG consumption.
@@ -258,7 +259,7 @@ export class BonusPool {
         }
 
         if (this.isSentinelEntry(entry)) return null;
-        this.spawnOnKillBurst(entry, state, detailPreset);
+        this.spawnOnKillBurst({ entry, state, detailPreset });
         return entry;
       }
     }
@@ -342,11 +343,12 @@ export class BonusPool {
     }
 
     if (this.isSentinelEntry(entry)) return null;
-    this.spawnOnKillBurst(entry, state, detailPreset);
+    this.spawnOnKillBurst({ entry, state, detailPreset });
     return entry;
   }
 
-  private spawnOnKillBurst(entry: BonusEntry, state: GameplayState, detailPreset: number): void {
+  private spawnOnKillBurst(opts: { entry: BonusEntry; state: GameplayState; detailPreset: number }): void {
+    const { entry, state, detailPreset } = opts;
     const rng = state.rng;
     const effects = state.effects;
     for (let i = 0; i < 16; i++) {
