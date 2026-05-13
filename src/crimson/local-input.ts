@@ -15,7 +15,7 @@ import {
 } from './input-codes.ts';
 import { PlayerInput } from './sim/input.ts';
 import type { PlayerState } from './sim/state-types.ts';
-import { AIM_KEYBOARD_TURN_RATE, AIM_JOYSTICK_TURN_RATE } from './aim-constants';
+import { _AIM_KEYBOARD_TURN_RATE, _AIM_JOYSTICK_TURN_RATE } from './aim-constants';
 
 // ---------------------------------------------------------------------------
 // Module-level constants
@@ -483,10 +483,10 @@ export class LocalInputInterpreter {
         moveModeType === MovementControlType.STATIC
       ) {
         if (inputCodeIsDown(aimRightKey, { playerIndex: idx })) {
-          heading = heading + dt * AIM_KEYBOARD_TURN_RATE;
+          heading = heading + dt * _AIM_KEYBOARD_TURN_RATE;
         }
         if (inputCodeIsDown(aimLeftKey, { playerIndex: idx })) {
-          heading = heading - dt * AIM_KEYBOARD_TURN_RATE;
+          heading = heading - dt * _AIM_KEYBOARD_TURN_RATE;
         }
         aim = aimPointFromHeading(player.pos, heading);
       }
@@ -511,10 +511,10 @@ export class LocalInputInterpreter {
       }
     } else if (aimScheme === AimScheme.JOYSTICK) {
       if (aimPovRightActive(idx, this._preserveBugs)) {
-        heading = heading + dt * AIM_JOYSTICK_TURN_RATE;
+        heading = heading + dt * _AIM_JOYSTICK_TURN_RATE;
       }
       if (aimPovLeftActive(idx, this._preserveBugs)) {
-        heading = heading - dt * AIM_JOYSTICK_TURN_RATE;
+        heading = heading - dt * _AIM_JOYSTICK_TURN_RATE;
       }
       aim = aimPointFromHeading(player.pos, heading);
     } else if (aimScheme === AimScheme.COMPUTER) {

@@ -45,7 +45,7 @@ import {
   weaponAssignPlayer,
   weaponEntry,
 } from './weapon-runtime/assign.ts';
-import { AIM_JOYSTICK_TURN_RATE, AIM_KEYBOARD_TURN_RATE } from './aim-constants';
+import { _AIM_JOYSTICK_TURN_RATE, _AIM_KEYBOARD_TURN_RATE } from './aim-constants';
 import { QuestLevel } from "@crimson/quests/level.js";
 
 // ---------------------------------------------------------------------------
@@ -546,19 +546,19 @@ function _playerUpdateAimByScheme(opts: {
     if (aimScheme === AimScheme.KEYBOARD) {
       if (movementMode === MovementControlType.RELATIVE || movementMode === MovementControlType.STATIC) {
         if (inputState.turnRightPressed) {
-          player.aimHeading = f32(player.aimHeading + f32(dt * AIM_KEYBOARD_TURN_RATE));
+          player.aimHeading = f32(player.aimHeading + f32(dt * _AIM_KEYBOARD_TURN_RATE));
         }
         if (inputState.turnLeftPressed) {
-          player.aimHeading = f32(player.aimHeading - f32(dt * AIM_KEYBOARD_TURN_RATE));
+          player.aimHeading = f32(player.aimHeading - f32(dt * _AIM_KEYBOARD_TURN_RATE));
         }
         targetAim = _playerAimPointFromHeading(player, player.aimHeading);
       }
     } else if (aimScheme === AimScheme.JOYSTICK) {
       if (inputState.turnRightPressed) {
-        player.aimHeading = f32(player.aimHeading + f32(dt * AIM_JOYSTICK_TURN_RATE));
+        player.aimHeading = f32(player.aimHeading + f32(dt * _AIM_JOYSTICK_TURN_RATE));
       }
       if (inputState.turnLeftPressed) {
-        player.aimHeading = f32(player.aimHeading - f32(dt * AIM_JOYSTICK_TURN_RATE));
+        player.aimHeading = f32(player.aimHeading - f32(dt * _AIM_JOYSTICK_TURN_RATE));
       }
       targetAim = _playerAimPointFromHeading(player, player.aimHeading);
     }
