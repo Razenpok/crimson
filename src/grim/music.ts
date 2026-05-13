@@ -2,6 +2,7 @@
 
 import { type CrandLike } from './rand.ts';
 import { fetchPaq } from './paq.ts';
+import { type ConsoleState } from './console.ts';
 
 const MUSIC_PAQ_NAME = 'music.paq';
 
@@ -153,22 +154,35 @@ export async function loadMusicTrack(
   audioCtx: AudioContext,
   assetsUrl: string,
   relPath: string,
-  opts?: { console?: unknown },
+  opts?: { console?: ConsoleState | null },
 ): Promise<[string, number] | null> {
   const normalized = relPath.replace(/\\/g, '/');
-  if (!state.ready || !state.enabled) return null;
+  const console = opts?.console ?? null;
+  if (!state.ready || !state.enabled) {
+    if (console !== null) {
+      console.log.log(`SFX Tune ${state.nextTrackId} <- '${normalized}' FAILED`);
+    }
+    return null;
+  }
 
   const key = _normalizeTrackKey(normalized);
   const existingId = state.trackIds.get(key);
-  if (existingId !== undefined) return [key, existingId];
+  if (existingId !== undefined) {
+    if (console !== null) {
+      console.log.log(`SFX Tune ${existingId} <- '${normalized}' ok`);
+    }
+    return [key, existingId];
+  }
 
   if (state.tracks.has(key)) {
     const trackId = state.nextTrackId++;
     state.trackIds.set(key, trackId);
+    if (console !== null) {
+      console.log.log(`SFX Tune ${trackId} <- '${normalized}' ok`);
+    }
     return [key, trackId];
   }
 
-  // Try loading from paq entries
   let data: Uint8Array | undefined;
   if (state.paqEntries) {
     data = state.paqEntries.get(normalized);
@@ -178,14 +192,30 @@ export async function loadMusicTrack(
     }
   }
 
-  if (!data) return null;
+  if (!data) {
+    if (console !== null) {
+      console.log.log(`SFX Tune ${state.nextTrackId} <- '${normalized}' FAILED`);
+    }
+    return null;
+  }
 
-  const buffer = await audioCtx.decodeAudioData(
-    data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer
-  );
+  let buffer: AudioBuffer;
+  try {
+    buffer = await audioCtx.decodeAudioData(
+      data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer,
+    );
+  } catch {
+    if (console !== null) {
+      console.log.log(`SFX Tune ${state.nextTrackId} <- '${normalized}' FAILED`);
+    }
+    return null;
+  }
   const trackId = state.nextTrackId++;
   state.tracks.set(key, buffer);
   state.trackIds.set(key, trackId);
+  if (console !== null) {
+    console.log.log(`SFX Tune ${trackId} <- '${normalized}' ok`);
+  }
   return [key, trackId];
 }
 
