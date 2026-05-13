@@ -45,40 +45,70 @@ class PlayGameModeEntry {
   gameMode: number | null;
   showCount: boolean;
 
-  constructor(
-    key: string,
-    label: string,
-    tooltip: string,
-    action: string,
-    gameMode: number | null = null,
-    showCount: boolean = false,
-  ) {
-    this.key = key;
-    this.label = label;
-    this.tooltip = tooltip;
-    this.action = action;
-    this.gameMode = gameMode;
-    this.showCount = showCount;
+  constructor(opts: {
+    key: string;
+    label: string;
+    tooltip: string;
+    action: string;
+    gameMode?: number | null;
+    showCount?: boolean;
+  }) {
+    this.key = opts.key;
+    this.label = opts.label;
+    this.tooltip = opts.tooltip;
+    this.action = opts.action;
+    this.gameMode = opts.gameMode ?? null;
+    this.showCount = opts.showCount ?? false;
   }
 }
 
-interface PlayGameContentLayout {
-  scale: number;
-  basePos: Vec2;
-  dropPos: Vec2;
+class PlayGameContentLayout {
+  readonly scale: number;
+  readonly basePos: Vec2;
+  readonly dropPos: Vec2;
+
+  constructor(opts: { scale: number; basePos: Vec2; dropPos: Vec2 }) {
+    this.scale = opts.scale;
+    this.basePos = opts.basePos;
+    this.dropPos = opts.dropPos;
+  }
 }
 
-interface PlayerCountWidgetLayout {
-  pos: Vec2;
-  width: number;
-  headerH: number;
-  rowH: number;
-  rowsY0: number;
-  fullH: number;
-  arrowPos: Vec2;
-  arrowSize: Vec2;
-  textPos: Vec2;
-  textScale: number;
+class PlayerCountWidgetLayout {
+  readonly pos: Vec2;
+  readonly width: number;
+  readonly headerH: number;
+  readonly rowH: number;
+  readonly rowsY0: number;
+  readonly fullH: number;
+  readonly arrowPos: Vec2;
+  readonly arrowSize: Vec2;
+  readonly textPos: Vec2;
+  readonly textScale: number;
+
+  constructor(opts: {
+    pos: Vec2;
+    width: number;
+    headerH: number;
+    rowH: number;
+    rowsY0: number;
+    fullH: number;
+    arrowPos: Vec2;
+    arrowSize: Vec2;
+    textPos: Vec2;
+    textScale: number;
+  }) {
+    this.pos = opts.pos;
+    this.width = opts.width;
+    this.headerH = opts.headerH;
+    this.rowH = opts.rowH;
+    this.rowsY0 = opts.rowsY0;
+    this.fullH = opts.fullH;
+    this.arrowPos = opts.arrowPos;
+    this.arrowSize = opts.arrowSize;
+    this.textPos = opts.textPos;
+    this.textScale = opts.textScale;
+  }
 }
 
 export class PlayGameMenuView extends PanelMenuView {
@@ -247,7 +277,11 @@ export class PlayGameMenuView extends PanelMenuView {
     const basePos = panelTopLeft.add(new Vec2(266.0 * panelScale, 50.0 * panelScale));
     const dropPos = basePos.add(new Vec2(80.0 * panelScale, 1.0 * panelScale));
 
-    return { scale: panelScale, basePos, dropPos };
+    return new PlayGameContentLayout({
+      scale: panelScale,
+      basePos,
+      dropPos,
+    });
   }
 
   private _questsTotalPlayed(): number {
@@ -298,47 +332,69 @@ export class PlayGameMenuView extends PanelMenuView {
 
     const entries: PlayGameModeEntry[] = [];
     if (showTutorial && mainTotal <= 0) {
-      entries.push(new PlayGameModeEntry(
-        'tutorial', 'Tutorial',
-        'Learn how to play Crimsonland.',
-        'start_tutorial', GameMode.TUTORIAL,
-      ));
+      entries.push(new PlayGameModeEntry({
+        key: 'tutorial',
+        label: 'Tutorial',
+        tooltip: 'Learn how to play Crimsonland.',
+        action: 'start_tutorial',
+        gameMode: GameMode.TUTORIAL,
+      }));
     }
 
     entries.push(
-      new PlayGameModeEntry('quests', ' Quests ',
-        'Unlock new weapons and perks in Quest mode.',
-        'open_quests', null, true),
-      new PlayGameModeEntry('rush', '  Rush  ',
-        'Face a rush of aliens in Rush mode.',
-        'start_rush', GameMode.RUSH, true),
-      new PlayGameModeEntry('survival', 'Survival',
-        'Gain perks and weapons and fight back.',
-        'start_survival', GameMode.SURVIVAL, true),
+      new PlayGameModeEntry({
+        key: 'quests',
+        label: ' Quests ',
+        tooltip: 'Unlock new weapons and perks in Quest mode.',
+        action: 'open_quests',
+        showCount: true,
+      }),
+      new PlayGameModeEntry({
+        key: 'rush',
+        label: '  Rush  ',
+        tooltip: 'Face a rush of aliens in Rush mode.',
+        action: 'start_rush',
+        gameMode: GameMode.RUSH,
+        showCount: true,
+      }),
+      new PlayGameModeEntry({
+        key: 'survival',
+        label: 'Survival',
+        tooltip: 'Gain perks and weapons and fight back.',
+        action: 'start_survival',
+        gameMode: GameMode.SURVIVAL,
+        showCount: true,
+      }),
     );
 
     if (hasTypo) {
-      entries.push(new PlayGameModeEntry(
-        'typo', "Typ'o'Shooter",
-        "Use your typing skills as the weapon to lay\nthem down.",
-        'start_typo', GameMode.TYPO, true,
-      ));
+      entries.push(new PlayGameModeEntry({
+        key: 'typo',
+        label: "Typ'o'Shooter",
+        tooltip: "Use your typing skills as the weapon to lay\nthem down.",
+        action: 'start_typo',
+        gameMode: GameMode.TYPO,
+        showCount: true,
+      }));
     }
 
     if (showTutorial && mainTotal > 0) {
-      entries.push(new PlayGameModeEntry(
-        'tutorial', 'Tutorial',
-        'Learn how to play Crimsonland.',
-        'start_tutorial', GameMode.TUTORIAL,
-      ));
+      entries.push(new PlayGameModeEntry({
+        key: 'tutorial',
+        label: 'Tutorial',
+        tooltip: 'Learn how to play Crimsonland.',
+        action: 'start_tutorial',
+        gameMode: GameMode.TUTORIAL,
+      }));
     }
 
     if (this._lanLockstepEnabled()) {
-      entries.push(new PlayGameModeEntry(
-        'lan', ' Network ',
-        'Host or join a rollback-first network session.',
-        'open_lan_session',
-      ));
+      entries.push(new PlayGameModeEntry({
+        key: 'lan',
+        label: ' Network ',
+        tooltip: 'Host or join a rollback-first network session.',
+        action: 'open_lan_session',
+      }));
     }
 
     // The y after the last row is used as a tooltip anchor in `sub_44ed80`.
@@ -419,7 +475,7 @@ export class PlayGameMenuView extends PanelMenuView {
     const rowH = 16.0 * scale;
     const fullH = (PlayGameMenuView._PLAYER_COUNT_LABELS.length * 16.0 + 24.0) * scale;
     const arrow = 16.0 * scale;
-    return {
+    return new PlayerCountWidgetLayout({
       pos,
       width,
       headerH,
@@ -430,7 +486,7 @@ export class PlayGameMenuView extends PanelMenuView {
       arrowSize: new Vec2(arrow, arrow),
       textPos: pos.add(new Vec2(4.0 * scale, 1.0 * scale)),
       textScale,
-    };
+    });
   }
 
   private _updatePlayerCount(pos: Vec2, scale: number, opts: { font: SmallFontData }): boolean {
