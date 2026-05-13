@@ -6,6 +6,7 @@ import { type SfxId } from './sfx-map.ts';
 import { type MusicState, initMusicState, loadMusicTracks, playMusic, stopMusic, triggerGameTune, updateMusic, setMusicVolume, shutdownMusic } from './music.ts';
 import { type SfxState, initSfxState, loadSfxIndex, playSfx, setSfxVolume, shutdownSfx } from './sfx.ts';
 import { resolveAssetsUrl } from './assets.ts';
+import { type ConsoleState } from './console.ts';
 
 export interface AudioState {
   ready: boolean;
@@ -14,7 +15,7 @@ export interface AudioState {
   sfx: SfxState;
 }
 
-export async function initAudioState(config: CrimsonConfig, assetsUrl: string): Promise<AudioState> {
+export async function initAudioState(config: CrimsonConfig, assetsUrl: string, console?: ConsoleState | null): Promise<AudioState> {
   // Resolve to local or CDN fallback (cached after first call)
   assetsUrl = await resolveAssetsUrl(assetsUrl);
 
@@ -27,6 +28,8 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string): 
   const sfxEnabled = !soundDisabled;
 
   if (!musicEnabled && !sfxEnabled) {
+    console?.log.log('audio: disabled (music + sfx)');
+    console?.log.flush();
     return {
       ready: false,
       audioContext: null,
@@ -39,6 +42,8 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string): 
   try {
     audioContext = new AudioContext();
   } catch {
+    console?.log.log('audio: device init failed');
+    console?.log.flush();
     return {
       ready: false,
       audioContext: null,

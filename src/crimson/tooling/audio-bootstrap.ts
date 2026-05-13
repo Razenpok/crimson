@@ -51,7 +51,7 @@ export async function initViewAudio(assetsDir: string, opts: { seed?: number } =
   }
 
   try {
-    const audio = await initAudioState(config, assetsDir);
+    const audio = await initAudioState(config, assetsDir, console);
     return new ViewAudioBootstrap(config, console, audio, audioRng);
   } catch {
     return new ViewAudioBootstrap(config, console, null, audioRng);
