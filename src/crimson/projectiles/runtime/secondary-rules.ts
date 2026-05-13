@@ -4,10 +4,6 @@ import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 
 export class DetonationRule {
   readonly tag = 'detonation';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export class RocketRule {
@@ -51,7 +47,6 @@ export class RocketRule {
     this.burstScale = opts.burstScale ?? 0.4;
     this.burstMinDetail = opts.burstMinDetail ?? 2;
     this.freezeShardTargetPos = opts.freezeShardTargetPos ?? false;
-    Object.freeze(this);
   }
 }
 
@@ -90,7 +85,6 @@ export class HomingRocketRule {
     this.extraDecals = opts.extraDecals ?? 10;
     this.extraRadius = opts.extraRadius ?? 64.0;
     this.freezeShardTargetPos = opts.freezeShardTargetPos ?? false;
-    Object.freeze(this);
   }
 }
 
@@ -129,7 +123,6 @@ export class RocketMinigunRule {
     this.extraDecals = opts.extraDecals ?? 3;
     this.extraRadius = opts.extraRadius ?? 44.0;
     this.freezeShardTargetPos = opts.freezeShardTargetPos ?? true;
-    Object.freeze(this);
   }
 }
 
