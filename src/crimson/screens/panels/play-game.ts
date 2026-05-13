@@ -87,6 +87,8 @@ export class PlayGameMenuView extends PanelMenuView {
 
   private _playerListOpen: boolean = false;
   private _dirty: boolean = false;
+
+  // Hover fade timers for tooltips (0..1000ms-ish; original uses ~0.0009 alpha scale).
   private _tooltipMs: Map<string, number> = new Map();
   private _modeButtons: Map<string, UiButtonState> = new Map();
 
