@@ -31,11 +31,12 @@ export interface CreatureAIStateLike {
 }
 
 export class CreatureAIUpdate {
-  constructor(
-    public readonly moveScale: number,
-    public readonly selfDamage: number | null = null,
-  ) {
-    Object.freeze(this);
+  readonly moveScale: number;
+  readonly selfDamage: number | null;
+
+  constructor(opts: { moveScale: number; selfDamage?: number | null }) {
+    this.moveScale = opts.moveScale;
+    this.selfDamage = opts.selfDamage ?? null;
   }
 }
 
@@ -89,11 +90,9 @@ function _distanceF32(a: Vec2, b: Vec2): number {
 }
 
 function _orbitTargetF32(
-  playerPos: Vec2,
-  orbitPhase: number,
-  dist: number,
-  scale: number,
+  opts: { playerPos: Vec2; orbitPhase: number; dist: number; scale: number },
 ): Vec2 {
+  const { playerPos, orbitPhase, dist, scale } = opts;
   const orbitDist = f32(f32(dist) * f32(scale));
   const phase = f32(orbitPhase);
   const px = f32(playerPos.x);
@@ -106,7 +105,8 @@ function _orbitTargetF32(
   );
 }
 
-function _linkTargetF32(linkPos: Vec2, offset: Vec2): Vec2 {
+function _linkTargetF32(opts: { linkPos: Vec2; offset: Vec2 }): Vec2 {
+  const { linkPos, offset } = opts;
   return new Vec2(
     f32(linkPos.x + offset.x),
     f32(linkPos.y + offset.y),
@@ -137,27 +137,42 @@ export function creatureAiUpdateTarget(
     if (distToPlayer > 800.0) {
       creature.target = f32Vec2(opts.playerPos);
     } else {
-      creature.target = _orbitTargetF32(opts.playerPos, orbitPhase, distToPlayer, 0.85);
+      creature.target = _orbitTargetF32({
+        playerPos: opts.playerPos,
+        orbitPhase,
+        dist: distToPlayer,
+        scale: 0.85,
+      });
     }
   } else if (aiMode === CreatureAiMode.ORBIT_PLAYER_WIDE) {
-    creature.target = _orbitTargetF32(opts.playerPos, orbitPhase, distToPlayer, 0.9);
+    creature.target = _orbitTargetF32({
+      playerPos: opts.playerPos,
+      orbitPhase,
+      dist: distToPlayer,
+      scale: 0.9,
+    });
   } else if (aiMode === CreatureAiMode.ORBIT_PLAYER_TIGHT) {
     if (distToPlayer > 800.0) {
       creature.target = f32Vec2(opts.playerPos);
     } else {
-      creature.target = _orbitTargetF32(opts.playerPos, orbitPhase, distToPlayer, 0.55);
+      creature.target = _orbitTargetF32({
+        playerPos: opts.playerPos,
+        orbitPhase,
+        dist: distToPlayer,
+        scale: 0.55,
+      });
     }
   } else if (aiMode === CreatureAiMode.FOLLOW_LINK) {
     const link = resolveLiveLink(opts.creatures, creature.linkIndex);
     if (link !== null) {
-      creature.target = _linkTargetF32(link.pos, creature.targetOffset ?? new Vec2());
+      creature.target = _linkTargetF32({ linkPos: link.pos, offset: creature.targetOffset ?? new Vec2() });
     } else {
       creature.aiMode = CreatureAiMode.ORBIT_PLAYER;
     }
   } else if (aiMode === CreatureAiMode.FOLLOW_LINK_TETHERED) {
     const link = resolveLiveLink(opts.creatures, creature.linkIndex);
     if (link !== null) {
-      creature.target = _linkTargetF32(link.pos, creature.targetOffset ?? new Vec2());
+      creature.target = _linkTargetF32({ linkPos: link.pos, offset: creature.targetOffset ?? new Vec2() });
       const distToTarget = _distanceF32(creature.pos, creature.target);
       if (distToTarget <= 64.0) {
         moveScale = f32(distToTarget * 0.015625);
@@ -177,7 +192,12 @@ export function creatureAiUpdateTarget(
     } else if (distToPlayer > 800.0) {
       creature.target = f32Vec2(opts.playerPos);
     } else {
-      creature.target = _orbitTargetF32(opts.playerPos, orbitPhase, distToPlayer, 0.85);
+      creature.target = _orbitTargetF32({
+        playerPos: opts.playerPos,
+        orbitPhase,
+        dist: distToPlayer,
+        scale: 0.85,
+      });
     }
   } else if (aiMode === CreatureAiMode.HOLD_TIMER) {
     if ((creature.flags & CreatureFlags.AI7_LINK_TIMER) && creature.linkIndex > 0) {
@@ -215,5 +235,5 @@ export function creatureAiUpdateTarget(
   const dx = f32(creature.target.x - creature.pos.x);
   const dy = f32(creature.target.y - creature.pos.y);
   creature.targetHeading = headingFromDeltaF32({ dx, dy });
-  return new CreatureAIUpdate(f32(moveScale), selfDamage);
+  return new CreatureAIUpdate({ moveScale: f32(moveScale), selfDamage });
 }
