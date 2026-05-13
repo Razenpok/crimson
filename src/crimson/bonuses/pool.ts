@@ -44,9 +44,9 @@ function bonusEntryIsEmpty(entry: BonusEntry): boolean {
   );
 }
 
-// Keep native amount-domain behavior: any raw bonus amount that happens to
-// match a weapon id can trip suppression checks under `--preserve-bugs`.
 function weaponIdFromNativeAmount(amount: number): WeaponId | null {
+  // Keep native amount-domain behavior: any raw bonus amount that happens to
+  // match a weapon id can trip suppression checks under `--preserve-bugs`.
   const weaponId = int(amount);
   if (!WEAPON_BY_ID.has(weaponId as WeaponId)) return null;
   return weaponId as WeaponId;
@@ -453,7 +453,7 @@ export function bonusFindAimHoverEntry(
   return null;
 }
 
-/** Return the classic label text for a bonus entry. */
+/** Return the classic label text for a bonus entry (`bonus_label_for_entry`). */
 export function bonusLabelForEntry(entry: BonusEntry, opts: { preserveBugs?: boolean } = {}): string {
   const preserveBugs = opts.preserveBugs ?? false;
   const bonusId = entry.bonusId;
