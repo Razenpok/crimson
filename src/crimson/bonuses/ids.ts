@@ -146,7 +146,6 @@ export const BONUS_TABLE: readonly BonusMeta[] = [
     notes: '`bonus_apply` updates `player_speed_bonus_timer` (`DAT_00490bc4`).',
   },
   {
-    // Native stored amount is 4; the pickup adds a fixed 5 seconds (scaled by Bonus Economist).
     bonusId: BonusId.FIRE_BULLETS,
     name: 'Fire Bullets',
     description: 'For few seconds -- make them count.',
