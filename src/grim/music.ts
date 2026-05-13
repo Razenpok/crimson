@@ -152,6 +152,17 @@ function _normalizeTrackKey(relPath: string): string {
   return name;
 }
 
+async function _ensureMusicEntries(state: MusicState, assetsUrl: string): Promise<Map<string, Uint8Array> | null> {
+  if (state.paqEntries !== null) return state.paqEntries;
+  try {
+    const entries = await fetchPaq(`${assetsUrl}/${MUSIC_PAQ_NAME}`);
+    state.paqEntries = entries;
+    return entries;
+  } catch {
+    return null;
+  }
+}
+
 export async function loadMusicTrack(
   state: MusicState,
   audioCtx: AudioContext,
@@ -187,11 +198,19 @@ export async function loadMusicTrack(
   }
 
   let data: Uint8Array | undefined;
-  if (state.paqEntries) {
-    data = state.paqEntries.get(normalized);
+  try {
+    const response = await fetch(`${assetsUrl}/${normalized}`);
+    if (response.ok) {
+      data = new Uint8Array(await response.arrayBuffer());
+    }
+  } catch {
+  }
+  if (!data) {
+    const entries = await _ensureMusicEntries(state, assetsUrl);
+    data = entries?.get(normalized);
     if (!data) {
       const baseName = normalized.slice(normalized.lastIndexOf('/') + 1);
-      data = state.paqEntries.get(baseName);
+      data = entries?.get(baseName);
     }
   }
 
