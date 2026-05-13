@@ -1,11 +1,13 @@
 // Port of crimson/logging.py
 
-const LEVELS: Record<string, number> = {
+const _LEVELS: Record<string, number> = {
   debug: 10,
   info: 20,
   warning: 30,
   error: 40,
 };
+
+let _structlogLoggerFactoryConfigured = false;
 
 export class ValueError extends Error {
   constructor(message: string) {
@@ -19,9 +21,9 @@ export function resolveLogLevel(value: string | number): number {
     return int(value);
   }
   const levelName = String(value).trim().toLowerCase();
-  const resolved = LEVELS[levelName];
+  const resolved = _LEVELS[levelName];
   if (resolved === undefined) {
-    const supported = Object.keys(LEVELS).sort().join(', ');
+    const supported = Object.keys(_LEVELS).sort().join(', ');
     throw new ValueError(`unsupported log level ${_repr(value)}; expected one of: ${supported}`);
   }
   return int(resolved);
@@ -107,12 +109,16 @@ function _configureStructlog(opts: { level: number }): string[] {
     'structlog.stdlib.add_log_level',
     'structlog.processors.TimeStamper(fmt="iso", utc=True)',
   ];
+  _structlogLoggerFactoryConfigured = true;
   void int(opts.level);
   return processors;
 }
 
 export function ensureStructlogStdlibDefaults(): void {
-  _configureStructlog({ level: LEVELS.info });
+  if (_structlogLoggerFactoryConfigured) {
+    return;
+  }
+  _configureStructlog({ level: _LEVELS.info });
 }
 
 export function configureComponentLogging(opts: {
@@ -129,7 +135,7 @@ export function configureComponentLogging(opts: {
     component: String(opts.component),
     logger_name: String(opts.loggerName),
     log_file: resolvedLogFile,
-    level: Object.entries(LEVELS).find(([, value]) => value === levelNo)?.[0] ?? String(levelNo),
+    level: Object.entries(_LEVELS).find(([, value]) => value === levelNo)?.[0] ?? String(levelNo),
   });
   return resolvedLogFile;
 }
