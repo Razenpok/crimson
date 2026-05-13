@@ -52,6 +52,18 @@ const KEY_RIGHT_CONTROL = 345;
 
 export type CommandHandler = (args: string[]) => void;
 
+function parseConsoleFloat(value: string): number {
+  const stripped = value.trim();
+  if (stripped.length === 0) return 0.0;
+  if (/^[+-]?(?:nan|inf(?:inity)?)$/i.test(stripped)) {
+    return Number(stripped.replace(/inf(?:inity)?/i, 'Infinity'));
+  }
+  if (!/^[+-]?(?:(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)$/.test(stripped)) {
+    return 0.0;
+  }
+  return Number(stripped);
+}
+
 export class ConsoleLog {
   lines: string[] = [];
 
@@ -104,7 +116,7 @@ export class ConsoleState {
   }
 
   registerCvar(name: string, value: string): void {
-    this.cvars.set(name, { name, value, valueF: parseFloat(value) || 0.0 });
+    this.cvars.set(name, { name, value, valueF: parseConsoleFloat(value) });
   }
 
   setOpen(open: boolean): void {
@@ -131,7 +143,7 @@ export class ConsoleState {
     if (cvar) {
       if (args.length > 0) {
         cvar.value = args.join(' ');
-        cvar.valueF = parseFloat(cvar.value) || 0.0;
+        cvar.valueF = parseConsoleFloat(cvar.value);
         this.log.log(`"${cvar.name}" set to "${cvar.value}" (${cvar.valueF.toFixed(6)})`);
       } else {
         this.log.log(`"${cvar.name}" is "${cvar.value}" (${cvar.valueF.toFixed(6)})`);
