@@ -20,6 +20,10 @@ export function tickQuestSpawnTimeline(
   noCreaturesTimerMs: number;
   spawnCalls: readonly SpawnTemplateCall[];
 } {
+  // Advance quest spawn-table firing (pure model of `quest_spawn_timeline_update` / 0x00434250).
+  //
+  // Returns:
+  //   (updated_entries, creatures_none_active, no_creatures_timer_ms, spawn_calls)
   const timelineMs = f32(questSpawnTimelineMs);
   const dtMs = f32(frameDtMs);
 
@@ -58,7 +62,7 @@ export function tickQuestSpawnTimeline(
     const basePos = entry.pos;
     const offscreenX = basePos.x < 0.0 || f32(opts.terrainWidth) < basePos.x;
 
-    for (let spawnIdx = 0; spawnIdx < entry.count; spawnIdx++) {
+    for (let spawnIdx = 0; spawnIdx < int(entry.count); spawnIdx++) {
       const magnitude = f32(spawnIdx * 0x28);
       const offset = (spawnIdx & 1) === 0 ? magnitude : -magnitude;
       let pos: Vec2;
@@ -75,6 +79,7 @@ export function tickQuestSpawnTimeline(
     }
   }
 
+  // After spawning, the original forces the "none active" flag off.
   creaturesNoneActive = false;
 
   return {
@@ -86,6 +91,7 @@ export function tickQuestSpawnTimeline(
 }
 
 export function questSpawnTableEmpty(entries: readonly SpawnEntry[]): boolean {
+  // Return True when all quest spawn entries are exhausted (count <= 0).
   return entries.every(entry => entry.count <= 0);
 }
 
@@ -105,6 +111,15 @@ export function tickQuestModeSpawns(
   noCreaturesTimerMs: number;
   spawnCalls: readonly SpawnTemplateCall[];
 } {
+  // Advance quest-mode spawning (spawn timeline + table firing).
+  //
+  // Modeled after the spawning portion of `quest_mode_update` (0x004070e0), which:
+  //   - Advances `quest_spawn_timeline` unless the quest is idle-complete (no creatures active and
+  //     the spawn table is empty).
+  //   - Calls `quest_spawn_timeline_update` to fire spawn entries.
+  //
+  // Returns:
+  //   (updated_entries, quest_spawn_timeline_ms, creatures_none_active, no_creatures_timer_ms, spawn_calls)
   let timelineMs = f32(questSpawnTimelineMs);
   const dtMs = f32(frameDtMs);
 
