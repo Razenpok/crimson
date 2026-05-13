@@ -3,12 +3,19 @@
 import { Vec2 } from '@grim/geom.ts';
 import { RGBA } from '@grim/color.ts';
 import { clamp } from '@grim/math.ts';
-import { CreatureTypeId } from '@crimson/creatures/spawn-ids.ts';
+import { CreatureTypeId } from '@crimson/creatures/spawn.ts';
 
-export interface TypoSpawnCall {
+export class TypoSpawnCall {
   readonly pos: Vec2;
   readonly typeId: CreatureTypeId;
   readonly tintRgba: RGBA;
+
+  constructor(opts: { pos: Vec2; typeId: CreatureTypeId; tintRgba: RGBA }) {
+    this.pos = opts.pos;
+    this.typeId = opts.typeId;
+    this.tintRgba = opts.tintRgba;
+    Object.freeze(this);
+  }
 }
 
 export function tickTypoSpawns(
@@ -35,16 +42,16 @@ export function tickTypoSpawns(
     const tintB = clamp(Math.sin(tintT * 0.0001) + 0.3, 0.0, 1.0);
     const tint = new RGBA(tintR, tintG, tintB, 1.0);
 
-    spawns.push({
+    spawns.push(new TypoSpawnCall({
       pos: new Vec2(opts.worldWidth + 64.0, y),
       typeId: CreatureTypeId.SPIDER_SP2,
       tintRgba: tint,
-    });
-    spawns.push({
+    }));
+    spawns.push(new TypoSpawnCall({
       pos: new Vec2(-64.0, y),
       typeId: CreatureTypeId.ALIEN,
       tintRgba: tint,
-    });
+    }));
   }
 
   return [cooldown, spawns];

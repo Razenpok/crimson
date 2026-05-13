@@ -2,8 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import { CreatureTypeId, CreatureAiMode, CreatureFlags } from '@crimson/creatures/spawn-ids.ts';
-import type { CreatureInit } from '@crimson/creatures/runtime.ts';
+import { CreatureTypeId, CreatureAiMode, CreatureFlags, CreatureInit } from '@crimson/creatures/spawn.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PlayerInput } from '@crimson/sim/input.ts';
 import {
@@ -117,31 +116,17 @@ export function typoMidStep(ctx: MidStepContext): void {
       size *= 0.8;
     }
 
-    const init: CreatureInit = {
-      originTemplateId: 0,
-      pos: call.pos,
-      heading,
-      phaseSeed: 0.0,
-      typeId: call.typeId,
-      flags,
-      aiMode: CreatureAiMode.CHASE_PLAYER,
-      health: 1.0,
-      maxHealth: 1.0,
-      moveSpeed,
-      rewardValue: 1.0,
-      size,
-      contactDamage: 100.0,
-      tint: call.tintRgba.toTuple(),
-      orbitAngle: null,
-      orbitRadius: null,
-      rangedProjectileType: null,
-      aiLinkParent: null,
-      aiTimer: null,
-      targetOffset: null,
-      spawnSlot: null,
-      bonusId: null,
-      bonusDurationOverride: null,
-    };
+    const init = new CreatureInit(0, call.pos, heading, 0.0);
+    init.typeId = call.typeId;
+    init.flags = flags;
+    init.aiMode = CreatureAiMode.CHASE_PLAYER;
+    init.health = 1.0;
+    init.maxHealth = 1.0;
+    init.moveSpeed = moveSpeed;
+    init.rewardValue = 1.0;
+    init.size = size;
+    init.contactDamage = 100.0;
+    init.tint = call.tintRgba.toTuple();
 
     const creatureIdx = ctx.world.creatures.spawnInit(init);
     if (creatureIdx === null || creatureIdx === undefined) continue;
