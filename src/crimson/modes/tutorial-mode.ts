@@ -44,17 +44,9 @@ import {
 } from './base-gameplay-mode.ts';
 import { PerkMenuController, type PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const WORLD_SIZE = 1024.0;
 
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
-
-// ---------------------------------------------------------------------------
-// TutorialMode
-// ---------------------------------------------------------------------------
 
 export class TutorialMode extends BaseGameplayMode {
   private _perkMenu = new PerkMenuController();
@@ -88,10 +80,6 @@ export class TutorialMode extends BaseGameplayMode {
     this._repeatButton = new UiButtonState('Repeat tutorial', { forceWide: true });
   }
 
-  // ---------------------------------------------------------------------------
-  // Session builder
-  // ---------------------------------------------------------------------------
-
   private _newSimSession(): DeterministicSession {
     return buildTutorialSession({
       world: this.simWorld.worldState,
@@ -104,17 +92,9 @@ export class TutorialMode extends BaseGameplayMode {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Player count
-  // ---------------------------------------------------------------------------
-
   protected _runtimePlayerCount(): number {
     return 1;
   }
-
-  // ---------------------------------------------------------------------------
-  // Replay helpers
-  // ---------------------------------------------------------------------------
 
   protected _replayClaimedStatsComplete(): boolean {
     return int(this.state.tutorial.stageIndex) >= 8;
@@ -129,10 +109,6 @@ export class TutorialMode extends BaseGameplayMode {
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     return `tutorial_${opts.stamp}`;
   }
-
-  // ---------------------------------------------------------------------------
-  // Lifecycle
-  // ---------------------------------------------------------------------------
 
   open(): void {
     super.open();
@@ -171,10 +147,6 @@ export class TutorialMode extends BaseGameplayMode {
     this._frameInputState = null;
     super.close();
   }
-
-  // ---------------------------------------------------------------------------
-  // Perk menu
-  // ---------------------------------------------------------------------------
 
   private _openPerkMenu(): void {
     this._openPerkMenuUi({
@@ -220,10 +192,6 @@ export class TutorialMode extends BaseGameplayMode {
     return [this._buildInput()];
   }
 
-  // ---------------------------------------------------------------------------
-  // Input handling
-  // ---------------------------------------------------------------------------
-
   protected _handleInput(): void {
     if (this._perkMenu.open && InputState.wasKeyPressed(27)) { // Escape
       this._perkMenu.close();
@@ -240,10 +208,6 @@ export class TutorialMode extends BaseGameplayMode {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Tutorial run finish
-  // ---------------------------------------------------------------------------
-
   private _finishTutorialRun(restart: boolean): void {
     this._saveReplay();
     if (restart) {
@@ -252,10 +216,6 @@ export class TutorialMode extends BaseGameplayMode {
     }
     this.closeRequested = true;
   }
-
-  // ---------------------------------------------------------------------------
-  // Prompt button update
-  // ---------------------------------------------------------------------------
 
   private _updatePromptButtons(dtMs: number, mouse: Vec2, click: boolean): void {
     const tutorial = this.state.tutorial;
@@ -319,10 +279,6 @@ export class TutorialMode extends BaseGameplayMode {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Full perk menu UI context (for PerkMenuController)
-  // ---------------------------------------------------------------------------
-
   private _fullPerkMenuUiContext(): FullPerkMenuUiContext {
     return {
       player: this.player,
@@ -334,10 +290,6 @@ export class TutorialMode extends BaseGameplayMode {
       mouse: this._uiMousePos(),
     };
   }
-
-  // ---------------------------------------------------------------------------
-  // Update
-  // ---------------------------------------------------------------------------
 
   update(dt: number): void {
     this._updateAudio(dt);
@@ -406,10 +358,6 @@ export class TutorialMode extends BaseGameplayMode {
     this._updatePromptButtons(dtUiMs, mouse, click);
   }
 
-  // ---------------------------------------------------------------------------
-  // Draw
-  // ---------------------------------------------------------------------------
-
   draw(): void {
     const perkMenuActive = this._perkMenu.active;
 
@@ -454,10 +402,6 @@ export class TutorialMode extends BaseGameplayMode {
       this._drawMenuCursor();
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw helpers
-  // ---------------------------------------------------------------------------
 
   private _drawTutorialPrompts(hudBottom: number): void {
     const overlay = this.state.tutorialOverlay;
