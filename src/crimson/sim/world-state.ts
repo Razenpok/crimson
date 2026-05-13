@@ -9,8 +9,9 @@ import { cameraShakeUpdate } from '@crimson/camera.ts';
 import { creatureAnimAdvancePhase } from '@crimson/creatures/anim.ts';
 import { creatureApplyDamageWithLethalFollowup } from '@crimson/creatures/damage.ts';
 import {
-  type CreatureDeath,
+  CreatureDeath,
   CreaturePool,
+  CreatureUpdateOptions,
   type SpawnEnv,
 } from '@crimson/creatures/runtime.ts';
 import {
@@ -206,7 +207,7 @@ export class WorldState {
       playerTakeProjectileDamage(this.state, this.players[idx], Number(damage));
     };
 
-    const creatureResult = this.creatures.update(dt, { options: {
+    const creatureResult = this.creatures.update(dt, { options: new CreatureUpdateOptions({
       state: this.state,
       players: this.players,
       rng: this.state.rng,
@@ -217,7 +218,7 @@ export class WorldState {
       fxQueueRotated,
       detailPreset: int(detailPreset),
       violenceDisabled: int(violenceDisabled),
-    } });
+    }) });
 
     const deaths: CreatureDeath[] = [...creatureResult.deaths];
     const sfx: SfxId[] = [...creatureResult.sfx];

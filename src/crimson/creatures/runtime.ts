@@ -291,22 +291,30 @@ export class CreatureState {
   }
 }
 
-export interface CreatureDeath {
-  readonly index: number;
-  readonly pos: Vec2;
-  readonly typeId: CreatureTypeId;
-  readonly rewardValue: number;
-  readonly xpAwarded: number;
-  readonly owner: OwnerRef;
+export class CreatureDeath {
+  constructor(
+    public readonly index: number,
+    public readonly pos: Vec2,
+    public readonly typeId: CreatureTypeId,
+    public readonly rewardValue: number,
+    public readonly xpAwarded: number,
+    public readonly owner: OwnerRef,
+  ) {
+    Object.freeze(this);
+  }
 }
 
-export interface CreatureUpdateResult {
-  readonly deaths: readonly CreatureDeath[];
-  readonly spawned: readonly number[];
-  readonly sfx: readonly SfxId[];
+export class CreatureUpdateResult {
+  constructor(
+    public readonly deaths: readonly CreatureDeath[] = [],
+    public readonly spawned: readonly number[] = [],
+    public readonly sfx: readonly SfxId[] = [],
+  ) {
+    Object.freeze(this);
+  }
 }
 
-export interface CreatureUpdateOptions {
+export class CreatureUpdateOptions {
   readonly state: GameplayState;
   readonly players: PlayerState[];
   readonly rng: CrandLike;
@@ -317,9 +325,34 @@ export interface CreatureUpdateOptions {
   readonly fxQueueRotated: FxQueueRotated;
   readonly detailPreset: number;
   readonly violenceDisabled: number;
+
+  constructor(opts: {
+    state: GameplayState;
+    players: PlayerState[];
+    rng: CrandLike;
+    env: SpawnEnv;
+    worldWidth: number;
+    worldHeight: number;
+    fxQueue: FxQueue;
+    fxQueueRotated: FxQueueRotated;
+    detailPreset?: number;
+    violenceDisabled?: number;
+  }) {
+    this.state = opts.state;
+    this.players = opts.players;
+    this.rng = opts.rng;
+    this.env = opts.env;
+    this.worldWidth = opts.worldWidth;
+    this.worldHeight = opts.worldHeight;
+    this.fxQueue = opts.fxQueue;
+    this.fxQueueRotated = opts.fxQueueRotated;
+    this.detailPreset = opts.detailPreset ?? 5;
+    this.violenceDisabled = opts.violenceDisabled ?? 0;
+    Object.freeze(this);
+  }
 }
 
-interface _CreatureInteractionCtx {
+class _CreatureInteractionCtx {
   pool: CreaturePool;
   creatureIndex: number;
   creature: CreatureState;
@@ -338,6 +371,46 @@ interface _CreatureInteractionCtx {
   sfx: SfxId[];
   skipCreature: boolean;
   contactDistSq: number;
+
+  constructor(opts: {
+    pool: CreaturePool;
+    creatureIndex: number;
+    creature: CreatureState;
+    state: GameplayState;
+    players: PlayerState[];
+    player: PlayerState;
+    dt: number;
+    rng: CrandLike;
+    detailPreset: number;
+    violenceDisabled: number;
+    worldWidth: number;
+    worldHeight: number;
+    fxQueue: FxQueue | null;
+    fxQueueRotated: FxQueueRotated | null;
+    deaths: CreatureDeath[];
+    sfx: SfxId[];
+    skipCreature?: boolean;
+    contactDistSq?: number;
+  }) {
+    this.pool = opts.pool;
+    this.creatureIndex = opts.creatureIndex;
+    this.creature = opts.creature;
+    this.state = opts.state;
+    this.players = opts.players;
+    this.player = opts.player;
+    this.dt = opts.dt;
+    this.rng = opts.rng;
+    this.detailPreset = opts.detailPreset;
+    this.violenceDisabled = opts.violenceDisabled;
+    this.worldWidth = opts.worldWidth;
+    this.worldHeight = opts.worldHeight;
+    this.fxQueue = opts.fxQueue;
+    this.fxQueueRotated = opts.fxQueueRotated;
+    this.deaths = opts.deaths;
+    this.sfx = opts.sfx;
+    this.skipCreature = opts.skipCreature ?? false;
+    this.contactDistSq = opts.contactDistSq ?? 0.0;
+  }
 }
 
 type _CreatureInteractionStep = (ctx: _CreatureInteractionCtx) => void;
@@ -1329,7 +1402,7 @@ export class CreaturePool {
         }
       }
 
-      const interactionCtx: _CreatureInteractionCtx = {
+      const interactionCtx = new _CreatureInteractionCtx({
         pool: this,
         creatureIndex: idx,
         creature,
@@ -1348,7 +1421,7 @@ export class CreaturePool {
         sfx,
         skipCreature: false,
         contactDistSq: targetDistSq,
-      };
+      });
       for (const step of _CREATURE_INTERACTION_STEPS) {
         step(interactionCtx);
         if (interactionCtx.skipCreature) break;
@@ -1384,7 +1457,7 @@ export class CreaturePool {
       }
     }
 
-    return { deaths, spawned, sfx };
+    return new CreatureUpdateResult(deaths, spawned, sfx);
   }
 
   handleDeath(idx: number, opts: {
@@ -1431,14 +1504,14 @@ export class CreaturePool {
       // `if (active != 0)`. Re-entrant callers (notably secondary
       // detonation follow-up) can invoke death handling after the first call
       // has already deactivated the creature.
-      return {
-        index: idx,
-        pos: creature.pos,
-        typeId: creature.typeId,
-        rewardValue: creature.rewardValue,
-        xpAwarded: 0,
-        owner: creature.lastHitOwner,
-      };
+      return new CreatureDeath(
+        idx,
+        creature.pos,
+        creature.typeId,
+        creature.rewardValue,
+        0,
+        creature.lastHitOwner,
+      );
     }
     const death = this._startDeath(
       idx,
@@ -1734,13 +1807,13 @@ export class CreaturePool {
       );
     }
 
-    return {
-      index: idx,
-      pos: creature.pos,
-      typeId: creature.typeId,
-      rewardValue: creature.rewardValue,
+    return new CreatureDeath(
+      idx,
+      creature.pos,
+      creature.typeId,
+      creature.rewardValue,
       xpAwarded,
-      owner: creature.lastHitOwner,
-    };
+      creature.lastHitOwner,
+    );
   }
 }
