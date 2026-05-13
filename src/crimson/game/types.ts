@@ -1,7 +1,7 @@
 // Port of crimson/game/types.py
 
 import type { Vec2 } from '@grim/geom.ts';
-import type { Crand } from '@grim/rand.ts';
+import type { Crand, CrandLike } from '@grim/rand.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 import type { RuntimeResources } from '@grim/assets.ts';
 import type { AudioState } from '@grim/audio.ts';
@@ -14,10 +14,6 @@ import type { QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import type { PauseBackground } from '@crimson/pause-background.ts';
 
 export type { PauseBackground } from '@crimson/pause-background.ts';
-
-// ---------------------------------------------------------------------------
-// GameConfig — frozen (interface)
-// ---------------------------------------------------------------------------
 
 export interface GameConfig {
   readonly assetsUrl: string;
@@ -47,10 +43,6 @@ export function defaultGameConfig(assetsUrl: string): GameConfig {
   };
 }
 
-// ---------------------------------------------------------------------------
-// HighScoresRequest
-// ---------------------------------------------------------------------------
-
 export interface HighScoresRequest {
   gameModeId: GameMode;
   questLevel: QuestLevel | null;
@@ -73,10 +65,6 @@ export interface GameStateStatus {
   incrementWeaponUsageSlot(slot: number): void;
 }
 
-// ---------------------------------------------------------------------------
-// Screen — protocol interface
-// ---------------------------------------------------------------------------
-
 export interface Screen {
   open(): void;
   close(): void;
@@ -85,9 +73,36 @@ export interface Screen {
   takeAction?(): string | null;
 }
 
-// ---------------------------------------------------------------------------
-// GameState — mutable class
-// ---------------------------------------------------------------------------
+export interface GameplayScreen extends Screen, PauseBackground {
+  closeRequested: boolean;
+  defaultGameModeId: GameMode;
+
+  bindStatus(status: GameStateStatus | null): void;
+  bindScreenFade(fade: GameState | null): void;
+  bindAudio(audio: AudioState | null, audioRng: CrandLike): void;
+  setLanRuntime(opts: {
+    enabled: boolean;
+    role: string;
+    expected_players?: number;
+    connected_players?: number;
+    waiting_for_players?: boolean;
+    expectedPlayers?: number;
+    connectedPlayers?: number;
+    waitingForPlayers?: boolean;
+  }): void;
+  bindLanRuntime(runtime: unknown): void;
+  setLanMatchStart(opts: { seed: number; startTick?: number; status?: GameStateStatus | null }): void;
+  stealGroundForMenu(): GroundRenderer | null;
+  menuGroundCamera(): Vec2;
+  consoleElapsedMs(): number;
+  prepareDemoTrialOverlayFrame(): void;
+  regenerateTerrainForConsole(): void;
+  setRtxMode(mode: RtxRenderMode): void;
+  setRuntimeUpdatesPerFrame(value: number): void;
+  frameTelemetry(): [number, number, number, number, number, number];
+  consumeOutcome?(): QuestRunOutcome | null;
+  startRun?(level: QuestLevel, opts: { status: GameStateStatus | null }): void;
+}
 
 export class GameState {
   assetsUrl: string;
@@ -96,7 +111,6 @@ export class GameState {
   status: GameStateStatus;
   console: ConsoleState;
   demoEnabled: boolean;
-  debugEnabled: boolean;
   preserveBugs: boolean;
   resources: RuntimeResources | null;
   audio: AudioState | null;
@@ -134,12 +148,12 @@ export class GameState {
     status: GameStateStatus;
     console: ConsoleState;
     demoEnabled: boolean;
-    debugEnabled?: boolean;
     preserveBugs: boolean;
     resources: RuntimeResources | null;
     audio: AudioState | null;
     sessionStart: number;
     rtxMode: RtxRenderMode;
+    skipIntro?: boolean;
   }) {
     this.assetsUrl = init.assetsUrl;
     this.rng = init.rng;
@@ -147,13 +161,12 @@ export class GameState {
     this.status = init.status;
     this.console = init.console;
     this.demoEnabled = init.demoEnabled;
-    this.debugEnabled = init.debugEnabled ?? false;
     this.preserveBugs = init.preserveBugs;
     this.resources = init.resources;
     this.audio = init.audio;
     this.sessionStart = init.sessionStart;
     this.rtxMode = init.rtxMode;
-    this.skipIntro = false;
+    this.skipIntro = init.skipIntro ?? false;
     this.gammaRamp = 1.0;
     this.sndFreqAdjustmentEnabled = true;
     this.menuGround = null;

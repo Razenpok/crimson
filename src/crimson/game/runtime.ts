@@ -432,15 +432,13 @@ export function runGame(
     status,
     console,
     demoEnabled: config.demoEnabled,
-    debugEnabled: config.debug,
     preserveBugs: config.preserveBugs,
+    skipIntro: config.noIntro,
     resources: null,
     audio: null,
     sessionStart: performance.now(),
     rtxMode: modeFromRtxFlag(config.rtx),
   });
-
-  state.skipIntro = config.noIntro;
 
   const handlers = bootCommandHandlers(state, status);
   registerBootCommands(console, handlers);

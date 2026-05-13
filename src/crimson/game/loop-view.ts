@@ -3,8 +3,7 @@
 import * as wgl from '@wgl';
 import { type View, ViewContext } from '@grim/view.ts';
 import { Vec2 } from '@grim/geom.ts';
-import { type CrandLike } from '@grim/rand.ts';
-import { type AudioState, audioStopMusic } from '@grim/audio.ts';
+import { audioStopMusic } from '@grim/audio.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { InputState } from '@grim/input.ts';
 import { inputBeginFrame } from '@crimson/input-codes.ts';
@@ -12,7 +11,7 @@ import { inputBeginFrame } from '@crimson/input-codes.ts';
 import { debugEnabled } from '@crimson/debug.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { type RtxRenderMode, cycleRtxRenderMode } from '@crimson/render/rtx/mode.ts';
-import { type Screen, type GameState, type PauseBackground } from './types.ts';
+import { type Screen, type GameState, type GameplayScreen } from './types.ts';
 import {
   type DemoTrialOverlayInfo,
   demoTrialOverlayInfo,
@@ -44,9 +43,7 @@ import { QuestResultsView } from '@crimson/screens/quest-views/quest-results.ts'
 import { QuestFailedView } from '@crimson/screens/quest-views/quest-failed.ts';
 import { EndNoteView } from '@crimson/screens/quest-views/end-note.ts';
 
-import { type QuestLevel } from '@crimson/quests/level.ts';
-import { type GameStatus } from '@crimson/modes/base-gameplay-mode.ts';
-import { QuestMode, type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
+import { QuestMode } from '@crimson/modes/quest-mode.ts';
 import { SurvivalMode } from '@crimson/modes/survival-mode.ts';
 import { RushMode } from '@crimson/modes/rush-mode.ts';
 import { TypoShooterMode } from '@crimson/modes/typo-mode.ts';
@@ -60,41 +57,6 @@ import { type GameStatusPersist } from './runtime.ts';
 const KEY_F4 = 115;
 const KEY_P = 80;
 const KEY_ESCAPE = 27;
-
-interface GameplayScreen extends Screen, PauseBackground {
-  closeRequested: boolean;
-  defaultGameModeId: GameMode;
-
-  setRuntimeUpdatesPerFrame(value: number): void;
-  frameTelemetry(): [number, number, number, number, number, number];
-  consoleElapsedMs(): number;
-  regenerateTerrainForConsole(): void;
-  prepareDemoTrialOverlayFrame(): void;
-
-  bindStatus(status: GameStatus | null): void;
-  bindAudio(audio: AudioState | null, audioRng: CrandLike): void;
-  setRtxMode(mode: RtxRenderMode): void;
-  bindScreenFade(fade: GameState | null): void;
-
-  setLanRuntime(opts: {
-    enabled: boolean;
-    role: string;
-    expected_players?: number;
-    connected_players?: number;
-    waiting_for_players?: boolean;
-    expectedPlayers?: number;
-    connectedPlayers?: number;
-    waitingForPlayers?: boolean;
-  }): void;
-  bindLanRuntime(runtime: unknown): void;
-  setLanMatchStart(opts: { seed: number; startTick?: number; status?: unknown }): void;
-
-  stealGroundForMenu(): GroundRenderer | null;
-  menuGroundCamera(): Vec2 | null;
-
-  consumeOutcome?(): QuestRunOutcome | null;
-  startRun?(level: QuestLevel, status: GameStatus | null): void;
-}
 
 const GAMMA_RAMP_VS = `#version 300 es
 precision highp float;
