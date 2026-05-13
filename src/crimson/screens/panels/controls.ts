@@ -60,6 +60,18 @@ const KEY_DELETE = 46;
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
 
+function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
+  const thick = Math.max(1, int(lineThick));
+  const x = int(rect.x);
+  const y = int(rect.y);
+  const w = int(rect.w);
+  const h = int(rect.h);
+  wgl.drawRectangle(x, y, w, thick, color);
+  wgl.drawRectangle(x, y + h - thick, w, thick, color);
+  wgl.drawRectangle(x, y, thick, h, color);
+  wgl.drawRectangle(x + w - thick, y, thick, h, color);
+}
+
 function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; controls: CrimsonControlsConfig }): number {
   const playerIndex = opts.playerIndex;
   const controls = opts.controls;
@@ -888,11 +900,11 @@ export class ControlsMenuView extends PanelMenuView {
       drawSmallText(font, title, new Vec2(xHeading, y), textColorFull);
       const lineY = y + 13.0 * panelScale;
       const lineH = Math.max(1.0, panelScale);
-      wgl.drawRectangle(
+      const line = wgl.makeRectangle(
         xHeading, lineY,
         228.0 * panelScale, lineH,
-        wgl.makeColor(1, 1, 1, 178 / 255),
       );
+      drawRectangleLinesEx(line, Math.max(1.0, panelScale), wgl.makeColor(1, 1, 1, 178 / 255));
     };
 
     drawSmallText(
@@ -903,11 +915,11 @@ export class ControlsMenuView extends PanelMenuView {
     const headerW = measureSmallTextWidth(font, 'Configured controls');
     const headerLineY = rightTopLeft.y + 51.0 * panelScale;
     const headerLineH = Math.max(1.0, panelScale);
-    wgl.drawRectangle(
+    const headerLine = wgl.makeRectangle(
       rightTopLeft.x + 120.0 * panelScale, headerLineY,
       headerW, headerLineH,
-      wgl.makeColor(1, 1, 1, 204 / 255),
     );
+    drawRectangleLinesEx(headerLine, Math.max(1.0, panelScale), wgl.makeColor(1, 1, 1, 204 / 255));
 
     const sections = this._rebindSections({ playerIndex: playerIdx, aimScheme, moveMode });
     const rows = this._collectRebindRows({
@@ -956,8 +968,8 @@ export class ControlsMenuView extends PanelMenuView {
         const valueW = measureSmallTextWidth(font, valueText);
         const underlineY = rowLayout.rowY + 13.0 * panelScale;
         wgl.drawRectangle(
-          valuePos.x, underlineY,
-          valueW, Math.max(1.0, panelScale),
+          int(valuePos.x), int(underlineY),
+          Math.max(0, int(valueW)), 1,
           valueColor,
         );
 
