@@ -15,10 +15,16 @@ import {
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
 
-interface ModsContentLayout {
-  scale: number;
-  basePos: Vec2;
-  labelPos: Vec2;
+class ModsContentLayout {
+  readonly scale: number;
+  readonly basePos: Vec2;
+  readonly labelPos: Vec2;
+
+  constructor(opts: { scale: number; basePos: Vec2; labelPos: Vec2 }) {
+    this.scale = opts.scale;
+    this.basePos = opts.basePos;
+    this.labelPos = opts.labelPos;
+  }
 }
 
 export class ModsMenuView extends PanelMenuView {
@@ -49,7 +55,7 @@ export class ModsMenuView extends PanelMenuView {
     ).add(this._panelOffset.mul(panelScale));
     const basePos = panelTopLeft.add(new Vec2(212.0 * panelScale, 32.0 * panelScale));
     const labelPos = basePos.offset({ dx: 8.0 * panelScale });
-    return { scale: panelScale, basePos, labelPos };
+    return new ModsContentLayout({ scale: panelScale, basePos, labelPos });
   }
 
   private _buildLines(): string[] {
