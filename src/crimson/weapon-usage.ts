@@ -7,11 +7,21 @@ import { WeaponId } from '@crimson/weapons.ts';
 // - tracked weapon ids map 1:1 to slots 1..52
 // - weapon id 53 has no safe slot in this table
 export const WEAPON_USAGE_SLOT_COUNT = 53;
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL as number;
+const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL;
 const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = WEAPON_USAGE_SLOT_COUNT - 1;
 
+export type WeaponUsageCount = number;
 export type WeaponUsageCounts = readonly number[];
 export const ZERO_WEAPON_USAGE_COUNTS: WeaponUsageCounts = Array.from({ length: WEAPON_USAGE_SLOT_COUNT }, () => 0);
+
+export function weaponUsageSlotForWeaponId(weaponId: number): number | null {
+  // Map a weapon id to save-status usage slot, or `None` if untracked.
+  const id = int(weaponId);
+  if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
+    return id;
+  }
+  return null;
+}
 
 export function normalizeWeaponUsageCounts(values: object): WeaponUsageCounts {
   if (!Array.isArray(values)) {
@@ -27,13 +37,4 @@ export function normalizeWeaponUsageCounts(values: object): WeaponUsageCounts {
     }
   }
   return normalized;
-}
-
-export function weaponUsageSlotForWeaponId(weaponId: number): number | null {
-  // Map a weapon id to save-status usage slot, or `None` if untracked.
-  const id = int(weaponId);
-  if (WEAPON_USAGE_TRACKED_WEAPON_ID_MIN <= id && id <= WEAPON_USAGE_TRACKED_WEAPON_ID_MAX) {
-    return id;
-  }
-  return null;
 }
