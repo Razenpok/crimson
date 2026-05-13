@@ -35,7 +35,7 @@ export function formatScoreDate(entry: HighScoreRecord): string {
 
 export function ordinal(value: number): string {
   const n = int(value);
-  const suffix = (n % 100 >= 11 && n % 100 <= 13) ? 'th'
+  const suffix = (n % 100 >= 10 && n % 100 <= 20) ? 'th'
     : (n % 10 === 1) ? 'st'
     : (n % 10 === 2) ? 'nd'
     : (n % 10 === 3) ? 'rd'
@@ -44,7 +44,7 @@ export function ordinal(value: number): string {
 }
 
 export function formatElapsedMmSs(valueMs: number): string {
-  const totalSec = Math.max(0, Math.floor(valueMs / 1000));
+  const totalSec = Math.floor(Math.max(0, int(valueMs)) / 1000);
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
   return `${m}:${s < 10 ? '0' : ''}${s}`;
