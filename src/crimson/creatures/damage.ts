@@ -24,7 +24,7 @@ function anyPlayerHasPerk(players: readonly PlayerState[], perkId: PerkId): bool
   return false;
 }
 
-interface CreatureDamageCtx {
+class CreatureDamageCtx {
   creature: CreatureState;
   damage: number;
   damageType: number;
@@ -33,6 +33,26 @@ interface CreatureDamageCtx {
   dt: number;
   players: readonly PlayerState[];
   rng: CrandLike;
+
+  constructor(opts: {
+    creature: CreatureState;
+    damage: number;
+    damageType: number;
+    impulse: Vec2;
+    owner: OwnerRef;
+    dt: number;
+    players: readonly PlayerState[];
+    rng: CrandLike;
+  }) {
+    this.creature = opts.creature;
+    this.damage = opts.damage;
+    this.damageType = opts.damageType;
+    this.impulse = opts.impulse;
+    this.owner = opts.owner;
+    this.dt = opts.dt;
+    this.players = opts.players;
+    this.rng = opts.rng;
+  }
 }
 
 type CreatureDamageStep = (ctx: CreatureDamageCtx) => void;
@@ -137,13 +157,13 @@ function damageType4Pyromaniac(ctx: CreatureDamageCtx): void {
   ctx.rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_PYROMANIAC });
 }
 
-/** Port the `creature_apply_damage` lethal branch for `flags & 0x10`. */
 function damageLethalRangedShockBurst(
   creature: CreatureState,
   rng: CrandLike,
   effects: EffectPool | null,
   detailPreset: number,
 ): void {
+  // Port the `creature_apply_damage` lethal branch for `flags & 0x10`.
   if ((creature.flags & CreatureFlags.RANGED_ATTACK_SHOCK) === 0) return;
   for (let i = 0; i < 5; i++) {
     const rotation = (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_ROTATION }) & 0x7F) * 0.049087387;
@@ -172,11 +192,11 @@ function damageLethalRangedShockBurst(
   }
 }
 
-/** Resolve the native `creature_apply_damage` death sound, if this path owns one. */
 export function resolveNativeDeathSfx(
   creature: CreatureState,
   opts: { rng: CrandLike; preserveBugs?: boolean },
 ): SfxId[] {
+  // Resolve the native `creature_apply_damage` death sound, if this path owns one.
   const rng = opts.rng;
   const preserveBugs = opts.preserveBugs ?? false;
   if ((creature.flags & CreatureFlags.RANGED_ATTACK_SHOCK) !== 0) return [];
@@ -209,19 +229,18 @@ const CREATURE_DAMAGE_ALIVE_STEPS: Map<number, readonly CreatureDamageStep[]> = 
   [CreatureDamageType.FIRE, [damageType4Pyromaniac]],
 ]);
 
-/**
- * Apply damage to a creature, returning true if the hit killed it.
- *
- * This is a partial port of `creature_apply_damage` (FUN_004207c0).
- *
- * Notes:
- * - Death side-effects are handled by the caller.
- * - `damageType` is a native integer category; call sites must supply it.
- */
 export function creatureApplyDamage(
   creature: CreatureState,
   opts: { damageAmount: number; damageType: number; impulse: Vec2; owner: OwnerRef; dt: number; players: readonly PlayerState[]; rng: CrandLike; effects?: EffectPool | null; detailPreset?: number },
 ): boolean {
+  // Apply damage to a creature, returning true if the hit killed it.
+  //
+  // This is a partial port of `creature_apply_damage` (FUN_004207c0).
+  //
+  // Notes:
+  // - Death side-effects are handled by the caller.
+  // - `damageType` is a native integer category; call sites must supply it.
+
   const damageAmount = opts.damageAmount;
   const damageType = opts.damageType;
   const impulse = opts.impulse;
@@ -234,7 +253,7 @@ export function creatureApplyDamage(
   creature.lastHitOwner = owner;
   creature.hitFlashTimer = 0.2;
 
-  const ctx: CreatureDamageCtx = {
+  const ctx = new CreatureDamageCtx({
     creature,
     damage: damageAmount,
     damageType: int(damageType),
@@ -243,7 +262,7 @@ export function creatureApplyDamage(
     dt,
     players,
     rng,
-  };
+  });
 
   const globalPreSteps = CREATURE_DAMAGE_GLOBAL_PRE_STEPS.get(ctx.damageType);
   if (globalPreSteps !== undefined) {
@@ -292,16 +311,15 @@ export function creatureApplyDamage(
   return false;
 }
 
-/**
- * Apply damage and run a required lethal follow-up exactly on death transition.
- *
- * This helper keeps lethal bookkeeping adjacent to damage application so runtime
- * call sites cannot accidentally skip death handling side effects.
- */
 export function creatureApplyDamageWithLethalFollowup(
   creature: CreatureState,
   opts: { damageAmount: number; damageType: number; impulse: Vec2; owner: OwnerRef; dt: number; players: readonly PlayerState[]; rng: CrandLike; preserveBugs?: boolean; effects?: EffectPool | null; detailPreset?: number; onLethal: (sfx: SfxId[]) => void },
 ): boolean {
+  // Apply damage and run a required lethal follow-up exactly on death transition.
+  //
+  // This helper keeps lethal bookkeeping adjacent to damage application so runtime
+  // call sites cannot accidentally skip death handling side effects.
+
   const damageAmount = opts.damageAmount;
   const damageType = opts.damageType;
   const impulse = opts.impulse;
