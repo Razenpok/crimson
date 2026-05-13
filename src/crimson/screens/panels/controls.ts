@@ -581,12 +581,19 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _updateDropdown(
-    layout: ControlsDropdownLayout,
-    itemCount: number,
-    isOpen: boolean,
-    enabled: boolean,
-    scale: number,
+    opts: {
+      layout: ControlsDropdownLayout;
+      itemCount: number;
+      isOpen: boolean;
+      enabled: boolean;
+      scale: number;
+    },
   ): [boolean, number | null, boolean] {
+    const layout = opts.layout;
+    const itemCount = opts.itemCount;
+    const isOpen = opts.isOpen;
+    const enabled = opts.enabled;
+    const scale = opts.scale;
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -653,9 +660,13 @@ export class ControlsMenuView extends PanelMenuView {
     const playerEnabled = !(this._moveMethodOpen || this._aimMethodOpen || rebindActive);
 
     {
-      const [newOpen, selected, consumed] = this._updateDropdown(
-        moveLayout, moveItems.length, this._moveMethodOpen, moveEnabled, panelScale,
-      );
+      const [newOpen, selected, consumed] = this._updateDropdown({
+        layout: moveLayout,
+        itemCount: moveItems.length,
+        isOpen: this._moveMethodOpen,
+        enabled: moveEnabled,
+        scale: panelScale,
+      });
       this._moveMethodOpen = newOpen;
       if (selected !== null) {
         const selectedIdx = Math.max(0, Math.min(int(selected), moveMethodIds.length - 1));
@@ -666,9 +677,13 @@ export class ControlsMenuView extends PanelMenuView {
     }
 
     {
-      const [newOpen, selected, consumed] = this._updateDropdown(
-        aimLayout, aimItems.length, this._aimMethodOpen, aimEnabled, panelScale,
-      );
+      const [newOpen, selected, consumed] = this._updateDropdown({
+        layout: aimLayout,
+        itemCount: aimItems.length,
+        isOpen: this._aimMethodOpen,
+        enabled: aimEnabled,
+        scale: panelScale,
+      });
       this._aimMethodOpen = newOpen;
       if (selected !== null) {
         const selectedIdx = Math.max(0, Math.min(int(selected), aimItemIds.length - 1));
@@ -679,9 +694,13 @@ export class ControlsMenuView extends PanelMenuView {
     }
 
     {
-      const [newOpen, selected, consumed] = this._updateDropdown(
-        playerLayout, playerItems.length, this._playerProfileOpen, playerEnabled, panelScale,
-      );
+      const [newOpen, selected, consumed] = this._updateDropdown({
+        layout: playerLayout,
+        itemCount: playerItems.length,
+        isOpen: this._playerProfileOpen,
+        enabled: playerEnabled,
+        scale: panelScale,
+      });
       this._playerProfileOpen = newOpen;
       if (selected !== null) {
         this._configPlayer = Math.max(1, Math.min(4, selected + 1));
@@ -835,12 +854,30 @@ export class ControlsMenuView extends PanelMenuView {
     ];
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (isOpen) continue;
-      this._drawDropdown(layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
+      this._drawDropdown({
+        layout,
+        items,
+        selectedIndex,
+        isOpen,
+        enabled,
+        scale: panelScale,
+        resources,
+        font,
+      });
     }
     // Active list must render last so overlapping widgets don't occlude open options.
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (!isOpen) continue;
-      this._drawDropdown(layout, items, selectedIndex, isOpen, enabled, panelScale, resources, font);
+      this._drawDropdown({
+        layout,
+        items,
+        selectedIndex,
+        isOpen,
+        enabled,
+        scale: panelScale,
+        resources,
+        font,
+      });
     }
 
     // --- Right panel: configured bindings list ---
@@ -941,15 +978,25 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _drawDropdown(
-    layout: ControlsDropdownLayout,
-    items: string[],
-    selectedIndex: number,
-    isOpen: boolean,
-    enabled: boolean,
-    scale: number,
-    resources: RuntimeResources,
-    font: SmallFontData,
+    opts: {
+      layout: ControlsDropdownLayout;
+      items: string[];
+      selectedIndex: number;
+      isOpen: boolean;
+      enabled: boolean;
+      scale: number;
+      resources: RuntimeResources;
+      font: SmallFontData;
+    },
   ): void {
+    const layout = opts.layout;
+    const items = opts.items;
+    const selectedIndex = opts.selectedIndex;
+    const isOpen = opts.isOpen;
+    const enabled = opts.enabled;
+    const scale = opts.scale;
+    const resources = opts.resources;
+    const font = opts.font;
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const hoveredHeader = enabled && mouseInsideRectWithPadding(
