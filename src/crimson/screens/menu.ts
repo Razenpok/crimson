@@ -13,6 +13,7 @@ import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
+import { resolveTerrainSlots } from '@crimson/terrain-slots.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
 
@@ -96,14 +97,6 @@ export function ensureMenuGround(
   let ground = state.menuGround;
   const generatedNewTerrain = ground === null || regenerate;
 
-  // Slot mapping: 0 => TER_Q1_BASE, 1 => TER_Q1_OVERLAY, 2 => TER_Q2_BASE, etc.
-  const slotToTextureId: TextureId[] = [
-    TextureId.TER_Q1_BASE, TextureId.TER_Q1_OVERLAY,
-    TextureId.TER_Q2_BASE, TextureId.TER_Q2_OVERLAY,
-    TextureId.TER_Q3_BASE, TextureId.TER_Q3_OVERLAY,
-    TextureId.TER_Q4_BASE, TextureId.TER_Q4_OVERLAY,
-  ];
-
   let base: wgl.Texture;
   let overlay: wgl.Texture;
   let detail: wgl.Texture;
@@ -112,12 +105,12 @@ export function ensureMenuGround(
   if (generatedNewTerrain) {
     const terrain = advanceUnlockTerrain(
       state.rng,
-      { unlockIndex: 0, width: 1024, height: 1024 }, // unlockIndex — quest_unlock_index not tracked on GameState yet
+      { unlockIndex: int(state.status.questUnlockIndex), width: 1024, height: 1024 },
     );
-    // resolveTerrainSlots: map slot indices to texture IDs and look them up.
-    base = getTexture(resources, slotToTextureId[terrain.terrainSlots[0]]);
-    overlay = getTexture(resources, slotToTextureId[terrain.terrainSlots[1]]);
-    detail = getTexture(resources, slotToTextureId[terrain.terrainSlots[2]]);
+    [base, overlay, detail] = resolveTerrainSlots(
+      terrain.terrainSlots,
+      (id: TextureId) => getTexture(resources, id),
+    );
     terrainSeed = terrain.terrainSeed;
   } else {
     base = ground!.texture;
@@ -294,7 +287,6 @@ export class MenuView {
       if (this.state.audio.music.activeTrack !== theme) {
         audioStopMusic(this.state.audio);
       }
-      this.state.audio.music.activeTrack = theme;
       audioPlayMusic(this.state.audio, theme);
     }
     this._isOpen = true;
@@ -310,7 +302,6 @@ export class MenuView {
     if (this.state.audio !== null) {
       if (!this._closing) {
         const theme = this.state.demoEnabled ? 'crimsonquest' : 'crimson_theme';
-        this.state.audio.music.activeTrack = theme;
         audioPlayMusic(this.state.audio, theme);
       }
       audioUpdate(this.state.audio, dt);
