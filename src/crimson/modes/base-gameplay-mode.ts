@@ -62,7 +62,7 @@ import type { PerkMenuUiContext as FullPerkMenuUiContext } from './components/pe
 import { drawTargetHealthBar, HudState } from '@crimson/ui/hud.ts';
 import type { HighScoreRecord } from '@crimson/screens/results/game-over.ts';
 import { GameOverUi } from '@crimson/screens/results/game-over.ts';
-import type { GameState } from '@crimson/game/types.ts';
+import type { GameState, GameStateStatus } from '@crimson/game/types.ts';
 import { WorldRuntime } from '@crimson/world/runtime.ts';
 import type { SimWorldState } from '@crimson/world/sim-world-state.ts';
 import type { RenderResources } from '@crimson/world/render-resources.ts';
@@ -87,14 +87,8 @@ interface ReplayCheckpoint {
   events: WorldEvents | null;
 }
 
-// GameStatus stub — persistence module not yet ported
-export interface GameStatus {
-  questUnlockIndex: number;
-  questUnlockIndexFull: number;
-  incrementQuestPlayCount?(idx: number): void;
-}
-
-interface GameStatusData {}
+export type GameStatus = GameStateStatus;
+type GameStatusData = GameStateStatus;
 
 function debugEnabled(): boolean {
   return false;
