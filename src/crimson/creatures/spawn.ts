@@ -95,7 +95,6 @@ export class AlienSpawnerSpec {
     this.moveSpeed = opts.moveSpeed;
     this.rewardValue = opts.rewardValue;
     this.tint = opts.tint;
-    Object.freeze(this);
   }
 }
 
@@ -213,7 +212,6 @@ export class ConstantSpawnSpec {
     public readonly bonusId: BonusId | null = null,
     public readonly bonusDurationOverride: number | null = null,
   ) {
-    Object.freeze(this);
   }
 }
 
@@ -265,7 +263,6 @@ export class FormationChildSpec {
     public readonly orbitAngle: number | null = null,
     public readonly orbitRadius: number | null = null,
   ) {
-    Object.freeze(this);
   }
 }
 
@@ -323,7 +320,6 @@ export class GridFormationSpec {
     this.yRange = opts.yRange;
     this.applyFallback = opts.applyFallback ?? false;
     this.setParentMaxHealth = opts.setParentMaxHealth ?? true;
-    Object.freeze(this);
   }
 }
 
@@ -361,7 +357,6 @@ export class RingFormationSpec {
     this.applyFallback = opts.applyFallback ?? false;
     this.setPosition = opts.setPosition ?? false;
     this.setParentMaxHealth = opts.setParentMaxHealth ?? true;
-    Object.freeze(this);
   }
 }
 
@@ -601,7 +596,6 @@ export class SpawnEnv {
     public readonly hardcore: boolean,
     public readonly questFailRetryCount: number,
   ) {
-    Object.freeze(this);
   }
 }
 
@@ -611,7 +605,6 @@ export class BurstEffect {
     public readonly pos: Vec2,
     public readonly count: number,
   ) {
-    Object.freeze(this);
   }
 }
 
@@ -694,7 +687,6 @@ export class SpawnPlan {
     public readonly effects: readonly BurstEffect[] = [],
     public readonly primary: number = 0,
   ) {
-    Object.freeze(this);
   }
 }
 
@@ -1106,7 +1098,6 @@ export class SurvivalSpawnPosCallers {
     public readonly leftY: RngCallerStatic,
     public readonly rightY: RngCallerStatic,
   ) {
-    Object.freeze(this);
   }
 }
 
@@ -1419,7 +1410,6 @@ export class SpawnTemplateCall {
     public readonly pos: Vec2,
     public readonly heading: number,
   ) {
-    Object.freeze(this);
   }
 }
 
