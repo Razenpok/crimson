@@ -1,15 +1,14 @@
 // Port of crimson/perks/availability.py
 
 import { GameMode } from '@crimson/game-modes.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameStatus } from '@crimson/gameplay.ts';
+import { allQuests } from '@crimson/quests/index.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
+import { PERK_COUNT_SIZE, type GameplayState, type PlayerState } from '@crimson/sim/state-types.ts';
 import { perkCountGet } from './helpers.ts';
 import { PERK_BY_ID, PerkFlags, PerkId } from './ids.ts';
-import { PERK_COUNT_SIZE } from '@crimson/sim/state-types.ts';
-import { QuestLevel } from "@crimson/quests/level.js";
-import { allQuests } from "@crimson/quests/registry.js";
-import { GameplayState, GameStatus } from "@crimson/gameplay.js";
 
-const _PERK_BASE_AVAILABLE_MAX_ID = PerkId.BONUS_MAGNET;
+const _PERK_BASE_AVAILABLE_MAX_ID = int(PerkId.BONUS_MAGNET);
 const _PERK_ALWAYS_AVAILABLE: readonly PerkId[] = [
   PerkId.MAN_BOMB,
   PerkId.LIVING_FORTRESS,
@@ -31,7 +30,7 @@ export function buildPerkAvailability(opts: { status: GameStatus | null }): bool
   }
 
   for (const perkId of _PERK_ALWAYS_AVAILABLE) {
-    const idx = perkId;
+    const idx = int(perkId);
     if (idx >= 0 && idx < available.length) {
       available[idx] = true;
     }
@@ -48,15 +47,12 @@ export function buildPerkAvailability(opts: { status: GameStatus | null }): bool
     }
   }
 
-  available[PerkId.ANTIPERK] = false;
+  available[int(PerkId.ANTIPERK)] = false;
   return available;
 }
 
 export function preparePerkAvailability(state: GameplayState): void {
-  const built = buildPerkAvailability({ status: state.status });
-  for (let i = 0; i < built.length && i < state.perkAvailable.length; i++) {
-    state.perkAvailable[i] = built[i];
-  }
+  state.perkAvailable.splice(0, state.perkAvailable.length, ...buildPerkAvailability({ status: state.status }));
 }
 
 export function perkCanOffer(
@@ -65,6 +61,11 @@ export function perkCanOffer(
   perkId: PerkId,
   opts: { gameMode: GameMode; playerCount: number },
 ): boolean {
+  /** Return whether `perk_id` is eligible for selection.
+   *
+   * Modeled after `perk_can_offer` (0x0042fb10).
+   */
+
   if (perkId === PerkId.ANTIPERK) {
     return false;
   }
