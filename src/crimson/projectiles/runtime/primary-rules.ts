@@ -52,96 +52,60 @@ export class PrimaryProjectileRule {
     this.stopOnHit = opts.stopOnHit ?? true;
     this.emitDefaultFreezeShard = opts.emitDefaultFreezeShard ?? true;
     this.resetShockChainOnLinger = opts.resetShockChainOnLinger ?? false;
-    Object.freeze(this);
   }
 }
 
-function rule(
-  linger: LingerHandler,
-  preHit: PreHitHandler = preHitNone,
-  postHit: PostHitHandler = postHitNone,
-  stopOnHit: boolean = true,
-  emitDefaultFreezeShard: boolean = true,
-  resetShockChainOnLinger: boolean = false,
-): PrimaryProjectileRule {
-  return new PrimaryProjectileRule({
-    linger,
-    preHit,
-    postHit,
-    stopOnHit,
-    emitDefaultFreezeShard,
-    resetShockChainOnLinger,
-  });
-}
-
-const _DEFAULT_RULE: PrimaryProjectileRule = rule(lingerDefault);
+const _DEFAULT_RULE = new PrimaryProjectileRule({ linger: lingerDefault });
 
 export const PRIMARY_PROJECTILE_RULE_BY_TYPE_ID: Map<ProjectileTemplateId, PrimaryProjectileRule> = new Map([
-  [ProjectileTemplateId.GAUSS_GUN, rule(
-    lingerGaussGun,
-    preHitNone,
-    postHitNone,
-    false,
-    false,
-  )],
-  [ProjectileTemplateId.FIRE_BULLETS, rule(
-    lingerDefault,
-    preHitNone,
-    postHitNone,
-    false,
-    false,
-  )],
-  [ProjectileTemplateId.BLADE_GUN, rule(
-    lingerDefault,
-    preHitNone,
-    postHitNone,
-    false,
-  )],
-  [ProjectileTemplateId.PULSE_GUN, rule(
-    lingerDefault,
-    preHitNone,
-    postHitPulseGun,
-  )],
-  [ProjectileTemplateId.ION_RIFLE, rule(
-    lingerIonRifle,
-    preHitNone,
-    postHitIonRifle,
-    true,
-    true,
-    true,
-  )],
-  [ProjectileTemplateId.ION_MINIGUN, rule(
-    lingerIonMinigun,
-    preHitNone,
-    postHitIonCommon,
-    true,
-    true,
-    true,
-  )],
-  [ProjectileTemplateId.ION_CANNON, rule(
-    lingerIonCannon,
-    preHitNone,
-    postHitIonCommon,
-  )],
-  [ProjectileTemplateId.SHRINKIFIER, rule(
-    lingerDefault,
-    preHitNone,
-    postHitShrinkifier,
-  )],
-  [ProjectileTemplateId.PLASMA_CANNON, rule(
-    lingerDefault,
-    preHitNone,
-    postHitPlasmaCannon,
-  )],
-  [ProjectileTemplateId.SPLITTER_GUN, rule(
-    lingerDefault,
-    preHitSplitter,
-  )],
-  [ProjectileTemplateId.PLAGUE_SPREADER, rule(
-    lingerDefault,
-    preHitNone,
-    postHitPlagueSpreader,
-  )],
+  [ProjectileTemplateId.GAUSS_GUN, new PrimaryProjectileRule({
+    linger: lingerGaussGun,
+    stopOnHit: false,
+    emitDefaultFreezeShard: false,
+  })],
+  [ProjectileTemplateId.FIRE_BULLETS, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    stopOnHit: false,
+    emitDefaultFreezeShard: false,
+  })],
+  [ProjectileTemplateId.BLADE_GUN, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    stopOnHit: false,
+  })],
+  [ProjectileTemplateId.PULSE_GUN, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    postHit: postHitPulseGun,
+  })],
+  [ProjectileTemplateId.ION_RIFLE, new PrimaryProjectileRule({
+    linger: lingerIonRifle,
+    postHit: postHitIonRifle,
+    resetShockChainOnLinger: true,
+  })],
+  [ProjectileTemplateId.ION_MINIGUN, new PrimaryProjectileRule({
+    linger: lingerIonMinigun,
+    postHit: postHitIonCommon,
+    resetShockChainOnLinger: true,
+  })],
+  [ProjectileTemplateId.ION_CANNON, new PrimaryProjectileRule({
+    linger: lingerIonCannon,
+    postHit: postHitIonCommon,
+  })],
+  [ProjectileTemplateId.SHRINKIFIER, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    postHit: postHitShrinkifier,
+  })],
+  [ProjectileTemplateId.PLASMA_CANNON, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    postHit: postHitPlasmaCannon,
+  })],
+  [ProjectileTemplateId.SPLITTER_GUN, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    preHit: preHitSplitter,
+  })],
+  [ProjectileTemplateId.PLAGUE_SPREADER, new PrimaryProjectileRule({
+    linger: lingerDefault,
+    postHit: postHitPlagueSpreader,
+  })],
 ]);
 
 export function primaryRuleForTypeId(typeId: ProjectileTemplateId): PrimaryProjectileRule {
