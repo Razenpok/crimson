@@ -1,11 +1,8 @@
 // Port of crimson/screens/quest_views/shared.py
 
-import { QuestLevel, QUEST_COUNT } from '@crimson/quests/level.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
-
-// ---------------------------------------------------------------------------
-// Quest menu layout constants
-// ---------------------------------------------------------------------------
+import { Vec2 } from '@grim/geom.ts';
 
 export const QUEST_MENU_BASE_X = -5.0;
 export const QUEST_MENU_BASE_Y = 185.0;
@@ -39,20 +36,13 @@ export const QUEST_BACK_BUTTON_X_OFFSET = 138.0;
 export const QUEST_BACK_BUTTON_Y_OFFSET = 212.0;
 export const QUEST_PANEL_HEIGHT = 378.0;
 
-// ---------------------------------------------------------------------------
-// Quest menu layout struct
-// ---------------------------------------------------------------------------
-
 export interface QuestMenuLayout {
-  readonly titlePos: { readonly x: number; readonly y: number };
-  readonly iconsStartPos: { readonly x: number; readonly y: number };
-  readonly listPos: { readonly x: number; readonly y: number };
+  readonly titlePos: Vec2;
+  readonly iconsStartPos: Vec2;
+  readonly listPos: Vec2;
 }
 
-// ---------------------------------------------------------------------------
-// End-note panel layout constants
-// ---------------------------------------------------------------------------
-
+// game_update_victory_screen (0x00406350): used as the "end note" screen after the final quest.
 export const END_NOTE_PANEL_POS_X = -45.0;
 export const END_NOTE_PANEL_POS_Y = 110.0;
 export const END_NOTE_PANEL_GEOM_X0 = -63.0;
@@ -60,21 +50,20 @@ export const END_NOTE_PANEL_GEOM_Y0 = -81.0;
 export const END_NOTE_PANEL_W = 510.0;
 export const END_NOTE_PANEL_H = 378.0;
 
-export const END_NOTE_HEADER_X_OFFSET = 214.0;
-export const END_NOTE_HEADER_Y_OFFSET = 46.0;
+export const END_NOTE_HEADER_X_OFFSET = 214.0;  // v11 + 44 - 10 in the decompile, relative to panel-left
+export const END_NOTE_HEADER_Y_OFFSET = 46.0;  // (base_y + 40) + 6 in the decompile, relative to panel-top
 export const END_NOTE_BODY_X_OFFSET = END_NOTE_HEADER_X_OFFSET - 8.0;
 export const END_NOTE_BODY_Y_GAP = 32.0;
 export const END_NOTE_LINE_STEP_Y = 14.0;
-export const END_NOTE_AFTER_BODY_Y_GAP = 22.0;
+export const END_NOTE_AFTER_BODY_Y_GAP = 22.0;  // 14 + 8 in the decompile
 
-export const END_NOTE_BUTTON_X_OFFSET = 266.0;
-export const END_NOTE_BUTTON_Y_OFFSET = 210.0;
+export const END_NOTE_BUTTON_X_OFFSET = 266.0;  // (v11 + 44 + 20) - 4 + 26, relative to panel-left
+export const END_NOTE_BUTTON_Y_OFFSET = 210.0;  // (base_y + 40) + 170 in the decompile, relative to panel-top
 export const END_NOTE_BUTTON_STEP_Y = 32.0;
 
-// ---------------------------------------------------------------------------
-// Quest-failed panel layout constants
-// ---------------------------------------------------------------------------
-
+// `quest_failed_screen_update` panel geometry/anchors:
+// - panel is the classic ui_menuPanel at (-45, 110) with geom x0/y0 (-63, -81)
+// - reaper banner X = panel-left + 214; message/buttons are derived from that anchor.
 export const QUEST_FAILED_PANEL_POS_X = -45.0;
 export const QUEST_FAILED_PANEL_POS_Y = 110.0;
 export const QUEST_FAILED_PANEL_GEOM_X0 = -63.0;
@@ -88,17 +77,13 @@ export const QUEST_FAILED_BANNER_W = 256.0;
 export const QUEST_FAILED_BANNER_H = 64.0;
 
 export const QUEST_FAILED_MESSAGE_X_OFFSET = QUEST_FAILED_BANNER_X_OFFSET + 30.0;
-export const QUEST_FAILED_MESSAGE_Y_OFFSET = 126.0;
+export const QUEST_FAILED_MESSAGE_Y_OFFSET = 126.0;  // (base_y + 40) + 70 + 16
 export const QUEST_FAILED_SCORE_X_OFFSET = QUEST_FAILED_BANNER_X_OFFSET + 40.0;
-export const QUEST_FAILED_SCORE_Y_OFFSET = 152.0;
+export const QUEST_FAILED_SCORE_Y_OFFSET = 152.0;  // message_y + 16 + 10 in native
 export const QUEST_FAILED_BUTTON_X_OFFSET = QUEST_FAILED_BANNER_X_OFFSET + 52.0;
-export const QUEST_FAILED_BUTTON_Y_OFFSET = 240.0;
+export const QUEST_FAILED_BUTTON_Y_OFFSET = 240.0;  // score_y baseline + 98 in native
 export const QUEST_FAILED_BUTTON_STEP_Y = 32.0;
 export const QUEST_FAILED_PANEL_SLIDE_DURATION_MS = 250.0;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 export function playerNameDefault(config: CrimsonConfig): string {
   return config.profile.playerName;
@@ -106,7 +91,7 @@ export function playerNameDefault(config: CrimsonConfig): string {
 
 export function nextQuestLevel(level: QuestLevel): QuestLevel | null {
   const nextIndex = level.globalIndex + 1;
-  if (nextIndex >= QUEST_COUNT) {
+  if (nextIndex >= 50) {
     return null;
   }
   return QuestLevel.fromGlobalIndex(nextIndex);
