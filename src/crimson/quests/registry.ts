@@ -16,8 +16,18 @@ export function registerQuest(opts: {
   unlockWeaponId?: WeaponId | null;
   terrainSlots?: TerrainSlotTriplet | null;
 }): (builder: QuestBuilder) => QuestBuilder {
+  function _builderName(builderFn: QuestBuilder): string {
+    return builderFn.name || String(builderFn);
+  }
+
   return (builder: QuestBuilder): QuestBuilder => {
     const questLevel = QuestLevel.parse(opts.level);
+    const resolvedTerrainSlots = opts.terrainSlots !== undefined && opts.terrainSlots !== null
+      ? opts.terrainSlots
+      : terrainSlotsForQuest(questLevel);
+    const normalizedUnlockWeaponId = opts.unlockWeaponId !== undefined && opts.unlockWeaponId !== null
+      ? opts.unlockWeaponId
+      : null;
     const quest: QuestDefinition = {
       level: questLevel,
       title: opts.title,
@@ -25,31 +35,23 @@ export function registerQuest(opts: {
       timeLimitMs: opts.timeLimitMs,
       startWeaponId: opts.startWeaponId,
       unlockPerkId: opts.unlockPerkId ?? null,
-      unlockWeaponId: opts.unlockWeaponId ?? null,
-      terrainSlots: opts.terrainSlots ?? terrainSlotsForQuest(questLevel),
+      unlockWeaponId: normalizedUnlockWeaponId,
+      terrainSlots: resolvedTerrainSlots,
     };
     const key = quest.level.text;
     const existing = _QUESTS.get(key);
     if (existing !== undefined) {
       throw new Error(
-        `duplicate quest level ${key}: ${existing.builder.name} vs ${builder.name}`,
+        `duplicate quest level ${quest.level.text}: ${_builderName(existing.builder)} vs ${_builderName(builder)}`,
       );
     }
     _QUESTS.set(key, quest);
-    allQuestsCached = undefined;
     return builder;
   };
 }
 
-let allQuestsCached: QuestDefinition[] | undefined;
-
-export function allQuests() {
-  if (allQuestsCached === undefined) {
-    allQuestsCached = Array.from(_QUESTS.values()).sort(
-      (a, b) => a.level.globalIndex - b.level.globalIndex,
-    );
-  }
-  return allQuestsCached;
+export function allQuests(): QuestDefinition[] {
+  return Array.from(_QUESTS.values()).sort((a, b) => a.level.globalIndex - b.level.globalIndex);
 }
 
 export function questByLevel(level: QuestLevel): QuestDefinition | null {
