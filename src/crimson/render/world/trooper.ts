@@ -37,6 +37,7 @@ function drawRing(
   segments: number,
   color: wgl.Color,
 ): void {
+  // WebGL replacement for raylib's `draw_ring`.
   const white = wgl.getWhiteTexture();
   const step = (Math.PI * 2.0) / segments;
   wgl.beginQuads(white);
