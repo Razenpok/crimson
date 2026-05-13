@@ -3,7 +3,7 @@
 import { SfxId } from '@grim/sfx-map.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { PresentationStepCommands } from './presentation-step.ts';
-import { TerrainFxBatch, EMPTY_TERRAIN_FX_BATCH } from './terrain-fx.ts';
+import { TerrainFxBatch } from './terrain-fx.ts';
 import { FrameTiming } from './timing.ts';
 import { WorldEvents } from './world-state.ts';
 
@@ -19,13 +19,12 @@ export class DeterministicStepResult {
     public presentation: PresentationStepCommands,
     public presentationPlanMs: number,
     public presentationRngTrace: PresentationRngTrace,
-    public terrainFx: TerrainFxBatch = EMPTY_TERRAIN_FX_BATCH,
+    public terrainFx: TerrainFxBatch = new TerrainFxBatch(),
     public postApplySfx: readonly SfxId[] = [],
   ) {
   }
 }
 
-// Unused in WebGL port: replay system excluded
 export function timeScaleReflexBoostBonus(opts: {
   reflexBoostTimer: number;
   timeScaleActive: boolean;

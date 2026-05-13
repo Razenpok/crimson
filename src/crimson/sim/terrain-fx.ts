@@ -21,19 +21,25 @@ export interface TerrainCorpseFx {
   readonly creatureTypeId: number;
 }
 
-export interface TerrainFxBatch {
+export class TerrainFxBatch {
   readonly decals: readonly TerrainDecalFx[];
   readonly corpses: readonly TerrainCorpseFx[];
+
+  constructor(opts: { decals?: readonly TerrainDecalFx[]; corpses?: readonly TerrainCorpseFx[] } = {}) {
+    this.decals = opts.decals ?? [];
+    this.corpses = opts.corpses ?? [];
+  }
+
+  isEmpty(): boolean {
+    return this.decals.length === 0 && this.corpses.length === 0;
+  }
 }
 
 export function terrainFxBatchIsEmpty(batch: TerrainFxBatch): boolean {
-  return batch.decals.length === 0 && batch.corpses.length === 0;
+  return batch.isEmpty();
 }
 
-export const EMPTY_TERRAIN_FX_BATCH: TerrainFxBatch = {
-  decals: [],
-  corpses: [],
-};
+export const EMPTY_TERRAIN_FX_BATCH = new TerrainFxBatch();
 
 export class TerrainFxScratch {
   decals = new FxQueue();
@@ -64,6 +70,6 @@ export class TerrainFxScratch {
 
     this.clear();
 
-    return { decals, corpses };
+    return new TerrainFxBatch({ decals, corpses });
   }
 }

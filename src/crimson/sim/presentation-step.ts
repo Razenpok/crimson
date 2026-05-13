@@ -13,9 +13,8 @@ import type { ProjectileHit } from '@crimson/projectiles/types.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
-import type { BonusPickupEvent, PlayerState } from './state-types.ts';
+import type { BonusPickupEvent, GameplayState, PlayerState } from './state-types.ts';
 import { BEAM_TYPES } from './world-defs.ts';
-import { GameplayState } from "@crimson/gameplay.ts";
 
 const _MAX_HIT_SFX_PER_FRAME = 4;
 const _BULLET_HIT_SFX: readonly SfxId[] = [
@@ -23,21 +22,15 @@ const _BULLET_HIT_SFX: readonly SfxId[] = [
   SfxId.BULLET_HIT_04, SfxId.BULLET_HIT_05, SfxId.BULLET_HIT_06,
 ];
 
-// --- PresentationStepCommands ---
-
 export class PresentationStepCommands {
   triggerGameTune = false;
   sfx: SfxId[] = [];
 }
 
-// --- PresentationAudioSink ---
-
 export interface PresentationAudioSink {
   triggerGameTune(): string | null;
   playSfx(sfx: SfxId): void;
 }
-
-// --- plan_player_audio_sfx ---
 
 export function planPlayerAudioSfx(
   player: PlayerState,
@@ -69,8 +62,6 @@ export function planPlayerAudioSfx(
   return sfx;
 }
 
-// --- _hit_sfx_for_type ---
-
 function _hitSfxForType(
   typeId: number,
   _beamTypes: ReadonlySet<number>,
@@ -82,8 +73,6 @@ function _hitSfxForType(
   }
   return _BULLET_HIT_SFX[rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_HIT_SFX }) % _BULLET_HIT_SFX.length];
 }
-
-// --- plan_hit_sfx ---
 
 export function planHitSfx(
   hits: ProjectileHit[],
@@ -99,6 +88,11 @@ export function planHitSfx(
 
   for (let idx = 0; idx < end; idx++) {
     if (!opts.demoModeActive && opts.gameMode !== GameMode.RUSH && !localGameTuneStarted) {
+      // Mirrors `projectile_update`: first eligible hit calls
+      // `sfx_play_exclusive(music_track_extra_0)` and skips the panned
+      // bullet/shock hit sound for that same hit. Native
+      // `sfx_play_exclusive` also performs one RNG draw to pick the
+      // playlist entry, so consume one draw here for stream parity.
       triggerGameTune = true;
       localGameTuneStarted = true;
       opts.rng.rand({ caller: RngCallerStatic.SFX_PLAY_EXCLUSIVE_PLAYLIST_PICK });
@@ -111,8 +105,6 @@ export function planHitSfx(
   return [triggerGameTune, sfx];
 }
 
-// --- ProjectileDecalPostCtx ---
-
 export interface ProjectileDecalPostCtx {
   readonly hit: ProjectileHit;
   readonly baseAngle: number;
@@ -120,8 +112,6 @@ export interface ProjectileDecalPostCtx {
   readonly freezeActive: boolean;
   readonly freezeShardSpawn: ((pos: Vec2, angle: number) => void) | null;
 }
-
-// --- queue_projectile_decals ---
 
 export function queueProjectileDecals(
   opts: { state: GameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hits: ProjectileHit[]; rng: CrandLike; detailPreset: number; violenceDisabled: number },
@@ -133,8 +123,6 @@ export function queueProjectileDecals(
     queueProjectileDecalsPostHit({ fxQueue: opts.fxQueue, postCtx, rng: opts.rng });
   }
 }
-
-// --- queue_projectile_decals_pre_hit ---
 
 export function queueProjectileDecalsPreHit(
   opts: { state: GameplayState; players: readonly PlayerState[]; fxQueue: FxQueue; hit: ProjectileHit; rng: CrandLike; detailPreset: number; violenceDisabled: number },
@@ -153,7 +141,7 @@ export function queueProjectileDecalsPreHit(
   const baseAngle = opts.hit.hit.sub(opts.hit.origin).toAngle();
 
   if (typeId === ProjectileTemplateId.BLADE_GUN) {
-    for (let i = 0; i < 8; i++) {
+    for (let _ = 0; _ < 8; _++) {
       opts.state.effects.spawnBloodSplatter({
         pos: opts.hit.hit,
         angle: (opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_BLADE_GUN_SPLATTER_ANGLE }) & 0xFF) * 0.024543693,
@@ -162,8 +150,9 @@ export function queueProjectileDecalsPreHit(
     }
   }
 
+  // Native `projectile_update` spawns blood splatter before terrain decals.
   if (bloody) {
-    for (let i = 0; i < 8; i++) {
+    for (let _ = 0; _ < 8; _++) {
       const spread = ((opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_BLOODY_MESS_SPREAD }) & 0x1F) - 16.0) * 0.0625;
       opts.state.effects.spawnBloodSplatter({
         pos: opts.hit.hit, angle: baseAngle + spread, age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
@@ -190,7 +179,7 @@ export function queueProjectileDecalsPreHit(
       hi += 10;
     }
   } else if (!freezeActive) {
-    for (let i = 0; i < 2; i++) {
+    for (let _ = 0; _ < 2; _++) {
       opts.state.effects.spawnBloodSplatter({
         pos: opts.hit.hit, angle: baseAngle, age: 0.0, rng: opts.rng, detailPreset: opts.detailPreset, violenceDisabled: opts.violenceDisabled,
       });
@@ -211,14 +200,14 @@ export function queueProjectileDecalsPreHit(
   };
 }
 
-// --- queue_projectile_decals_post_hit ---
-
 export function queueProjectileDecalsPostHit(
   opts: { fxQueue: FxQueue; postCtx: ProjectileDecalPostCtx; rng: CrandLike },
 ): void {
   const hit = opts.postCtx.hit;
   const baseAngle = opts.postCtx.baseAngle;
 
+  // Native consumes one extra `crt_rand()` per creature hit before the
+  // post-hit terrain decal burst branch.
   opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_POST_HIT_DECAL_BURN });
 
   const hookHandled = queueProjectileLargeStreakDecal({
@@ -229,7 +218,7 @@ export function queueProjectileDecalsPostHit(
 
   if (hookHandled || opts.postCtx.freezeActive) return;
 
-  for (let i = 0; i < 3; i++) {
+  for (let _ = 0; _ < 3; _++) {
     const spread = (opts.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_DECAL_SPREAD }) % 20 - 10) * 0.1;
     const angle = baseAngle + spread;
     const direction = Vec2.fromAngle(angle).mul(20.0);
@@ -239,8 +228,6 @@ export function queueProjectileDecalsPostHit(
     opts.fxQueue.addRandom({ pos: hit.target.add(direction.mul(2.5)), rng: opts.rng });
   }
 }
-
-// --- plan_world_presentation_step ---
 
 export function planWorldPresentationStep(opts: {
   state: GameplayState;
@@ -324,8 +311,6 @@ export function planWorldPresentationStep(opts: {
 
   return commands;
 }
-
-// --- apply_presentation_plan ---
 
 export function applyPresentationPlan(
   opts: { plan: PresentationStepCommands; audioSink: PresentationAudioSink | null; applyAudio?: boolean },
