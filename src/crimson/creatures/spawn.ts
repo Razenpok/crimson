@@ -53,6 +53,8 @@ class ValueError extends Error {
 
 
 export class UnsupportedSpawnTemplateError extends ValueError {
+  /** Raised when a spawn template id is outside the supported rewrite coverage. */
+
   constructor(message: string) {
     super(message);
     this.name = 'UnsupportedSpawnTemplateError';
@@ -468,7 +470,6 @@ export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map([
 ]);
 
 
-// Unused in WebGL port: debug/CLI display only
 export function spawnIdLabel(spawnId: SpawnId): string {
   const entry = SPAWN_ID_TO_TEMPLATE.get(spawnId);
   if (entry === undefined || entry.creature === null) {
@@ -2266,6 +2267,14 @@ export function buildSpawnPlan(
   rng: CrandLike,
   env: SpawnEnv,
 ): SpawnPlan {
+  /** Pure plan builder modeled after `creature_spawn_template` (0x00430AF0).
+   *
+   * The plan lists:
+   *   - every creature allocated and configured directly by the template
+   *   - any spawn-slot configurations (deferred child spawns)
+   *   - side-effects like burst FX
+   */
+
   const [ctx, finalHeading] = PlanBuilder.start(templateId, pos, heading, rng, env);
 
   const builder = TEMPLATE_BUILDERS.get(templateId);
