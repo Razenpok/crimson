@@ -2,7 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+import type { GameplayState } from "@crimson/gameplay.js";
 
 // Camera helpers recovered from the original crimsonland.exe.
 // This module currently models the `camera_update` screen shake logic, which is
@@ -15,7 +15,7 @@ export function cameraShakeStart(state: GameplayState, opts: { pulses: number; t
   //   - `camera_shake_pulses = 0x14`
   //   - `camera_shake_timer = 0.2`
 
-  state.cameraShakePulses = opts.pulses;
+  state.cameraShakePulses = int(opts.pulses);
   state.cameraShakeTimer = opts.timer;
 }
 
@@ -50,7 +50,7 @@ export function cameraShakeUpdate(state: GameplayState, dt: number): void {
   //   iVar4 = camera_shake_pulses * 0x3c;
   //   iVar1 = rand() % (iVar4 / 0x14) + rand() % 10;
   // ... where (pulses * 0x3c) / 0x14 == pulses * 3.
-  const maxAmp = state.cameraShakePulses * 3;
+  const maxAmp = int(state.cameraShakePulses) * 3;
   if (maxAmp <= 0) {
     state.cameraShakeOffset = new Vec2();
     state.cameraShakeTimer = 0.0;
