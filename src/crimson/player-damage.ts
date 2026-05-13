@@ -1,5 +1,10 @@
 // Port of crimson/player_damage.py
 
+// Player damage intake helpers.
+//
+// This is a minimal, rewrite-focused port of `player_take_damage` (0x00425e50).
+// See: `docs/crimsonland-exe/player-damage.md`.
+
 import { SfxId } from '@grim/sfx-map.ts';
 import { f32 } from './math-parity.ts';
 import { PerkId } from './perks/ids.ts';
@@ -21,6 +26,8 @@ export function playerTakeDamage(
   damage: number,
   opts: { dt?: number | null; players?: readonly PlayerState[] | null; onLethal?: (() => void) | null } = {},
 ): number {
+  // Apply damage to a player, returning the actual damage applied.
+
   const dt = opts.dt ?? null;
   const players = opts.players ?? null;
   const onLethal = opts.onLethal ?? null;
@@ -41,12 +48,15 @@ export function playerTakeDamage(
   if (player.shieldTimer > 0.0) return 0.0;
 
   let wasAliveSource: PlayerState = player;
+  // Native bug: the pre-hit alive flag is read from player 1 health even when
+  // damaging player 2; preserve this under `--preserve-bugs`.
   if (state.preserveBugs && players && players.length > 0) {
     wasAliveSource = players[0];
   }
   const wasAlive = wasAliveSource.health > 0.0;
 
   if (perkActive(player, PerkId.THICK_SKINNED)) {
+    // Native uses an f32 constant (`~0.666`) here, not exact 2/3.
     damageScaled = f32(damageScaled * _THICK_SKINNED_DAMAGE_SCALE_F32);
   }
 
@@ -69,6 +79,8 @@ export function playerTakeDamage(
   }
 
   let lethalHit = player.health < 0.0;
+  // Native routes exact-zero Highlander kills through the pain branch; default
+  // rewrite mode treats `health == 0` as lethal here.
   if (!state.preserveBugs && player.health === 0.0) {
     lethalHit = true;
   }
@@ -76,6 +88,7 @@ export function playerTakeDamage(
     player.deathTimer -= dt * 28.0;
   }
 
+  // Native emits pain/death VO before heading jitter + low-health timer RNG work.
   if (!lethalHit) {
     state.sfxQueue.push(
       _PLAYER_PAIN_SFX[state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_PAIN_SFX }) % _PLAYER_PAIN_SFX.length],
@@ -98,6 +111,7 @@ export function playerTakeDamage(
   if (!dodged) {
     if (!perkActive(player, PerkId.UNSTOPPABLE)) {
       player.heading += ((state.rng.rand({ caller: RngCallerStatic.PLAYER_TAKE_DAMAGE_HEADING }) % 100) - 50) * 0.04;
+      // Native uses post-Tough-Reloader damage (before Thick Skinned) for spread heat growth.
       player.spreadHeat = Math.min(0.48, player.spreadHeat + spreadHeatDamage * 0.01);
     }
 
@@ -114,6 +128,11 @@ export function playerTakeProjectileDamage(
   player: PlayerState,
   damage: number,
 ): number {
+  // Apply projectile damage to a player (modeled after `projectile_update` player-hit logic).
+  //
+  // Native `projectile_update` does not call `player_take_damage` for projectile hits: it sets
+  // `projectile.life_timer = 0.25` and subtracts a fixed amount (usually 10.0) if shield is down.
+
   const dmg = damage;
   if (dmg <= 0.0) return 0.0;
   if (state.debugGodMode) return 0.0;
