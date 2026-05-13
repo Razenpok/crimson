@@ -230,6 +230,12 @@ function _axisValueForGamepad(gamepadIndex: number, axis: number): number {
   return Math.max(-1.0, Math.min(1.0, value));
 }
 
+function _rawAxisValueForGamepad(gamepadIndex: number, axis: number): number {
+  const gamepad = _gamepadForIndex(int(gamepadIndex));
+  if (gamepad === null) return 0.0;
+  return gamepad.axes[int(axis)] ?? 0.0;
+}
+
 function _axisValueFromCode(keyCode: number, playerIndex: number): number {
   const code = int(keyCode);
   const axis = AXIS_CODE_TO_AXIS[code];
@@ -349,7 +355,7 @@ export function captureFirstPressedInputCode(
     const gamepad = _playerGamepadIndex(playerIdx);
     if (_isGamepadAvailable(gamepad)) {
       for (const [codeStr, axis] of Object.entries(AXIS_CODE_TO_AXIS)) {
-        const value = _axisValueForGamepad(gamepad, axis);
+        const value = _rawAxisValueForGamepad(gamepad, axis);
         if (Math.abs(value) >= axisThreshold) {
           return Number(codeStr);
         }
