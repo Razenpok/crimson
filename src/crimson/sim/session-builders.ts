@@ -41,6 +41,7 @@ export function enforceRushLoadout(world: WorldState): void {
     if (player.weapon.weaponId !== RUSH_WEAPON_ID) {
       weaponAssignPlayer(player, RUSH_WEAPON_ID, { state: world.state });
     }
+    // Native `rush_mode_update` forces assault rifle + 30 ammo every frame.
     player.weapon.ammo = RUSH_FORCED_AMMO;
   }
 }
@@ -209,7 +210,7 @@ export function buildTutorialSession(opts: {
     gameTuneStarted: opts.gameTuneStarted,
     demoModeActive: opts.demoModeActive,
     beforeStepHook: () => tutorialBeforeStep(opts.world),
-    postStepHook: (ctx) => tutorialPostStep({ world: ctx.world, stepResult: ctx.stepResult, dtSimMs: ctx.dtSimMs, worldSize: ctx.worldSize, detailPreset: ctx.detailPreset }),
+    postStepHook: tutorialPostStep,
     inputTransform: (inputs: PlayerInput[]) =>
       tutorialInputTransform(opts.world, inputs),
   });
