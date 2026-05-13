@@ -5,6 +5,7 @@ import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import { savedNameLabels } from '@grim/config.ts';
 import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
 import { formatScoreDate } from './shared.ts';
@@ -85,9 +86,42 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
 function savedScoreNames(view: HighScoresView): string[] {
-  const config = view.state.config.profile;
-  const count = Math.max(0, Math.min(config.savedNames.length, config.savedNameCount));
-  return config.savedNames.slice(0, Math.max(1, count));
+  return savedNameLabels(view.state.config.profile);
+}
+
+function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  const ix1 = int(x1);
+  const iy1 = int(y1);
+  const ix2 = int(x2);
+  const iy2 = int(y2);
+  if (iy1 === iy2) {
+    wgl.drawRectangle(Math.min(ix1, ix2), iy1, Math.abs(ix2 - ix1), 1, color);
+    return;
+  }
+  if (ix1 === ix2) {
+    wgl.drawRectangle(ix1, Math.min(iy1, iy2), 1, Math.abs(iy2 - iy1), color);
+    return;
+  }
+  wgl.drawRectangle(ix1, iy1, ix2 - ix1, iy2 - iy1, color);
+}
+
+function gameModeFromId(modeRaw: number): GameMode {
+  switch (int(modeRaw)) {
+    case GameMode.DEMO:
+      return GameMode.DEMO;
+    case GameMode.SURVIVAL:
+      return GameMode.SURVIVAL;
+    case GameMode.RUSH:
+      return GameMode.RUSH;
+    case GameMode.QUESTS:
+      return GameMode.QUESTS;
+    case GameMode.TYPO:
+      return GameMode.TYPO;
+    case GameMode.TUTORIAL:
+      return GameMode.TUTORIAL;
+    default:
+      return GameMode.DEMO;
+  }
 }
 
 function drawDropdown(
@@ -238,7 +272,7 @@ function drawRightPanelQuestOptions(
   drawSmallText(font, 'Show scores:', optionsTopLeft.add(new Vec2(HS_RIGHT_SHOW_SCORES_X * scale, HS_RIGHT_SHOW_SCORES_Y * scale)), textColor);
   drawSmallText(font, 'Selected score list:', optionsTopLeft.add(new Vec2(HS_RIGHT_SCORE_LIST_X * scale, HS_RIGHT_SCORE_LIST_Y * scale)), textColor);
 
-  // Dropdown items
+  // Dropdown widgets (state_14 quest variant).
   const showScoresItems = ['Best of all time', 'Best of month', 'Best of week', 'Best of day'];
   const playerItems = ['1 player', '2 players', '3 players', '4 players'];
   const modeItems: [string, number][] = [['Quests', 3], ['Rush', 2], ['Survival', 1]];
@@ -371,12 +405,11 @@ function drawRightPanelLocalScore(
   drawSmallText(font, name, cardTopLeft.add(new Vec2(HS_LOCAL_NAME_X * scale, HS_LOCAL_NAME_Y * scale)), textColor);
   drawSmallText(font, 'Local score', cardTopLeft.add(new Vec2(HS_LOCAL_LABEL_X * scale, HS_LOCAL_LABEL_Y * scale)), textColor);
 
-  // Separator line
-  wgl.drawRectangle(
+  drawLine(
     int(cardTopLeft.x + 78.0 * scale),
     int(cardTopLeft.y + 57.0 * scale),
-    int(39.0 * scale),
-    1,
+    int(cardTopLeft.x + 117.0 * scale),
+    int(cardTopLeft.y + 57.0 * scale),
     separatorColor,
   );
 
@@ -384,23 +417,18 @@ function drawRightPanelLocalScore(
   if (dateText) {
     drawSmallText(font, dateText, cardTopLeft.add(new Vec2(HS_LOCAL_DATE_X * scale, HS_LOCAL_DATE_Y * scale)), textColor);
   }
-  wgl.drawRectangle(
+  drawLine(
     int(cardTopLeft.x + 74.0 * scale),
     int(cardTopLeft.y + 72.0 * scale),
-    int(192.0 * scale),
-    1,
+    int(cardTopLeft.x + 266.0 * scale),
+    int(cardTopLeft.y + 72.0 * scale),
     separatorColor,
   );
 
   drawSmallText(font, 'Score', cardTopLeft.add(new Vec2(HS_LOCAL_SCORE_LABEL_X * scale, HS_LOCAL_SCORE_LABEL_Y * scale)), textColor);
 
-  let modeId: GameMode;
   const modeRaw = int(entry.gameModeId);
-  try {
-    modeId = modeRaw as GameMode;
-  } catch {
-    modeId = GameMode.DEMO;
-  }
+  const modeId = gameModeFromId(modeRaw);
   const elapsedMs = int(entry.survivalElapsedMs);
   const scoreXp = int(entry.scoreXp);
 
@@ -412,21 +440,24 @@ function drawRightPanelLocalScore(
   }
 
   drawSmallText(font, timeLabel, cardTopLeft.add(new Vec2(HS_LOCAL_TIME_LABEL_X * scale, HS_LOCAL_TIME_LABEL_Y * scale)), gameTimeColor);
-  // Vertical separator
-  wgl.drawRectangle(
+  drawLine(
     int(cardTopLeft.x + 170.0 * scale),
     int(cardTopLeft.y + 90.0 * scale),
-    1,
-    int(48.0 * scale),
+    int(cardTopLeft.x + 170.0 * scale),
+    int(cardTopLeft.y + 138.0 * scale),
     separatorColor,
   );
 
-  // Score value
+  // Native highscore card:
+  // - Rush/Quest: score is survival time in seconds (ms * 0.001), rendered with 2 decimals.
+  // - Others: score is XP (u32).
   let scoreValuePosX = HS_LOCAL_SCORE_VALUE_X * scale;
   let scoreValuePosY = HS_LOCAL_SCORE_VALUE_Y * scale;
   let scoreValue: string;
   if (modeId === GameMode.RUSH || modeId === GameMode.QUESTS) {
     scoreValue = `${(Math.max(0, elapsedMs) * 0.001).toFixed(2)} secs`;
+    // Quest/Rush scores are variable-width second labels ("%.2f secs") and are
+    // centered in the left score column in native.
     const scoreLabelW = measureSmallTextWidth(font, 'Score');
     const scoreValueW = measureSmallTextWidth(font, scoreValue);
     const scoreColCenterX = HS_LOCAL_SCORE_LABEL_X * scale + scoreLabelW * 0.5;
@@ -458,11 +489,11 @@ function drawRightPanelLocalScore(
     hitPct = Math.floor((shotsHit * 100) / shotsFired);
   }
 
-  wgl.drawRectangle(
+  drawLine(
     int(cardTopLeft.x + 74.0 * scale),
     int(cardTopLeft.y + 142.0 * scale),
-    int(192.0 * scale),
-    1,
+    int(cardTopLeft.x + 266.0 * scale),
+    int(cardTopLeft.y + 142.0 * scale),
     separatorColor,
   );
 
@@ -484,11 +515,11 @@ function drawRightPanelLocalScore(
   drawSmallText(font, `Frags: ${frags}`, cardTopLeft.add(new Vec2(HS_LOCAL_FRAGS_X * scale, HS_LOCAL_FRAGS_Y * scale)), lowerSectionColor);
   drawSmallText(font, `Hit %: ${hitPct}%`, cardTopLeft.add(new Vec2(HS_LOCAL_HIT_X * scale, HS_LOCAL_HIT_Y * scale)), lowerSectionColor);
 
-  wgl.drawRectangle(
+  drawLine(
     int(cardTopLeft.x + 74.0 * scale),
     int(cardTopLeft.y + 194.0 * scale),
-    int(192.0 * scale),
-    1,
+    int(cardTopLeft.x + 266.0 * scale),
+    int(cardTopLeft.y + 194.0 * scale),
     separatorColor,
   );
 }
