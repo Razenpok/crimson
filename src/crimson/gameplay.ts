@@ -54,9 +54,19 @@ import { QuestLevel } from "@crimson/quests/level.js";
 // ---------------------------------------------------------------------------
 
 export interface GameStatus {
+  gameSequenceId: number;
   questUnlockIndex: number;
   questUnlockIndexFull: number;
-  incrementQuestPlayCount?(idx: number): void;
+  questPlayCounts: number[];
+  modePlayOther: number;
+  unknownTail: Uint8Array;
+  saveIfDirty(): void;
+  incrementModePlayCountForMode(mode: GameMode): void;
+  modePlayCountForMode(mode: number): number;
+  questPlayCount(index: number): number;
+  incrementQuestPlayCount(idx: number): number;
+  weaponUsageCountSlot(slot: number): number;
+  incrementWeaponUsageSlot(slot: number): void;
 }
 
 // ---------------------------------------------------------------------------

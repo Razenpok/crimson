@@ -7,7 +7,7 @@ import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts
 import { InputState } from '@grim/input.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
-import { buildWeaponAvailability, type WeaponAvailabilityStatus } from '@crimson/weapon-runtime/availability.ts';
+import { buildWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
 import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
 import { DatabaseBaseView } from './databases-base.ts';
@@ -203,7 +203,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _buildWeaponDatabaseIds(): number[] {
-    const status: WeaponAvailabilityStatus | null = this.state.status;
+    const status = this.state.status;
     const available = buildWeaponAvailability({
       status,
       gameMode: this.state.config.gameplay.mode,

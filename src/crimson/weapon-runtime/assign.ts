@@ -7,7 +7,7 @@ import { WeaponSlot } from '@crimson/sim/state-types.ts';
 import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
 import type { Weapon } from '@crimson/weapons.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+import type { GameplayState } from "@crimson/gameplay.js";
 
 export function weaponEntry(weaponId: WeaponId): Weapon {
   const entry = WEAPON_BY_ID.get(weaponId);
@@ -51,17 +51,13 @@ export function initDefaultAltWeapon(player: PlayerState): void {
   });
 }
 
-export interface WeaponAssignStatus {
-  incrementWeaponUsageSlot(slot: number): void;
-}
-
 export function weaponAssignPlayer(
   player: PlayerState,
   weaponId: WeaponId,
   opts: { state: GameplayState },
 ): void {
   const state = opts.state;
-  const status = state.status as WeaponAssignStatus | null;
+  const status = state.status;
   if (status !== null && !state.demoModeActive) {
     const usageSlot = weaponUsageSlotForWeaponId(weaponId);
     if (usageSlot !== null) {
