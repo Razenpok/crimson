@@ -175,9 +175,9 @@ export class ProjectilePool {
     let barrelGreaserActive = false;
     let ionGunMasterActive = false;
     let ionScale = ionAoeScale;
-    const poisonIdx = PerkId.POISON_BULLETS as number;
-    const barrelIdx = PerkId.BARREL_GREASER as number;
-    const ionIdx = PerkId.ION_GUN_MASTER as number;
+    const poisonIdx = PerkId.POISON_BULLETS;
+    const barrelIdx = PerkId.BARREL_GREASER;
+    const ionIdx = PerkId.ION_GUN_MASTER;
     for (const player of players) {
       const perkCounts = player.perkCounts;
 
@@ -223,12 +223,12 @@ export class ProjectilePool {
 
     const creatureSpatial = new CreatureSpatialHash(creatures, _creatureIsCollidable);
 
-    const _damageScale = (typeId: number): number => {
+    const _damageScale = (typeId: ProjectileTemplateId): number => {
       const value = damageScaleByType.get(typeId);
       if (value !== undefined) {
         return value;
       }
-      return weaponEntryForProjectileTypeId(typeId as ProjectileTemplateId).damageScale;
+      return weaponEntryForProjectileTypeId(typeId).damageScale;
     };
 
     const _damageDistanceF32 = (origin: Vec2, pos: Vec2): number => {
