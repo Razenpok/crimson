@@ -28,14 +28,16 @@ import {
 } from '@crimson/ui/text-input.ts';
 
 // ---------------------------------------------------------------------------
-// High-score types (stub -- these will come from a persistence module)
+// High-score types
 // ---------------------------------------------------------------------------
 
-export const NAME_MAX_EDIT = 15;
+export const NAME_MAX_EDIT = 0x14;
 export const TABLE_MAX = 100;
 
 export interface HighScoreRecord {
   gameModeId: number;
+  questStageMajor?: number;
+  questStageMinor?: number;
   scoreXp: number;
   survivalElapsedMs: number;
   mostUsedWeaponId: number;
@@ -46,8 +48,26 @@ export interface HighScoreRecord {
 }
 
 export function rankIndex(records: HighScoreRecord[], candidate: HighScoreRecord): number {
+  const mode = int(candidate.gameModeId);
+  if (mode === GameMode.RUSH) {
+    const score = int(candidate.survivalElapsedMs);
+    for (let i = 0; i < records.length; i++) {
+      if (score > int(records[i].survivalElapsedMs)) return i;
+    }
+    return records.length;
+  }
+  if (mode === GameMode.QUESTS) {
+    const score = int(candidate.survivalElapsedMs);
+    for (let i = 0; i < records.length; i++) {
+      const other = int(records[i].survivalElapsedMs);
+      if (other === 0) return i;
+      if (score < other) return i;
+    }
+    return records.length;
+  }
+  const score = int(candidate.scoreXp);
   for (let i = 0; i < records.length; i++) {
-    if (candidate.scoreXp > records[i].scoreXp) return i;
+    if (score > int(records[i].scoreXp)) return i;
   }
   return records.length;
 }

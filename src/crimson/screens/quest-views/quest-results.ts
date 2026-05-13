@@ -115,6 +115,8 @@ export class QuestResultsView {
     const shotsHit = Math.max(0, Math.min(int(outcome.shotsHit), shotsFired));
     const record = {
       gameModeId: GameMode.QUESTS,
+      questStageMajor: int(level.major),
+      questStageMinor: int(level.minor),
       scoreXp: int(outcome.experience),
       survivalElapsedMs: int(breakdown.finalTimeMs),
       mostUsedWeaponId: outcome.mostUsedWeaponId,
