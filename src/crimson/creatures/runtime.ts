@@ -1203,9 +1203,13 @@ export class CreaturePool {
             creature.moveSpeed,
           );
           creature.vel = moveDelta;
+          // Native path (flags without 0x4): no bounds clamp here; offscreen spawns
+          // remain offscreen until their own velocity moves them in.
           creature.pos = _advancePosByDeltaF32(creature.pos, moveDelta);
         }
       } else {
+        // Spawner/short-strip creatures clamp to bounds using `size` as a radius; most are stationary
+        // unless ANIM_LONG_STRIP is set (see creature_update_all).
         const radius = Math.max(0.0, creature.size);
         const maxX = Math.max(radius, worldWidth - radius);
         const maxY = Math.max(radius, worldHeight - radius);
@@ -1245,12 +1249,16 @@ export class CreaturePool {
         this._plaguebearerSpreadInfection(idx);
       }
 
+      // Native decrements contact/ranged cooldown before interaction checks,
+      // then lets contact hits raise it back by +1.0 in the same frame.
       if (creature.attackCooldown <= 0.0) {
         creature.attackCooldown = 0.0;
       } else {
         creature.attackCooldown -= dt;
       }
 
+      // Native radioactive contact pulse runs after movement/AI/cooldown
+      // synthesis inside the live-creature branch.
       if (players.length > 0 && perkActive(players[0], PerkId.RADIOACTIVE)) {
         const radioactivePlayer = players[0];
         const dist = creature.pos.sub(radioactivePlayer.pos).length();
@@ -1354,6 +1362,8 @@ export class CreaturePool {
       }
       if (interactionCtx.skipCreature) continue;
 
+      // Tick owner-bound spawn slots at creature-loop tail so spawned children
+      // can still be visited later in the same update pass.
       if (
         dt > 0.0 &&
         state.bonuses.freeze <= 0.0 &&
@@ -1395,6 +1405,8 @@ export class CreaturePool {
     fxQueue: FxQueue | null;
     keepCorpse?: boolean;
   }): CreatureDeath {
+    /** Run one-shot death side effects and return the `CreatureDeath` event. */
+
     const state = opts.state;
     const players = opts.players;
     const rng = opts.rng;
@@ -1422,6 +1434,10 @@ export class CreaturePool {
       }
     }
     if (!creature.active) {
+      // Native `creature_handle_death` gates its XP/bonus/freeze body under
+      // `if (active != 0)`. Re-entrant callers (notably secondary
+      // detonation follow-up) can invoke death handling after the first call
+      // has already deactivated the creature.
       return {
         index: idx,
         pos: creature.pos,
@@ -1443,6 +1459,8 @@ export class CreaturePool {
     );
 
     if (keepCorpse) {
+      // Native `creature_handle_death` always decrements lifecycle_stage by
+      // frame_dt for corpse-keeping deaths, independent of current value.
       creature.lifecycleStage = creature.lifecycleStage - dt;
     } else {
       creature.active = false;
@@ -1545,6 +1563,13 @@ export class CreaturePool {
     detailPreset: number = 5,
     violenceDisabled: number = 0,
   ): void {
+    /** Advance the post-death lifecycle_stage ramp and queue corpse decals.
+     *
+     * This matches the `lifecycle_stage` death staging inside `creature_update_all`:
+     * - while lifecycle_stage > 0: decrement quickly and slide backwards
+     * - once lifecycle_stage <= 0: queue a corpse decal and fade out until < -10, then deactivate.
+     */
+
     if (dt <= 0.0) return;
 
     const dtF32 = f32(dt);
@@ -1562,6 +1587,8 @@ export class CreaturePool {
     creature.lifecycleStage = f32(newHitbox);
     if (newHitbox > 0.0) {
       if (longStrip) {
+        // Match float-local multiply chain in `creature_update_all`:
+        // slide = (float)((float)(hitbox * dt) * 9.0f)
         const slide = f32(f32(newHitbox * dtF32) * f32(CREATURE_DEATH_SLIDE_SCALE));
         const direction = headingToDirectionF32(creature.heading);
         creature.vel = new Vec2(
@@ -1598,6 +1625,8 @@ export class CreaturePool {
 
     this.killCount += 1;
 
+    // Native `creature_update_all` emits a 19-splatter blood burst when a
+    // ping-pong corpse first reaches this staged kill point.
     if (
       violenceDisabled === 0 &&
       ((int(creature.flags)) & CreatureFlags.ANIM_PING_PONG) !== 0 &&
@@ -1626,6 +1655,13 @@ export class CreaturePool {
   }
 
   finalizePostRenderLifecycle(): void {
+    /** Mirror render-time corpse culling from native `creature_render_type`.
+     *
+     * Native deactivates entries only after draw once `lifecycle_stage < -10.0`. Keeping
+     * this outside `creature_update_all` preserves slot-allocation timing for same-tick
+     * survival/rush spawns.
+     */
+
     for (const creature of this._entries) {
       if (!creature.active) continue;
       if (classifyCreatureLifecycle(creature.lifecycleStage) !== CreatureLifecyclePhase.DESPAWNED) {
