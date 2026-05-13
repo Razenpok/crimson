@@ -11,7 +11,7 @@ import { inputBeginFrame } from '@crimson/input-codes.ts';
 import { debugEnabled } from '@crimson/debug.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { type RtxRenderMode, cycleRtxRenderMode } from '@crimson/render/rtx/mode.ts';
-import { type Screen, type GameState, type GameplayScreen } from './types.ts';
+import { type Screen, type GameState, type GameplayScreen, HighScoresRequest } from './types.ts';
 import {
   type DemoTrialOverlayInfo,
   demoTrialOverlayInfo,
@@ -823,11 +823,9 @@ export class GameLoopView implements View {
     action: string | null,
   ): string | null {
     if (action === 'open_high_scores') {
-      this.state.pendingHighScores = {
+      this.state.pendingHighScores = new HighScoresRequest({
         gameModeId: gameplay.defaultGameModeId,
-        questLevel: null,
-        highlightRank: null,
-      };
+      });
       return action;
     }
 
