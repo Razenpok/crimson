@@ -292,25 +292,43 @@ export class CreatureState {
 }
 
 export class CreatureDeath {
-  constructor(
-    public readonly index: number,
-    public readonly pos: Vec2,
-    public readonly typeId: CreatureTypeId,
-    public readonly rewardValue: number,
-    public readonly xpAwarded: number,
-    public readonly owner: OwnerRef,
-  ) {
-    Object.freeze(this);
+  readonly index: number;
+  readonly pos: Vec2;
+  readonly typeId: CreatureTypeId;
+  readonly rewardValue: number;
+  readonly xpAwarded: number;
+  readonly owner: OwnerRef;
+
+  constructor(opts: {
+    index: number;
+    pos: Vec2;
+    typeId: CreatureTypeId;
+    rewardValue: number;
+    xpAwarded: number;
+    owner: OwnerRef;
+  }) {
+    this.index = opts.index;
+    this.pos = opts.pos;
+    this.typeId = opts.typeId;
+    this.rewardValue = opts.rewardValue;
+    this.xpAwarded = opts.xpAwarded;
+    this.owner = opts.owner;
   }
 }
 
 export class CreatureUpdateResult {
-  constructor(
-    public readonly deaths: readonly CreatureDeath[] = [],
-    public readonly spawned: readonly number[] = [],
-    public readonly sfx: readonly SfxId[] = [],
-  ) {
-    Object.freeze(this);
+  readonly deaths: readonly CreatureDeath[];
+  readonly spawned: readonly number[];
+  readonly sfx: readonly SfxId[];
+
+  constructor(opts: {
+    deaths?: readonly CreatureDeath[];
+    spawned?: readonly number[];
+    sfx?: readonly SfxId[];
+  } = {}) {
+    this.deaths = opts.deaths ?? [];
+    this.spawned = opts.spawned ?? [];
+    this.sfx = opts.sfx ?? [];
   }
 }
 
@@ -348,7 +366,6 @@ export class CreatureUpdateOptions {
     this.fxQueueRotated = opts.fxQueueRotated;
     this.detailPreset = opts.detailPreset ?? 5;
     this.violenceDisabled = opts.violenceDisabled ?? 0;
-    Object.freeze(this);
   }
 }
 
@@ -1457,7 +1474,7 @@ export class CreaturePool {
       }
     }
 
-    return new CreatureUpdateResult(deaths, spawned, sfx);
+    return new CreatureUpdateResult({ deaths, spawned, sfx });
   }
 
   handleDeath(idx: number, opts: {
@@ -1504,14 +1521,14 @@ export class CreaturePool {
       // `if (active != 0)`. Re-entrant callers (notably secondary
       // detonation follow-up) can invoke death handling after the first call
       // has already deactivated the creature.
-      return new CreatureDeath(
-        idx,
-        creature.pos,
-        creature.typeId,
-        creature.rewardValue,
-        0,
-        creature.lastHitOwner,
-      );
+      return new CreatureDeath({
+        index: int(idx),
+        pos: creature.pos,
+        typeId: creature.typeId,
+        rewardValue: creature.rewardValue,
+        xpAwarded: 0,
+        owner: creature.lastHitOwner,
+      });
     }
     const death = this._startDeath(
       idx,
@@ -1807,13 +1824,13 @@ export class CreaturePool {
       );
     }
 
-    return new CreatureDeath(
-      idx,
-      creature.pos,
-      creature.typeId,
-      creature.rewardValue,
+    return new CreatureDeath({
+      index: int(idx),
+      pos: creature.pos,
+      typeId: creature.typeId,
+      rewardValue: creature.rewardValue,
       xpAwarded,
-      creature.lastHitOwner,
-    );
+      owner: creature.lastHitOwner,
+    });
   }
 }
