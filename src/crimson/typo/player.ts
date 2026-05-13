@@ -8,13 +8,12 @@ import { WeaponId } from '@crimson/weapons.ts';
 
 export const TYPO_WEAPON_ID = WeaponId.SAWED_OFF_SHOTGUN;
 
-/**
- * Match Typ-o Shooter's bespoke player loop (`player_fire_weapon @ 0x00444980`).
- *
- * Typ-o resets timers and tops up ammo each frame, so typing speed (not weapon
- * cooldown) controls rate of fire.
- */
 export function enforceTypoPlayerFrame(player: PlayerState, opts: { state: GameplayState }): void {
+  // Match Typ-o Shooter's bespoke player loop (`player_fire_weapon @ 0x00444980`).
+  //
+  // Typ-o resets timers and tops up ammo each frame, so typing speed (not weapon
+  // cooldown) controls rate of fire.
+
   if (player.weapon.weaponId !== TYPO_WEAPON_ID) {
     weaponAssignPlayer(player, TYPO_WEAPON_ID, { state: opts.state });
   }
@@ -31,11 +30,12 @@ export function enforceTypoPlayerFrame(player: PlayerState, opts: { state: Gamep
 export function buildTypoPlayerInput(
   opts: { aim: Vec2; fireRequested: boolean; reloadRequested: boolean },
 ): PlayerInput {
+  const fire = opts.fireRequested;
   return new PlayerInput({
     move: new Vec2(),
     aim: opts.aim,
-    fireDown: opts.fireRequested,
-    firePressed: opts.fireRequested,
+    fireDown: fire,
+    firePressed: fire,
     reloadPressed: opts.reloadRequested,
   });
 }
