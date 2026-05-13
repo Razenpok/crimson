@@ -21,13 +21,23 @@ export const LOGO_REF_IN_START = 7.0;
 export const LOGO_REF_IN_END = 8.0;
 export const LOGO_REF_HOLD_END = 10.0;
 export const LOGO_REF_OUT_END = 11.0;
+export const DEBUG_LOADING_HOLD_ENV = 'CRIMSON_DEBUG_LOADING_HOLD_SECONDS';
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
 
-function clamp01(value: number): number {
-  if (value < 0.0) return 0.0;
-  if (value > 1.0) return 1.0;
-  return value;
+function debugLoadingHoldSeconds(): number {
+  const processLike = (globalThis as typeof globalThis & {
+    process?: { env?: Record<string, string | undefined> };
+  }).process;
+  const raw = (processLike?.env?.[DEBUG_LOADING_HOLD_ENV] ?? '').trim();
+  if (!raw) {
+    return 0.0;
+  }
+  const value = Number(raw);
+  if (!Number.isFinite(value)) {
+    return 0.0;
+  }
+  return Math.max(0.0, value);
 }
 
 export class BootView {
@@ -40,7 +50,7 @@ export class BootView {
   private _logoActive: boolean = false;
   private _introStarted: boolean = false;
   private _themeStarted: boolean = false;
-  private _loadingHoldRemaining: number = 0.0;
+  private _loadingHoldRemaining: number = debugLoadingHoldSeconds();
 
   constructor(state: GameState) {
     this.state = state;
@@ -55,7 +65,7 @@ export class BootView {
     this._logoActive = false;
     this._introStarted = false;
     this._themeStarted = false;
-    this._loadingHoldRemaining = 0.0;
+    this._loadingHoldRemaining = debugLoadingHoldSeconds();
     this._loadResources();
   }
 
@@ -77,6 +87,7 @@ export class BootView {
       queueTrack(audio.music, 'gt2_harppen');
       const loaded = resources.textures.size;
       state.console.log.log(`runtime resources loaded: ${loaded} textures`);
+      state.console.log.flush();
       this._fadeOutReady = true;
     }).catch((err) => {
       state.console.log.log(`boot: failed to load resources: ${err}`);
@@ -161,7 +172,6 @@ export class BootView {
   }
 
   close(): void {
-    // Shut down audio and unload resources (matching Python close())
     if (this.state.audio !== null) {
       audioShutdown(this.state.audio);
       this.state.audio = null;
@@ -207,7 +217,7 @@ export class BootView {
       } else {
         alpha = 1.0 - (t - LOGO_10_HOLD_END);
       }
-      return [TextureId.SPLASH_10TONS, clamp01(alpha)];
+      return [TextureId.SPLASH_10TONS, BootView._clamp01(alpha)];
     }
     if (LOGO_REF_IN_START <= t && t < LOGO_REF_OUT_END) {
       let alpha: number;
@@ -218,7 +228,7 @@ export class BootView {
       } else {
         alpha = 1.0 - (t - LOGO_REF_HOLD_END);
       }
-      return [TextureId.SPLASH_REFLEXIVE, clamp01(alpha)];
+      return [TextureId.SPLASH_REFLEXIVE, BootView._clamp01(alpha)];
     }
     return null;
   }
@@ -247,7 +257,17 @@ export class BootView {
   }
 
   private _splashAlpha(): number {
-    return clamp01(this._bootTime * SPLASH_ALPHA_SCALE);
+    return BootView._clamp01(this._bootTime * SPLASH_ALPHA_SCALE);
+  }
+
+  private static _clamp01(value: number): number {
+    if (value < 0.0) {
+      return 0.0;
+    }
+    if (value > 1.0) {
+      return 1.0;
+    }
+    return value;
   }
 
   private _drawSplash(resources: RuntimeResources, alpha: number): void {
@@ -263,12 +283,11 @@ export class BootView {
     const bandLeft = -4.0;
     const bandRight = screenW + 4.0;
 
-    const lineAlpha = clamp01(alpha * 0.7);
+    const lineAlpha = BootView._clamp01(alpha * 0.7);
     const lr = 149 / 255;
     const lg = 175 / 255;
     const lb = 198 / 255;
 
-    // Top border line
     wgl.drawRectangle(
       int(Math.round(bandLeft)),
       int(Math.round(bandTop)),
@@ -276,7 +295,6 @@ export class BootView {
       1,
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
-    // Bottom border line
     wgl.drawRectangle(
       int(Math.round(bandLeft)),
       int(Math.round(bandBottom)),
@@ -284,7 +302,6 @@ export class BootView {
       1,
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
-    // Left border line
     wgl.drawRectangle(
       int(Math.round(bandLeft)),
       int(Math.round(bandTop)),
@@ -292,7 +309,6 @@ export class BootView {
       int(Math.round(bandHeight)),
       wgl.makeColor(lr, lg, lb, lineAlpha),
     );
-    // Right border line
     wgl.drawRectangle(
       int(Math.round(bandRight)),
       int(Math.round(bandTop)),
