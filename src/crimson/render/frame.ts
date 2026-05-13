@@ -7,7 +7,7 @@ import { GroundRenderer } from '@grim/terrain-render.ts';
 import { PlayerState } from '@crimson/sim/state-types.ts';
 import { CreaturePool } from '@crimson/creatures/runtime.ts';
 import { RtxRenderMode } from './rtx/mode.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+import type { GameplayState } from '@crimson/gameplay.ts';
 
 // Typed world snapshot consumed by render code.
 // This intentionally carries references (not deep copies) so render can be

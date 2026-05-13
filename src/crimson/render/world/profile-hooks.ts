@@ -7,19 +7,16 @@ export interface RenderProfileSink {
 let _activeSink: RenderProfileSink | null = null;
 const _passStack: Array<[string, number]> = [];
 
-// Unused in WebGL port: replay render telemetry excluded
 export function setActiveSink(sink: RenderProfileSink | null): RenderProfileSink | null {
   const prev = _activeSink;
   _activeSink = sink;
   return prev;
 }
 
-// Unused in WebGL port: replay render telemetry excluded
 export function clearPassStack(): void {
   _passStack.length = 0;
 }
 
-// Unused in WebGL port: replay render telemetry excluded
 export function currentPassName(): string | null {
   if (_passStack.length === 0) return null;
   return _passStack[_passStack.length - 1][0];
