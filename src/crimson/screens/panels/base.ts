@@ -275,7 +275,7 @@ export class PanelMenuView {
     this._ground = ensureMenuGround(this.state);
   }
 
-  private _drawBackground(): void {
+  protected _drawBackground(): void {
     wgl.clearBackground(wgl.makeColor(0, 0, 0, 1));
     const pauseBackground = this.state.pauseBackground;
     if (pauseBackground !== null) {
@@ -309,7 +309,7 @@ export class PanelMenuView {
     drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
   }
 
-  private _drawEntry(entry: MenuEntry): void {
+  protected _drawEntry(entry: MenuEntry): void {
     const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
@@ -375,7 +375,7 @@ export class PanelMenuView {
     }
   }
 
-  private _drawSign(): void {
+  protected _drawSign(): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(

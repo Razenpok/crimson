@@ -24,8 +24,10 @@ import {
 import {
   MENU_LABEL_ROW_HEIGHT,
   MENU_PANEL_WIDTH,
+  drawMenuCursorHelper,
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
 
 const MENU_LABEL_ROW_OPTIONS = 2;
@@ -155,6 +157,25 @@ export class OptionsMenuView extends PanelMenuView {
     })) {
       this._beginCloseTransition('open_controls');
     }
+  }
+
+  override draw(): void {
+    this._assertOpen();
+    this._drawBackground();
+    drawScreenFade(this.state);
+    const entry = this._entry;
+    if (entry === null) {
+      throw new Error('OptionsMenuView entry must be initialized before draw()');
+    }
+    this._drawPanel();
+    this._drawEntry(entry);
+    this._drawSign();
+    this._drawOptionsContents();
+    drawMenuCursorHelper(
+      this.state,
+      requireRuntimeResources(this.state),
+      this._cursorPulseTime,
+    );
   }
 
   protected override _beginCloseTransition(action: string): void {
