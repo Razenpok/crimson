@@ -3,20 +3,20 @@
 import * as wgl from "@wgl";
 import { Vec2 } from "@grim/geom.ts";
 
-import { getTexture, type RuntimeResources, TextureId } from "@grim/assets.ts";
+import { getTexture, TextureId } from "@grim/assets.ts";
 import { SmallFontData } from "@grim/fonts/small.ts";
 import { audioPlaySfx, audioUpdate } from "@grim/audio.ts";
 import { SfxId } from "@grim/sfx-map.ts";
 import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
 import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
-import { drawMenuCursor } from "@crimson/ui/cursor.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
 import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
 import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState, } from "@crimson/ui/perk-menu.ts";
 import { type GameState } from "@crimson/game/types.ts";
 import { fxDetailEnabled } from "@grim/config.ts";
 import { hsLeftPanelPosX, hsRightPanelPosX, } from "@crimson/screens/high-scores-layout.ts";
+import { requireRuntimeResources } from "@crimson/screens/assets.ts";
 import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import {
   PANEL_TIMELINE_END_MS,
@@ -34,14 +34,14 @@ import {
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
+  drawMenuCursorHelper,
+  ensureMenuGround,
+  menuGroundCamera,
   signLayoutScale,
   uiElementAnim,
 } from "@crimson/screens/menu.ts";
 
-// ---------------------------------------------------------------------------
-// Shared panel layout (state_14/15/16): tall left panel + short right panel
-// ---------------------------------------------------------------------------
-
+// Shared panel layout (state_14/15/16 in the oracle): tall left panel + short right panel.
 export const LEFT_PANEL_POS_Y = 185.0;
 export const LEFT_PANEL_HEIGHT = 378.0;
 export const RIGHT_PANEL_POS_Y = 200.0;
@@ -50,10 +50,6 @@ export const RIGHT_PANEL_HEIGHT = 254.0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
-
-// ---------------------------------------------------------------------------
-// DatabaseBaseView
-// ---------------------------------------------------------------------------
 
 export abstract class DatabaseBaseView {
   state: GameState;
@@ -82,7 +78,7 @@ export abstract class DatabaseBaseView {
     this._widescreenYShift = menuWidescreenYShift(layoutW);
     this._ground = this.state.pauseBackground !== null
       ? null
-      : this.state.menuGround;
+      : ensureMenuGround(this.state);
     this._cursorPulseTime = 0.0;
     this._timelineMs = 0;
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;
@@ -142,7 +138,8 @@ export abstract class DatabaseBaseView {
     this._closeAction = action;
   }
 
-  private _drawSign(resources: RuntimeResources): void {
+  private _drawSign(): void {
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(int(screenW));
@@ -218,7 +215,7 @@ export abstract class DatabaseBaseView {
     const scale = 1.0;
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
     const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, LEFT_PANEL_POS_Y), scale });
-    const resources = this.state.resources!;
+    const resources = requireRuntimeResources(this.state);
 
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
@@ -250,8 +247,7 @@ export abstract class DatabaseBaseView {
     if (this.state.pauseBackground !== null) {
       this.state.pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
     drawScreenFade(this.state);
 
@@ -284,7 +280,7 @@ export abstract class DatabaseBaseView {
     const leftPanelTopLeft = leftTopLeft.offset({ dx: leftSlideX });
     const rightPanelTopLeft = rightTopLeft.offset({ dx: rightSlideX });
 
-    const resources = this.state.resources!;
+    const resources = requireRuntimeResources(this.state);
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
 
     drawClassicMenuPanel(
@@ -307,17 +303,10 @@ export abstract class DatabaseBaseView {
       scale,
     });
 
-    this._drawSign(resources);
+    this._drawSign();
 
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
+    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
-
-  // ---------------------------------------------------------------------------
-  // Abstract methods — subclasses must implement
-  // ---------------------------------------------------------------------------
 
   protected abstract _backButtonPos(): Vec2;
 
@@ -333,6 +322,5 @@ export abstract class DatabaseBaseView {
     _scale: number,
     _mouse: { x: number; y: number },
   ): void {
-    // Default: no interaction. Subclasses may override.
   }
 }
