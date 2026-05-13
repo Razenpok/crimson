@@ -9,14 +9,24 @@ export const SIZE_CODE_GRID: Record<number, number> = {
   0x80: 2,
 };
 
-export interface EffectAtlasEntry {
+export class EffectAtlasEntry {
   readonly effectId: number;
   readonly sizeCode: number;
   readonly frame: number;
+
+  constructor(effectId: number, sizeCode: number, frame: number) {
+    this.effectId = effectId;
+    this.sizeCode = sizeCode;
+    this.frame = frame;
+  }
+
+  get grid(): number {
+    return SIZE_CODE_GRID[this.sizeCode];
+  }
 }
 
 function entry(effectId: number, sizeCode: number, frame: number): EffectAtlasEntry {
-  return { effectId, sizeCode, frame };
+  return new EffectAtlasEntry(effectId, sizeCode, frame);
 }
 
 export const EFFECT_ID_ATLAS_TABLE: readonly EffectAtlasEntry[] = [
@@ -77,13 +87,13 @@ export function effectSrcRect(
   const textureWidth = opts.textureWidth;
   const textureHeight = opts.textureHeight;
 
-  const e = EFFECT_ID_ATLAS_TABLE_BY_ID.get(effectId);
+  const e = EFFECT_ID_ATLAS_TABLE_BY_ID.get(int(effectId));
   if (e === undefined) return null;
 
   const grid = SIZE_CODE_GRID[e.sizeCode];
   if (!grid) return null;
 
-  const frame = e.frame;
+  const frame = int(e.frame);
   const col = frame % grid;
   const row = Math.floor(frame / grid);
   const cellW = textureWidth / grid;
