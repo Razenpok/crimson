@@ -421,12 +421,14 @@ export function runGame(
 
   const seed = config.seed ?? ((Date.now() * 0xDEAD + 0xBEEF) >>> 0);
   const rng = new Crand(seed);
+  const assetsDir = config.assetsDir ?? config.baseDir;
 
   const console = createConsole();
   const status = createGameStatus();
 
   const state = new GameState({
-    assetsUrl: config.assetsUrl,
+    baseDir: config.baseDir,
+    assetsDir,
     rng,
     config: cfg,
     status,
@@ -438,6 +440,7 @@ export function runGame(
     audio: null,
     sessionStart: performance.now(),
     rtxMode: modeFromRtxFlag(config.rtx),
+    pendingNetworkSession: config.pendingNetworkSession,
   });
 
   const handlers = bootCommandHandlers(state, status);
@@ -449,7 +452,7 @@ export function runGame(
   console.log.log(
     `config: ${cfg.display.width}x${cfg.display.height} windowed=${cfg.display.windowed}`,
   );
-  console.log.log(`assets: ${config.assetsUrl}`);
+  console.log.log(`assets: ${assetsDir}`);
   console.log.log(`commands: ${console.commands.size} registered`);
   console.log.log(`cvars: ${console.cvars.size} registered`);
 

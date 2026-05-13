@@ -6,7 +6,7 @@ import { App } from './grim/app.ts';
 import { InputState } from './grim/input.ts';
 import { type View } from './grim/view.ts';
 import { runGame } from './crimson/game/runtime.ts';
-import { type GameConfig, GameState } from "./crimson/game/types.ts";
+import { GameConfig, GameState } from './crimson/game/types.ts';
 
 /**
  * Minimal boot view that loads assets asynchronously, then switches to the
@@ -120,8 +120,8 @@ function main(): void {
   InputState.init(canvas);
   wgl.setContext(ctx);
 
-  const config: GameConfig = {
-    assetsUrl: './assets',
+  const config = new GameConfig({
+    assetsDir: './assets',
     width: canvas.width,
     height: canvas.height,
     fps: 60,
@@ -131,7 +131,7 @@ function main(): void {
     debug: false,
     rtx: false,
     preserveBugs: false,
-  };
+  });
 
   const app = new App({
     width: canvas.width,
