@@ -33,25 +33,11 @@ export function downloadMissingPaqs(
 ): readonly DownloadResult[] {
   const baseUrl = opts.baseUrl ?? ASSET_BASE_URL;
   const names = opts.names ?? DEFAULT_PAQ_FILES;
-  if (names.length === 0) {
-    return [];
-  }
-  console.log.log(`assets: missing ${names.join(', ')} (downloading)`);
-  const results: DownloadResult[] = [];
-  for (const name of names) {
-    const url = `${baseUrl}/${name}`;
-    const dest = `${assetsDir}/${name}`;
-    try {
-      _downloadFile(url, dest);
-    } catch (exc) {
-      const error = String(exc instanceof Error ? exc.message : exc);
-      results.push(new DownloadResult({ name, ok: false, error }));
-      console.log.log(`assets: failed to download ${name}: ${error}`);
-      continue;
-    }
-    results.push(new DownloadResult({ name, ok: true }));
-    console.log.log(`assets: downloaded ${name}`);
-  }
-  console.log.flush();
-  return results;
+  void assetsDir;
+  void console;
+  void baseUrl;
+  void names;
+  // Path.mkdir/is_file and tempfile replace are not available in the WebGL runtime.
+  // Browser asset loading resolves PAQs by URL, so there are no local files to download.
+  return [];
 }
