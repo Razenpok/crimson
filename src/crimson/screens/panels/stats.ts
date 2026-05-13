@@ -3,7 +3,7 @@
 import * as wgl from "@wgl";
 import { Vec2 } from "@grim/geom.ts";
 
-import { getTexture, type RuntimeResources, TextureId } from "@grim/assets.ts";
+import { getTexture, TextureId } from "@grim/assets.ts";
 import { drawSmallText } from "@grim/fonts/small.ts";
 import { audioPlayMusic, audioPlaySfx, audioStopMusic, audioUpdate } from "@grim/audio.ts";
 import { SfxId } from "@grim/sfx-map.ts";
@@ -11,7 +11,6 @@ import { fxDetailEnabled } from "@grim/config.ts";
 import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
 import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
-import { drawMenuCursor } from "@crimson/ui/cursor.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
 import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
 import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "@crimson/ui/perk-menu.ts";
@@ -21,6 +20,7 @@ import { requireRuntimeResources } from "@crimson/screens/assets.ts";
 import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import {
   MENU_LABEL_ROW_HEIGHT,
+  MENU_LABEL_ROW_STATISTICS,
   MENU_PANEL_OFFSET_X,
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
@@ -32,21 +32,20 @@ import {
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
+  drawMenuCursorHelper,
+  ensureMenuGround,
+  menuGroundCamera,
   signLayoutScale,
   uiElementAnim,
 } from "@crimson/screens/menu.ts";
+import { PANEL_TIMELINE_END_MS, PANEL_TIMELINE_START_MS } from "./base.ts";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const PANEL_TIMELINE_START_MS = 300;
-const PANEL_TIMELINE_END_MS = 0;
-
+// Measured from ui_render_trace_oracle_1024x768.json (state_4:played for # hours # minutes, timeline=300).
 const STATISTICS_PANEL_POS_X = -89.0;
 const STATISTICS_PANEL_POS_Y = 185.0;
 const STATISTICS_PANEL_HEIGHT = 378.0;
 
+// Child layout inside the panel (relative to panel top-left).
 const _TITLE_X = 290.0;
 const _TITLE_Y = 52.0;
 const _TITLE_W = 128.0;
@@ -67,30 +66,24 @@ const _STATS_EASTER_TRIGGER_ROLL = 3;
 const _STATS_EASTER_TEXT = 'Orbes Volantes Exstare';
 const _STATS_EASTER_TEXT_Y = 5.0;
 
-// Label row index for the "statistics" label in UI_ITEM_TEXTS texture.
-const MENU_LABEL_ROW_STATISTICS = 3;
-
 const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function statsMenuEasterRoll(currentRoll: number, rng: { rand(opts?: { caller?: number }): number }): number {
-  if (currentRoll !== _STATS_EASTER_ROLL_UNSET) {
-    return currentRoll;
+  if (int(currentRoll) !== _STATS_EASTER_ROLL_UNSET) {
+    return int(currentRoll);
   }
-  return rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_ROLL }) % 32;
+  return int(rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_ROLL }) % 32);
 }
 
 function isOrbesVolantesDay(date: Date): boolean {
-  return date.getMonth() === 2 && date.getDate() === 3; // month is 0-indexed
+  return int(date.getMonth() + 1) === 3 && int(date.getDate()) === 3;
 }
 
-export function formatPlaytimeText(gameSequenceMs: number, preserveBugs: boolean = false): string {
+export function formatPlaytimeText(gameSequenceMs: number, opts: { preserveBugs?: boolean } = {}): string {
+  const preserveBugs = opts.preserveBugs ?? false;
   const totalMinutes = Math.floor(Math.max(0, gameSequenceMs) / 1000 / 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
@@ -102,10 +95,12 @@ export function formatPlaytimeText(gameSequenceMs: number, preserveBugs: boolean
   return `played for ${hours} ${hourLabel} ${minutes} ${minuteLabel}`;
 }
 
-// ---------------------------------------------------------------------------
-// StatisticsMenuView
-// ---------------------------------------------------------------------------
-
+// Classic "Statistics" menu (state_id=4).
+//
+// This is a small hub panel with buttons for:
+//   - High scores
+//   - Weapons / Perks databases
+//   - Credits
 export class StatisticsMenuView {
   state: GameState;
 
@@ -140,7 +135,7 @@ export class StatisticsMenuView {
   open(): void {
     const layoutW = this.state.config.display.width;
     this._widescreenYShift = menuWidescreenYShift(layoutW);
-    this._ground = this.state.pauseBackground !== null ? null : this.state.menuGround;
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
     this._cursorPulseTime = 0.0;
     this._action = null;
     this._timelineMs = 0;
@@ -212,7 +207,8 @@ export class StatisticsMenuView {
     }
   }
 
-  private _panelTopLeft(scale: number): Vec2 {
+  private _panelTopLeft(opts: { scale: number }): Vec2 {
+    const scale = opts.scale;
     return new Vec2(
       STATISTICS_PANEL_POS_X + MENU_PANEL_OFFSET_X * scale,
       STATISTICS_PANEL_POS_Y + this._widescreenYShift + MENU_PANEL_OFFSET_Y * scale,
@@ -275,7 +271,7 @@ export class StatisticsMenuView {
       PANEL_TIMELINE_END_MS,
       panelW, 0,
     );
-    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX, dy: 0 });
+    const panelTopLeft = this._panelTopLeft({ scale }).offset({ dx: slideX, dy: 0 });
     const resources = requireRuntimeResources(this.state);
 
     const [mx, my] = InputState.mousePosition();
@@ -326,8 +322,7 @@ export class StatisticsMenuView {
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
 
     drawScreenFade(this.state);
@@ -342,13 +337,13 @@ export class StatisticsMenuView {
       PANEL_TIMELINE_END_MS,
       panelW, 0,
     );
-    const panelTopLeft = this._panelTopLeft(scale).offset({ dx: slideX, dy: 0 });
+    const panelTopLeft = this._panelTopLeft({ scale }).offset({ dx: slideX, dy: 0 });
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, STATISTICS_PANEL_HEIGHT * scale);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
 
-    // Title: full-size row from UI_ITEM_TEXTS (128x32).
+    // Title: full-size row from ui_itemTexts.jaz (128x32).
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const rowH = MENU_LABEL_ROW_HEIGHT;
     const src = wgl.makeRectangle(0.0, MENU_LABEL_ROW_STATISTICS * rowH, labelTex.width, rowH);
@@ -366,19 +361,18 @@ export class StatisticsMenuView {
     // "played for # hours # minutes"
     const font = resources.smallFont;
     const playtimeMs = this.state.status.gameSequenceId;
-    const playtimeText = formatPlaytimeText(playtimeMs, this.state.preserveBugs);
+    const playtimeText = formatPlaytimeText(playtimeMs, { preserveBugs: this.state.preserveBugs });
     const playtimePos = panelTopLeft.add(new Vec2(_PLAYTIME_X * scale, _PLAYTIME_Y * scale));
     drawSmallText(font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));
 
-    // Easter egg: Orbes Volantes Exstare
     const today = new Date();
-    if (isOrbesVolantesDay(today) && this.state.statsMenuEasterEggRoll === _STATS_EASTER_TRIGGER_ROLL) {
+    if (isOrbesVolantesDay(today) && int(this.state.statsMenuEasterEggRoll) === _STATS_EASTER_TRIGGER_ROLL) {
       this.state.statsMenuEasterEggRoll = _STATS_EASTER_ROLL_UNSET;
       const easterX = this.state.rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X }) % 64 + 16;
       drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 128 / 255));
     }
 
-    // Buttons
+    // Buttons.
     const buttonBase = panelTopLeft.add(new Vec2(_BUTTON_X * scale, _BUTTON_Y0 * scale));
     const buttons = [this._btnHighScores, this._btnWeapons, this._btnPerks, this._btnCredits];
     for (let i = 0; i < buttons.length; i++) {
@@ -392,11 +386,12 @@ export class StatisticsMenuView {
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
     buttonDraw(resources, this._btnBack, { pos: backPos, width: backW, scale });
 
-    this._drawSign(resources, scale);
-    this._drawMenuCursor(resources);
+    this._drawSign({ scale });
+    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
-  private _drawSign(resources: RuntimeResources, _scale: number): void {
+  private _drawSign(_opts: { scale: number }): void {
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(int(screenW));
@@ -427,10 +422,4 @@ export class StatisticsMenuView {
     );
   }
 
-  private _drawMenuCursor(resources: RuntimeResources): void {
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
-  }
 }
