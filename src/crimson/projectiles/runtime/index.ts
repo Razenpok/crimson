@@ -7,9 +7,9 @@ export {
   primaryRuleForTypeId,
 } from './primary-rules.ts';
 export {
-  type PrimaryStepCtx,
+  PrimaryStepCtx,
   ProjectilePool,
-  type ProjectileUpdateOptions,
+  ProjectileUpdateOptions,
   projectileCollisionProfile,
 } from './projectile-pool.ts';
 export {

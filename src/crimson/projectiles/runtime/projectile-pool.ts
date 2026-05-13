@@ -31,7 +31,7 @@ import { applyDamageToCreature, hitRadiusFor, withinNativeFindRadius } from './c
 import { primaryRuleForTypeId } from './primary-rules.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
 
-export interface ProjectileUpdateOptions {
+export class ProjectileUpdateOptions {
   readonly worldSize: number;
   readonly damageScaleByType: Map<number, number>;
   readonly rng: CrandLike;
@@ -42,12 +42,48 @@ export interface ProjectileUpdateOptions {
   readonly detailPreset?: number;
   readonly onHit?: ((hit: ProjectileHit) => object) | null;
   readonly onHitPost?: ((hit: ProjectileHit, ctx: object) => void) | null;
+
+  constructor(opts: {
+    worldSize: number;
+    damageScaleByType: Map<number, number>;
+    rng: CrandLike;
+    runtimeState: GameplayState;
+    players: readonly PlayerState[];
+    applyPlayerDamage: (playerIndex: number, damage: number) => void;
+    ionAoeScale?: number;
+    detailPreset?: number;
+    onHit?: ((hit: ProjectileHit) => object) | null;
+    onHitPost?: ((hit: ProjectileHit, ctx: object) => void) | null;
+  }) {
+    this.worldSize = opts.worldSize;
+    this.damageScaleByType = opts.damageScaleByType;
+    this.rng = opts.rng;
+    this.runtimeState = opts.runtimeState;
+    this.players = opts.players;
+    this.applyPlayerDamage = opts.applyPlayerDamage;
+    this.ionAoeScale = opts.ionAoeScale ?? 1.0;
+    this.detailPreset = opts.detailPreset ?? 5;
+    this.onHit = opts.onHit ?? null;
+    this.onHitPost = opts.onHitPost ?? null;
+    Object.freeze(this);
+  }
 }
 
-export interface PrimaryStepCtx {
+export class PrimaryStepCtx {
   readonly dt: number;
   readonly creatures: readonly CreatureState[];
   readonly options: ProjectileUpdateOptions;
+
+  constructor(opts: {
+    dt: number;
+    creatures: readonly CreatureState[];
+    options: ProjectileUpdateOptions;
+  }) {
+    this.dt = opts.dt;
+    this.creatures = opts.creatures;
+    this.options = opts.options;
+    Object.freeze(this);
+  }
 }
 
 const _DEFAULT_PROJECTILE_COLLISION_PROFILE: ProjectileCollisionProfile = {

@@ -25,6 +25,10 @@ import type { OwnerRef } from '@crimson/owner-ref.ts';
 import { perksUpdateEffects } from '@crimson/perks/runtime/effects.ts';
 import { PLAYER_DEATH_HOOKS, WORLD_DT_STEPS } from '@crimson/perks/runtime/manifest.ts';
 import { playerTakeProjectileDamage } from '@crimson/player-damage.ts';
+import {
+  PrimaryStepCtx,
+  ProjectileUpdateOptions,
+} from '@crimson/projectiles/runtime/projectile-pool.ts';
 import type { ProjectileHit } from '@crimson/projectiles/types.ts';
 import { PlayerInput } from './input.ts';
 import { normalizeInputFrame } from './input-frame.ts';
@@ -319,10 +323,10 @@ export class WorldState {
       }
     };
 
-    const hits: ProjectileHit[] = this.state.projectiles.step({
+    const hits: ProjectileHit[] = this.state.projectiles.step(new PrimaryStepCtx({
       dt: Number(dt),
       creatures: creatureEntries,
-      options: {
+      options: new ProjectileUpdateOptions({
         worldSize: Number(worldSize),
         damageScaleByType,
         rng: this.state.rng,
@@ -332,8 +336,8 @@ export class WorldState {
         detailPreset: int(detailPreset),
         onHit: _onProjectileHitPre,
         onHitPost: _onProjectileHitPost,
-      },
-    });
+      }),
+    }));
 
     this.state.secondaryProjectiles.step({
       dt: Number(dt),
