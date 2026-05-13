@@ -63,18 +63,17 @@ export class AudioRouter {
     opts: { prevShotSeq: number; prevReloadActive: boolean; prevReloadTimer: number },
   ): void {
     if (this.audio === null) return;
-    const weapon = WEAPON_BY_ID.get(player.weapon.weaponId);
-    if (weapon === undefined) return;
+    const weapon = WEAPON_BY_ID.get(player.weapon.weaponId)!;
 
     const { prevShotSeq, prevReloadActive, prevReloadTimer } = opts;
     if (int(player.shotSeq) > int(prevShotSeq)) {
       if (player.fireBulletsTimer > 0.0) {
         // player_update (crimsonland.exe): when Fire Bullets is active, the regular per-weapon
         // shot sfx is suppressed and replaced by Fire Bullets + Plasma Minigun fire sfx.
-        const fireBullets = WEAPON_BY_ID.get(WeaponId.FIRE_BULLETS);
-        const plasmaMinigun = WEAPON_BY_ID.get(WeaponId.PLASMA_MINIGUN);
-        if (fireBullets) this.playSfx(fireBullets.fireSound);
-        if (plasmaMinigun) this.playSfx(plasmaMinigun.fireSound);
+        const fireBullets = WEAPON_BY_ID.get(WeaponId.FIRE_BULLETS)!;
+        const plasmaMinigun = WEAPON_BY_ID.get(WeaponId.PLASMA_MINIGUN)!;
+        this.playSfx(fireBullets.fireSound);
+        this.playSfx(plasmaMinigun.fireSound);
       } else {
         this.playSfx(weapon.fireSound);
       }
