@@ -11,7 +11,7 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import { GameState } from '@crimson/game/types.ts';
+import { type GameState } from '@crimson/game/types.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import {
@@ -50,15 +50,13 @@ const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-export type EndNoteState = GameState;
-
 // Final quest "Show End Note" flow.
 //
 // Classic:
 //   - quest_results_screen_update uses "Show End Note" instead of "Play Next" for quest 5.10
 //   - clicking it transitions to state 0x15 (game_update_victory_screen @ 0x00406350)
 export class EndNoteView {
-  private state: EndNoteState;
+  private state: GameState;
   private _ground: GroundRenderer | null = null;
   private _action: string | null = null;
   private _cursorPulseTime: number = 0.0;
@@ -72,7 +70,7 @@ export class EndNoteView {
   private _typoButton: UiButtonState;
   private _mainMenuButton: UiButtonState;
 
-  constructor(state: EndNoteState) {
+  constructor(state: GameState) {
     this.state = state;
     this._survivalButton = new UiButtonState('Survival', { forceWide: true });
     this._rushButton = new UiButtonState('  Rush  ', { forceWide: true });
@@ -129,7 +127,7 @@ export class EndNoteView {
 
     if (!enabled) return;
 
-    const screenW = this.state.config.display.width;
+    const screenW = wgl.getScreenWidth();
     const scale = 1.0;
     const layoutW = scale ? screenW / scale : screenW;
     const widescreenShiftY = menuWidescreenYShift(layoutW);
