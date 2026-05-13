@@ -89,11 +89,19 @@ export class PlayerState {
   }
 }
 
-export interface BonusPickupEvent {
+export class BonusPickupEvent {
   readonly playerIndex: number;
   readonly bonusId: BonusId;
   readonly amount: number;
   readonly pos: Vec2;
+
+  constructor(opts: { playerIndex: number; bonusId: BonusId; amount: number; pos: Vec2 }) {
+    this.playerIndex = opts.playerIndex;
+    this.bonusId = opts.bonusId;
+    this.amount = opts.amount;
+    this.pos = opts.pos;
+    Object.freeze(this);
+  }
 }
 
 export type GameplayState = GameplayStateType;

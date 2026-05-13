@@ -3,7 +3,7 @@
 import { f32 } from '@crimson/math-parity.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { BonusPickupEvent, type GameplayState, type PlayerState } from '@crimson/sim/state-types.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { bonusApply } from './apply.ts';
 import { bonusHudUpdate } from './hud.ts';
@@ -72,12 +72,12 @@ export function bonusTelekineticUpdate(
     );
     entry.picked = true;
     entry.timeLeft = BONUS_PICKUP_LINGER;
-    pickups.push({
+    pickups.push(new BonusPickupEvent({
       playerIndex: int(player.index),
       bonusId: entry.bonusId,
       amount: int(entry.amount),
       pos: entry.pos,
-    });
+    }));
 
     // Match the exe: after a telekinetic pickup, reset the hover accumulator.
     player.bonusAimHoverIndex = -1;

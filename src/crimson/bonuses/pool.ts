@@ -6,7 +6,7 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import type { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { BonusPickupEvent, GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { BonusPickupEvent, type GameplayState, type PlayerState } from '@crimson/sim/state-types.ts';
 import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { BONUS_BY_ID, BonusId, bonusDisplayName } from './ids.ts';
 import { bonusPickRandomType } from './selection.ts';
@@ -415,12 +415,12 @@ export class BonusPool {
           );
           entry.picked = true;
           entry.timeLeft = BONUS_PICKUP_LINGER;
-          pickups.push({
+          pickups.push(new BonusPickupEvent({
             playerIndex: player.index,
             bonusId: entry.bonusId,
             amount: entry.amount,
             pos: entry.pos,
-          });
+          }));
           pickedNow = true;
           break;
         }
