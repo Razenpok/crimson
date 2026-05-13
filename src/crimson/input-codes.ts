@@ -336,8 +336,10 @@ export function captureFirstPressedInputCode(
     const gamepad = _playerGamepadIndex(playerIdx);
     if (_isGamepadAvailable(gamepad)) {
       for (const [codeStr, button] of Object.entries(JOYS_BUTTON_CODES)) {
-        if (_gamepadButtonDown(gamepad, button)) {
-          return Number(codeStr);
+        const code = Number(codeStr);
+        const down = _gamepadButtonDown(gamepad, button);
+        if (_pressedState.isPressed({ playerIndex: gamepad, keyCode: code, isDown: down })) {
+          return code;
         }
       }
     }
