@@ -3,7 +3,7 @@
 import { Vec2 } from '@grim/geom.ts';
 import type { SpawnTemplateCall } from '@crimson/creatures/spawn.ts';
 import { f32 } from '@crimson/math-parity.ts';
-import type { SpawnEntry } from './types.ts';
+import { SpawnEntry } from './types.ts';
 
 export function tickQuestSpawnTimeline(
   entries: readonly SpawnEntry[],
@@ -75,7 +75,7 @@ export function tickQuestSpawnTimeline(
     }
 
     if (entry.count !== 0) {
-      updatedEntries[idx] = { ...entry, count: 0 };
+      updatedEntries[idx] = new SpawnEntry({ ...entry, count: 0 });
     }
   }
 

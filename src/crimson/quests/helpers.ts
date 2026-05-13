@@ -2,7 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
-import type { SpawnEntry } from './types.ts';
+import { SpawnEntry } from './types.ts';
 
 export class EdgePoints {
   readonly left: Vec2;
@@ -107,13 +107,13 @@ export function spawn(
     count: number;
   },
 ): SpawnEntry {
-  return {
+  return new SpawnEntry({
     pos: point,
     heading: opts.heading ?? 0.0,
     spawnId: opts.spawnId,
     triggerMs: opts.triggerMs,
     count: opts.count,
-  };
+  });
 }
 
 export function spawnAt(

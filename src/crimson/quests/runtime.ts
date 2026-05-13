@@ -3,7 +3,7 @@
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
 import { SpawnId } from '@crimson/creatures/spawn-ids.ts';
-import type { QuestContext, QuestDefinition, SpawnEntry } from './types.ts';
+import { SpawnEntry, type QuestContext, type QuestDefinition } from './types.ts';
 
 const QUEST_COMPLETION_HIT_SFX_START_MS = 800.0;
 const QUEST_COMPLETION_HIT_SFX_END_MS = 0x353;
@@ -26,7 +26,7 @@ export function applyHardcoreSpawnTableAdjustment(entries: SpawnEntry[]): SpawnE
         count += 8;
       }
     }
-    adjusted.push(count === entry.count ? entry : { ...entry, count });
+    adjusted.push(count === entry.count ? entry : new SpawnEntry({ ...entry, count }));
   }
   return adjusted;
 }

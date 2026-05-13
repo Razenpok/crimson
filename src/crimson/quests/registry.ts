@@ -3,7 +3,7 @@
 import { terrainSlotsForQuest, TerrainSlotTriplet } from "@crimson/terrain-slots.ts";
 import { WeaponId } from "@crimson/weapons.ts";
 import { QuestLevel } from "./level.ts";
-import type { QuestBuilder, QuestDefinition } from "./types.ts";
+import { QuestDefinition, type QuestBuilder } from "./types.ts";
 
 const _QUESTS: Map<string, QuestDefinition> = new Map();
 
@@ -28,7 +28,7 @@ export function registerQuest(opts: {
     const normalizedUnlockWeaponId = opts.unlockWeaponId !== undefined && opts.unlockWeaponId !== null
       ? opts.unlockWeaponId
       : null;
-    const quest: QuestDefinition = {
+    const quest = new QuestDefinition({
       level: questLevel,
       title: opts.title,
       builder,
@@ -37,7 +37,7 @@ export function registerQuest(opts: {
       unlockPerkId: opts.unlockPerkId ?? null,
       unlockWeaponId: normalizedUnlockWeaponId,
       terrainSlots: resolvedTerrainSlots,
-    };
+    });
     const key = quest.level.text;
     const existing = _QUESTS.get(key);
     if (existing !== undefined) {

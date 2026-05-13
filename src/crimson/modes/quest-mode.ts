@@ -23,9 +23,9 @@ import {
 import { advanceExplicitTerrain, advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import {
+  QuestContext,
   type QuestDefinition,
   type SpawnEntry,
-  type QuestContext,
 } from '@crimson/quests/types.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { buildQuestSpawnTable } from '@crimson/quests/runtime.ts';
@@ -502,11 +502,11 @@ export class QuestMode extends BaseGameplayMode {
     );
     this.applyTerrainSetup({ terrainSlots: questTerrain.terrainSlots, seed: questTerrain.terrainSeed });
 
-    const ctx: QuestContext = {
+    const ctx = new QuestContext({
       width: int(this.worldSize),
       height: int(this.worldSize),
       playerCount: this.simWorld.players.length,
-    };
+    });
     const entries = buildQuestSpawnTable(quest, ctx, {
       rng: this.state.rng,
       hardcore: hardcoreFlag,

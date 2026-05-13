@@ -7,18 +7,34 @@ import type { WeaponId } from '@crimson/weapons.ts';
 import type { QuestLevel } from './level.ts';
 import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
 
-export interface QuestContext {
+export class QuestContext {
   readonly width: number;
   readonly height: number;
   readonly playerCount: number;
+
+  constructor(opts: { width: number; height: number; playerCount: number }) {
+    this.width = opts.width;
+    this.height = opts.height;
+    this.playerCount = opts.playerCount;
+    Object.freeze(this);
+  }
 }
 
-export interface SpawnEntry {
+export class SpawnEntry {
   readonly pos: Vec2;
   readonly heading: number;
   readonly spawnId: SpawnId;
   readonly triggerMs: number;
   readonly count: number;
+
+  constructor(opts: { pos: Vec2; heading: number; spawnId: SpawnId; triggerMs: number; count: number }) {
+    this.pos = opts.pos;
+    this.heading = opts.heading;
+    this.spawnId = opts.spawnId;
+    this.triggerMs = opts.triggerMs;
+    this.count = opts.count;
+    Object.freeze(this);
+  }
 }
 
 export type QuestBuilder = (
@@ -26,7 +42,7 @@ export type QuestBuilder = (
   opts: { rng: CrandLike; fullVersion: boolean },
 ) => SpawnEntry[];
 
-export interface QuestDefinition {
+export class QuestDefinition {
   readonly level: QuestLevel;
   readonly title: string;
   readonly builder: QuestBuilder;
@@ -35,12 +51,33 @@ export interface QuestDefinition {
   readonly terrainSlots: TerrainSlotTriplet;
   readonly unlockPerkId: number | null;
   readonly unlockWeaponId: WeaponId | null;
-}
 
-export function questDefinitionMajor(quest: QuestDefinition): number {
-  return int(quest.level.major);
-}
+  constructor(opts: {
+    level: QuestLevel;
+    title: string;
+    builder: QuestBuilder;
+    timeLimitMs: number;
+    startWeaponId: WeaponId;
+    terrainSlots: TerrainSlotTriplet;
+    unlockPerkId?: number | null;
+    unlockWeaponId?: WeaponId | null;
+  }) {
+    this.level = opts.level;
+    this.title = opts.title;
+    this.builder = opts.builder;
+    this.timeLimitMs = opts.timeLimitMs;
+    this.startWeaponId = opts.startWeaponId;
+    this.terrainSlots = opts.terrainSlots;
+    this.unlockPerkId = opts.unlockPerkId ?? null;
+    this.unlockWeaponId = opts.unlockWeaponId ?? null;
+    Object.freeze(this);
+  }
 
-export function questDefinitionMinor(quest: QuestDefinition): number {
-  return int(quest.level.minor);
+  get major(): number {
+    return int(this.level.major);
+  }
+
+  get minor(): number {
+    return int(this.level.minor);
+  }
 }
