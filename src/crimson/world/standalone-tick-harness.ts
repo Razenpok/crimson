@@ -93,6 +93,7 @@ export class StandaloneTickHarness {
     const runner = new TickRunner({
       session,
       inputProvider: provider,
+      config: { traceRng: false },
     });
 
     this._session = session;
@@ -136,12 +137,10 @@ export class StandaloneTickHarness {
       updateCamera: (dtSim) => runtime.updateCamera(dtSim),
       onOutputApplied: (output) => {
         const reaction = reactions.get(int(output.tickIndex)) ?? new PostApplyReaction();
-        if (reaction) {
-          applyPostApplyReaction({
-            reaction,
-            playSfx: (sfx) => runtime.audioBridge.router.playSfx(sfx),
-          });
-        }
+        applyPostApplyReaction({
+          reaction,
+          playSfx: (sfx) => runtime.audioBridge.router.playSfx(sfx),
+        });
       },
       applyAudio: true,
     });
