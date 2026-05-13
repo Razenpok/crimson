@@ -1,5 +1,7 @@
 // Port of crimson/perks/runtime/manifest.py
 
+// Single source of truth for perk hook ownership and dispatch ordering.
+
 import type { PerkId } from '@crimson/perks/ids.ts';
 import { HOOKS as AMMO_MANIAC_HOOKS } from '@crimson/perks/impl/ammo-maniac.ts';
 import { HOOKS as BANDAGE_HOOKS } from '@crimson/perks/impl/bandage.ts';
@@ -32,7 +34,7 @@ import {
   type PlayerDeathHook,
   type PlayerPerkTickStep,
   type WorldDtStep,
-} from "./hook-types.ts";
+} from './hook-types.ts';
 import { updatePlayerBonusTimers } from './player-bonus-timers.ts';
 
 // Order is parity-critical for runtime dispatch.

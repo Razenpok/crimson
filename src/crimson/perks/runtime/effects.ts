@@ -2,10 +2,12 @@
 
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { FxQueue } from '@crimson/effects.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
-import { PerksUpdateEffectsCtx } from './effects-context.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
+import { PerksUpdateEffectsCtx, creatureFindInRadius } from './effects-context.ts';
 import { PERKS_UPDATE_EFFECT_STEPS } from './manifest.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+
+// Backward-compatible re-export used by HUD target hover wiring.
+export const _creatureFindInRadius = creatureFindInRadius;
 
 const _PERKS_UPDATE_EFFECT_STEPS = PERKS_UPDATE_EFFECT_STEPS;
 
@@ -15,8 +17,11 @@ export function perksUpdateEffects(
   dt: number,
   opts: { creatures?: readonly CreatureState[] | null; fxQueue?: FxQueue | null } = {},
 ): void {
-  // Apply frame-based perk effect updates.
-  // Port subset of `perks_update_effects` (0x00406b40).
+  /** Apply frame-based perk effect updates.
+   *
+   * Port subset of `perks_update_effects` (0x00406b40).
+   */
+
   if (dt <= 0.0) {
     return;
   }

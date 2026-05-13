@@ -1,15 +1,14 @@
 // Port of crimson/perks/runtime/player_ticks.py
 
 import type { Vec2 } from '@grim/geom.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { PLAYER_PERK_TICK_STEPS } from './manifest.ts';
 import {
   type OwnerRefForPlayerFn,
   type OwnerRefForPlayerProjectilesFn,
-  PlayerPerkTickCtx,
+  type PlayerPerkTickCtx,
   type ProjectileSpawnFn,
 } from './player-tick-context.ts';
-import { GameplayState } from "@crimson/gameplay.js";
 
 const _PLAYER_PERK_TICK_STEPS = PLAYER_PERK_TICK_STEPS;
 
