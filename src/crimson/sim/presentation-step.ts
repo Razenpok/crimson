@@ -105,7 +105,22 @@ export function planHitSfx(
   return [triggerGameTune, sfx];
 }
 
-export interface ProjectileDecalPostCtx {
+export class ProjectileDecalPostCtx {
+  constructor(opts: {
+    hit: ProjectileHit;
+    baseAngle: number;
+    typeId: number;
+    freezeActive: boolean;
+    freezeShardSpawn?: ((pos: Vec2, angle: number) => void) | null;
+  }) {
+    this.hit = opts.hit;
+    this.baseAngle = opts.baseAngle;
+    this.typeId = opts.typeId;
+    this.freezeActive = opts.freezeActive;
+    this.freezeShardSpawn = opts.freezeShardSpawn ?? null;
+    Object.freeze(this);
+  }
+
   readonly hit: ProjectileHit;
   readonly baseAngle: number;
   readonly typeId: number;
@@ -191,13 +206,13 @@ export function queueProjectileDecalsPreHit(
     }
   }
 
-  return {
+  return new ProjectileDecalPostCtx({
     hit: opts.hit,
     baseAngle,
     typeId: typeId as number,
     freezeActive,
     freezeShardSpawn,
-  };
+  });
 }
 
 export function queueProjectileDecalsPostHit(
