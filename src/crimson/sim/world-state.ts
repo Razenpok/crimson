@@ -666,8 +666,8 @@ export class WorldState {
           dt,
           size: Number(creature.size),
           localScale: Number(creature.moveScale),
-          flags: creature.flags as CreatureFlags,
-          aiMode: creature.aiMode as number,
+          flags: creature.flags,
+          aiMode: creature.aiMode,
         },
       );
       creature.animPhase = newPhase;
