@@ -3,7 +3,7 @@
 import type { CrandLike } from '@grim/rand.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 
-export const NAME_MAX_CHARS = 16;
+export const NAME_MAX_CHARS = 16; // creature_name_assign_random enforces strlen < 0x10.
 
 const _NAME_PARTS: readonly string[] = [
   'lamb',   'gun',    'head',   'tail',   'leg',
@@ -155,12 +155,21 @@ export function loadTypoDictionary(raw: string): string[] {
   for (const line of raw.split(/\r?\n/)) {
     const text = line.split('#', 2)[0].trim();
     if (!text) continue;
-    if (text.length >= NAME_MAX_CHARS) continue;
+    if (Array.from(text).length >= NAME_MAX_CHARS) continue;
     if (seen.has(text)) continue;
     words.push(text);
     seen.add(text);
   }
   return words;
+}
+
+function _isAlphaOrDot(text: string): boolean {
+  for (const ch of text) {
+    if (!(ch === '.' || /^\p{L}$/u.test(ch))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function loadTypoHighscoreNames(records: readonly { name(): string }[]): string[] {
@@ -170,7 +179,7 @@ export function loadTypoHighscoreNames(records: readonly { name(): string }[]): 
     const name = record.name();
     if (!name) continue;
     if (seen.has(name)) continue;
-    if (!/^[a-zA-Z.]+$/.test(name)) continue;
+    if (!_isAlphaOrDot(name)) continue;
     names.push(name);
     seen.add(name);
   }
@@ -251,7 +260,7 @@ export class CreatureNameTable {
         if (attempts < 200) continue;
       }
 
-      if (name.length < NAME_MAX_CHARS) {
+      if (Array.from(name).length < NAME_MAX_CHARS) {
         this.names[idx] = name;
         return name;
       }
