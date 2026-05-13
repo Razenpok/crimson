@@ -2,7 +2,7 @@
 
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 
-export interface PlasmaProjectileRenderConfig {
+export class PlasmaProjectileRenderConfig {
   readonly rgb: [number, number, number];
   readonly spacing: number;
   readonly segLimit: number;
@@ -12,9 +12,34 @@ export interface PlasmaProjectileRenderConfig {
   readonly auraRgb: [number, number, number];
   readonly auraSize: number;
   readonly auraAlphaMul: number;
+
+  constructor(opts: {
+    rgb: [number, number, number];
+    spacing: number;
+    segLimit: number;
+    tailSize: number;
+    headSize: number;
+    headAlphaMul: number;
+    auraRgb: [number, number, number];
+    auraSize: number;
+    auraAlphaMul: number;
+  }) {
+    this.rgb = opts.rgb;
+    this.spacing = opts.spacing;
+    this.segLimit = opts.segLimit;
+    this.tailSize = opts.tailSize;
+    this.headSize = opts.headSize;
+    this.headAlphaMul = opts.headAlphaMul;
+    this.auraRgb = opts.auraRgb;
+    this.auraSize = opts.auraSize;
+    this.auraAlphaMul = opts.auraAlphaMul;
+    Object.freeze(this.rgb);
+    Object.freeze(this.auraRgb);
+    Object.freeze(this);
+  }
 }
 
-const DEFAULT_PLASMA_RENDER_CONFIG: PlasmaProjectileRenderConfig = {
+const DEFAULT_PLASMA_RENDER_CONFIG = new PlasmaProjectileRenderConfig({
   rgb: [1.0, 1.0, 1.0],
   spacing: 2.1,
   segLimit: 3,
@@ -24,10 +49,10 @@ const DEFAULT_PLASMA_RENDER_CONFIG: PlasmaProjectileRenderConfig = {
   auraRgb: [1.0, 1.0, 1.0],
   auraSize: 120.0,
   auraAlphaMul: 0.15,
-};
+});
 
 const PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID = new Map<number, PlasmaProjectileRenderConfig>([
-  [ProjectileTemplateId.PLASMA_RIFLE, {
+  [ProjectileTemplateId.PLASMA_RIFLE, new PlasmaProjectileRenderConfig({
     rgb: [1.0, 1.0, 1.0],
     spacing: 2.5,
     segLimit: 8,
@@ -37,9 +62,9 @@ const PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID = new Map<number, PlasmaProject
     auraRgb: [1.0, 1.0, 1.0],
     auraSize: 256.0,
     auraAlphaMul: 0.3,
-  }],
+  })],
   [ProjectileTemplateId.PLASMA_MINIGUN, DEFAULT_PLASMA_RENDER_CONFIG],
-  [ProjectileTemplateId.PLASMA_CANNON, {
+  [ProjectileTemplateId.PLASMA_CANNON, new PlasmaProjectileRenderConfig({
     rgb: [1.0, 1.0, 1.0],
     spacing: 2.6,
     segLimit: 18,
@@ -49,8 +74,8 @@ const PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID = new Map<number, PlasmaProject
     auraRgb: [1.0, 1.0, 1.0],
     auraSize: 256.0,
     auraAlphaMul: 0.4,
-  }],
-  [ProjectileTemplateId.SPIDER_PLASMA, {
+  })],
+  [ProjectileTemplateId.SPIDER_PLASMA, new PlasmaProjectileRenderConfig({
     rgb: [0.3, 1.0, 0.3],
     spacing: DEFAULT_PLASMA_RENDER_CONFIG.spacing,
     segLimit: DEFAULT_PLASMA_RENDER_CONFIG.segLimit,
@@ -60,8 +85,8 @@ const PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID = new Map<number, PlasmaProject
     auraRgb: [0.3, 1.0, 0.3],
     auraSize: DEFAULT_PLASMA_RENDER_CONFIG.auraSize,
     auraAlphaMul: DEFAULT_PLASMA_RENDER_CONFIG.auraAlphaMul,
-  }],
-  [ProjectileTemplateId.SHRINKIFIER, {
+  })],
+  [ProjectileTemplateId.SHRINKIFIER, new PlasmaProjectileRenderConfig({
     rgb: [0.3, 0.3, 1.0],
     spacing: DEFAULT_PLASMA_RENDER_CONFIG.spacing,
     segLimit: DEFAULT_PLASMA_RENDER_CONFIG.segLimit,
@@ -71,11 +96,11 @@ const PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID = new Map<number, PlasmaProject
     auraRgb: [0.3, 0.3, 1.0],
     auraSize: DEFAULT_PLASMA_RENDER_CONFIG.auraSize,
     auraAlphaMul: DEFAULT_PLASMA_RENDER_CONFIG.auraAlphaMul,
-  }],
+  })],
 ]);
 
 export function plasmaProjectileRenderConfig(typeId: number): PlasmaProjectileRenderConfig {
-  return PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID.get(typeId) ?? DEFAULT_PLASMA_RENDER_CONFIG;
+  return PLASMA_PROJECTILE_RENDER_CONFIG_BY_TYPE_ID.get(int(typeId)) ?? DEFAULT_PLASMA_RENDER_CONFIG;
 }
 
 const BEAM_EFFECT_SCALE_BY_TYPE_ID = new Map<number, number>([
@@ -85,7 +110,7 @@ const BEAM_EFFECT_SCALE_BY_TYPE_ID = new Map<number, number>([
 ]);
 
 export function beamEffectScale(typeId: number): number {
-  return BEAM_EFFECT_SCALE_BY_TYPE_ID.get(typeId) ?? 0.8;
+  return BEAM_EFFECT_SCALE_BY_TYPE_ID.get(int(typeId)) ?? 0.8;
 }
 
 const KNOWN_PROJ_RGB_BY_TYPE_ID = new Map<number, [number, number, number]>([
@@ -98,5 +123,5 @@ const KNOWN_PROJ_RGB_BY_TYPE_ID = new Map<number, [number, number, number]>([
 ]);
 
 export function knownProjRgb(typeId: number): [number, number, number] {
-  return KNOWN_PROJ_RGB_BY_TYPE_ID.get(typeId) ?? [240, 220, 160];
+  return KNOWN_PROJ_RGB_BY_TYPE_ID.get(int(typeId)) ?? [240, 220, 160];
 }
