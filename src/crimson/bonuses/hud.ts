@@ -1,8 +1,14 @@
 // Port of crimson/bonuses/hud.py
 
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { BonusId } from './ids.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+
+class ValueError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValueError';
+  }
+}
 
 export interface TimerRef {
   readonly kind: string; // "global" or "player"
@@ -74,32 +80,32 @@ export class BonusHudState {
 }
 
 export function bonusHudUpdate(state: GameplayState, players: PlayerState[], opts: { dt?: number } = {}): void {
-  const dt = Math.max(0.0, Number(opts.dt ?? 0.0));
+  const dt = Math.max(0.0, opts.dt ?? 0.0);
   const globalTimers: Record<string, number> = {
-    'weapon_power_up': Number(state.bonuses.weaponPowerUp),
-    'reflex_boost': Number(state.bonuses.reflexBoost),
-    'energizer': Number(state.bonuses.energizer),
-    'double_experience': Number(state.bonuses.doubleExperience),
-    'freeze': Number(state.bonuses.freeze),
+    'weapon_power_up': state.bonuses.weaponPowerUp,
+    'reflex_boost': state.bonuses.reflexBoost,
+    'energizer': state.bonuses.energizer,
+    'double_experience': state.bonuses.doubleExperience,
+    'freeze': state.bonuses.freeze,
   };
 
   const globalTimerValue = (key: string): number => {
     const v = globalTimers[key];
     if (v === undefined) {
-      throw new Error(`Unexpected bonus HUD global timer key: ${key}`);
+      throw new ValueError(`Unexpected bonus HUD global timer key: ${key}`);
     }
     return v;
   };
 
   const playerTimerValue = (player: PlayerState, key: string): number => {
     const playerTimers: Record<string, number> = {
-      'fire_bullets_timer': Number(player.fireBulletsTimer),
-      'shield_timer': Number(player.shieldTimer),
-      'speed_bonus_timer': Number(player.speedBonusTimer),
+      'fire_bullets_timer': player.fireBulletsTimer,
+      'shield_timer': player.shieldTimer,
+      'speed_bonus_timer': player.speedBonusTimer,
     };
     const v = playerTimers[key];
     if (v === undefined) {
-      throw new Error(`Unexpected bonus HUD player timer key: ${key}`);
+      throw new ValueError(`Unexpected bonus HUD player timer key: ${key}`);
     }
     return v;
   };
