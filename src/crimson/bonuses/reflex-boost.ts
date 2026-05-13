@@ -1,5 +1,7 @@
 // Port of crimson/bonuses/reflex_boost.py
 
+// Reflex Boost pickup presentation behavior.
+
 import { RGBA } from '@grim/color.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import type { BonusPickupEvent, GameplayState } from '@crimson/sim/state-types.ts';
