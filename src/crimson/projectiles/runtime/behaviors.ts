@@ -183,9 +183,7 @@ export function lingerIonCannon(ctx: ProjectileUpdateCtx, proj: Projectile): voi
 export function preHitSplitter(ctx: ProjectileUpdateCtx, proj: Projectile, hitIdx: number): void {
   spawnSplitterHitEffects(
     ctx.effects,
-    proj.pos,
-    ctx.rng,
-    ctx.detailPreset,
+    { pos: proj.pos, rng: ctx.rng, detailPreset: ctx.detailPreset },
   );
   // Native player-hit checks key off non-player ownership; creature-owned splitters
   // always satisfy this, so they can hit players even when the parent was local-owned.
@@ -212,10 +210,7 @@ export function postHitIonCommon(ctx: ProjectileUpdateCtx, hit: ProjectileHitInf
   spawnIonHitEffects(
     ctx.effects,
     ctx.sfxQueue,
-    hit.proj.typeId,
-    hit.proj.pos,
-    ctx.rng,
-    ctx.detailPreset,
+    { typeId: hit.proj.typeId, pos: hit.proj.pos, rng: ctx.rng, detailPreset: ctx.detailPreset },
   );
 }
 
@@ -319,17 +314,14 @@ export function postHitPlasmaCannon(ctx: ProjectileUpdateCtx, hit: ProjectileHit
   spawnPlasmaCannonHitEffects(
     ctx.effects,
     ctx.sfxQueue,
-    hit.proj.pos,
-    ctx.detailPreset,
+    { pos: hit.proj.pos, detailPreset: ctx.detailPreset },
   );
 }
 
 export function postHitShrinkifier(ctx: ProjectileUpdateCtx, hit: ProjectileHitInfo): void {
   spawnShrinkifierHitEffects(
     ctx.effects,
-    hit.proj.pos,
-    ctx.rng,
-    ctx.detailPreset,
+    { pos: hit.proj.pos, rng: ctx.rng, detailPreset: ctx.detailPreset },
   );
 
   const creature = ctx.creatures[int(hit.hitIdx)];

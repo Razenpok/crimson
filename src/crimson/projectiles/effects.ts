@@ -16,14 +16,17 @@ export { _spawnSplitterHitEffects as spawnSplitterHitEffects };
 
 export function _spawnShrinkifierHitEffects(
   effects: EffectPool | null,
-  pos: Vec2,
-  rng: CrandLike,
-  detailPreset: number,
+  opts: {
+    pos: Vec2;
+    rng: CrandLike;
+    detailPreset: number;
+  },
 ): void {
   // Port of `effect_spawn_shrinkifier_hit` (0x0042f080).
 
   if (effects === null) return;
 
+  const { pos, rng, detailPreset } = opts;
   const detail = int(detailPreset);
 
   // Core pulse (effect_id=1).
@@ -75,13 +78,16 @@ export function _spawnShrinkifierHitEffects(
 export function _spawnIonHitEffects(
   effects: EffectPool | null,
   sfxQueue: SfxId[] | null,
-  typeId: ProjectileTemplateId,
-  pos: Vec2,
-  rng: CrandLike,
-  detailPreset: number,
+  opts: {
+    typeId: ProjectileTemplateId;
+    pos: Vec2;
+    rng: CrandLike;
+    detailPreset: number;
+  },
 ): void {
   if (effects === null) return;
 
+  const { typeId, pos, rng, detailPreset } = opts;
   let ringScale = 0.0;
   let ringStrength = 0.0;
   let burstScale = 0.0;
@@ -167,8 +173,10 @@ export function _spawnIonHitEffects(
 export function _spawnPlasmaCannonHitEffects(
   effects: EffectPool | null,
   sfxQueue: SfxId[] | null,
-  pos: Vec2,
-  detailPreset: number,
+  opts: {
+    pos: Vec2;
+    detailPreset: number;
+  },
 ): void {
   // Port of `projectile_update` Plasma Cannon hit extras.
   //
@@ -180,6 +188,7 @@ export function _spawnPlasmaCannonHitEffects(
 
   if (effects === null) return;
 
+  const { pos, detailPreset } = opts;
   if (sfxQueue !== null) {
     sfxQueue.push(SfxId.EXPLOSION_MEDIUM);
     sfxQueue.push(SfxId.SHOCKWAVE);
@@ -212,14 +221,17 @@ export function _spawnPlasmaCannonHitEffects(
 
 export function _spawnSplitterHitEffects(
   effects: EffectPool | null,
-  pos: Vec2,
-  rng: CrandLike,
-  detailPreset: number,
+  opts: {
+    pos: Vec2;
+    rng: CrandLike;
+    detailPreset: number;
+  },
 ): void {
   // Port of `FUN_0042f3f0(pos, 26.0, 3)` from the Splitter Gun hit branch.
 
   if (effects === null) return;
 
+  const { pos, rng, detailPreset } = opts;
   const detail = int(detailPreset);
   for (let i = 0; i < 3; i++) {
     const angle = (rng.rand({ caller: RngCallerStatic.SPLITTER_HIT_ANGLE }) & 0x1FF) * (Math.PI * 2.0 / 512.0);
