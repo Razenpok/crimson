@@ -12,11 +12,23 @@ export enum RebindTarget {
   GLOBAL_RELOAD_CODE = 7,
 }
 
-export interface RebindRowSpec {
+export class RebindRowSpec {
   readonly label: string;
   readonly target: RebindTarget;
   readonly targetIndex: number | null;
   readonly axis: boolean;
+
+  constructor(
+    label: string,
+    target: RebindTarget,
+    targetIndex: number | null = null,
+    axis: boolean = false,
+  ) {
+    this.label = label;
+    this.target = target;
+    this.targetIndex = targetIndex;
+    this.axis = axis;
+  }
 }
 
 export function rebindRow(
@@ -25,7 +37,7 @@ export function rebindRow(
   targetIndex: number | null = null,
   axis: boolean = false,
 ): RebindRowSpec {
-  return { label, target, targetIndex, axis };
+  return new RebindRowSpec(label, target, targetIndex, axis);
 }
 
 // Port of `input_configure_for_label` (0x00447c90).
