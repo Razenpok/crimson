@@ -1,5 +1,4 @@
 // Port of crimson/projectiles/runtime/__init__.py
-// Barrel re-export for the runtime sub-package.
 
 export { withinNativeFindRadius } from './collision.ts';
 export {
@@ -7,7 +6,6 @@ export {
   type PrimaryProjectileRule,
   primaryRuleForTypeId,
 } from './primary-rules.ts';
-export { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 export {
   type PrimaryStepCtx,
   ProjectilePool,
