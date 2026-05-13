@@ -43,15 +43,25 @@ export function creatureFindInRadius(
 }
 
 export class PerksUpdateEffectsCtx {
+  state: GameplayState;
+  players: PlayerState[];
+  dt: number;
+  creatures: readonly CreatureState[] | null;
+  fxQueue: FxQueue | null;
   private _aimTargetByPlayerIndex: Map<number, number> = new Map();
 
-  constructor(
-    public state: GameplayState,
-    public players: PlayerState[],
-    public dt: number,
-    public creatures: readonly CreatureState[] | null,
-    public fxQueue: FxQueue | null,
-  ) {
+  constructor(opts: {
+    state: GameplayState;
+    players: PlayerState[];
+    dt: number;
+    creatures: readonly CreatureState[] | null;
+    fxQueue: FxQueue | null;
+  }) {
+    this.state = opts.state;
+    this.players = opts.players;
+    this.dt = opts.dt;
+    this.creatures = opts.creatures;
+    this.fxQueue = opts.fxQueue;
   }
 
   aimTargetForPlayer(playerIndex: number): number {

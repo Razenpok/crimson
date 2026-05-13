@@ -26,13 +26,13 @@ export function perksUpdateEffects(
   }
   const creatures = opts.creatures ?? null;
   const fxQueue = opts.fxQueue ?? null;
-  const ctx = new PerksUpdateEffectsCtx(
+  const ctx = new PerksUpdateEffectsCtx({
     state,
     players,
     dt,
     creatures,
     fxQueue,
-  );
+  });
   for (const step of _PERKS_UPDATE_EFFECT_STEPS) {
     step(ctx);
   }

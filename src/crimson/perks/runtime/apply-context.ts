@@ -6,15 +6,30 @@ import type { PerkId } from '@crimson/perks/ids.ts';
 import type { PerkSelectionState } from '@crimson/perks/state.ts';
 
 export class PerkApplyCtx {
-  constructor(
-    public state: GameplayState,
-    public players: PlayerState[],
-    public owner: PlayerState,
-    public perkId: PerkId,
-    public perkState: PerkSelectionState | null,
-    public dt: number | null,
-    public creatures: readonly CreatureState[] | null,
-  ) {
+  state: GameplayState;
+  players: PlayerState[];
+  owner: PlayerState;
+  perkId: PerkId;
+  perkState: PerkSelectionState | null;
+  dt: number | null;
+  creatures: readonly CreatureState[] | null;
+
+  constructor(opts: {
+    state: GameplayState;
+    players: PlayerState[];
+    owner: PlayerState;
+    perkId: PerkId;
+    perkState: PerkSelectionState | null;
+    dt: number | null;
+    creatures: readonly CreatureState[] | null;
+  }) {
+    this.state = opts.state;
+    this.players = opts.players;
+    this.owner = opts.owner;
+    this.perkId = opts.perkId;
+    this.perkState = opts.perkState;
+    this.dt = opts.dt;
+    this.creatures = opts.creatures;
   }
 
   frameDt(): number {

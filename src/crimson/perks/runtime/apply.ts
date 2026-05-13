@@ -28,7 +28,7 @@ export function perkApply(
     const handler = PERK_APPLY_HANDLERS.get(perkId);
     if (handler !== undefined) {
       handler(
-        new PerkApplyCtx(
+        new PerkApplyCtx({
           state,
           players,
           owner,
@@ -36,7 +36,7 @@ export function perkApply(
           perkState,
           dt,
           creatures,
-        ),
+        }),
       );
     }
   } finally {
