@@ -1,11 +1,9 @@
+// Port of grim/raylib_api.py
+
 import { type WebGLContext, type RenderTarget, BlendMode } from "@grim/webgl.js";
 
 export { BlendMode };
 export type { RenderTarget };
-
-// ---------------------------------------------------------------------------
-// Branded types
-// ---------------------------------------------------------------------------
 
 export type Brand<K, T extends string> = K & { readonly __brand: T };
 
@@ -26,16 +24,8 @@ export interface Texture {
 
 export function makeTexture(id: WebGLTexture, width: number, height: number): Texture { return { id, width, height }; }
 
-// ---------------------------------------------------------------------------
-// Module-level context (set once at startup via setContext)
-// ---------------------------------------------------------------------------
-
 let ctx: WebGLContext;
 export function setContext(context: WebGLContext): void { ctx = context; }
-
-// ---------------------------------------------------------------------------
-// Screen
-// ---------------------------------------------------------------------------
 
 export function getScreenWidth(): number { return ctx.screenWidth; }
 export function getScreenHeight(): number { return ctx.screenHeight; }
@@ -43,10 +33,6 @@ export function clearBackground(color: Color): void {
   ctx.clearBackground(color.r, color.g, color.b, color.a);
 }
 export function setGammaGain(gain: number): void { ctx.setGammaGain(gain); }
-
-// ---------------------------------------------------------------------------
-// Drawing — matches rl.draw_texture_pro / rl.draw_rectangle
-// ---------------------------------------------------------------------------
 
 export function drawTexturePro(
   texture: Texture,
@@ -63,14 +49,9 @@ export function drawRectangle(x: number, y: number, w: number, h: number, color:
   ctx.drawRectangle(x, y, w, h, color.r, color.g, color.b, color.a);
 }
 
-// ---------------------------------------------------------------------------
-// Blend modes — matches rl.begin_blend_mode / rl.end_blend_mode
-// ---------------------------------------------------------------------------
-
 export function beginBlendMode(mode: BlendMode): void { ctx.setBlendMode(mode); }
 export function endBlendMode(): void { ctx.setBlendMode(BlendMode.ALPHA); }
 
-// matches rl.rl_set_blend_factors / rl.rl_set_blend_factors_separate
 export function rlSetBlendFactors(src: number, dst: number, eq: number): void {
   ctx.setCustomBlendFactors(src, dst, eq);
 }
@@ -81,23 +62,11 @@ export function rlSetBlendFactorsSeparate(
   ctx.setCustomBlendFactorsSeparate(srcRGB, dstRGB, eqRGB, srcA, dstA, eqA);
 }
 
-// ---------------------------------------------------------------------------
-// Alpha test & color mask — matches rl.rl_color_mask
-// ---------------------------------------------------------------------------
-
 export function setAlphaTest(enabled: boolean): void { ctx.setAlphaTest(enabled); }
 export function rlColorMask(r: boolean, g: boolean, b: boolean, a: boolean): void { ctx.setColorMask(r, g, b, a); }
 
-// ---------------------------------------------------------------------------
-// Scissor
-// ---------------------------------------------------------------------------
-
 export function setScissor(x: number, y: number, w: number, h: number): void { ctx.setScissor(x, y, w, h); }
 export function clearScissor(): void { ctx.clearScissor(); }
-
-// ---------------------------------------------------------------------------
-// Immediate-mode quads — matches rl.rl_begin / rl.rl_end / rl.rl_vertex2f etc.
-// ---------------------------------------------------------------------------
 
 export function beginQuads(texture: Texture): void { ctx.beginQuads(texture); }
 export function endQuads(): void { ctx.endQuads(); }
@@ -105,18 +74,10 @@ export function rlTexCoord2f(u: number, v: number): void { ctx.texCoord2f(u, v);
 export function rlColor4f(r: number, g: number, b: number, a: number): void { ctx.color4f(r, g, b, a); }
 export function rlVertex2f(x: number, y: number): void { ctx.vertex2f(x, y); }
 
-// ---------------------------------------------------------------------------
-// Render targets — matches rl.begin_texture_mode / rl.end_texture_mode
-// ---------------------------------------------------------------------------
-
 export function beginTextureMode(rt: RenderTarget): void { ctx.beginRenderTarget(rt); }
 export function endTextureMode(): void { ctx.endRenderTarget(); }
 export function loadRenderTexture(width: number, height: number): RenderTarget { return ctx.createRenderTarget(width, height); }
 export function unloadRenderTexture(rt: RenderTarget): void { ctx.destroyRenderTarget(rt); }
-
-// ---------------------------------------------------------------------------
-// Texture management
-// ---------------------------------------------------------------------------
 
 export function loadTexture(
   source: ImageBitmap | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas,
@@ -124,19 +85,25 @@ export function loadTexture(
 ): Texture { return ctx.loadTexture(source, opts); }
 export function unloadTexture(texture: Texture): void { ctx.unloadTexture(texture); }
 
-// ---------------------------------------------------------------------------
-// Misc
-// ---------------------------------------------------------------------------
-
 export function flush(): void { ctx.flush(); }
 export function getWhiteTexture(): Texture { return ctx.whiteTexture; }
 export function resize(width: number, height: number): void { ctx.resize(width, height); }
 export function getCanvas(): HTMLCanvasElement { return ctx.canvas; }
 export function destroy(): void { ctx.destroy(); }
 
-// Simple FPS counter — tracks the last frame time and returns 1/dt.
 let _lastFrameTime = 0;
 let _currentFps = 0;
+let _textCanvas: HTMLCanvasElement | null = null;
+let _textCtx: CanvasRenderingContext2D | null = null;
+
+function textContext(): CanvasRenderingContext2D | null {
+  if (typeof document === 'undefined') return null;
+  if (_textCtx !== null) return _textCtx;
+  _textCanvas = document.createElement('canvas');
+  _textCtx = _textCanvas.getContext('2d');
+  return _textCtx;
+}
+
 export function updateFps(now: number): void {
   if (_lastFrameTime > 0) {
     const dt = (now - _lastFrameTime) * 0.001;
@@ -145,10 +112,6 @@ export function updateFps(now: number): void {
   _lastFrameTime = now;
 }
 export function getFps(): number { return _currentFps; }
-
-// ---------------------------------------------------------------------------
-// Texture settings — matches rl.set_texture_filter / rl.set_texture_wrap
-// ---------------------------------------------------------------------------
 
 export const enum TextureFilter {
   POINT = 0,
@@ -168,26 +131,44 @@ export function setTextureWrap(texture: Texture, wrap: TextureWrap): void {
   ctx.setTextureWrap(texture, wrap);
 }
 
-// ---------------------------------------------------------------------------
-// Text fallback — matches rl.measure_text / rl.draw_text for the no-font path.
-// In the WebGL port the bitmap font is always loaded, so these are rarely hit.
-// They use the 2D canvas measurement API as a rough approximation.
-// ---------------------------------------------------------------------------
-
 export function measureText(text: string, fontSize: number): number {
-  // Approximate: assume ~0.6 em-width per character at the given font size.
+  const textCtx = textContext();
+  if (textCtx !== null) {
+    textCtx.font = `${fontSize}px sans-serif`;
+    return textCtx.measureText(text).width;
+  }
   return text.length * fontSize * 0.6;
 }
 
 export function drawText(text: string, x: number, y: number, fontSize: number, color: Color): void {
-  // Fallback text rendering is intentionally empty in the WebGL port; the
-  // bitmap font path should always be available.
-}
+  if (text.length === 0) return;
+  const textCtx = textContext();
+  const canvas = _textCanvas;
+  if (textCtx === null || canvas === null) return;
 
-// ---------------------------------------------------------------------------
-// Blend factor constants — matches rd.* (raylib defines)
-// These are standard WebGL enum values.
-// ---------------------------------------------------------------------------
+  textCtx.font = `${fontSize}px sans-serif`;
+  const width = Math.max(1, Math.ceil(textCtx.measureText(text).width));
+  const height = Math.max(1, Math.ceil(fontSize * 1.25));
+  canvas.width = width;
+  canvas.height = height;
+  textCtx.font = `${fontSize}px sans-serif`;
+  textCtx.textBaseline = 'top';
+  textCtx.clearRect(0, 0, width, height);
+  textCtx.fillStyle = 'rgba(255, 255, 255, 1)';
+  textCtx.fillText(text, 0, 0);
+
+  const texture = ctx.loadTexture(canvas, { clamp: true, pointFilter: false });
+  ctx.drawTexturePro(
+    texture,
+    { x: 0, y: 0, w: width, h: height },
+    { x, y, w: width, h: height },
+    { x: 0, y: 0 },
+    0,
+    { r: color.r, g: color.g, b: color.b, a: color.a },
+  );
+  ctx.flush();
+  ctx.unloadTexture(texture);
+}
 
 export const RL_SRC_ALPHA = 0x0302;
 export const RL_ONE_MINUS_SRC_ALPHA = 0x0303;

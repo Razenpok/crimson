@@ -1,3 +1,5 @@
+// Port of crimson/game/loop_view.py
+
 import * as wgl from '@wgl';
 import { type View, ViewContext } from '@grim/view.ts';
 import { Vec2 } from '@grim/geom.ts';

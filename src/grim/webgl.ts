@@ -1,3 +1,5 @@
+// Port of grim/raylib_api.py
+
 export enum BlendMode {
   ALPHA,
   ADDITIVE,
