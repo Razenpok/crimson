@@ -9,7 +9,6 @@ import type { PerksUpdateEffectsCtx } from './effects-context.ts';
 import type { PlayerPerkTickCtx } from './player-tick-context.ts';
 
 export type WorldDtStep = (opts: { dt: number; players: PlayerState[] }) => number;
-export type PerksUpdateEffectsStep = (ctx: PerksUpdateEffectsCtx) => void;
 
 export type PlayerDeathHook = (opts: {
   state: GameplayState;
@@ -24,6 +23,7 @@ export type PlayerDeathHook = (opts: {
 }) => void;
 
 export type PlayerPerkTickStep = (ctx: PlayerPerkTickCtx) => void;
+export type PerksUpdateEffectsStep = (ctx: PerksUpdateEffectsCtx) => void;
 
 export class PerkHooks {
   readonly perkId: PerkId;
