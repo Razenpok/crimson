@@ -496,7 +496,7 @@ export class QuestMode extends BaseGameplayMode {
     this._localInput.reset({ players: this.simWorld.players });
     this.bindStatus(opts.status);
 
-    const boundStatus = this.state.status as GameStatus | null;
+    const boundStatus = this.state.status;
     const genericUnlockIndex = boundStatus != null ? (boundStatus.questUnlockIndex ?? 0) : 0;
 
     advanceUnlockTerrain(

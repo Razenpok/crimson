@@ -31,7 +31,6 @@ import { PERK_MENU_TRANSITION_MS } from '@crimson/ui/perk-menu.ts';
 
 import {
   BaseGameplayMode,
-  type GameStatus,
   type LanSession,
   type LanStepAction,
 } from './base-gameplay-mode.ts';
@@ -305,7 +304,7 @@ export class SurvivalMode extends BaseGameplayMode {
     this._resetLanCaptureClock();
     this._lanLastTickIndex = -1;
 
-    const status = this.state.status as GameStatus | null;
+    const status = this.state.status;
     const simUnlockIndex = status != null ? (status.questUnlockIndex ?? 0) : 0;
     const questUnlockIndex = int(simUnlockIndex);
 

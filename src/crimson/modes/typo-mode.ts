@@ -32,7 +32,6 @@ import { drawTypingBox, drawTypoNameLabels } from '@crimson/ui/overlays/typo-run
 
 import {
   BaseGameplayMode,
-  type GameStatus,
 } from './base-gameplay-mode.ts';
 import { buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 
@@ -113,7 +112,7 @@ export class TypoShooterMode extends BaseGameplayMode {
     // empty tuples if not available.  The native code loads from disk here;
     // we skip the file I/O and rely on the pre-populated state.
 
-    const status = this.state.status as GameStatus | null;
+    const status = this.state.status;
     const questUnlockIndex = status !== null ? int(status.questUnlockIndex) : 0;
 
     const terrain = advanceUnlockTerrain(

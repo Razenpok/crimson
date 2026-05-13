@@ -24,7 +24,6 @@ import { drawHudOverlay, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 
 import {
   BaseGameplayMode,
-  type GameStatus,
   type LanSession,
   type LanStepAction,
 } from './base-gameplay-mode.ts';
@@ -95,7 +94,7 @@ export class RushMode extends BaseGameplayMode {
     this._resetGameplayFrameClock();
     this._resetLanCaptureClock();
 
-    const status = this.state.status as GameStatus | null;
+    const status = this.state.status;
     const simUnlockIndex = status != null ? (status.questUnlockIndex ?? 0) : 0;
     const questUnlockIndex = int(simUnlockIndex);
 
