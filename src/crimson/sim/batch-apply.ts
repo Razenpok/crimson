@@ -39,7 +39,7 @@ export function applySimMetadataTickResult(opts: {
 }): PresentationTickOutput {
   const { simWorld, tickResult, gameTuneStarted } = opts;
   const step = tickResult.payload.step;
-  applyTickToSim({ simWorld, step, gameTuneStarted });
+  applyTickToSim({ simWorld, step, gameTuneStarted: Boolean(gameTuneStarted) });
   return new PresentationTickOutput({
     tickIndex: int(tickResult.sourceTick.tickIndex),
     dtSim: Number(step.dtSim),
@@ -57,7 +57,7 @@ export function applyTickToSim(opts: {
     events: step.events,
     presentation: step.presentation,
     dtSim: Number(step.dtSim),
-    gameTuneStarted: gameTuneStarted,
+    gameTuneStarted: Boolean(gameTuneStarted),
   });
 }
 export function applySimMetadataBatch(opts: {
@@ -67,7 +67,7 @@ export function applySimMetadataBatch(opts: {
 }): PresentationTickOutput[] {
   const { simWorld, completedResults, gameTuneStarted } = opts;
   return completedResults.map((tickResult) =>
-    applySimMetadataTickResult({ simWorld, tickResult, gameTuneStarted, }),
+    applySimMetadataTickResult({ simWorld, tickResult, gameTuneStarted: Boolean(gameTuneStarted), }),
   );
 }
 export function applyPresentationOutputs(opts: {
@@ -95,7 +95,7 @@ export function applyPresentationOutputs(opts: {
 
   for (const output of outputs) {
     if (output.presentation !== null) {
-      applyAudioPlan(output.presentation, applyAudio);
+      applyAudioPlan(output.presentation, Boolean(applyAudio));
       if (updateCamera != null) {
         updateCamera(Number(output.dtSim));
       }

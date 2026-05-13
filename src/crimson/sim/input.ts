@@ -1,7 +1,8 @@
 // Port of crimson/sim/input.py
 
 import { Vec2 } from '@grim/geom.ts';
-import { AimScheme, MovementControlType } from '@grim/config.ts';
+import { AimScheme } from '@crimson/aim-schemes.ts';
+import { MovementControlType } from '@crimson/movement-controls.ts';
 
 export class PlayerInput {
   readonly move: Vec2;
@@ -34,7 +35,6 @@ export class PlayerInput {
     this.turnRightPressed = defined(opts?.turnRightPressed, null);
   }
 
-  /** Return a new PlayerInput with selected fields replaced (equivalent to msgspec.structs.replace). */
   replace(overrides: Partial<PlayerInput>): PlayerInput {
     return new PlayerInput({
       move: defined(overrides.move, this.move),
