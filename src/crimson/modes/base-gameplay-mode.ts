@@ -16,6 +16,7 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 
+import { debugEnabled } from '@crimson/debug.ts';
 import type { CreatureDeath, CreaturePool } from '@crimson/creatures/runtime.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { LocalInputInterpreter, clearInputEdges } from '@crimson/local-input.ts';
@@ -89,10 +90,6 @@ interface ReplayCheckpoint {
 
 export type GameStatus = GameStateStatus;
 type GameStatusData = GameStateStatus;
-
-function debugEnabled(): boolean {
-  return false;
-}
 
 interface AppliedBatchTick {
   tick: DeterministicSessionTick;
@@ -918,7 +915,7 @@ export class BaseGameplayMode {
 
 
   protected get _debugEnabled(): boolean {
-    return false;
+    return debugEnabled();
   }
 
 
