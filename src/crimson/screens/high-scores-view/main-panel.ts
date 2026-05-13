@@ -27,7 +27,6 @@ import {
 import { modeLabel } from './shared.ts';
 import type { HighScoresView } from './view.ts';
 
-const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
 export function drawMainPanel(
@@ -104,7 +103,9 @@ export function drawMainPanel(
     }
 
     if (globalIndex < maxIndex) {
-      // Flip horizontally for right arrow.
+      // state_14 flips ui_arrow.jaz (uv 1..0) for the right arrow.
+      // Keep src.x in-range; with CLAMP wrap, raylib can collapse flipped UVs
+      // when the rect starts at x=tex.width.
       const src = wgl.makeRectangle(0.0, 0.0, -arrow.width, arrow.height);
       const arrowPos = leftPanelTopLeft.add(new Vec2(HS_QUEST_ARROW_X * scale, HS_QUEST_ARROW_Y * scale));
       const dst = wgl.makeRectangle(arrowPos.x, arrowPos.y, dstW, dstH);
@@ -112,7 +113,6 @@ export function drawMainPanel(
     }
   }
 
-  // Column headers
   const headerColor = wgl.makeColor(1, 1, 1, 1);
   drawSmallText(font, 'Rank', leftPanelTopLeft.add(new Vec2(211.0 * scale, 84.0 * scale)), headerColor);
   drawSmallText(font, 'Score', leftPanelTopLeft.add(new Vec2(246.0 * scale, 84.0 * scale)), headerColor);
@@ -143,7 +143,6 @@ export function drawMainPanel(
       : null;
 
   const [mx, my] = InputState.mousePosition();
-  // Hit test for row hovering
   if (
     frameX <= mx && mx < frameX + frameW &&
     frameY <= my && my < frameY + frameH &&
@@ -185,7 +184,6 @@ export function drawMainPanel(
     }
   }
 
-  // Buttons
   const buttonBasePos = leftPanelTopLeft.add(new Vec2(HS_BUTTON_X * scale, HS_BUTTON_Y0 * scale));
   let w = buttonWidth(resources, view.updateButton.label, { scale, forceWide: view.updateButton.forceWide });
   buttonDraw(resources, view.updateButton, { pos: buttonBasePos, width: w, scale });
