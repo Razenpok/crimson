@@ -158,12 +158,15 @@ function damageType4Pyromaniac(ctx: CreatureDamageCtx): void {
 }
 
 function damageLethalRangedShockBurst(
-  creature: CreatureState,
-  rng: CrandLike,
-  effects: EffectPool | null,
-  detailPreset: number,
+  opts: {
+    creature: CreatureState;
+    rng: CrandLike;
+    effects: EffectPool | null;
+    detailPreset: number;
+  },
 ): void {
   // Port the `creature_apply_damage` lethal branch for `flags & 0x10`.
+  const { creature, rng, effects, detailPreset } = opts;
   if ((creature.flags & CreatureFlags.RANGED_ATTACK_SHOCK) === 0) return;
   for (let i = 0; i < 5; i++) {
     const rotation = (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_ROTATION }) & 0x7F) * 0.049087387;
@@ -299,12 +302,12 @@ export function creatureApplyDamage(
       creature.lifecycleStage = f32(creature.lifecycleStage - 0.001);
     }
     creature.vel = creature.vel.sub(impulse.mul(2.0));
-    damageLethalRangedShockBurst(
+    damageLethalRangedShockBurst({
       creature,
       rng,
       effects,
-      int(detailPreset),
-    );
+      detailPreset: int(detailPreset),
+    });
     return true;
   }
 
