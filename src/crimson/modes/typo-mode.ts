@@ -132,18 +132,18 @@ export class TypoShooterMode extends BaseGameplayMode {
 
   protected _handleInput(): void {
     if (this._gameOverActive) {
-      if (InputState.wasKeyPressed(27)) { // Escape
+      if (InputState.wasKeyPressed(27)) {
         this._action = 'back_to_menu';
         this.closeRequested = true;
       }
       return;
     }
 
-    if (InputState.wasKeyPressed(9)) { // Tab
+    if (InputState.wasKeyPressed(9)) {
       this._paused = !this._paused;
     }
 
-    if (InputState.wasKeyPressed(27)) { // Escape
+    if (InputState.wasKeyPressed(27)) {
       this._action = 'open_pause_menu';
       return;
     }
@@ -210,8 +210,8 @@ export class TypoShooterMode extends BaseGameplayMode {
 
     const dtWorld = this._paused ? 0.0 : frameDt;
 
-    // Native: delay game-over transition until the trooper death animation
-    // finishes (checks death_timer < 0.0 in the main gameplay loop).
+    // Native: delay game-over transition until the trooper death animation finishes
+    // (checks `death_timer < 0.0` in the main gameplay loop).
     if (this.player.health <= 0.0) {
       if (dtWorld > 0.0) {
         this.player.deathTimer -= dtWorld * 20.0;
