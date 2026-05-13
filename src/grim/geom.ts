@@ -233,4 +233,8 @@ export class Rect {
     const py = point.y;
     return this.x <= px && px <= this.right && this.y <= py && py <= this.bottom;
   }
+
+  toWgl() {
+    return wgl.makeRectangle(this.x, this.y, this.w, this.h);
+  }
 }
