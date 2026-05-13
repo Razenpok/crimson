@@ -16,6 +16,7 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 const DIM_COLOR = wgl.makeColor(1, 1, 1, 0.7);
 
 function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_rectangle_lines_ex`.
   const thick = Math.max(1, int(lineThick));
   const x = int(rect.x);
   const y = int(rect.y);
@@ -26,10 +27,6 @@ function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl
   wgl.drawRectangle(x, y, thick, h, color);
   wgl.drawRectangle(x + w - thick, y, thick, h, color);
 }
-
-// ---------------------------------------------------------------------------
-// UnlockedWeaponsDatabaseView
-// ---------------------------------------------------------------------------
 
 export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   private _weaponIds: number[] = [];
