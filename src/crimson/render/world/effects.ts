@@ -10,6 +10,14 @@ import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
 
+function byteChannel(value: number): number {
+  return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255;
+}
+
+function colorFromRgba(r: number, g: number, b: number, a: number): wgl.Color {
+  return wgl.makeColor(byteChannel(r), byteChannel(g), byteChannel(b), byteChannel(a));
+}
+
 function srcRectForEffect(
   effectId: number,
   texWidth: number,
@@ -55,8 +63,8 @@ export function drawParticlePool(
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
   if (fxDetail1 && srcLarge !== null) {
-    const alphaByte = clamp(alpha * 0.065, 0.0, 1.0);
-    const tint = wgl.makeColor(1, 1, 1, alphaByte);
+    const alphaByte = int(clamp(alpha * 0.065, 0.0, 1.0) * 255.0 + 0.5);
+    const tint = wgl.makeColor(1, 1, 1, alphaByte / 255);
     for (let idx = 0; idx < particles.length; idx++) {
       const entry = particles[idx];
       if (!entry.active || (idx % 2) || entry.styleId === ParticleStyleId.BUBBLEGUN) continue;
@@ -82,13 +90,11 @@ export function drawParticlePool(
     const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = entry.spin * RAD_TO_DEG;
-    const tint = wgl.makeColor(
-      entry.scaleX, entry.scaleY, entry.scaleZ, entry.age * alpha,
-    );
+    const tint = colorFromRgba(entry.scaleX, entry.scaleY, entry.scaleZ, entry.age * alpha);
     wgl.drawTexturePro(texture, srcNormal, dst, origin, rotationDeg, tint);
   }
 
-  const alphaClamped = clamp(alpha, 0.0, 1.0);
+  const alphaByte = int(clamp(alpha, 0.0, 1.0) * 255.0 + 0.5);
   for (const entry of particles) {
     if (!entry.active || entry.styleId !== ParticleStyleId.BUBBLEGUN) continue;
     const wobble = Math.sin(entry.spin) * 3.0;
@@ -100,7 +106,7 @@ export function drawParticlePool(
     const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
     const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);
-    const tint = wgl.makeColor(1, 1, 1, entry.age * alphaClamped);
+    const tint = wgl.makeColor(1, 1, 1, int(entry.age * alphaByte + 0.5) / 255);
     wgl.drawTexturePro(texture, srcStyle8, dst, origin, 0.0, tint);
   }
 
@@ -147,7 +153,7 @@ export function drawSpriteEffectPool(
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = entry.rotation * RAD_TO_DEG;
     const c = entry.color.scaledAlpha(alpha);
-    const tint = wgl.makeColor(c.r, c.g, c.b, c.a);
+    const tint = colorFromRgba(c.r, c.g, c.b, c.a);
     wgl.drawTexturePro(texture, src, dst, origin, rotationDeg, tint);
   }
   wgl.endBlendMode();
@@ -185,6 +191,7 @@ export function drawEffectPool(
     const row = Math.floor(f / grid);
     const cellW = texture.width / grid;
     const cellH = texture.height / grid;
+    // Native effect pool clamps UVs to (cell_size - 2px) to avoid bleeding.
     const src = wgl.makeRectangle(
       cellW * col, cellH * row,
       Math.max(0.0, cellW - 2.0), Math.max(0.0, cellH - 2.0),
@@ -208,7 +215,7 @@ export function drawEffectPool(
 
     const rotationDeg = entry.rotation * RAD_TO_DEG;
     const c = entry.color.scaledAlpha(alpha);
-    const tint = wgl.makeColor(c.r, c.g, c.b, c.a);
+    const tint = colorFromRgba(c.r, c.g, c.b, c.a);
 
     const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);

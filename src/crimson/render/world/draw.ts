@@ -43,6 +43,32 @@ const NATIVE_CREATURE_SPRITE_DRAW_ORDER: CreatureTypeId[] = [
   CreatureTypeId.LIZARD,
 ];
 
+function byteChannel(value: number): number {
+  return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255;
+}
+
+function colorFromRgba(r: number, g: number, b: number, a: number): wgl.Color {
+  return wgl.makeColor(byteChannel(r), byteChannel(g), byteChannel(b), byteChannel(a));
+}
+
+function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
+  const segments = Math.max(24, int(radius * 1.5 + 0.5));
+  const step = (Math.PI * 2.0) / segments;
+  const white = wgl.getWhiteTexture();
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(color.r, color.g, color.b, color.a);
+  for (let i = 0; i < segments; i++) {
+    const a0 = i * step;
+    const a1 = (i + 1) * step;
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x + Math.cos(a0) * radius, center.y + Math.sin(a0) * radius);
+    wgl.rlVertex2f(center.x + Math.cos(a1) * radius, center.y + Math.sin(a1) * radius);
+  }
+  wgl.endQuads();
+}
+
 export interface WorldDrawContext {
   readonly camera: Vec2;
   readonly viewScale: Vec2;
@@ -71,33 +97,35 @@ export function drawWorld(
   if (entityAlpha <= 1e-3) return;
 
   wgl.setAlphaTest(true);
-  const drawCtx = buildDrawContext(renderCtx, { camera, viewScale, scale, entityAlpha });
+  try {
+    const drawCtx = buildDrawContext(renderCtx, { camera, viewScale, scale, entityAlpha });
 
-  const endPlayersDead = beginPass('players_dead');
-  drawPlayers(renderCtx, { ctx: drawCtx, alive: false });
-  endPass('players_dead');
+    const endPlayersDead = beginPass('players_dead');
+    drawPlayers(renderCtx, { ctx: drawCtx, alive: false });
+    endPass('players_dead');
 
-  const endCreatures = beginPass('creatures');
-  drawCreatures(renderCtx, { ctx: drawCtx });
-  endPass('creatures');
+    const endCreatures = beginPass('creatures');
+    drawCreatures(renderCtx, { ctx: drawCtx });
+    endPass('creatures');
 
-  const endFreeze = beginPass('freeze_overlay');
-  drawFreezeOverlay(renderCtx, { ctx: drawCtx });
-  endPass('freeze_overlay');
+    const endFreeze = beginPass('freeze_overlay');
+    drawFreezeOverlay(renderCtx, { ctx: drawCtx });
+    endPass('freeze_overlay');
 
-  const endPlayersAlive = beginPass('players_alive');
-  drawPlayers(renderCtx, { ctx: drawCtx, alive: true });
-  endPass('players_alive');
+    const endPlayersAlive = beginPass('players_alive');
+    drawPlayers(renderCtx, { ctx: drawCtx, alive: true });
+    endPass('players_alive');
 
-  const endProjEffects = beginPass('projectiles_effects');
-  drawProjectilesAndEffects(renderCtx, { ctx: drawCtx });
-  endPass('projectiles_effects');
+    const endProjEffects = beginPass('projectiles_effects');
+    drawProjectilesAndEffects(renderCtx, { ctx: drawCtx });
+    endPass('projectiles_effects');
 
-  const endBonusUi = beginPass('bonus_ui');
-  drawBonusAndUi(renderCtx, { ctx: drawCtx, drawAimIndicatorsEnabled });
-  endPass('bonus_ui');
-
-  wgl.setAlphaTest(false);
+    const endBonusUi = beginPass('bonus_ui');
+    drawBonusAndUi(renderCtx, { ctx: drawCtx, drawAimIndicatorsEnabled });
+    endPass('bonus_ui');
+  } finally {
+    wgl.setAlphaTest(false);
+  }
 }
 
 export function computeViewTransform(
@@ -119,14 +147,15 @@ function drawBackground(
   opts: { camera: Vec2; screenSize: Vec2; outSize: Vec2 },
 ): void {
   const { camera, screenSize, outSize } = opts;
-  wgl.clearBackground(wgl.makeColor(10 / 255, 10 / 255, 12 / 255, 1));
   const ground = renderCtx.frame.ground;
-  if (ground !== null) {
-    ground.drawView(
-      camera,
-      { screenW: screenSize.x, screenH: screenSize.y, outW: outSize.x, outH: outSize.y },
-    );
+  if (ground === null) {
+    throw new Error('ground renderer must be initialized before live world draw');
   }
+  wgl.clearBackground(wgl.makeColor(10 / 255, 10 / 255, 12 / 255, 1));
+  ground.drawView(
+    camera,
+    { screenW: screenSize.x, screenH: screenSize.y, outW: outSize.x, outH: outSize.y },
+  );
 }
 
 function effectSrcRectFromTexture(
@@ -152,6 +181,8 @@ function buildDrawContext(
   if (monsterVision) {
     monsterVisionSrc = effectSrcRectFromTexture(particlesTexture, EffectId.AURA);
   }
+  // Native uses `effect_select_texture(0x10)` (EffectId.AURA) for creature overlays
+  // (monster vision, shadow, poison aura).
   const poisonSrc = effectSrcRectFromTexture(particlesTexture, EffectId.AURA);
 
   return {
@@ -183,18 +214,10 @@ function drawPlayer(
     return;
   }
 
-  // Fallback: colored circle
   const screen = WorldRenderCtx.worldToScreenWith(player.pos, ctx.camera, ctx.viewScale);
   const r = Math.max(1.0, 14.0 * ctx.scale);
-  const size = r * 2;
-  const whTex = wgl.getWhiteTexture();
-  const tint = wgl.makeColor(90 / 255, 190 / 255, 120 / 255, ctx.entityAlpha);
-  wgl.drawTexturePro(
-    whTex, wgl.makeRectangle(0, 0, 1, 1),
-    wgl.makeRectangle(screen.x, screen.y, size, size),
-    wgl.makeVector2(size * 0.5, size * 0.5),
-    0, tint,
-  );
+  const tint = wgl.makeColor(90 / 255, 190 / 255, 120 / 255, int(255 * ctx.entityAlpha + 0.5) / 255);
+  drawFilledCircle(screen, r, tint);
 }
 
 function drawPlayers(
@@ -239,18 +262,19 @@ function drawCreatureOverlays(
       const size = 90.0 * ctx.scale;
       const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-      const tint = wgl.makeColor(1, 1, 0, clamp(mvAlpha, 0.0, 1.0));
+      const tint = wgl.makeColor(1, 1, 0, byteChannel(mvAlpha));
       wgl.drawTexturePro(ctx.particlesTexture, ctx.monsterVisionSrc, dst, origin, 0.0, tint);
     }
   }
 
   if (ctx.particlesTexture !== null && ctx.poisonSrc !== null && creature.plagueInfected) {
+    // creature_render_all: collision_flag overlay (black 80x80 aura), drawn before red poison flag.
     const plagueAlpha = fade * ctx.entityAlpha;
     if (plagueAlpha > 1e-3) {
       const size = 80.0 * ctx.scale;
       const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-      const tint = wgl.makeColor(0, 0, 0, clamp(plagueAlpha, 0.0, 1.0));
+      const tint = wgl.makeColor(0, 0, 0, byteChannel(plagueAlpha));
       wgl.drawTexturePro(ctx.particlesTexture, ctx.poisonSrc, dst, origin, 0.0, tint);
     }
   }
@@ -265,7 +289,7 @@ function drawCreatureOverlays(
       const size = 60.0 * ctx.scale;
       const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-      const tint = wgl.makeColor(1, 0, 0, clamp(poisonAlpha, 0.0, 1.0));
+      const tint = wgl.makeColor(1, 0, 0, byteChannel(poisonAlpha));
       wgl.drawTexturePro(ctx.particlesTexture, ctx.poisonSrc, dst, origin, 0.0, tint);
     }
   }
@@ -276,6 +300,8 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
   const frame = renderCtx.frame;
   const creatureEntries = frame.creatures.entries as CreatureState[];
 
+  // Native `creature_render_all` batches all overlays across the active pool
+  // before any species-specific sprite passes.
   for (const creature of iterActiveCreatureOverlayPass(creatureEntries)) {
     const screen = WorldRenderCtx.worldToScreenWith(creature.pos, ctx.camera, ctx.viewScale);
     const lifecycleStage = creature.lifecycleStage;
@@ -292,18 +318,9 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
     const texture = creatureTexture(resources, asset);
 
     if (texture === null) {
-      // Fallback circle
       const r = Math.max(1.0, creature.size * 0.5 * ctx.scale);
-      const size = r * 2;
-      const tint = wgl.makeColor(220 / 255, 90 / 255, 90 / 255, ctx.entityAlpha);
-      wgl.drawTexturePro(
-        wgl.getWhiteTexture(),
-        wgl.makeRectangle(0, 0, 1, 1),
-        wgl.makeRectangle(screen.x, screen.y, size, size),
-        wgl.makeVector2(size * 0.5, size * 0.5),
-        0,
-        tint,
-      );
+      const tint = wgl.makeColor(220 / 255, 90 / 255, 90 / 255, int(255 * ctx.entityAlpha + 0.5) / 255);
+      drawFilledCircle(screen, r, tint);
       continue;
     }
 
@@ -312,9 +329,13 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
 
     let tintRgba = creature.tint;
 
-    // Energizer tint
+    // Energizer: tint "weak" creatures blue-ish while active.
+    // Mirrors `creature_render_type` (0x00418b60) branch when
+    // `_bonus_energizer_timer > 0` and `max_health < 500`.
     const energizerTimer = frame.state.bonuses.energizer;
     if (energizerTimer > 0.0 && creature.maxHp < 500.0) {
+      // Native clamps to 1.0, then blends towards (0.5, 0.5, 1.0, 1.0).
+      // Effect is full strength while timer >= 1 and fades out during the last second.
       let t = energizerTimer;
       if (t >= 1.0) t = 1.0;
       else if (t < 0.0) t = 0.0;
@@ -322,15 +343,18 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
     }
 
     if (lifecycleStage < 0.0) {
+      // Mirrors the main-pass alpha fade when lifecycle_stage ramps negative.
       tintRgba = tintRgba.withAlpha(Math.max(0.0, tintRgba.a + lifecycleStage * 0.1));
     }
 
-    const scaledTint = tintRgba.scaledAlpha(ctx.entityAlpha).clamped();
-    const tint = wgl.makeColor(scaledTint.r, scaledTint.g, scaledTint.b, scaledTint.a);
+    const scaledTint = tintRgba.scaledAlpha(ctx.entityAlpha);
+    const tint = colorFromRgba(scaledTint.r, scaledTint.g, scaledTint.b, scaledTint.a);
 
     const sizeScale = clamp(creature.size / 64.0, 0.25, 2.0);
     const config = frame.config;
     const fxDetail = config !== null ? fxDetailEnabled(config.display, 0) : true;
+    // Mirrors `creature_render_type`: the "shadow-ish" pass is gated by fx_detail_0
+    // and is disabled when the Monster Vision perk is active.
     const shadow = fxDetail && (!frame.players.length || !perkActive(frame.players[0], PerkId.MONSTER_VISION));
     const longStrip =
       ((creature.flags as number) & CreatureFlags.ANIM_PING_PONG) === 0 ||
@@ -339,14 +363,18 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
     let phase = creature.animPhase;
     if (longStrip) {
       if (lifecycleStage < 0.0) {
+        // Negative phase selects the fallback "corpse" frame in creature_render_type.
         phase = -1.0;
       } else if (lifecycleStage < 16.0) {
+        // Death staging: while lifecycle_stage ramps down (16..0), creature_render_type
+        // selects frames via `__ftol((base_frame + 15) - lifecycle_stage)`.
         phase = (info.base + 0x0f) - lifecycleStage - 0.5;
       }
     }
 
     let shadowAlpha: number | null = null;
     if (shadow) {
+      // Shadow pass uses tint_a * 0.4 and fades much faster for corpses (lifecycle_stage < 0).
       let shadowA = creature.tint.a * 0.4;
       if (lifecycleStage < 0.0) {
         shadowA += lifecycleStage * (longStrip ? 0.5 : 0.1);
@@ -390,7 +418,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawCont
   const freezeAlpha = clamp(fade * ctx.entityAlpha * 0.7, 0.0, 1.0);
   if (freezeAlpha <= 1e-3) return;
 
-  const tint = wgl.makeColor(1, 1, 1, freezeAlpha);
+  const tint = wgl.makeColor(1, 1, 1, byteChannel(freezeAlpha));
   wgl.beginBlendMode(wgl.BlendMode.ALPHA);
   const creatures = renderCtx.frame.creatures.entries as CreatureState[];
   for (let idx = 0; idx < creatures.length; idx++) {

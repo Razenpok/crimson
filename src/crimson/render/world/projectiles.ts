@@ -15,6 +15,24 @@ import type { ProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts
 import type { SecondaryProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
 import { WorldRenderCtx } from './context.ts';
 
+function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
+  const segments = Math.max(24, int(radius * 1.5 + 0.5));
+  const step = (Math.PI * 2.0) / segments;
+  const white = wgl.getWhiteTexture();
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(color.r, color.g, color.b, color.a);
+  for (let i = 0; i < segments; i++) {
+    const a0 = i * step;
+    const a1 = (i + 1) * step;
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x + Math.cos(a0) * radius, center.y + Math.sin(a0) * radius);
+    wgl.rlVertex2f(center.x + Math.cos(a1) * radius, center.y + Math.sin(a1) * radius);
+  }
+  wgl.endQuads();
+}
+
 export function drawProjectile(
   renderCtx: WorldRenderCtx,
   proj: Projectile,
@@ -51,7 +69,7 @@ export function drawProjectile(
   const mapping = KNOWN_PROJ_FRAMES.get(typeId);
   if (mapping === undefined) return;
   const [grid, frame] = mapping;
-  alpha = clamp(clamp(life / 0.4, 0.0, 1.0) * alpha, 0.0, 1.0);
+  alpha = int(clamp(clamp(life / 0.4, 0.0, 1.0) * 255.0 * alpha, 0.0, 255.0) + 0.5) / 255;
   const [red, green, blue] = knownProjRgb(typeId);
   const tint = wgl.makeColor(red / 255, green / 255, blue / 255, alpha);
   renderCtx.drawAtlasSprite(texture, grid, frame, screen, 0.6 * scale, angle, tint);
@@ -78,6 +96,8 @@ export function drawSharpshooterLaserSight(
   renderCtx: WorldRenderCtx,
   opts: { camera: Vec2; viewScale: Vec2; scale: number; alpha: number },
 ): void {
+  // Laser sight overlay for the Sharpshooter perk (`projectile_render` @ 0x00422c70).
+
   const { camera, viewScale, scale } = opts;
   let alpha = clamp(opts.alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
@@ -86,8 +106,8 @@ export function drawSharpshooterLaserSight(
   const players = renderCtx.frame.players;
   if (!players.length) return;
 
-  const tailAlpha = clamp(alpha * 0.5, 0.0, 1.0);
-  const headAlpha = clamp(alpha * 0.2, 0.0, 1.0);
+  const tailAlpha = int(clamp(alpha * 0.5, 0.0, 1.0) * 255.0 + 0.5) / 255;
+  const headAlpha = int(clamp(alpha * 0.2, 0.0, 1.0) * 255.0 + 0.5) / 255;
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   wgl.beginQuads(bulletTrailTexture);
@@ -163,13 +183,7 @@ export function drawSecondaryProjectile(
   };
   if (drawSecondaryProjectileFromRegistry(registryCtx)) return;
 
-  // Fallback: draw a small colored circle approximation using a white texture quad.
   const r = Math.max(1.0, 4.0 * scale);
-  const size = r * 2.0;
-  const whTex = wgl.getWhiteTexture();
-  const src = wgl.makeRectangle(0, 0, 1, 1);
-  const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
-  const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-  const tint = wgl.makeColor(200 / 255, 200 / 255, 220 / 255, (200 / 255) * alpha);
-  wgl.drawTexturePro(whTex, src, dst, origin, 0, tint);
+  const tint = wgl.makeColor(200 / 255, 200 / 255, 220 / 255, int(200 * alpha + 0.5) / 255);
+  drawFilledCircle(screen, r, tint);
 }

@@ -13,15 +13,48 @@ import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
 const LAN_PLAYER_RING_RGB: [number, number, number][] = [
+  // Match existing trooper torso tint colors for P1/P2.
   [77, 77, 255],
   [255, 140, 89],
+  // Distinct colors for P3/P4 (4-player LAN readability).
   [90, 240, 255],
   [255, 120, 230],
 ];
 
+function byteChannel(value: number): number {
+  return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255;
+}
+
 export function lanPlayerRingRgb(playerIndex: number): [number, number, number] {
   const idx = Math.max(0, Math.min(LAN_PLAYER_RING_RGB.length - 1, int(playerIndex)));
   return LAN_PLAYER_RING_RGB[idx];
+}
+
+function drawRing(
+  center: Vec2,
+  inner: number,
+  outer: number,
+  segments: number,
+  color: wgl.Color,
+): void {
+  const white = wgl.getWhiteTexture();
+  const step = (Math.PI * 2.0) / segments;
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(color.r, color.g, color.b, color.a);
+  for (let i = 0; i < segments; i++) {
+    const a0 = i * step;
+    const a1 = (i + 1) * step;
+    const cos0 = Math.cos(a0);
+    const sin0 = Math.sin(a0);
+    const cos1 = Math.cos(a1);
+    const sin1 = Math.sin(a1);
+    wgl.rlVertex2f(center.x + cos0 * inner, center.y + sin0 * inner);
+    wgl.rlVertex2f(center.x + cos0 * outer, center.y + sin0 * outer);
+    wgl.rlVertex2f(center.x + cos1 * outer, center.y + sin1 * outer);
+    wgl.rlVertex2f(center.x + cos1 * inner, center.y + sin1 * inner);
+  }
+  wgl.endQuads();
 }
 
 export function drawLanPlayerRing(
@@ -45,38 +78,14 @@ export function drawLanPlayerRing(
   const thickness = Math.max(2.5 * scale, baseSize * 0.11);
   const inner = Math.max(0.0, outer - thickness);
   const glowOuter = outer + Math.max(2.0 * scale, baseSize * 0.08);
-
-  // Approximate ring with a color quad since WebGLContext doesn't have drawRing.
-  // Use additive blend with the white texture as a filled circle approximation.
-  const coreAlpha = clamp(alpha * 0.9, 0.0, 1.0);
-  const glowAlpha = clamp(alpha * 0.35, 0.0, 1.0);
+  const segments = Math.max(24, int(outer * 1.5 + 0.5));
+  const center = new Vec2(screenPos.x, screenPos.y);
+  const core = wgl.makeColor(red / 255, green / 255, blue / 255, byteChannel(alpha * 0.9));
+  const glow = wgl.makeColor(red / 255, green / 255, blue / 255, byteChannel(alpha * 0.35));
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
-
-  // Core ring approximation: draw a color quad at the ring location.
-  // A proper ring shader would be better, but this is a reasonable approximation.
-  const whTex = wgl.getWhiteTexture();
-  const ringSize = outer * 2.0;
-  const src = wgl.makeRectangle(0, 0, 1, 1);
-  const dst = wgl.makeRectangle(
-    screenPos.x - outer, screenPos.y - outer, ringSize, ringSize,
-  );
-  const origin = wgl.makeVector2(0, 0);
-  const coreTint = wgl.makeColor(
-    red / 255, green / 255, blue / 255, coreAlpha * 0.3,
-  );
-  wgl.drawTexturePro(whTex, src, dst, origin, 0, coreTint);
-
-  // Glow ring
-  const glowSize = glowOuter * 2.0;
-  const glowDst = wgl.makeRectangle(
-    screenPos.x - glowOuter, screenPos.y - glowOuter, glowSize, glowSize,
-  );
-  const glowTint = wgl.makeColor(
-    red / 255, green / 255, blue / 255, glowAlpha * 0.2,
-  );
-  wgl.drawTexturePro(whTex, src, glowDst, origin, 0, glowTint);
-
+  drawRing(center, inner, outer, segments, core);
+  drawRing(center, outer, glowOuter, segments, glow);
   wgl.endBlendMode();
 }
 
@@ -128,9 +137,7 @@ export function drawPlayerTrooperSprite(
           const size = 100.0 * scale;
           const dst = wgl.makeRectangle(screenPos.x, screenPos.y, size, size);
           const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-          const tint = wgl.makeColor(
-            77 / 255, 153 / 255, 77 / 255, clamp(auraAlpha, 0.0, 1.0),
-          );
+          const tint = wgl.makeColor(77 / 255, 153 / 255, 77 / 255, byteChannel(auraAlpha));
           wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
           wgl.drawTexturePro(particlesTexture, src, dst, origin, 0.0, tint);
           wgl.endBlendMode();
@@ -139,8 +146,8 @@ export function drawPlayerTrooperSprite(
     }
   }
 
-  const tint = wgl.makeColor(240 / 255, 240 / 255, 255 / 255, alpha);
-  const shadowTint = wgl.makeColor(0, 0, 0, (90 / 255) * alpha);
+  const tint = wgl.makeColor(240 / 255, 240 / 255, 255 / 255, int(255 * alpha + 0.5) / 255);
+  const shadowTint = wgl.makeColor(0, 0, 0, int(90 * alpha + 0.5) / 255);
   let overlayTint = tint;
   if (renderFrame.players.length > 1) {
     const index = player.index;
@@ -220,7 +227,7 @@ export function drawPlayerTrooperSprite(
 
             let halfVal = Math.sin(t * 3.0) + 17.5;
             const size = halfVal * 2.0 * scale;
-            const a = clamp(strength * 0.4, 0.0, 1.0);
+            const a = byteChannel(strength * 0.4);
             const shieldTint = wgl.makeColor(91 / 255, 180 / 255, 255 / 255, a);
             const dst = wgl.makeRectangle(center.x, center.y, size, size);
             const origin = wgl.makeVector2(size * 0.5, size * 0.5);
@@ -228,7 +235,7 @@ export function drawPlayerTrooperSprite(
 
             halfVal = Math.sin(t * 3.0) * 4.0 + 24.0;
             const size2 = halfVal * 2.0 * scale;
-            const a2 = clamp(strength * 0.3, 0.0, 1.0);
+            const a2 = byteChannel(strength * 0.3);
             const shieldTint2 = wgl.makeColor(91 / 255, 180 / 255, 255 / 255, a2);
             const dst2 = wgl.makeRectangle(center.x, center.y, size2, size2);
             const origin2 = wgl.makeVector2(size2 * 0.5, size2 * 0.5);
@@ -260,7 +267,7 @@ export function drawPlayerTrooperSprite(
             );
             const dst = wgl.makeRectangle(flashPos.x, flashPos.y, size, size);
             const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-            const tintFlash = wgl.makeColor(1, 1, 1, flashAlpha);
+            const tintFlash = wgl.makeColor(1, 1, 1, int(flashAlpha * 255.0 + 0.5) / 255);
             wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
             wgl.drawTexturePro(
               muzzleFlashTexture, src, dst, origin,
@@ -277,6 +284,7 @@ export function drawPlayerTrooperSprite(
   // Dead player
   let deadFrame: number;
   if (player.deathTimer >= 0.0) {
+    // Matches the observed frame ramp (32..52) in player_sprite_trace.jsonl.
     deadFrame = 32 + int((16.0 - player.deathTimer) * 1.25);
     if (deadFrame > 52) deadFrame = 52;
     if (deadFrame < 32) deadFrame = 32;
