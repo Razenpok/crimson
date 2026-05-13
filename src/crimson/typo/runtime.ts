@@ -179,13 +179,20 @@ export function typoInputTransform(world: WorldState, inputs: PlayerInput[]): Pl
   typo.pendingFireTarget = null;
   typo.pendingReload = false;
 
-  const transformedPrimary = primary.replace({
+  const transformedPrimary = new PlayerInput({
     move: new Vec2(),
     aim: new Vec2(aim.x, aim.y),
+    moveMode: primary.moveMode,
+    aimScheme: primary.aimScheme,
     fireDown,
     firePressed,
     reloadPressed,
     reloadDown: false,
+    moveToCursorPressed: primary.moveToCursorPressed,
+    moveForwardPressed: primary.moveForwardPressed,
+    moveBackwardPressed: primary.moveBackwardPressed,
+    turnLeftPressed: primary.turnLeftPressed,
+    turnRightPressed: primary.turnRightPressed,
   });
 
   return [transformedPrimary];

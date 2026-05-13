@@ -236,7 +236,21 @@ export function questPostStep(ctx: PostStepContext, spawn: QuestSpawnState): voi
 
 export function rushInputTransform(inputs: PlayerInput[]): PlayerInput[] {
   return inputs.map((inp) =>
-    inp.reloadPressed ? inp.replace({ reloadPressed: false }) : inp,
+    inp.reloadPressed ? new PlayerInput({
+      move: inp.move,
+      aim: inp.aim,
+      moveMode: inp.moveMode,
+      aimScheme: inp.aimScheme,
+      fireDown: inp.fireDown,
+      firePressed: inp.firePressed,
+      reloadPressed: false,
+      reloadDown: inp.reloadDown,
+      moveToCursorPressed: inp.moveToCursorPressed,
+      moveForwardPressed: inp.moveForwardPressed,
+      moveBackwardPressed: inp.moveBackwardPressed,
+      turnLeftPressed: inp.turnLeftPressed,
+      turnRightPressed: inp.turnRightPressed,
+    }) : inp,
   );
 }
 

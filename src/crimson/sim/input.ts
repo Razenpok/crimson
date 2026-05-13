@@ -36,23 +36,6 @@ export class PlayerInput {
     Object.freeze(this);
   }
 
-  replace(overrides: Partial<PlayerInput>): PlayerInput {
-    return new PlayerInput({
-      move: defined(overrides.move, this.move),
-      aim: defined(overrides.aim, this.aim),
-      moveMode: defined(overrides.moveMode, this.moveMode),
-      aimScheme: defined(overrides.aimScheme, this.aimScheme),
-      fireDown: defined(overrides.fireDown, this.fireDown),
-      firePressed: defined(overrides.firePressed, this.firePressed),
-      reloadPressed: defined(overrides.reloadPressed, this.reloadPressed),
-      reloadDown: defined(overrides.reloadDown, this.reloadDown),
-      moveToCursorPressed: defined(overrides.moveToCursorPressed, this.moveToCursorPressed),
-      moveForwardPressed: defined(overrides.moveForwardPressed, this.moveForwardPressed),
-      moveBackwardPressed: defined(overrides.moveBackwardPressed, this.moveBackwardPressed),
-      turnLeftPressed: defined(overrides.turnLeftPressed, this.turnLeftPressed),
-      turnRightPressed: defined(overrides.turnRightPressed, this.turnRightPressed),
-    });
-  }
 }
 
 function defined<T>(value: T | undefined, fallback: T) {
