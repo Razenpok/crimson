@@ -36,10 +36,16 @@ export const QUEST_BACK_BUTTON_X_OFFSET = 138.0;
 export const QUEST_BACK_BUTTON_Y_OFFSET = 212.0;
 export const QUEST_PANEL_HEIGHT = 378.0;
 
-export interface QuestMenuLayout {
+export class QuestMenuLayout {
   readonly titlePos: Vec2;
   readonly iconsStartPos: Vec2;
   readonly listPos: Vec2;
+
+  constructor(opts: { titlePos: Vec2; iconsStartPos: Vec2; listPos: Vec2 }) {
+    this.titlePos = opts.titlePos;
+    this.iconsStartPos = opts.iconsStartPos;
+    this.listPos = opts.listPos;
+  }
 }
 
 // game_update_victory_screen (0x00406350): used as the "end note" screen after the final quest.

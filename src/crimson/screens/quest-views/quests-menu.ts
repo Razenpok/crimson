@@ -49,7 +49,6 @@ import {
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import type { GameState } from '@crimson/game/types.ts';
-import type { QuestMenuLayout } from './shared.ts';
 import {
   QUEST_MENU_BASE_X,
   QUEST_MENU_BASE_Y,
@@ -77,6 +76,7 @@ import {
   QUEST_BACK_BUTTON_X_OFFSET,
   QUEST_BACK_BUTTON_Y_OFFSET,
   QUEST_PANEL_HEIGHT,
+  QuestMenuLayout,
 } from './shared.ts';
 
 const KEY_ESCAPE = 27;
@@ -100,6 +100,7 @@ const MOUSE_BUTTON_LEFT = 0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
+// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   if (x1 === x2) {
     const y = Math.min(y1, y2);
@@ -114,10 +115,14 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Col
   }
 }
 
-export type QuestsMenuState = GameState;
-
+// Quest selection menu.
+//
+// Layout and gating are based on `sub_447d40` (crimsonland.exe).
+//
+// The classic game treats this as a distinct UI state (transition target `0x0b`),
+// entered from the Play Game panel.
 export class QuestsMenuView {
-  private state: QuestsMenuState;
+  private state: GameState;
 
   private _isOpen: boolean = false;
   private _ground: GroundRenderer | null = null;
@@ -136,7 +141,7 @@ export class QuestsMenuView {
   private _closeAction: string | null = null;
   private _panelOpenSfxPlayed: boolean = false;
 
-  constructor(state: QuestsMenuState) {
+  constructor(state: GameState) {
     this.state = state;
     this._backButton = new UiButtonState('Back');
   }
@@ -219,7 +224,6 @@ export class QuestsMenuView {
       }
     }
 
-    // Debug: unlock all quests
     if (debugEnabled() && InputState.wasKeyPressed(KEY_F5)) {
       const unlock = 49;
       if (int(status.questUnlockIndex) < unlock) {
@@ -346,7 +350,11 @@ export class QuestsMenuView {
     const iconsStartPos = titlePos.add(new Vec2(QUEST_STAGE_ICON_X_OFFSET, QUEST_STAGE_ICON_Y_OFFSET));
     const lastIconX = iconsStartPos.x + QUEST_STAGE_ICON_STEP * 4.0;
     const listPos = new Vec2(lastIconX - 208.0 + 16.0, titlePos.y + QUEST_LIST_Y_OFFSET);
-    return { titlePos, iconsStartPos, listPos };
+    return new QuestMenuLayout({
+      titlePos,
+      iconsStartPos,
+      listPos,
+    });
   }
 
   private _hoveredStage(layout: QuestMenuLayout): number | null {
