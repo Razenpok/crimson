@@ -61,10 +61,9 @@ export function perkCanOffer(
   perkId: PerkId,
   opts: { gameMode: GameMode; playerCount: number },
 ): boolean {
-  /** Return whether `perk_id` is eligible for selection.
-   *
-   * Modeled after `perk_can_offer` (0x0042fb10).
-   */
+  // Return whether `perk_id` is eligible for selection.
+  //
+  // Modeled after `perk_can_offer` (0x0042fb10).
 
   if (perkId === PerkId.ANTIPERK) {
     return false;
