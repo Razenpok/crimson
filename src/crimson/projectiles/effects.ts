@@ -44,8 +44,8 @@ export function _spawnShrinkifierHitEffects(
     detailPreset: detail,
   });
 
-  const count = detail < 3 ? 2 : 4;
   // Debris puffs (effect_id=0), detail-scaled count.
+  const count = detail < 3 ? 2 : 4;
   for (let i = 0; i < count; i++) {
     const rotation = (rng.rand({ caller: RngCallerStatic.SHRINKIFIER_HIT_ROTATION }) & 0x7F) * 0.049087387;
     const velocity = new Vec2(
