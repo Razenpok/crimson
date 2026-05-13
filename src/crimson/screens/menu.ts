@@ -136,7 +136,7 @@ export function ensureMenuGround(
   return ground;
 }
 
-function drawMenuCursorHelper(
+export function drawMenuCursorHelper(
   state: GameState,
   resources: RuntimeResources,
   pulseTime: number,

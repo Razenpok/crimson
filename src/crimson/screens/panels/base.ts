@@ -9,7 +9,6 @@ import { fxDetailEnabled } from '@grim/config.ts';
 import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { GameState } from '@crimson/game/types.ts';
@@ -37,6 +36,7 @@ import {
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
   MenuEntry,
+  drawMenuCursorHelper,
   ensureMenuGround,
   labelAlpha,
   menuGroundCamera,
@@ -217,7 +217,11 @@ export class PanelMenuView {
     this._drawEntry(entry);
     this._drawSign();
     this._drawContents();
-    this._drawMenuCursor();
+    drawMenuCursorHelper(
+      this.state,
+      requireRuntimeResources(this.state),
+      this._cursorPulseTime,
+    );
   }
 
   takeAction(): string | null {
@@ -405,15 +409,6 @@ export class PanelMenuView {
       wgl.makeRectangle(signPos.x, signPos.y, signW, signH),
       signOrigin, rotationDeg, WHITE,
     );
-  }
-
-  private _drawMenuCursor(): void {
-    const resources = requireRuntimeResources(this.state);
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    const pos = new Vec2(mx, my);
-    drawMenuCursor(particles, cursorTex, { pos, pulseTime: this._cursorPulseTime });
   }
 
   protected _entryEnabled(_entry: MenuEntry): boolean {
