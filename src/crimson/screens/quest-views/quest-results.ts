@@ -4,15 +4,14 @@ import * as wgl from '@wgl';
 
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import { GroundRenderer } from '@grim/terrain-render.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { f32 } from '@crimson/math-parity.ts';
-import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { computeQuestFinalTime } from '@crimson/quests/results.ts';
-import { WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
+import { type WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
 import { PERK_BY_ID, PerkId, perkDisplayName } from '@crimson/perks/ids.ts';
 import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
@@ -21,12 +20,8 @@ import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
 import type { GameState } from '@crimson/game/types.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
 
-export type { QuestRunOutcome };
-
-export type QuestResultsState = GameState;
-
 export class QuestResultsView {
-  private state: QuestResultsState;
+  private state: GameState;
   private _ground: GroundRenderer | null = null;
   private _questLevel: QuestLevel | null = null;
   private _questTitle: string = '';
@@ -35,7 +30,7 @@ export class QuestResultsView {
   private _ui: QuestResultsUiImpl | null = null;
   private _action: string | null = null;
 
-  constructor(state: QuestResultsState) {
+  constructor(state: GameState) {
     this.state = state;
   }
 
