@@ -1,8 +1,4 @@
 // Port of crimson/modes/base_gameplay_mode.py
-//
-// Excludes networking (LAN lockstep, rollback, resync) which is not applicable
-// to the WebGL single-player port.  LAN-related paths are inert so that
-// subclass call-sites compile without change.
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
@@ -49,7 +45,7 @@ import {
   TickSupply,
 } from '@crimson/sim/input-providers.ts';
 import {
-  type PostApplyReaction,
+  PostApplyReaction,
   applyPostApplyReaction,
   buildPostApplyReaction,
 } from '@crimson/sim/presentation-reactions.ts';
@@ -71,9 +67,8 @@ import type { AudioBridge } from '@crimson/world/audio-bridge.ts';
 import type { TerrainRuntime } from '@crimson/world/terrain-runtime.ts';
 import type { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
-import { GameplayState } from "@crimson/gameplay.js";
+import type { GameplayState } from '@crimson/gameplay.ts';
 
-/** Replay is not applicable to WebGL port; shape retained for structure. */
 interface ReplayRecorder {
   tickIndex: number;
   recordedTickCount: number;
@@ -122,7 +117,6 @@ interface ModeFrameState {
 
 export type LanStepAction = 'continue' | 'stop_before_finalize' | 'stop_after_finalize';
 
-/** Alias for DeterministicSession used in LAN contexts. */
 export type LanSession = DeterministicSession;
 
 class LanRuntimeInputProvider {
@@ -178,7 +172,6 @@ const LAN_SIM_DETAIL_PRESET = 5;
 const LAN_SIM_VIOLENCE_DISABLED = 0;
 
 export class BaseGameplayMode {
-  // -- injected references --
   protected _assetsRoot: string;
   protected _small: SmallFontData | null = null;
   protected _hudState: HudState;
@@ -264,7 +257,6 @@ export class BaseGameplayMode {
   protected _tickRunnerNextTickIndex = 0;
   protected _tickRunnerLocalClock: FixedStepClock | null = null;
 
-  // -- state aliases (set in _bindWorld) --
   state!: GameplayState;
   creatures!: CreaturePool;
   player!: PlayerState;
@@ -447,7 +439,8 @@ export class BaseGameplayMode {
       this._lanStatusData = null;
       this._statusSim = this._statusBase;
     }
-    // Keep the currently-bound world state in sync
+    // Keep the currently-bound world state in sync (note that `open()` resets
+    // the underlying simulation state, so `_bindWorld()` also re-applies it).
     this.state.status = this._statusSim;
   }
 
@@ -550,6 +543,8 @@ export class BaseGameplayMode {
     this._localInput.setPreserveBugs(preserveBugs);
     this._hudState.preserveBugs = preserveBugs;
     this._gameOverUi.preserveBugs = preserveBugs;
+    // `GameplayState.status` is the simulation status (LAN may override it
+    // with a deterministic session-local status to avoid split brain).
     this.state.status = this._statusSim;
   }
 
@@ -1133,6 +1128,7 @@ export class BaseGameplayMode {
 
   regenerateTerrainForConsole(): void {
     if (this.renderResources.ground === null) return;
+    // Keep this deterministic without consuming gameplay RNG.
     this._terrainRegenCounter = ((this._terrainRegenCounter + 1) >>> 0) & 0xFFFFFFFF;
     const terrainSeed = (Number((this.state).rng?.state ?? 0) + this._terrainRegenCounter) & 0xFFFFFFFF;
     this.renderResources.ground.scheduleGenerate(terrainSeed);
@@ -1145,7 +1141,7 @@ export class BaseGameplayMode {
       fadeAlpha = Number(this._screenFade.screenFadeAlpha);
     }
     if (fadeAlpha <= 0.0) return;
-    const alpha = Math.max(0.0, Math.min(1.0, fadeAlpha));
+    const alpha = int(255 * Math.max(0.0, Math.min(1.0, fadeAlpha))) / 255;
     const screenW = wgl.getScreenWidth();
     const screenH = wgl.getScreenHeight();
     wgl.drawRectangle(0, 0, screenW, screenH, wgl.makeColor(0, 0, 0, alpha));
@@ -1172,7 +1168,6 @@ export class BaseGameplayMode {
     return 60;
   }
 
-  // Instance method for convenience
   protected _deterministicTickRate(): number {
     return 60;
   }
@@ -1426,10 +1421,8 @@ export class BaseGameplayMode {
         ? (dtSim: number) => this._worldRuntime.updateCamera(dtSim)
         : null,
       onOutputApplied: (output: PresentationTickOutput) => {
-        const reaction = reactionByTick.get(output.tickIndex);
-        if (reaction) {
-          this._applyTickPostApplyReaction(reaction, { dtSeconds: Number(output.dtSim) });
-        }
+        const reaction = reactionByTick.get(output.tickIndex) ?? new PostApplyReaction();
+        this._applyTickPostApplyReaction(reaction, { dtSeconds: Number(output.dtSim) });
       },
       applyAudio: opts.applyAudio,
     });
