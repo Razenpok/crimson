@@ -2,7 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import type { CreaturePool } from '@crimson/creatures/runtime.ts';
-import type { SpawnEnv } from '@crimson/creatures/runtime.ts';
+import type { SpawnEnv } from '@crimson/creatures/spawn.ts';
 import { PlayerState } from '@crimson/sim/state-types.ts';
 import { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import {
@@ -11,11 +11,7 @@ import {
 } from '@crimson/sim/world-state.ts';
 import { weaponAssignPlayer, initDefaultAltWeapon } from '@crimson/weapon-runtime/index.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
-import { GameplayState } from "@crimson/gameplay.js";
-
-// ---------------------------------------------------------------------------
-// Weapon damage scale map (built once from the weapon table)
-// ---------------------------------------------------------------------------
+import { GameplayState } from "@crimson/gameplay.ts";
 
 function _weaponDamageScaleMap(): Map<number, number> {
   const table = new Map<number, number>();
@@ -26,10 +22,6 @@ function _weaponDamageScaleMap(): Map<number, number> {
   }
   return table;
 }
-
-// ---------------------------------------------------------------------------
-// resetWorldPlayers
-// ---------------------------------------------------------------------------
 
 export function resetWorldPlayers(
   players: PlayerState[],
@@ -66,10 +58,6 @@ export function resetWorldPlayers(
   // Reset-time loadout bootstrap should not leak queued reload SFX.
   state.sfxQueue.length = 0;
 }
-
-// ---------------------------------------------------------------------------
-// SimWorldState
-// ---------------------------------------------------------------------------
 
 function _emptyWorldEvents(): WorldEvents {
   return {
