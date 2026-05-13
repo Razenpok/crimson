@@ -75,7 +75,7 @@ export enum WeaponId {
   NUKE_LAUNCHER = 53,
 }
 
-export interface Weapon {
+export class Weapon {
   readonly weaponId: WeaponId;
   readonly name: string;
   readonly ammoClass: number | null;
@@ -90,6 +90,38 @@ export interface Weapon {
   readonly travelBudget: number;
   readonly damageScale: number;
   readonly pelletCount: number;
+
+  constructor(opts: {
+    weaponId: WeaponId;
+    name: string;
+    ammoClass: number | null;
+    clipSize: number;
+    shotCooldown: number;
+    reloadTime: number;
+    spreadHeatInc: number;
+    fireSound: SfxId;
+    reloadSound: SfxId;
+    iconIndex: number;
+    flags: number | null;
+    travelBudget: number;
+    damageScale: number;
+    pelletCount: number;
+  }) {
+    this.weaponId = opts.weaponId;
+    this.name = opts.name;
+    this.ammoClass = opts.ammoClass;
+    this.clipSize = opts.clipSize;
+    this.shotCooldown = opts.shotCooldown;
+    this.reloadTime = opts.reloadTime;
+    this.spreadHeatInc = opts.spreadHeatInc;
+    this.fireSound = opts.fireSound;
+    this.reloadSound = opts.reloadSound;
+    this.iconIndex = opts.iconIndex;
+    this.flags = opts.flags;
+    this.travelBudget = opts.travelBudget;
+    this.damageScale = opts.damageScale;
+    this.pelletCount = opts.pelletCount;
+  }
 }
 
 function w(
@@ -108,11 +140,11 @@ function w(
   damageScale: number,
   pelletCount: number,
 ): Weapon {
-  return {
+  return new Weapon({
     weaponId, name, ammoClass, clipSize, shotCooldown, reloadTime,
     spreadHeatInc, fireSound, reloadSound, iconIndex, flags,
     travelBudget, damageScale, pelletCount,
-  };
+  });
 }
 
 export const WEAPON_TABLE: readonly Weapon[] = [
