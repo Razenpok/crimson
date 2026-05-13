@@ -11,7 +11,7 @@ import {
   headingFromCenter,
   linePoints,
   radialPoints,
-  spawnEntry,
+  spawn,
   spawnAt,
 } from './helpers.ts';
 import { registerQuest } from './registry.ts';
@@ -49,17 +49,17 @@ registerQuest({
   unlockWeaponId: WeaponId.PLASMA_RIFLE,
 })(function build2_2SpiderSpawns(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   return [
-    spawnEntry(new Vec2(128.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(896.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(896.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(128.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(-64.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 3000, count: 2 }),
-    spawnEntry(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: 18000, count: 1 }),
-    spawnEntry(new Vec2(448.0, 448.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 20500, count: 1 }),
-    spawnEntry(new Vec2(576.0, 448.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 26000, count: 1 }),
-    spawnEntry(new Vec2(1088.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 21000, count: 2 }),
-    spawnEntry(new Vec2(576.0, 576.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 31500, count: 1 }),
-    spawnEntry(new Vec2(448.0, 576.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 22000, count: 1 }),
+    spawn(new Vec2(128.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(896.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(896.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(128.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(-64.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 3000, count: 2 }),
+    spawn(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: 18000, count: 1 }),
+    spawn(new Vec2(448.0, 448.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 20500, count: 1 }),
+    spawn(new Vec2(576.0, 448.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 26000, count: 1 }),
+    spawn(new Vec2(1088.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 21000, count: 2 }),
+    spawn(new Vec2(576.0, 576.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 31500, count: 1 }),
+    spawn(new Vec2(448.0, 576.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: 22000, count: 1 }),
   ];
 });
 
@@ -74,19 +74,19 @@ registerQuest({
   if (ctx.playerCount + 4 >= 0) {
     let trigger = 500;
     for (const pos of linePoints(new Vec2(256.0, 256.0), new Vec2(102.4, 0.0), ctx.playerCount + 4)) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
       trigger += 500;
     }
     trigger = 10500;
     for (const pos of linePoints(new Vec2(256.0, 768.0), new Vec2(102.4, 0.0), ctx.playerCount + 4)) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
       trigger += 500;
     }
   }
   if (ctx.playerCount + 7 >= 0) {
     let trigger = 40500;
     for (const pos of linePoints(new Vec2(256.0, 512.0), new Vec2(64.0, 0.0), ctx.playerCount + 7)) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, triggerMs: trigger, count: 1 }));
       trigger += 3500;
     }
   }
@@ -109,13 +109,13 @@ registerQuest({
     entries.push(spawnAt(edges.left, { heading: 0.0, spawnId: SpawnId.AI1_SPIDER_SP1_BLUE_TINT_1B, triggerMs: triggerB, count: 1 }));
     if (wave === 10 || wave === 20) {
       const trigger = wave * 2000 + 2500;
-      entries.push(spawnEntry(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
-      entries.push(spawnEntry(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
     }
     if (wave === 30) {
       const trigger = 62500;
-      entries.push(spawnEntry(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
-      entries.push(spawnEntry(new Vec2(256.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(new Vec2(256.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
     }
   }
   return entries;
@@ -136,7 +136,7 @@ registerQuest({
     const angle = (rng.rand({ caller: RngCallerStatic.QUEST_BUILD_SWEEP_STAKES_ANGLE }) % 612) * 0.01;
     for (const pos of radialPoints(center, angle, 0x54, 0xFC, 0x2A)) {
       const heading = headingFromCenter(pos, center);
-      entries.push(spawnEntry(pos, { heading, spawnId: SpawnId.ALIEN_AI7_ORBITER_36, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading, spawnId: SpawnId.ALIEN_AI7_ORBITER_36, triggerMs: trigger, count: 1 }));
     }
     trigger += Math.max(step, 600);
     step -= 0x50;
@@ -177,7 +177,7 @@ registerQuest({
 
   function setEntry(idx: number, pos: Vec2, sid: SpawnId, trigger: number, count: number): void {
     if (idx < 0 || idx >= entries.length) return;
-    entries[idx] = spawnEntry(pos, { heading: 0.0, spawnId: sid, triggerMs: trigger, count });
+    entries[idx] = spawn(pos, { heading: 0.0, spawnId: sid, triggerMs: trigger, count });
   }
 
   // Loop 1: x from 256 to <688, step 72
@@ -242,10 +242,10 @@ registerQuest({
   unlockWeaponId: WeaponId.SAWED_OFF_SHOTGUN,
 })(function build2_8LandOfLizards(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   return [
-    spawnEntry(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 2000, count: 1 }),
-    spawnEntry(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 12000, count: 1 }),
-    spawnEntry(new Vec2(256.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 22000, count: 1 }),
-    spawnEntry(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 32000, count: 1 }),
+    spawn(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 2000, count: 1 }),
+    spawn(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 12000, count: 1 }),
+    spawn(new Vec2(256.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 22000, count: 1 }),
+    spawn(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_RING_24_0E, triggerMs: 32000, count: 1 }),
   ];
 });
 
@@ -262,13 +262,13 @@ registerQuest({
   let trigger = 2500;
   for (let i = 0; i < 12; i++) {
     const x = i % 2 === 0 ? edges.left.x : edges.right.x;
-    entries.push(spawnEntry(new Vec2(x, edges.left.y), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_5_19, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, edges.left.y), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_5_19, triggerMs: trigger, count: 1 }));
     trigger += 2500;
   }
   const loopCount = 12;
-  entries.push(spawnEntry(new Vec2(-264.0, edges.left.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: (loopCount - 1) * 2500, count: 1 }));
+  entries.push(spawn(new Vec2(-264.0, edges.left.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: (loopCount - 1) * 2500, count: 1 }));
   const specialTrigger = (5 * loopCount + 15) * 500;
-  entries.push(spawnEntry(new Vec2(edges.left.x, edges.left.y), { heading: 0.0, spawnId: SpawnId.FORMATION_GRID_ALIEN_BRONZE_18, triggerMs: specialTrigger, count: 1 }));
+  entries.push(spawn(new Vec2(edges.left.x, edges.left.y), { heading: 0.0, spawnId: SpawnId.FORMATION_GRID_ALIEN_BRONZE_18, triggerMs: specialTrigger, count: 1 }));
   return entries;
 });
 
@@ -280,16 +280,16 @@ registerQuest({
   unlockWeaponId: WeaponId.PLASMA_MINIGUN,
 })(function build2_10Spideroids(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   const entries: SpawnEntryType[] = [
-    spawnEntry(new Vec2(1088.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 1000, count: 1 }),
-    spawnEntry(new Vec2(-64.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 3000, count: 1 }),
-    spawnEntry(new Vec2(1088.0, 256.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 6000, count: 1 }),
+    spawn(new Vec2(1088.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 1000, count: 1 }),
+    spawn(new Vec2(-64.0, 512.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 3000, count: 1 }),
+    spawn(new Vec2(1088.0, 256.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 6000, count: 1 }),
   ];
   if (fullVersion) {
-    entries.push(spawnEntry(new Vec2(1088.0, 762.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 9000, count: 1 }));
-    entries.push(spawnEntry(new Vec2(512.0, 1088.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 9000, count: 1 }));
+    entries.push(spawn(new Vec2(1088.0, 762.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 9000, count: 1 }));
+    entries.push(spawn(new Vec2(512.0, 1088.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 9000, count: 1 }));
   }
   if (ctx.playerCount >= 2 || fullVersion) {
-    entries.push(spawnEntry(new Vec2(-64.0, 762.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 9000, count: 1 }));
+    entries.push(spawn(new Vec2(-64.0, 762.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP2_SPLITTER_01, triggerMs: 9000, count: 1 }));
   }
   return entries;
 });

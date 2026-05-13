@@ -10,7 +10,7 @@ import {
   cornerPoints,
   edgeMidpoints,
   headingFromCenter,
-  spawnEntry,
+  spawn,
   spawnAt,
 } from './helpers.ts';
 import { registerQuest } from './registry.ts';
@@ -43,8 +43,8 @@ registerQuest({
   const center = centerPoint(ctx.width, ctx.height);
   const edges = edgeMidpoints(ctx.width, ctx.height);
   const entries: SpawnEntryType[] = [
-    spawnEntry(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: 1000, count: 2 }),
-    spawnEntry(new Vec2(256.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: 1700, count: 2 }),
+    spawn(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: 1000, count: 2 }),
+    spawn(new Vec2(256.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: 1700, count: 2 }),
   ];
   for (let i = 2; i < 18; i++) {
     const trigger = (i * 5 - 10) * 720;
@@ -53,7 +53,7 @@ registerQuest({
     );
     if (i > 6) {
       entries.push(
-        spawnEntry(new Vec2(edges.right.x, center.y - 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger, count: 1 }),
+        spawn(new Vec2(edges.right.x, center.y - 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger, count: 1 }),
       );
     }
     if (i === 13) {
@@ -63,7 +63,7 @@ registerQuest({
     }
     if (i > 10) {
       entries.push(
-        spawnEntry(new Vec2(edges.left.x, center.y + 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger, count: 1 }),
+        spawn(new Vec2(edges.left.x, center.y + 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger, count: 1 }),
       );
     }
   }
@@ -87,7 +87,7 @@ registerQuest({
     const point = center.add(Vec2.fromAngle(angle).mul(radius));
     const heading = headingFromCenter(point, center);
     entries.push(
-      spawnEntry(point, { heading, spawnId: SpawnId.ALIEN_AI7_ORBITER_36, triggerMs: trigger, count: 1 }),
+      spawn(point, { heading, spawnId: SpawnId.ALIEN_AI7_ORBITER_36, triggerMs: trigger, count: 1 }),
     );
     trigger += Math.max(step, 1100);
     step -= 50;
@@ -154,11 +154,11 @@ registerQuest({
   unlockPerkId: PerkId.DOCTOR,
 })(function build1_5AlienDens(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   return [
-    spawnEntry(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 23500, count: ctx.playerCount }),
-    spawnEntry(new Vec2(256.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 38500, count: 1 }),
-    spawnEntry(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 38500, count: 1 }),
+    spawn(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 23500, count: ctx.playerCount }),
+    spawn(new Vec2(256.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 38500, count: 1 }),
+    spawn(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 38500, count: 1 }),
   ];
 });
 
@@ -182,7 +182,7 @@ registerQuest({
     );
     if (int(rng.rand({ caller: RngCallerStatic.QUEST_BUILD_THE_RANDOM_FACTOR_BRUTE_GATE }) % 5) === 3) {
       entries.push(
-        spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_GREY_BRUTE_29, triggerMs: trigger, count: ctx.playerCount }),
+        spawn(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_GREY_BRUTE_29, triggerMs: trigger, count: ctx.playerCount }),
       );
     }
     trigger += 10000;
@@ -217,22 +217,22 @@ registerQuest({
   unlockWeaponId: WeaponId.GAUSS_GUN,
 })(function build1_8AlienSquads(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   const entries: SpawnEntryType[] = [
-    spawnEntry(new Vec2(-256.0, 256.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(-256.0, 768.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 2500, count: 1 }),
-    spawnEntry(new Vec2(768.0, -256.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 5500, count: 1 }),
-    spawnEntry(new Vec2(768.0, 1280.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 8500, count: 1 }),
-    spawnEntry(new Vec2(1280.0, 1280.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 14500, count: 1 }),
-    spawnEntry(new Vec2(1280.0, 768.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 18500, count: 1 }),
-    spawnEntry(new Vec2(-256.0, 256.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 25000, count: 1 }),
-    spawnEntry(new Vec2(-256.0, 768.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 30000, count: 1 }),
+    spawn(new Vec2(-256.0, 256.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(-256.0, 768.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 2500, count: 1 }),
+    spawn(new Vec2(768.0, -256.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 5500, count: 1 }),
+    spawn(new Vec2(768.0, 1280.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 8500, count: 1 }),
+    spawn(new Vec2(1280.0, 1280.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 14500, count: 1 }),
+    spawn(new Vec2(1280.0, 768.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 18500, count: 1 }),
+    spawn(new Vec2(-256.0, 256.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 25000, count: 1 }),
+    spawn(new Vec2(-256.0, 768.0), { heading: 0.0, spawnId: SpawnId.FORMATION_RING_ALIEN_8_12, triggerMs: 30000, count: 1 }),
   ];
   let trigger = 36200;
   while (trigger < 83000) {
     entries.push(
-      spawnEntry(new Vec2(-64.0, -64.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger - 400, count: 1 }),
+      spawn(new Vec2(-64.0, -64.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger - 400, count: 1 }),
     );
     entries.push(
-      spawnEntry(new Vec2(ctx.width + 64.0, ctx.height + 64.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger, count: 1 }),
+      spawn(new Vec2(ctx.width + 64.0, ctx.height + 64.0), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_PALE_GREEN_26, triggerMs: trigger, count: 1 }),
     );
     trigger += 1800;
   }
@@ -249,18 +249,18 @@ registerQuest({
   const center = centerPoint(ctx.width, ctx.height);
   const edges = edgeMidpoints(ctx.width, ctx.height);
   const entries: SpawnEntryType[] = [
-    spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: 1500, count: ctx.playerCount * 2 + 6 }),
-    spawnEntry(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 8000, count: 1 }),
-    spawnEntry(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 13000, count: 1 }),
-    spawnEntry(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 18000, count: 1 }),
-    spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: 25000, count: ctx.playerCount * 2 + 6 }),
-    spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: 39000, count: ctx.playerCount * 3 + 3 }),
-    spawnEntry(new Vec2(384.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 41100, count: 1 }),
-    spawnEntry(new Vec2(640.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 42100, count: 1 }),
-    spawnEntry(new Vec2(512.0, 640.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 43100, count: 1 }),
-    spawnEntry(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 44100, count: 1 }),
-    spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1E, triggerMs: 50000, count: ctx.playerCount * 2 + 5 }),
-    spawnEntry(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1F, triggerMs: 55000, count: ctx.playerCount * 2 + 2 }),
+    spawn(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: 1500, count: ctx.playerCount * 2 + 6 }),
+    spawn(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 8000, count: 1 }),
+    spawn(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 13000, count: 1 }),
+    spawn(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 18000, count: 1 }),
+    spawn(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: 25000, count: ctx.playerCount * 2 + 6 }),
+    spawn(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1D, triggerMs: 39000, count: ctx.playerCount * 3 + 3 }),
+    spawn(new Vec2(384.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 41100, count: 1 }),
+    spawn(new Vec2(640.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 42100, count: 1 }),
+    spawn(new Vec2(512.0, 640.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, triggerMs: 43100, count: 1 }),
+    spawn(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, triggerMs: 44100, count: 1 }),
+    spawn(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1E, triggerMs: 50000, count: ctx.playerCount * 2 + 5 }),
+    spawn(new Vec2(center.x, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.ALIEN_RANDOM_1F, triggerMs: 55000, count: ctx.playerCount * 2 + 2 }),
   ];
   return entries;
 });
@@ -273,7 +273,7 @@ registerQuest({
   unlockWeaponId: WeaponId.ROCKET_LAUNCHER,
 })(function build1_10EightLeggedTerror(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   const entries: SpawnEntryType[] = [
-    spawnEntry(
+    spawn(
       new Vec2(ctx.width - 256, Math.floor(ctx.width / 2)),
       { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, triggerMs: 1000, count: 1 },
     ),

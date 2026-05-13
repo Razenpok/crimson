@@ -8,7 +8,7 @@ import {
   centerPoint,
   edgeMidpoints,
   ringPoints,
-  spawnEntry,
+  spawn,
   spawnAt,
 } from './helpers.ts';
 import { registerQuest } from './registry.ts';
@@ -69,8 +69,8 @@ registerQuest({
     entries.push(spawnAt(edges.left, { heading: 0.0, spawnId: SpawnId.ZOMBIE_RANDOM_41, triggerMs: trigger, count: 6 }));
     if (wave % 5 === 0) {
       const idx = Math.floor(wave / 5);
-      entries.push(spawnEntry(new Vec2(356.0, idx * 0xB4 + 0x100), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: trigger, count: idx + 1 }));
-      entries.push(spawnEntry(new Vec2(356.0, idx * 0xB4 + 0x180), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: trigger, count: idx + 2 }));
+      entries.push(spawn(new Vec2(356.0, idx * 0xB4 + 0x100), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: trigger, count: idx + 1 }));
+      entries.push(spawn(new Vec2(356.0, idx * 0xB4 + 0x180), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: trigger, count: idx + 2 }));
     }
     trigger += 7000;
     wave += 1;
@@ -141,7 +141,7 @@ registerQuest({
   let iVar5 = 0;
   for (let idx = 0; idx < 10; idx++) {
     const y = Math.floor(iVar5 / 10) + 200;
-    entries.push(spawnEntry(new Vec2(824.0, y), { heading: 0.0, spawnId: spawnIdFor(idx % 2 === 1), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(824.0, y), { heading: 0.0, spawnId: spawnIdFor(idx % 2 === 1), triggerMs: trigger, count: 1 }));
     trigger += 1800;
     iVar5 += 0x270;
   }
@@ -150,19 +150,19 @@ registerQuest({
   let toggle = false;
   for (let i = 0; i < 10; i++) {
     const x = 0x338 - Math.floor(iVar5 / 10);
-    entries.push(spawnEntry(new Vec2(x, 824.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, 824.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 1500;
     toggle = !toggle;
     iVar5 += 0x270;
   }
 
-  entries.push(spawnEntry(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+  entries.push(spawn(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
 
   iVar5 = 0;
   toggle = false;
   for (let i = 0; i < 10; i++) {
     const y = 0x338 - Math.floor(iVar5 / 10);
-    entries.push(spawnEntry(new Vec2(200.0, y), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(200.0, y), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 1200;
     toggle = !toggle;
     iVar5 += 0x270;
@@ -172,7 +172,7 @@ registerQuest({
   toggle = false;
   for (let i = 0; i < 10; i++) {
     const x = Math.floor(iVar5 / 10) + 200;
-    entries.push(spawnEntry(new Vec2(x, 200.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, 200.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 800;
     toggle = !toggle;
     iVar5 += 0x270;
@@ -182,7 +182,7 @@ registerQuest({
   toggle = false;
   for (let i = 0; i < 10; i++) {
     const y = Math.floor(iVar5 / 10) + 200;
-    entries.push(spawnEntry(new Vec2(824.0, y), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(824.0, y), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 800;
     toggle = !toggle;
     iVar5 += 0x270;
@@ -192,7 +192,7 @@ registerQuest({
   toggle = false;
   for (let i = 0; i < 10; i++) {
     const x = 0x338 - Math.floor(iVar5 / 10);
-    entries.push(spawnEntry(new Vec2(x, 824.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, 824.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 700;
     toggle = !toggle;
     iVar5 += 0x270;
@@ -202,7 +202,7 @@ registerQuest({
   toggle = false;
   for (let i = 0; i < 10; i++) {
     const y = 0x338 - Math.floor(iVar5 / 10);
-    entries.push(spawnEntry(new Vec2(200.0, y), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(200.0, y), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 700;
     toggle = !toggle;
     iVar5 += 0x270;
@@ -212,7 +212,7 @@ registerQuest({
   toggle = false;
   for (let i = 0; i < 10; i++) {
     const x = Math.floor(iVar5 / 10) + 200;
-    entries.push(spawnEntry(new Vec2(x, 200.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, 200.0), { heading: 0.0, spawnId: spawnIdFor(toggle), triggerMs: trigger, count: 1 }));
     trigger += 800;
     toggle = !toggle;
     iVar5 += 0x270;
@@ -236,7 +236,7 @@ registerQuest({
   if (ringCount > 0) {
     let trigger = 0;
     for (const [pos, _angle] of ringPoints(center, 158.0, ringCount)) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
       trigger += 200;
     }
   }
@@ -256,7 +256,7 @@ registerQuest({
   if (outerCount > 0) {
     let trigger = 42500;
     for (const [pos, _angle] of ringPoints(center, 258.0, outerCount)) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, triggerMs: trigger, count: 1 }));
       trigger += 500;
     }
   }
@@ -282,7 +282,7 @@ registerQuest({
       for (let i = 0; i < playerCount + 9; i++) {
         const x = (((i * i * 0x4C + 0xEC) * i + outerSeed * outerIndex) % 0x380) + 0x40;
         const y = ((innerSeed * i + (outerIndex * outerIndex * 0x4C + 0x1B) * outerIndex) % 0x380) + 0x40;
-        entries.push(spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+        entries.push(spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
         trigger += 300;
         innerSeed += 0x15;
       }
@@ -303,14 +303,14 @@ registerQuest({
 })(function build4_9TheAnnihilation(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   const entries: SpawnEntryType[] = [];
   const halfW = Math.floor(ctx.width / 2);
-  entries.push(spawnEntry(new Vec2(128.0, halfW), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: 500, count: 2 }));
+  entries.push(spawn(new Vec2(128.0, halfW), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: 500, count: 2 }));
 
   let trigger = 500;
   let iVar5 = 0;
   for (let idx = 0; idx < 12; idx++) {
     const y = Math.floor(iVar5 / 12) + 0x80;
     const x = idx % 2 === 0 ? 832.0 : 896.0;
-    entries.push(spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
     trigger += 500;
     iVar5 += 0x300;
   }
@@ -321,7 +321,7 @@ registerQuest({
   for (let i = 0; i < 12; i++) {
     const y = Math.floor(iVar5 / 12) + 0x80;
     const x = toggle ? 832.0 : 896.0;
-    entries.push(spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
     trigger += 300;
     toggle = !toggle;
     iVar5 += 0x300;
@@ -337,10 +337,10 @@ registerQuest({
   unlockWeaponId: WeaponId.ION_CANNON,
 })(function build4_10TheEndOfAll(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   const entries: SpawnEntryType[] = [
-    spawnEntry(new Vec2(128.0, 128.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 3000, count: 1 }),
-    spawnEntry(new Vec2(896.0, 128.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 6000, count: 1 }),
-    spawnEntry(new Vec2(128.0, 896.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 9000, count: 1 }),
-    spawnEntry(new Vec2(896.0, 896.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 12000, count: 1 }),
+    spawn(new Vec2(128.0, 128.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 3000, count: 1 }),
+    spawn(new Vec2(896.0, 128.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 6000, count: 1 }),
+    spawn(new Vec2(128.0, 896.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 9000, count: 1 }),
+    spawn(new Vec2(896.0, 896.0), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: 12000, count: 1 }),
   ];
 
   const center = centerPoint(ctx.width, ctx.height);
@@ -348,18 +348,18 @@ registerQuest({
 
   let trigger = 13000;
   for (const [pos, _angle] of ringPoints(center, 80.0, 6, { step: 1.0471976 })) {
-    entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
     trigger += 300;
   }
 
-  entries.push(spawnEntry(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_3C_SLOW_0B, triggerMs: trigger, count: 1 }));
+  entries.push(spawn(new Vec2(512.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_3C_SLOW_0B, triggerMs: trigger, count: 1 }));
 
   trigger = 18000;
   let y = 0x100;
   let toggle = false;
   while (y < 0x300) {
     const x = toggle ? edgesWide.right.x : edgesWide.left.x;
-    entries.push(spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: trigger, count: 2 }));
+    entries.push(spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: trigger, count: 2 }));
     trigger += 1000;
     toggle = !toggle;
     y += 0x80;
@@ -367,14 +367,14 @@ registerQuest({
 
   trigger = 43000;
   for (const [pos, _angle] of ringPoints(center, 80.0, 6, { step: 1.0471976, start: 0.5235988 })) {
-    entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
     trigger += 300;
   }
 
   if (fullVersion) {
     trigger = 62800;
     for (const [pos, _angle] of ringPoints(center, 180.0, 12, { step: 0.5235988, start: 0.5235988 })) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: trigger, count: 1 }));
       trigger += 500;
     }
   }
@@ -384,7 +384,7 @@ registerQuest({
   toggle = false;
   while (y < 0x300) {
     const x = toggle ? edgesWide.right.x : edgesWide.left.x;
-    entries.push(spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: trigger, count: 2 }));
+    entries.push(spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, triggerMs: trigger, count: 2 }));
     trigger += 1000;
     toggle = !toggle;
     y += 0x80;

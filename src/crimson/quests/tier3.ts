@@ -12,7 +12,7 @@ import {
   linePoints,
   radialPoints,
   ringPoints,
-  spawnEntry,
+  spawn,
   spawnAt,
 } from './helpers.ts';
 import { registerQuest } from './registry.ts';
@@ -30,10 +30,10 @@ registerQuest({
   const entries: SpawnEntryType[] = [
     spawnAt(edgesWide.right, { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: 1500, count: 2 }),
     spawnAt(edgesWide.left, { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: 1500, count: 2 }),
-    spawnEntry(new Vec2(896.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
-    spawnEntry(new Vec2(128.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
-    spawnEntry(new Vec2(128.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
-    spawnEntry(new Vec2(896.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
+    spawn(new Vec2(896.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
+    spawn(new Vec2(128.0, 128.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
+    spawn(new Vec2(128.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
+    spawn(new Vec2(896.0, 896.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: 2000, count: 1 }),
   ];
 
   let trigger = 4000;
@@ -73,13 +73,13 @@ registerQuest({
 })(function build3_2LizardKings(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   const center = centerPoint(ctx.width, ctx.height);
   const entries: SpawnEntryType[] = [
-    spawnEntry(new Vec2(1152.0, 512.0), { heading: 0.0, spawnId: SpawnId.FORMATION_CHAIN_LIZARD_4_11, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(-128.0, 512.0), { heading: 0.0, spawnId: SpawnId.FORMATION_CHAIN_LIZARD_4_11, triggerMs: 1500, count: 1 }),
-    spawnEntry(new Vec2(1152.0, 896.0), { heading: 0.0, spawnId: SpawnId.FORMATION_CHAIN_LIZARD_4_11, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(1152.0, 512.0), { heading: 0.0, spawnId: SpawnId.FORMATION_CHAIN_LIZARD_4_11, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(-128.0, 512.0), { heading: 0.0, spawnId: SpawnId.FORMATION_CHAIN_LIZARD_4_11, triggerMs: 1500, count: 1 }),
+    spawn(new Vec2(1152.0, 896.0), { heading: 0.0, spawnId: SpawnId.FORMATION_CHAIN_LIZARD_4_11, triggerMs: 1500, count: 1 }),
   ];
   let trigger = 1500;
   for (const [pos, angle] of ringPoints(center, 256.0, 28, { step: 0.34906587 })) {
-    entries.push(spawnEntry(pos, { heading: -angle, spawnId: SpawnId.LIZARD_RANDOM_31, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(pos, { heading: -angle, spawnId: SpawnId.LIZARD_RANDOM_31, triggerMs: trigger, count: 1 }));
     trigger += 900;
   }
   return entries;
@@ -93,7 +93,7 @@ function theKillingRandomSpawner(
 ): SpawnEntryType {
   const y = (rng.rand({ caller: yCaller }) % 768) + 128.0;
   const x = (rng.rand({ caller: xCaller }) % 768) + 128.0;
-  return spawnEntry(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs, count: 3 });
+  return spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs, count: 3 });
 }
 
 registerQuest({
@@ -164,15 +164,15 @@ registerQuest({
   const entries: SpawnEntryType[] = [];
   let trigger = 1000;
   for (const pos of linePoints(new Vec2(256.0, 256.0), new Vec2(0.0, 102.4), 5)) {
-    entries.push(spawnEntry(new Vec2(256.0, pos.y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
-    entries.push(spawnEntry(new Vec2(768.0, pos.y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(256.0, pos.y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(768.0, pos.y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
     trigger += 800;
   }
 
   trigger = 8000;
   for (const pos of linePoints(new Vec2(256.0, 256.0), new Vec2(102.4, 0.0), 5)) {
-    entries.push(spawnEntry(new Vec2(pos.x, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
-    entries.push(spawnEntry(new Vec2(pos.x, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(pos.x, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
+    entries.push(spawn(new Vec2(pos.x, 768.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
     trigger += 800;
   }
   return entries;
@@ -193,7 +193,7 @@ registerQuest({
     entries.push(spawnAt(edges.right, { heading: 0.0, spawnId: SpawnId.LIZARD_RANDOM_2E, triggerMs: trigger, count }));
     entries.push(spawnAt(edges.left, { heading: 0.0, spawnId: SpawnId.LIZARD_RANDOM_2E, triggerMs: trigger, count }));
     if (wave === 4) {
-      entries.push(spawnEntry(new Vec2(ctx.width + 128.0, edges.right.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: 1500, count: 2 }));
+      entries.push(spawn(new Vec2(ctx.width + 128.0, edges.right.y), { heading: 0.0, spawnId: SpawnId.ALIEN_CONST_RED_FAST_2B, triggerMs: 1500, count: 2 }));
     }
     trigger += 8000;
   }
@@ -211,7 +211,7 @@ registerQuest({
   const center = centerPoint(ctx.width, ctx.height);
   const entries: SpawnEntryType[] = [
     spawnAt(edges.bottom, { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 500, count: 1 }),
-    spawnEntry(new Vec2(center.x + 64.0, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 500, count: 1 }),
+    spawn(new Vec2(center.x + 64.0, edges.bottom.y), { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_AI7_TIMER_38, triggerMs: 500, count: 1 }),
     spawnAt(edges.top, { heading: 0.0, spawnId: SpawnId.SPIDER_SP1_CONST_BLUE_40, triggerMs: 500, count: 4 }),
   ];
 
@@ -243,9 +243,9 @@ registerQuest({
     trigger += 6000;
   }
   entries.push(
-    spawnEntry(new Vec2(128.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: 10000, count: 1 }),
-    spawnEntry(new Vec2(128.0, 384.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: 10000, count: 1 }),
-    spawnEntry(new Vec2(128.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: 10000, count: 1 }),
+    spawn(new Vec2(128.0, 256.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: 10000, count: 1 }),
+    spawn(new Vec2(128.0, 384.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: 10000, count: 1 }),
+    spawn(new Vec2(128.0, 512.0), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, triggerMs: 10000, count: 1 }),
   );
   return entries;
 });
@@ -264,7 +264,7 @@ registerQuest({
   while (step > 560) {
     const angle = (rng.rand({ caller: RngCallerStatic.QUEST_BUILD_DEJA_VU_ANGLE }) % 612) * 0.01;
     for (const pos of radialPoints(center, angle, 0x54, 0xFC, 0x2A)) {
-      entries.push(spawnEntry(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
+      entries.push(spawn(pos, { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, triggerMs: trigger, count: 1 }));
     }
     trigger += step;
     step -= 0x50;
@@ -280,9 +280,9 @@ registerQuest({
   unlockWeaponId: WeaponId.JACKHAMMER,
 })(function build3_10ZombieMasters(ctx: QuestContext, { rng, fullVersion = true }): SpawnEntryType[] {
   return [
-    spawnEntry(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 1000, count: ctx.playerCount }),
-    spawnEntry(new Vec2(512.0, 256.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 6000, count: 1 }),
-    spawnEntry(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 14000, count: ctx.playerCount }),
-    spawnEntry(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 18000, count: 1 }),
+    spawn(new Vec2(256.0, 256.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 1000, count: ctx.playerCount }),
+    spawn(new Vec2(512.0, 256.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 6000, count: 1 }),
+    spawn(new Vec2(768.0, 256.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 14000, count: ctx.playerCount }),
+    spawn(new Vec2(768.0, 768.0), { heading: 0.0, spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00, triggerMs: 18000, count: 1 }),
   ];
 });
