@@ -257,8 +257,8 @@ export class DemoView {
 
   protected _purchaseScreenTriggered(): boolean {
     if (InputState.wasMouseButtonPressed(0)) return true;
-    if (InputState.wasKeyPressed(27)) return true; // KEY_ESCAPE
-    if (InputState.wasKeyPressed(32)) return true; // KEY_SPACE
+    if (InputState.wasKeyPressed(27)) return true;
+    if (InputState.wasKeyPressed(32)) return true;
     return false;
   }
 
@@ -290,7 +290,7 @@ export class DemoView {
 
   private _updatePurchaseScreen(dtMs: number): void {
     dtMs = Math.max(0, int(dtMs));
-    if (InputState.wasKeyPressed(27)) { // KEY_ESCAPE
+    if (InputState.wasKeyPressed(27)) {
       this._purchaseActive = false;
       this._finished = true;
       return;
@@ -338,7 +338,7 @@ export class DemoView {
     }
 
     // Keyboard activation for convenience; original uses UI mouse.
-    purchaseRequested = purchaseRequested || InputState.wasKeyPressed(13); // KEY_ENTER
+    purchaseRequested = purchaseRequested || InputState.wasKeyPressed(13);
     if (purchaseRequested) {
       this._triggerPurchase();
     }
