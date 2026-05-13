@@ -360,11 +360,10 @@ export class MenuView {
       return;
     }
 
-    const resources = requireRuntimeResources(this.state);
-    this._hoveredIndex = this._hoveredEntryIndex(resources);
+    this._hoveredIndex = this._hoveredEntryIndex();
 
     if (InputState.wasKeyPressed(KEY_TAB)) {
-      const reverse = InputState.isKeyDown(KEY_LEFT_SHIFT);
+      const reverse = InputState.isKeyDown(KEY_LEFT_SHIFT) || InputState.isKeyDown(KEY_RIGHT_SHIFT);
       const delta = reverse ? -1 : 1;
       this._selectedIndex = ((this._selectedIndex + delta) % this._menuEntries.length + this._menuEntries.length) % this._menuEntries.length;
       this._focusTimerMs = 1000;
@@ -414,8 +413,8 @@ export class MenuView {
     }
     drawScreenFade(this.state);
     const resources = requireRuntimeResources(this.state);
-    this._drawMenuItems(resources);
-    this._drawMenuSign(resources);
+    this._drawMenuItems();
+    this._drawMenuSign();
     drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
@@ -441,11 +440,11 @@ export class MenuView {
       return;
     }
     const entry = this._menuEntries[index];
-    this.state.console.log.log(`menu select: ${index} (row ${entry.row})`);
-    this.state.console.log.flush();
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
     }
+    this.state.console.log.log(`menu select: ${index} (row ${entry.row})`);
+    this.state.console.log.flush();
     if (entry.row === MENU_LABEL_ROW_QUIT) {
       this._beginQuitTransition();
     } else if (entry.row === MENU_LABEL_ROW_PLAY_GAME) {
@@ -528,8 +527,9 @@ export class MenuView {
     return [showTop, true, true, true, true, false];
   }
 
-  private _drawMenuItems(resources: RuntimeResources): void {
+  private _drawMenuItems(): void {
     if (this._menuEntries.length === 0) return;
+    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const itemW = item.width;
@@ -622,14 +622,14 @@ export class MenuView {
     return false;
   }
 
-  private _hoveredEntryIndex(resources: RuntimeResources): number | null {
+  private _hoveredEntryIndex(): number | null {
     if (this._menuEntries.length === 0) return null;
     const [mx, my] = InputState.mousePosition();
     const mousePos = new Vec2(mx, my);
     for (let idx = 0; idx < this._menuEntries.length; idx++) {
       const entry = this._menuEntries[idx];
       if (!this._menuEntryEnabled(entry)) continue;
-      if (this._menuItemBounds(entry, resources).contains(mousePos)) {
+      if (this._menuItemBounds(entry).contains(mousePos)) {
         return idx;
       }
     }
@@ -669,8 +669,9 @@ export class MenuView {
     return [1.0, 0.0];
   }
 
-  private _menuItemBounds(entry: MenuEntry, resources: RuntimeResources): Rect {
+  private _menuItemBounds(entry: MenuEntry): Rect {
     // FUN_0044fb50: inset bounds derived from quad0 v0/v2 and pos_x/pos_y.
+    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const itemW = item.width;
     const itemH = item.height;
@@ -726,7 +727,7 @@ export class MenuView {
     return maxMs;
   }
 
-  private _drawMenuSign(resources: RuntimeResources): void {
+  private _drawMenuSign(): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
@@ -749,6 +750,7 @@ export class MenuView {
       // slide is ignored for render_mode==0 (transform) elements
       rotationDeg = angleRad * (180.0 / Math.PI);
     }
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
