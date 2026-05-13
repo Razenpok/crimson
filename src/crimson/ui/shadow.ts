@@ -16,7 +16,6 @@ export function drawUiQuadShadow(opts: {
   origin: wgl.Vector2;
   rotationDeg: number;
 }): void {
-  // From original Python code (might not be true for WebGL):
   // NOTE: raylib/rlgl tracks custom blend factors as state; some backends
   // only apply them when switching the blend mode.
   wgl.rlSetBlendFactorsSeparate(

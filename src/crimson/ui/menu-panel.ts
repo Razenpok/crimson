@@ -3,9 +3,18 @@
 import * as wgl from '@wgl';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from './shadow.ts';
 
+// Classic menu panel is rendered from the *inset* inner region of ui_menuPanel:
+//   - X inset: 1px on each side (uv 1/512 .. 511/512) => 510px wide
+//   - Y inset: 1px on each side (uv 1/256 .. 255/256) => 254px tall
+//
+// When a panel is taller than the base height, the original stretches it using a
+// 3-slice: [top][mid][bottom]. The source slice boundaries are at y=130 and y=150
+// in the texture (see grim UVs in ui_render_trace).
 const MENU_PANEL_INSET = 1.0;
 const MENU_PANEL_SRC_SLICE_Y1 = 130.0;
 const MENU_PANEL_SRC_SLICE_Y2 = 150.0;
+
+// Destination slice heights observed in the original at scale=1.0 (1024x768).
 const MENU_PANEL_DST_TOP_H = 138.0;
 const MENU_PANEL_DST_BOTTOM_H = 116.0;
 
@@ -15,6 +24,10 @@ export function drawClassicMenuPanel(
   texture: wgl.Texture,
   opts: { dst: wgl.Rectangle; tint?: wgl.Color; shadow?: boolean; flipX?: boolean },
 ): void {
+  // Draw a classic menu panel (ui_menuPanel) with the same slicing behavior as the original.
+  //
+  // - Uses inset source rect (1px border skipped) to match the vertex/UV inset.
+  // - Uses 3-slice only when dst is taller than (top + bottom); otherwise draws a single quad.
   const dst = opts.dst;
   const tint = opts.tint ?? WHITE;
   const shadow = opts.shadow ?? false;
@@ -31,6 +44,8 @@ export function drawClassicMenuPanel(
 
   const { x: dstX, y: dstY, w: dstW, h: dstH } = dst;
 
+  // Scale slice heights with the panel width (menu panel uses the same scale factor).
+  // dst.width is already in our "inset" width space (510 at scale=1.0).
   const scale = dstW !== 0.0 ? dstW / 510.0 : 1.0;
   const topH = MENU_PANEL_DST_TOP_H * scale;
   const bottomH = MENU_PANEL_DST_BOTTOM_H * scale;
@@ -40,6 +55,11 @@ export function drawClassicMenuPanel(
 
   function flipSrc(rect: wgl.Rectangle): wgl.Rectangle {
     if (!flipX) return rect;
+    // Use negative source width to mirror the panel, but keep src.x in-range.
+    //
+    // With CLAMP wrap, raylib's DrawTexturePro behaves badly when flipping via
+    // src.x=rect.x+rect.width (u near 1.0) and negative widths; it can clamp
+    // the UVs to the edge texel and collapse the panel to a transparent strip.
     return wgl.makeRectangle(rect.x, rect.y, -rect.w, rect.h);
   }
 
@@ -56,10 +76,12 @@ export function drawClassicMenuPanel(
     return;
   }
 
+  // Source slice rects (in texture pixels, with 1px inset).
   const srcTop = flipSrc(wgl.makeRectangle(srcX, srcY, srcW, Math.max(0.0, MENU_PANEL_SRC_SLICE_Y1 - inset)));
   const srcMid = flipSrc(wgl.makeRectangle(srcX, MENU_PANEL_SRC_SLICE_Y1, srcW, Math.max(0.0, MENU_PANEL_SRC_SLICE_Y2 - MENU_PANEL_SRC_SLICE_Y1)));
   const srcBot = flipSrc(wgl.makeRectangle(srcX, MENU_PANEL_SRC_SLICE_Y2, srcW, Math.max(0.0, (texH - inset) - MENU_PANEL_SRC_SLICE_Y2)));
 
+  // Destination slices.
   const dstTop = wgl.makeRectangle(dstX, dstY, dstW, topH);
   const dstMid = wgl.makeRectangle(dstX, dstY + topH, dstW, midH);
   const dstBot = wgl.makeRectangle(dstX, dstY + topH + midH, dstW, bottomH);

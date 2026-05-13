@@ -44,7 +44,7 @@ export function drawCursorGlow(
   } else {
     let alpha = (Math.pow(2.0, Math.sin(pulseTime)) + 2.0) * 0.32;
     alpha = clamp01(alpha);
-    const tint = wgl.makeColor(1, 1, 1, alpha);
+    const tint = wgl.makeColor(1, 1, 1, int(alpha * 255.0 + 0.5) / 255);
 
     const offsets: [number, number, number][] = [
       [-28.0, -28.0, 64.0],
