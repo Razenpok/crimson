@@ -45,6 +45,14 @@ export class QuestResultsBreakdownAnim {
   }
 }
 
+function pyRound(value: number): number {
+  const floorValue = Math.floor(value);
+  const frac = value - floorValue;
+  if (frac < 0.5) return floorValue;
+  if (frac > 0.5) return floorValue + 1;
+  return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+}
+
 export function computeQuestFinalTime(opts: {
   baseTimeMs: number;
   playerHealth: number;
@@ -62,12 +70,12 @@ export function computeQuestFinalTime(opts: {
   if (opts.playerHealthValues != null && opts.playerHealthValues.length > 0) {
     lifeBonusMs = 0;
     for (const health of opts.playerHealthValues) {
-      lifeBonusMs += int(Math.round(health));
+      lifeBonusMs += int(pyRound(health));
     }
   } else {
-    lifeBonusMs = int(Math.round(opts.playerHealth));
+    lifeBonusMs = int(pyRound(opts.playerHealth));
     if (opts.player2Health != null) {
-      lifeBonusMs += int(Math.round(opts.player2Health));
+      lifeBonusMs += int(pyRound(opts.player2Health));
     }
   }
 
