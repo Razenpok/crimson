@@ -43,13 +43,13 @@ import { ModsMenuView } from '@crimson/screens/panels/mods.ts';
 import { PanelMenuView } from '@crimson/screens/panels/base.ts';
 
 import { QuestsMenuView, type QuestsMenuState } from '@crimson/screens/quest-views/quests-menu.ts';
-import { QuestResultsView, type QuestResultsState } from '@crimson/screens/quest-views/quest-results.ts';
+import { QuestResultsView } from '@crimson/screens/quest-views/quest-results.ts';
 import { QuestFailedView } from '@crimson/screens/quest-views/quest-failed.ts';
 import { EndNoteView } from '@crimson/screens/quest-views/end-note.ts';
 
 import { type QuestLevel } from '@crimson/quests/level.ts';
 import { type GameStatus } from '@crimson/modes/base-gameplay-mode.ts';
-import { QuestMode } from '@crimson/modes/quest-mode.ts';
+import { QuestMode, type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { SurvivalMode } from '@crimson/modes/survival-mode.ts';
 import { RushMode } from '@crimson/modes/rush-mode.ts';
 import { TypoShooterMode } from '@crimson/modes/typo-mode.ts';
@@ -96,7 +96,7 @@ interface GameplayScreen extends Screen, PauseBackground {
   stealGroundForMenu(): GroundRenderer | null;
   menuGroundCamera(): Vec2 | null;
 
-  consumeOutcome?(): { kind: string } | null;
+  consumeOutcome?(): QuestRunOutcome | null;
   startRun?(level: QuestLevel, status: GameStatus | null): void;
 }
 
@@ -233,7 +233,7 @@ export class GameLoopView implements View {
         audio: state.audio,
         audioRng: state.rng,
       }),
-      quest_results: new QuestResultsView(gs as unknown as QuestResultsState),
+      quest_results: new QuestResultsView(gs),
       quest_failed: new QuestFailedView(gs),
       end_note: new EndNoteView(gs),
       open_high_scores: new HighScoresView(gs),

@@ -10,6 +10,7 @@ import type { GroundRenderer } from '@grim/terrain-render.ts';
 import type { GameMode } from '@crimson/game-modes.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import type { QuestLevel } from '@crimson/quests/level.ts';
+import type { QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 
 // ---------------------------------------------------------------------------
 // GameConfig — frozen (interface)
@@ -115,7 +116,7 @@ export class GameState {
   statsMenuEasterEggRoll: number;
   pendingQuestLevel: QuestLevel | null;
   pendingHighScores: HighScoresRequest | null;
-  questOutcome: { kind: string } | null;
+  questOutcome: QuestRunOutcome | null;
   questFailRetryCount: number;
   terrainRegenerateRequested: boolean;
   survivalElapsedMs: number;

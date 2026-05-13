@@ -3,87 +3,24 @@
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 
-import type { CrimsonConfig } from '@grim/config.ts';
-import { type AudioState, audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
-import { type QuestFinalTime, computeQuestFinalTime } from '@crimson/quests/results.ts';
+import { computeQuestFinalTime } from '@crimson/quests/results.ts';
 import { weaponDisplayName } from '@crimson/weapons.ts';
 import { perkDisplayName } from '@crimson/perks/ids.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
-import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
 import { QuestResultsUi as QuestResultsUiImpl } from '@crimson/screens/results/quest-results.ts';
+import type { GameState } from '@crimson/game/types.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
-
-// ---------------------------------------------------------------------------
-// Interfaces for the state consumed by QuestResultsView
-// ---------------------------------------------------------------------------
 
 export type { QuestRunOutcome };
 
-export interface QuestResultsStatus {
-  questUnlockIndex: number;
-  questUnlockIndexFull: number;
-  incrementQuestPlayCount(index: number): void;
-  saveIfDirty(): void;
-}
-
-export interface QuestResultsState {
-  config: {
-    display: {
-      width: number;
-      height: number;
-      violenceDisabled: number;
-    };
-    gameplay: {
-      mode: number;
-      hardcore: boolean;
-      questLevel: QuestLevel | null;
-    };
-    profile: { playerName: string };
-    save(): void;
-  };
-  audio: AudioState | null;
-  preserveBugs: boolean;
-  assetsDir: string;
-  baseDir: string;
-  questOutcome: QuestRunOutcome | null;
-  questFailRetryCount: number;
-  pendingQuestLevel: QuestLevel | null;
-  pendingHighScores: { gameModeId: number; questLevel: QuestLevel | null; highlightRank: number | null } | null;
-  pauseBackground: { drawPauseBackground(opts?: { entityAlpha?: number }): void } | null;
-  menuGround: { processPending(): void; draw(camera: Vec2): void } | null;
-  menuGroundCamera: Vec2 | null;
-  screenFadeAlpha: number;
-  screenFadeRamp: boolean;
-  status: QuestResultsStatus;
-  console: { log: { log(msg: string): void } };
-}
-
-// ---------------------------------------------------------------------------
-// QuestResultsUi — placeholder interface for the actual results UI
-// ---------------------------------------------------------------------------
-
-export interface QuestResultsUi {
-  open(opts: {
-    record: HighScoreRecord;
-    breakdown: QuestFinalTime;
-    questLevel: QuestLevel;
-    questTitle: string;
-    unlockWeaponName: string;
-    unlockPerkName: string;
-    playerNameDefault: string;
-  }): void;
-  close(): void;
-  update(dt: number, playSfx: ((sfxId: SfxId) => void) | null): string | null;
-  draw(): void;
-  worldEntityAlpha(): number;
-  highlightRank: number | null;
-}
+export type QuestResultsState = GameState;
 
 // ---------------------------------------------------------------------------
 // QuestResultsView
@@ -96,7 +33,7 @@ export class QuestResultsView {
   private _questTitle: string = '';
   private _unlockWeaponName: string = '';
   private _unlockPerkName: string = '';
-  private _ui: QuestResultsUi | null = null;
+  private _ui: QuestResultsUiImpl | null = null;
   private _action: string | null = null;
 
   constructor(state: QuestResultsState) {
@@ -184,11 +121,9 @@ export class QuestResultsView {
       creatureKillCount: int(outcome.killCount),
       shotsFired,
       shotsHit,
-      name: playerNameDefault(this.state.config as unknown as CrimsonConfig),
+      name: playerNameDefault(this.state.config),
     };
-    // The view's state.config is a subset of CrimsonConfig; at runtime it is always
-    // the full CrimsonConfig instance, so the cast is safe.
-    const ui = new QuestResultsUiImpl(this.state.config as unknown as CrimsonConfig);
+    const ui = new QuestResultsUiImpl(this.state.config);
     ui.preserveBugs = this.state.preserveBugs;
     ui.open({
       record,
@@ -197,9 +132,9 @@ export class QuestResultsView {
       questTitle: this._questTitle,
       unlockWeaponName: this._unlockWeaponName,
       unlockPerkName: this._unlockPerkName,
-      playerNameDefault: playerNameDefault(this.state.config as unknown as CrimsonConfig),
+      playerNameDefault: playerNameDefault(this.state.config),
     });
-    this._ui = ui as unknown as QuestResultsUi;
+    this._ui = ui;
   }
 
   close(): void {
@@ -227,8 +162,10 @@ export class QuestResultsView {
     const audio = this.state.audio;
     const playSfxFn: ((sfxId: SfxId) => void) | null =
       audio !== null ? (name: SfxId) => { audioPlaySfx(audio, name); } : null;
+    const resources = this.state.resources;
+    if (resources === null) return;
 
-    const action = ui.update(dt, playSfxFn);
+    const action = ui.update(dt, { resources, playSfx: playSfxFn });
     if (action === 'play_again') {
       if (this._questLevel === null) throw new Error('quest level must be set');
       this._setPendingQuestLevel(this._questLevel);
@@ -276,7 +213,9 @@ export class QuestResultsView {
     }
     drawScreenFade(this.state);
     if (ui !== null) {
-      ui.draw();
+      const resources = this.state.resources;
+      if (resources === null) return;
+      ui.draw({ resources });
       return;
     }
 
