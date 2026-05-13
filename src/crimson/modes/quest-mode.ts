@@ -16,7 +16,6 @@ import {
   DeterministicSession,
   type DeterministicSessionTick,
   QuestSpawnState,
-
 } from '@crimson/sim/sessions.ts';
 import {
   buildQuestSession,
@@ -59,16 +58,12 @@ import {
 } from '@crimson/sim/presentation-reactions.ts';
 import type { TickResult } from '@crimson/sim/hooks.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const WORLD_SIZE = 1024.0;
 
 const UI_TEXT_SCALE = 1.0;
 const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
-const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
+const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.5) / 255);
 
 const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
   const ids: WeaponId[] = [];
@@ -77,10 +72,6 @@ const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
   }
   return ids.sort((a, b) => a - b);
 })();
-
-// ---------------------------------------------------------------------------
-// QuestRunOutcome
-// ---------------------------------------------------------------------------
 
 export interface QuestRunOutcome {
   readonly kind: 'completed' | 'failed';
@@ -98,17 +89,12 @@ export interface QuestRunOutcome {
   readonly playerHealthValues: readonly number[];
 }
 
-// ---------------------------------------------------------------------------
-// QuestMode
-// ---------------------------------------------------------------------------
-
 export class QuestMode extends BaseGameplayMode {
   private _questDef: QuestDefinition | null = null;
   private _questLevel: QuestLevel | null = null;
   private _questTotalSpawnCount = 0;
   private _outcome: QuestRunOutcome | null = null;
   private _grimMono: GrimMonoFont | null = null;
-  private _perkPromptPendingCount = 0;
   private _perkPrompt = new PerkPromptState();
   private _perkMenu = new PerkMenuController({ onClose: () => this._resetPerkPrompt() });
   private _questSpawnState = new QuestSpawnState();
@@ -136,10 +122,6 @@ export class QuestMode extends BaseGameplayMode {
     this._questLevel = opts.config.gameplay.questLevel ?? new QuestLevel(1, 1);
   }
 
-  // ---------------------------------------------------------------------------
-  // Lifecycle
-  // ---------------------------------------------------------------------------
-
   open(): void {
     super.open();
     this._questDef = null;
@@ -150,7 +132,6 @@ export class QuestMode extends BaseGameplayMode {
     const courierTex = getTexture(this.renderResources.resources, TextureId.DEFAULT_FONT_COURIER);
     this._grimMono = courierTex != null ? createGrimMonoFont(courierTex) : null;
 
-    this._perkPromptPendingCount = 0;
     this._perkPrompt.reset();
     this._perkMenu.reset();
     this._resetGameplayFrameClock();
@@ -163,10 +144,6 @@ export class QuestMode extends BaseGameplayMode {
     this._simSession = null;
     super.close();
   }
-
-  // ---------------------------------------------------------------------------
-  // Session builder
-  // ---------------------------------------------------------------------------
 
   private _newSimSession(spawnEntries: readonly SpawnEntry[]): DeterministicSession {
     const questDef = this._questDef;
@@ -188,10 +165,6 @@ export class QuestMode extends BaseGameplayMode {
     return session;
   }
 
-  // ---------------------------------------------------------------------------
-  // Perk UI
-  // ---------------------------------------------------------------------------
-
   private _tryOpenPerkMenu(): void {
     this._openPerkMenuUi({
       menu: this._perkMenu,
@@ -202,8 +175,7 @@ export class QuestMode extends BaseGameplayMode {
   }
 
   private _resetPerkPrompt(): void {
-    this._perkPromptPendingCount = this.state.perkSelection.pendingCount;
-    this._perkPrompt.resetIfPending({ pendingCount: this._perkPromptPendingCount });
+    this._perkPrompt.resetIfPending({ pendingCount: this.state.perkSelection.pendingCount });
   }
 
   private _updatePerkUi(dtUiMs: number): void {
@@ -242,10 +214,6 @@ export class QuestMode extends BaseGameplayMode {
     }
     this._tickPerkMenuTimeline(dtUiMs);
   }
-
-  // ---------------------------------------------------------------------------
-  // Perk prompt overrides
-  // ---------------------------------------------------------------------------
 
   protected _pollPerkOpenRequest(opts: {
     pendingCount: number;
@@ -315,10 +283,6 @@ export class QuestMode extends BaseGameplayMode {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Replay helpers
-  // ---------------------------------------------------------------------------
-
   protected _replayCheckpointElapsedMs(): number {
     return this._questSpawnState.spawnTimelineMs;
   }
@@ -338,10 +302,6 @@ export class QuestMode extends BaseGameplayMode {
     const baseTimeMs = int(this._questSpawnState.spawnTimelineMs);
     return `quest_${level}_${stamp}_${kind}_t${baseTimeMs}`;
   }
-
-  // ---------------------------------------------------------------------------
-  // LAN helpers
-  // ---------------------------------------------------------------------------
 
   protected _lanModeName(): 'survival' | 'rush' | 'quests' {
     return 'quests';
@@ -404,10 +364,6 @@ export class QuestMode extends BaseGameplayMode {
     return 'continue';
   }
 
-  // ---------------------------------------------------------------------------
-  // Post-apply reaction hooks
-  // ---------------------------------------------------------------------------
-
   protected _buildTickPostApplyReaction(opts: { tickResult: TickResult }): PostApplyReaction {
     return buildPostApplyReaction({
       tickResult: opts.tickResult,
@@ -426,16 +382,14 @@ export class QuestMode extends BaseGameplayMode {
   private _playQuestCompletionMusic(): void {
     if (this.audio === null) return;
     audioPlayMusic(this.audio, 'crimsonquest');
-    // Start silent — volume is faded in during update
     const playback = this.audio.music.playbacks?.get?.('crimsonquest');
     if (playback != null) {
       playback.volume = 0.0;
+      if (playback.gainNode !== null) {
+        playback.gainNode.gain.value = 0.0;
+      }
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Resync snapshot
-  // ---------------------------------------------------------------------------
 
   protected _applyResyncSnapshot(snapshot: unknown): void {
     const rs = snapshot as {
@@ -458,19 +412,11 @@ export class QuestMode extends BaseGameplayMode {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Outcome
-  // ---------------------------------------------------------------------------
-
   consumeOutcome(): QuestRunOutcome | null {
     const outcome = this._outcome;
     this._outcome = null;
     return outcome;
   }
-
-  // ---------------------------------------------------------------------------
-  // Start run
-  // ---------------------------------------------------------------------------
 
   startRun(level: QuestLevel, opts: { status: GameStatus | null }): void {
     const quest = questByLevel(level);
@@ -482,10 +428,15 @@ export class QuestMode extends BaseGameplayMode {
       return;
     }
     this._outcome = null;
+    this._replayRecorder = null;
+    this._replayCheckpoints.length = 0;
+    this._replayCheckpointsLastTick = null;
 
     const hardcoreFlag = this.config.gameplay.hardcore;
     this.hardcore = hardcoreFlag;
 
+    // Native quest start does not reseed RNG per level; carry the current
+    // session RNG state into the next run.
     const seed = int(this.state.rng.state) & 0xFFFFFFFF;
     this._runResetSeed = seed;
 
@@ -504,7 +455,8 @@ export class QuestMode extends BaseGameplayMode {
       { unlockIndex: genericUnlockIndex, width: int(this.worldSize), height: int(this.worldSize) },
     );
 
-    // Native burns one crt_rand for highscore_record_random_tag
+    // Native `quest_start_selected()` burns one `crt_rand()` for
+    // `highscore_record_random_tag` before quest terrain and spawn setup.
     this.state.rng.rand({ caller: RngCallerStatic.QUEST_START_SELECTED_HIGHSCORE_RANDOM_TAG });
 
     const questTerrain = advanceExplicitTerrain(
@@ -539,40 +491,36 @@ export class QuestMode extends BaseGameplayMode {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Input handling
-  // ---------------------------------------------------------------------------
-
   protected _handleInput(): void {
-    if (this._perkMenu.open && InputState.wasKeyPressed(27)) { // Escape
+    if (this._perkMenu.open && InputState.wasKeyPressed(27)) {
       this.audioBridge.router.playSfx?.(SfxId.UI_BUTTONCLICK);
       this._perkMenu.close();
       return;
     }
 
-    if (!this._lanEnabled && InputState.wasKeyPressed(9)) { // Tab
+    if (!this._lanEnabled && InputState.wasKeyPressed(9)) {
       this._paused = !this._paused;
     }
 
     if (this._debugEnabled && !this._perkMenu.open) {
-      if (InputState.wasKeyPressed(113)) { // F2
+      if (InputState.wasKeyPressed(113)) {
         this.state.debugGodMode = !this.state.debugGodMode;
         this.audioBridge.router.playSfx?.(SfxId.UI_BUTTONCLICK);
       }
-      if (InputState.wasKeyPressed(114)) { // F3
+      if (InputState.wasKeyPressed(114)) {
         this.state.perkSelection.pendingCount += 1;
         this.state.perkSelection.choicesDirty = true;
         this.audioBridge.router.playSfx?.(SfxId.UI_LEVELUP);
       }
-      if (InputState.wasKeyPressed(219)) { // [
+      if (InputState.wasKeyPressed(219)) {
         this._debugCycleWeapon(-1);
       }
-      if (InputState.wasKeyPressed(221)) { // ]
+      if (InputState.wasKeyPressed(221)) {
         this._debugCycleWeapon(1);
       }
     }
 
-    if (InputState.wasKeyPressed(27)) { // Escape
+    if (InputState.wasKeyPressed(27)) {
       this._action = 'open_pause_menu';
       return;
     }
@@ -584,13 +532,9 @@ export class QuestMode extends BaseGameplayMode {
     const current = this.player.weapon.weaponId;
     let idx = weaponIds.indexOf(current);
     if (idx < 0) idx = 0;
-    const weaponId = weaponIds[((idx + delta) % weaponIds.length + weaponIds.length) % weaponIds.length];
+    const weaponId = weaponIds[((idx + int(delta)) % weaponIds.length + weaponIds.length) % weaponIds.length];
     weaponAssignPlayer(this.player, weaponId, { state: this.state });
   }
-
-  // ---------------------------------------------------------------------------
-  // Death transition
-  // ---------------------------------------------------------------------------
 
   private _deathTransitionReady(): boolean {
     let deadPlayers = 0;
@@ -611,10 +555,6 @@ export class QuestMode extends BaseGameplayMode {
       player.deathTimer -= delta;
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Outcome builders
-  // ---------------------------------------------------------------------------
 
   private _buildCompletedOutcome(): void {
     if (this._questLevel === null) {
@@ -676,10 +616,6 @@ export class QuestMode extends BaseGameplayMode {
     this.closeRequested = true;
   }
 
-  // ---------------------------------------------------------------------------
-  // Update
-  // ---------------------------------------------------------------------------
-
   update(dt: number): void {
     const frame = this._beginModeUpdate(dt);
     if (frame === null) return;
@@ -701,7 +637,8 @@ export class QuestMode extends BaseGameplayMode {
     }
     if (simDt <= 0.0) {
       this._resetGameplayFrameClock();
-      // Keep death countdown moving at real-time pace while paused
+      // Match legacy transition behavior: keep countdown moving, but at
+      // real-time pace while perk-menu transition is holding world ticks.
       this._tickDeathTimers(frame.dt, 1.0);
       if (this._deathTransitionReady()) {
         this._closeFailedRun();
@@ -743,10 +680,6 @@ export class QuestMode extends BaseGameplayMode {
       onCheckpoint,
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw
-  // ---------------------------------------------------------------------------
 
   draw(): void {
     const perkMenuActive = this._perkMenu.active;
@@ -828,10 +761,6 @@ export class QuestMode extends BaseGameplayMode {
     }
     this._drawLanWaitOverlay();
   }
-
-  // ---------------------------------------------------------------------------
-  // Draw helpers
-  // ---------------------------------------------------------------------------
 
   private _drawGameCursor(): void {
     const resources = this.renderResources.resources;
