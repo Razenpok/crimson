@@ -257,7 +257,7 @@ export class ControlsMenuView extends PanelMenuView {
     const [panelScale] = this._menuItemScale(0);
     const leftTopLeft = this._leftPanelTopLeft(panelScale);
     const rightTopLeft = this._rightPanelTopLeft(panelScale);
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
 
     let clickConsumed = this._updateMethodDropdowns(leftTopLeft, panelScale, font);
@@ -283,10 +283,6 @@ export class ControlsMenuView extends PanelMenuView {
       }
     }
     super._beginCloseTransition(action);
-  }
-
-  private _requireResources(): RuntimeResources {
-    return requireRuntimeResources(this.state);
   }
 
   private _currentPlayerIndex(): number {
