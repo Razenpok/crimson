@@ -85,24 +85,25 @@ const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-interface CreditsLine {
+class CreditsLine {
   text: string;
   flags: number;
-}
 
-function makeCreditsLine(text: string = '', flags: number = 0): CreditsLine {
-  return { text, flags };
+  constructor(opts: { text?: string; flags?: number } = {}) {
+    this.text = opts.text ?? '';
+    this.flags = opts.flags ?? 0;
+  }
 }
 
 function creditsBuildLines(): { lines: CreditsLine[]; lineMaxIndex: number; secretLineBaseIndex: number } {
   const lines: CreditsLine[] = [];
   for (let i = 0; i < _CREDITS_TABLE_SIZE; i++) {
-    lines.push(makeCreditsLine());
+    lines.push(new CreditsLine());
   }
   let lineMaxIndex = 0;
 
   function lineSet(index: number, text: string, flags: number): void {
-    lines[index] = makeCreditsLine(text, flags);
+    lines[index] = new CreditsLine({ text, flags });
     lineMaxIndex = index;
   }
 
