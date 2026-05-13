@@ -6,12 +6,11 @@ import { OwnerRef } from '@crimson/owner-ref.ts';
 import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import type { CreaturePool, CreatureDeath } from '@crimson/creatures/runtime.ts';
 import type { FxQueue } from '@crimson/effects.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
-import { creatureApplyDamageWithLethalFollowup } from "@crimson/creatures/damage.js";
-import { GameplayState } from "@crimson/gameplay.js";
+import { creatureApplyDamageWithLethalFollowup } from '@crimson/creatures/damage.ts';
 
 export function applyFinalRevengeOnPlayerDeath(opts: {
   state: GameplayState;
@@ -24,6 +23,8 @@ export function applyFinalRevengeOnPlayerDeath(opts: {
   fxQueue: FxQueue | null;
   deaths: CreatureDeath[];
 }): void {
+  /** Apply Final Revenge perk behavior when a player dies. */
+
   const {
     state,
     creatures,

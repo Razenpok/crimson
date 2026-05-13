@@ -8,7 +8,7 @@ import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
-import { PlayerPerkTickCtx } from "@crimson/perks/runtime/player-tick-context.js";
+import type { PlayerPerkTickCtx } from '@crimson/perks/runtime/player-tick-context.ts';
 
 export function tickFireCough(ctx: PlayerPerkTickCtx): void {
   if (!perkActive(ctx.player, PerkId.FIRE_CAUGH)) {
