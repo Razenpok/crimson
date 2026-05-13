@@ -46,14 +46,21 @@ const TUTORIAL_HINT_TEXT_BUGS: readonly string[] = [
 ];
 
 
-export interface BonusSpawnCall {
+export class BonusSpawnCall {
   readonly bonusId: BonusId;
   readonly amount: number;
   readonly pos: Vec2;
+
+  constructor(opts: { bonusId: BonusId; amount: number; pos: Vec2 }) {
+    this.bonusId = opts.bonusId;
+    this.amount = opts.amount;
+    this.pos = opts.pos;
+    Object.freeze(this);
+  }
 }
 
 
-export interface TutorialFrameActions {
+export class TutorialFrameActions {
   readonly promptText: string;
   readonly promptAlpha: number;
   readonly hintText: string;
@@ -64,6 +71,31 @@ export interface TutorialFrameActions {
   readonly playLevelupSfx: boolean;
   readonly forcePlayerHealth: number;
   readonly forcePlayerExperience: number | null;
+
+  constructor(opts: {
+    promptText?: string;
+    promptAlpha?: number;
+    hintText?: string;
+    hintAlpha?: number;
+    spawnTemplates?: readonly SpawnTemplateCall[];
+    spawnBonuses?: readonly BonusSpawnCall[];
+    stage5BonusCarrierDrop?: [BonusId, number] | null;
+    playLevelupSfx?: boolean;
+    forcePlayerHealth?: number;
+    forcePlayerExperience?: number | null;
+  } = {}) {
+    this.promptText = opts.promptText ?? '';
+    this.promptAlpha = opts.promptAlpha ?? 0.0;
+    this.hintText = opts.hintText ?? '';
+    this.hintAlpha = opts.hintAlpha ?? 0.0;
+    this.spawnTemplates = opts.spawnTemplates ?? [];
+    this.spawnBonuses = opts.spawnBonuses ?? [];
+    this.stage5BonusCarrierDrop = opts.stage5BonusCarrierDrop ?? null;
+    this.playLevelupSfx = opts.playLevelupSfx ?? false;
+    this.forcePlayerHealth = opts.forcePlayerHealth ?? 100.0;
+    this.forcePlayerExperience = opts.forcePlayerExperience ?? null;
+    Object.freeze(this);
+  }
 }
 
 
@@ -261,9 +293,9 @@ export function tickTutorialTimeline(
       state.stageTransitionTimerMs = -1000;
       playLevelupSfx = true;
       spawnBonuses.push(
-        { bonusId: BonusId.POINTS, amount: 500, pos: new Vec2(260.0, 260.0) },
-        { bonusId: BonusId.POINTS, amount: 1000, pos: new Vec2(600.0, 400.0) },
-        { bonusId: BonusId.POINTS, amount: 500, pos: new Vec2(300.0, 400.0) },
+        new BonusSpawnCall({ bonusId: BonusId.POINTS, amount: 500, pos: new Vec2(260.0, 260.0) }),
+        new BonusSpawnCall({ bonusId: BonusId.POINTS, amount: 1000, pos: new Vec2(600.0, 400.0) }),
+        new BonusSpawnCall({ bonusId: BonusId.POINTS, amount: 500, pos: new Vec2(300.0, 400.0) }),
       );
     }
   } else if (stageIndex === 2) {
@@ -310,7 +342,7 @@ export function tickTutorialTimeline(
     }
   }
 
-  const actions: TutorialFrameActions = {
+  const actions = new TutorialFrameActions({
     promptText: basePromptText,
     promptAlpha: basePromptAlpha,
     hintText,
@@ -321,7 +353,7 @@ export function tickTutorialTimeline(
     playLevelupSfx,
     forcePlayerHealth: 100.0,
     forcePlayerExperience: forceExperience,
-  };
+  });
 
   return [state, actions];
 }

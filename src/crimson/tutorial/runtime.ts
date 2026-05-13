@@ -1,11 +1,11 @@
 // Port of crimson/tutorial/runtime.py
 
 import { SfxId } from '@grim/sfx-map.ts';
-import { CreatureFlags, SpawnId } from '@crimson/creatures/spawn-ids.ts';
-import { survivalCheckLevelUp } from "@crimson/gameplay.ts";
+import { CreatureFlags, SpawnId } from '@crimson/creatures/spawn.ts';
+import { survivalCheckLevelUp } from '@crimson/gameplay.ts';
 import type { PlayerInput } from '@crimson/sim/input.ts';
 import { WorldState } from '@crimson/sim/world-state.ts';
-import { TutorialOverlayState } from "./state.ts";
+import { TutorialOverlayState } from './state.ts';
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
 import type { DeterministicStepResult } from '@crimson/sim/step-pipeline.ts';
 
