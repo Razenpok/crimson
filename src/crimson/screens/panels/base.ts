@@ -92,10 +92,8 @@ const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-export type PanelGameState = GameState;
-
 export class PanelMenuView {
-  state: PanelGameState;
+  state: GameState;
 
   private _isOpen: boolean = false;
   private _title: string;
@@ -120,7 +118,7 @@ export class PanelMenuView {
   private _panelOpenSfxPlayed: boolean = false;
 
   constructor(
-    state: PanelGameState,
+    state: GameState,
     opts: {
       title: string;
       body?: string | null;

@@ -15,9 +15,9 @@ import {
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { type GameState } from '@crimson/game/types.ts';
 import {
   PanelMenuView,
-  type PanelGameState,
   MENU_LABEL_ROW_HEIGHT,
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
@@ -102,10 +102,7 @@ interface PlayerCountWidgetLayout {
 // State interface consumed by PlayGameMenuView
 // ---------------------------------------------------------------------------
 
-export interface PlayGamePanelState extends PanelGameState {
-  demoEnabled: boolean;
-  debugEnabled: boolean;
-}
+export type PlayGamePanelState = GameState;
 
 // ---------------------------------------------------------------------------
 // PlayGameMenuView

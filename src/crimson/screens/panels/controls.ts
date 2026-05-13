@@ -14,11 +14,11 @@ import {
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { type DropdownLayoutBase } from '@crimson/ui/layout.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { type GameState } from '@crimson/game/types.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
 import { INPUT_CODE_UNBOUND, inputCodeName } from '@crimson/input-codes.ts';
 import {
   PanelMenuView,
-  type PanelGameState,
   MENU_PANEL_WIDTH,
   MENU_PANEL_HEIGHT,
   PANEL_TIMELINE_START_MS,
@@ -256,7 +256,7 @@ export class ControlsMenuView extends PanelMenuView {
   private _rebindPlayerIndex: number | null = null;
   private _rebindSkipFrames: number = 0;
 
-  constructor(state: PanelGameState) {
+  constructor(state: GameState) {
     super(state, {
       title: 'Controls',
       backAction: 'open_options',
