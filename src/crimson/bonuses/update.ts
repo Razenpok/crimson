@@ -12,13 +12,13 @@ import { bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_M
 
 const _REFLEX_TIMER_SUBTRACT_BIAS = 4e-9;
 
-/** Allow Telekinetic perk owners to pick up bonuses by aiming at them. */
 export function bonusTelekineticUpdate(
   state: GameplayState,
   players: PlayerState[],
   dt: number,
   opts: { creatures: readonly CreatureState[]; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
 ): BonusPickupEvent[] {
+  // Allow Telekinetic perk owners to pick up bonuses by aiming at them.
   const creatures = opts.creatures;
   const detailPreset = opts.detailPreset ?? 5;
   const deferFreezeCorpseFx = opts.deferFreezeCorpseFx ?? false;
@@ -88,13 +88,14 @@ export function bonusTelekineticUpdate(
   return pickups;
 }
 
-/** Advance world bonuses and global timers (subset of `bonus_update`). */
 export function bonusUpdate(
   state: GameplayState,
   players: PlayerState[],
   dt: number,
   opts: { creatures: readonly CreatureState[]; updateHud?: boolean; detailPreset?: number; deferFreezeCorpseFx?: boolean; freezeCorpseIndices?: Set<number> | null },
 ): BonusPickupEvent[] {
+  // Advance world bonuses and global timers (subset of `bonus_update`).
+
   const creatures = opts.creatures;
   const updateHud = opts.updateHud ?? true;
   const detailPreset = opts.detailPreset ?? 5;
@@ -153,8 +154,9 @@ export function bonusUpdate(
   return pickups;
 }
 
-/** Advance global timers that native decrements before `bonusUpdate`. */
 export function bonusUpdatePrePickupTimers(state: GameplayState, dt: number): void {
+  // Advance global timers that native decrements before `bonus_update`.
+
   if (dt <= 0.0) {
     return;
   }
