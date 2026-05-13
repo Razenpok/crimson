@@ -3,10 +3,17 @@
 import { Vec2 } from '@grim/geom.ts';
 import { CrimsonConfig } from '@grim/config.ts';
 
-export interface WorldViewportState {
+export class WorldViewportState {
   readonly worldSize: number;
   readonly config: CrimsonConfig | null;
   readonly camera: Vec2;
+
+  constructor(opts: { worldSize: number; config: CrimsonConfig | null; camera: Vec2 }) {
+    this.worldSize = opts.worldSize;
+    this.config = opts.config;
+    this.camera = opts.camera;
+    Object.freeze(this);
+  }
 }
 
 export function cameraScreenSize(
