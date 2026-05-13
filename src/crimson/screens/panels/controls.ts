@@ -230,9 +230,9 @@ export class ControlsMenuView extends PanelMenuView {
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
 
-    let clickConsumed = this._updateMethodDropdowns(leftTopLeft, panelScale, font);
+    let clickConsumed = this._updateMethodDropdowns({ leftTopLeft, panelScale, font });
     if (!clickConsumed) {
-      clickConsumed = this._updateRebindCapture(rightTopLeft, panelScale, font);
+      clickConsumed = this._updateRebindCapture({ rightTopLeft, panelScale, font });
     }
     if (!clickConsumed && this._updateDirectionArrowCheckbox(
       leftTopLeft, panelScale, this._checkboxEnabled(), resources, font,
@@ -419,7 +419,10 @@ export class ControlsMenuView extends PanelMenuView {
     return rows;
   }
 
-  private _updateRebindCapture(rightTopLeft: Vec2, panelScale: number, font: SmallFontData): boolean {
+  private _updateRebindCapture(opts: { rightTopLeft: Vec2; panelScale: number; font: SmallFontData }): boolean {
+    const rightTopLeft = opts.rightTopLeft;
+    const panelScale = opts.panelScale;
+    const font = opts.font;
     const playerIdx = this._currentPlayerIndex();
     const playerControls = this.state.config.controls.players[playerIdx];
     const aimScheme = playerControls.aimScheme;
@@ -494,21 +497,21 @@ export class ControlsMenuView extends PanelMenuView {
     return false;
   }
 
-  private _setPlayerMoveMode(playerIndex: number, moveMode: MovementControlType): void {
-    this.state.config.controls.players[playerIndex].movement = moveMode;
+  private _setPlayerMoveMode(opts: { playerIndex: number; moveMode: MovementControlType }): void {
+    this.state.config.controls.players[opts.playerIndex].movement = opts.moveMode;
   }
 
-  private _setPlayerAimScheme(playerIndex: number, aimScheme: AimScheme): void {
-    this.state.config.controls.players[playerIndex].aimScheme = aimScheme;
+  private _setPlayerAimScheme(opts: { playerIndex: number; aimScheme: AimScheme }): void {
+    this.state.config.controls.players[opts.playerIndex].aimScheme = opts.aimScheme;
   }
 
-  private static _moveMethodIds(moveMode: MovementControlType): MovementControlType[] {
+  private static _moveMethodIds(opts: { moveMode: MovementControlType }): MovementControlType[] {
     const items: MovementControlType[] = [
       MovementControlType.RELATIVE,
       MovementControlType.STATIC,
       MovementControlType.DUAL_ACTION_PAD,
     ];
-    if (moveMode === MovementControlType.MOUSE_POINT_CLICK) {
+    if (opts.moveMode === MovementControlType.MOUSE_POINT_CLICK) {
       items.push(MovementControlType.MOUSE_POINT_CLICK);
     }
     return items;
@@ -584,13 +587,16 @@ export class ControlsMenuView extends PanelMenuView {
     return [isOpen, null, false];
   }
 
-  private _updateMethodDropdowns(leftTopLeft: Vec2, panelScale: number, font: SmallFontData): boolean {
+  private _updateMethodDropdowns(opts: { leftTopLeft: Vec2; panelScale: number; font: SmallFontData }): boolean {
+    const leftTopLeft = opts.leftTopLeft;
+    const panelScale = opts.panelScale;
+    const font = opts.font;
     const config = this.state.config;
     const playerIdx = this._currentPlayerIndex();
     const playerControls = config.controls.players[playerIdx];
     const aimScheme = playerControls.aimScheme;
     const moveMode = playerControls.movement;
-    const moveMethodIds = ControlsMenuView._moveMethodIds(moveMode);
+    const moveMethodIds = ControlsMenuView._moveMethodIds({ moveMode });
     const moveItems = moveMethodIds.map(m => inputSchemeLabel(m));
     const aimItemIds = controlsAimMethodDropdownIds(aimScheme);
     const aimItems = aimItemIds.map(a => inputConfigureForLabel(a));
@@ -621,7 +627,7 @@ export class ControlsMenuView extends PanelMenuView {
       this._moveMethodOpen = newOpen;
       if (selected !== null) {
         const selectedIdx = Math.max(0, Math.min(int(selected), moveMethodIds.length - 1));
-        this._setPlayerMoveMode(playerIdx, moveMethodIds[selectedIdx]);
+        this._setPlayerMoveMode({ playerIndex: playerIdx, moveMode: moveMethodIds[selectedIdx] });
         this._dirty = true;
       }
       if (consumed) return true;
@@ -634,7 +640,7 @@ export class ControlsMenuView extends PanelMenuView {
       this._aimMethodOpen = newOpen;
       if (selected !== null) {
         const selectedIdx = Math.max(0, Math.min(int(selected), aimItemIds.length - 1));
-        this._setPlayerAimScheme(playerIdx, aimItemIds[selectedIdx]);
+        this._setPlayerAimScheme({ playerIndex: playerIdx, aimScheme: aimItemIds[selectedIdx] });
         this._dirty = true;
       }
       if (consumed) return true;
@@ -695,7 +701,7 @@ export class ControlsMenuView extends PanelMenuView {
     const playerControls = config.controls.players[playerIdx];
     const aimScheme = playerControls.aimScheme;
     const moveMode = playerControls.movement;
-    const moveMethodIds = ControlsMenuView._moveMethodIds(moveMode);
+    const moveMethodIds = ControlsMenuView._moveMethodIds({ moveMode });
     const moveItems = moveMethodIds.map(m => inputSchemeLabel(m));
     const aimItemIds = controlsAimMethodDropdownIds(aimScheme);
     const aimItems = aimItemIds.map(a => inputConfigureForLabel(a));
