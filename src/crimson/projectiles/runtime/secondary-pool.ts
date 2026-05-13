@@ -77,7 +77,6 @@ export class SecondarySpawnSpec {
     this.targetHint = opts.targetHint ?? null;
     this.creatures = opts.creatures ?? null;
     this.preserveBugs = opts.preserveBugs ?? false;
-    Object.freeze(this);
   }
 }
 
@@ -103,7 +102,6 @@ export class SecondaryStepCtx {
     this.fxQueue = opts.fxQueue ?? null;
     this.detailPreset = opts.detailPreset ?? 5;
     this.onDetonationKill = opts.onDetonationKill ?? null;
-    Object.freeze(this);
   }
 }
 
@@ -112,7 +110,8 @@ export class SecondaryProjectilePool {
   private _entries: SecondaryProjectile[];
   private _creatureDamageApplier: CreatureDamageApplier | null;
 
-  constructor(size: number = SECONDARY_PROJECTILE_POOL_SIZE) {
+  constructor(opts: { size?: number } = {}) {
+    const size = opts.size ?? SECONDARY_PROJECTILE_POOL_SIZE;
     this._entries = Array.from({ length: size }, () => new SecondaryProjectile());
     this._creatureDamageApplier = null;
   }
@@ -216,16 +215,18 @@ export class SecondaryProjectilePool {
     const _applySecondaryDamage = (
       creatureIndex: number,
       damage: number,
-      owner: OwnerRef,
-      impulse: Vec2 = new Vec2(),
+      opts: {
+        owner: OwnerRef;
+        impulse?: Vec2;
+      },
     ): void => {
       applyDamageToCreature(
         creatures,
         int(creatureIndex),
         damage,
         CreatureDamageType.EXPLOSION,
-        impulse,
-        owner,
+        opts.impulse ?? new Vec2(),
+        opts.owner,
         this._creatureDamageApplier,
       );
     };
@@ -292,8 +293,7 @@ export class SecondaryProjectilePool {
             _applySecondaryDamage(
               creatureIdx,
               damage,
-              entry.owner,
-              impulse,
+              { owner: entry.owner, impulse },
             );
             creatureSpatial.syncIndex(int(creatureIdx));
             if (onDetonationKill !== null && hpBefore > 0.0 && creature.hp <= 0.0) {
@@ -483,8 +483,7 @@ export class SecondaryProjectilePool {
         _applySecondaryDamage(
           hitIdx,
           damage,
-          entry.owner,
-          entry.vel.div(dt),
+          { owner: entry.owner, impulse: entry.vel.div(dt) },
         );
         creatureSpatial.syncIndex(int(hitIdx));
 
