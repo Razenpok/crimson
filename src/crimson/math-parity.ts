@@ -1,12 +1,14 @@
 // Port of crimson/math_parity.py
 
+// Float/trig helpers for native movement math parity.
+
 import { Vec2 } from '@grim/geom.ts';
 
 const _f32buf = new Float32Array(1);
 const _u32buf = new Uint32Array(_f32buf.buffer);
 
 function f32FromBits(bits: number): number {
-  _u32buf[0] = bits >>> 0;
+  _u32buf[0] = int(bits) >>> 0;
   return _f32buf[0];
 }
 
