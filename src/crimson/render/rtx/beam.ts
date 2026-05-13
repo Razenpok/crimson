@@ -14,7 +14,7 @@ export const SHADER_STAMP_VIRTUAL_HEAD_FIRE_RADIUS_MULTIPLIER = 1.35;
 
 /**
  * Draw the beam body using the RTX fast-stamped shader.
- * Currently stubbed — returns false so the caller falls back to classic sprite mode.
+ * Returns false so the caller falls back to classic sprite mode.
  */
 export function drawBeamFastStampedBody(_opts: {
   originScreen: Vec2;
@@ -32,7 +32,7 @@ export function drawBeamFastStampedBody(_opts: {
 
 /**
  * Draw the beam head glow using the RTX fast-stamped shader.
- * Currently stubbed — returns false so the caller falls back to classic sprite mode.
+ * Returns false so the caller falls back to classic sprite mode.
  */
 export function drawBeamFastStampedHead(_opts: {
   centerScreen: Vec2;

@@ -4,7 +4,7 @@
 // demo trial overlay, and the overall game flow.
 //
 // Networking (LAN lobby, lockstep, rollback, network sessions) is excluded;
-// all network-related paths are stubbed as no-ops.
+// network-related paths are inert in the WebGL port.
 
 import * as wgl from '@wgl';
 import { type View, ViewContext } from '@grim/view.ts';
@@ -229,9 +229,7 @@ export class GameLoopView implements View {
 
     this._frontViews = {
       open_play_game: new PlayGameMenuView(gs),
-      // Network session / lobby screens stubbed — LAN excluded from WebGL port
-      // open_lan_session: no-op
-      // open_lan_lobby: no-op
+      // LAN excluded from WebGL port.
       open_quests: new QuestsMenuView(gs),
       open_pause_menu: new PauseMenuView(gs),
       start_quest: new QuestMode({
@@ -329,28 +327,26 @@ export class GameLoopView implements View {
   }
 
   // -----------------------------------------------------------------------
-  // LAN stubs — networking excluded from WebGL port
+  // LAN placeholders — networking excluded from WebGL port
   // -----------------------------------------------------------------------
 
-  /** LAN UI enabled cvar check — always true (no-op in WebGL). */
+  /** LAN UI enabled cvar check. */
   private _lanUiEnabled(): boolean {
     const cvar = this.state.console.cvars.get('cv_lanLockstepEnabled');
     if (cvar === undefined) return true;
     return cvar.valueF !== 0;
   }
 
-  /** Auto LAN start — no-op in WebGL (no pending network session). */
+  /** Auto LAN start for browser builds. */
   private _autoLanStartAction(): string | null {
-    // Networking excluded: always null
     return null;
   }
 
   /**
-   * Resolve LAN-related actions — in WebGL, network actions are no-ops.
+   * Resolve LAN-related actions for the WebGL port.
    * Non-LAN actions pass through unmodified.
    */
   private _resolveLanAction(action: string): string | null {
-    // Network session/lobby actions are stubbed
     if (action === 'open_lan_session') {
       // LAN UI is excluded; treat as open_play_game fallback
       return 'open_play_game';
@@ -371,7 +367,7 @@ export class GameLoopView implements View {
     return action;
   }
 
-  /** Network runtime tick — no-op in WebGL. */
+  /** Network runtime tick for browser builds. */
   private _tickNetworkRuntime(): void {
     this._runtimeUpdatesPerFrame = 0;
     this.state.runtimeUpdatesPerFrame = 0;
@@ -921,7 +917,6 @@ export class GameLoopView implements View {
       audioStopMusic(this.state.audio);
     }
 
-    // Configure LAN runtime — no-op in WebGL single-player
     this._configureLanRuntime(gameplay);
 
     gameplay.bindStatus(this._status);
@@ -935,7 +930,7 @@ export class GameLoopView implements View {
     }
   }
 
-  /** Configure LAN runtime on a gameplay screen — no-op in WebGL. */
+  /** Configure LAN runtime on a gameplay screen. */
   private _configureLanRuntime(gameplay: GameplayScreen): void {
     gameplay.setLanRuntime({
       enabled: false,

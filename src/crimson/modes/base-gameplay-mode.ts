@@ -1,8 +1,8 @@
 // Port of crimson/modes/base_gameplay_mode.py
 //
 // Excludes networking (LAN lockstep, rollback, resync) which is not applicable
-// to the WebGL single-player port.  All LAN-related state is stubbed as no-ops
-// so that subclass call-sites compile without change.
+// to the WebGL single-player port.  LAN-related paths are inert so that
+// subclass call-sites compile without change.
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
@@ -73,7 +73,7 @@ import type { PresentationStepCommands } from '@crimson/sim/presentation-step.ts
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 import { GameplayState } from "@crimson/gameplay.js";
 
-/** Replay is not applicable to WebGL port; stubs retained for structure. */
+/** Replay is not applicable to WebGL port; shape retained for structure. */
 interface ReplayRecorder {
   tickIndex: number;
   recordedTickCount: number;

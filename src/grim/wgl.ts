@@ -183,9 +183,8 @@ export function measureText(text: string, fontSize: number): number {
 }
 
 export function drawText(text: string, x: number, y: number, fontSize: number, color: Color): void {
-  // Fallback text rendering is a no-op in the WebGL port; the bitmap font
-  // path should always be available.  This stub exists only to keep the
-  // two-branch structure consistent with the Python source.
+  // Fallback text rendering is intentionally empty in the WebGL port; the
+  // bitmap font path should always be available.
 }
 
 // ---------------------------------------------------------------------------
