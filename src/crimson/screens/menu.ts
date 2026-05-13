@@ -597,13 +597,11 @@ export class MenuView {
   }
 
   private _modsAvailable(): boolean {
-    // Mods are not supported in the WebGL port.
     return false;
   }
 
   private _otherGamesEnabled(): boolean {
     // Original game checks a config string via grim_get_config_var(100).
-    // WebGL has no config-var environment bridge.
     return false;
   }
 
