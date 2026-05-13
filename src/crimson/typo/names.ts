@@ -149,41 +149,14 @@ function _typoBuildCustomName(
   return _pickWord(rng, dictionaryWords);
 }
 
-export function loadTypoDictionary(raw: string): string[] {
-  const words: string[] = [];
-  const seen = new Set<string>();
-  for (const line of raw.split(/\r?\n/)) {
-    const text = line.split('#', 2)[0].trim();
-    if (!text) continue;
-    if (Array.from(text).length >= NAME_MAX_CHARS) continue;
-    if (seen.has(text)) continue;
-    words.push(text);
-    seen.add(text);
-  }
-  return words;
+export function loadTypoDictionary(_path: string): string[] {
+  // Path.read_text filesystem access is not available in the WebGL runtime.
+  return [];
 }
 
-function _isAlphaOrDot(text: string): boolean {
-  for (const ch of text) {
-    if (!(ch === '.' || /^\p{L}$/u.test(ch))) {
-      return false;
-    }
-  }
-  return true;
-}
-
-export function loadTypoHighscoreNames(records: readonly { name(): string }[]): string[] {
-  const names: string[] = [];
-  const seen = new Set<string>();
-  for (const record of records) {
-    const name = record.name();
-    if (!name) continue;
-    if (seen.has(name)) continue;
-    if (!_isAlphaOrDot(name)) continue;
-    names.push(name);
-    seen.add(name);
-  }
-  return names;
+export function loadTypoHighscoreNames(_path: string): string[] {
+  // read_highscore_table filesystem access is not available in the WebGL runtime.
+  return [];
 }
 
 export class CreatureNameTable {
