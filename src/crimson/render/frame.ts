@@ -9,10 +9,10 @@ import { CreaturePool } from '@crimson/creatures/runtime.ts';
 import { RtxRenderMode } from './rtx/mode.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
 
-// Typed world snapshot consumed by render code.
-// This intentionally carries references (not deep copies) so render can be
-// deterministic per frame boundary while remaining allocation-light.
-export interface RenderFrame {
+export class RenderFrame {
+  // Typed world snapshot consumed by render code.
+  // This intentionally carries references (not deep copies) so render can be
+  // deterministic per frame boundary while remaining allocation-light.
   readonly worldSize: number;
   readonly demoModeActive: boolean;
   readonly config: CrimsonConfig | null;
@@ -30,4 +30,39 @@ export interface RenderFrame {
   readonly lanLocalAimIndicatorsOnly: boolean;
   readonly lanLocalPlayerSlotIndex: number;
   readonly rtxMode: RtxRenderMode;
+
+  constructor(opts: {
+    worldSize: number;
+    demoModeActive: boolean;
+    config: CrimsonConfig | null;
+    camera: Vec2;
+    ground: GroundRenderer | null;
+    state: GameplayState;
+    players: readonly PlayerState[];
+    creatures: CreaturePool;
+    resources: RuntimeResources;
+    elapsedMs: number;
+    bonusAnimPhase: number;
+    lanPlayerRingsEnabled: boolean;
+    lanLocalAimIndicatorsOnly: boolean;
+    lanLocalPlayerSlotIndex: number;
+    rtxMode: RtxRenderMode;
+  }) {
+    this.worldSize = opts.worldSize;
+    this.demoModeActive = opts.demoModeActive;
+    this.config = opts.config;
+    this.camera = opts.camera;
+    this.ground = opts.ground;
+    this.state = opts.state;
+    this.players = opts.players;
+    this.creatures = opts.creatures;
+    this.resources = opts.resources;
+    this.elapsedMs = opts.elapsedMs;
+    this.bonusAnimPhase = opts.bonusAnimPhase;
+    this.lanPlayerRingsEnabled = opts.lanPlayerRingsEnabled;
+    this.lanLocalAimIndicatorsOnly = opts.lanLocalAimIndicatorsOnly;
+    this.lanLocalPlayerSlotIndex = opts.lanLocalPlayerSlotIndex;
+    this.rtxMode = opts.rtxMode;
+    Object.freeze(this);
+  }
 }

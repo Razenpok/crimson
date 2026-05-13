@@ -13,7 +13,7 @@ import * as wgl from '@wgl';
 import { creatureCorpseFrameForType } from '@crimson/creatures/anim.ts';
 import type { CreaturePool } from '@crimson/creatures/runtime.ts';
 import type { PlayerState } from '@crimson/sim/state-types.ts';
-import type { RenderFrame } from '@crimson/render/frame.ts';
+import { RenderFrame } from '@crimson/render/frame.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
   type FxQueueTextures,
@@ -179,7 +179,7 @@ export class RenderResources {
     lanLocalPlayerSlotIndex: number;
     rtxMode: RtxRenderMode;
   }): RenderFrame {
-    return {
+    return new RenderFrame({
       worldSize: this.worldSize,
       demoModeActive: Boolean(opts.demoModeActive),
       config: this.config,
@@ -195,6 +195,6 @@ export class RenderResources {
       lanLocalAimIndicatorsOnly: Boolean(opts.lanLocalAimIndicatorsOnly),
       lanLocalPlayerSlotIndex: int(opts.lanLocalPlayerSlotIndex),
       rtxMode: opts.rtxMode,
-    };
+    });
   }
 }
