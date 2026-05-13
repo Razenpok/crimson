@@ -3,15 +3,16 @@
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { GameState } from '@crimson/game/types.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import {
   UiButtonState,
@@ -23,7 +24,9 @@ import {
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import { drawMenuCursorHelper, ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
   END_NOTE_AFTER_BODY_Y_GAP,
   END_NOTE_BODY_X_OFFSET,
@@ -49,9 +52,14 @@ const WHITE = wgl.makeColor(1, 1, 1, 1);
 
 export type EndNoteState = GameState;
 
+// Final quest "Show End Note" flow.
+//
+// Classic:
+//   - quest_results_screen_update uses "Show End Note" instead of "Play Next" for quest 5.10
+//   - clicking it transitions to state 0x15 (game_update_victory_screen @ 0x00406350)
 export class EndNoteView {
   private state: EndNoteState;
-  private _ground: { processPending(): void; draw(camera: Vec2): void } | null = null;
+  private _ground: GroundRenderer | null = null;
   private _action: string | null = null;
   private _cursorPulseTime: number = 0.0;
   private _timelineMs: number = 0;
@@ -79,7 +87,7 @@ export class EndNoteView {
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;
     this._closing = false;
     this._closeAction = null;
-    this._ground = this.state.pauseBackground !== null ? null : (this.state.menuGround ?? null);
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
   }
 
   close(): void {
@@ -135,7 +143,7 @@ export class EndNoteView {
       END_NOTE_BUTTON_Y_OFFSET * scale,
     ));
 
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -159,7 +167,7 @@ export class EndNoteView {
     const typoW = buttonWidth(resources, this._typoButton.label, { scale, forceWide: this._typoButton.forceWide });
     if (buttonUpdate(this._typoButton, { pos: buttonPos, width: typoW, dtMs, mouse, click })) {
       this.state.config.gameplay.mode = GameMode.TYPO;
-      this._beginCloseTransition('start_typo', true);
+      this._beginCloseTransition('start_typo', { fadeToBlack: true });
       return;
     }
 
@@ -177,13 +185,12 @@ export class EndNoteView {
     if (pauseBackground !== null) {
       pauseBackground.drawPauseBackground({ entityAlpha: this._worldEntityAlpha() });
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
     drawScreenFade(this.state);
 
     const screenW = wgl.getScreenWidth();
-    const resources = this._requireResources();
+    const resources = requireRuntimeResources(this.state);
     const scale = 1.0;
     const layoutW = scale ? screenW / scale : screenW;
     const widescreenShiftY = menuWidescreenYShift(layoutW);
@@ -193,7 +200,7 @@ export class EndNoteView {
       (END_NOTE_PANEL_GEOM_Y0 + END_NOTE_PANEL_POS_Y + widescreenShiftY) * scale,
     );
 
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(
       panelTex,
@@ -249,7 +256,6 @@ export class EndNoteView {
     bodyPos = bodyPos.offset({ dy: END_NOTE_AFTER_BODY_Y_GAP * scale });
     drawSmallText(font, 'Good luck with your battles, trooper!', bodyPos, bodyColor);
 
-    // Buttons
     let buttonPos = panelTopLeft.add(new Vec2(
       END_NOTE_BUTTON_X_OFFSET * scale,
       END_NOTE_BUTTON_Y_OFFSET * scale,
@@ -266,24 +272,13 @@ export class EndNoteView {
     const mainW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainW, scale });
 
-    // Menu cursor
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
+    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
   takeAction(): string | null {
     const action = this._action;
     this._action = null;
     return action;
-  }
-
-  private _requireResources(): RuntimeResources {
-    if (this.state.resources === null) {
-      throw new Error('runtime resources are not loaded');
-    }
-    return this.state.resources;
   }
 
   private _worldEntityAlpha(): number {
@@ -296,7 +291,8 @@ export class EndNoteView {
     return alpha;
   }
 
-  private _beginCloseTransition(action: string, fadeToBlack: boolean = false): void {
+  private _beginCloseTransition(action: string, opts: { fadeToBlack?: boolean } = {}): void {
+    const fadeToBlack = opts.fadeToBlack ?? false;
     if (this._closing) return;
     if (fadeToBlack) {
       this.state.screenFadeAlpha = 0.0;
