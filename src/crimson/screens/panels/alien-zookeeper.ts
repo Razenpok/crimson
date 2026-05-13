@@ -2,7 +2,7 @@
 
 import * as wgl from "@wgl";
 import { Vec2 } from "@grim/geom.ts";
-import { getTexture, type RuntimeResources, TextureId } from "@grim/assets.ts";
+import { getTexture, TextureId } from "@grim/assets.ts";
 import { drawSmallText } from "@grim/fonts/small.ts";
 import { audioPlaySfx, audioUpdate } from "@grim/audio.ts";
 import { SfxId } from "@grim/sfx-map.ts";
@@ -10,7 +10,6 @@ import { fxDetailEnabled } from "@grim/config.ts";
 import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
 import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
-import { drawMenuCursor } from "@crimson/ui/cursor.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
 import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
 import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "@crimson/ui/perk-menu.ts";
@@ -32,13 +31,12 @@ import {
   MENU_SIGN_POS_Y,
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_WIDTH,
+  drawMenuCursorHelper,
+  ensureMenuGround,
+  menuGroundCamera,
   signLayoutScale,
   uiElementAnim,
 } from "@crimson/screens/menu.ts";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 const _BOARD_SIDE = 6;
 const _BOARD_CELLS = _BOARD_SIDE * _BOARD_SIDE;
@@ -62,6 +60,7 @@ const _BOARD_Y_OFFSET = 40.0;
 const _TITLE = 'AlienZooKeeper';
 const _SUBTITLE_1 = 'a puzzle game unfinished';
 const _SUBTITLE_2 = '..or something more?';
+const _LABEL_SCORE = 'score: %d';
 const _LABEL_GAME_OVER = 'Game Over';
 
 const _RESET_LABEL = 'Reset';
@@ -71,10 +70,6 @@ const KEY_ESCAPE = 27;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-
-// ---------------------------------------------------------------------------
-// AzkLayout
-// ---------------------------------------------------------------------------
 
 interface AzkLayout {
   scale: number;
@@ -98,15 +93,40 @@ interface AzkLayout {
   backPos: Vec2;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+function toColor(r: number, g: number, b: number, a: number): wgl.Color {
+  return wgl.makeColor(
+    int(Math.max(0.0, Math.min(1.0, r)) * 255.0 + 0.5) / 255,
+    int(Math.max(0.0, Math.min(1.0, g)) * 255.0 + 0.5) / 255,
+    int(Math.max(0.0, Math.min(1.0, b)) * 255.0 + 0.5) / 255,
+    int(Math.max(0.0, Math.min(1.0, a)) * 255.0 + 0.5) / 255,
+  );
+}
+
+function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
+  const thick = Math.max(1, int(lineThick));
+  const x = int(rect.x);
+  const y = int(rect.y);
+  const w = int(rect.w);
+  const h = int(rect.h);
+  wgl.drawRectangle(x, y, w, thick, color);
+  wgl.drawRectangle(x, y + h - thick, w, thick, color);
+  wgl.drawRectangle(x, y, thick, h, color);
+  wgl.drawRectangle(x + w - thick, y, thick, h, color);
+}
+
+function drawRectangleRec(rect: wgl.Rectangle, color: wgl.Color): void {
+  wgl.drawRectangle(rect.x, rect.y, rect.w, rect.h, color);
+}
 
 function mouseInsideRect(
-  mx: number, my: number,
-  x: number, y: number, w: number, h: number,
+  mouse: { x: number; y: number },
+  opts: { x: number; y: number; w: number; h: number },
 ): boolean {
-  return (x <= mx && mx <= (x + w)) && (y <= my && my <= (y + h));
+  const x = opts.x;
+  const y = opts.y;
+  const w = opts.w;
+  const h = opts.h;
+  return (x <= mouse.x && mouse.x <= (x + w)) && (y <= mouse.y && mouse.y <= (y + h));
 }
 
 function creditsSecretMatch3Find(board: number[]): [boolean, number, number] {
@@ -136,10 +156,6 @@ function creditsSecretMatch3Find(board: number[]): [boolean, number, number] {
 
   return [false, 0, 0];
 }
-
-// ---------------------------------------------------------------------------
-// AlienZooKeeperView
-// ---------------------------------------------------------------------------
 
 export class AlienZooKeeperView {
   state: GameState;
@@ -174,7 +190,7 @@ export class AlienZooKeeperView {
   open(): void {
     const layoutW = this.state.config.display.width;
     this._widescreenYShift = menuWidescreenYShift(layoutW);
-    this._ground = this.state.pauseBackground !== null ? null : this.state.menuGround;
+    this._ground = this.state.pauseBackground !== null ? null : ensureMenuGround(this.state);
     this._cursorPulseTime = 0.0;
     this._timelineMs = 0;
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;
@@ -227,7 +243,8 @@ export class AlienZooKeeperView {
     this._closeAction = action;
   }
 
-  private _panelSlideX(scale: number): number {
+  private _panelSlideX(opts: { scale: number }): number {
+    const scale = opts.scale;
     const panelW = MENU_PANEL_WIDTH * scale;
     const [_angleRad, slideX] = uiElementAnim(
       this,
@@ -243,7 +260,7 @@ export class AlienZooKeeperView {
   private _layout(opts: { scale: number }): AzkLayout {
     const scale = opts.scale;
     const layoutOffsetX = this.state.config.display.width < 641.0 ? _LAYOUT_OFFSET_X_SMALL : _LAYOUT_OFFSET_X;
-    const slideX = this._panelSlideX(scale);
+    const slideX = this._panelSlideX({ scale });
     const anchorX = _LAYOUT_POS_X + layoutOffsetX + _BOARD_X_OFFSET + slideX;
     const titleBaseY = _LAYOUT_BASE_Y + _LAYOUT_POS_Y + _TITLE_BASE_Y_OFFSET + this._widescreenYShift;
     const boardX = anchorX + (22.0 * scale);
@@ -278,7 +295,7 @@ export class AlienZooKeeperView {
   private _fillEmptyCells(): void {
     for (let i = 0; i < this._board.length; i++) {
       if (this._board[i] === -1) {
-        this._board[i] = this.state.rng.rand({ caller: RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_FILL_EMPTY }) % 5;
+        this._board[i] = int(this.state.rng.rand({ caller: RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_FILL_EMPTY }) % 5);
       }
     }
   }
@@ -286,7 +303,7 @@ export class AlienZooKeeperView {
   private _rerollBoardNoInitialMatch(): void {
     while (true) {
       for (let i = 0; i < _BOARD_CELLS; i++) {
-        this._board[i] = this.state.rng.rand({ caller: RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_REROLL_FILL }) % 5;
+        this._board[i] = int(this.state.rng.rand({ caller: RngCallerStatic.CREDITS_SECRET_ALIEN_ZOOKEEPER_REROLL_FILL }) % 5);
       }
       const [hasMatch] = creditsSecretMatch3Find(this._board);
       if (!hasMatch) return;
@@ -300,7 +317,9 @@ export class AlienZooKeeperView {
     this._timerMs = _TIMER_RESET_MS;
   }
 
-  private _resolveTileClick(layout: AzkLayout, mx: number, my: number): void {
+  private _resolveTileClick(opts: { layout: AzkLayout; mouse: { x: number; y: number } }): void {
+    const layout = opts.layout;
+    const mouse = opts.mouse;
     if (this._timerMs <= 0) return;
 
     for (let index = 0; index < this._board.length; index++) {
@@ -310,7 +329,7 @@ export class AlienZooKeeperView {
       const col = index % _BOARD_SIDE;
       const x = layout.boardX + col * layout.tileSize;
       const y = layout.boardY + row * layout.tileSize;
-      if (!mouseInsideRect(mx, my, x, y, layout.tileSize, layout.tileSize)) continue;
+      if (!mouseInsideRect(mouse, { x, y, w: layout.tileSize, h: layout.tileSize })) continue;
 
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_CLINK_01);
 
@@ -404,14 +423,13 @@ export class AlienZooKeeperView {
     const layout = this._layout({ scale });
     const [mx, my] = InputState.mousePosition();
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    const mouse = { x: mx, y: my };
     if (click) {
-      this._resolveTileClick(layout, mx, my);
+      this._resolveTileClick({ layout, mouse });
     }
 
     const resources = requireRuntimeResources(this.state);
     const dtMsF = dtClamped * 1000.0;
-    const mouse = { x: mx, y: my };
-
     const resetW = buttonWidth(resources, this._resetButton.label, { scale, forceWide: this._resetButton.forceWide });
     if (buttonUpdate(this._resetButton, { pos: layout.resetPos, width: resetW, dtMs: dtMsF, mouse, click })) {
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
@@ -433,8 +451,7 @@ export class AlienZooKeeperView {
     if (this.state.pauseBackground !== null) {
       this.state.pauseBackground.drawPauseBackground();
     } else if (this._ground !== null) {
-      const camera = this.state.menuGroundCamera ?? new Vec2();
-      this._ground.draw(camera);
+      this._ground.draw(menuGroundCamera(this.state));
     }
 
     drawScreenFade(this.state);
@@ -444,7 +461,6 @@ export class AlienZooKeeperView {
     const scale = this.state.config.display.width < 641.0 ? 0.9 : 1.0;
     const layout = this._layout({ scale });
 
-    // Draw panel background
     const dst = wgl.makeRectangle(
       layout.panelX,
       layout.panelY,
@@ -455,53 +471,37 @@ export class AlienZooKeeperView {
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
 
-    // Title and subtitles
     drawSmallText(font, _TITLE, new Vec2(layout.titleX, layout.titleY), WHITE);
     drawSmallText(font, _SUBTITLE_1, new Vec2(layout.subtitle1X, layout.subtitle1Y), WHITE);
     drawSmallText(font, _SUBTITLE_2, new Vec2(layout.subtitle2X, layout.subtitle2Y), WHITE);
 
-    // Score
-    const scoreText = `score: ${int(this._score)}`;
-    drawSmallText(font, scoreText, new Vec2(layout.scoreX, layout.scoreY), wgl.makeColor(1.0, 1.0, 1.0, 0.7));
+    const scoreText = _LABEL_SCORE.replace('%d', `${int(this._score)}`);
+    drawSmallText(font, scoreText, new Vec2(layout.scoreX, layout.scoreY), toColor(1.0, 1.0, 1.0, 0.7));
 
-    // Board background
-    wgl.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, layout.boardSize, wgl.makeColor(0.0, 0.0, 0.0, 0.6));
-    // Board border
+    const boardBg = wgl.makeRectangle(layout.boardX, layout.boardY, layout.boardSize, layout.boardSize);
+    drawRectangleRec(boardBg, toColor(0.0, 0.0, 0.0, 0.6));
     const borderW = Math.max(1.0, scale);
-    wgl.drawRectangle(layout.boardX, layout.boardY, layout.boardSize, borderW, WHITE);
-    wgl.drawRectangle(layout.boardX, layout.boardY + layout.boardSize - borderW, layout.boardSize, borderW, WHITE);
-    wgl.drawRectangle(layout.boardX, layout.boardY, borderW, layout.boardSize, WHITE);
-    wgl.drawRectangle(layout.boardX + layout.boardSize - borderW, layout.boardY, borderW, layout.boardSize, WHITE);
+    drawRectangleLinesEx(boardBg, borderW, WHITE);
 
-    // Timer bar
     let timerValue = Math.floor(this._timerMs / 100);
     if (timerValue > 0xC0) timerValue = 0xC0;
     const timerH = 6.0 * scale;
     const timerY = layout.boardY + (200.0 * scale);
     const timerFillW = timerValue * scale;
-    wgl.drawRectangle(layout.boardX, timerY, timerFillW, timerH, wgl.makeColor(0.2, 0.6, 1.0, 0.6));
-    // Timer border
-    wgl.drawRectangle(layout.boardX, timerY, layout.boardSize, borderW, WHITE);
-    wgl.drawRectangle(layout.boardX, timerY + timerH - borderW, layout.boardSize, borderW, WHITE);
-    wgl.drawRectangle(layout.boardX, timerY, borderW, timerH, WHITE);
-    wgl.drawRectangle(layout.boardX + layout.boardSize - borderW, timerY, borderW, timerH, WHITE);
+    drawRectangleRec(wgl.makeRectangle(layout.boardX, timerY, timerFillW, timerH), toColor(0.2, 0.6, 1.0, 0.6));
+    drawRectangleLinesEx(wgl.makeRectangle(layout.boardX, timerY, layout.boardSize, timerH), borderW, WHITE);
 
-    // Selection highlight
     if (this._selectedIndex >= 0) {
       const selRow = Math.floor(this._selectedIndex / _BOARD_SIDE);
       const selCol = this._selectedIndex % _BOARD_SIDE;
       const selX = layout.boardX + selCol * layout.tileSize + (4.0 * scale);
       const selY = layout.boardY + selRow * layout.tileSize + (4.0 * scale);
       const selSize = 24.0 * scale;
-      wgl.drawRectangle(selX, selY, selSize, selSize, wgl.makeColor(0.2, 0.4, 0.7, 0.4));
-      // Selection border
-      wgl.drawRectangle(selX, selY, selSize, borderW, WHITE);
-      wgl.drawRectangle(selX, selY + selSize - borderW, selSize, borderW, WHITE);
-      wgl.drawRectangle(selX, selY, borderW, selSize, WHITE);
-      wgl.drawRectangle(selX + selSize - borderW, selY, borderW, selSize, WHITE);
+      const selRect = wgl.makeRectangle(selX, selY, selSize, selSize);
+      drawRectangleRec(selRect, toColor(0.2, 0.4, 0.7, 0.4));
+      drawRectangleLinesEx(selRect, borderW, WHITE);
     }
 
-    // Draw alien tiles
     const alien = getTexture(resources, TextureId.ALIEN);
     const frameW = alien.width / 8.0;
     const frameH = alien.height / 8.0;
@@ -522,39 +522,37 @@ export class AlienZooKeeperView {
       );
       let tint: wgl.Color;
       if (tile === 0) {
-        tint = wgl.makeColor(1.0, 0.5, 0.5, 1.0);
+        tint = toColor(1.0, 0.5, 0.5, 1.0);
       } else if (tile === 1) {
-        tint = wgl.makeColor(0.5, 0.5, 1.0, 1.0);
+        tint = toColor(0.5, 0.5, 1.0, 1.0);
       } else if (tile === 2) {
-        tint = wgl.makeColor(1.0, 0.5, 1.0, 1.0);
+        tint = toColor(1.0, 0.5, 1.0, 1.0);
       } else if (tile === 3) {
-        tint = wgl.makeColor(0.5, 1.0, 1.0, 1.0);
+        tint = toColor(0.5, 1.0, 1.0, 1.0);
       } else if (tile === 4) {
-        tint = wgl.makeColor(1.0, 1.0, 0.5, 1.0);
+        tint = toColor(1.0, 1.0, 0.5, 1.0);
       } else {
         tint = WHITE;
       }
       wgl.drawTexturePro(alien, src, tileDst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
     }
 
-    // Game over text (blinks)
     if (this._timerMs === 0 && Math.cos(this._animTimeMs * 0.005) > 0.0) {
       drawSmallText(font, _LABEL_GAME_OVER, new Vec2(layout.gameOverX, layout.gameOverY), WHITE);
     }
 
-    // Buttons
     const resetW = buttonWidth(resources, this._resetButton.label, { scale, forceWide: this._resetButton.forceWide });
     buttonDraw(resources, this._resetButton, { pos: layout.resetPos, width: resetW, scale });
 
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
     buttonDraw(resources, this._backButton, { pos: layout.backPos, width: backW, scale });
 
-    // Sign and cursor
-    this._drawSign(resources);
-    this._drawMenuCursor(resources);
+    this._drawSign();
+    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
-  private _drawSign(resources: RuntimeResources): void {
+  private _drawSign(): void {
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(int(screenW));
@@ -585,10 +583,4 @@ export class AlienZooKeeperView {
     );
   }
 
-  private _drawMenuCursor(resources: RuntimeResources): void {
-    const particles = getTexture(resources, TextureId.PARTICLES);
-    const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
-    const [mx, my] = InputState.mousePosition();
-    drawMenuCursor(particles, cursorTex, { pos: new Vec2(mx, my), pulseTime: this._cursorPulseTime });
-  }
 }
