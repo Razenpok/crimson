@@ -250,7 +250,7 @@ export class BonusPool {
           return null;
         }
 
-        if (entry.amount === (WeaponId.PISTOL as number) || (
+        if (entry.amount === WeaponId.PISTOL || (
           players.length > 0 && perkActive(players[0], PerkId.MY_FAVOURITE_WEAPON)
         )) {
           this.clearEntry(entry);
