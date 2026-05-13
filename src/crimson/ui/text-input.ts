@@ -58,7 +58,6 @@ export function updateNameEntryText(
     }
   }
 
-  // Backspace
   if (InputState.wasKeyPressed(KEY_BACKSPACE) && caret > 0) {
     text = text.slice(0, caret - 1) + text.slice(caret);
     caret -= 1;
@@ -71,7 +70,6 @@ export function updateNameEntryText(
     }
   }
 
-  // Arrow keys / Home / End
   if (InputState.wasKeyPressed(KEY_LEFT)) {
     caret = Math.max(0, caret - 1);
   }
