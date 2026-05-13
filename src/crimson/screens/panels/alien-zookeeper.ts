@@ -71,7 +71,7 @@ const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-interface AzkLayout {
+class AzkLayout {
   scale: number;
   panelX: number;
   panelY: number;
@@ -91,6 +91,48 @@ interface AzkLayout {
   gameOverY: number;
   resetPos: Vec2;
   backPos: Vec2;
+
+  constructor(opts: {
+    scale: number;
+    panelX: number;
+    panelY: number;
+    boardX: number;
+    boardY: number;
+    tileSize: number;
+    boardSize: number;
+    titleX: number;
+    titleY: number;
+    subtitle1X: number;
+    subtitle1Y: number;
+    subtitle2X: number;
+    subtitle2Y: number;
+    scoreX: number;
+    scoreY: number;
+    gameOverX: number;
+    gameOverY: number;
+    resetPos: Vec2;
+    backPos: Vec2;
+  }) {
+    this.scale = opts.scale;
+    this.panelX = opts.panelX;
+    this.panelY = opts.panelY;
+    this.boardX = opts.boardX;
+    this.boardY = opts.boardY;
+    this.tileSize = opts.tileSize;
+    this.boardSize = opts.boardSize;
+    this.titleX = opts.titleX;
+    this.titleY = opts.titleY;
+    this.subtitle1X = opts.subtitle1X;
+    this.subtitle1Y = opts.subtitle1Y;
+    this.subtitle2X = opts.subtitle2X;
+    this.subtitle2Y = opts.subtitle2Y;
+    this.scoreX = opts.scoreX;
+    this.scoreY = opts.scoreY;
+    this.gameOverX = opts.gameOverX;
+    this.gameOverY = opts.gameOverY;
+    this.resetPos = opts.resetPos;
+    this.backPos = opts.backPos;
+  }
 }
 
 function toColor(r: number, g: number, b: number, a: number): wgl.Color {
@@ -103,6 +145,7 @@ function toColor(r: number, g: number, b: number, a: number): wgl.Color {
 }
 
 function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_rectangle_lines_ex`.
   const thick = Math.max(1, int(lineThick));
   const x = int(rect.x);
   const y = int(rect.y);
@@ -115,6 +158,7 @@ function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl
 }
 
 function drawRectangleRec(rect: wgl.Rectangle, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_rectangle_rec`.
   wgl.drawRectangle(rect.x, rect.y, rect.w, rect.h, color);
 }
 
@@ -269,7 +313,7 @@ export class AlienZooKeeperView {
     const tileSize = _TILE_SIZE * scale;
     const boardSize = _BOARD_SIZE * scale;
 
-    return {
+    return new AzkLayout({
       scale,
       panelX: _LAYOUT_POS_X + layoutOffsetX + slideX,
       panelY: _LAYOUT_BASE_Y + _LAYOUT_POS_Y + this._widescreenYShift,
@@ -289,7 +333,7 @@ export class AlienZooKeeperView {
       gameOverY: boardY + (74.0 * scale), // 96 - 22
       resetPos: new Vec2(anchorX + (38.0 * scale), titleBaseY + (256.0 * scale)),
       backPos: new Vec2(anchorX + (138.0 * scale), titleBaseY + (256.0 * scale)),
-    };
+    });
   }
 
   private _fillEmptyCells(): void {
