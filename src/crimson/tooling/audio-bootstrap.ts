@@ -1,7 +1,7 @@
 // Port of crimson/tooling/audio_bootstrap.py
 
 import { type AudioState, initAudioState } from '@grim/audio.ts';
-import { type CrimsonConfig, defaultCrimsonConfig } from '@grim/config.ts';
+import { type CrimsonConfig, ensureCrimsonCfg } from '@grim/config.ts';
 import { ConsoleLog, ConsoleState } from '@grim/console.ts';
 import { Crand } from '@grim/rand.ts';
 
@@ -33,13 +33,16 @@ export async function initViewAudio(assetsDir: string, opts: { seed?: number } =
   const runtimeDir = defaultRuntimeDir();
   let config: CrimsonConfig;
   try {
-    config = defaultCrimsonConfig();
+    config = ensureCrimsonCfg(runtimeDir);
   } catch {
     return new ViewAudioBootstrap(null, null, null, audioRng);
   }
 
-  const console = new ConsoleState();
-  console.log = new ConsoleLog();
+  const console = new ConsoleState({
+    baseDir: runtimeDir,
+    log: new ConsoleLog(runtimeDir),
+    assetsDir,
+  });
   try {
     downloadMissingPaqs(assetsDir, console);
   } catch (exc) {
@@ -49,7 +52,6 @@ export async function initViewAudio(assetsDir: string, opts: { seed?: number } =
 
   try {
     const audio = await initAudioState(config, assetsDir);
-    void runtimeDir;
     return new ViewAudioBootstrap(config, console, audio, audioRng);
   } catch {
     return new ViewAudioBootstrap(config, console, null, audioRng);

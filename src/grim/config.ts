@@ -5,6 +5,8 @@ import { GameMode } from "@crimson/game-modes.ts";
 
 export { GameMode };
 
+export const CRIMSON_CFG_NAME = 'crimson.cfg';
+
 export enum AimScheme {
   UNKNOWN = -1,
   MOUSE = 0,
@@ -190,6 +192,11 @@ export function defaultCrimsonConfig(): CrimsonConfig {
       // WebGL has no file-backed crimson.cfg path; keep the Python method as a no-op.
     },
   };
+}
+
+export function ensureCrimsonCfg(_baseDir: string): CrimsonConfig {
+  // WebGL has no file-backed crimson.cfg path; use the default config.
+  return defaultCrimsonConfig();
 }
 
 const PLAYER_NAME_MAX_BYTES = 31;

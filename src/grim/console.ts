@@ -12,6 +12,7 @@ export const MAX_CONSOLE_INPUT = 0x3FF;
 export const DEFAULT_CONSOLE_HEIGHT = 300;
 export const EXTENDED_CONSOLE_HEIGHT = 480;
 export const CONSOLE_VERSION_TEXT = 'Crimsonland 1.9.93';
+export const CONSOLE_LOG_NAME = 'console.log';
 export const CONSOLE_ANIM_SPEED = 3.5;
 export const CONSOLE_BLINK_SPEED = 3.0;
 export const CONSOLE_LINE_HEIGHT = 16.0;
@@ -65,17 +66,26 @@ function parseConsoleFloat(value: string): number {
 }
 
 export class ConsoleLog {
+  baseDir: string;
   lines: string[] = [];
+  flushedIndex = 0;
+
+  constructor(baseDir = '') {
+    this.baseDir = baseDir;
+  }
 
   log(message: string): void {
     this.lines.push(message);
     if (this.lines.length > MAX_CONSOLE_LINES) {
-      this.lines.splice(0, this.lines.length - MAX_CONSOLE_LINES);
+      const overflow = this.lines.length - MAX_CONSOLE_LINES;
+      this.lines.splice(0, overflow);
+      this.flushedIndex = Math.max(0, this.flushedIndex - overflow);
     }
   }
 
   clear(): void {
     this.lines.length = 0;
+    this.flushedIndex = 0;
   }
 
   flush(): void {
@@ -90,7 +100,10 @@ export interface ConsoleCvar {
 }
 
 export class ConsoleState {
-  log = new ConsoleLog();
+  baseDir: string;
+  log: ConsoleLog;
+  assetsDir: string | null;
+  scriptDirs: readonly string[];
   commands = new Map<string, CommandHandler>();
   cvars = new Map<string, ConsoleCvar>();
   openFlag = false;
@@ -110,6 +123,13 @@ export class ConsoleState {
   _slideT = 1.0;
   _offsetY = 0.0;
   _blinkTime = 0.0;
+
+  constructor(opts: { baseDir?: string; log?: ConsoleLog; assetsDir?: string | null; scriptDirs?: readonly string[] } = {}) {
+    this.baseDir = opts.baseDir ?? '';
+    this.log = opts.log ?? new ConsoleLog(this.baseDir);
+    this.assetsDir = opts.assetsDir ?? null;
+    this.scriptDirs = opts.scriptDirs ?? [];
+  }
 
   registerCommand(name: string, handler: CommandHandler): void {
     this.commands.set(name, handler);
@@ -567,8 +587,17 @@ export function registerCoreCommands(console: ConsoleState): void {
   });
 }
 
-export function createConsole(): ConsoleState {
-  const console = new ConsoleState();
+export function createConsole(baseDir = '', assetsDir: string | null = null): ConsoleState {
+  let scriptDirs: readonly string[] = [baseDir];
+  if (assetsDir !== null && assetsDir !== baseDir) {
+    scriptDirs = [...scriptDirs, assetsDir];
+  }
+  const console = new ConsoleState({
+    baseDir,
+    log: new ConsoleLog(baseDir),
+    assetsDir,
+    scriptDirs,
+  });
   console.registerCvar('version', CONSOLE_VERSION_TEXT);
   console.registerCvar('con_monoFont', '1');
   console.registerCvar('cv_showFPS', '0');
