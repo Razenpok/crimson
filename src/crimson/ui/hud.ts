@@ -11,17 +11,9 @@ import { survivalLevelThreshold } from '@crimson/gameplay.ts';
 import { type PlayerState } from '@crimson/sim/state-types.ts';
 import { WEAPON_BY_ID, WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
 
-// ---------------------------------------------------------------------------
-// Color constants (0..1 float tuples)
-// ---------------------------------------------------------------------------
-
 const HUD_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const HUD_HINT_COLOR = wgl.makeColor(170 / 255, 170 / 255, 180 / 255, 1.0);
 const HUD_ACCENT_COLOR = wgl.makeColor(240 / 255, 200 / 255, 80 / 255, 1.0);
-
-// ---------------------------------------------------------------------------
-// Layout constants
-// ---------------------------------------------------------------------------
 
 const HUD_BASE_WIDTH = 1024.0;
 const HUD_BASE_HEIGHT = 768.0;
@@ -62,10 +54,6 @@ const HUD_BONUS_SPACING = 52.0;
 const HUD_BONUS_PANEL_OFFSET_Y = -11.0;
 const HUD_XP_BAR_RGBA = new RGBA(0.1, 0.3, 0.6, 1.0);
 const HUD_QUEST_LEFT_Y_SHIFT = 80.0;
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 export interface HudRenderFlags {
   readonly showHealth: boolean;
@@ -134,10 +122,6 @@ export interface HudLayout {
   readonly hudYShift: number;
 }
 
-// ---------------------------------------------------------------------------
-// Public helpers
-// ---------------------------------------------------------------------------
-
 export function hudFlagsForGameMode(gameModeId: GameMode): HudRenderFlags {
   switch (gameModeId) {
     case GameMode.QUESTS:
@@ -202,10 +186,6 @@ export function hudLayout(
   return { scale, textScale, lineH, hudYShift };
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
 function _drawText(
   font: SmallFontData | null,
   text: string,
@@ -215,8 +195,13 @@ function _drawText(
 ): void {
   if (font !== null) {
     drawSmallText(font, text, pos, color);
+  } else {
+    wgl.drawText(text, int(pos.x), int(pos.y), int(18 * _scale), color);
   }
-  // No rl.draw_text fallback in WebGL — skip if font is null.
+}
+
+function _u8(value: number): number {
+  return int(255 * Math.max(0.0, Math.min(1.0, value))) / 255;
 }
 
 function _withAlpha(
@@ -224,7 +209,7 @@ function _withAlpha(
   alpha: number,
 ): wgl.Color {
   alpha = Math.max(0.0, Math.min(1.0, alpha));
-  return wgl.makeColor(color.r, color.g, color.b, color.a * alpha);
+  return wgl.makeColor(color.r, color.g, color.b, _u8(color.a * alpha));
 }
 
 function _questPanelSlideX(timeMs: number): number {
@@ -256,16 +241,14 @@ function _drawProgressBar(
   rgba = rgba.clamped();
   const barH = 4.0 * scale;
   const innerH = 2.0 * scale;
-  // Background color
-  const bgR = rgba.r * 0.6;
-  const bgG = rgba.g * 0.6;
-  const bgB = rgba.b * 0.6;
-  const bgA = rgba.a * 0.4;
-  // Foreground color
-  const fgR = rgba.r;
-  const fgG = rgba.g;
-  const fgB = rgba.b;
-  const fgA = rgba.a;
+  const bgR = _u8(rgba.r * 0.6);
+  const bgG = _u8(rgba.g * 0.6);
+  const bgB = _u8(rgba.b * 0.6);
+  const bgA = _u8(rgba.a * 0.4);
+  const fgR = _u8(rgba.r);
+  const fgG = _u8(rgba.g);
+  const fgB = _u8(rgba.b);
+  const fgA = _u8(rgba.a);
   wgl.drawRectangle(
     int(pos.x),
     int(pos.y),
@@ -290,6 +273,7 @@ export function drawTargetHealthBar(
   let alpha = Math.max(0.0, Math.min(1.0, opts.alpha ?? 1.0));
   let scale = Math.max(0.1, opts.scale ?? 1.0);
 
+  // Matches `hud_update_and_render` (0x0041ca90): color shifts from red->green as ratio increases.
   const r = (1.0 - ratio) * 0.9 + 0.1;
   const g = ratio * 0.9 + 0.1;
   const rgba = new RGBA(r, g, 0.7, 0.2 * alpha);
@@ -335,10 +319,6 @@ function _bonusIconSrc(
   const row = Math.floor(int(iconId) / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
-
-// ---------------------------------------------------------------------------
-// Main HUD overlay
-// ---------------------------------------------------------------------------
 
 export function drawHudOverlay(
   context: HudRenderContext,
@@ -408,9 +388,7 @@ export function drawHudOverlay(
   const panelTextColor = _withAlpha(HUD_TEXT_COLOR, alpha * HUD_PANEL_ALPHA);
   const hudYShift = layout.hudYShift;
 
-  // -----------------------------------------------------------------------
   // Top bar background.
-  // -----------------------------------------------------------------------
   {
     const src = wgl.makeRectangle(0.0, 0.0, gameTop.width, gameTop.height);
     const dst = wgl.makeRectangle(
@@ -426,14 +404,12 @@ export function drawHudOverlay(
       dst,
       wgl.makeVector2(0, 0),
       0.0,
-      wgl.makeColor(1.0, 1.0, 1.0, topAlpha),
+      wgl.makeColor(1.0, 1.0, 1.0, _u8(topAlpha)),
     );
     maxY = Math.max(maxY, dst.y + dst.h);
   }
 
-  // -----------------------------------------------------------------------
   // Pulsing heart.
-  // -----------------------------------------------------------------------
   if (showHealth) {
     const t = Math.max(0.0, elapsedMs) / 1000.0;
     const src = wgl.makeRectangle(0.0, 0.0, lifeHeart.width, lifeHeart.height);
@@ -475,15 +451,13 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_ICON_ALPHA)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
   }
 
-  // -----------------------------------------------------------------------
   // Health bar.
-  // -----------------------------------------------------------------------
   if (showHealth) {
     let barBasePos = new Vec2(HUD_HEALTH_BAR_POS[0], HUD_HEALTH_BAR_POS[1]);
     const barSize = new Vec2(HUD_HEALTH_BAR_SIZE[0], HUD_HEALTH_BAR_SIZE[1]);
@@ -507,7 +481,7 @@ export function drawHudOverlay(
         bgDst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_HEALTH_BG_ALPHA),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_HEALTH_BG_ALPHA)),
       );
       const healthRatio = Math.max(0.0, Math.min(1.0, hudPlayer.health / 100.0));
       if (healthRatio > 0.0) {
@@ -530,16 +504,14 @@ export function drawHudOverlay(
           fillDst,
           wgl.makeVector2(0, 0),
           0.0,
-          wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
+          wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_ICON_ALPHA)),
         );
       }
       maxY = Math.max(maxY, bgDst.y + bgDst.h);
     }
   }
 
-  // -----------------------------------------------------------------------
   // Weapon icon.
-  // -----------------------------------------------------------------------
   if (showWeapon) {
     let iconBasePos: Vec2;
     let iconSize: Vec2;
@@ -572,15 +544,13 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_ICON_ALPHA),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_ICON_ALPHA)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
   }
 
-  // -----------------------------------------------------------------------
   // Ammo bars.
-  // -----------------------------------------------------------------------
   if (showWeapon) {
     let ammoBasePos: Vec2;
     let ammoStep: Vec2;
@@ -629,7 +599,7 @@ export function drawHudOverlay(
           dst,
           wgl.makeVector2(0, 0),
           0.0,
-          wgl.makeColor(1.0, 1.0, 1.0, barAlpha),
+          wgl.makeColor(1.0, 1.0, 1.0, _u8(barAlpha)),
         );
         maxY = Math.max(maxY, dst.y + dst.h);
       }
@@ -652,9 +622,7 @@ export function drawHudOverlay(
     }
   }
 
-  // -----------------------------------------------------------------------
   // Quest HUD panels (mm:ss timer + progress).
-  // -----------------------------------------------------------------------
   if (showQuestHud) {
     const timeMs = Math.max(0.0, elapsedMs);
     const slideX = _questPanelSlideX(timeMs);
@@ -680,7 +648,7 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, questPanelAlpha),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(questPanelAlpha)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
@@ -701,7 +669,7 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, questPanelAlpha),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(questPanelAlpha)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
@@ -724,7 +692,7 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, clockAlpha),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(clockAlpha)),
       );
 
       // NOTE: Raylib's draw_texture_pro uses dst.x/y as the rotation origin position;
@@ -745,7 +713,7 @@ export function drawHudOverlay(
         dst2,
         origin,
         rotation,
-        wgl.makeColor(1.0, 1.0, 1.0, clockAlpha),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(clockAlpha)),
       );
     }
 
@@ -789,9 +757,7 @@ export function drawHudOverlay(
     }
   }
 
-  // -----------------------------------------------------------------------
   // Survival XP panel.
-  // -----------------------------------------------------------------------
   const xpTarget = score === null ? int(player.experience) : int(score);
   const xpDisplay = showXp ? state.smoothXp(xpTarget, frameDtMs) : xpTarget;
   if (showXp) {
@@ -810,7 +776,7 @@ export function drawHudOverlay(
       dst,
       wgl.makeVector2(0, 0),
       0.0,
-      wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_PANEL_ALPHA),
+      wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_PANEL_ALPHA)),
     );
     maxY = Math.max(maxY, dst.y + dst.h);
   }
@@ -854,9 +820,7 @@ export function drawHudOverlay(
     maxY = Math.max(maxY, ui(progressPos.y + 4.0));
   }
 
-  // -----------------------------------------------------------------------
   // Mode time clock/text (rush/typo-style HUD).
-  // -----------------------------------------------------------------------
   if (showTime) {
     const timeMs = Math.max(0.0, elapsedMs);
     const clockPos = new Vec2(HUD_CLOCK_POS[0], HUD_CLOCK_POS[1]);
@@ -875,7 +839,7 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_CLOCK_ALPHA)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
@@ -898,7 +862,7 @@ export function drawHudOverlay(
         dst,
         origin,
         rotation,
-        wgl.makeColor(1.0, 1.0, 1.0, alpha * HUD_CLOCK_ALPHA),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha * HUD_CLOCK_ALPHA)),
       );
     }
     {
@@ -909,9 +873,7 @@ export function drawHudOverlay(
     }
   }
 
-  // -----------------------------------------------------------------------
   // Bonus HUD slots (icon + timers), slide in/out from the left.
-  // -----------------------------------------------------------------------
   let bonusBottomY = HUD_BONUS_BASE_Y + hudYShift;
   if (bonusHud !== null) {
     let bonusY = HUD_BONUS_BASE_Y + hudYShift;
@@ -961,7 +923,7 @@ export function drawHudOverlay(
           dst,
           wgl.makeVector2(0, 0),
           0.0,
-          wgl.makeColor(1.0, 1.0, 1.0, bonusPanelAlpha),
+          wgl.makeColor(1.0, 1.0, 1.0, _u8(bonusPanelAlpha)),
         );
         maxY = Math.max(maxY, dst.y + dst.h);
       }
@@ -982,7 +944,7 @@ export function drawHudOverlay(
           dst,
           wgl.makeVector2(0, 0),
           0.0,
-          wgl.makeColor(1.0, 1.0, 1.0, alpha),
+          wgl.makeColor(1.0, 1.0, 1.0, _u8(alpha)),
         );
         maxY = Math.max(maxY, dst.y + dst.h);
       }
@@ -1068,9 +1030,7 @@ export function drawHudOverlay(
     bonusBottomY = bonusY;
   }
 
-  // -----------------------------------------------------------------------
   // Weapon aux timer overlay (weapon name popup).
-  // -----------------------------------------------------------------------
   const auxPanelBasePos = new Vec2(-12.0, bonusBottomY - 17.0);
   const auxIconBasePos = new Vec2(105.0, bonusBottomY - 5.0);
   const auxTextBasePos = new Vec2(8.0, bonusBottomY + 1.0);
@@ -1108,7 +1068,7 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, panelAlphaVal),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(panelAlphaVal)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
@@ -1129,7 +1089,7 @@ export function drawHudOverlay(
         dst,
         wgl.makeVector2(0, 0),
         0.0,
-        wgl.makeColor(1.0, 1.0, 1.0, panelAlphaVal),
+        wgl.makeColor(1.0, 1.0, 1.0, _u8(panelAlphaVal)),
       );
       maxY = Math.max(maxY, dst.y + dst.h);
     }
