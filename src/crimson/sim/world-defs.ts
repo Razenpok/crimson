@@ -27,8 +27,8 @@ export const CREATURE_ASSET = new Map<CreatureTypeId, string>([
   [CreatureTypeId.TROOPER, 'trooper'],
 ]);
 
-// Based on docs/atlas.md (projectile 'type_id' values index the weapon table).
 export const KNOWN_PROJ_FRAMES = new Map<number, [number, number]>([
+  // Based on docs/atlas.md (projectile `type_id` values index the weapon table).
   [ProjectileTemplateId.PULSE_GUN, [2, 0]],
   [ProjectileTemplateId.SPLITTER_GUN, [4, 3]],
   [ProjectileTemplateId.BLADE_GUN, [4, 6]],
