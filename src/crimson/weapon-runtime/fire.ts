@@ -8,6 +8,7 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { playerTakeDamage } from '@crimson/player-damage.ts';
 import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
+import { SecondarySpawnSpec } from '@crimson/projectiles/runtime/secondary-pool.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { PlayerInput } from '@crimson/sim/input.ts';
@@ -350,7 +351,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         targetHint = aim;
         spawnCreatures = creatures;
       }
-      state.secondaryProjectiles.spawnFromSpec({
+      state.secondaryProjectiles.spawnFromSpec(new SecondarySpawnSpec({
         pos: muzzle,
         angle: shotAngle,
         typeId: mode.typeId,
@@ -358,7 +359,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         targetHint,
         creatures: spawnCreatures as CreatureState[] | null,
         preserveBugs: state.preserveBugs,
-      });
+      }));
       break;
     }
     case 'ParticleStreamMode': {
@@ -420,7 +421,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         angle = shotAngle - spread * 0.5;
       }
       for (let i = 0; i < rocketCount; i++) {
-        state.secondaryProjectiles.spawnFromSpec({
+        state.secondaryProjectiles.spawnFromSpec(new SecondarySpawnSpec({
           pos: muzzle,
           angle,
           typeId: SecondaryProjectileTypeId.HOMING_ROCKET,
@@ -428,7 +429,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
           targetHint: aim,
           creatures: creatures as CreatureState[] | null,
           preserveBugs: state.preserveBugs,
-        });
+        }));
         angle += step;
       }
       ammoCost = rocketCount;

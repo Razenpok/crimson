@@ -29,6 +29,7 @@ import {
   PrimaryStepCtx,
   ProjectileUpdateOptions,
 } from '@crimson/projectiles/runtime/projectile-pool.ts';
+import { SecondaryStepCtx } from '@crimson/projectiles/runtime/secondary-pool.ts';
 import type { ProjectileHit } from '@crimson/projectiles/types.ts';
 import { PlayerInput } from './input.ts';
 import { normalizeInputFrame } from './input-frame.ts';
@@ -339,14 +340,14 @@ export class WorldState {
       }),
     }));
 
-    this.state.secondaryProjectiles.step({
+    this.state.secondaryProjectiles.step(new SecondaryStepCtx({
       dt: Number(dt),
       creatures: creatureEntries,
       runtimeState: this.state,
       fxQueue,
       detailPreset: int(detailPreset),
       onDetonationKill: _onSecondaryDetonationKill,
-    });
+    }));
 
     this._runPostDamagePlayerDeathHooks({
       prevHealth,

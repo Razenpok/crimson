@@ -14,8 +14,8 @@ export {
 } from './projectile-pool.ts';
 export {
   SecondaryProjectilePool,
-  type SecondarySpawnSpec,
-  type SecondaryStepCtx,
+  SecondarySpawnSpec,
+  SecondaryStepCtx,
 } from './secondary-pool.ts';
 export {
   SECONDARY_RULE_BY_TYPE_ID,

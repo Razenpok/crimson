@@ -49,24 +49,62 @@ const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
 ];
 
 
-export interface SecondarySpawnSpec {
+export class SecondarySpawnSpec {
   readonly pos: Vec2;
   readonly angle: number;
   readonly typeId: SecondaryProjectileTypeId;
-  readonly owner?: OwnerRef;
-  readonly timeToLive?: number;
-  readonly targetHint?: Vec2 | null;
-  readonly creatures?: CreatureState[] | null;
-  readonly preserveBugs?: boolean;
+  readonly owner: OwnerRef;
+  readonly timeToLive: number;
+  readonly targetHint: Vec2 | null;
+  readonly creatures: readonly CreatureState[] | null;
+  readonly preserveBugs: boolean;
+
+  constructor(opts: {
+    pos: Vec2;
+    angle: number;
+    typeId: SecondaryProjectileTypeId;
+    owner?: OwnerRef;
+    timeToLive?: number;
+    targetHint?: Vec2 | null;
+    creatures?: readonly CreatureState[] | null;
+    preserveBugs?: boolean;
+  }) {
+    this.pos = opts.pos;
+    this.angle = opts.angle;
+    this.typeId = opts.typeId;
+    this.owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
+    this.timeToLive = opts.timeToLive ?? 2.0;
+    this.targetHint = opts.targetHint ?? null;
+    this.creatures = opts.creatures ?? null;
+    this.preserveBugs = opts.preserveBugs ?? false;
+    Object.freeze(this);
+  }
 }
 
-export interface SecondaryStepCtx {
+export class SecondaryStepCtx {
   readonly dt: number;
-  readonly creatures: CreatureState[];
-  readonly runtimeState?: GameplayState | null;
-  readonly fxQueue?: FxQueue | null;
-  readonly detailPreset?: number;
-  readonly onDetonationKill?: SecondaryDetonationKillHandler | null;
+  readonly creatures: readonly CreatureState[];
+  readonly runtimeState: GameplayState | null;
+  readonly fxQueue: FxQueue | null;
+  readonly detailPreset: number;
+  readonly onDetonationKill: SecondaryDetonationKillHandler | null;
+
+  constructor(opts: {
+    dt: number;
+    creatures: readonly CreatureState[];
+    runtimeState?: GameplayState | null;
+    fxQueue?: FxQueue | null;
+    detailPreset?: number;
+    onDetonationKill?: SecondaryDetonationKillHandler | null;
+  }) {
+    this.dt = opts.dt;
+    this.creatures = opts.creatures;
+    this.runtimeState = opts.runtimeState ?? null;
+    this.fxQueue = opts.fxQueue ?? null;
+    this.detailPreset = opts.detailPreset ?? 5;
+    this.onDetonationKill = opts.onDetonationKill ?? null;
+    Object.freeze(this);
+  }
 }
 
 
