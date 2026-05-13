@@ -1,7 +1,7 @@
 // Port of crimson/modes/components/highscore_record_builder.py
 
 import { GameMode } from '@crimson/game-modes.ts';
-import { GameplayState } from '@crimson/gameplay.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 import { type PlayerState } from '@crimson/sim/state-types.ts';
 import { mostUsedWeaponIdForPlayer } from '@crimson/weapon-runtime/index.ts';
 import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
