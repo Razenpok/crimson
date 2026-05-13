@@ -14,6 +14,7 @@ export class DownloadResult {
     this.name = name;
     this.ok = ok;
     this.error = error;
+    Object.freeze(this);
   }
 }
 
