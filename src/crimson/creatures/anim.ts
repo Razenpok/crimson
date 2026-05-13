@@ -9,6 +9,7 @@ const _FLAG_RANGED_ATTACK_SHOCK = int(CreatureFlags.RANGED_ATTACK_SHOCK);
 const _f32Buffer = new Float32Array(1);
 
 function _f32(value: number): number {
+    // Round-trip through float32 to match the game's stored float behavior.
     _f32Buffer[0] = value;
     return _f32Buffer[0];
 }
@@ -38,6 +39,7 @@ const _CREATURE_CORPSE_FRAMES: Record<number, number> = {
 
 export function creatureCorpseFrameForType(typeId: number): number {
     // Resolve the bodyset frame index used for corpse decals (`fx_queue_render`).
+
     const frame = _CREATURE_CORPSE_FRAMES[typeId];
     if (frame !== undefined) {
         return int(frame);
@@ -86,14 +88,12 @@ export function creatureAnimPhaseStep(opts: {
     const speedScale = (quantizeF32 ? _f32(30.0) : 30.0) / size;
     const flagsBits = int(flags);
     const isLongStrip = (flagsBits & _FLAG_ANIM_PING_PONG) === 0 || (flagsBits & _FLAG_ANIM_LONG_STRIP) !== 0;
-    let stripMul: number;
+    let stripMul = quantizeF32 ? _f32(25.0) : 25.0;
     if (!isLongStrip) {
         stripMul = quantizeF32 ? _f32(22.0) : 22.0;
     } else if (aiMode === CreatureAiMode.HOLD_TIMER) {
         // Long-strip creatures stop advancing animation phase in ai_mode == 7.
         return 0.0;
-    } else {
-        stripMul = quantizeF32 ? _f32(25.0) : 25.0;
     }
 
     const step = animRate * moveSpeed * dt * speedScale * localScale * stripMul;
@@ -115,6 +115,7 @@ export function creatureAnimAdvancePhase(
     },
 ): [number, number] {
     // Advance anim_phase and wrap it the same way as creature_update_all.
+    //
     // Returns (new_phase, applied_step).
     const quantizeF32 = opts.quantizeF32 ?? true;
 
@@ -168,6 +169,9 @@ export function creatureAnimSelectFrame(
     },
 ): [frameIndex: number, mirrorApplied: boolean, mode: string] {
     // Select an 8x8 atlas frame index (creature_render_type).
+    //
+    // Returns (frame_index, mirror_applied, mode).
+    //
     // Note: mirrorApplied refers to the long-strip ping-pong index mirroring
     // (frame = 0x1f - frame) when the per-type mirror flag is set, not a texture flip.
     const flags = opts.flags ?? (0 as CreatureFlags);
