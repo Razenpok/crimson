@@ -6,6 +6,13 @@ export const INPUT_CODE_UNBOUND = 0x17E;
 const AXIS_DEADZONE = 0.2;
 const _AXIS_DOWN_THRESHOLD = 0.5;
 
+class ValueError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValueError';
+  }
+}
+
 const DIK_TO_DOM_KEY: Record<number, number> = {
   0x01: 27,
   0x02: 49,
@@ -171,6 +178,9 @@ class PressedState {
   }
 
   beginFrame(): void {
+    // Keep last-known key state for keys that are not polled every frame.
+    // This preserves edge semantics across temporary input-query gaps and
+    // matches the native latch-style behavior used by input_primary_just_pressed.
     this.prevDown = new Map(this.down);
     this.pressedCache.clear();
     const wheelDelta = InputState.mouseWheelDelta();
@@ -199,8 +209,12 @@ const _pressedState = new PressedState();
 const PRIMARY_EDGE_SENTINEL_PLAYER = -1;
 const PRIMARY_EDGE_SENTINEL_KEY = -1;
 
-export function inputBeginFrame(): void {
-  _pressedState.beginFrame();
+function _dikToDomKey(dikCode: number): number | undefined {
+  return DIK_TO_DOM_KEY[int(dikCode)];
+}
+
+function _mouseButtonForCode(keyCode: number): number | undefined {
+  return MOUSE_CODE_TO_BUTTON[int(keyCode)];
 }
 
 function _playerGamepadIndex(playerIndex: number): number {
@@ -246,6 +260,11 @@ function _axisValueFromCode(keyCode: number, playerIndex: number): number {
   return 0.0;
 }
 
+export function inputAxisValue(keyCode: number, opts: { playerIndex?: number } = {}): number {
+  const playerIndex = opts.playerIndex ?? 0;
+  return _axisValueFromCode(int(keyCode), int(playerIndex));
+}
+
 function _gamepadButtonDown(gamepadIndex: number, button: number): boolean {
   const gamepad = _gamepadForIndex(int(gamepadIndex));
   if (gamepad === null) return false;
@@ -256,11 +275,11 @@ function _digitalDownForPlayer(keyCode: number, playerIndex: number): boolean {
   const code = int(keyCode);
   if (code === INPUT_CODE_UNBOUND) return false;
 
-  const mouseButton = MOUSE_CODE_TO_BUTTON[code];
+  const mouseButton = _mouseButtonForCode(code);
   if (mouseButton !== undefined) return InputState.isMouseButtonDown(mouseButton);
 
   if (code < 0x100) {
-    const domKey = DIK_TO_DOM_KEY[code];
+    const domKey = _dikToDomKey(code);
     if (domKey === undefined) return false;
     return InputState.isKeyDown(domKey);
   }
@@ -281,85 +300,10 @@ function _digitalDownForPlayer(keyCode: number, playerIndex: number): boolean {
   return false;
 }
 
-export function inputCodeIsDown(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
-  const code = int(keyCode);
-  const playerIndex = int(opts.playerIndex ?? 0);
-  const down = _digitalDownForPlayer(code, playerIndex);
-  return _pressedState.markDown({ playerIndex, keyCode: code, isDown: down });
-}
+export function inputBeginFrame(): void {
+  // Latch input edge state once per rendered frame.
 
-export function inputCodeIsPressed(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
-  const code = int(keyCode);
-  const playerIndex = int(opts.playerIndex ?? 0);
-
-  if (code === 0x109) return _pressedState.wheelUp;
-  if (code === 0x10A) return _pressedState.wheelDown;
-
-  const down = _digitalDownForPlayer(code, playerIndex);
-  return _pressedState.isPressed({ playerIndex, keyCode: code, isDown: down });
-}
-
-export function inputAxisValue(keyCode: number, opts: { playerIndex?: number } = {}): number {
-  const playerIndex = opts.playerIndex ?? 0;
-  return _axisValueFromCode(int(keyCode), int(playerIndex));
-}
-
-export function captureFirstPressedInputCode(
-  opts: { playerIndex: number; includeKeyboard?: boolean; includeMouse?: boolean; includeGamepad?: boolean; includeAxes?: boolean; axisThreshold?: number },
-): number | null {
-  const includeKeyboard = opts.includeKeyboard ?? true;
-  const includeMouse = opts.includeMouse ?? true;
-  const includeGamepad = opts.includeGamepad ?? true;
-  const includeAxes = opts.includeAxes ?? true;
-  const axisThreshold = opts.axisThreshold ?? 0.5;
-  const playerIdx = int(opts.playerIndex);
-  if (includeKeyboard) {
-    let key: number;
-    while ((key = InputState.getKeyPressed()) > 0) {
-      const code = DOM_KEY_TO_DIK[key];
-      if (code !== undefined && code !== INPUT_CODE_UNBOUND) {
-        return code;
-      }
-    }
-  }
-
-  if (includeMouse) {
-    for (const [codeStr, button] of Object.entries(MOUSE_CODE_TO_BUTTON)) {
-      if (InputState.wasMouseButtonPressed(button)) {
-        return Number(codeStr);
-      }
-    }
-    const wheel = InputState.mouseWheelDelta();
-    if (wheel > 0) return 0x109;
-    if (wheel < 0) return 0x10A;
-  }
-
-  if (includeGamepad) {
-    const gamepad = _playerGamepadIndex(playerIdx);
-    if (_isGamepadAvailable(gamepad)) {
-      for (const [codeStr, button] of Object.entries(JOYS_BUTTON_CODES)) {
-        const code = Number(codeStr);
-        const down = _gamepadButtonDown(gamepad, button);
-        if (_pressedState.isPressed({ playerIndex: gamepad, keyCode: code, isDown: down })) {
-          return code;
-        }
-      }
-    }
-  }
-
-  if (includeAxes) {
-    const gamepad = _playerGamepadIndex(playerIdx);
-    if (_isGamepadAvailable(gamepad)) {
-      for (const [codeStr, axis] of Object.entries(AXIS_CODE_TO_AXIS)) {
-        const value = _rawAxisValueForGamepad(gamepad, axis);
-        if (Math.abs(value) >= axisThreshold) {
-          return Number(codeStr);
-        }
-      }
-    }
-  }
-
-  return null;
+  _pressedState.beginFrame();
 }
 
 const EXTENDED_NAMES: Record<number, string> = {
@@ -439,11 +383,87 @@ export function inputCodeName(keyCode: number): string {
   return `KEY_${code.toString(16).toUpperCase().padStart(4, '0')}`;
 }
 
+export function inputCodeIsDown(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
+  const code = int(keyCode);
+  const playerIndex = int(opts.playerIndex ?? 0);
+  const down = _digitalDownForPlayer(code, playerIndex);
+  return _pressedState.markDown({ playerIndex, keyCode: code, isDown: down });
+}
+
+export function inputCodeIsPressed(keyCode: number, opts: { playerIndex?: number } = {}): boolean {
+  const code = int(keyCode);
+  const playerIndex = int(opts.playerIndex ?? 0);
+
+  if (code === 0x109) return _pressedState.wheelUp;
+  if (code === 0x10A) return _pressedState.wheelDown;
+
+  const down = _digitalDownForPlayer(code, playerIndex);
+  return _pressedState.isPressed({ playerIndex, keyCode: code, isDown: down });
+}
+
+export function captureFirstPressedInputCode(
+  opts: { playerIndex: number; includeKeyboard?: boolean; includeMouse?: boolean; includeGamepad?: boolean; includeAxes?: boolean; axisThreshold?: number },
+): number | null {
+  const includeKeyboard = opts.includeKeyboard ?? true;
+  const includeMouse = opts.includeMouse ?? true;
+  const includeGamepad = opts.includeGamepad ?? true;
+  const includeAxes = opts.includeAxes ?? true;
+  const axisThreshold = opts.axisThreshold ?? 0.5;
+  const playerIdx = int(opts.playerIndex);
+  if (includeKeyboard) {
+    let key: number;
+    while ((key = InputState.getKeyPressed()) > 0) {
+      const code = DOM_KEY_TO_DIK[key];
+      if (code !== undefined && code !== INPUT_CODE_UNBOUND) {
+        return code;
+      }
+    }
+  }
+
+  if (includeMouse) {
+    for (const [codeStr, button] of Object.entries(MOUSE_CODE_TO_BUTTON)) {
+      if (InputState.wasMouseButtonPressed(button)) {
+        return Number(codeStr);
+      }
+    }
+    const wheel = InputState.mouseWheelDelta();
+    if (wheel > 0) return 0x109;
+    if (wheel < 0) return 0x10A;
+  }
+
+  if (includeGamepad) {
+    const gamepad = _playerGamepadIndex(playerIdx);
+    if (_isGamepadAvailable(gamepad)) {
+      for (const [codeStr, button] of Object.entries(JOYS_BUTTON_CODES)) {
+        const code = Number(codeStr);
+        const down = _gamepadButtonDown(gamepad, button);
+        if (_pressedState.isPressed({ playerIndex: gamepad, keyCode: code, isDown: down })) {
+          return code;
+        }
+      }
+    }
+  }
+
+  if (includeAxes) {
+    const gamepad = _playerGamepadIndex(playerIdx);
+    if (_isGamepadAvailable(gamepad)) {
+      for (const [codeStr, axis] of Object.entries(AXIS_CODE_TO_AXIS)) {
+        const value = _rawAxisValueForGamepad(gamepad, axis);
+        if (Math.abs(value) >= axisThreshold) {
+          return Number(codeStr);
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 function _inputPrimaryAnyDown(fireCodes: number[], playerCount: number): boolean {
   if (inputCodeIsDown(0x100, { playerIndex: 0 })) return true;
   const count = Math.max(1, Math.min(4, int(playerCount)));
   if (fireCodes.length < count) {
-    throw new Error(`fire_codes must provide at least ${count} entries, got ${fireCodes.length}`);
+    throw new ValueError(`fire_codes must provide at least ${count} entries, got ${fireCodes.length}`);
   }
   for (let playerIndex = 0; playerIndex < count; playerIndex++) {
     const fireKey = int(fireCodes[playerIndex]);
