@@ -329,11 +329,9 @@ export class TypoShooterMode extends BaseGameplayMode {
   private _drawTypingBox(): void {
     const typo = this.state.typo;
     if (typo == null || typo.typing == null) return;
-    const screenH = wgl.getScreenHeight();
     const panelTexture = getTexture(this.renderResources.resources, TextureId.UI_IND_PANEL);
     if (panelTexture === null) return;
     drawTypingBox(
-      screenH,
       panelTexture,
       {
         text: typo.typing.text ?? '',

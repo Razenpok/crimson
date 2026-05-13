@@ -49,13 +49,12 @@ export function drawTypoNameLabels(
     const x = screenPos.x - textW * 0.5;
     const bgAlpha = labelAlpha * NAME_LABEL_BG_ALPHA;
 
-    wgl.drawRectangle(x - 4, y, textW + 8, textH, wgl.makeColor(0, 0, 0, bgAlpha));
-    opts.drawText(text, new Vec2(x, y), wgl.makeColor(1, 1, 1, labelAlpha), NAME_LABEL_SCALE);
+    wgl.drawRectangle(x - 4, y, textW + 8, textH, wgl.makeColor(0, 0, 0, int(255 * bgAlpha) / 255));
+    opts.drawText(text, new Vec2(x, y), wgl.makeColor(1, 1, 1, int(255 * labelAlpha) / 255), NAME_LABEL_SCALE);
   }
 }
 
 export function drawTypingBox(
-  screenH: number,
   panelTexture: wgl.Texture,
   opts: {
     text: string;
@@ -64,20 +63,21 @@ export function drawTypingBox(
     measureTextWidth: MeasureUiTextWidth;
   },
 ): void {
+  const screenH = wgl.getScreenHeight();
   const panelX = -1.0;
   const panelY = screenH - 144.0;
   const textY = screenH - 127.0;
 
   const src = wgl.makeRectangle(0, 0, panelTexture.width, panelTexture.height);
   const dst = wgl.makeRectangle(panelX, panelY, TYPING_PANEL_WIDTH, TYPING_PANEL_HEIGHT);
-  const tint = wgl.makeColor(1, 1, 1, TYPING_PANEL_ALPHA);
+  const tint = wgl.makeColor(1, 1, 1, int(255 * TYPING_PANEL_ALPHA) / 255);
   wgl.drawTexturePro(panelTexture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 
   opts.drawText(TYPING_PROMPT + opts.text, new Vec2(TYPING_TEXT_X, textY), wgl.makeColor(1, 1, 1, 1), 1.0);
 
   const cursorDim = Math.sin(opts.cursorPulseTime * 4.0) > 0.0;
   const cursorAlpha = cursorDim ? 0.4 : 1.0;
-  const cursorColor = wgl.makeColor(1, 1, 1, cursorAlpha);
+  const cursorColor = wgl.makeColor(1, 1, 1, int(255 * cursorAlpha) / 255);
   const textW = opts.measureTextWidth(opts.text, 1.0);
   const cursorX = textW + TYPING_CURSOR_X_OFFSET;
   opts.drawText(TYPING_CURSOR, new Vec2(cursorX, textY), cursorColor, 1.0);
