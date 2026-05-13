@@ -12,13 +12,17 @@ import {
 import type { DeterministicSession } from './sessions.ts';
 import type { GameCommand } from './input-providers.ts';
 import type { PlayerInput } from './input.ts';
-export interface TickRunnerConfig {
+
+export class TickRunnerConfig {
   readonly traceRng: boolean;
+
+  constructor(opts: { traceRng?: boolean } = {}) {
+    this.traceRng = opts.traceRng ?? false;
+    Object.freeze(this);
+  }
 }
 
-const DEFAULT_TICK_RUNNER_CONFIG: TickRunnerConfig = {
-  traceRng: false,
-};
+const DEFAULT_TICK_RUNNER_CONFIG = new TickRunnerConfig();
 export class TickBatchResult {
   ticksCompleted: number;
   batchStatus: InputStatus;

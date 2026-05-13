@@ -7,7 +7,9 @@ type TypoChar = string;
 
 export class PerkMenuOpenCommand {
   readonly tag = 'perk_menu_open' as const;
-  constructor(readonly playerIndex: number) {}
+  constructor(readonly playerIndex: number) {
+    Object.freeze(this);
+  }
 }
 
 export class PerkPickCommand {
@@ -15,7 +17,9 @@ export class PerkPickCommand {
   constructor(
     readonly playerIndex: number,
     readonly choiceIndex: number,
-  ) {}
+  ) {
+    Object.freeze(this);
+  }
 }
 
 export class TypoCharCommand {
@@ -23,17 +27,23 @@ export class TypoCharCommand {
   constructor(
     readonly playerIndex: number,
     readonly ch: TypoChar,
-  ) {}
+  ) {
+    Object.freeze(this);
+  }
 }
 
 export class TypoBackspaceCommand {
   readonly tag = 'typo_backspace' as const;
-  constructor(readonly playerIndex: number) {}
+  constructor(readonly playerIndex: number) {
+    Object.freeze(this);
+  }
 }
 
 export class TypoSubmitCommand {
   readonly tag = 'typo_submit' as const;
-  constructor(readonly playerIndex: number) {}
+  constructor(readonly playerIndex: number) {
+    Object.freeze(this);
+  }
 }
 
 export type GameCommand =
@@ -65,6 +75,7 @@ export class FrameContext {
     this.candidateTicks = opts.candidateTicks;
     this.isNetworked = opts.isNetworked ?? false;
     this.isReplay = opts.isReplay ?? false;
+    Object.freeze(this);
   }
 }
 
@@ -90,6 +101,7 @@ export class ResolvedTick {
     this.dtSeconds = opts.dtSeconds;
     this.inputs = opts.inputs ?? [];
     this.commands = opts.commands ?? [];
+    Object.freeze(this);
   }
 }
 
@@ -100,6 +112,7 @@ export class TickSupply {
   constructor(status: InputStatus, tick: ResolvedTick | null = null) {
     this.status = status;
     this.tick = tick;
+    Object.freeze(this);
   }
 }
 
