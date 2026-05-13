@@ -104,10 +104,16 @@ function _wrapAngle(angle: number): number {
   return f32((f32(angle) + NATIVE_PI) % NATIVE_TAU - NATIVE_PI);
 }
 
-/** Smoothly approach `target` angle from `current` at the given `rate`,
- *  choosing the shortest arc (direct vs. wrapped).  Mirrors the native
- *  `_angle_approach` helper used by the creature heading update. */
+// Native `angle_approach` (0x0041f430).
+//
+// Keep this close to the decompile:
+// - wrap angle into [0, 2pi]
+// - choose direct-vs-wrapped arc
+// - clamp arc scale to <= 1.0
+// - step by `frame_dt * arc_scale * rate`
 function _angleApproach(current: number, target: number, rate: number, dt: number): number {
+  // Native keeps these values in float locals (`fVar*`) across the function.
+  // Preserve that spill behavior to avoid branch flips near the `tau` boundary.
   let angle: number = f32(current);
   const targetF: number = f32(target);
   const rateF: number = f32(rate);
@@ -148,18 +154,19 @@ function _angleApproach(current: number, target: number, rate: number, dt: numbe
   return f32(angle - stepDelta);
 }
 
-// Native movement path computes cos/sin in x87 precision, then multiplies
-// dt * move_scale * move_speed * CREATURE_SPEED_SCALE sequentially (each
-// intermediate result kept in float locals, not f32-flushed).
 function _movementDeltaFromHeadingF32(
   heading: number,
   dt: number,
   moveScale: number,
   moveSpeed: number,
 ): Vec2 {
-  // Native keeps these values in float locals (not f32-flushed between steps).
+  // Native movement path computes cos/sin in x87 precision and rounds only on the
+  // final velocity write (`creature_update_all` around 0x00426b85..0x00426bb1).
+  // Avoid pre-rounding direction components to float32 here.
   const radians = f32(heading) - NATIVE_HALF_PI;
 
+  // Preserve native multiply order:
+  // `vel = trig(heading - half_pi) * frame_dt * move_scale * move_speed * 30.0`
   let vx = Math.cos(radians);
   vx *= dt;
   vx *= moveScale;
