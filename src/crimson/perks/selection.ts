@@ -341,7 +341,9 @@ export function perkSelectionPick(
   }
   const perkId = choices[idx];
   perkApply(state, players, perkId, { perkState, dt, creatures });
-  console.assert(int(perkState.pendingCount) > 0, 'picked perk must leave a pending perk to resolve');
+  if (int(perkState.pendingCount) <= 0) {
+    throw new Error('picked perk must leave a pending perk to resolve');
+  }
   perkState.pendingCount -= 1;
   perkState.choicesDirty = true;
   if (refreshChoices) {
