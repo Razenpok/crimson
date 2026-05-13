@@ -66,22 +66,50 @@ const _PELLET_SPEED_SCALE_CALLER_BY_WEAPON: ReadonlyMap<WeaponId, number> = new 
   [WeaponId.PLASMA_SHOTGUN, RngCallerStatic.PLAYER_UPDATE_PLASMA_SHOTGUN_PELLET_SPEED_SCALE],
 ]);
 
-export interface WeaponFireCtx {
+export class WeaponFireCtx {
   player: PlayerState;
   inputState: PlayerInput;
   dt: number;
   state: GameplayState;
-  detailPreset?: number;
-  creatures?: readonly CreatureState[] | null;
-  players?: readonly PlayerState[] | null;
-  forcePreSwapFireGate?: boolean;
-  onPlayerLethal?: ((player: PlayerState) => void) | null;
+  detailPreset: number;
+  creatures: readonly CreatureState[] | null;
+  players: readonly PlayerState[] | null;
+  forcePreSwapFireGate: boolean;
+  onPlayerLethal: ((player: PlayerState) => void) | null;
+
+  constructor(opts: {
+    player: PlayerState;
+    inputState: PlayerInput;
+    dt: number;
+    state: GameplayState;
+    detailPreset?: number;
+    creatures?: readonly CreatureState[] | null;
+    players?: readonly PlayerState[] | null;
+    forcePreSwapFireGate?: boolean;
+    onPlayerLethal?: ((player: PlayerState) => void) | null;
+  }) {
+    this.player = opts.player;
+    this.inputState = opts.inputState;
+    this.dt = opts.dt;
+    this.state = opts.state;
+    this.detailPreset = opts.detailPreset ?? 5;
+    this.creatures = opts.creatures ?? null;
+    this.players = opts.players ?? null;
+    this.forcePreSwapFireGate = opts.forcePreSwapFireGate ?? false;
+    this.onPlayerLethal = opts.onPlayerLethal ?? null;
+  }
 }
 
-export interface WeaponFireResult {
+export class WeaponFireResult {
   readonly fired: boolean;
   readonly shotCount: number;
   readonly ammoCost: number;
+
+  constructor(opts: { fired: boolean; shotCount?: number; ammoCost?: number }) {
+    this.fired = opts.fired;
+    this.shotCount = opts.shotCount ?? 0;
+    this.ammoCost = opts.ammoCost ?? 0.0;
+  }
 }
 
 function spawnNativeFireMuzzleSprites(
@@ -182,26 +210,26 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   const inputState = ctx.inputState;
   const dt = ctx.dt;
   const state = ctx.state;
-  const creatures = ctx.creatures ?? null;
-  const players = ctx.players ?? null;
-  const forcePreSwapFireGate = ctx.forcePreSwapFireGate ?? false;
-  const onPlayerLethal = ctx.onPlayerLethal ?? null;
+  const creatures = ctx.creatures;
+  const players = ctx.players;
+  const forcePreSwapFireGate = ctx.forcePreSwapFireGate;
+  const onPlayerLethal = ctx.onPlayerLethal;
 
   const weaponId = player.weapon.weaponId;
   const weapon = weaponEntry(weaponId);
 
   if (!forcePreSwapFireGate && player.weapon.shotCooldown > 0.0) {
-    return { fired: false, shotCount: 0, ammoCost: 0.0 };
+    return new WeaponFireResult({ fired: false });
   }
   if (!inputState.fireDown) {
-    return { fired: false, shotCount: 0, ammoCost: 0.0 };
+    return new WeaponFireResult({ fired: false });
   }
 
   let ammoCost = 1.0;
   const isFireBullets = player.fireBulletsTimer > 0.0;
   if (!forcePreSwapFireGate && player.weapon.reloadTimer > 0.0) {
     if (player.experience <= 0) {
-      return { fired: false, shotCount: 0, ammoCost: 0.0 };
+      return new WeaponFireResult({ fired: false });
     }
     if (perkActive(player, PerkId.REGRESSION_BULLETS)) {
       const ammoClass = weapon.ammoClass !== null ? int(weapon.ammoClass) : 0;
@@ -223,7 +251,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         { dt, players, onLethal: onPlayerLethal !== null ? (() => onPlayerLethal(player)) : null },
       );
     } else {
-      return { fired: false, shotCount: 0, ammoCost: 0.0 };
+      return new WeaponFireResult({ fired: false });
     }
   }
 
@@ -268,7 +296,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
       pos: muzzle,
       aimHeading,
       draws: shellCasingDraws,
-      detailPreset: int(ctx.detailPreset ?? 5),
+      detailPreset: int(ctx.detailPreset),
     });
   }
 
@@ -357,7 +385,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
         typeId: mode.typeId,
         owner,
         targetHint,
-        creatures: spawnCreatures as CreatureState[] | null,
+        creatures: spawnCreatures,
         preserveBugs: state.preserveBugs,
       }));
       break;
@@ -427,7 +455,7 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
           typeId: SecondaryProjectileTypeId.HOMING_ROCKET,
           owner,
           targetHint: aim,
-          creatures: creatures as CreatureState[] | null,
+          creatures,
           preserveBugs: state.preserveBugs,
         }));
         angle += step;
@@ -484,5 +512,5 @@ export function fireWeapon(ctx: WeaponFireCtx): WeaponFireResult {
   if (player.weapon.ammo <= 0.0 && reloadStartGateOpen) {
     playerStartReload(player, state);
   }
-  return { fired: true, shotCount: int(shotCount), ammoCost };
+  return new WeaponFireResult({ fired: true, shotCount: int(shotCount), ammoCost });
 }

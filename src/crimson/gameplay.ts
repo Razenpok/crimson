@@ -27,7 +27,7 @@ import type { PlayerInput } from './sim/input.ts';
 import { PERK_COUNT_SIZE, type PlayerState } from './sim/state-types.ts';
 import { ftolMsI32 } from './sim/timing.ts';
 import { WEAPON_TABLE, WeaponId } from './weapons.ts';
-import { fireWeapon } from './weapon-runtime/fire.ts';
+import { fireWeapon, WeaponFireCtx } from './weapon-runtime/fire.ts';
 import {
   ownerRefForPlayer,
   ownerRefForPlayerProjectiles,
@@ -1111,7 +1111,7 @@ export function playerUpdate(
     state.survivalRewardFireSeen = true;
   }
 
-  fireWeapon({
+  fireWeapon(new WeaponFireCtx({
     player,
     inputState,
     dt,
@@ -1121,7 +1121,7 @@ export function playerUpdate(
     players,
     forcePreSwapFireGate,
     onPlayerLethal: onPlayerLethal ?? undefined,
-  });
+  }));
 
   while (player.movePhase > 14.0) {
     player.movePhase -= 14.0;
