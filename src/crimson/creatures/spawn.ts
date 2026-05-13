@@ -593,18 +593,26 @@ export function spawnIdLabel(spawnId: SpawnId): string {
 }
 
 
-export interface SpawnEnv {
-  readonly terrainWidth: number;
-  readonly terrainHeight: number;
-  readonly demoModeActive: boolean;
-  readonly hardcore: boolean;
-  readonly questFailRetryCount: number;
+export class SpawnEnv {
+  constructor(
+    public readonly terrainWidth: number,
+    public readonly terrainHeight: number,
+    public readonly demoModeActive: boolean,
+    public readonly hardcore: boolean,
+    public readonly questFailRetryCount: number,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 
-export interface BurstEffect {
-  readonly pos: Vec2;
-  readonly count: number;
+export class BurstEffect {
+  constructor(
+    public readonly pos: Vec2,
+    public readonly count: number,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 
@@ -679,11 +687,15 @@ export class SpawnSlotInit {
 }
 
 
-export interface SpawnPlan {
-  readonly creatures: readonly CreatureInit[];
-  readonly spawnSlots: readonly SpawnSlotInit[];
-  readonly effects: readonly BurstEffect[];
-  readonly primary: number;
+export class SpawnPlan {
+  constructor(
+    public readonly creatures: readonly CreatureInit[] = [],
+    public readonly spawnSlots: readonly SpawnSlotInit[] = [],
+    public readonly effects: readonly BurstEffect[] = [],
+    public readonly primary: number = 0,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 
@@ -1014,12 +1026,12 @@ class PlanBuilder {
       finalHeading,
       this.env,
     );
-    return {
-      creatures: this.creatures.slice(),
-      spawnSlots: this.spawnSlots.slice(),
-      effects: this.effects.slice(),
-      primary: this.primary,
-    };
+    return new SpawnPlan(
+      this.creatures.slice(),
+      this.spawnSlots.slice(),
+      this.effects.slice(),
+      this.primary,
+    );
   }
 }
 
@@ -1086,30 +1098,34 @@ function clamp01(value: number): number {
 }
 
 
-export interface SurvivalSpawnPosCallers {
-  readonly edge: RngCallerStatic;
-  readonly topX: RngCallerStatic;
-  readonly bottomX: RngCallerStatic;
-  readonly leftY: RngCallerStatic;
-  readonly rightY: RngCallerStatic;
+export class SurvivalSpawnPosCallers {
+  constructor(
+    public readonly edge: RngCallerStatic,
+    public readonly topX: RngCallerStatic,
+    public readonly bottomX: RngCallerStatic,
+    public readonly leftY: RngCallerStatic,
+    public readonly rightY: RngCallerStatic,
+  ) {
+    Object.freeze(this);
+  }
 }
 
 
-export const SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS: SurvivalSpawnPosCallers = {
-  edge: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_EDGE,
-  topX: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_TOP_X,
-  bottomX: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_BOTTOM_X,
-  leftY: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_LEFT_Y,
-  rightY: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_RIGHT_Y,
-};
+export const SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS = new SurvivalSpawnPosCallers(
+  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_EDGE,
+  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_TOP_X,
+  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_BOTTOM_X,
+  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_LEFT_Y,
+  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_RIGHT_Y,
+);
 
-export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS: SurvivalSpawnPosCallers = {
-  edge: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_EDGE,
-  topX: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_TOP_X,
-  bottomX: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_BOTTOM_X,
-  leftY: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_LEFT_Y,
-  rightY: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_RIGHT_Y,
-};
+export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS = new SurvivalSpawnPosCallers(
+  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_EDGE,
+  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_TOP_X,
+  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_BOTTOM_X,
+  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_LEFT_Y,
+  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_RIGHT_Y,
+);
 
 
 /**
@@ -1397,10 +1413,18 @@ export function tickSurvivalWaveSpawns(
 }
 
 
-export interface SpawnTemplateCall {
-  readonly templateId: SpawnId;
-  readonly pos: Vec2;
-  readonly heading: number;
+export class SpawnTemplateCall {
+  constructor(
+    public readonly templateId: SpawnId,
+    public readonly pos: Vec2,
+    public readonly heading: number,
+  ) {
+    Object.freeze(this);
+  }
+}
+
+function spawnCall(templateId: SpawnId, pos: Vec2, heading: number): SpawnTemplateCall {
+  return new SpawnTemplateCall(templateId, pos, heading);
 }
 
 
@@ -1420,15 +1444,15 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
     if (stage === 0) {
       if (level < 5) break;
       stage = 1;
-      spawns.push({ templateId: SpawnId.FORMATION_RING_ALIEN_8_12, pos: new Vec2(-164.0, 512.0), heading });
-      spawns.push({ templateId: SpawnId.FORMATION_RING_ALIEN_8_12, pos: new Vec2(1188.0, 512.0), heading });
+      spawns.push(spawnCall(SpawnId.FORMATION_RING_ALIEN_8_12, new Vec2(-164.0, 512.0), heading));
+      spawns.push(spawnCall(SpawnId.FORMATION_RING_ALIEN_8_12, new Vec2(1188.0, 512.0), heading));
       continue;
     }
 
     if (stage === 1) {
       if (level < 9) break;
       stage = 2;
-      spawns.push({ templateId: SpawnId.ALIEN_CONST_RED_BOSS_2C, pos: new Vec2(1088.0, 512.0), heading });
+      spawns.push(spawnCall(SpawnId.ALIEN_CONST_RED_BOSS_2C, new Vec2(1088.0, 512.0), heading));
       continue;
     }
 
@@ -1437,11 +1461,11 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
       stage = 3;
       const step = f32(42.666668);
       for (let i = 0; i < 12; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP2_RANDOM_35,
-          pos: new Vec2(1088.0, f32(f32(i) * f32(step) + f32(256.0))),
+        spawns.push(spawnCall(
+          SpawnId.SPIDER_SP2_RANDOM_35,
+          new Vec2(1088.0, f32(f32(i) * f32(step) + f32(256.0))),
           heading,
-        });
+        ));
       }
       continue;
     }
@@ -1450,11 +1474,7 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
       if (level < 13) break;
       stage = 4;
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.ALIEN_CONST_RED_FAST_2B,
-          pos: new Vec2(1088.0, i * 64.0 + 384.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.ALIEN_CONST_RED_FAST_2B, new Vec2(1088.0, i * 64.0 + 384.0), heading));
       }
       continue;
     }
@@ -1463,18 +1483,10 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
       if (level < 15) break;
       stage = 5;
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP1_AI7_TIMER_38,
-          pos: new Vec2(1088.0, i * 64.0 + 384.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.SPIDER_SP1_AI7_TIMER_38, new Vec2(1088.0, i * 64.0 + 384.0), heading));
       }
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP1_AI7_TIMER_38,
-          pos: new Vec2(-64.0, i * 64.0 + 384.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.SPIDER_SP1_AI7_TIMER_38, new Vec2(-64.0, i * 64.0 + 384.0), heading));
       }
       continue;
     }
@@ -1482,22 +1494,22 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
     if (stage === 5) {
       if (level < 17) break;
       stage = 6;
-      spawns.push({ templateId: SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, pos: new Vec2(1088.0, 512.0), heading });
+      spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, new Vec2(1088.0, 512.0), heading));
       continue;
     }
 
     if (stage === 6) {
       if (level < 19) break;
       stage = 7;
-      spawns.push({ templateId: SpawnId.SPIDER_SP2_SPLITTER_01, pos: new Vec2(640.0, 512.0), heading });
+      spawns.push(spawnCall(SpawnId.SPIDER_SP2_SPLITTER_01, new Vec2(640.0, 512.0), heading));
       continue;
     }
 
     if (stage === 7) {
       if (level < 21) break;
       stage = 8;
-      spawns.push({ templateId: SpawnId.SPIDER_SP2_SPLITTER_01, pos: new Vec2(384.0, 256.0), heading });
-      spawns.push({ templateId: SpawnId.SPIDER_SP2_SPLITTER_01, pos: new Vec2(640.0, 768.0), heading });
+      spawns.push(spawnCall(SpawnId.SPIDER_SP2_SPLITTER_01, new Vec2(384.0, 256.0), heading));
+      spawns.push(spawnCall(SpawnId.SPIDER_SP2_SPLITTER_01, new Vec2(640.0, 768.0), heading));
       continue;
     }
 
@@ -1505,18 +1517,10 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
       if (level < 26) break;
       stage = 9;
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C,
-          pos: new Vec2(1088.0, i * 64.0 + 384.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, new Vec2(1088.0, i * 64.0 + 384.0), heading));
       }
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C,
-          pos: new Vec2(-64.0, i * 64.0 + 384.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, new Vec2(-64.0, i * 64.0 + 384.0), heading));
       }
       continue;
     }
@@ -1524,21 +1528,13 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
     if (stage === 9) {
       if (level <= 31) break;
       stage = 10;
-      spawns.push({ templateId: SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, pos: new Vec2(1088.0, 512.0), heading });
-      spawns.push({ templateId: SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, pos: new Vec2(-64.0, 512.0), heading });
+      spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, new Vec2(1088.0, 512.0), heading));
+      spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, new Vec2(-64.0, 512.0), heading));
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C,
-          pos: new Vec2(i * 64.0 + 384.0, -64.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, new Vec2(i * 64.0 + 384.0, -64.0), heading));
       }
       for (let i = 0; i < 4; i++) {
-        spawns.push({
-          templateId: SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C,
-          pos: new Vec2(i * 64.0 + 384.0, 1088.0),
-          heading,
-        });
+        spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, new Vec2(i * 64.0 + 384.0, 1088.0), heading));
       }
       continue;
     }
@@ -1644,9 +1640,9 @@ export function tickRushModeSpawns(
 export function buildTutorialStage3FireSpawns(): SpawnTemplateCall[] {
   const heading = Math.PI;
   return [
-    { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(-164.0, 412.0), heading },
-    { templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26, pos: new Vec2(-184.0, 512.0), heading },
-    { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(-154.0, 612.0), heading },
+    spawnCall(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(-164.0, 412.0), heading),
+    spawnCall(SpawnId.ALIEN_CONST_PALE_GREEN_26, new Vec2(-184.0, 512.0), heading),
+    spawnCall(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(-154.0, 612.0), heading),
   ];
 }
 
@@ -1655,9 +1651,9 @@ export function buildTutorialStage3FireSpawns(): SpawnTemplateCall[] {
 export function buildTutorialStage4ClearSpawns(): SpawnTemplateCall[] {
   const heading = Math.PI;
   return [
-    { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(1188.0, 412.0), heading },
-    { templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26, pos: new Vec2(1208.0, 512.0), heading },
-    { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(1178.0, 612.0), heading },
+    spawnCall(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(1188.0, 412.0), heading),
+    spawnCall(SpawnId.ALIEN_CONST_PALE_GREEN_26, new Vec2(1208.0, 512.0), heading),
+    spawnCall(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(1178.0, 612.0), heading),
   ];
 }
 
@@ -1683,19 +1679,19 @@ export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): Spawn
 
   if ((n & 1) === 0) {
     if (n < 6) {
-      spawns.push({ templateId: SpawnId.ALIEN_CONST_WEAPON_BONUS_27, pos: new Vec2(1056.0, 1056.0), heading });
+      spawns.push(spawnCall(SpawnId.ALIEN_CONST_WEAPON_BONUS_27, new Vec2(1056.0, 1056.0), heading));
     }
-    spawns.push({ templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(1188.0, 1136.0), heading });
-    spawns.push({ templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26, pos: new Vec2(1208.0, 512.0), heading });
-    spawns.push({ templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(1178.0, 612.0), heading });
+    spawns.push(spawnCall(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(1188.0, 1136.0), heading));
+    spawns.push(spawnCall(SpawnId.ALIEN_CONST_PALE_GREEN_26, new Vec2(1208.0, 512.0), heading));
+    spawns.push(spawnCall(SpawnId.ALIEN_CONST_GREEN_24, new Vec2(1178.0, 612.0), heading));
     if (n === 4) {
-      spawns.push({ templateId: SpawnId.SPIDER_SP1_CONST_BLUE_40, pos: new Vec2(512.0, 1056.0), heading });
+      spawns.push(spawnCall(SpawnId.SPIDER_SP1_CONST_BLUE_40, new Vec2(512.0, 1056.0), heading));
     }
     return spawns;
   }
 
   if (n < 6) {
-    spawns.push({ templateId: SpawnId.ALIEN_CONST_WEAPON_BONUS_27, pos: new Vec2(-32.0, 1056.0), heading });
+    spawns.push(spawnCall(SpawnId.ALIEN_CONST_WEAPON_BONUS_27, new Vec2(-32.0, 1056.0), heading));
   }
   spawns.push(...buildTutorialStage3FireSpawns());
   return spawns;
@@ -1707,7 +1703,7 @@ export function buildTutorialStage6PerksDoneSpawns(): SpawnTemplateCall[] {
   const heading = Math.PI;
   return [
     ...buildTutorialStage3FireSpawns(),
-    { templateId: SpawnId.ALIEN_CONST_PURPLE_28, pos: new Vec2(-32.0, -32.0), heading },
+    spawnCall(SpawnId.ALIEN_CONST_PURPLE_28, new Vec2(-32.0, -32.0), heading),
     ...buildTutorialStage4ClearSpawns(),
   ];
 }
@@ -1726,7 +1722,7 @@ function applyTail(
 
   // Demo-burst effect (skipped when demo_mode_active != 0).
   if (!env.demoModeActive && 0.0 < c.pos.x && c.pos.x < env.terrainWidth && 0.0 < c.pos.y && c.pos.y < env.terrainHeight) {
-    planEffects.push({ pos: c.pos, count: 8 });
+    planEffects.push(new BurstEffect(c.pos, 8));
   }
 
   if (c.health !== null) {
