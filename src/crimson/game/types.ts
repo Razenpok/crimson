@@ -11,6 +11,9 @@ import type { GameMode } from '@crimson/game-modes.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import type { QuestLevel } from '@crimson/quests/level.ts';
 import type { QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
+import type { PauseBackground } from '@crimson/pause-background.ts';
+
+export type { PauseBackground } from '@crimson/pause-background.ts';
 
 // ---------------------------------------------------------------------------
 // GameConfig — frozen (interface)
@@ -80,10 +83,6 @@ export interface Screen {
   update(dt: number): void;
   draw(): void;
   takeAction?(): string | null;
-}
-
-export interface PauseBackground {
-  drawPauseBackground(opts?: { entityAlpha?: number }): void;
 }
 
 // ---------------------------------------------------------------------------
