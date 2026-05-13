@@ -36,6 +36,7 @@ export interface MusicState {
   activeTrack: string | null;
   playbacks: Map<string, TrackPlayback>;
   queue: string[];
+  // Mirrors the original game's "start a random game tune on first hit" gate.
   gameTuneStarted: boolean;
   gameTuneTrack: string | null;
   trackIds: Map<string, number>;
@@ -79,7 +80,6 @@ export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext,
     state.tracks.set(trackName, buffer);
   }
 
-  // Build track ID map
   let idx = 0;
   for (const name of state.tracks.keys()) {
     state.trackIds.set(name, idx++);
@@ -98,7 +98,8 @@ export function playMusic(state: MusicState, audioCtx: AudioContext | null, trac
   const buffer = state.tracks.get(trackName);
   if (!buffer) return;
 
-  // Mute all other tracks
+  // Original behavior uses an "exclusive" music channel: requesting a track
+  // mutes (fades out) any other currently-unmuted music ids.
   for (const [key, pb] of state.playbacks) {
     if (key !== trackName && !pb.muted) {
       pb.muted = true;
@@ -111,6 +112,8 @@ export function playMusic(state: MusicState, audioCtx: AudioContext | null, trac
     state.playbacks.set(trackName, pb);
   }
 
+  // Mirror `sfx_play_exclusive`: only arm/unmute the requested track when its
+  // tracked volume has already faded to silence.
   if (pb.volume <= 0.0) {
     pb.muted = false;
     pb.volume = state.volume;
@@ -253,6 +256,7 @@ export function updateMusic(state: MusicState, audioCtx: AudioContext | null, dt
 
   const targetVolume = state.volume;
   if (targetVolume <= 0.0) {
+    // Original behavior: global music volume at 0 stops playback immediately.
     for (const [key, pb] of state.playbacks) {
       if (pb.gainNode) pb.gainNode.gain.value = 0.0;
       if (pb.source) { try { pb.source.stop(); } catch {} }
@@ -278,7 +282,7 @@ export function updateMusic(state: MusicState, audioCtx: AudioContext | null, dt
       continue;
     }
 
-    // Unmuted: ensure playing
+    // Unmuted track: ensure it stays playing and ramp toward target volume.
     if (!pb.playing) {
       _startPlayback(pb, audioCtx, pb.volume);
     }
@@ -296,6 +300,8 @@ export function setMusicVolume(state: MusicState, volume: number): void {
   volume = Math.max(0.0, Math.min(1.0, volume));
   state.volume = volume;
   if (!state.ready || !state.enabled) return;
+  // Mirror original: volume decreases take effect immediately; increases are ramped
+  // by `updateMusic`.
   for (const pb of state.playbacks.values()) {
     if (pb.muted) continue;
     if (pb.volume > state.volume) pb.volume = state.volume;
