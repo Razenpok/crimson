@@ -13,7 +13,6 @@ import { GameMode } from '@crimson/game-modes.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
-
 } from '@crimson/sim/sessions.ts';
 import { buildTypoSession } from '@crimson/sim/session-builders.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
@@ -151,18 +150,16 @@ export class TypoShooterMode extends BaseGameplayMode {
   }
 
   private _enqueueTypingCommands(): void {
-    // Enter / KP Enter → submit
     const enterPressed = InputState.wasKeyPressed(13) || InputState.wasKeyPressed(0x100D);
     const typo = this.state.typo;
     if (enterPressed && typo != null && typo.typing != null && typo.typing.text) {
       this.enqueueInputCommand(new TypoSubmitCommand(0));
     }
 
-    // Backspace (including key-repeat)
+    // Native processes at most one keychar per frame via `console_input_poll`.
     if (InputState.wasKeyPressed(8) || InputState.wasKeyPressedRepeat(8)) {
       this.enqueueInputCommand(new TypoBackspaceCommand(0));
     } else {
-      // Character input — poll one codepoint per frame
       const codepoint = InputState.getCharPressed();
       if (codepoint !== 13 && codepoint !== 8 && codepoint >= 0x20 && codepoint <= 0xFF) {
         const ch = String.fromCharCode(codepoint);
