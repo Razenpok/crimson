@@ -16,7 +16,6 @@ import {
 import { buildPerkAvailability } from '@crimson/perks/availability.ts';
 import { perksDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
-import { GameStatus } from "@crimson/gameplay.ts";
 
 const KEY_LEFT = 37;
 const KEY_RIGHT = 39;
@@ -391,8 +390,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   }
 
   private _buildPerkDatabaseIds(): PerkId[] {
-    const status = (this.state as unknown as { status?: GameStatus | null }).status ?? null;
-    const available = buildPerkAvailability({ status });
+    const available = buildPerkAvailability({ status: this.state.status });
     const perkIds: PerkId[] = [];
     for (let idx = 1; idx < available.length; idx++) {
       if (available[idx]) {
