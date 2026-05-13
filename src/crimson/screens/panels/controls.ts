@@ -10,6 +10,7 @@ import {
   MovementControlType,
   type CrimsonControlsConfig,
   defaultCrimsonConfig,
+  fxDetailEnabled,
 } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { type DropdownLayoutBase } from '@crimson/ui/layout.ts';
@@ -713,7 +714,7 @@ export class ControlsMenuView extends PanelMenuView {
 
   protected override _drawPanel(): void {
     const resources = requireRuntimeResources(this.state);
-    const fxDetail = this.state.config.display.fxDetail[0];
+    const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const [panelScale] = this._menuItemScale(0);
     const panelW = MENU_PANEL_WIDTH * panelScale;
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
@@ -723,7 +724,7 @@ export class ControlsMenuView extends PanelMenuView {
     const leftH = MENU_PANEL_HEIGHT * panelScale;
     drawClassicMenuPanel(panel, {
       dst: wgl.makeRectangle(leftTopLeft.x, leftTopLeft.y, panelW, leftH),
-      tint: WHITE, shadow: !!fxDetail,
+      tint: WHITE, shadow: fxDetail,
     });
 
     // Right (configured bindings) panel: tall 378px panel rendered as 3 vertical slices.
@@ -732,7 +733,7 @@ export class ControlsMenuView extends PanelMenuView {
     drawClassicMenuPanel(panel, {
       dst: wgl.makeRectangle(rightTopLeft.x, rightTopLeft.y, panelW, rightH),
       // Original ui_element_slot_40 sets direction_flag=1, which mirrors panel UVs.
-      tint: WHITE, shadow: !!fxDetail, flipX: true,
+      tint: WHITE, shadow: fxDetail, flipX: true,
     });
   }
 
@@ -852,6 +853,7 @@ export class ControlsMenuView extends PanelMenuView {
         !(this._aimMethodOpen || this._playerProfileOpen || this._rebindActive()),
       ],
     ];
+    // Active list must render last so overlapping widgets don't occlude open options.
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (isOpen) continue;
       this._drawDropdown({
@@ -865,7 +867,6 @@ export class ControlsMenuView extends PanelMenuView {
         font,
       });
     }
-    // Active list must render last so overlapping widgets don't occlude open options.
     for (const [isOpen, layout, items, selectedIndex, enabled] of dropdowns) {
       if (!isOpen) continue;
       this._drawDropdown({
@@ -881,7 +882,8 @@ export class ControlsMenuView extends PanelMenuView {
     }
 
     // --- Right panel: configured bindings list ---
-    const drawSectionHeading = (title: string, y: number): void => {
+    const drawSectionHeading = (title: string, opts: { y: number }): void => {
+      const y = opts.y;
       const xHeading = rightTopLeft.x + 44.0 * panelScale;
       drawSmallText(font, title, new Vec2(xHeading, y), textColorFull);
       const lineY = y + 13.0 * panelScale;
@@ -923,7 +925,7 @@ export class ControlsMenuView extends PanelMenuView {
 
     let y = rightTopLeft.y + 64.0 * panelScale;
     for (const [sectionTitle, sectionRows] of sections) {
-      drawSectionHeading(sectionTitle, y);
+      drawSectionHeading(sectionTitle, { y });
       let rowY = y + 18.0 * panelScale;
       for (let i = 0; i < sectionRows.length; i++) {
         const rowLayout = rows[rowIter++];
