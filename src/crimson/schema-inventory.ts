@@ -73,6 +73,11 @@ function _resolveImportModule(opts: {
   return baseParts.join('.');
 }
 
+function _baseName(_base: unknown): string | null {
+  // Python ast.expr inspection is not available in the WebGL runtime.
+  throw new Error('schema inventory requires Python ast expression inspection');
+}
+
 function _resolveSymbol(symbol: string, opts: { imports: Record<string, string> }): string {
   if (symbol in opts.imports) {
     return opts.imports[symbol];
@@ -87,6 +92,41 @@ function _resolveSymbol(symbol: string, opts: { imports: Record<string, string> 
   return symbol;
 }
 
+class _ClassInfo {
+  readonly className: string;
+  readonly fullName: string;
+  readonly module: string;
+  readonly path: string;
+  readonly lineno: number;
+  readonly resolvedBases: readonly string[];
+
+  constructor(opts: {
+    className: string;
+    fullName: string;
+    module: string;
+    path: string;
+    lineno: number;
+    resolvedBases: readonly string[];
+  }) {
+    this.className = opts.className;
+    this.fullName = opts.fullName;
+    this.module = opts.module;
+    this.path = opts.path;
+    this.lineno = opts.lineno;
+    this.resolvedBases = opts.resolvedBases;
+    Object.freeze(this);
+  }
+}
+
+function _iterClassInfos(_sourceRoot: string): _ClassInfo[] {
+  void _baseName;
+  void _moduleNameForPath;
+  void _resolveImportModule;
+  void _resolveSymbol;
+  // Python ast parsing and filesystem traversal are not available in the WebGL runtime.
+  throw new Error('schema inventory requires Python ast parsing and filesystem traversal');
+}
+
 function _bucketForPath(path: string): string {
   const parts = path.split('/');
   if (parts.length >= 3 && parts[0] === 'src' && parts[1] === 'crimson') {
@@ -98,9 +138,58 @@ function _bucketForPath(path: string): string {
   return 'other';
 }
 
-export function listStructClasses(_opts: { sourceRoot: string }): StructClass[] {
-  // Python ast parsing and filesystem traversal are not available in the WebGL runtime.
-  throw new Error('schema inventory requires Python ast parsing and filesystem traversal');
+export function listStructClasses(opts: { sourceRoot: string }): StructClass[] {
+  const infos = _iterClassInfos(opts.sourceRoot);
+
+  const byFullName = new Map(infos.map((info) => [info.fullName, info]));
+  const structFullNames = new Set<string>();
+
+  for (const info of infos) {
+    if (info.resolvedBases.includes('msgspec.Struct')) {
+      structFullNames.add(info.fullName);
+    }
+  }
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const info of infos) {
+      if (structFullNames.has(info.fullName)) {
+        continue;
+      }
+      for (const base of info.resolvedBases) {
+        if (structFullNames.has(base)) {
+          structFullNames.add(info.fullName);
+          changed = true;
+          break;
+        }
+        if (!base.includes('.')) {
+          const sameModuleBase = info.module ? `${info.module}.${base}` : base;
+          if (structFullNames.has(sameModuleBase)) {
+            structFullNames.add(info.fullName);
+            changed = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const structs: StructClass[] = [];
+  for (const fullName of Array.from(structFullNames).sort()) {
+    const info = byFullName.get(fullName);
+    if (info === undefined) {
+      continue;
+    }
+    structs.push(new StructClass({
+      className: info.className,
+      fullName: info.fullName,
+      module: info.module,
+      path: info.path,
+      lineno: info.lineno,
+    }));
+  }
+  return structs;
 }
 
 export function summarizeInventory(opts: { structs: StructClass[] }): InventorySummary {
