@@ -1609,6 +1609,7 @@ function applyTail(
 ): void {
   const c = planCreatures[primaryIdx];
 
+  // Demo-burst effect (skipped when demo_mode_active != 0).
   if (!env.demoModeActive && 0.0 < c.pos.x && c.pos.x < env.terrainWidth && 0.0 < c.pos.y && c.pos.y < env.terrainHeight) {
     planEffects.push({ pos: c.pos, count: 8 });
   }
@@ -1617,6 +1618,7 @@ function applyTail(
     c.maxHealth = c.health;
   }
 
+  // Spider_sp1 "AI7 timer" auto-enable (applies to the *return* creature).
   if (c.typeId === CreatureTypeId.SPIDER_SP1 && !(
     c.flags & (CreatureFlags.RANGED_ATTACK_SHOCK | CreatureFlags.AI7_LINK_TIMER)
   )) {
@@ -1629,16 +1631,20 @@ function applyTail(
     }
   }
 
+  // Hardcore tweak for template 0x38 only.
   if (templateId === SpawnId.SPIDER_SP1_AI7_TIMER_38 && env.hardcore && c.moveSpeed !== null) {
     c.moveSpeed *= 0.7;
   }
 
   c.heading = finalHeading;
 
+  // Quest fail retry count modifiers.
   const slotIdx = c.spawnSlot;
   const hasSpawnSlot = slotIdx !== null && slotIdx >= 0 && slotIdx < planSpawnSlots.length;
 
   if (!env.hardcore) {
+    // This is written as a short-circuit expression in the original:
+    // for flag 0x4 creatures, always bump their spawn-slot interval by +0.2 in non-hardcore.
     if ((c.flags & HAS_SPAWN_SLOT_FLAG) && hasSpawnSlot && slotIdx !== null) {
       planSpawnSlots[slotIdx].interval += 0.2;
     }
@@ -1684,6 +1690,7 @@ function applyTail(
       }
     }
   } else {
+    // In hardcore: quest fail retry count is forcibly cleared (global), and creature stats are buffed.
     if (c.moveSpeed !== null) {
       c.moveSpeed *= 1.05;
     }
@@ -1705,6 +1712,11 @@ function applyTail(
 
 
 function applyUnhandledCreatureTypeFallback(planCreatures: CreatureInit[], primaryIdx: number): void {
+  // Some template paths jump to the "Unhandled creatureType.\n" debug block in the original,
+  // which forcibly overwrites `type_id` and `health` on the *current* creature pointer.
+  // See artifacts/creature_spawn_template/binja-hlil.txt (label_431099).
+  // Notably: several grid/ring templates in the late formation switch ladder
+  // (e.g. 0x11, 0x13..0x17) reach LAB_00431094.
   const c = planCreatures[primaryIdx];
   c.typeId = CreatureTypeId.ALIEN;
   c.health = 20.0;
