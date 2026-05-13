@@ -2,9 +2,8 @@
 
 import type { Vec2 } from '@grim/geom.ts';
 import type { OwnerRef } from '@crimson/owner-ref.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
-import { ProjectileTemplateId } from "@crimson/projectiles/types.js";
-import { GameplayState } from "@crimson/gameplay.js";
+import type { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
+import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 
 export type ProjectileSpawnFn = (
   state: GameplayState,
