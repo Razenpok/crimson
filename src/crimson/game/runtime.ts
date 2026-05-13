@@ -1,9 +1,7 @@
 // Port of crimson/game/runtime.py
 //
 // WebGL adaptation: no faulthandler, no file-based crash log, no PAQ download,
-// no webbrowser.open (stubbed), no raylib config flags.  The `runGame` function
-// wires up the GameState, registers console commands, and hands off to the
-// GameLoopView via the engine App.
+// no webbrowser.open, no raylib config flags.
 
 import * as wgl from '@wgl';
 import { defaultCrimsonConfig } from '@grim/config.ts';
@@ -391,9 +389,6 @@ function bootCommandHandlers(
 }
 
 function registerCoreCvars(console: ConsoleState, width: number, height: number): void {
-  // Matches Python's register_core_cvars in grim/console.py.
-  // cvars already registered in createConsole: cv_silentloads, cv_bodiesFade,
-  // cv_uiTransparency, cv_showFPS — so we skip those here.
   console.registerCvar('cv_uiPointFilterPanels', '0');
   console.registerCvar('cv_enableMousePointAndClickMovement', '0');
   console.registerCvar('cv_verbose', '0');
@@ -458,10 +453,8 @@ export function runGame(
     rtxMode: modeFromRtxFlag(config.rtx),
   });
 
-  // Skip intro if requested
   state.skipIntro = config.noIntro;
 
-  // Register console commands
   const handlers = bootCommandHandlers(state, status);
   registerBootCommands(console, handlers);
   registerCoreCvars(console, width, height);
@@ -474,8 +467,6 @@ export function runGame(
   console.log.log(`assets: ${config.assetsUrl}`);
   console.log.log(`commands: ${console.commands.size} registered`);
   console.log.log(`cvars: ${console.cvars.size} registered`);
-
-  // NOTE: autoexec.txt exec is skipped in WebGL — no filesystem
 
   const view = new GameLoopView(state, status);
 
