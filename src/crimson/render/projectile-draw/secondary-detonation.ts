@@ -7,6 +7,34 @@ import { clamp } from '@grim/math.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import type { SecondaryProjectileDrawCtx } from './types.ts';
 
+function drawCircleLines(x: number, y: number, radius: number, color: wgl.Color): void {
+  const r = Math.max(1.0, radius);
+  const innerR = Math.max(0.0, r - 0.5);
+  const outerR = r + 0.5;
+  const segments = Math.max(24, int(r * 0.25 + 24.0));
+  const step = (Math.PI * 2.0) / segments;
+  const white = wgl.getWhiteTexture();
+
+  wgl.beginBlendMode(wgl.BlendMode.ALPHA);
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(color.r, color.g, color.b, color.a);
+  for (let i = 0; i < segments; i++) {
+    const a0 = i * step;
+    const a1 = (i + 1) * step;
+    const cos0 = Math.cos(a0);
+    const sin0 = Math.sin(a0);
+    const cos1 = Math.cos(a1);
+    const sin1 = Math.sin(a1);
+    wgl.rlVertex2f(x + cos0 * innerR, y + sin0 * innerR);
+    wgl.rlVertex2f(x + cos0 * outerR, y + sin0 * outerR);
+    wgl.rlVertex2f(x + cos1 * outerR, y + sin1 * outerR);
+    wgl.rlVertex2f(x + cos1 * innerR, y + sin1 * innerR);
+  }
+  wgl.endQuads();
+  wgl.endBlendMode();
+}
+
 export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
   if (ctx.projType !== 3) return false;
@@ -21,15 +49,10 @@ export function drawSecondaryDetonation(ctx: SecondaryProjectileDrawCtx): boolea
 
   const particlesTexture = getTexture(renderer.frame.resources, TextureId.PARTICLES);
   if (particlesTexture === null) {
-    // TODO: Python draws a circle outline via rl.draw_circle_lines here;
-    // the fallback below approximates it with a textured quad.
-    // Fallback: approximate circle outline with a white-texture quad
-    const radius = Math.max(1.0, detScale * t * 80.0 * scale);
-    const size = radius * 2.0;
-    const whTex = wgl.getWhiteTexture();
-    const sp = ctx.screenPos;
-    const tint = wgl.makeColor(1.0, 180 / 255, 100 / 255, fade * (180.0 / 255.0));
-    wgl.drawTexturePro(whTex, wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
+    const radius = detScale * t * 80.0;
+    const alphaByte = int(clamp((1.0 - t) * 180.0 * ctx.alpha, 0.0, 255.0) + 0.5);
+    const color = wgl.makeColor(1.0, 180 / 255, 100 / 255, alphaByte / 255);
+    drawCircleLines(int(ctx.screenPos.x), int(ctx.screenPos.y), Math.max(1.0, radius * scale), color);
     return true;
   }
 
