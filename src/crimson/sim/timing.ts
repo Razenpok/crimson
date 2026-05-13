@@ -6,7 +6,7 @@ export function ftolMsI32(dtSeconds: number): number {
   // Convert seconds -> integer milliseconds via float32 scale + truncation.
   const dtF32 = f32(dtSeconds);
   const scaledMsF32 = f32(dtF32 * 1000.0);
-  return Math.trunc(scaledMsF32);
+  return int(Math.trunc(scaledMsF32));
 }
 
 export class FrameTiming {

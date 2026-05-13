@@ -17,8 +17,11 @@ export class QuestLevel {
     if (parts.length !== 2) {
       throw new Error(`invalid quest level: '${value}'`);
     }
-    const major = parseInt(parts[0], 10);
-    const minor = parseInt(parts[1], 10);
+    if (!/^[+-]?\d+$/.test(parts[0]) || !/^[+-]?\d+$/.test(parts[1])) {
+      throw new Error(`invalid quest level: '${value}'`);
+    }
+    const major = int(Number(parts[0]));
+    const minor = int(Number(parts[1]));
     if (
       isNaN(major) || isNaN(minor) ||
       major < 1 || major > QUEST_STAGE_COUNT ||

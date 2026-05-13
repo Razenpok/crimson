@@ -50,12 +50,12 @@ export function computeQuestFinalTime(opts: {
   if (opts.playerHealthValues != null && opts.playerHealthValues.length > 0) {
     lifeBonusMs = 0;
     for (const health of opts.playerHealthValues) {
-      lifeBonusMs += Math.round(health);
+      lifeBonusMs += int(Math.round(health));
     }
   } else {
-    lifeBonusMs = Math.round(opts.playerHealth);
+    lifeBonusMs = int(Math.round(opts.playerHealth));
     if (opts.player2Health != null) {
-      lifeBonusMs += Math.round(opts.player2Health);
+      lifeBonusMs += int(Math.round(opts.player2Health));
     }
   }
 
