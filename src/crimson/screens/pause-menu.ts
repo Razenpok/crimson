@@ -11,6 +11,7 @@ import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { type GameState } from '@crimson/game/types.ts';
+import { type PauseBackground } from '@crimson/pause-background.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
 import {
@@ -161,7 +162,6 @@ export class PauseMenuView {
 
     this._hoveredIndex = this._hoveredEntryIndex();
 
-    // Tab navigation
     if (InputState.wasKeyPressed(KEY_TAB)) {
       const reverse = InputState.isKeyDown(KEY_LEFT_SHIFT) || InputState.isKeyDown(KEY_RIGHT_SHIFT);
       const delta = reverse ? -1 : 1;
@@ -233,7 +233,7 @@ export class PauseMenuView {
     }
   }
 
-  private _pauseBackground() {
+  private _pauseBackground(): PauseBackground | null {
     return this.state.pauseBackground;
   }
 
@@ -399,7 +399,6 @@ export class PauseMenuView {
         origin, rotationDeg, WHITE,
       );
 
-      // Label
       let counterValue = entry.hoverAmount;
       if (idx === this._selectedIndex && this._focusTimerMs > 0) {
         counterValue = this._focusTimerMs;
@@ -424,7 +423,6 @@ export class PauseMenuView {
       const labelOrigin = wgl.makeVector2(-labelOffsetX, -labelOffsetY);
       wgl.drawTexturePro(labelTex, src, labelDst, labelOrigin, rotationDeg, tint);
 
-      // Glow pass for enabled entries
       if (this._menuEntryEnabled(entry)) {
         let glowAlpha = alpha;
         if (0 <= entry.readyTimerMs && entry.readyTimerMs < 0x100) {
