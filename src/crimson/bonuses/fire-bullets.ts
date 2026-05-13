@@ -1,5 +1,7 @@
 // Port of crimson/bonuses/fire_bullets.py
 
+// Fire Bullets feature hooks for deterministic presentation output.
+
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { f32 } from '@crimson/math-parity.ts';
@@ -37,6 +39,7 @@ export function queueLargeHitDecalStreak(opts: {
   freezeOrigin?: Vec2 | null;
   spawnFreezeShard?: ((pos: Vec2, angle: number) => void) | null;
 }): void {
+  // Queue the large decal streak used by Fire Bullets impact hits.
   const { hit, baseAngle, fxQueue, rng } = opts;
   const freezeOrigin = opts.freezeOrigin ?? null;
   const spawnFreezeShard = opts.spawnFreezeShard ?? null;
