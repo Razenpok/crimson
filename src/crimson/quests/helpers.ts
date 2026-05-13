@@ -98,7 +98,7 @@ export function* linePoints(start: Vec2, step: Vec2, count: number): IterableIte
   }
 }
 
-export function spawnEntry(
+export function spawn(
   point: Vec2,
   opts: {
     heading?: number;
@@ -114,18 +114,6 @@ export function spawnEntry(
     triggerMs: opts.triggerMs,
     count: opts.count,
   };
-}
-
-export function spawn(
-  point: Vec2,
-  opts: {
-    heading?: number;
-    spawnId: SpawnId;
-    triggerMs: number;
-    count: number;
-  },
-): SpawnEntry {
-  return spawnEntry(point, opts);
 }
 
 export function spawnAt(
