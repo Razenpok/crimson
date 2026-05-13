@@ -14,7 +14,18 @@ import { DatabaseBaseView } from './databases-base.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const DIM_COLOR = wgl.makeColor(1, 1, 1, 0.7);
-const MOUSE_BUTTON_LEFT = 0;
+
+function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
+  const thick = Math.max(1, int(lineThick));
+  const x = int(rect.x);
+  const y = int(rect.y);
+  const w = int(rect.w);
+  const h = int(rect.h);
+  wgl.drawRectangle(x, y, w, thick, color);
+  wgl.drawRectangle(x, y + h - thick, w, thick, color);
+  wgl.drawRectangle(x, y, thick, h, color);
+  wgl.drawRectangle(x + w - thick, y, thick, h, color);
+}
 
 // ---------------------------------------------------------------------------
 // UnlockedWeaponsDatabaseView
@@ -64,12 +75,15 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const titleText = 'Unlocked Weapons Database';
     drawSmallText(font, titleText, titlePos, wgl.makeColor(1, 1, 1, 1));
     const titleW = measureSmallTextWidth(font, titleText);
-    // 1px outline strip under the title with alpha 0.5
-    wgl.drawRectangle(
-      Math.floor(titlePos.x),
-      Math.floor(titlePos.y + 13.0 * scale),
-      Math.floor(titleW),
-      Math.max(1, Math.floor(1.0 * scale)),
+    // Decompile path draws a 1px outline strip under the title with alpha 0.5.
+    drawRectangleLinesEx(
+      wgl.makeRectangle(
+        titlePos.x,
+        titlePos.y + 13.0 * scale,
+        titleW,
+        Math.max(1.0, 1.0 * scale),
+      ),
+      1.0,
       wgl.makeColor(1, 1, 1, 0.5),
     );
 
@@ -79,7 +93,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     drawSmallText(font, `${count} ${weaponLabel} in database`, left.add(new Vec2(210.0 * scale, 80.0 * scale)), dimColor);
     drawSmallText(font, 'Weapon', left.add(new Vec2(210.0 * scale, 108.0 * scale)), textColor);
 
-    // Oracle frame: outer [114,322]-[364,486], inner [115,323]-[363,485]
+    // Oracle frame: outer [114,322]-[364,486], inner [115,323]-[363,485].
     const frameX = left.x + 212.0 * scale;
     const frameY = left.y + 128.0 * scale;
     const frameW = 250.0 * scale;
@@ -97,7 +111,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
       wgl.makeColor(0, 0, 0, 1),
     );
 
-    // Oracle list widget is 10 rows tall
+    // Oracle list widget is 10 rows tall.
     const listTopLeft = left.add(new Vec2(218.0 * scale, 130.0 * scale));
     const rowStep = 16.0 * scale;
     const visibleRows = 10;
@@ -252,8 +266,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _weaponLabelAndIcon(weaponId: number): [string, number | null] {
-    const weapon = WEAPON_BY_ID.get(weaponId as WeaponId);
-    if (!weapon) return [`weapon_${weaponId}`, null];
+    const weapon = WEAPON_BY_ID.get(weaponId as WeaponId)!;
     const name = weaponDisplayName(weapon.weaponId, { preserveBugs: this.state.preserveBugs });
     return [name, weapon.iconIndex];
   }
