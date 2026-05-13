@@ -10,10 +10,10 @@ export class DownloadResult {
   readonly ok: boolean;
   readonly error: string | null;
 
-  constructor(name: string, ok: boolean, error: string | null = null) {
-    this.name = name;
-    this.ok = ok;
-    this.error = error;
+  constructor(opts: { name: string; ok: boolean; error?: string | null }) {
+    this.name = opts.name;
+    this.ok = opts.ok;
+    this.error = opts.error ?? null;
     Object.freeze(this);
   }
 }
@@ -45,11 +45,11 @@ export function downloadMissingPaqs(
       _downloadFile(url, dest);
     } catch (exc) {
       const error = String(exc instanceof Error ? exc.message : exc);
-      results.push(new DownloadResult(name, false, error));
+      results.push(new DownloadResult({ name, ok: false, error }));
       console.log.log(`assets: failed to download ${name}: ${error}`);
       continue;
     }
-    results.push(new DownloadResult(name, true));
+    results.push(new DownloadResult({ name, ok: true }));
     console.log.log(`assets: downloaded ${name}`);
   }
   console.log.flush();
