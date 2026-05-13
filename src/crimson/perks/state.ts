@@ -7,14 +7,36 @@ import { PerkId } from './ids.ts';
 // These are global (not per-player) in crimsonland.exe: `flt_473310`,
 // `flt_473314`, and `flt_473318`.
 export class PerkEffectIntervals {
-  manBomb = 4.0;
-  fireCough = 2.0;
-  hotTempered = 2.0;
+  manBomb: number;
+  fireCough: number;
+  hotTempered: number;
+
+  constructor(opts: {
+    manBomb?: number;
+    fireCough?: number;
+    hotTempered?: number;
+  } = {}) {
+    this.manBomb = opts.manBomb ?? 4.0;
+    this.fireCough = opts.fireCough ?? 2.0;
+    this.hotTempered = opts.hotTempered ?? 2.0;
+  }
 }
 
 export class PerkSelectionState {
-  pendingCount = 0;
-  choices: PerkId[] = [];
-  choicesDirty = true;
-  capturePlayerPerkCountsKnown = true;
+  pendingCount: number;
+  choices: PerkId[];
+  choicesDirty: boolean;
+  capturePlayerPerkCountsKnown: boolean;
+
+  constructor(opts: {
+    pendingCount?: number;
+    choices?: PerkId[];
+    choicesDirty?: boolean;
+    capturePlayerPerkCountsKnown?: boolean;
+  } = {}) {
+    this.pendingCount = opts.pendingCount ?? 0;
+    this.choices = opts.choices ?? [];
+    this.choicesDirty = opts.choicesDirty ?? true;
+    this.capturePlayerPerkCountsKnown = opts.capturePlayerPerkCountsKnown ?? true;
+  }
 }
