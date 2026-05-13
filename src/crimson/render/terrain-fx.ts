@@ -5,9 +5,15 @@ import { GroundRenderer, GroundDecal, GroundCorpseDecal } from '@grim/terrain-re
 import { effectSrcRect } from '@crimson/effects-atlas.ts';
 import { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 
-export interface FxQueueTextures {
+export class FxQueueTextures {
   readonly particles: wgl.Texture;
   readonly bodyset: wgl.Texture;
+
+  constructor(opts: { particles: wgl.Texture; bodyset: wgl.Texture }) {
+    this.particles = opts.particles;
+    this.bodyset = opts.bodyset;
+    Object.freeze(this);
+  }
 }
 
 export function bakeTerrainFxBatch(

@@ -16,7 +16,7 @@ import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { RenderFrame } from '@crimson/render/frame.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
-  type FxQueueTextures,
+  FxQueueTextures,
   bakeTerrainFxBatch,
 } from '@crimson/render/terrain-fx.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
@@ -121,10 +121,10 @@ export class RenderResources {
     const overlay = getTexture(resources, TextureId.TER_Q1_OVERLAY);
     this.setGroundTextures({ base, overlay, detail: base });
     this.scheduleGroundGeneration({ seed: terrainSeed });
-    this.fxTextures = {
+    this.fxTextures = new FxQueueTextures({
       particles: getTexture(resources, TextureId.PARTICLES),
       bodyset: getTexture(resources, TextureId.BODYSET),
-    };
+    });
   }
 
   close(): void {
