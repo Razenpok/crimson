@@ -19,6 +19,7 @@ const QUEST_COMPLETE_BANNER_HOLD_END_MS = 1500.0;
 const QUEST_COMPLETE_BANNER_FADE_OUT_END_MS = 2000.0;
 
 export function questTitleAlpha(timerMs: number): number {
+  timerMs = Number(timerMs);
   if (timerMs <= 0.0 || timerMs > QUEST_TITLE_TOTAL_MS) return 0.0;
   if (timerMs < QUEST_TITLE_FADE_IN_MS && QUEST_TITLE_FADE_IN_MS > 1e-3) {
     return timerMs / QUEST_TITLE_FADE_IN_MS;
@@ -29,7 +30,7 @@ export function questTitleAlpha(timerMs: number): number {
 }
 
 export function questCompleteBannerAlpha(timerMs: number): number {
-  const t = timerMs;
+  const t = Number(timerMs);
   if (t <= 0.0) return 0.0;
   if (t < QUEST_COMPLETE_BANNER_FADE_IN_MS) {
     return clamp(t / QUEST_COMPLETE_BANNER_FADE_IN_MS, 0.0, 1.0);
@@ -51,24 +52,23 @@ export function drawQuestTitleTimerOverlay(
   number: string,
   opts: { timerMs: number },
 ): void {
-  const screenW = wgl.getScreenWidth();
-  const screenH = wgl.getScreenHeight();
   const alpha = questTitleAlpha(opts.timerMs);
   if (alpha <= 0.0) return;
-  drawQuestTitleOverlay(screenW, screenH, font, title, number, { alpha });
+  drawQuestTitleOverlay(font, title, number, { alpha });
 }
 
 export function drawQuestCompleteBannerOverlay(
   texture: wgl.Texture,
   opts: { timerMs: number },
 ): void {
-  if (opts.timerMs <= 0.0) return;
-  const alpha = questCompleteBannerAlpha(opts.timerMs);
+  const timerMs = Number(opts.timerMs);
+  if (timerMs <= 0.0) return;
+  const alpha = questCompleteBannerAlpha(timerMs);
   if (alpha <= 0.0) return;
   const screenW = wgl.getScreenWidth();
   const screenH = wgl.getScreenHeight();
   const scale =
-    QUEST_COMPLETE_BANNER_SCALE_BASE + opts.timerMs * QUEST_COMPLETE_BANNER_SCALE_RATE;
+    QUEST_COMPLETE_BANNER_SCALE_BASE + timerMs * QUEST_COMPLETE_BANNER_SCALE_RATE;
   const width = QUEST_COMPLETE_BANNER_BASE_W * scale;
   const height = QUEST_COMPLETE_BANNER_BASE_H * scale;
   const centerX = screenW * 0.5;
@@ -80,6 +80,6 @@ export function drawQuestCompleteBannerOverlay(
     width,
     height,
   );
-  const tint = wgl.makeColor(1.0, 1.0, 1.0, clamp(alpha, 0.0, 1.0));
+  const tint = wgl.makeColor(1.0, 1.0, 1.0, int(clamp(alpha, 0.0, 1.0) * 255.0) / 255);
   wgl.drawTexturePro(texture, src, dst, wgl.makeVector2(0, 0), 0.0, tint);
 }
