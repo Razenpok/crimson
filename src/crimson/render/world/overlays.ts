@@ -118,7 +118,7 @@ export function drawClockGauge(
 export function directionArrowEnabled(renderCtx: WorldRenderCtx, playerIndex: number): boolean {
   const config = renderCtx.frame.config;
   if (config === null) return true;
-  return config.controls.players[playerIndex]?.showDirectionArrow ?? true;
+  return config.controls.players[int(playerIndex)].showDirectionArrow;
 }
 
 export function directionArrowTint(
