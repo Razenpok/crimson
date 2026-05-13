@@ -10,14 +10,21 @@ class ValueError extends Error {
   }
 }
 
-export interface TimerRef {
+export class TimerRef {
   readonly kind: string; // "global" or "player"
   readonly key: string;
   readonly playerIndex: number | null;
+
+  constructor(kind: string, key: string, playerIndex: number | null = null) {
+    this.kind = kind;
+    this.key = key;
+    this.playerIndex = playerIndex;
+    Object.freeze(this);
+  }
 }
 
 export function timerRef(kind: string, key: string, playerIndex: number | null = null): TimerRef {
-  return { kind, key, playerIndex };
+  return new TimerRef(kind, key, playerIndex);
 }
 
 export class BonusHudSlot {
@@ -80,6 +87,8 @@ export class BonusHudState {
 }
 
 export function bonusHudUpdate(state: GameplayState, players: PlayerState[], opts: { dt?: number } = {}): void {
+  // Refresh HUD slots based on current timer values + advance slide animation.
+
   const dt = Math.max(0.0, opts.dt ?? 0.0);
   const globalTimers: Record<string, number> = {
     'weapon_power_up': state.bonuses.weaponPowerUp,
