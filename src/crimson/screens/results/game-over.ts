@@ -7,7 +7,7 @@ import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts
 import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import { type CrandLike } from '@grim/rand.ts';
+import { Crand, type CrandLike } from '@grim/rand.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
@@ -337,6 +337,7 @@ export class GameOverUi {
     const screenW = wgl.getScreenWidth();
     const screenH = wgl.getScreenHeight();
     const scale = uiScale(screenW, screenH);
+    const rng = opts.rng ?? new Crand(0);
 
     if (this.phase === 0) {
       if (this._deferNameInputUntilControlsReleased) {
@@ -348,8 +349,6 @@ export class GameOverUi {
         return null;
       }
       const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
-      // Provide a stub rng if none given
-      const rng = opts.rng ?? { rand(_caller: number) { return 0; } } as CrandLike;
       const [newText, newCaret] = updateNameEntryText(
         this.inputText,
         this.inputCaret,
