@@ -7,6 +7,13 @@ const LEVELS: Record<string, number> = {
   error: 40,
 };
 
+export class ValueError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValueError';
+  }
+}
+
 export function resolveLogLevel(value: string | number): number {
   if (typeof value === 'number') {
     return int(value);
@@ -15,7 +22,7 @@ export function resolveLogLevel(value: string | number): number {
   const resolved = LEVELS[levelName];
   if (resolved === undefined) {
     const supported = Object.keys(LEVELS).sort().join(', ');
-    throw new Error(`unsupported log level ${_repr(value)}; expected one of: ${supported}`);
+    throw new ValueError(`unsupported log level ${_repr(value)}; expected one of: ${supported}`);
   }
   return int(resolved);
 }
