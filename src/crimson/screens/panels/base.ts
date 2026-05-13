@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
@@ -10,6 +10,7 @@ import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { GameState } from '@crimson/game/types.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
@@ -147,7 +148,7 @@ export class PanelMenuView {
   open(): void {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
-    this._widescreenYShift = (layoutW * 0.0015625 * 150.0) - 150.0;
+    this._widescreenYShift = menuWidescreenYShift(layoutW);
     this._entry = new MenuEntry(0, MENU_LABEL_ROW_BACK, this._backPos.y);
     this._hovered = false;
     this._timelineMs = 0;
@@ -233,9 +234,8 @@ export class PanelMenuView {
 
   draw(): void {
     this._assertOpen();
-    const resources = requireRuntimeResources(this.state);
     this._drawBackground();
-    this._drawScreenFade();
+    drawScreenFade(this.state);
 
     const entry = this._entry;
     if (entry === null) {
@@ -243,10 +243,10 @@ export class PanelMenuView {
     }
 
     this._drawPanel();
-    this._drawEntry(resources, entry);
-    this._drawSign(resources);
+    this._drawEntry(entry);
+    this._drawSign();
     this._drawContents();
-    this._drawMenuCursor(resources);
+    this._drawMenuCursor();
   }
 
   takeAction(): string | null {
@@ -312,10 +312,6 @@ export class PanelMenuView {
     }
   }
 
-  private _drawScreenFade(): void {
-    drawScreenFade(this.state);
-  }
-
   protected _drawPanel(): void {
     const resources = requireRuntimeResources(this.state);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
@@ -338,7 +334,8 @@ export class PanelMenuView {
     drawClassicMenuPanel(panel, { dst, tint: WHITE, shadow: fxDetail });
   }
 
-  private _drawEntry(resources: RuntimeResources, entry: MenuEntry): void {
+  private _drawEntry(entry: MenuEntry): void {
+    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const itemW = item.width;
@@ -403,7 +400,7 @@ export class PanelMenuView {
     }
   }
 
-  private _drawSign(resources: RuntimeResources): void {
+  private _drawSign(): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
@@ -418,6 +415,7 @@ export class PanelMenuView {
     // so the sign is already locked in place. Keep it static here.
     const rotationDeg = 0.0;
 
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
@@ -438,7 +436,8 @@ export class PanelMenuView {
     );
   }
 
-  private _drawMenuCursor(resources: RuntimeResources): void {
+  private _drawMenuCursor(): void {
+    const resources = requireRuntimeResources(this.state);
     const particles = getTexture(resources, TextureId.PARTICLES);
     const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
     const [mx, my] = InputState.mousePosition();
