@@ -17,10 +17,6 @@ import { resolveTerrainSlots } from '@crimson/terrain-slots.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 export const MENU_LABEL_WIDTH = 122.0;
 export const MENU_LABEL_HEIGHT = 28.0;
 export const MENU_LABEL_ROW_HEIGHT = 32.0;
@@ -65,7 +61,6 @@ export const MENU_SIGN_POS_X_PAD = 4.0;
 // {"event":"demo_mode_start","dt_since_start_ms":23024,...}
 export const MENU_DEMO_IDLE_START_MS = 23_000;
 
-// Key codes
 const KEY_TAB = 9;
 const KEY_ENTER = 13;
 const KEY_LEFT_SHIFT = 16;
@@ -75,10 +70,6 @@ const MOUSE_BUTTON_RIGHT = 2;
 const MOUSE_BUTTON_MIDDLE = 1;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 export function menuGroundCamera(state: GameState): Vec2 {
   const camera = state.menuGroundCamera;
@@ -147,10 +138,6 @@ export function drawMenuCursorHelper(
   const pos = new Vec2(mx, my);
   drawMenuCursor(particles, cursorTex, { pos, pulseTime });
 }
-
-// ---------------------------------------------------------------------------
-// MenuEntry
-// ---------------------------------------------------------------------------
 
 export class MenuEntry {
   slot: number;
@@ -223,10 +210,6 @@ export function signLayoutScale(width: number): [number, number] {
   }
   return [1.0, 0.0];
 }
-
-// ---------------------------------------------------------------------------
-// MenuView
-// ---------------------------------------------------------------------------
 
 export class MenuView {
   state: GameState;
@@ -424,10 +407,6 @@ export class MenuView {
     this._pendingAction = null;
     return action;
   }
-
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
 
   private _assertOpen(): void {
     if (!this._isOpen) {
