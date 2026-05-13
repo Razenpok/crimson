@@ -37,24 +37,29 @@ const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
-interface PlayGameModeEntry {
+class PlayGameModeEntry {
   key: string;
   label: string;
   tooltip: string;
   action: string;
   gameMode: number | null;
   showCount: boolean;
-}
 
-function modeEntry(
-  key: string,
-  label: string,
-  tooltip: string,
-  action: string,
-  gameMode: number | null = null,
-  showCount: boolean = false,
-): PlayGameModeEntry {
-  return { key, label, tooltip, action, gameMode, showCount };
+  constructor(
+    key: string,
+    label: string,
+    tooltip: string,
+    action: string,
+    gameMode: number | null = null,
+    showCount: boolean = false,
+  ) {
+    this.key = key;
+    this.label = label;
+    this.tooltip = tooltip;
+    this.action = action;
+    this.gameMode = gameMode;
+    this.showCount = showCount;
+  }
 }
 
 interface PlayGameContentLayout {
@@ -293,7 +298,7 @@ export class PlayGameMenuView extends PanelMenuView {
 
     const entries: PlayGameModeEntry[] = [];
     if (showTutorial && mainTotal <= 0) {
-      entries.push(modeEntry(
+      entries.push(new PlayGameModeEntry(
         'tutorial', 'Tutorial',
         'Learn how to play Crimsonland.',
         'start_tutorial', GameMode.TUTORIAL,
@@ -301,19 +306,19 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     entries.push(
-      modeEntry('quests', ' Quests ',
+      new PlayGameModeEntry('quests', ' Quests ',
         'Unlock new weapons and perks in Quest mode.',
         'open_quests', null, true),
-      modeEntry('rush', '  Rush  ',
+      new PlayGameModeEntry('rush', '  Rush  ',
         'Face a rush of aliens in Rush mode.',
         'start_rush', GameMode.RUSH, true),
-      modeEntry('survival', 'Survival',
+      new PlayGameModeEntry('survival', 'Survival',
         'Gain perks and weapons and fight back.',
         'start_survival', GameMode.SURVIVAL, true),
     );
 
     if (hasTypo) {
-      entries.push(modeEntry(
+      entries.push(new PlayGameModeEntry(
         'typo', "Typ'o'Shooter",
         "Use your typing skills as the weapon to lay\nthem down.",
         'start_typo', GameMode.TYPO, true,
@@ -321,7 +326,7 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     if (showTutorial && mainTotal > 0) {
-      entries.push(modeEntry(
+      entries.push(new PlayGameModeEntry(
         'tutorial', 'Tutorial',
         'Learn how to play Crimsonland.',
         'start_tutorial', GameMode.TUTORIAL,
@@ -329,7 +334,7 @@ export class PlayGameMenuView extends PanelMenuView {
     }
 
     if (this._lanLockstepEnabled()) {
-      entries.push(modeEntry(
+      entries.push(new PlayGameModeEntry(
         'lan', ' Network ',
         'Host or join a rollback-first network session.',
         'open_lan_session',
