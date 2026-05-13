@@ -76,11 +76,9 @@ interface PlayerCountWidgetLayout {
 }
 
 export class PlayGameMenuView extends PanelMenuView {
-  /**
-   * Play Game mode select panel.
-   *
-   * Layout and gating are based on `sub_44ed80` (crimsonland.exe).
-   */
+  // Play Game mode select panel.
+  //
+  // Layout and gating are based on `sub_44ed80` (crimsonland.exe).
 
   private static readonly _PLAYER_COUNT_LABELS = ['1 player', '2 players', '3 players', '4 players'];
 
@@ -393,17 +391,15 @@ export class PlayGameMenuView extends PanelMenuView {
   }
 
   private _playerCountWidgetLayout(pos: Vec2, scale: number, opts: { font: SmallFontData }): PlayerCountWidgetLayout {
-    /**
-     * Return Play Game player-count dropdown metrics.
-     *
-     * `ui_list_widget_update` (0x43efc0):
-     *   - width = max(label_w) + 0x30
-     *   - header height = 16
-     *   - open height = (count * 16) + 0x18
-     *   - arrow icon = 16x16 at (x + width - 16 - 1, y)
-     *   - selected label at (x + 4, y + 1)
-     *   - list rows start at y + 17, step 16
-     */
+    // Return Play Game player-count dropdown metrics.
+    //
+    // `ui_list_widget_update` (0x43efc0):
+    //   - width = max(label_w) + 0x30
+    //   - header height = 16
+    //   - open height = (count * 16) + 0x18
+    //   - arrow icon = 16x16 at (x + width - 16 - 1, y)
+    //   - selected label at (x + 4, y + 1)
+    //   - list rows start at y + 17, step 16
     const textScale = 1.0 * scale;
     let maxLabelW = 0.0;
     for (const label of PlayGameMenuView._PLAYER_COUNT_LABELS) {
