@@ -22,7 +22,7 @@ export function resolveLogLevel(value: string | number): number {
 
 function _repr(value: string | number): string {
   if (typeof value === 'string') {
-    return `'${value}'`;
+    return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   }
   return String(value);
 }
