@@ -494,8 +494,13 @@ export interface BurstEffect {
 
 
 export class CreatureInit {
+  // Template id that produced this creature (not necessarily unique per creature in formations).
   originTemplateId: number;
   pos: Vec2;
+  // Heading is optional at plan-build time:
+  // - `null` means "preserve stale slot heading" (native `creature_alloc_slot` behavior).
+  // - explicit float means "set heading to this value".
+  // The base template path writes heading explicitly at tail (`final_heading`).
   heading: number | null;
   phaseSeed: number;
   typeId: CreatureTypeId | null = null;
@@ -511,10 +516,16 @@ export class CreatureInit {
   orbitAngle: number | null = null;
   orbitRadius: number | null = null;
   rangedProjectileType: number | null = null;
+  // AI link semantics:
+  // - For most formations (ai_mode 3/5/...), `aiLinkParent` references another creature index
+  //   (typically the parent or previous element in the chain).
+  // - For AI7 timer mode (flag 0x80), `aiTimer` is written into link_index.
   aiLinkParent: number | null = null;
   aiTimer: number | null = null;
   targetOffset: Vec2 | null = null;
+  // Spawn slot reference (stored in link_index when flags include HAS_SPAWN_SLOT_FLAG).
   spawnSlot: number | null = null;
+  // BONUS_ON_DEATH uses link_index low/high 16-bit fields for bonus spawn args.
   bonusId: BonusId | null = null;
   bonusDurationOverride: number | null = null;
 
