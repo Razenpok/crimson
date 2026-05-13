@@ -17,10 +17,9 @@ export function perksUpdateEffects(
   dt: number,
   opts: { creatures?: readonly CreatureState[] | null; fxQueue?: FxQueue | null } = {},
 ): void {
-  /** Apply frame-based perk effect updates.
-   *
-   * Port subset of `perks_update_effects` (0x00406b40).
-   */
+  // Apply frame-based perk effect updates.
+  //
+  // Port subset of `perks_update_effects` (0x00406b40).
 
   if (dt <= 0.0) {
     return;
