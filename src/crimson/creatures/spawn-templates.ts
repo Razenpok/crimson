@@ -3,15 +3,38 @@
 import { CreatureFlags, CreatureTypeId, SpawnId, type Tint } from './spawn-ids.ts';
 
 
-export interface SpawnTemplate {
+type SpawnTemplateInit = {
+    spawnId: SpawnId;
+    typeId: CreatureTypeId | null;
+    flags: CreatureFlags | null;
+    creature: string | null;
+    animNote: string | null;
+    tint?: Tint | null;
+    size?: number | null;
+    moveSpeed?: number | null;
+};
+
+export class SpawnTemplate {
     readonly spawnId: SpawnId;
     readonly typeId: CreatureTypeId | null;
     readonly flags: CreatureFlags | null;
     readonly creature: string | null;
     readonly animNote: string | null;
-    readonly tint?: Tint | null;
-    readonly size?: number | null;
-    readonly moveSpeed?: number | null;
+    readonly tint: Tint | null;
+    readonly size: number | null;
+    readonly moveSpeed: number | null;
+
+    constructor(opts: SpawnTemplateInit) {
+        this.spawnId = opts.spawnId;
+        this.typeId = opts.typeId;
+        this.flags = opts.flags;
+        this.creature = opts.creature;
+        this.animNote = opts.animNote;
+        this.tint = opts.tint ?? null;
+        this.size = opts.size ?? null;
+        this.moveSpeed = opts.moveSpeed ?? null;
+        Object.freeze(this);
+    }
 }
 
 export const TYPE_ID_TO_NAME: Map<number, string> = new Map(
@@ -22,7 +45,7 @@ export const TYPE_ID_TO_NAME: Map<number, string> = new Map(
 
 // For many template ids, tint/size/move_speed are randomized or derived from other fields.
 // We only fill them in when the game uses fixed constants (and keep the rest as `null`).
-export const SPAWN_TEMPLATES: readonly SpawnTemplate[] = [
+export const SPAWN_TEMPLATES: readonly SpawnTemplate[] = ([
     {
         spawnId: SpawnId.ZOMBIE_BOSS_SPAWNER_00,
         typeId: CreatureTypeId.ZOMBIE,
@@ -594,7 +617,7 @@ export const SPAWN_TEMPLATES: readonly SpawnTemplate[] = [
         size: 70.0,
         moveSpeed: 2.1,
     },
-];
+] satisfies readonly SpawnTemplateInit[]).map((entry) => new SpawnTemplate(entry));
 
 export const SPAWN_ID_TO_TEMPLATE: Map<SpawnId, SpawnTemplate> = new Map(
     SPAWN_TEMPLATES.map((entry) => [entry.spawnId, entry]),
