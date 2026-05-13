@@ -2,6 +2,19 @@
 
 export const APP_NAME = 'banteg/crimsonland';
 
+function _expandUser(path: string, env: Record<string, string | undefined> | undefined): string {
+  if (path === '~') {
+    return env?.HOME ?? path;
+  }
+  if (path.startsWith('~/')) {
+    const home = env?.HOME;
+    if (home !== undefined) {
+      return `${home}${path.slice(1)}`;
+    }
+  }
+  return path;
+}
+
 export function defaultRuntimeDir(): string {
   // Return the default per-user runtime directory.
   //
@@ -11,7 +24,7 @@ export function defaultRuntimeDir(): string {
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
   const override = env?.CRIMSON_RUNTIME_DIR || env?.CRIMSON_BASE_DIR;
   if (override) {
-    return override;
+    return _expandUser(override, env);
   }
 
   // PlatformDirs is not available in the WebGL runtime.
