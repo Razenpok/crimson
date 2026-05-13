@@ -50,10 +50,10 @@ export function buildSurvivalSession(opts: {
   world: WorldState;
   worldSize: number;
   damageScaleByType: Map<number, number>;
-  detailPreset?: number;
-  violenceDisabled?: number;
-  gameTuneStarted?: boolean;
-  finalizePostRenderLifecycle?: boolean;
+  detailPreset: number;
+  violenceDisabled: number;
+  gameTuneStarted: boolean;
+  finalizePostRenderLifecycle: boolean;
   applyWorldDtSteps?: boolean;
 }): [DeterministicSession, SurvivalSpawnState] {
   const spawnState = new SurvivalSpawnState();
@@ -77,10 +77,10 @@ export function buildRushSession(opts: {
   world: WorldState;
   worldSize: number;
   damageScaleByType: Map<number, number>;
-  detailPreset?: number;
-  violenceDisabled?: number;
-  gameTuneStarted?: boolean;
-  finalizePostRenderLifecycle?: boolean;
+  detailPreset: number;
+  violenceDisabled: number;
+  gameTuneStarted: boolean;
+  finalizePostRenderLifecycle: boolean;
 }): [DeterministicSession, RushSpawnState] {
   const spawnState = new RushSpawnState();
   const session = new DeterministicSession({
@@ -105,12 +105,12 @@ export function buildQuestSession(opts: {
   world: WorldState;
   worldSize: number;
   damageScaleByType: Map<number, number>;
-  detailPreset?: number;
-  violenceDisabled?: number;
-  gameTuneStarted?: boolean;
-  demoModeActive?: boolean;
-  applyWorldDtSteps?: boolean;
-  finalizePostRenderLifecycle?: boolean;
+  detailPreset: number;
+  violenceDisabled: number;
+  gameTuneStarted: boolean;
+  demoModeActive: boolean;
+  applyWorldDtSteps: boolean;
+  finalizePostRenderLifecycle: boolean;
   spawnEntries: SpawnEntry[];
   questLevel: QuestLevel | null;
   startWeaponId: WeaponId | null;
@@ -152,9 +152,9 @@ export function buildTypoSession(opts: {
   world: WorldState;
   worldSize: number;
   damageScaleByType: Map<number, number>;
-  detailPreset?: number;
-  violenceDisabled?: number;
-  gameTuneStarted?: boolean;
+  detailPreset: number;
+  violenceDisabled: number;
+  gameTuneStarted: boolean;
   dictionaryWords?: readonly string[];
   highscoreNames?: readonly string[];
 }): DeterministicSession {
@@ -188,10 +188,10 @@ export function buildTutorialSession(opts: {
   world: WorldState;
   worldSize: number;
   damageScaleByType: Map<number, number>;
-  detailPreset?: number;
-  violenceDisabled?: number;
-  gameTuneStarted?: boolean;
-  demoModeActive?: boolean;
+  detailPreset: number;
+  violenceDisabled: number;
+  gameTuneStarted: boolean;
+  demoModeActive: boolean;
 }): DeterministicSession {
   resetTutorialState(
     opts.world.state.tutorial,
