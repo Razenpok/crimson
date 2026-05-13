@@ -311,10 +311,6 @@ export class OptionsMenuView extends PanelMenuView {
     return false;
   }
 
-  protected override _drawContents(): void {
-    this._drawOptionsContents();
-  }
-
   private _drawOptionsContents(): void {
     const resources = requireRuntimeResources(this.state);
     const labelsTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
