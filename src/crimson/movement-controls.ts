@@ -1,5 +1,6 @@
 // Port of crimson/movement_controls.py
 
+// Movement control mode ids from `config_player_mode_flags`.
 export enum MovementControlType {
   UNKNOWN = 0,
   RELATIVE = 1,

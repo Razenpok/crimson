@@ -40,24 +40,6 @@ export function terrainSlotsForQuest(level: QuestLevel): TerrainSlotTriplet {
   return [level.minor & 3, 1, 3];
 }
 
-export function terrainSlotsToTextureIds(
-  slots: TerrainSlotTriplet,
-): [TextureId, TextureId, TextureId] {
-  return [
-    _TEXTURE_ID_BY_TERRAIN_SLOT[slots[0]],
-    _TEXTURE_ID_BY_TERRAIN_SLOT[slots[1]],
-    _TEXTURE_ID_BY_TERRAIN_SLOT[slots[2]],
-  ];
-}
-
-export function resolveTerrainSlots<T>(
-  slots: TerrainSlotTriplet,
-  lookup: (id: TextureId) => T,
-): [T, T, T] {
-  const [baseId, overlayId, detailId] = terrainSlotsToTextureIds(slots);
-  return [lookup(baseId), lookup(overlayId), lookup(detailId)];
-}
-
 export function chooseUnlockTerrainSlots(opts: { unlockIndex: number; rng: CrandLike }): TerrainSlotTriplet {
   const unlockIndex = opts.unlockIndex;
   const rng = opts.rng;
@@ -76,4 +58,22 @@ export function chooseUnlockTerrainSlots(opts: { unlockIndex: number; rng: Crand
     }
   }
   return DEFAULT_TERRAIN_SLOTS;
+}
+
+export function terrainSlotsToTextureIds(
+  slots: TerrainSlotTriplet,
+): [TextureId, TextureId, TextureId] {
+  return [
+    _TEXTURE_ID_BY_TERRAIN_SLOT[slots[0]],
+    _TEXTURE_ID_BY_TERRAIN_SLOT[slots[1]],
+    _TEXTURE_ID_BY_TERRAIN_SLOT[slots[2]],
+  ];
+}
+
+export function resolveTerrainSlots<T>(
+  slots: TerrainSlotTriplet,
+  lookup: (id: TextureId) => T,
+): [T, T, T] {
+  const [baseId, overlayId, detailId] = terrainSlotsToTextureIds(slots);
+  return [lookup(baseId), lookup(overlayId), lookup(detailId)];
 }
