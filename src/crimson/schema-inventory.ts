@@ -129,6 +129,18 @@ export function summarizeInventory(opts: { structs: StructClass[] }): InventoryS
   });
 }
 
+function _sortJsonKeys(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => _sortJsonKeys(item));
+  }
+  if (value !== null && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
+    return Object.fromEntries(entries.map(([key, item]) => [key, _sortJsonKeys(item)]));
+  }
+  return value;
+}
+
 export function inventoryAsJson(opts: { summary: InventorySummary; structs: StructClass[] }): string {
   const payload = {
     total_structs: int(opts.summary.totalStructs),
@@ -154,7 +166,7 @@ export function inventoryAsJson(opts: { summary: InventorySummary; structs: Stru
       lineno: int(item.lineno),
     })),
   };
-  return JSON.stringify(payload, null, 2);
+  return JSON.stringify(_sortJsonKeys(payload), null, 2);
 }
 
 export const __schemaInventoryInternals = {
