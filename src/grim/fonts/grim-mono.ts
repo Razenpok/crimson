@@ -6,6 +6,7 @@ import { Vec2 } from '@grim/geom.ts';
 export const GRIM_MONO_ADVANCE = 16.0;
 export const GRIM_MONO_DRAW_SIZE = 32.0;
 export const GRIM_MONO_LINE_HEIGHT = 28.0;
+export const GRIM_MONO_TEXTURE_FILTER = wgl.TextureFilter.BILINEAR;
 
 export interface GrimMonoFont {
   texture: wgl.Texture;
@@ -16,7 +17,7 @@ export interface GrimMonoFont {
 }
 
 export function createGrimMonoFont(texture: wgl.Texture): GrimMonoFont {
-  // TODO: rl.set_texture_filter(texture, GRIM_MONO_TEXTURE_FILTER)
+  wgl.setTextureFilter(texture, GRIM_MONO_TEXTURE_FILTER);
   const grid = 16;
   return {
     texture,
@@ -34,7 +35,6 @@ export function drawGrimMonoText(
   scale: number,
   color: wgl.Color,
 ): void {
-  // TODO: review
   let xPos = pos.x;
   let yPos = pos.y;
   const advance = font.advance * scale;
