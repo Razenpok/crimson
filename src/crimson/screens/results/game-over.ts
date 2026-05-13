@@ -27,10 +27,6 @@ import {
   updateNameEntryText,
 } from '@crimson/ui/text-input.ts';
 
-// ---------------------------------------------------------------------------
-// High-score types
-// ---------------------------------------------------------------------------
-
 export const NAME_MAX_EDIT = 0x14;
 export const TABLE_MAX = 100;
 
@@ -72,24 +68,31 @@ export function rankIndex(records: HighScoreRecord[], candidate: HighScoreRecord
   return records.length;
 }
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const GAME_OVER_PANEL_X = -45.0;
+// `ui_menu_layout_init` sets game-over panel pos to (-45, 110):
+//   _DAT_0048cc60 = 0xc2340000 (-45.0)
+//   _DAT_0048cc64 = 0x42dc0000 (110.0)
 const GAME_OVER_PANEL_Y = 110.0;
+// `DAT_0048cc48` is cloned from the 3-slice menu panel layout (`ui_menu_item_element._pad4+0xac`)
+// in `ui_menu_layout_init`; trace confirms a 510x378 bbox for both phase 0 and phase 1.
 const GAME_OVER_PANEL_W = 510.0;
 const GAME_OVER_PANEL_H = 378.0;
 
+// Measured from ui_render_trace at 1024x768 (stable timeline):
+// panel top-left is (pos_x + 21, pos_y - 81) and size is 510x254, plus a shadow pass at +7,+7.
 const GAME_OVER_PANEL_OFFSET_X = 21.0;
 const GAME_OVER_PANEL_OFFSET_Y = -81.0;
 
 const TEXTURE_TOP_BANNER_W = 256.0;
 const TEXTURE_TOP_BANNER_H = 64.0;
 
+// `game_over_screen_update` (0x0040ffc0) computes banner/content X from:
+//   local_10 = quad0_x0 + pos_x + 180.0
+//   local_18 = offset_x + local_10 + 44.0 - 10.0
+// so banner/content anchor is +214 from the panel-left edge in steady state.
 const GAME_OVER_BANNER_X_OFFSET = 214.0;
 
-const INPUT_BOX_W = 166.0;
+const INPUT_BOX_W = 166.0; // `_DAT_0048259c = 0xa6` before `ui_text_input_update`
 const INPUT_BOX_H = 18.0;
 
 const PANEL_SLIDE_DURATION_MS = 250.0;
@@ -106,17 +109,13 @@ const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const MOUSE_BUTTON_LEFT = 0;
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function weaponIconSrc(
   texture: wgl.Texture,
   weaponIdNative: number,
 ): wgl.Rectangle | null {
   const weaponId = weaponIdNative as WeaponId;
   const entry = WEAPON_BY_ID.get(weaponId);
-  if (!entry) return null;
+  if (entry === undefined) throw new Error(`Unknown weapon id: ${weaponIdNative}`);
   const iconIndex = entry.iconIndex;
   if (iconIndex < 0 || iconIndex > 31) return null;
   const grid = 8;
@@ -126,6 +125,22 @@ function weaponIconSrc(
   const col = frame % grid;
   const row = Math.floor(frame / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
+}
+
+function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
+  const ix1 = int(x1);
+  const iy1 = int(y1);
+  const ix2 = int(x2);
+  const iy2 = int(y2);
+  if (iy1 === iy2) {
+    wgl.drawRectangle(Math.min(ix1, ix2), iy1, Math.abs(ix2 - ix1), 1, color);
+    return;
+  }
+  if (ix1 === ix2) {
+    wgl.drawRectangle(ix1, Math.min(iy1, iy2), 1, Math.abs(iy2 - iy1), color);
+    return;
+  }
+  wgl.drawRectangle(ix1, iy1, ix2 - ix1, iy2 - iy1, color);
 }
 
 interface GameOverPanelLayout {
@@ -165,10 +180,6 @@ function drawSmall(
   drawSmallText(font, text, pos, color);
 }
 
-// ---------------------------------------------------------------------------
-// GameOverUi
-// ---------------------------------------------------------------------------
-
 export class GameOverUi {
   config: CrimsonConfig;
   preserveBugs = false;
@@ -190,7 +201,7 @@ export class GameOverUi {
   private _closing = false;
   private _closeAction: string | null = null;
 
-  // Buttons
+  // Buttons (rendered via existing ui_button implementation)
   private _okButton = new UiButtonState('OK', { forceWide: false });
   private _playAgainButton = new UiButtonState('Play Again', { forceWide: true });
   private _highScoresButton = new UiButtonState('High scores', { forceWide: true });
@@ -245,7 +256,18 @@ export class GameOverUi {
     return alpha;
   }
 
+  private _textWidth(font: SmallFontData, text: string, scale: number): number {
+    void scale;
+    return measureSmallTextWidth(font, text);
+  }
+
+  private _drawSmall(font: SmallFontData, text: string, pos: Vec2, scale: number, color: wgl.Color): void {
+    void scale;
+    drawSmallText(font, text, pos, color);
+  }
+
   private _panelLayout(opts: { screenW: number; scale: number }): GameOverPanelLayout {
+    // Keep consistent with the main menu panel offsets.
     const t = PANEL_SLIDE_DURATION_MS > 1e-6 ? this._introMs / PANEL_SLIDE_DURATION_MS : 1.0;
     const eased = easeOutCubic(t);
     const panelSlideX = -GAME_OVER_PANEL_W * (1.0 - eased);
@@ -313,6 +335,7 @@ export class GameOverUi {
       InputState.wasKeyPressed(KEY_ENTER);
     }
     if (this.phase === -1) {
+      // If in the top 100, prompt for a name. Otherwise show score-too-low message and buttons.
       const gameModeId = this.config.gameplay.mode as number;
       const candidate: HighScoreRecord = { ...opts.record, gameModeId };
       this._candidateRecord = candidate;
@@ -321,7 +344,9 @@ export class GameOverUi {
       const idx = rankIndex(records, candidate);
       this.rank = idx;
       flushTextInputEvents();
+      // Match native `grim_was_key_pressed(ENTER)` after the input flush.
       InputState.wasKeyPressed(KEY_ENTER);
+      InputState.wasKeyPressed(KEY_NUMPAD_ENTER);
 
       if (idx < TABLE_MAX) {
         this.phase = 0;
@@ -339,10 +364,12 @@ export class GameOverUi {
     const scale = uiScale(screenW, screenH);
     const rng = opts.rng ?? new Crand(0);
 
+    // Basic text input behavior for the name-entry phase.
     if (this.phase === 0) {
       if (this._deferNameInputUntilControlsReleased) {
         flushTextInputEvents();
         InputState.wasKeyPressed(KEY_ENTER);
+        InputState.wasKeyPressed(KEY_NUMPAD_ENTER);
         if (!gameplayControlsHeld(this.config)) {
           this._deferNameInputUntilControlsReleased = false;
         }
@@ -382,7 +409,7 @@ export class GameOverUi {
         }
       }
     } else {
-      // Buttons phase
+      // Buttons phase: let the caller handle navigation; we just report actions.
       const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
       const panelLayout = this._panelLayout({ screenW, scale });
       const bannerPos = panelLayout.topLeft.add(new Vec2(GAME_OVER_BANNER_X_OFFSET * scale, 40.0 * scale));
@@ -494,14 +521,14 @@ export class GameOverUi {
       labelColor,
     );
 
-    // Separator between columns
+    // Separator between columns (mirrors FUN_00441220 + offset adjustments).
     const separatorX = cardOrigin.x + 80.0 * scale;
-    wgl.drawRectangle(
+    drawLine(
       int(separatorX),
       int(cardOrigin.y),
-      1,
-      int(48.0 * scale),
-      wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, labelColor.a),
+      int(separatorX),
+      int(cardOrigin.y + 48.0 * scale),
+      labelColor,
     );
 
     // Right column: Game time + gauge, or Experience in quest mode.
@@ -533,6 +560,8 @@ export class GameOverUi {
 
       const clockPointer = getTexture(resources, TextureId.UI_CLOCK_POINTER);
       const clockPointerSrc = wgl.makeRectangle(0.0, 0.0, clockPointer.width, clockPointer.height);
+      // NOTE: Raylib's draw_texture_pro uses dst.x/y as the rotation origin position;
+      // offset by half-size so the 32x32 quad stays aligned with the table.
       const clockPointerPos = col2Pos.add(new Vec2(24.0 * scale, 30.0 * scale));
       const clockPointerDst = wgl.makeRectangle(clockPointerPos.x, clockPointerPos.y, 32.0 * scale, 32.0 * scale);
       const seconds = Math.max(0, Math.floor(elapsedMs / 1000));
@@ -544,7 +573,7 @@ export class GameOverUi {
       drawSmall(font, timeText, col2Pos.add(new Vec2(40.0 * scale, 19.0 * scale)), labelColor);
     }
 
-    // Second row: weapon icon + frags + hit ratio
+    // Second row: weapon icon + frags + hit ratio (suppressed while entering the name).
     const rowPos = cardOrigin.offset({ dy: 52.0 * scale });
     this._hoverWeapon = Math.max(0.0, Math.min(1.0, this._hoverWeapon));
     this._hoverHitRatio = Math.max(0.0, Math.min(1.0, this._hoverHitRatio));
