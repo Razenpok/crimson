@@ -58,13 +58,13 @@ export const MENU_SIGN_POS_Y_SMALL = 60.0;
 export const MENU_SIGN_POS_X_PAD = 4.0;
 
 // Measured in the shareware/demo attract loop trace:
-// {"event":"demo_mode_start","dt_since_start_ms":23024,...}
+// {"event":"demo_mode_start","dt_since_start_ms":23024,"game_state_id":0,"demo_mode_active":0,...}
 export const MENU_DEMO_IDLE_START_MS = 23_000;
 
 const KEY_TAB = 9;
 const KEY_ENTER = 13;
 const KEY_LEFT_SHIFT = 16;
-const KEY_RIGHT_SHIFT = 16; // DOM doesn't distinguish shift keys by keyCode
+const KEY_RIGHT_SHIFT = 16;
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
 const MOUSE_BUTTON_MIDDLE = 1;
@@ -240,7 +240,8 @@ export class MenuView {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
-    // Shareware gating is controlled by the demoEnabled flag.
+    // Shareware gating is controlled by the --demo flag (see GameState.demo_enabled),
+    // not by a persisted config byte.
     this._fullVersion = !this.state.demoEnabled;
     this._menuEntries = this._menuEntriesForFlags(
       this._fullVersion,
@@ -343,7 +344,8 @@ export class MenuView {
       return;
     }
 
-    this._hoveredIndex = this._hoveredEntryIndex();
+    const resources = requireRuntimeResources(this.state);
+    this._hoveredIndex = this._hoveredEntryIndex(resources);
 
     if (InputState.wasKeyPressed(KEY_TAB)) {
       const reverse = InputState.isKeyDown(KEY_LEFT_SHIFT) || InputState.isKeyDown(KEY_RIGHT_SHIFT);
@@ -396,8 +398,8 @@ export class MenuView {
     }
     drawScreenFade(this.state);
     const resources = requireRuntimeResources(this.state);
-    this._drawMenuItems();
-    this._drawMenuSign();
+    this._drawMenuItems(resources);
+    this._drawMenuSign(resources);
     drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
   }
 
@@ -452,7 +454,6 @@ export class MenuView {
 
   private _initGround(): void {
     this._ground = ensureMenuGround(this.state);
-    this.state.menuGround = this._ground;
   }
 
   private _menuEntriesForFlags(
@@ -473,12 +474,14 @@ export class MenuView {
 
   private static _menuLabelRows(_fullVersion: boolean, otherGames: boolean): number[] {
     // Label atlas rows in ui_itemTexts.jaz:
-    //   0 BUY NOW (unused), 1 PLAY GAME, 2 OPTIONS, 3 STATISTICS, 4 MODS,
+    //   0 BUY NOW (unused in rewrite), 1 PLAY GAME, 2 OPTIONS, 3 STATISTICS, 4 MODS,
     //   5 OTHER GAMES, 6 QUIT, 7 BACK
     const top = 4;
     if (otherGames) {
       return [top, 1, 2, 3, 5, 6];
     }
+    // ui_menu_layout_init swaps table idx 6/7 depending on config var 100:
+    // when empty, QUIT becomes idx 6 and the idx 7 element is inactive.
     return [top, 1, 2, 3, 6, 7];
   }
 
@@ -506,9 +509,8 @@ export class MenuView {
     return [showTop, true, true, true, true, false];
   }
 
-  private _drawMenuItems(): void {
+  private _drawMenuItems(resources: RuntimeResources): void {
     if (this._menuEntries.length === 0) return;
-    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const itemW = item.width;
@@ -555,7 +557,7 @@ export class MenuView {
       if (idx === this._selectedIndex && this._focusTimerMs > 0) {
         counterValue = this._focusTimerMs;
       }
-      const alpha = labelAlpha(counterValue);
+      const alpha = MenuView._labelAlpha(counterValue);
       const alphaNorm = alpha / 255;
       const tint = wgl.makeColor(1, 1, 1, alphaNorm);
       const src = wgl.makeRectangle(
@@ -601,14 +603,14 @@ export class MenuView {
     return false;
   }
 
-  private _hoveredEntryIndex(): number | null {
+  private _hoveredEntryIndex(resources: RuntimeResources): number | null {
     if (this._menuEntries.length === 0) return null;
     const [mx, my] = InputState.mousePosition();
     const mousePos = new Vec2(mx, my);
     for (let idx = 0; idx < this._menuEntries.length; idx++) {
       const entry = this._menuEntries[idx];
       if (!this._menuEntryEnabled(entry)) continue;
-      if (this._menuItemBounds(entry).contains(mousePos)) {
+      if (this._menuItemBounds(entry, resources).contains(mousePos)) {
         return idx;
       }
     }
@@ -637,6 +639,11 @@ export class MenuView {
     }
   }
 
+  private static _labelAlpha(counterValue: number): number {
+    // ui_element_render: alpha = 100 + floor(counter_value * 155 / 1000)
+    return 100 + Math.floor((counterValue * 155) / 1000);
+  }
+
   private _menuEntryEnabled(entry: MenuEntry): boolean {
     return this._timelineMs >= MenuView._menuSlotStartMs(entry.slot);
   }
@@ -648,9 +655,8 @@ export class MenuView {
     return [1.0, 0.0];
   }
 
-  private _menuItemBounds(entry: MenuEntry): Rect {
+  private _menuItemBounds(entry: MenuEntry, resources: RuntimeResources): Rect {
     // FUN_0044fb50: inset bounds derived from quad0 v0/v2 and pos_x/pos_y.
-    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const itemW = item.width;
     const itemH = item.height;
@@ -706,7 +712,7 @@ export class MenuView {
     return maxMs;
   }
 
-  private _drawMenuSign(): void {
+  private _drawMenuSign(resources: RuntimeResources): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPos = new Vec2(
@@ -729,7 +735,6 @@ export class MenuView {
       // slide is ignored for render_mode==0 (transform) elements
       rotationDeg = angleRad * (180.0 / Math.PI);
     }
-    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
