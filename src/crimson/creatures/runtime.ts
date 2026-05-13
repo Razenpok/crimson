@@ -36,7 +36,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import {
   awardExperience,
   awardExperienceFromReward,
-  survivalRecordRecentDeath as survivalRecordRecentDeath_,
+  survivalRecordRecentDeath,
 } from '@crimson/gameplay.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { ftolMsI32 } from '@crimson/sim/timing.ts';
@@ -198,13 +198,6 @@ function _ownerToPlayerIndex(owner: OwnerRef): number | null {
 
 function _travelBudgetForTypeId(typeId: ProjectileTemplateId): number {
   return weaponEntryForProjectileTypeId(typeId).travelBudget;
-}
-
-function survivalRecordRecentDeath(
-  state: GameplayState,
-  pos: Vec2,
-): void {
-  survivalRecordRecentDeath_(state, { pos });
 }
 
 export class CreatureState {
@@ -1417,7 +1410,7 @@ export class CreaturePool {
     const fxQueue = opts.fxQueue;
     const keepCorpse = opts.keepCorpse ?? true;
     const creature = this._entries[int(idx)];
-    survivalRecordRecentDeath(state, creature.pos);
+    survivalRecordRecentDeath(state, { pos: creature.pos });
     if (
       ((int(creature.flags)) & CreatureFlags.BONUS_ON_DEATH) !== 0 &&
       creature.bonusId !== null
