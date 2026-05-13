@@ -84,9 +84,8 @@ const COLOR_GREEN = wgl.makeColor(25 / 255, 200 / 255, 25 / 255, 1.0);
 // reused by quest/game-over captions and score-card separator outlines.
 const COLOR_UI_ACCENT = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 1.0);
 
-// DOM key codes
 const KEY_ENTER = 13;
-const KEY_KP_ENTER = 13; // DOM numpad enter produces the same keyCode as regular enter
+const KEY_KP_ENTER = 13;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const KEY_H = 72;
@@ -111,6 +110,7 @@ function weaponIconSrc(
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
+// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   const ix1 = int(x1);
   const iy1 = int(y1);
@@ -127,9 +127,14 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Col
   wgl.drawRectangle(ix1, iy1, ix2 - ix1, iy2 - iy1, color);
 }
 
-interface QuestResultsPanelLayout {
-  panel: Rect;
-  topLeft: Vec2;
+class QuestResultsPanelLayout {
+  readonly panel: Rect;
+  readonly topLeft: Vec2;
+
+  constructor(opts: { panel: Rect; topLeft: Vec2 }) {
+    this.panel = opts.panel;
+    this.topLeft = opts.topLeft;
+  }
 }
 
 function textWidth(font: SmallFontData, text: string): number {
@@ -296,7 +301,7 @@ export class QuestResultsUi {
     const panelPosY = (QUEST_RESULTS_PANEL_GEOM_Y0 + QUEST_RESULTS_PANEL_POS_Y + widescreenShiftY) * scale;
     const topLeft = new Vec2(panelPosX, panelPosY);
     const panel = Rect.fromTopLeft(topLeft, QUEST_RESULTS_PANEL_W * scale, QUEST_RESULTS_PANEL_H * scale);
-    return { panel, topLeft };
+    return new QuestResultsPanelLayout({ panel, topLeft });
   }
 
   private _drawNameEntryStats(
