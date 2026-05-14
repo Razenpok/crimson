@@ -56,7 +56,6 @@ export class PerkMenuUiContext {
     this.mouse = opts.mouse;
     this.fxDetail = opts.fxDetail ?? false;
     this.playSfx = opts.playSfx ?? null;
-    Object.freeze(this);
   }
 }
 
@@ -293,7 +292,6 @@ export class PerkMenuController {
       return null;
     }
 
-    // Enter or Space to confirm selection
     if (InputState.wasKeyPressed(13) || InputState.wasKeyPressed(32)) {
       if (ctx.playSfx) {
         ctx.playSfx(SfxId.UI_BUTTONCLICK);
@@ -379,7 +377,11 @@ export class PerkMenuController {
     }
 
     const selected = choices[this._selectedIndex];
-    const desc = this._prewrappedPerkDesc(selected, ctx.resources.smallFont, {
+    let desc = perkDisplayDescription(selected, {
+      violenceDisabled: ctx.violenceDisabled,
+      preserveBugs,
+    });
+    desc = this._prewrappedPerkDesc(selected, ctx.resources.smallFont, {
       violenceDisabled: ctx.violenceDisabled,
       preserveBugs,
     });
