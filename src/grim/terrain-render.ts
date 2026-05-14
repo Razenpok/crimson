@@ -19,6 +19,15 @@ export const TERRAIN_ROTATION_MAX = 0x13A;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
+// Grim2D enables alpha test globally with:
+//   ALPHATESTENABLE=1, ALPHAFUNC=GREATER, ALPHAREF=4
+// See: analysis/ghidra/raw/grim.dll_decompiled.c (FUN_10004520).
+//
+// WebGL does not expose fixed-function alpha test, so the renderer emulates it
+// with a tiny discard shader selected by `wgl.setAlphaTest`.
+// This shim is required for parity; shader/program creation failures surface
+// through the WebGL context instead of silently drifting away from the native
+// cutoff behavior.
 function blendCustom(srcFactor: number, dstFactor: number, blendEquation: number, draw: () => void): void {
   // NOTE: raylib/rlgl tracks custom blend factors as state; some backends only
   // apply them when switching the blend mode. Set factors both before and
@@ -140,10 +149,12 @@ export class GroundRenderer {
   }
 
   generationPending(): boolean {
+    // True while a scheduled terrain generate is still pending.
     return this._scheduledSeed !== null;
   }
 
   renderTargetReady(): boolean {
+    // True when the terrain render target exists and is ready for drawing.
     return this.renderTarget !== null && this._renderTargetReady;
   }
 
@@ -312,6 +323,11 @@ export class GroundRenderer {
   }
 
   private _fitViewWindow(screenW: number, screenH: number): [number, number] {
+    // Convert output dimensions into a world-space camera window.
+    //
+    // Keep a uniform pixel scale and never request a camera window larger than
+    // the terrain dimensions. This avoids non-uniform stretch on widescreen
+    // outputs where only one axis exceeds world size.
     const worldW = this.width;
     const worldH = this.height;
     if (worldW <= 0.0 || worldH <= 0.0) {
@@ -377,6 +393,8 @@ export class GroundRenderer {
     }
 
     try {
+      // WebGL render-target creation checks framebuffer completeness so
+      // incomplete FBO attachments fail immediately.
       this.renderTarget = wgl.loadRenderTexture(renderW, renderH);
     } catch {
       return false;
