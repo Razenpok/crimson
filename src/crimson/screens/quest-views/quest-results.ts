@@ -17,7 +17,7 @@ import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { QuestResultsUi as QuestResultsUiImpl } from '@crimson/screens/results/quest-results.ts';
 import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
-import type { GameState } from '@crimson/game/types.ts';
+import { HighScoresRequest, type GameState } from '@crimson/game/types.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
 
 export class QuestResultsView {
@@ -265,11 +265,11 @@ export class QuestResultsView {
       highlightRank = this._ui.highlightRank;
     }
     if (this._questLevel === null) throw new Error('quest level must be set');
-    this.state.pendingHighScores = {
+    this.state.pendingHighScores = new HighScoresRequest({
       gameModeId: GameMode.QUESTS,
       questLevel: this._questLevel,
       highlightRank,
-    };
+    });
     this._action = 'open_high_scores';
   }
 
