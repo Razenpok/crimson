@@ -122,9 +122,12 @@ export class HighScoreRecord {
   setName(value: string): void {
     const limit = NAME_SIZE - 1;
     this.data.fill(0, 0, NAME_SIZE);
-    const count = Math.min(limit, value.length);
-    for (let i = 0; i < count; i++) {
-      this.data[i] = value.charCodeAt(i) & 0xFF;
+    let count = 0;
+    for (let i = 0; i < value.length && count < limit; i++) {
+      const code = value.charCodeAt(i);
+      if (code > 0xFF) continue;
+      this.data[count] = code;
+      count += 1;
     }
     this.data[Math.min(count, limit)] = 0;
   }
@@ -412,6 +415,7 @@ export function encodeRecordPayload(decoded: Uint8Array): Uint8Array {
 }
 
 function storageKey(path: string): string {
+  // Browser/WebGL builds store highscore wire records in localStorage instead of Path files.
   return `crimson-highscores:${path}`;
 }
 

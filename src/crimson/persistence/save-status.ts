@@ -214,6 +214,7 @@ export class GameStatus extends GameStatusData {
   }
 
   save(): void {
+    // Browser/WebGL builds cannot create path.parent directories before saving.
     saveStatus(this.path, this);
     this.dirty = false;
   }
@@ -387,6 +388,7 @@ export function computeChecksum(decoded: Uint8Array): number {
 }
 
 function storageKey(path: string): string {
+  // Browser/WebGL builds store game.cfg wire data in localStorage instead of Path files.
   return `crimson-game-status:${path}`;
 }
 
