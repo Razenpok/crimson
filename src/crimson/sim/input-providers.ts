@@ -95,8 +95,8 @@ export enum InputStatus {
 export class ResolvedTick {
   readonly tickIndex: number;
   readonly dtSeconds: number;
-  readonly inputs: readonly PlayerInput[];
-  readonly commands: readonly GameCommand[];
+  readonly inputs: PlayerInput[];
+  readonly commands: GameCommand[];
 
   constructor(opts: {
     tickIndex: number;
@@ -106,8 +106,8 @@ export class ResolvedTick {
   }) {
     this.tickIndex = opts.tickIndex;
     this.dtSeconds = opts.dtSeconds;
-    this.inputs = opts.inputs ?? [];
-    this.commands = opts.commands ?? [];
+    this.inputs = Array.from(opts.inputs ?? []);
+    this.commands = Array.from(opts.commands ?? []);
   }
 }
 
