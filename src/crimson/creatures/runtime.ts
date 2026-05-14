@@ -1605,7 +1605,7 @@ export class CreaturePool {
     entry.vel = new Vec2();
     entry.forceTarget = 0;
 
-    entry.flags = init.flags || (0 as CreatureFlags);
+    entry.flags = init.flags || 0;
     entry.aiMode = init.aiMode;
 
     let hp = init.health ?? 0.0;
