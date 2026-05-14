@@ -1,5 +1,7 @@
 // Port of crimson/schema_inventory.py
 
+type JsonValue = null | string | number | boolean | JsonValue[] | { [key: string]: JsonValue };
+
 export class StructClass {
   readonly className: string;
   readonly fullName: string;
@@ -73,7 +75,7 @@ function _resolveImportModule(opts: {
   return baseParts.join('.');
 }
 
-function _baseName(_base: unknown): string | null {
+function _baseName(_base: object): string | null {
   // Python ast.expr inspection is not available in the WebGL runtime.
   throw new Error('schema inventory requires Python ast expression inspection');
 }
@@ -222,12 +224,12 @@ export function summarizeInventory(opts: { structs: StructClass[] }): InventoryS
   });
 }
 
-function _sortJsonKeys(value: unknown): unknown {
+function _sortJsonKeys(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {
     return value.map((item) => _sortJsonKeys(item));
   }
   if (value !== null && typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>)
+    const entries = Object.entries(value)
       .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
     return Object.fromEntries(entries.map(([key, item]) => [key, _sortJsonKeys(item)]));
   }
@@ -248,7 +250,7 @@ function _ensureAsciiJson(text: string): string {
 }
 
 export function inventoryAsJson(opts: { summary: InventorySummary; structs: StructClass[] }): string {
-  const payload = {
+  const payload: JsonValue = {
     total_structs: int(opts.summary.totalStructs),
     counts_by_bucket: Object.fromEntries(
       Object.entries(opts.summary.countsByBucket).map(([k, v]) => [String(k), int(v)]),
