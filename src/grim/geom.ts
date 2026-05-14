@@ -219,7 +219,7 @@ export class Rect {
     this.h = optsOrX.h ?? 0.0;
   }
 
-  static fromXywh(value: { x: number; y: number; width: number; height: number }) {
+  static fromXywh(value: Rect | { x: number; y: number; width: number; height: number }) {
     return new Rect(value.x, value.y, value.width, value.height);
   }
 
