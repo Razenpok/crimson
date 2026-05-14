@@ -82,11 +82,11 @@ export class WorldRuntime {
     });
 
     this.camera = new Vec2(-1.0, -1.0);
-    this.renderer = new WorldRenderer(
-      this.worldSize,
-      this.config,
-      this.camera,
-    );
+    this.renderer = new WorldRenderer({
+      worldSize: this.worldSize,
+      config: this.config,
+      camera: this.camera,
+    });
 
     this._syncWorldSizeOwnership();
     this.syncAudioBridgeState();

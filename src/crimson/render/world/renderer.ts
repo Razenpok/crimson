@@ -9,11 +9,18 @@ import { buildWorldRenderCtx } from './context.ts';
 import { drawWorld } from './draw.ts';
 
 export class WorldRenderer {
-  constructor(
-    public worldSize: number = 0,
-    public config: CrimsonConfig | null = null,
-    public camera: Vec2 = new Vec2()
-  ) {
+  worldSize: number;
+  config: CrimsonConfig | null;
+  camera: Vec2;
+
+  constructor(opts: {
+    worldSize: number;
+    config: CrimsonConfig | null;
+    camera: Vec2;
+  }) {
+    this.worldSize = opts.worldSize;
+    this.config = opts.config;
+    this.camera = opts.camera;
   }
 
   syncViewport(opts: { worldSize: number; config: CrimsonConfig | null; camera: Vec2 }): void {
