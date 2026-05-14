@@ -11,11 +11,11 @@ import { InputState } from '@grim/input.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
-import { fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
+import { HighScoreDateMode, fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { UiButtonState, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { menuWidescreenYShift, type DropdownLayoutBase } from '@crimson/ui/layout.ts';
+import { DropdownLayoutBase, menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
@@ -38,6 +38,7 @@ import {
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
 import {
+  FADE_TO_GAME_ACTIONS,
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';
@@ -79,14 +80,6 @@ import { resolveRequest, loadRecords } from './records.ts';
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
-const FADE_TO_GAME_ACTIONS = new Set([
-  'start_survival',
-  'start_rush',
-  'start_typo',
-  'start_tutorial',
-  'start_quest',
-]);
-
 const KEY_ESCAPE = 27;
 const KEY_UP = 38;
 const KEY_DOWN = 40;
@@ -95,6 +88,9 @@ const KEY_PAGE_DOWN = 34;
 const KEY_HOME = 36;
 const KEY_END = 35;
 const MOUSE_BUTTON_LEFT = 0;
+
+class ScoresDropdownLayout extends DropdownLayoutBase {
+}
 
 function gameModeFromId(modeRaw: number): GameMode {
   switch (int(modeRaw)) {
@@ -129,7 +125,6 @@ export class HighScoresView {
   private _closeAction: string | null = null;
   private _dirty: boolean = false;
 
-  // Public for main-panel and right-panel draw modules
   updateButton: UiButtonState;
   playButton: UiButtonState;
   backButton: UiButtonState;
@@ -138,7 +133,7 @@ export class HighScoresView {
   private _records: HighScoreRecord[] = [];
   private _scrollIndex: number = 0;
 
-  // Right-panel dropdown state
+  // Right-panel list widget state (quests variant).
   playerCountOpen: boolean = false;
   gameModeOpen: boolean = false;
   showScoresOpen: boolean = false;
@@ -247,7 +242,7 @@ export class HighScoresView {
     const resources = requireRuntimeResources(this.state);
     const font = resources.smallFont;
 
-    // Compute animated panel positions
+    // Compute animated panel positions so hit-tests match the draw path even while sliding.
     const panelW = MENU_PANEL_WIDTH * scale;
     const [, leftSlideX] = uiElementAnim(
       this, 1, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 0,
@@ -357,22 +352,22 @@ export class HighScoresView {
     this._closeAction = action;
   }
 
-  private _dropdownLayout(opts: { pos: Vec2; width: number; itemCount: number; scale: number }): DropdownLayoutBase {
+  private _dropdownLayout(opts: { pos: Vec2; width: number; itemCount: number; scale: number }): ScoresDropdownLayout {
     const headerH = 16.0 * opts.scale;
     const rowH = 16.0 * opts.scale;
     const fullH = (opts.itemCount * 16.0 + 24.0) * opts.scale;
-    return {
-      pos: opts.pos,
-      width: opts.width,
-      headerH: headerH,
-      rowH: rowH,
-      rowsY0: opts.pos.y + 17.0 * opts.scale,
-      fullH: fullH,
-    };
+    return new ScoresDropdownLayout(
+      opts.pos,
+      opts.width,
+      headerH,
+      rowH,
+      opts.pos.y + 17.0 * opts.scale,
+      fullH,
+    );
   }
 
   private _updateDropdown(
-    layout: DropdownLayoutBase,
+    layout: ScoresDropdownLayout,
     itemCount: number,
     isOpen: boolean,
     enabled: boolean,
@@ -469,7 +464,7 @@ export class HighScoresView {
       showScoresLayout, showScoresItems.length, this.showScoresOpen, showScoresEnabled, scale,
     );
     if (selected !== null) {
-      this.state.config.profile.scoreDateMode = selected;
+      this.state.config.profile.scoreDateMode = int(selected) as HighScoreDateMode;
       this._dirty = true;
       this._reloadRecords();
     }
@@ -528,10 +523,11 @@ export class HighScoresView {
       this.state.config.gameplay.mode = modeId;
       request.gameModeId = modeId;
       if (modeId === GameMode.TYPO) {
+        // Native forces Typ-o shooter scores to 1 player.
         this.state.config.gameplay.playerCount = 1;
       } else if (modeId === GameMode.QUESTS) {
+        // Ensure quest selection exists when switching into quests.
         if (request.questLevel === null) {
-          // Ensure quest selection exists when switching into quests.
           request.questLevel = this.state.config.gameplay.questLevel ?? new QuestLevel(1, 1);
         }
       }
@@ -599,6 +595,7 @@ export class HighScoresView {
     const arrowW = arrow.width * scale;
     const arrowH = arrow.height * scale;
 
+    // The native has two arrows spaced 255px apart; at 1.1 only the "next" arrow is drawn.
     const prevPos = leftPanelTopLeft.add(new Vec2((HS_QUEST_ARROW_X - 255.0) * scale, HS_QUEST_ARROW_Y * scale));
     const nextPos = leftPanelTopLeft.add(new Vec2(HS_QUEST_ARROW_X * scale, HS_QUEST_ARROW_Y * scale));
     const prevRect = Rect.fromTopLeft(prevPos, arrowW, arrowH);
@@ -747,15 +744,6 @@ export class HighScoresView {
     return alpha;
   }
 
-  _visibleRows(font: SmallFontData): number {
-    const rowStep = font.cellSize;
-    const tableTop = 188.0 + rowStep;
-    const reservedBottom = 96.0;
-    const screenH = wgl.getScreenHeight();
-    const available = Math.max(0.0, screenH - tableTop - reservedBottom);
-    return Math.max(1, Math.floor(available / rowStep));
-  }
-
   takeAction(): string | null {
     this._assertOpen();
     const action = this._action;
@@ -767,5 +755,14 @@ export class HighScoresView {
     if (!this._isOpen) {
       throw new Error('HighScoresView must be opened before use');
     }
+  }
+
+  _visibleRows(font: SmallFontData): number {
+    const rowStep = font.cellSize;
+    const tableTop = 188.0 + rowStep;
+    const reservedBottom = 96.0;
+    const screenH = wgl.getScreenHeight();
+    const available = Math.max(0.0, screenH - tableTop - reservedBottom);
+    return Math.max(1, Math.floor(available / rowStep));
   }
 }
