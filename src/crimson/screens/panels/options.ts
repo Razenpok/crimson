@@ -71,7 +71,7 @@ export class OptionsMenuView extends PanelMenuView {
     'Mouse sensitivity:',
   ];
 
-  private _controlsButton: UiButtonState = new UiButtonState({ label: 'Controls', forceWide: true  });
+  private _controlsButton: UiButtonState = new UiButtonState({ label: 'Controls', forceWide: true });
   private _sliderSfx: SliderState = new SliderState({ value: 10, minValue: 0, maxValue: 10 });
   private _sliderMusic: SliderState = new SliderState({ value: 10, minValue: 0, maxValue: 10 });
   private _sliderDetail: SliderState = new SliderState({ value: 5, minValue: 1, maxValue: 5 });
@@ -89,7 +89,7 @@ export class OptionsMenuView extends PanelMenuView {
 
   override open(): void {
     super.open();
-    this._controlsButton = new UiButtonState({ label: 'Controls', forceWide: true  });
+    this._controlsButton = new UiButtonState({ label: 'Controls', forceWide: true });
     this._activeSlider = null;
     this._dirty = false;
     this._syncFromConfig();
@@ -331,7 +331,7 @@ export class OptionsMenuView extends PanelMenuView {
     const scale = layout.scale;
 
     const font = resources.smallFont;
-    const textColor = wgl.makeColor(1, 1, 1, 0.8);
+    const textColor = wgl.makeColor(1, 1, 1, int(255 * 0.8) / 255);
 
     const titleW = 128.0;
     const src = wgl.makeRectangle(
@@ -404,7 +404,7 @@ export class OptionsMenuView extends PanelMenuView {
     for (let idx = 0; idx < slider.maxValue; idx++) {
       const tex = idx < slider.value ? rectOn : rectOff;
       const dst = wgl.makeRectangle(pos.x + idx * rectW, pos.y, rectW, rectH);
-      const tint = idx < slider.value ? WHITE : wgl.makeColor(1, 1, 1, 0.5);
+      const tint = idx < slider.value ? WHITE : wgl.makeColor(1, 1, 1, int(255 * 0.5) / 255);
       wgl.drawTexturePro(
         tex,
         wgl.makeRectangle(0.0, 0.0, tex.width, tex.height),
