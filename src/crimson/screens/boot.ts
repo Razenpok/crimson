@@ -74,10 +74,10 @@ export class BootView {
 
     Promise.all([
       state.resources === null
-        ? loadRuntimeResources(state.assetsUrl)
+        ? loadRuntimeResources(state.assetsDir)
         : Promise.resolve(state.resources),
       state.audio === null
-        ? initAudioState(state.config, state.assetsUrl, state.console)
+        ? initAudioState(state.config, state.assetsDir, state.console)
         : Promise.resolve(state.audio),
     ]).then(([resources, audio]) => {
       state.resources = resources;

@@ -337,8 +337,4 @@ export class GameState {
     this.presentationPlanMs = 0.0;
     this.presentationApplyMs = 0.0;
   }
-
-  get assetsUrl(): string {
-    return this.assetsDir;
-  }
 }

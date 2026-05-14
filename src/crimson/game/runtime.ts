@@ -204,7 +204,7 @@ function bootCommandHandlers(
     if (!audio || !audio.audioContext) {
       return;
     }
-    loadMusicTrack(audio.music, audio.audioContext, state.assetsUrl, relPath, { console: con })
+    loadMusicTrack(audio.music, audio.audioContext, state.assetsDir, relPath, { console: con })
       .then((result) => {
         if (result) {
           const [key, trackId] = result;
