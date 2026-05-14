@@ -209,6 +209,14 @@ export function unloadResources(res: RuntimeResources): void {
   res.textures.clear();
 }
 
+export function unloadRuntimeResources(resources: RuntimeResources | null): void {
+  if (resources === null) {
+    return;
+  }
+  unregisterRuntimeResources(resources.assetsUrl);
+  unloadResources(resources);
+}
+
 // --- Runtime resources registry (mirrors Python's _REGISTERED_RESOURCES) ---
 
 const _registeredResources = new Map<string, RuntimeResources>();

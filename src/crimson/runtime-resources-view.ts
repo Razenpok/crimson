@@ -1,6 +1,6 @@
 // Port of crimson/runtime_resources_view.py
 
-import { type RuntimeResources, loadRuntimeResources, unloadResources } from '@grim/assets.ts';
+import { type RuntimeResources, loadRuntimeResources, unloadRuntimeResources } from '@grim/assets.ts';
 import type { View } from '@grim/view.ts';
 
 export class RuntimeResourcesView {
@@ -19,9 +19,7 @@ export class RuntimeResourcesView {
     try {
       this._view.open();
     } catch (exc) {
-      if (this._resources !== null) {
-        unloadResources(this._resources);
-      }
+      unloadRuntimeResources(this._resources);
       this._resources = null;
       throw exc;
     }
@@ -39,9 +37,7 @@ export class RuntimeResourcesView {
     try {
       this._view.close();
     } finally {
-      if (this._resources !== null) {
-        unloadResources(this._resources);
-      }
+      unloadRuntimeResources(this._resources);
       this._resources = null;
     }
   }
