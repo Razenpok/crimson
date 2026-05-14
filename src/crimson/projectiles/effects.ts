@@ -196,7 +196,8 @@ export function _spawnPlasmaCannonHitEffects(
 
   const detail = int(detailPreset);
 
-  const _spawnRing = (scale: number): void => {
+  const _spawnRing = (opts: { scale: number }): void => {
+    const scale = opts.scale;
     effects.spawn({
       effectId: EffectId.RING,
       pos,
@@ -215,8 +216,8 @@ export function _spawnPlasmaCannonHitEffects(
     });
   };
 
-  _spawnRing(1.5);
-  _spawnRing(1.0);
+  _spawnRing({ scale: 1.5 });
+  _spawnRing({ scale: 1.0 });
 }
 
 export function _spawnSplitterHitEffects(
