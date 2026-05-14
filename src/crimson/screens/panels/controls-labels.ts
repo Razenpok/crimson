@@ -63,7 +63,7 @@ export function controlsMethodLabels(
   controls: CrimsonControlsConfig,
   opts: { playerIndex: number },
 ): [string, string] {
-  const player = controls.players[opts.playerIndex];
+  const player = controls.player(opts.playerIndex);
   return [inputConfigureForLabel(player.aimScheme), inputSchemeLabel(player.movement)];
 }
 
