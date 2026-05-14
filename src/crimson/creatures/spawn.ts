@@ -246,38 +246,8 @@ export class ConstantSpawnSpec {
   }
 }
 
-function constSpec(
-  typeId: CreatureTypeId,
-  health: number,
-  moveSpeed: number,
-  rewardValue: number,
-  tint: TintRGBA,
-  size: number,
-  contactDamage: number,
-  flags: CreatureFlags = 0 as CreatureFlags,
-  aiMode: number = CreatureAiMode.ORBIT_PLAYER,
-  orbitAngle: number | null = null,
-  orbitRadius: number | null = null,
-  rangedProjectileType: number | null = null,
-  bonusId: BonusId | null = null,
-  bonusDurationOverride: number | null = null,
-): ConstantSpawnSpec {
-  return new ConstantSpawnSpec({
-    typeId,
-    health,
-    moveSpeed,
-    rewardValue,
-    tint,
-    size,
-    contactDamage,
-    flags,
-    aiMode,
-    orbitAngle,
-    orbitRadius,
-    rangedProjectileType,
-    bonusId,
-    bonusDurationOverride,
-  });
+function constSpec(opts: ConstantSpawnSpecInit): ConstantSpawnSpec {
+  return new ConstantSpawnSpec(opts);
 }
 
 
@@ -405,103 +375,38 @@ function rangeArray(start: number, stop: number, step: number): number[] {
 
 
 export const CONSTANT_SPAWN_TEMPLATES: Map<SpawnId, ConstantSpawnSpec> = new Map([
-  [SpawnId.SPIDER_SP2_SPLITTER_01, constSpec(
-    CreatureTypeId.SPIDER_SP2, 400.0, 2.0, 1000.0, [0.8, 0.7, 0.4, 1.0], 80.0, 17.0,
-    CreatureFlags.SPLIT_ON_DEATH,
-  )],
-  [SpawnId.ALIEN_CONST_BROWN_TRANSPARENT_0F, constSpec(
-    CreatureTypeId.ALIEN, 20.0, 2.9, 60.0, [0.665, 0.385, 0.259, 0.56], 50.0, 35.0,
-  )],
-  [SpawnId.ALIEN_CONST_PURPLE_GHOST_21, constSpec(
-    CreatureTypeId.ALIEN, 53.0, 1.7, 120.0, [0.7, 0.1, 0.51, 0.5], 55.0, 8.0,
-  )],
-  [SpawnId.ALIEN_CONST_GREEN_GHOST_22, constSpec(
-    CreatureTypeId.ALIEN, 25.0, 1.7, 150.0, [0.1, 0.7, 0.51, 0.05], 50.0, 8.0,
-  )],
-  [SpawnId.ALIEN_CONST_GREEN_GHOST_SMALL_23, constSpec(
-    CreatureTypeId.ALIEN, 5.0, 1.7, 180.0, [0.1, 0.7, 0.51, 0.04], 45.0, 8.0,
-  )],
-  [SpawnId.ALIEN_CONST_GREEN_24, constSpec(
-    CreatureTypeId.ALIEN, 20.0, 2.0, 110.0, [0.1, 0.7, 0.11, 1.0], 50.0, 4.0,
-  )],
-  [SpawnId.ALIEN_CONST_GREEN_SMALL_25, constSpec(
-    CreatureTypeId.ALIEN, 25.0, 2.5, 125.0, [0.1, 0.8, 0.11, 1.0], 30.0, 3.0,
-  )],
-  [SpawnId.ALIEN_CONST_PALE_GREEN_26, constSpec(
-    CreatureTypeId.ALIEN, 50.0, 2.2, 125.0, [0.6, 0.8, 0.6, 1.0], 45.0, 10.0,
-  )],
-  [SpawnId.ALIEN_CONST_WEAPON_BONUS_27, constSpec(
-    CreatureTypeId.ALIEN, 50.0, 2.1, 125.0, [1.0, 0.8, 0.1, 1.0], 45.0, 10.0,
-    CreatureFlags.BONUS_ON_DEATH,
-    CreatureAiMode.ORBIT_PLAYER,
-    null, null, null,
-    BonusId.WEAPON, 5,
-  )],
-  [SpawnId.ALIEN_CONST_PURPLE_28, constSpec(
-    CreatureTypeId.ALIEN, 50.0, 1.7, 150.0, [0.7, 0.1, 0.51, 1.0], 55.0, 8.0,
-  )],
-  [SpawnId.ALIEN_CONST_GREY_BRUTE_29, constSpec(
-    CreatureTypeId.ALIEN, 800.0, 2.5, 450.0, [0.8, 0.8, 0.8, 1.0], 70.0, 20.0,
-  )],
-  [SpawnId.ALIEN_CONST_GREY_FAST_2A, constSpec(
-    CreatureTypeId.ALIEN, 50.0, 3.1, 300.0, [0.3, 0.3, 0.3, 1.0], 60.0, 8.0,
-  )],
-  [SpawnId.ALIEN_CONST_RED_FAST_2B, constSpec(
-    CreatureTypeId.ALIEN, 30.0, 3.6, 450.0, [1.0, 0.3, 0.3, 1.0], 35.0, 20.0,
-  )],
-  [SpawnId.ALIEN_CONST_RED_BOSS_2C, constSpec(
-    CreatureTypeId.ALIEN, 3800.0, 2.0, 1500.0, [0.85, 0.2, 0.2, 1.0], 80.0, 40.0,
-  )],
-  [SpawnId.ALIEN_CONST_CYAN_AI2_2D, constSpec(
-    CreatureTypeId.ALIEN, 45.0, 3.1, 200.0, [0.0, 0.9, 0.8, 1.0], 38.0, 3.0,
-    0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
-  )],
-  [SpawnId.LIZARD_CONST_GREY_2F, constSpec(
-    CreatureTypeId.LIZARD, 20.0, 2.5, 150.0, [0.8, 0.8, 0.8, 1.0], 45.0, 4.0,
-  )],
-  [SpawnId.LIZARD_CONST_YELLOW_BOSS_30, constSpec(
-    CreatureTypeId.LIZARD, 1000.0, 2.0, 400.0, [0.9, 0.8, 0.1, 1.0], 65.0, 10.0,
-  )],
-  [SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, constSpec(
-    CreatureTypeId.SPIDER_SP1, 4500.0, 2.0, 4500.0, [1.0, 1.0, 1.0, 1.0], 64.0, 50.0,
-    CreatureFlags.RANGED_ATTACK_SHOCK,
-    CreatureAiMode.ORBIT_PLAYER,
-    0.9, null, 9,
-  )],
-  [SpawnId.SPIDER_SP1_CONST_RED_BOSS_3B, constSpec(
-    CreatureTypeId.SPIDER_SP1, 1200.0, 2.0, 4000.0, [0.9, 0.0, 0.0, 1.0], 70.0, 20.0,
-  )],
-  [SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, constSpec(
-    CreatureTypeId.SPIDER_SP1, 200.0, 2.0, 200.0, [0.9, 0.1, 0.1, 1.0], 40.0, 20.0,
-    CreatureFlags.RANGED_ATTACK_VARIANT,
-    CreatureAiMode.CHASE_PLAYER,
-    0.4, null, 26,
-  )],
-  [SpawnId.SPIDER_SP1_CONST_WHITE_FAST_3E, constSpec(
-    CreatureTypeId.SPIDER_SP1, 1000.0, 2.8, 500.0, [1.0, 1.0, 1.0, 1.0], 64.0, 40.0,
-  )],
-  [SpawnId.SPIDER_SP1_CONST_BROWN_SMALL_3F, constSpec(
-    CreatureTypeId.SPIDER_SP1, 200.0, 2.3, 210.0, [0.7, 0.4, 0.1, 1.0], 35.0, 20.0,
-  )],
-  [SpawnId.SPIDER_SP1_CONST_BLUE_40, constSpec(
-    CreatureTypeId.SPIDER_SP1, 70.0, 2.2, 160.0, [0.5, 0.6, 0.9, 1.0], 45.0, 5.0,
-  )],
-  [SpawnId.ZOMBIE_CONST_GREY_42, constSpec(
-    CreatureTypeId.ZOMBIE, 200.0, 1.7, 160.0, [0.9, 0.9, 0.9, 1.0], 45.0, 15.0,
-  )],
-  [SpawnId.ZOMBIE_CONST_GREEN_BRUTE_43, constSpec(
-    CreatureTypeId.ZOMBIE, 2000.0, 2.1, 460.0, [0.2, 0.6, 0.1, 1.0], 70.0, 15.0,
-  )],
+  [SpawnId.SPIDER_SP2_SPLITTER_01, constSpec({ typeId: CreatureTypeId.SPIDER_SP2, health: 400.0, moveSpeed: 2.0, rewardValue: 1000.0, tint: [0.8, 0.7, 0.4, 1.0], size: 80.0, contactDamage: 17.0, flags: CreatureFlags.SPLIT_ON_DEATH })],
+  [SpawnId.ALIEN_CONST_BROWN_TRANSPARENT_0F, constSpec({ typeId: CreatureTypeId.ALIEN, health: 20.0, moveSpeed: 2.9, rewardValue: 60.0, tint: [0.665, 0.385, 0.259, 0.56], size: 50.0, contactDamage: 35.0 })],
+  [SpawnId.ALIEN_CONST_PURPLE_GHOST_21, constSpec({ typeId: CreatureTypeId.ALIEN, health: 53.0, moveSpeed: 1.7, rewardValue: 120.0, tint: [0.7, 0.1, 0.51, 0.5], size: 55.0, contactDamage: 8.0 })],
+  [SpawnId.ALIEN_CONST_GREEN_GHOST_22, constSpec({ typeId: CreatureTypeId.ALIEN, health: 25.0, moveSpeed: 1.7, rewardValue: 150.0, tint: [0.1, 0.7, 0.51, 0.05], size: 50.0, contactDamage: 8.0 })],
+  [SpawnId.ALIEN_CONST_GREEN_GHOST_SMALL_23, constSpec({ typeId: CreatureTypeId.ALIEN, health: 5.0, moveSpeed: 1.7, rewardValue: 180.0, tint: [0.1, 0.7, 0.51, 0.04], size: 45.0, contactDamage: 8.0 })],
+  [SpawnId.ALIEN_CONST_GREEN_24, constSpec({ typeId: CreatureTypeId.ALIEN, health: 20.0, moveSpeed: 2.0, rewardValue: 110.0, tint: [0.1, 0.7, 0.11, 1.0], size: 50.0, contactDamage: 4.0 })],
+  [SpawnId.ALIEN_CONST_GREEN_SMALL_25, constSpec({ typeId: CreatureTypeId.ALIEN, health: 25.0, moveSpeed: 2.5, rewardValue: 125.0, tint: [0.1, 0.8, 0.11, 1.0], size: 30.0, contactDamage: 3.0 })],
+  [SpawnId.ALIEN_CONST_PALE_GREEN_26, constSpec({ typeId: CreatureTypeId.ALIEN, health: 50.0, moveSpeed: 2.2, rewardValue: 125.0, tint: [0.6, 0.8, 0.6, 1.0], size: 45.0, contactDamage: 10.0 })],
+  [SpawnId.ALIEN_CONST_WEAPON_BONUS_27, constSpec({ typeId: CreatureTypeId.ALIEN, health: 50.0, moveSpeed: 2.1, rewardValue: 125.0, tint: [1.0, 0.8, 0.1, 1.0], size: 45.0, contactDamage: 10.0, flags: CreatureFlags.BONUS_ON_DEATH, bonusId: BonusId.WEAPON, bonusDurationOverride: 5 })],
+  [SpawnId.ALIEN_CONST_PURPLE_28, constSpec({ typeId: CreatureTypeId.ALIEN, health: 50.0, moveSpeed: 1.7, rewardValue: 150.0, tint: [0.7, 0.1, 0.51, 1.0], size: 55.0, contactDamage: 8.0 })],
+  [SpawnId.ALIEN_CONST_GREY_BRUTE_29, constSpec({ typeId: CreatureTypeId.ALIEN, health: 800.0, moveSpeed: 2.5, rewardValue: 450.0, tint: [0.8, 0.8, 0.8, 1.0], size: 70.0, contactDamage: 20.0 })],
+  [SpawnId.ALIEN_CONST_GREY_FAST_2A, constSpec({ typeId: CreatureTypeId.ALIEN, health: 50.0, moveSpeed: 3.1, rewardValue: 300.0, tint: [0.3, 0.3, 0.3, 1.0], size: 60.0, contactDamage: 8.0 })],
+  [SpawnId.ALIEN_CONST_RED_FAST_2B, constSpec({ typeId: CreatureTypeId.ALIEN, health: 30.0, moveSpeed: 3.6, rewardValue: 450.0, tint: [1.0, 0.3, 0.3, 1.0], size: 35.0, contactDamage: 20.0 })],
+  [SpawnId.ALIEN_CONST_RED_BOSS_2C, constSpec({ typeId: CreatureTypeId.ALIEN, health: 3800.0, moveSpeed: 2.0, rewardValue: 1500.0, tint: [0.85, 0.2, 0.2, 1.0], size: 80.0, contactDamage: 40.0 })],
+  [SpawnId.ALIEN_CONST_CYAN_AI2_2D, constSpec({ typeId: CreatureTypeId.ALIEN, health: 45.0, moveSpeed: 3.1, rewardValue: 200.0, tint: [0.0, 0.9, 0.8, 1.0], size: 38.0, contactDamage: 3.0, aiMode: CreatureAiMode.CHASE_PLAYER })],
+  [SpawnId.LIZARD_CONST_GREY_2F, constSpec({ typeId: CreatureTypeId.LIZARD, health: 20.0, moveSpeed: 2.5, rewardValue: 150.0, tint: [0.8, 0.8, 0.8, 1.0], size: 45.0, contactDamage: 4.0 })],
+  [SpawnId.LIZARD_CONST_YELLOW_BOSS_30, constSpec({ typeId: CreatureTypeId.LIZARD, health: 1000.0, moveSpeed: 2.0, rewardValue: 400.0, tint: [0.9, 0.8, 0.1, 1.0], size: 65.0, contactDamage: 10.0 })],
+  [SpawnId.SPIDER_SP1_CONST_SHOCK_BOSS_3A, constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 4500.0, moveSpeed: 2.0, rewardValue: 4500.0, tint: [1.0, 1.0, 1.0, 1.0], size: 64.0, contactDamage: 50.0, flags: CreatureFlags.RANGED_ATTACK_SHOCK, orbitAngle: 0.9, rangedProjectileType: 9 })],
+  [SpawnId.SPIDER_SP1_CONST_RED_BOSS_3B, constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 1200.0, moveSpeed: 2.0, rewardValue: 4000.0, tint: [0.9, 0.0, 0.0, 1.0], size: 70.0, contactDamage: 20.0 })],
+  [SpawnId.SPIDER_SP1_CONST_RANGED_VARIANT_3C, constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 200.0, moveSpeed: 2.0, rewardValue: 200.0, tint: [0.9, 0.1, 0.1, 1.0], size: 40.0, contactDamage: 20.0, flags: CreatureFlags.RANGED_ATTACK_VARIANT, aiMode: CreatureAiMode.CHASE_PLAYER, orbitAngle: 0.4, rangedProjectileType: 26 })],
+  [SpawnId.SPIDER_SP1_CONST_WHITE_FAST_3E, constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 1000.0, moveSpeed: 2.8, rewardValue: 500.0, tint: [1.0, 1.0, 1.0, 1.0], size: 64.0, contactDamage: 40.0 })],
+  [SpawnId.SPIDER_SP1_CONST_BROWN_SMALL_3F, constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 200.0, moveSpeed: 2.3, rewardValue: 210.0, tint: [0.7, 0.4, 0.1, 1.0], size: 35.0, contactDamage: 20.0 })],
+  [SpawnId.SPIDER_SP1_CONST_BLUE_40, constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 70.0, moveSpeed: 2.2, rewardValue: 160.0, tint: [0.5, 0.6, 0.9, 1.0], size: 45.0, contactDamage: 5.0 })],
+  [SpawnId.ZOMBIE_CONST_GREY_42, constSpec({ typeId: CreatureTypeId.ZOMBIE, health: 200.0, moveSpeed: 1.7, rewardValue: 160.0, tint: [0.9, 0.9, 0.9, 1.0], size: 45.0, contactDamage: 15.0 })],
+  [SpawnId.ZOMBIE_CONST_GREEN_BRUTE_43, constSpec({ typeId: CreatureTypeId.ZOMBIE, health: 2000.0, moveSpeed: 2.1, rewardValue: 460.0, tint: [0.2, 0.6, 0.1, 1.0], size: 70.0, contactDamage: 15.0 })],
 ]);
 
 
 export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
   ([
   [SpawnId.FORMATION_GRID_ALIEN_GREEN_14, {
-    parent: constSpec(
-      CreatureTypeId.ALIEN, 1500.0, 2.0, 600.0, [0.7, 0.8, 0.31, 1.0], 50.0, 40.0,
-      0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.ALIEN, health: 1500.0, moveSpeed: 2.0, rewardValue: 600.0, tint: [0.7, 0.8, 0.31, 1.0], size: 50.0, contactDamage: 40.0, aiMode: CreatureAiMode.CHASE_PLAYER }),
     childAiMode: CreatureAiMode.FOLLOW_LINK_TETHERED,
     childSpec: childSpec({
       typeId: CreatureTypeId.ALIEN,
@@ -518,10 +423,7 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
     setParentMaxHealth: true,
   }],
   [SpawnId.FORMATION_GRID_ALIEN_WHITE_15, {
-    parent: constSpec(
-      CreatureTypeId.ALIEN, 1500.0, 2.0, 600.0, [1.0, 1.0, 1.0, 1.0], 60.0, 40.0,
-      0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.ALIEN, health: 1500.0, moveSpeed: 2.0, rewardValue: 600.0, tint: [1.0, 1.0, 1.0, 1.0], size: 60.0, contactDamage: 40.0, aiMode: CreatureAiMode.CHASE_PLAYER }),
     childAiMode: CreatureAiMode.LINK_GUARD,
     childSpec: childSpec({
       typeId: CreatureTypeId.ALIEN,
@@ -538,10 +440,7 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
     setParentMaxHealth: true,
   }],
   [SpawnId.FORMATION_GRID_LIZARD_WHITE_16, {
-    parent: constSpec(
-      CreatureTypeId.LIZARD, 1500.0, 2.0, 600.0, [1.0, 1.0, 1.0, 1.0], 64.0, 40.0,
-      0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.LIZARD, health: 1500.0, moveSpeed: 2.0, rewardValue: 600.0, tint: [1.0, 1.0, 1.0, 1.0], size: 64.0, contactDamage: 40.0, aiMode: CreatureAiMode.CHASE_PLAYER }),
     childAiMode: CreatureAiMode.LINK_GUARD,
     childSpec: childSpec({
       typeId: CreatureTypeId.LIZARD,
@@ -558,10 +457,7 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
     setParentMaxHealth: true,
   }],
   [SpawnId.FORMATION_GRID_SPIDER_SP1_WHITE_17, {
-    parent: constSpec(
-      CreatureTypeId.SPIDER_SP1, 1500.0, 2.0, 600.0, [1.0, 1.0, 1.0, 1.0], 60.0, 40.0,
-      0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.SPIDER_SP1, health: 1500.0, moveSpeed: 2.0, rewardValue: 600.0, tint: [1.0, 1.0, 1.0, 1.0], size: 60.0, contactDamage: 40.0, aiMode: CreatureAiMode.CHASE_PLAYER }),
     childAiMode: CreatureAiMode.LINK_GUARD,
     childSpec: childSpec({
       typeId: CreatureTypeId.SPIDER_SP1,
@@ -578,10 +474,7 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
     setParentMaxHealth: true,
   }],
   [SpawnId.FORMATION_GRID_ALIEN_BRONZE_18, {
-    parent: constSpec(
-      CreatureTypeId.ALIEN, 500.0, 2.0, 600.0, [0.7, 0.8, 0.31, 1.0], 40.0, 40.0,
-      0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.ALIEN, health: 500.0, moveSpeed: 2.0, rewardValue: 600.0, tint: [0.7, 0.8, 0.31, 1.0], size: 40.0, contactDamage: 40.0, aiMode: CreatureAiMode.CHASE_PLAYER }),
     childAiMode: CreatureAiMode.FOLLOW_LINK,
     childSpec: childSpec({
       typeId: CreatureTypeId.ALIEN,
@@ -606,9 +499,7 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
 export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map(
   ([
   [SpawnId.FORMATION_RING_ALIEN_8_12, {
-    parent: constSpec(
-      CreatureTypeId.ALIEN, 200.0, 2.2, 600.0, [0.65, 0.85, 0.97, 1.0], 55.0, 14.0,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.ALIEN, health: 200.0, moveSpeed: 2.2, rewardValue: 600.0, tint: [0.65, 0.85, 0.97, 1.0], size: 55.0, contactDamage: 14.0 }),
     childAiMode: CreatureAiMode.FOLLOW_LINK,
     childSpec: childSpec({
       typeId: CreatureTypeId.ALIEN,
@@ -627,9 +518,7 @@ export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map(
     setParentMaxHealth: true,
   }],
   [SpawnId.FORMATION_RING_ALIEN_5_19, {
-    parent: constSpec(
-      CreatureTypeId.ALIEN, 50.0, 3.8, 300.0, [0.95, 0.55, 0.37, 1.0], 55.0, 40.0,
-    ),
+    parent: constSpec({ typeId: CreatureTypeId.ALIEN, health: 50.0, moveSpeed: 3.8, rewardValue: 300.0, tint: [0.95, 0.55, 0.37, 1.0], size: 55.0, contactDamage: 40.0 }),
     childAiMode: CreatureAiMode.FOLLOW_LINK_TETHERED,
     childSpec: childSpec({
       typeId: CreatureTypeId.ALIEN,
