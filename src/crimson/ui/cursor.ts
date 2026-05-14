@@ -4,7 +4,7 @@ import * as wgl from '@wgl';
 import { Vec2 } from "@grim/geom.ts";
 import { effectSrcRect, EffectId } from "@crimson/effects-atlas.ts";
 
-const CURSOR_EFFECT_ID: number = int(EffectId.GLOW);
+export const CURSOR_EFFECT_ID: number = int(EffectId.GLOW);
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 

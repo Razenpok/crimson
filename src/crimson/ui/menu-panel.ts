@@ -10,13 +10,13 @@ import { UI_SHADOW_OFFSET, drawUiQuadShadow } from './shadow.ts';
 // When a panel is taller than the base height, the original stretches it using a
 // 3-slice: [top][mid][bottom]. The source slice boundaries are at y=130 and y=150
 // in the texture (see grim UVs in ui_render_trace).
-const MENU_PANEL_INSET = 1.0;
-const MENU_PANEL_SRC_SLICE_Y1 = 130.0;
-const MENU_PANEL_SRC_SLICE_Y2 = 150.0;
+export const MENU_PANEL_INSET = 1.0;
+export const MENU_PANEL_SRC_SLICE_Y1 = 130.0;
+export const MENU_PANEL_SRC_SLICE_Y2 = 150.0;
 
 // Destination slice heights observed in the original at scale=1.0 (1024x768).
-const MENU_PANEL_DST_TOP_H = 138.0;
-const MENU_PANEL_DST_BOTTOM_H = 116.0;
+export const MENU_PANEL_DST_TOP_H = 138.0;
+export const MENU_PANEL_DST_BOTTOM_H = 116.0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 
