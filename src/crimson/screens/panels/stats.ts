@@ -125,11 +125,11 @@ export class StatisticsMenuView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true  });
-    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true  });
-    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true  });
-    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true  });
-    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true });
+    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true });
+    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true });
+    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true });
+    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false });
   }
 
   open(): void {
@@ -144,11 +144,11 @@ export class StatisticsMenuView {
     this._closeAction = null;
     this._pendingAction = null;
 
-    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true  });
-    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true  });
-    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true  });
-    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true  });
-    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true });
+    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true });
+    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true });
+    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true });
+    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false });
 
     if (this.state.audio !== null) {
       if (this.state.audio.music.activeTrack !== 'shortie_monk') {
@@ -176,11 +176,11 @@ export class StatisticsMenuView {
     this._closing = false;
     this._closeAction = null;
     this._pendingAction = null;
-    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true  });
-    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true  });
-    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true  });
-    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true  });
-    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true });
+    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true });
+    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true });
+    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true });
+    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false });
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
     }
@@ -280,35 +280,36 @@ export class StatisticsMenuView {
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
     const dtMsF = Math.min(dt, 0.1) * 1000.0;
 
-    function updateButton(btn: UiButtonState, pos: Vec2): boolean {
+    function updateButton(btn: UiButtonState, opts: { pos: Vec2 }): boolean {
+      const pos = opts.pos;
       const w = buttonWidth(resources, btn.label, { scale, forceWide: btn.forceWide });
       return buttonUpdate(btn, { pos, width: w, dtMs: dtMsF, mouse, click });
     }
 
     const buttonBase = panelTopLeft.add(new Vec2(_BUTTON_X * scale, _BUTTON_Y0 * scale));
-    if (updateButton(this._btnHighScores, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 0.0 * scale }))) {
+    if (updateButton(this._btnHighScores, { pos: buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 0.0 * scale }) })) {
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_high_scores');
       return;
     }
-    if (updateButton(this._btnWeapons, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 1.0 * scale }))) {
+    if (updateButton(this._btnWeapons, { pos: buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 1.0 * scale }) })) {
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_weapon_database');
       return;
     }
-    if (updateButton(this._btnPerks, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 2.0 * scale }))) {
+    if (updateButton(this._btnPerks, { pos: buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 2.0 * scale }) })) {
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_perk_database');
       return;
     }
-    if (updateButton(this._btnCredits, buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 3.0 * scale }))) {
+    if (updateButton(this._btnCredits, { pos: buttonBase.offset({ dx: 0, dy: _BUTTON_STEP_Y * 3.0 * scale }) })) {
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('open_credits');
       return;
     }
 
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
-    if (updateButton(this._btnBack, backPos)) {
+    if (updateButton(this._btnBack, { pos: backPos })) {
       if (this.state.audio !== null) audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
       this._beginCloseTransition('back_to_menu');
       return;
@@ -365,13 +366,13 @@ export class StatisticsMenuView {
     const playtimeMs = this.state.status.gameSequenceId;
     const playtimeText = formatPlaytimeText(playtimeMs, { preserveBugs: this.state.preserveBugs });
     const playtimePos = panelTopLeft.add(new Vec2(_PLAYTIME_X * scale, _PLAYTIME_Y * scale));
-    drawSmallText(font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, 0.8));
+    drawSmallText(font, playtimeText, playtimePos, wgl.makeColor(1, 1, 1, int(255 * 0.8) / 255));
 
     const today = new Date();
     if (isOrbesVolantesDay(today) && int(this.state.statsMenuEasterEggRoll) === _STATS_EASTER_TRIGGER_ROLL) {
       this.state.statsMenuEasterEggRoll = _STATS_EASTER_ROLL_UNSET;
       const easterX = this.state.rng.rand({ caller: RngCallerStatic.REWRITE_STATS_MENU_EASTER_TEXT_X }) % 64 + 16;
-      drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(0.2, 1.0, 0.6, 128 / 255));
+      drawSmallText(font, _STATS_EASTER_TEXT, new Vec2(easterX, _STATS_EASTER_TEXT_Y), wgl.makeColor(51 / 255, 1, 153 / 255, 128 / 255));
     }
 
     // Buttons.
