@@ -4,9 +4,9 @@ import { type CrandLike } from './rand.ts';
 import { fetchPaq } from './paq.ts';
 import { type ConsoleState } from './console.ts';
 
-const MUSIC_PAK_NAME = 'music.paq';
+export const MUSIC_PAK_NAME = 'music.paq';
 
-const MUSIC_TRACKS: Record<string, string[]> = {
+export const MUSIC_TRACKS: Record<string, string[]> = {
   intro: ['music/intro.ogg', 'intro.ogg'],
   shortie_monk: ['music/shortie_monk.ogg', 'shortie_monk.ogg'],
   crimson_theme: ['music/crimson_theme.ogg', 'crimson_theme.ogg'],
