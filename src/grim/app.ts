@@ -6,7 +6,7 @@ import { InputState } from './input.ts';
 import { RenderPipeline, WindowSink } from './render-pipeline.ts';
 
 export const SCREENSHOT_DIR = 'screenshots';
-export const SCREENSHOT_KEY = 'F12';
+export const SCREENSHOT_KEY = 123;
 
 function _falseHook(): boolean {
   return false;
@@ -20,6 +20,20 @@ export class RunViewHooks {
     this.shouldClose = opts.shouldClose ?? _falseHook;
     this.consumeScreenshotRequest = opts.consumeScreenshotRequest ?? _falseHook;
   }
+}
+
+function _nextScreenshotIndex(_directory: string): number {
+  // Browser WebGL cannot inspect the user's download directory; start each run at 1.
+  return 1;
+}
+
+function _takeScreenshot(filename: string): void {
+  const canvas = wgl.getCanvas();
+  const url = canvas.toDataURL('image/png');
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
 }
 
 export interface AppConfig {
@@ -110,6 +124,8 @@ export function runView(
     hooks?: RunViewHooks | null;
   } = {},
 ): App {
+  // Run a Raylib window with a pluggable debug view.
+  // Raylib-only window flags/exit key have no WebGL equivalent.
   void opts.configFlags;
   void opts.exitKey;
   const app = new App({
@@ -119,6 +135,9 @@ export function runView(
     targetFps: opts.fps ?? 60,
   });
   const runHooks = opts.hooks ?? new RunViewHooks();
+  const screenshotDir = SCREENSHOT_DIR;
+  let screenshotIndex = _nextScreenshotIndex(screenshotDir);
+  let takeScreenshot = false;
   const renderPipeline = new RenderPipeline({
     sink: new WindowSink(),
     beginEndDrawing: false,
@@ -129,7 +148,10 @@ export function runView(
     },
     update(dt: number): void {
       view.update(dt);
-      void runHooks.consumeScreenshotRequest();
+      takeScreenshot = InputState.wasKeyPressed(SCREENSHOT_KEY);
+      if (runHooks.consumeScreenshotRequest()) {
+        takeScreenshot = true;
+      }
       if (runHooks.shouldClose()) {
         app.stop();
       }
@@ -141,6 +163,12 @@ export function runView(
         height: wgl.getScreenHeight(),
       });
       renderPipeline.present();
+      if (takeScreenshot) {
+        const filename = `${screenshotDir}/${String(screenshotIndex).padStart(5, '0')}.png`;
+        _takeScreenshot(filename);
+        screenshotIndex += 1;
+        takeScreenshot = false;
+      }
     },
     close(): void {
       try {
@@ -155,6 +183,7 @@ export function runView(
 }
 
 export function runWindow(width = 1280, height = 720, title = 'Crimsonland', fps = 60): App {
+  // Open a minimal Raylib window for the reference implementation.
   const emptyView: View = {
     open(): void {},
     update(_dt: number): void {},
