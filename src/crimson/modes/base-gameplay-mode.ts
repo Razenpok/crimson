@@ -301,6 +301,7 @@ export class BaseGameplayMode {
     this.rtxMode = RtxRenderMode.CLASSIC;
 
     this._worldRuntime = new WorldRuntime({
+      assetsUrl: this.assetsDir,
       worldSize: this.worldSize,
       demoModeActive: this.demoModeActive,
       questFailRetryCount: this.questFailRetryCount,

@@ -94,6 +94,7 @@ export class DemoView {
   constructor(state: GameState) {
     this.state = state;
     this._runtime = new WorldRuntime({
+      assetsUrl: state.assetsDir,
       worldSize: WORLD_SIZE,
       demoModeActive: true,
       hardcore: this.state.config.gameplay.hardcore,

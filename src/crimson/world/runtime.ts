@@ -16,6 +16,7 @@ import { TerrainRuntime } from './terrain-runtime.ts';
 
 export class WorldRuntime {
   // Composition container owning the 4 world components and shared lifecycle methods.
+  assetsUrl: string;
   worldSize: number;
   demoModeActive: boolean;
   questFailRetryCount: number;
@@ -38,6 +39,7 @@ export class WorldRuntime {
   renderer: WorldRenderer;
 
   constructor(opts: {
+    assetsUrl: string;
     worldSize?: number;
     demoModeActive?: boolean;
     questFailRetryCount?: number;
@@ -48,6 +50,7 @@ export class WorldRuntime {
     audio?: AudioState | null;
     rtxMode?: RtxRenderMode;
   }) {
+    this.assetsUrl = opts.assetsUrl;
     this.worldSize = opts.worldSize ?? 1024.0;
     this.demoModeActive = opts.demoModeActive ?? false;
     this.questFailRetryCount = opts.questFailRetryCount ?? 0;
@@ -66,7 +69,11 @@ export class WorldRuntime {
       preserveBugs: this.preserveBugs,
     });
 
-    const renderResources = new RenderResources({ worldSize: this.worldSize, config: this.config });
+    const renderResources = new RenderResources({
+      assetsUrl: this.assetsUrl,
+      worldSize: this.worldSize,
+      config: this.config,
+    });
     this.renderResources = renderResources;
 
     this.audioBridge = new AudioBridge({
