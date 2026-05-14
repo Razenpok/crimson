@@ -26,6 +26,7 @@ import {
   type LanSession,
   type LanStepAction,
 } from './base-gameplay-mode.ts';
+import { buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 
 const WORLD_SIZE = 1024.0;
 
@@ -120,7 +121,9 @@ export class RushMode extends BaseGameplayMode {
     if (this._gameOverActive) return;
 
     const gameModeId = this.config.gameplay.mode;
-    const record = this._buildHighscoreRecordForGameOver({
+    const record = buildHighscoreRecordForGameOver({
+      state: this.state,
+      player: this.player,
       survivalElapsedMs: int(this._sessionElapsedMs()),
       creatureKillCount: int(this.creatures.killCount),
       gameModeId,
