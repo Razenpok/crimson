@@ -35,6 +35,7 @@ export function applyTypoCommand(
   _requireSinglePlayerTypo(command);
   const typo = world.state.typo;
   const typing = typo.typing;
+  const commandTypeName = command.constructor.name;
 
   if (command instanceof TypoCharCommand) {
     if (command.ch) {
@@ -76,7 +77,7 @@ export function applyTypoCommand(
       typo.pendingReload = true;
     }
   } else {
-    throw new Error(`unhandled Typ-o command: ${(command as object).constructor.name}`);
+    throw new Error(`unhandled Typ-o command: ${commandTypeName}`);
   }
 }
 
