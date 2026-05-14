@@ -10,10 +10,19 @@ export type QuestStageMajor = number;
 export type QuestStageMinor = number;
 
 export class QuestLevel {
-  constructor(
-    public readonly major: number,
-    public readonly minor: number
-  ) {
+  public readonly major: number;
+  public readonly minor: number;
+
+  constructor(major: number, minor: number) {
+    if (
+      !Number.isInteger(major) || !Number.isInteger(minor) ||
+      major < 1 || major > QUEST_STAGE_COUNT ||
+      minor < 1 || minor > QUESTS_PER_STAGE
+    ) {
+      throw new Error(`invalid quest level: '${major}.${minor}'`);
+    }
+    this.major = major;
+    this.minor = minor;
   }
 
   static parse(value: string): QuestLevel {
@@ -22,23 +31,22 @@ export class QuestLevel {
     if (parts.length !== 2) {
       throw new Error(`invalid quest level: '${value}'`);
     }
-    if (!/^[+-]?\d+$/.test(parts[0]) || !/^[+-]?\d+$/.test(parts[1])) {
+    const majorText = parts[0].trim();
+    const minorText = parts[1].trim();
+    if (!/^[+-]?\d+$/.test(majorText) || !/^[+-]?\d+$/.test(minorText)) {
       throw new Error(`invalid quest level: '${value}'`);
     }
-    const major = int(Number(parts[0]));
-    const minor = int(Number(parts[1]));
-    if (
-      isNaN(major) || isNaN(minor) ||
-      major < 1 || major > QUEST_STAGE_COUNT ||
-      minor < 1 || minor > QUESTS_PER_STAGE
-    ) {
+    const major = int(Number(majorText));
+    const minor = int(Number(minorText));
+    try {
+      return new QuestLevel(major, minor);
+    } catch {
       throw new Error(`invalid quest level: '${value}'`);
     }
-    return new QuestLevel(major, minor);
   }
 
   static fromGlobalIndex(index: number): QuestLevel {
-    if (index < 0 || index >= QUEST_COUNT) {
+    if (!Number.isInteger(index) || index < 0 || index >= QUEST_COUNT) {
       throw new Error(`quest global index out of range: ${index} (expected 0..${QUEST_COUNT - 1})`);
     }
     const major = Math.floor(index / QUESTS_PER_STAGE) + 1;
