@@ -30,7 +30,6 @@ export class PresentationTickOutput {
     this.dtSim = opts.dtSim;
     this.presentation = opts.presentation;
     this.terrainFx = opts.terrainFx ?? EMPTY_TERRAIN_FX_BATCH;
-    Object.freeze(this);
   }
 }
 export function applySimMetadataTickResult(opts: {
