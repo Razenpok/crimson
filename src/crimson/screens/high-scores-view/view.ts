@@ -11,7 +11,7 @@ import { InputState } from '@grim/input.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
-import { HighScoreDateMode, fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
+import { fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { UiButtonState, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
@@ -258,10 +258,19 @@ export class HighScoresView {
     const rightPanelTopLeft = rightTopLeft.offset({ dx: rightSlideX });
 
     if (enabled) {
-      if (this._updateRightPanelWidgets(rightPanelTopLeft, scale, resources, font)) {
+      if (this._updateRightPanelWidgets({
+        rightTopLeft: rightPanelTopLeft,
+        scale,
+        resources,
+        font,
+      })) {
         return;
       }
-      if (this._updateQuestArrows(leftPanelTopLeft, scale, resources)) {
+      if (this._updateQuestArrows({
+        leftPanelTopLeft,
+        scale,
+        resources,
+      })) {
         return;
       }
     }
@@ -367,12 +376,15 @@ export class HighScoresView {
   }
 
   private _updateDropdown(
-    layout: ScoresDropdownLayout,
-    itemCount: number,
-    isOpen: boolean,
-    enabled: boolean,
-    scale: number,
+    opts: {
+      layout: ScoresDropdownLayout;
+      itemCount: number;
+      isOpen: boolean;
+      enabled: boolean;
+      scale: number;
+    },
   ): [boolean, number | null, boolean] {
+    const { layout, itemCount, isOpen, enabled, scale } = opts;
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const click = enabled && InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -414,11 +426,14 @@ export class HighScoresView {
   }
 
   private _updateRightPanelWidgets(
-    rightTopLeft: Vec2,
-    scale: number,
-    resources: RuntimeResources,
-    font: SmallFontData,
+    opts: {
+      rightTopLeft: Vec2;
+      scale: number;
+      resources: RuntimeResources;
+      font: SmallFontData;
+    },
   ): boolean {
+    const { rightTopLeft, scale, resources, font } = opts;
     const request = this._request;
     if (request === null) return false;
 
@@ -460,11 +475,15 @@ export class HighScoresView {
     const showScoresEnabled = !(this.playerCountOpen || this.gameModeOpen || this.scoreListOpen);
     let consumed: boolean;
     let selected: number | null;
-    [this.showScoresOpen, selected, consumed] = this._updateDropdown(
-      showScoresLayout, showScoresItems.length, this.showScoresOpen, showScoresEnabled, scale,
-    );
+    [this.showScoresOpen, selected, consumed] = this._updateDropdown({
+      layout: showScoresLayout,
+      itemCount: showScoresItems.length,
+      isOpen: this.showScoresOpen,
+      enabled: showScoresEnabled,
+      scale,
+    });
     if (selected !== null) {
-      this.state.config.profile.scoreDateMode = int(selected) as HighScoreDateMode;
+      this.state.config.profile.scoreDateMode = int(selected);
       this._dirty = true;
       this._reloadRecords();
     }
@@ -482,9 +501,13 @@ export class HighScoresView {
     const playerPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_PLAYER_COUNT_WIDGET_X * scale, HS_RIGHT_PLAYER_COUNT_WIDGET_Y * scale));
     const playerLayout = this._dropdownLayout({ pos: playerPos, width: HS_RIGHT_PLAYER_COUNT_WIDGET_W * scale, itemCount: playerItems.length, scale });
     const playerEnabled = !(this.gameModeOpen || this.showScoresOpen || this.scoreListOpen);
-    [this.playerCountOpen, selected, consumed] = this._updateDropdown(
-      playerLayout, playerItems.length, this.playerCountOpen, playerEnabled, scale,
-    );
+    [this.playerCountOpen, selected, consumed] = this._updateDropdown({
+      layout: playerLayout,
+      itemCount: playerItems.length,
+      isOpen: this.playerCountOpen,
+      enabled: playerEnabled,
+      scale,
+    });
     if (selected !== null) {
       const newCount = selected + 1;
       if (this.state.config.gameplay.playerCount !== newCount) {
@@ -515,9 +538,13 @@ export class HighScoresView {
     const gameModePos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_GAME_MODE_WIDGET_X * scale, HS_RIGHT_GAME_MODE_WIDGET_Y * scale));
     const gameModeLayout = this._dropdownLayout({ pos: gameModePos, width: HS_RIGHT_GAME_MODE_WIDGET_W * scale, itemCount: modeItems.length, scale });
     const gameModeEnabled = !(this.playerCountOpen || this.showScoresOpen || this.scoreListOpen);
-    [this.gameModeOpen, selected, consumed] = this._updateDropdown(
-      gameModeLayout, modeItems.length, this.gameModeOpen, gameModeEnabled, scale,
-    );
+    [this.gameModeOpen, selected, consumed] = this._updateDropdown({
+      layout: gameModeLayout,
+      itemCount: modeItems.length,
+      isOpen: this.gameModeOpen,
+      enabled: gameModeEnabled,
+      scale,
+    });
     if (selected !== null) {
       const [, modeId] = modeItems[Math.max(0, Math.min(selected, modeItems.length - 1))];
       this.state.config.gameplay.mode = modeId;
@@ -549,9 +576,13 @@ export class HighScoresView {
     const names = savedNameLabels(this.state.config.profile);
     const scoreListPos = shiftedRightTopLeft.add(new Vec2(HS_RIGHT_SCORE_LIST_WIDGET_X * scale, HS_RIGHT_SCORE_LIST_WIDGET_Y * scale));
     const scoreListLayout = this._dropdownLayout({ pos: scoreListPos, width: HS_RIGHT_SCORE_LIST_WIDGET_W * scale, itemCount: names.length, scale });
-    [this.scoreListOpen, selected, consumed] = this._updateDropdown(
-      scoreListLayout, names.length, this.scoreListOpen, scoreListEnabled, scale,
-    );
+    [this.scoreListOpen, selected, consumed] = this._updateDropdown({
+      layout: scoreListLayout,
+      itemCount: names.length,
+      isOpen: this.scoreListOpen,
+      enabled: scoreListEnabled,
+      scale,
+    });
     if (selected !== null) {
       this.state.config.profile.selectedSavedNameSlot = selected;
       this._dirty = true;
@@ -570,10 +601,13 @@ export class HighScoresView {
   }
 
   private _updateQuestArrows(
-    leftPanelTopLeft: Vec2,
-    scale: number,
-    resources: RuntimeResources,
+    opts: {
+      leftPanelTopLeft: Vec2;
+      scale: number;
+      resources: RuntimeResources;
+    },
   ): boolean {
+    const { leftPanelTopLeft, scale, resources } = opts;
     const request = this._request;
     if (request === null) return false;
     if (request.gameModeId !== GameMode.QUESTS) return false;
@@ -691,11 +725,12 @@ export class HighScoresView {
       highlightRank: selectedRank,
     });
 
-    this._drawSign(resources);
+    this._drawSign({ resources });
     this._drawMenuCursor(resources);
   }
 
-  private _drawSign(resources: RuntimeResources): void {
+  private _drawSign(opts: { resources: RuntimeResources }): void {
+    const { resources } = opts;
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const screenW = this.state.config.display.width;
     const [signScale, shiftX] = signLayoutScale(int(screenW));
