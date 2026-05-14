@@ -474,7 +474,8 @@ export class QuestsMenuView {
     return quest.title;
   }
 
-  private _questRowColors(hardcore: boolean): [wgl.Color, wgl.Color] {
+  private _questRowColors(opts: { hardcore: boolean }): [wgl.Color, wgl.Color] {
+    const hardcore = opts.hardcore;
     // `sub_447d40` uses different RGB when hardcore is toggled.
     let r: number, g: number, b: number;
     if (hardcore) {
@@ -489,7 +490,8 @@ export class QuestsMenuView {
     return [baseColor, hoverColor];
   }
 
-  private _questCounts(stage: number, row: number): [number, number] | null {
+  private _questCounts(opts: { stage: number; row: number }): [number, number] | null {
+    const { stage, row } = opts;
     // In `sub_447d40`, counts are indexed by (row + stage*10) and split across two
     // arrays at offsets 0xDC (games) and 0x17C (completed) within game.cfg.
     //
@@ -596,7 +598,7 @@ export class QuestsMenuView {
     const config = this.state.config;
     const status = this.state.status;
     const hardcoreFlag = config.gameplay.hardcore;
-    const [baseColor, hoverColor] = this._questRowColors(hardcoreFlag);
+    const [baseColor, hoverColor] = this._questRowColors({ hardcore: hardcoreFlag });
 
     const font = resources.smallFont;
     const y0 = this._rowsY0(layout);
@@ -640,7 +642,7 @@ export class QuestsMenuView {
       }
 
       if (showCounts && unlocked) {
-        const counts = this._questCounts(stage, row);
+        const counts = this._questCounts({ stage, row });
         if (counts !== null) {
           const [completed, games] = counts;
           const countsX = listPos.x + QUEST_LIST_NAME_X_OFFSET + titleW + 12.0;
