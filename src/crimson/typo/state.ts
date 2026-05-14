@@ -25,8 +25,8 @@ export class TypoState {
     this.typing = opts.typing ?? new TypingBuffer();
     this.names = opts.names ?? CreatureNameTable.sized(0);
     this.spawnCooldownMs = opts.spawnCooldownMs ?? 0;
-    this.dictionaryWords = opts.dictionaryWords ?? [];
-    this.highscoreNames = opts.highscoreNames ?? [];
+    this.dictionaryWords = Array.from(opts.dictionaryWords ?? [], (word) => String(word));
+    this.highscoreNames = Array.from(opts.highscoreNames ?? [], (name) => String(name));
     this.pendingFireTarget = opts.pendingFireTarget ?? null;
     this.pendingReload = opts.pendingReload ?? false;
   }
