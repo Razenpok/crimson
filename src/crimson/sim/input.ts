@@ -19,7 +19,21 @@ export class PlayerInput {
   readonly turnLeftPressed: boolean | null;
   readonly turnRightPressed: boolean | null;
 
-  constructor(opts?: Partial<PlayerInput>) {
+  constructor(opts?: {
+    move?: Vec2;
+    aim?: Vec2;
+    moveMode?: MovementControlType | null;
+    aimScheme?: AimScheme | null;
+    fireDown?: boolean;
+    firePressed?: boolean;
+    reloadPressed?: boolean;
+    reloadDown?: boolean;
+    moveToCursorPressed?: boolean;
+    moveForwardPressed?: boolean | null;
+    moveBackwardPressed?: boolean | null;
+    turnLeftPressed?: boolean | null;
+    turnRightPressed?: boolean | null;
+  }) {
     this.move = defined(opts?.move, new Vec2());
     this.aim = defined(opts?.aim, new Vec2());
     this.moveMode = defined(opts?.moveMode, null);
@@ -33,7 +47,6 @@ export class PlayerInput {
     this.moveBackwardPressed = defined(opts?.moveBackwardPressed, null);
     this.turnLeftPressed = defined(opts?.turnLeftPressed, null);
     this.turnRightPressed = defined(opts?.turnRightPressed, null);
-    Object.freeze(this);
   }
 
 }
