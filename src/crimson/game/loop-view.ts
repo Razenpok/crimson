@@ -148,7 +148,7 @@ export class GameLoopView implements View {
   private _frontViews: Record<string, Screen>;
   private _frontActive: Screen | null = null;
   private _frontStack: Screen[] = [];
-  private _active: Screen;
+  private _active: View;
 
   private _demoTrialOverlay: DemoTrialOverlayUi | null = null;
   private _demoTrialInfo: DemoTrialOverlayInfo | null = null;

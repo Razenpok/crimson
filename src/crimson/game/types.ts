@@ -7,6 +7,7 @@ import type { RuntimeResources } from '@grim/assets.ts';
 import type { AudioState } from '@grim/audio.ts';
 import type { ConsoleState } from '@grim/console.ts';
 import type { GroundRenderer } from '@grim/terrain-render.ts';
+import type { View } from '@grim/view.ts';
 import type { GameMode } from '@crimson/game-modes.ts';
 import type { GameStatus as GameStateStatus } from '@crimson/gameplay.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
@@ -188,12 +189,8 @@ export class HighScoresRequest {
   }
 }
 
-export interface Screen {
-  open(): void;
-  close(): void;
-  update(dt: number): void;
-  draw(): void;
-  takeAction?(): string | null;
+export interface Screen extends View {
+  takeAction(): string | null;
 }
 
 export type RollbackRuntime = object;
@@ -209,12 +206,9 @@ export interface GameplayScreen extends Screen, PauseBackground {
   setLanRuntime(opts: {
     enabled: boolean;
     role: string;
-    expected_players?: number;
-    connected_players?: number;
-    waiting_for_players?: boolean;
-    expectedPlayers?: number;
-    connectedPlayers?: number;
-    waitingForPlayers?: boolean;
+    expectedPlayers: number;
+    connectedPlayers: number;
+    waitingForPlayers: boolean;
   }): void;
   bindLanRuntime(runtime: RollbackRuntime | LockstepRuntime | null): void;
   setLanMatchStart(opts: { seed: number; startTick?: number; status?: GameStateStatus | null }): void;
