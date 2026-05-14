@@ -9,6 +9,19 @@ export function ftolMsI32(dtSeconds: number): number {
   return int(Math.trunc(scaledMsF32));
 }
 
+function _floatRepr(value: number): string {
+  if (Number.isNaN(value)) {
+    return 'nan';
+  }
+  if (value === Infinity) {
+    return 'inf';
+  }
+  if (value === -Infinity) {
+    return '-inf';
+  }
+  return String(value);
+}
+
 export class FrameTiming {
   readonly dt: number;
   readonly timeScaleActiveEntry: boolean;
@@ -55,13 +68,13 @@ export class FrameTiming {
   ): FrameTiming {
     const dtF32 = f32(dt);
     if (!Number.isFinite(dtF32)) {
-      throw new Error(`dt must be finite, got ${dt}`);
+      throw new Error(`dt must be finite, got ${_floatRepr(dt)}`);
     }
     const active = opts.timeScaleActiveEntry;
     const factor = f32(opts.timeScaleFactor);
     if (active && (!Number.isFinite(factor) || factor <= 0.0)) {
       throw new Error(
-        `time_scale_factor must be finite and > 0 when active, got ${opts.timeScaleFactor}`,
+        `time_scale_factor must be finite and > 0 when active, got ${_floatRepr(opts.timeScaleFactor)}`,
       );
     }
     let dtSim = dtF32;
