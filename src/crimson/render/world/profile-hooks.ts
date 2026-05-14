@@ -23,12 +23,14 @@ export function currentPassName(): string | null {
 }
 
 export function beginPass(name: string): void {
-  _passStack.push([name, performance.now()]);
+  _passStack.push([String(name), performance.now()]);
 }
 
 export function endPass(_name: string): void {
   if (_passStack.length === 0) return;
-  const [passName, startMs] = _passStack.pop()!;
+  const popped = _passStack.pop();
+  if (popped === undefined) return;
+  const [passName, startMs] = popped;
   const durationMs = Math.max(0, performance.now() - startMs);
   if (_activeSink === null) return;
   _activeSink.onPassDuration(passName, durationMs);
