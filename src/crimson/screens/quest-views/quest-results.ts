@@ -6,12 +6,11 @@ import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import { f32 } from '@crimson/math-parity.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { computeQuestFinalTime } from '@crimson/quests/results.ts';
-import { type WeaponId, weaponDisplayName } from '@crimson/weapons.ts';
+import { weaponDisplayName } from '@crimson/weapons.ts';
 import { PERK_BY_ID, PerkId, perkDisplayName } from '@crimson/perks/ids.ts';
 import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
@@ -59,14 +58,14 @@ export class QuestResultsView {
       const weaponIdNative = quest.unlockWeaponId !== null ? int(quest.unlockWeaponId) : 0;
       if (weaponIdNative > 0) {
         this._unlockWeaponName = weaponDisplayName(
-          weaponIdNative as WeaponId,
+          weaponIdNative,
           { preserveBugs: Boolean(this.state.preserveBugs) },
         );
       }
 
       const perkIdNative = quest.unlockPerkId !== null ? int(quest.unlockPerkId) : 0;
       if (perkIdNative !== int(PerkId.ANTIPERK)) {
-        const perkId = perkIdNative as PerkId;
+        const perkId = perkIdNative;
         const perkEntry = PERK_BY_ID.get(perkId);
         if (perkEntry !== undefined && perkEntry.name) {
           const violenceDisabled = this.state.config.display.violenceDisabled;
@@ -97,17 +96,17 @@ export class QuestResultsView {
     record.shotsFired = fired;
     record.shotsHit = hit;
 
-    let playerHealthValues = outcome.playerHealthValues.map((v) => f32(v));
+    let playerHealthValues = outcome.playerHealthValues.map((v) => v);
     if (playerHealthValues.length === 0) {
-      playerHealthValues = [f32(outcome.playerHealth)];
+      playerHealthValues = [outcome.playerHealth];
       if (outcome.player2Health !== null) {
-        playerHealthValues = playerHealthValues.concat([f32(outcome.player2Health)]);
+        playerHealthValues = playerHealthValues.concat([outcome.player2Health]);
       }
     }
     const breakdown = computeQuestFinalTime({
       baseTimeMs: int(outcome.baseTimeMs),
-      playerHealth: f32(outcome.playerHealth),
-      player2Health: outcome.player2Health !== null ? f32(outcome.player2Health) : null,
+      playerHealth: outcome.playerHealth,
+      player2Health: outcome.player2Health !== null ? outcome.player2Health : null,
       playerHealthValues,
       pendingPerkCount: int(outcome.pendingPerkCount),
     });
