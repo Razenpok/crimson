@@ -5,12 +5,12 @@ import type { TerrainSlotTriplet } from '@crimson/terrain-slots';
 import { chooseUnlockTerrainSlots } from '@crimson/terrain-slots';
 
 // Terrain stamping RNG consumption mirrors `grim/terrain_render.py` + `docs/crimsonland-exe/terrain.md`.
-const TERRAIN_RANDOM_PRELUDE_DRAWS = 3;
-const TERRAIN_DENSITY_BASE = 800;
-const TERRAIN_DENSITY_OVERLAY = 0x23;
-const TERRAIN_DENSITY_DETAIL = 0x0F;
-const TERRAIN_DENSITY_SHIFT = 19;
-const TERRAIN_RAND_DRAWS_PER_STAMP = 3; // rotation, then position draws (see terrain renderer parity notes)
+export const TERRAIN_RANDOM_PRELUDE_DRAWS = 3;
+export const TERRAIN_DENSITY_BASE = 800;
+export const TERRAIN_DENSITY_OVERLAY = 0x23;
+export const TERRAIN_DENSITY_DETAIL = 0x0F;
+export const TERRAIN_DENSITY_SHIFT = 19;
+export const TERRAIN_RAND_DRAWS_PER_STAMP = 3; // rotation, then position draws (see terrain renderer parity notes)
 
 export function terrainStampingDraws(opts: { width: number; height: number }): number {
   // Return the number of `rand()` draws consumed by the procedural terrain stamps.

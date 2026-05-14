@@ -16,7 +16,7 @@ export class FrameTiming {
   readonly zeroGateActive: boolean;
   readonly dtSim: number;
 
-  private constructor(opts: {
+  constructor(opts: {
     dt: number;
     timeScaleActiveEntry: boolean;
     timeScaleFactor: number;
