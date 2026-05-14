@@ -2,8 +2,7 @@
 
 import * as wgl from '@wgl';
 import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources, unloadRuntimeResources } from '@grim/assets.ts';
-import { audioPlayMusic, audioShutdown, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
-import { queueTrack } from '@grim/music.ts';
+import { type AudioState, audioPlayMusic, audioShutdown, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
 import { InputState } from '@grim/input.ts';
 import { type GameState } from '@crimson/game/types.ts';
 
@@ -83,22 +82,29 @@ export class BootView {
 
   private _loadResources(): void {
     const state = this.state;
+    const shouldLoadResources = state.resources === null;
+    const shouldInitAudio = state.audio === null;
+    const resourcesPromise: Promise<RuntimeResources> = shouldLoadResources
+      ? loadRuntimeResources(state.assetsDir)
+      : Promise.resolve(state.resources!);
+    const audioPromise: Promise<AudioState> = shouldInitAudio
+      ? initAudioState(state.config, state.assetsDir, state.console)
+      : Promise.resolve(state.audio!);
 
     Promise.all([
-      state.resources === null
-        ? loadRuntimeResources(state.assetsDir)
-        : Promise.resolve(state.resources),
-      state.audio === null
-        ? initAudioState(state.config, state.assetsDir, state.console)
-        : Promise.resolve(state.audio),
+      resourcesPromise,
+      audioPromise,
     ]).then(([resources, audio]) => {
       state.resources = resources;
       state.audio = audio;
-      queueTrack(audio.music, 'gt1_ingame');
-      queueTrack(audio.music, 'gt2_harppen');
-      const loaded = resources.textures.size;
-      state.console.log.log(`runtime resources loaded: ${loaded} textures`);
-      state.console.log.flush();
+      if (shouldLoadResources) {
+        const loaded = resources.textures.size;
+        state.console.log.log(`runtime resources loaded: ${loaded} textures`);
+        state.console.log.flush();
+      }
+      if (shouldInitAudio) {
+        state.console.execLine('exec music/game_tunes.txt');
+      }
       this._fadeOutReady = true;
     }).catch((err) => {
       state.console.log.log(`boot: failed to load resources: ${err}`);
