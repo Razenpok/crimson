@@ -29,6 +29,14 @@ import type { HighScoresView } from './view.ts';
 
 const ORIGIN = wgl.makeVector2(0, 0);
 
+function pyRound(value: number): number {
+  const floorValue = Math.floor(value);
+  const frac = value - floorValue;
+  if (frac < 0.5) return floorValue;
+  if (frac > 0.5) return floorValue + 1;
+  return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+}
+
 export function drawMainPanel(
   view: HighScoresView,
   opts: {
@@ -61,23 +69,23 @@ export function drawMainPanel(
   drawSmallText(font, title, titleDrawPos, wgl.makeColor(1, 1, 1, 1));
 
   const ulW = measureSmallTextWidth(font, title);
-  const ulH = Math.max(1, int(Math.round(1.0 * scale)));
+  const ulH = Math.max(1, int(pyRound(1.0 * scale)));
   const ulPos = leftPanelTopLeft.add(new Vec2(titleX * scale, HS_TITLE_UNDERLINE_Y * scale));
   wgl.drawRectangle(
-    int(Math.round(ulPos.x)),
-    int(Math.round(ulPos.y)),
-    int(Math.round(ulW)),
+    int(pyRound(ulPos.x)),
+    int(pyRound(ulPos.y)),
+    int(pyRound(ulW)),
     ulH,
-    wgl.makeColor(1, 1, 1, 0.7),
+    wgl.makeColor(1, 1, 1, int(255 * 0.7) / 255),
   );
 
   if (modeId === GameMode.QUESTS) {
     const hardcore = view.state.config.gameplay.hardcore;
     let questColor: wgl.Color;
     if (hardcore) {
-      questColor = wgl.makeColor(250 / 255, 70 / 255, 60 / 255, 0.7);
+      questColor = wgl.makeColor(250 / 255, 70 / 255, 60 / 255, int(255 * 0.7) / 255);
     } else {
-      questColor = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 0.7);
+      questColor = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, int(255 * 0.7) / 255);
     }
     const questLevel = new QuestLevel({ major: int(questMajor), minor: int(questMinor) });
     const quest = questByLevel(questLevel);
@@ -93,7 +101,7 @@ export function drawMainPanel(
 
     const dstW = arrow.width * scale;
     const dstH = arrow.height * scale;
-    const tint = wgl.makeColor(1, 1, 1, 0.51);
+    const tint = wgl.makeColor(1, 1, 1, int(255 * 0.51) / 255);
 
     if (globalIndex > 0) {
       const src = wgl.makeRectangle(0.0, 0.0, arrow.width, arrow.height);
@@ -123,12 +131,12 @@ export function drawMainPanel(
   const frameY = leftPanelTopLeft.y + HS_SCORE_FRAME_Y * scale;
   const frameW = HS_SCORE_FRAME_W * scale;
   const frameH = HS_SCORE_FRAME_H * scale;
-  wgl.drawRectangle(int(Math.round(frameX)), int(Math.round(frameY)), int(Math.round(frameW)), int(Math.round(frameH)), wgl.makeColor(1, 1, 1, 1));
+  wgl.drawRectangle(int(pyRound(frameX)), int(pyRound(frameY)), int(pyRound(frameW)), int(pyRound(frameH)), wgl.makeColor(1, 1, 1, 1));
   wgl.drawRectangle(
-    int(Math.round(frameX + 1.0 * scale)),
-    int(Math.round(frameY + 1.0 * scale)),
-    Math.max(0, int(Math.round(frameW - 2.0 * scale))),
-    Math.max(0, int(Math.round(frameH - 2.0 * scale))),
+    int(pyRound(frameX + 1.0 * scale)),
+    int(pyRound(frameY + 1.0 * scale)),
+    Math.max(0, int(pyRound(frameW - 2.0 * scale))),
+    Math.max(0, int(pyRound(frameH - 2.0 * scale))),
     wgl.makeColor(0, 0, 0, 1),
   );
 
@@ -172,7 +180,7 @@ export function drawMainPanel(
         value = `${int(entry.scoreXp)}`;
       }
 
-      let color = wgl.makeColor(1, 1, 1, 0.7);
+      let color = wgl.makeColor(1, 1, 1, int(255 * 0.7) / 255);
       if (selectedRank !== null && int(selectedRank) === idx) {
         color = wgl.makeColor(1, 1, 1, 1);
       }
