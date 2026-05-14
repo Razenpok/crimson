@@ -287,6 +287,7 @@ export class BaseGameplayMode {
     this._paused = false;
     this._localInput = new LocalInputInterpreter();
     this._gameOverUi = new GameOverUi({
+      assetsRoot: this._assetsRoot,
       baseDir: this._baseDir,
       config: opts.config,
       preserveBugs: opts.preserveBugs ?? false,
@@ -1092,7 +1093,6 @@ export class BaseGameplayMode {
     const action = this._gameOverUi.update(dt, {
       record,
       playerNameDefault: this._playerNameDefault(),
-      resources: this.renderResources.resources,
       playSfx: (id: SfxId) => this.audioBridge.router.playSfx(id),
       rng: null,
       mouse: this._uiMousePos(),

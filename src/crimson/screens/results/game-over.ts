@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type RuntimeResources, TextureId, getTexture, runtimeResourcesFor } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
@@ -96,7 +96,6 @@ function weaponIconSrc(
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
-// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   const ix1 = int(x1);
   const iy1 = int(y1);
@@ -142,20 +141,8 @@ function easeOutCubic(t: number): number {
   return 1.0 - Math.pow(1.0 - clamped, 3);
 }
 
-function textWidth(font: SmallFontData, text: string): number {
-  return measureSmallTextWidth(font, text);
-}
-
-function drawSmall(
-  font: SmallFontData,
-  text: string,
-  pos: Vec2,
-  color: wgl.Color,
-): void {
-  drawSmallText(font, text, pos, color);
-}
-
 export class GameOverUi {
+  assetsRoot: string;
   baseDir: string;
   config: CrimsonConfig;
   preserveBugs = false;
@@ -186,7 +173,8 @@ export class GameOverUi {
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;
 
-  constructor(opts: { baseDir?: string; config: CrimsonConfig; preserveBugs?: boolean }) {
+  constructor(opts: { assetsRoot: string; baseDir?: string; config: CrimsonConfig; preserveBugs?: boolean }) {
+    this.assetsRoot = opts.assetsRoot;
     this.baseDir = opts.baseDir ?? '';
     this.config = opts.config;
     this.preserveBugs = opts.preserveBugs ?? false;
@@ -213,9 +201,7 @@ export class GameOverUi {
     this._deferNameInputUntilControlsReleased = false;
   }
 
-  close(): void {
-    // no-op
-  }
+  close(): void {}
 
   consumeEnter(): boolean {
     if (this._consumeEnter) {
@@ -274,7 +260,6 @@ export class GameOverUi {
     opts: {
       record: HighScoreRecord;
       playerNameDefault: string;
-      resources: RuntimeResources;
       playSfx?: ((id: SfxId) => void) | null;
       rng?: CrandLike | null;
       mouse?: { x: number; y: number } | null;
@@ -285,7 +270,7 @@ export class GameOverUi {
     this._cursorPulseTime += this._dt * 1.1;
     const mouse = opts.mouse ?? { x: InputState.mousePosition()[0], y: InputState.mousePosition()[1] };
     const playSfx = opts.playSfx ?? null;
-    const resources = opts.resources;
+    const resources = runtimeResourcesFor(this.assetsRoot);
 
     if (this._closing) {
       this._introMs = Math.max(0.0, this._introMs - dtMs);
@@ -313,7 +298,8 @@ export class GameOverUi {
     }
     if (this.phase === -1) {
       // If in the top 100, prompt for a name. Otherwise show score-too-low message and buttons.
-      const gameModeId = this.config.gameplay.mode;
+      const gameModeRaw = this.config.gameplay.mode;
+      const gameModeId = Object.values(GameMode).includes(gameModeRaw) ? gameModeRaw : GameMode.DEMO;
       const candidate = opts.record.copy();
       candidate.gameModeId = gameModeId;
       this._candidateRecord = candidate;
@@ -465,19 +451,15 @@ export class GameOverUi {
 
     const cardOrigin = pos.offset({ dx: 4.0 * scale });
     const modeRaw = int(record.gameModeId);
-    let modeId: number;
-    try {
-      modeId = modeRaw;
-    } catch {
-      modeId = GameMode.DEMO;
-    }
+    const modeId = Object.values(GameMode).includes(modeRaw) ? modeRaw : GameMode.DEMO;
 
     // Left column: Score + value + Rank.
     const scoreLabel = 'Score';
-    const scoreLabelW = textWidth(font, scoreLabel);
-    drawSmall(
+    const scoreLabelW = this._textWidth(font, scoreLabel, 1.0 * scale);
+    this._drawSmall(
       font, scoreLabel,
       cardOrigin.offset({ dx: 32.0 * scale - scoreLabelW * 0.5 }),
+      1.0 * scale,
       labelColor,
     );
 
@@ -488,19 +470,21 @@ export class GameOverUi {
     } else {
       scoreValue = `${int(record.scoreXp)}`;
     }
-    const scoreValueW = textWidth(font, scoreValue);
-    drawSmall(
+    const scoreValueW = this._textWidth(font, scoreValue, 1.0 * scale);
+    this._drawSmall(
       font, scoreValue,
       cardOrigin.add(new Vec2(32.0 * scale - scoreValueW * 0.5, 15.0 * scale)),
+      1.0 * scale,
       valueColor,
     );
 
     const rankValue = formatOrdinal(int(this.rank) + 1);
     const rankText = `Rank: ${rankValue}`;
-    const rankW = textWidth(font, rankText);
-    drawSmall(
+    const rankW = this._textWidth(font, rankText, 1.0 * scale);
+    this._drawSmall(
       font, rankText,
       cardOrigin.add(new Vec2(32.0 * scale - rankW * 0.5, 30.0 * scale)),
+      1.0 * scale,
       labelColor,
     );
 
@@ -517,17 +501,18 @@ export class GameOverUi {
     // Right column: Game time + gauge, or Experience in quest mode.
     const col2Pos = cardOrigin.offset({ dx: 96.0 * scale });
     if (modeId === GameMode.QUESTS) {
-      drawSmall(font, 'Experience', col2Pos, labelColor);
+      this._drawSmall(font, 'Experience', col2Pos, 1.0 * scale, labelColor);
       const xpValue = `${int(record.scoreXp)}`;
-      const xpW = textWidth(font, xpValue);
-      drawSmall(
+      const xpW = this._textWidth(font, xpValue, 1.0 * scale);
+      this._drawSmall(
         font, xpValue,
         col2Pos.add(new Vec2(32.0 * scale - xpW * 0.5, 15.0 * scale)),
+        1.0 * scale,
         labelColor,
       );
       this._hoverTime = Math.max(0.0, this._hoverTime - dtHover);
     } else {
-      drawSmall(font, 'Game time', col2Pos.offset({ dx: 6.0 * scale }), labelColor);
+      this._drawSmall(font, 'Game time', col2Pos.offset({ dx: 6.0 * scale }), 1.0 * scale, labelColor);
       const timeRectPos = col2Pos.add(new Vec2(8.0 * scale, 16.0 * scale));
       const timeRect = Rect.fromTopLeft(timeRectPos, 64.0 * scale, 29.0 * scale);
       const hoveringTime = timeRect.contains(mouse);
@@ -553,7 +538,7 @@ export class GameOverUi {
       wgl.drawTexturePro(clockPointer, clockPointerSrc, clockPointerDst, origin, rotation, texTint);
 
       const timeText = formatTimeMmSs(elapsedMs);
-      drawSmall(font, timeText, col2Pos.add(new Vec2(40.0 * scale, 19.0 * scale)), labelColor);
+      this._drawSmall(font, timeText, col2Pos.add(new Vec2(40.0 * scale, 19.0 * scale)), 1.0 * scale, labelColor);
     }
 
     // Second row: weapon icon + frags + hit ratio (suppressed while entering the name).
@@ -577,22 +562,22 @@ export class GameOverUi {
 
       const weaponId = record.mostUsedWeaponId;
       const weaponName = weaponDisplayName(weaponId, { preserveBugs: this.preserveBugs });
-      const nameW = textWidth(font, weaponName);
+      const nameW = this._textWidth(font, weaponName, 1.0 * scale);
       const namePos = new Vec2(
         cardOrigin.x + Math.max(0.0, 32.0 * scale - nameW * 0.5),
         rowPos.y + 32.0 * scale,
       );
-      drawSmall(font, weaponName, namePos, hintColor);
+      this._drawSmall(font, weaponName, namePos, 1.0 * scale, hintColor);
 
       const fragsText = `Frags: ${int(record.creatureKillCount)}`;
       const statsPos = rowPos.offset({ dx: 110.0 * scale });
-      drawSmall(font, fragsText, statsPos.offset({ dy: 1.0 * scale }), labelColor);
+      this._drawSmall(font, fragsText, statsPos.offset({ dy: 1.0 * scale }), 1.0 * scale, labelColor);
 
       const fired = Math.max(0, int(record.shotsFired));
       const hit = Math.max(0, int(record.shotsHit));
       const ratio = fired > 0 ? int((hit * 100) / fired) : 0;
       const hitText = `Hit %: ${ratio}%`;
-      drawSmall(font, hitText, statsPos.offset({ dy: 15.0 * scale }), labelColor);
+      this._drawSmall(font, hitText, statsPos.offset({ dy: 15.0 * scale }), 1.0 * scale, labelColor);
 
       const hitRectPos = statsPos.offset({ dy: 15.0 * scale });
       const hitRect = Rect.fromTopLeft(hitRectPos, 64.0 * scale, 17.0 * scale);
@@ -612,20 +597,22 @@ export class GameOverUi {
     if (this._hoverWeapon > 0.5) {
       const t = (this._hoverWeapon - 0.5) * 2.0;
       const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, int(255 * alpha * t) / 255);
-      drawSmall(
+      this._drawSmall(
         font,
         'Most used weapon during the game',
         tooltipPos.offset({ dx: -20.0 * scale }),
+        1.0 * scale,
         col,
       );
     }
     if (this._hoverTime > 0.5) {
       const t = (this._hoverTime - 0.5) * 2.0;
       const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, int(255 * alpha * t) / 255);
-      drawSmall(
+      this._drawSmall(
         font,
         'The time the game lasted',
         tooltipPos.offset({ dx: 12.0 * scale }),
+        1.0 * scale,
         col,
       );
     }
@@ -635,10 +622,11 @@ export class GameOverUi {
       const hitRatioTooltip = this.preserveBugs
         ? 'The % of shot bullets hit the target'
         : 'The % of bullets that hit the target';
-      drawSmall(
+      this._drawSmall(
         font,
         hitRatioTooltip,
         tooltipPos.offset({ dx: -22.0 * scale }),
+        1.0 * scale,
         col,
       );
     }
@@ -687,14 +675,14 @@ export class GameOverUi {
 
     if (this.phase === 0) {
       const formPos = bannerPos.add(new Vec2(8.0 * scale, 84.0 * scale));
-      drawSmall(
+      this._drawSmall(
         font, 'State your name, trooper!',
         formPos.offset({ dx: 42.0 * scale }),
+        1.0 * scale,
         COLOR_TEXT,
       );
 
       const inputPos = formPos.offset({ dy: 40.0 * scale });
-      // Input box outline
       wgl.drawRectangle(
         int(inputPos.x),
         int(inputPos.y),
@@ -723,7 +711,6 @@ export class GameOverUi {
         int(INPUT_BOX_H * scale),
         wgl.makeColor(1, 1, 1, 1),
       );
-      // Input box fill
       wgl.drawRectangle(
         int(inputPos.x + 1.0 * scale),
         int(inputPos.y + 1.0 * scale),
@@ -736,13 +723,12 @@ export class GameOverUi {
         inputPos.add(new Vec2(4.0 * scale, 2.0 * scale)),
         { scale: 1.0 * scale, color: COLOR_TEXT_MUTED },
       );
-      // Caret
       let caretAlpha = 1.0;
       if (Math.sin(performance.now() * 0.004) > 0.0) {
         caretAlpha = 0.4;
       }
       const caretColor = wgl.makeColor(1.0, 1.0, 1.0, int(255 * caretAlpha) / 255);
-      const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
+      const caretX = inputPos.x + 4.0 * scale + this._textWidth(font, this.inputText.slice(0, this.inputCaret), 1.0 * scale);
       wgl.drawRectangle(
         int(caretX),
         int(inputPos.y + 2.0 * scale),
@@ -772,10 +758,11 @@ export class GameOverUi {
         (this.rank < TABLE_MAX ? 80.0 : 78.0) * scale,
       ));
       if (this.rank >= TABLE_MAX && bannerKind === 'reaper') {
-        drawSmall(
+        this._drawSmall(
           font,
           'Score too low for top100.',
           bannerPos.add(new Vec2(38.0 * scale, 62.0 * scale)),
+          1.0 * scale,
           wgl.makeColor(200 / 255, 200 / 255, 200 / 255, 1.0),
         );
       }
