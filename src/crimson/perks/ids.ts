@@ -533,7 +533,7 @@ export function perkDisplayName(
 ): string {
   const violenceDisabled = opts.violenceDisabled ?? 0;
   const preserveBugs = opts.preserveBugs ?? false;
-  if (perkId === PerkId.BLOODY_MESS_QUICK_LEARNER && violenceDisabled !== 0) {
+  if (perkId === PerkId.BLOODY_MESS_QUICK_LEARNER && int(violenceDisabled) !== 0) {
     return QUICK_LEARNER_NAME;
   }
   const entry = PERK_BY_ID.get(perkId);
@@ -551,7 +551,7 @@ export function perkDisplayDescription(
 ): string {
   const violenceDisabled = opts.violenceDisabled ?? 0;
   const preserveBugs = opts.preserveBugs ?? false;
-  if (perkId === PerkId.BLOODY_MESS_QUICK_LEARNER && violenceDisabled !== 0) {
+  if (perkId === PerkId.BLOODY_MESS_QUICK_LEARNER && int(violenceDisabled) !== 0) {
     return QUICK_LEARNER_DESCRIPTION;
   }
   const entry = PERK_BY_ID.get(perkId);
