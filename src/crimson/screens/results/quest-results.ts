@@ -5,7 +5,7 @@ import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture, runtimeResourcesFor } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
+import { type CrimsonConfig, fxDetailEnabled, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { Crand, type CrandLike } from '@grim/rand.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
@@ -88,7 +88,7 @@ const COLOR_GREEN = wgl.makeColor(25 / 255, 200 / 255, 25 / 255, 1.0);
 const COLOR_UI_ACCENT = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 1.0);
 
 const KEY_ENTER = 13;
-const KEY_KP_ENTER = 13;
+const KEY_KP_ENTER = 335;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const KEY_H = 72;
@@ -657,7 +657,7 @@ export class QuestResultsUi {
     const panelLayout = this._panelLayout({ screenW, scale });
     const panel = panelLayout.panel;
 
-    const fxDetail = this.config.display.fxDetail[0] ?? false;
+    const fxDetail = fxDetailEnabled(this.config.display, 0);
     drawClassicMenuPanel(
       getTexture(resources, TextureId.UI_MENU_PANEL),
       { dst: wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h), tint: wgl.makeColor(1, 1, 1, 1), shadow: fxDetail },

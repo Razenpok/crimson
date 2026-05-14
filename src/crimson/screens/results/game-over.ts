@@ -5,7 +5,7 @@ import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture, runtimeResourcesFor } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
+import { type CrimsonConfig, fxDetailEnabled, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { Crand, type CrandLike } from '@grim/rand.ts';
 import { GameMode } from '@crimson/game-modes.ts';
@@ -73,7 +73,7 @@ const COLOR_SCORE_LABEL = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 1.0);
 const COLOR_SCORE_VALUE = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
 
 const KEY_ENTER = 13;
-const KEY_NUMPAD_ENTER = 13;
+const KEY_NUMPAD_ENTER = 335;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const MOUSE_BUTTON_LEFT = 0;
@@ -655,7 +655,7 @@ export class GameOverUi {
     const panelTopLeft = panelLayout.topLeft;
 
     // Panel background
-    const fxDetail = this.config.display.fxDetail[0] ?? false;
+    const fxDetail = fxDetailEnabled(this.config.display, 0);
     drawClassicMenuPanel(
       getTexture(resources, TextureId.UI_MENU_PANEL),
       { dst: wgl.makeRectangle(panel.x, panel.y, panel.w, panel.h), tint: wgl.makeColor(1, 1, 1, 1), shadow: fxDetail },
