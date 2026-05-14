@@ -10,13 +10,13 @@ import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } 
 import { buildWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
 import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const DIM_COLOR = wgl.makeColor(1, 1, 1, 0.7);
 
 function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
-  // WebGL replacement for raylib's `draw_rectangle_lines_ex`.
   const thick = Math.max(1, int(lineThick));
   const x = int(rect.x);
   const y = int(rect.y);
@@ -26,6 +26,14 @@ function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl
   wgl.drawRectangle(x, y + h - thick, w, thick, color);
   wgl.drawRectangle(x, y, thick, h, color);
   wgl.drawRectangle(x + w - thick, y, thick, h, color);
+}
+
+function pyRound(value: number): number {
+  const floorValue = Math.floor(value);
+  const frac = value - floorValue;
+  if (frac < 0.5) return floorValue;
+  if (frac > 0.5) return floorValue + 1;
+  return floorValue % 2 === 0 ? floorValue : floorValue + 1;
 }
 
 export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
@@ -96,15 +104,15 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const frameW = 250.0 * scale;
     const frameH = 164.0 * scale;
     wgl.drawRectangle(
-      int(Math.round(frameX)), int(Math.round(frameY)),
-      int(Math.round(frameW)), int(Math.round(frameH)),
+      int(pyRound(frameX)), int(pyRound(frameY)),
+      int(pyRound(frameW)), int(pyRound(frameH)),
       wgl.makeColor(1, 1, 1, 1),
     );
     wgl.drawRectangle(
-      int(Math.round(frameX + 1.0 * scale)),
-      int(Math.round(frameY + 1.0 * scale)),
-      Math.max(0, int(Math.round(frameW - 2.0 * scale))),
-      Math.max(0, int(Math.round(frameH - 2.0 * scale))),
+      int(pyRound(frameX + 1.0 * scale)),
+      int(pyRound(frameY + 1.0 * scale)),
+      Math.max(0, int(pyRound(frameW - 2.0 * scale))),
+      Math.max(0, int(pyRound(frameH - 2.0 * scale))),
       wgl.makeColor(0, 0, 0, 1),
     );
 
@@ -240,7 +248,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _drawWicon(iconIndex: number, pos: Vec2, scale: number): void {
-    const resources = this.state.resources!;
+    const resources = requireRuntimeResources(this.state);
     const tex = getTexture(resources, TextureId.UI_WICONS);
     const idx = int(iconIndex);
     if (idx < 0 || idx > 31) return;
