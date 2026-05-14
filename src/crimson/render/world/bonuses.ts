@@ -65,7 +65,7 @@ export function drawBonusPickups(
     const screen = WorldRenderCtx.worldToScreenWith(bonus.pos, camera, viewScale);
     const bubbleDst = wgl.makeRectangle(screen.x, screen.y, bubbleSize, bubbleSize);
     const bubbleOrigin = wgl.makeVector2(bubbleSize * 0.5, bubbleSize * 0.5);
-    const tint = wgl.makeColor(1, 1, 1, bubbleAlpha);
+    const tint = wgl.makeColor(1, 1, 1, int(bubbleAlpha * 255.0 + 0.5) / 255);
     wgl.drawTexturePro(bonusesTexture, bubbleSrc, bubbleDst, bubbleOrigin, 0.0, tint);
 
     const bonusId = bonus.bonusId;
@@ -123,8 +123,8 @@ export function drawBonusHoverLabels(
   const textScale = 1.0;
   const screenW = wgl.getScreenWidth();
 
-  const shadow = wgl.makeColor(0, 0, 0, (180 / 255) * alpha);
-  const color = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, alpha);
+  const shadow = wgl.makeColor(0, 0, 0, int(180 * alpha + 0.5) / 255);
+  const color = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, int(255 * alpha + 0.5) / 255);
 
   const bonusPool = frame.state.bonusPool;
   for (const player of frame.players) {
