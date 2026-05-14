@@ -19,6 +19,7 @@ function cellKey(cx: number, cy: number): string {
 export class CreatureSpatialHash {
   creatures: readonly CreatureState[];
   isCollidable: (creature: CreatureState) => boolean;
+  bucketSize: number;
   private _bucketSize: number;
   private _cells: Map<string, number[]>;
   private _cellByIndex: (string | null)[];
@@ -32,6 +33,7 @@ export class CreatureSpatialHash {
     this.creatures = opts.creatures;
     this.isCollidable = opts.isCollidable;
     const bucketSize = opts.bucketSize ?? _SPATIAL_BUCKET_SIZE;
+    this.bucketSize = bucketSize;
     this._bucketSize = bucketSize > 0.0 ? bucketSize : _SPATIAL_BUCKET_SIZE;
     this._cells = new Map();
     this._cellByIndex = [];
@@ -69,10 +71,10 @@ export class CreatureSpatialHash {
   }
 
   syncIndex(index: number): void {
-    if (!(index >= 0 && index < this.creatures.length)) {
+    if (!(0 <= int(index) && int(index) < this.creatures.length)) {
       return;
     }
-    const idx = index;
+    const idx = int(index);
     const creature = this.creatures[idx];
     const previousCell = this._cellByIndex[idx];
     if (!this.isCollidable(creature)) {
@@ -142,7 +144,7 @@ export class CreatureSpatialHash {
     if (bucket === undefined) {
       return;
     }
-    const i = bucket.indexOf(index);
+    const i = bucket.indexOf(int(index));
     if (i === -1) {
       return;
     }
