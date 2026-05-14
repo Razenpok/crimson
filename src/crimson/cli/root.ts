@@ -38,7 +38,7 @@ export function safeRelpath(name: string): string {
   }
   for (const part of parts) {
     if (part === '.' || part === '..') {
-      throw new Error(`unsafe path part: ${JSON.stringify(part)}`);
+      throw new Error(`unsafe path part: ${pythonAsciiRepr(part)}`);
     }
   }
   return parts.join('/');
@@ -140,7 +140,7 @@ export function cmdQuests(opts: {
   const quest = QUEST_DEFS.get(opts.level);
   if (quest === undefined) {
     const available = [...QUEST_BUILDERS.keys()].sort().join(', ');
-    throw new Error(`unknown level ${JSON.stringify(opts.level)}. Available: ${available}`);
+    throw new Error(`unknown level ${pythonAsciiRepr(opts.level)}. Available: ${available}`);
   }
   let entries = quest.builder(
     new QuestContext({ width, height, playerCount }),
@@ -248,7 +248,14 @@ export function parseIntAuto(text: string): number {
       : radix === 8
         ? /^[0-7]+$/
         : /^[01]+$/;
-  const validUnderscores = /^[0-9a-fA-F]+(?:_[0-9a-fA-F]+)*$/.test(digits);
+  const underscorePattern = radix === 16
+    ? /^[0-9a-fA-F]+(?:_[0-9a-fA-F]+)*$/
+    : radix === 10
+      ? /^[0-9]+(?:_[0-9]+)*$/
+      : radix === 8
+        ? /^[0-7]+(?:_[0-7]+)*$/
+        : /^[01]+(?:_[01]+)*$/;
+  const validUnderscores = underscorePattern.test(digits);
   const decimalWithInvalidLeadingZero = radix === 10 && normalizedDigits.length > 1 && normalizedDigits.startsWith('0');
   if (
     normalizedDigits.length === 0 ||
@@ -256,11 +263,11 @@ export function parseIntAuto(text: string): number {
     !validUnderscores ||
     decimalWithInvalidLeadingZero
   ) {
-    throw new Error(`invalid integer: ${JSON.stringify(text)}`);
+    throw new Error(`invalid integer: ${pythonAsciiRepr(text)}`);
   }
   const value = Number.parseInt(sign + normalizedDigits, radix);
   if (Number.isNaN(value)) {
-    throw new Error(`invalid integer: ${JSON.stringify(text)}`);
+    throw new Error(`invalid integer: ${pythonAsciiRepr(text)}`);
   }
   return value;
 }
@@ -276,14 +283,16 @@ export function parseVec2(text: string): Vec2 {
   } else {
     const parts = raw.split(/\s+/);
     if (parts.length !== 2) {
-      throw new Error(`invalid vec2: ${JSON.stringify(text)} (expected 'x,y' or 'x y')`);
+      throw new Error(`invalid vec2: ${pythonAsciiRepr(text)} (expected 'x,y' or 'x y')`);
     }
     [left, right] = parts;
   }
-  const x = Number(left.trim());
-  const y = Number(right.trim());
-  if (Number.isNaN(x) || Number.isNaN(y)) {
-    throw new Error(`invalid vec2: ${JSON.stringify(text)}`);
+  const leftText = left.trim();
+  const rightText = right.trim();
+  const x = Number(leftText);
+  const y = Number(rightText);
+  if (leftText.length === 0 || rightText.length === 0 || Number.isNaN(x) || Number.isNaN(y)) {
+    throw new Error(`invalid vec2: ${pythonAsciiRepr(text)}`);
   }
   return new Vec2(x, y);
 }
