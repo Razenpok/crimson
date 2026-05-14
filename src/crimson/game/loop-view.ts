@@ -51,7 +51,7 @@ import { TutorialMode } from '@crimson/modes/tutorial-mode.ts';
 
 import { DEMO_PURCHASE_URL, DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
 
-import { type GameStatusPersist } from './runtime.ts';
+import { type GameStatus } from '@crimson/persistence/save-status.ts';
 
 const KEY_F4 = 115;
 const KEY_P = 80;
@@ -139,7 +139,7 @@ function isGameplayScreen(view: Screen | null): view is GameplayScreen {
 
 export class GameLoopView implements View {
   readonly state: GameState;
-  private _status: GameStatusPersist;
+  private _status: GameStatus;
 
   private _boot: BootView;
   private _demo: DemoView;
@@ -158,7 +158,7 @@ export class GameLoopView implements View {
   private _screenshotRequested = false;
   private _runtimeUpdatesPerFrame = 0;
 
-  constructor(state: GameState, status: GameStatusPersist) {
+  constructor(state: GameState, status: GameStatus) {
     this.state = state;
     this._status = status;
 

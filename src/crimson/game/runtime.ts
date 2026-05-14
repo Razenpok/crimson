@@ -14,7 +14,7 @@ import { loadMusicTrack, queueTrack } from '@grim/music.ts';
 
 import { GameMode } from '@crimson/game-modes.ts';
 import { setDebugEnabled } from '@crimson/debug.ts';
-import { ensureGameStatus, type GameStatus } from '@crimson/persistence/save-status.ts';
+import { ensureGameStatus } from '@crimson/persistence/save-status.ts';
 import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
   DEMO_QUEST_GRACE_TIME_MS,
@@ -54,11 +54,8 @@ function applyDebugConsoleDefaults(console: ConsoleState, debug: boolean): void 
   console.registerCvar('cv_showFPS', '1');
 }
 
-export type GameStatusPersist = GameStatus;
-
 function bootCommandHandlers(
   state: GameState,
-  status: GameStatusPersist,
 ): Record<string, CommandHandler> {
   const con = state.console;
 
@@ -124,10 +121,15 @@ function bootCommandHandlers(
       return;
     }
     const url = args[0];
+    let ok = false;
     try {
-      window.open(url, '_blank');
-      con.log.log(`Launching web browser (${url})..`);
+      ok = window.open(url, '_blank') !== null;
     } catch {
+      ok = false;
+    }
+    if (ok) {
+      con.log.log(`Launching web browser (${url})..`);
+    } else {
       con.log.log('Failed to launch web browser.');
     }
   }
@@ -153,10 +155,10 @@ function bootCommandHandlers(
       value = 0;
     }
     if (!Number.isFinite(value)) value = 0;
-    status.gameSequenceId = Math.max(0, value);
-    status.saveIfDirty();
+    state.status.gameSequenceId = Math.max(0, value);
+    state.status.saveIfDirty();
     con.log.log(
-      `demo trial: playtime=${status.gameSequenceId}ms (total ${DEMO_TOTAL_PLAY_TIME_MS}ms)`,
+      `demo trial: playtime=${state.status.gameSequenceId}ms (total ${DEMO_TOTAL_PLAY_TIME_MS}ms)`,
     );
   }
 
@@ -179,8 +181,8 @@ function bootCommandHandlers(
   }
 
   function cmdDemoTrialReset(_args: string[]): void {
-    status.gameSequenceId = 0;
-    status.saveIfDirty();
+    state.status.gameSequenceId = 0;
+    state.status.saveIfDirty();
     state.demoTrialElapsedMs = 0;
     con.log.log('demo trial: timers reset');
   }
@@ -198,7 +200,7 @@ function bootCommandHandlers(
     const info = demoTrialOverlayInfo({
       demoBuild: state.demoEnabled,
       gameModeId: modeId,
-      globalPlaytimeMs: int(status.gameSequenceId),
+      globalPlaytimeMs: int(state.status.gameSequenceId),
       questGraceElapsedMs: int(state.demoTrialElapsedMs),
       questLevel,
     });
@@ -208,7 +210,7 @@ function bootCommandHandlers(
         `demo=${state.demoEnabled ? 1 : 0} ` +
         `mode=${modeId} ` +
         `quest=${questLevel !== null ? `${questLevel.major}.${questLevel.minor}` : '0.0'} ` +
-        `playtime=${status.gameSequenceId}ms ` +
+        `playtime=${state.status.gameSequenceId}ms ` +
         `grace=${state.demoTrialElapsedMs}ms ` +
         `visible=${info.visible ? 1 : 0} ` +
         `kind=${info.kind} ` +
@@ -261,6 +263,13 @@ function bootCommandHandlers(
   };
 }
 
+function resolveAssetsDir(config: GameConfig): string {
+  if (config.assetsDir !== null) {
+    return config.assetsDir;
+  }
+  return config.baseDir;
+}
+
 export function runGame(
   config: GameConfig,
 ): { view: GameLoopView; state: GameState } {
@@ -276,7 +285,7 @@ export function runGame(
 
   const seed = config.seed ?? ((Date.now() * 0xDEAD + 0xBEEF) >>> 0);
   const rng = new Crand(seed);
-  const assetsDir = config.assetsDir ?? config.baseDir;
+  const assetsDir = resolveAssetsDir(config);
 
   const console = createConsole(config.baseDir, assetsDir);
   const status = ensureGameStatus(config.baseDir);
@@ -298,7 +307,7 @@ export function runGame(
     pendingNetworkSession: config.pendingNetworkSession,
   });
 
-  const handlers = bootCommandHandlers(state, status);
+  const handlers = bootCommandHandlers(state);
   registerBootCommands(console, handlers);
   registerCoreCvars(console, width, height);
   applyDebugConsoleDefaults(console, config.debug);
@@ -307,6 +316,7 @@ export function runGame(
   console.log.log(
     `config: ${cfg.display.width}x${cfg.display.height} windowed=${cfg.display.windowed}`,
   );
+  console.log.log(`status: ${status.path.split(/[\\/]/).pop() ?? status.path} loaded`);
   console.log.log(`assets: ${assetsDir}`);
   void runtimeDownloadTargets(assetsDir);
   requireRuntimeAssets(assetsDir);
