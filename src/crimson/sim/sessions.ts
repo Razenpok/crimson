@@ -13,7 +13,6 @@ import { PlayerInput } from './input.ts';
 import { normalizeInputFrame } from './input-frame.ts';
 import type {
   GameCommand,
-  PerkPickCommand,
 } from './input-providers.ts';
 import { planWorldPresentationStep } from './presentation-step.ts';
 import {
@@ -35,9 +34,9 @@ import type { WorldState } from './world-state.ts';
 // ---------------------------------------------------------------------------
 
 export class DeterministicSessionTick {
-  readonly step: DeterministicStepResult;
-  readonly elapsedMs: number;
-  readonly creatureCountWorldStep: number;
+  step: DeterministicStepResult;
+  elapsedMs: number;
+  creatureCountWorldStep: number;
 
   constructor(opts: {
     step: DeterministicStepResult;
@@ -376,7 +375,7 @@ export class DeterministicSession {
       for (const cmd of commands) {
         switch (cmd.tag) {
           case 'perk_pick': {
-            const ci = (cmd as PerkPickCommand).choiceIndex;
+            const ci = cmd.choiceIndex;
             const picked = perkSelectionPick(
               this.world.state,
               this.world.players,
