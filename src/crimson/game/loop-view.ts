@@ -813,9 +813,7 @@ export class GameLoopView implements View {
   private _prepareQuestRun(gameplay: QuestMode): void {
     const level = this.state.pendingQuestLevel;
     if (level === null) return;
-    if (typeof gameplay.startRun === 'function') {
-      gameplay.startRun(level, { status: this._status });
-    }
+    gameplay.startRun(level, { status: this._status });
   }
 
   private _resolveGameplayAction(
@@ -840,13 +838,11 @@ export class GameLoopView implements View {
     gameplay.closeRequested = false;
 
     if (gameplay instanceof QuestMode) {
-      if (typeof gameplay.consumeOutcome === 'function') {
-        const outcome = gameplay.consumeOutcome();
-        if (outcome !== null) {
-          this.state.questOutcome = outcome;
-          if (outcome.kind === 'completed') return 'quest_results';
-          if (outcome.kind === 'failed') return 'quest_failed';
-        }
+      const outcome = gameplay.consumeOutcome();
+      if (outcome !== null) {
+        this.state.questOutcome = outcome;
+        if (outcome.kind === 'completed') return 'quest_results';
+        if (outcome.kind === 'failed') return 'quest_failed';
       }
       return 'back_to_menu';
     }
