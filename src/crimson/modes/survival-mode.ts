@@ -64,6 +64,8 @@ export class SurvivalMode extends BaseGameplayMode {
   private _lanLastTickIndex = -1;
 
   constructor(opts: {
+    assetsUrl?: string;
+    preserveBugs?: boolean;
     config: CrimsonConfig;
     console?: ConsoleState | null;
     audio?: AudioState | null;
@@ -75,6 +77,8 @@ export class SurvivalMode extends BaseGameplayMode {
       demoModeActive: false,
       questFailRetryCount: 0,
       hardcore: false,
+      assetsUrl: opts.assetsUrl,
+      preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,
       audio: opts.audio ?? null,

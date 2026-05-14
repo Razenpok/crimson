@@ -38,6 +38,8 @@ const WORLD_SIZE = 1024.0;
 
 export class TypoShooterMode extends BaseGameplayMode {
   constructor(opts: {
+    assetsUrl?: string;
+    preserveBugs?: boolean;
     config: CrimsonConfig;
     console?: ConsoleState | null;
     audio?: AudioState | null;
@@ -49,6 +51,8 @@ export class TypoShooterMode extends BaseGameplayMode {
       demoModeActive: false,
       questFailRetryCount: 0,
       hardcore: false,
+      assetsUrl: opts.assetsUrl,
+      preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,
       audio: opts.audio ?? null,

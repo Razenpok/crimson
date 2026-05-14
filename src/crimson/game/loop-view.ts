@@ -1,7 +1,7 @@
 // Port of crimson/game/loop_view.py
 
 import * as wgl from '@wgl';
-import { type View, ViewContext } from '@grim/view.ts';
+import { type View } from '@grim/view.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { audioStopMusic } from '@grim/audio.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
@@ -119,9 +119,8 @@ function setGammaRampGain(shader: GammaRampShader, _gainLoc: number, gain: numbe
   shader.setGain(Math.max(0.0, gain));
 }
 
-function modeViewContext(state: GameState): ViewContext {
-  const preserveBugs = state.preserveBugs;
-  return new ViewContext({ assetsUrl: state.assetsDir, preserveBugs });
+function modeViewOptions(state: GameState): { assetsUrl: string; preserveBugs: boolean } {
+  return { assetsUrl: state.assetsDir, preserveBugs: state.preserveBugs };
 }
 
 function isGameplayScreen(view: Screen | null): view is GameplayScreen {
@@ -163,12 +162,14 @@ export class GameLoopView implements View {
     this._menu = new MenuView(state);
 
     const gs = state;
+    const modeOptions = modeViewOptions(state);
 
     this._frontViews = {
       open_play_game: new PlayGameMenuView(gs),
       open_quests: new QuestsMenuView(gs),
       open_pause_menu: new PauseMenuView(gs),
       start_quest: new QuestMode({
+        ...modeOptions,
         demoModeActive: state.demoEnabled,
         config: state.config,
         console: state.console,
@@ -180,24 +181,28 @@ export class GameLoopView implements View {
       end_note: new EndNoteView(gs),
       open_high_scores: new HighScoresView(gs),
       start_survival: new SurvivalMode({
+        ...modeOptions,
         config: state.config,
         console: state.console,
         audio: state.audio,
         audioRng: state.rng,
       }),
       start_rush: new RushMode({
+        ...modeOptions,
         config: state.config,
         console: state.console,
         audio: state.audio,
         audioRng: state.rng,
       }),
       start_typo: new TypoShooterMode({
+        ...modeOptions,
         config: state.config,
         console: state.console,
         audio: state.audio,
         audioRng: state.rng,
       }),
       start_tutorial: new TutorialMode({
+        ...modeOptions,
         demoModeActive: state.demoEnabled,
         config: state.config,
         console: state.console,
@@ -889,6 +894,10 @@ export class GameLoopView implements View {
       this.state.menuGroundCamera = camera;
       return;
     }
+    if (previous !== null && previous.renderTarget !== null) {
+      wgl.unloadRenderTexture(previous.renderTarget);
+      previous.renderTarget = null;
+    }
     this.state.menuGround = ground;
     this.state.menuGroundCamera = camera;
   }
@@ -971,8 +980,13 @@ export class GameLoopView implements View {
     if (overlay !== null) {
       overlay.close();
     }
+    if (this.state.menuGround !== null && this.state.menuGround.renderTarget !== null) {
+      wgl.unloadRenderTexture(this.state.menuGround.renderTarget);
+      this.state.menuGround.renderTarget = null;
+    }
     this.state.menuGround = null;
     this.state.menuGroundCamera = null;
     this._boot.close();
+    this.state.console.close();
   }
 }

@@ -58,6 +58,8 @@ export class TutorialMode extends BaseGameplayMode {
   private _frameInputState: PlayerInput | null = null;
 
   constructor(opts: {
+    assetsUrl?: string;
+    preserveBugs?: boolean;
     demoModeActive?: boolean;
     config: CrimsonConfig;
     console?: ConsoleState | null;
@@ -70,6 +72,8 @@ export class TutorialMode extends BaseGameplayMode {
       demoModeActive: opts.demoModeActive ?? false,
       questFailRetryCount: 0,
       hardcore: false,
+      assetsUrl: opts.assetsUrl,
+      preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,
       audio: opts.audio ?? null,

@@ -40,6 +40,8 @@ export class RushMode extends BaseGameplayMode {
   protected _simSession: DeterministicSession | null = null;
 
   constructor(opts: {
+    assetsUrl?: string;
+    preserveBugs?: boolean;
     config: CrimsonConfig;
     console?: ConsoleState | null;
     audio?: AudioState | null;
@@ -51,6 +53,8 @@ export class RushMode extends BaseGameplayMode {
       demoModeActive: false,
       questFailRetryCount: 0,
       hardcore: false,
+      assetsUrl: opts.assetsUrl,
+      preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,
       audio: opts.audio ?? null,
