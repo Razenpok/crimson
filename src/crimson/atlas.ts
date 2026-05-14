@@ -12,7 +12,7 @@
 // This module replicates the atlas cutting: given a grid size and frame index,
 // compute UVs or crop subimages.
 
-const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
+export const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
   0x80: 2,
   0x40: 4,
   0x20: 8,
@@ -20,7 +20,7 @@ const GRID_SIZE_BY_CODE: Readonly<Record<number, number>> = {
 };
 
 // DAT_004755f0 table (index -> (cell_code, group_id)) extracted from crimsonland.exe
-const SPRITE_TABLE: readonly (readonly [number, number])[] = [
+export const SPRITE_TABLE: readonly (readonly [number, number])[] = [
   [0x80, 0x2],
   [0x80, 0x3],
   [0x20, 0x0],
