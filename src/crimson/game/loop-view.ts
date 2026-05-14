@@ -51,8 +51,6 @@ import { TutorialMode } from '@crimson/modes/tutorial-mode.ts';
 
 import { DEMO_PURCHASE_URL, DemoTrialOverlayUi } from '@crimson/ui/demo-trial-overlay.ts';
 
-import { type GameStatus } from '@crimson/persistence/save-status.ts';
-
 const KEY_F4 = 115;
 const KEY_P = 80;
 const KEY_ESCAPE = 27;
@@ -139,7 +137,6 @@ function isGameplayScreen(view: Screen | null): view is GameplayScreen {
 
 export class GameLoopView implements View {
   readonly state: GameState;
-  private _status: GameStatus;
 
   private _boot: BootView;
   private _demo: DemoView;
@@ -158,9 +155,8 @@ export class GameLoopView implements View {
   private _screenshotRequested = false;
   private _runtimeUpdatesPerFrame = 0;
 
-  constructor(state: GameState, status: GameStatus) {
+  constructor(state: GameState) {
     this.state = state;
-    this._status = status;
 
     this._boot = new BootView(state);
     this._demo = new DemoView(state);
@@ -426,23 +422,23 @@ export class GameLoopView implements View {
           this._active = pauseView;
           return;
         }
-        if (this.state.pauseBackground !== null) {
-          this._frontStack.push(fa);
-          pauseView.open();
-          this._frontActive = pauseView;
-          this._active = pauseView;
+        if (this.state.pauseBackground === null) {
+          // Options panel uses open_pause_menu as back_action; when no game is
+          // running, treat it like back_to_menu.
+          this._frontActive!.close();
+          this._frontActive = null;
+          while (this._frontStack.length > 0) {
+            this._frontStack.pop()!.close();
+          }
+          this._menu.open();
+          this._active = this._menu;
+          this._menuActive = true;
           return;
         }
-        // Options panel uses open_pause_menu as back_action; when no game is
-        // running, treat it like back_to_menu.
-        this._frontActive!.close();
-        this._frontActive = null;
-        while (this._frontStack.length > 0) {
-          this._frontStack.pop()!.close();
-        }
-        this._menu.open();
-        this._active = this._menu;
-        this._menuActive = true;
+        fa.close();
+        pauseView.open();
+        this._frontActive = pauseView;
+        this._active = pauseView;
         return;
       }
 
@@ -460,7 +456,7 @@ export class GameLoopView implements View {
         };
         const modeId = modeMap[action];
         if (modeId !== undefined) {
-          this._status.incrementModePlayCountForMode(modeId);
+          this.state.status.incrementModePlayCountForMode(modeId);
         }
       }
 
@@ -615,7 +611,7 @@ export class GameLoopView implements View {
     if (this._gameplayScreen(this._frontActive) === null) return;
     const deltaMs = int(dt * 1000.0);
     if (deltaMs <= 0) return;
-    this._status.gameSequenceId = int(this._status.gameSequenceId + deltaMs);
+    this.state.status.gameSequenceId = int(this.state.status.gameSequenceId + deltaMs);
   }
 
   private _syncConsoleElapsedMs(): void {
@@ -680,7 +676,7 @@ export class GameLoopView implements View {
     const current = demoTrialOverlayInfo({
       demoBuild: true,
       gameModeId: modeId,
-      globalPlaytimeMs: int(this._status.gameSequenceId),
+      globalPlaytimeMs: int(this.state.status.gameSequenceId),
       questGraceElapsedMs: int(this.state.demoTrialElapsedMs),
       questLevel,
     });
@@ -691,20 +687,20 @@ export class GameLoopView implements View {
       demoBuild: true,
       gameModeId: modeId,
       overlayVisible: current.visible,
-      globalPlaytimeMs: int(this._status.gameSequenceId),
+      globalPlaytimeMs: int(this.state.status.gameSequenceId),
       questGraceElapsedMs: int(this.state.demoTrialElapsedMs),
       dtMs: int(dtMs),
     });
 
-    if (usedMs !== int(this._status.gameSequenceId)) {
-      this._status.gameSequenceId = int(usedMs);
+    if (usedMs !== int(this.state.status.gameSequenceId)) {
+      this.state.status.gameSequenceId = int(usedMs);
     }
     this.state.demoTrialElapsedMs = int(graceMs);
 
     const info = demoTrialOverlayInfo({
       demoBuild: true,
       gameModeId: modeId,
-      globalPlaytimeMs: int(this._status.gameSequenceId),
+      globalPlaytimeMs: int(this.state.status.gameSequenceId),
       questGraceElapsedMs: int(this.state.demoTrialElapsedMs),
       questLevel,
     });
@@ -788,7 +784,7 @@ export class GameLoopView implements View {
 
     this._configureLanRuntime(gameplay);
 
-    gameplay.bindStatus(this._status);
+    gameplay.bindStatus(this.state.status);
     gameplay.bindAudio(this.state.audio, this.state.rng);
     gameplay.setRtxMode(this.state.rtxMode);
     gameplay.bindScreenFade(this.state);
@@ -813,7 +809,7 @@ export class GameLoopView implements View {
   private _prepareQuestRun(gameplay: QuestMode): void {
     const level = this.state.pendingQuestLevel;
     if (level === null) return;
-    gameplay.startRun(level, { status: this._status });
+    gameplay.startRun(level, { status: this.state.status });
   }
 
   private _resolveGameplayAction(

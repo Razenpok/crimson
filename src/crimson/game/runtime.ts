@@ -326,7 +326,7 @@ export function runGame(
   console.execLine(`exec ${AUTOEXEC_NAME}`);
   console.log.flush();
 
-  const view = new GameLoopView(state, status);
+  const view = new GameLoopView(state);
 
   return { view, state };
 }
