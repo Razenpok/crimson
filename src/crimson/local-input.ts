@@ -2,10 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
-import {
-  type CrimsonConfig,
-  type CrimsonPlayerControls,
-} from '@grim/config.ts';
+import { type CrimsonConfig } from '@grim/config.ts';
 import {
   inputCodeIsDown,
   inputCodeIsPressed,
@@ -37,9 +34,19 @@ const _AIM_POV_LEFT_CODE = 0x133;
 const _AIM_POV_RIGHT_CODE = 0x134;
 
 class PerPlayerInputState {
-  aimHeading = 0.0;
-  moveTarget = new Vec2(-1.0, -1.0);
-  computerTargetCreatureIndex = -1;
+  aimHeading: number;
+  moveTarget: Vec2;
+  computerTargetCreatureIndex: number;
+
+  constructor(opts: {
+    aimHeading?: number;
+    moveTarget?: Vec2;
+    computerTargetCreatureIndex?: number;
+  } = {}) {
+    this.aimHeading = opts.aimHeading ?? 0.0;
+    this.moveTarget = opts.moveTarget ?? new Vec2(-1.0, -1.0);
+    this.computerTargetCreatureIndex = opts.computerTargetCreatureIndex ?? -1;
+  }
 }
 
 interface ComputerAimCreature {
@@ -61,18 +68,20 @@ function clampUnit(v: number): number {
 function aimPointFromHeading(
   pos: Vec2,
   heading: number,
-  radius: number = _AIM_RADIUS_KEYBOARD,
+  opts: { radius?: number } = {},
 ): Vec2 {
+  const radius = opts.radius ?? _AIM_RADIUS_KEYBOARD;
   return pos.add(Vec2.fromHeading(heading).mul(radius));
 }
 
-function resolveStaticMoveVector(
-  moveUp: boolean,
-  moveDown: boolean,
-  moveLeft: boolean,
-  moveRight: boolean,
-): Vec2 {
+function resolveStaticMoveVector(opts: {
+  moveUp: boolean;
+  moveDown: boolean;
+  moveLeft: boolean;
+  moveRight: boolean;
+}): Vec2 {
   // Mirror native move-mode 2 key precedence from `player_update`.
+  const { moveUp, moveDown, moveLeft, moveRight } = opts;
   let move = new Vec2();
   if (moveLeft) move = new Vec2(-1.0, 0.0);
   if (moveRight) move = new Vec2(1.0, 0.0);
@@ -99,38 +108,41 @@ function configPlayerCount(config: CrimsonConfig): number {
 
 function singlePlayerAltKeysEnabled(
   config: CrimsonConfig,
-  playerIndex: number,
+  opts: { playerIndex: number },
 ): boolean {
+  const playerIndex = int(opts.playerIndex);
   return playerIndex === 0 && configPlayerCount(config) === 1;
 }
 
 function keyDownWithSinglePlayerAlt(
   primaryKey: number,
-  altKey: number,
-  config: CrimsonConfig,
-  playerIndex: number,
+  opts: {
+    altKey: number;
+    config: CrimsonConfig;
+    playerIndex: number;
+  },
 ): boolean {
+  const { altKey, config } = opts;
+  const playerIndex = int(opts.playerIndex);
   if (inputCodeIsDown(primaryKey, { playerIndex })) return true;
-  if (singlePlayerAltKeysEnabled(config, playerIndex)) {
+  if (singlePlayerAltKeysEnabled(config, { playerIndex })) {
     return inputCodeIsDown(altKey, { playerIndex });
   }
   return false;
 }
 
-function aimPovLeftActive(
-  playerIndex: number,
-  preserveBugs: boolean,
-): boolean {
+function aimPovLeftActive(opts: { playerIndex: number; preserveBugs: boolean }): boolean {
   // Native input_aim_pov_left_active always reads joystick POV index 0.
+  const { preserveBugs } = opts;
+  const playerIndex = int(opts.playerIndex);
   const povIndex = preserveBugs ? 0 : playerIndex;
   return inputCodeIsDown(_AIM_POV_LEFT_CODE, { playerIndex: povIndex });
 }
 
-function aimPovRightActive(
-  playerIndex: number,
-  preserveBugs: boolean,
-): boolean {
+function aimPovRightActive(opts: { playerIndex: number; preserveBugs: boolean }): boolean {
   // Native input_aim_pov_right_active always reads joystick POV index 0.
+  const { preserveBugs } = opts;
+  const playerIndex = int(opts.playerIndex);
   const povIndex = preserveBugs ? 0 : playerIndex;
   return inputCodeIsDown(_AIM_POV_RIGHT_CODE, { playerIndex: povIndex });
 }
@@ -157,14 +169,14 @@ export class LocalInputInterpreter {
   private _states: PerPlayerInputState[];
   private _preserveBugs: boolean;
 
-  constructor(preserveBugs = false) {
+  constructor(opts: { preserveBugs?: boolean } = {}) {
     this._states = [
       new PerPlayerInputState(),
       new PerPlayerInputState(),
       new PerPlayerInputState(),
       new PerPlayerInputState(),
     ];
-    this._preserveBugs = preserveBugs;
+    this._preserveBugs = opts.preserveBugs ?? false;
   }
 
   setPreserveBugs(enabled: boolean): void {
@@ -172,9 +184,13 @@ export class LocalInputInterpreter {
   }
 
   private static _stateSlotForPlayer(
-    playerIndex: number,
-    player?: PlayerState | null,
+    opts: {
+      playerIndex: number;
+      player?: PlayerState | null;
+    },
   ): number {
+    const { player = null } = opts;
+    const playerIndex = int(opts.playerIndex);
     let slot = int(playerIndex);
     if (player != null) slot = int(player.index);
     return Math.max(0, Math.min(3, slot));
@@ -191,7 +207,7 @@ export class LocalInputInterpreter {
     if (players == null) return;
     for (let idx = 0; idx < players.length; idx++) {
       const player = players[idx];
-      const slot = LocalInputInterpreter._stateSlotForPlayer(idx, player);
+      const slot = LocalInputInterpreter._stateSlotForPlayer({ playerIndex: int(idx), player });
       const candidate = player.aimHeading;
       if (isFiniteNum(candidate)) {
         this._states[slot].aimHeading = candidate;
@@ -219,11 +235,15 @@ export class LocalInputInterpreter {
   }
 
   private _selectComputerTarget(
-    playerIndex: number,
-    player: PlayerState,
-    creatures: readonly ComputerAimCreature[],
+    opts: {
+      playerIndex: number;
+      player: PlayerState;
+      creatures: readonly ComputerAimCreature[];
+    },
   ): number | null {
-    const slot = LocalInputInterpreter._stateSlotForPlayer(playerIndex, player);
+    const { player, creatures } = opts;
+    const playerIndex = int(opts.playerIndex);
+    const slot = LocalInputInterpreter._stateSlotForPlayer({ playerIndex: int(playerIndex), player });
     const state = this._states[slot];
     const candidate = LocalInputInterpreter._nearestLivingCreatureIndex(
       player.pos,
@@ -266,9 +286,10 @@ export class LocalInputInterpreter {
 
   private _stateForPlayer(
     playerIndex: number,
-    player?: PlayerState | null,
+    opts: { player?: PlayerState | null } = {},
   ): PerPlayerInputState {
-    const slot = LocalInputInterpreter._stateSlotForPlayer(playerIndex, player);
+    const player = opts.player ?? null;
+    const slot = LocalInputInterpreter._stateSlotForPlayer({ playerIndex: int(playerIndex), player });
     const state = this._states[slot];
     if (player != null && !isFiniteNum(state.aimHeading)) {
       state.aimHeading = player.aimHeading;
@@ -296,8 +317,8 @@ export class LocalInputInterpreter {
     } = opts;
     const dt = opts.dt;
     const idx = Math.max(0, Math.min(3, int(opts.playerIndex)));
-    const state = this._stateForPlayer(idx, player);
-    const binds: CrimsonPlayerControls = config.controls.players[idx];
+    const state = this._stateForPlayer(idx, { player });
+    const binds = config.controls.player(idx);
     const aimScheme = binds.aimScheme;
     const moveModeType = binds.movement;
     const reloadKey = config.controls.reloadCode;
@@ -323,9 +344,11 @@ export class LocalInputInterpreter {
     if (computerMoveActive) {
       if (creatures && creatures.length > 0) {
         computerTargetIndex = this._selectComputerTarget(
-          idx,
-          player,
-          creatures,
+          {
+            playerIndex: idx,
+            player,
+            creatures,
+          },
         );
       }
       const centerDelta = _COMPUTER_ARENA_CENTER.sub(player.pos);
@@ -353,27 +376,35 @@ export class LocalInputInterpreter {
     } else if (moveModeType === MovementControlType.RELATIVE) {
       moveForwardPressed = keyDownWithSinglePlayerAlt(
         moveForwardKey,
-        _ALT_MOVE_KEY_UP,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_UP,
+          config,
+          playerIndex: idx,
+        },
       );
       moveBackwardPressed = keyDownWithSinglePlayerAlt(
         moveBackwardKey,
-        _ALT_MOVE_KEY_DOWN,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_DOWN,
+          config,
+          playerIndex: idx,
+        },
       );
       turnLeftPressed = keyDownWithSinglePlayerAlt(
         turnLeftKey,
-        _ALT_MOVE_KEY_LEFT,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_LEFT,
+          config,
+          playerIndex: idx,
+        },
       );
       turnRightPressed = keyDownWithSinglePlayerAlt(
         turnRightKey,
-        _ALT_MOVE_KEY_RIGHT,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_RIGHT,
+          config,
+          playerIndex: idx,
+        },
       );
       moveVec = new Vec2(
         (turnRightPressed ? 1.0 : 0.0) - (turnLeftPressed ? 1.0 : 0.0),
@@ -398,37 +429,47 @@ export class LocalInputInterpreter {
     } else if (moveModeType === MovementControlType.STATIC) {
       const moveUpPressed = keyDownWithSinglePlayerAlt(
         moveForwardKey,
-        _ALT_MOVE_KEY_UP,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_UP,
+          config,
+          playerIndex: idx,
+        },
       );
       const moveDownPressed = keyDownWithSinglePlayerAlt(
         moveBackwardKey,
-        _ALT_MOVE_KEY_DOWN,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_DOWN,
+          config,
+          playerIndex: idx,
+        },
       );
       const moveLeftPressed = keyDownWithSinglePlayerAlt(
         turnLeftKey,
-        _ALT_MOVE_KEY_LEFT,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_LEFT,
+          config,
+          playerIndex: idx,
+        },
       );
       const moveRightPressed = keyDownWithSinglePlayerAlt(
         turnRightKey,
-        _ALT_MOVE_KEY_RIGHT,
-        config,
-        idx,
+        {
+          altKey: _ALT_MOVE_KEY_RIGHT,
+          config,
+          playerIndex: idx,
+        },
       );
       moveForwardPressed = moveUpPressed;
       moveBackwardPressed = moveDownPressed;
       turnLeftPressed = moveLeftPressed;
       turnRightPressed = moveRightPressed;
       moveVec = resolveStaticMoveVector(
-        moveUpPressed,
-        moveDownPressed,
-        moveLeftPressed,
-        moveRightPressed,
+        {
+          moveUp: moveUpPressed,
+          moveDown: moveDownPressed,
+          moveLeft: moveLeftPressed,
+          moveRight: moveRightPressed,
+        },
       );
     } else {
       moveVec = new Vec2(
@@ -485,17 +526,21 @@ export class LocalInputInterpreter {
         aim = aimPointFromHeading(player.pos, heading);
       }
     } else if (aimScheme === AimScheme.JOYSTICK) {
-      if (aimPovRightActive(idx, this._preserveBugs)) {
+      if (aimPovRightActive({ playerIndex: idx, preserveBugs: this._preserveBugs })) {
         heading = heading + dt * _AIM_JOYSTICK_TURN_RATE;
       }
-      if (aimPovLeftActive(idx, this._preserveBugs)) {
+      if (aimPovLeftActive({ playerIndex: idx, preserveBugs: this._preserveBugs })) {
         heading = heading - dt * _AIM_JOYSTICK_TURN_RATE;
       }
       aim = aimPointFromHeading(player.pos, heading);
     } else if (aimScheme === AimScheme.COMPUTER) {
       let targetIndex = computerTargetIndex;
       if (targetIndex === null && creatures && creatures.length > 0) {
-        targetIndex = this._selectComputerTarget(idx, player, creatures);
+        targetIndex = this._selectComputerTarget({
+          playerIndex: idx,
+          player,
+          creatures,
+        });
       }
       if (
         creatures != null &&
