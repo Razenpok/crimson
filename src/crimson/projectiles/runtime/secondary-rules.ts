@@ -128,19 +128,11 @@ export class RocketMinigunRule {
 
 export type SecondaryProjectileRule = DetonationRule | RocketRule | HomingRocketRule | RocketMinigunRule;
 
-export const DETONATION_RULE = new DetonationRule();
-
-export const ROCKET_RULE = new RocketRule();
-
-export const HOMING_ROCKET_RULE = new HomingRocketRule();
-
-export const ROCKET_MINIGUN_RULE = new RocketMinigunRule();
-
 export const SECONDARY_RULE_BY_TYPE_ID = new Map<SecondaryProjectileTypeId, SecondaryProjectileRule>([
-  [SecondaryProjectileTypeId.DETONATION, DETONATION_RULE],
-  [SecondaryProjectileTypeId.ROCKET, ROCKET_RULE],
-  [SecondaryProjectileTypeId.HOMING_ROCKET, HOMING_ROCKET_RULE],
-  [SecondaryProjectileTypeId.ROCKET_MINIGUN, ROCKET_MINIGUN_RULE],
+  [SecondaryProjectileTypeId.DETONATION, new DetonationRule()],
+  [SecondaryProjectileTypeId.ROCKET, new RocketRule()],
+  [SecondaryProjectileTypeId.HOMING_ROCKET, new HomingRocketRule()],
+  [SecondaryProjectileTypeId.ROCKET_MINIGUN, new RocketMinigunRule()],
 ]);
 
 const _DEFAULT_ROCKET_RULE = new RocketRule({
