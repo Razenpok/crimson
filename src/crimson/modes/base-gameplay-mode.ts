@@ -847,6 +847,7 @@ export class BaseGameplayMode {
   protected _resetFrameTelemetry(): void {
     this._inputStallCount = 0;
     this._ticksAdvancedPerFrame = 0;
+    // Placeholder stage timers before profiler hooks land in later slices.
     this._simMs = 0.0;
     this._presentationPlanMs = 0.0;
     this._presentationApplyMs = 0.0;
@@ -1016,7 +1017,8 @@ export class BaseGameplayMode {
     this._gameOverBanner = 'reaper';
     this._gameOverUi.close();
 
-    // Stop any playing music before restarting gameplay
+    // Native game_over/victory transitions call `sfx_mute_all` on menu + extra
+    // tracks before restarting gameplay ("Play Again"), resetting first-hit tune gate.
     audioStopMusic(this.audio);
 
     const playerCount = this._runtimePlayerCount();
@@ -1028,7 +1030,8 @@ export class BaseGameplayMode {
     }
     this._runResetSeed = (seed >>> 0) & 0xFFFFFFFF;
 
-    // Reset LAN sim status at the start of each run
+    // Reset LAN sim status at the start of each run so per-session usage
+    // counts (weapon bias) start from a consistent baseline across peers.
     this._refreshEffectiveStatus({ resetLanStatus: true });
 
     this._syncWorldRuntimeConfig();
