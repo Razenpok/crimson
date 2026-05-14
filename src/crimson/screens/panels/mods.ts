@@ -58,12 +58,13 @@ export class ModsMenuView extends PanelMenuView {
   }
 
   private _buildLines(): string[] {
+    const modsDir = this.state.baseDir ? `${this.state.baseDir}/mods` : 'mods';
     // WebGL has no filesystem access for state.baseDir / "mods".
     return [
       'No mod DLLs found.',
       '',
       'Expected location:',
-      '  mods',
+      `  ${modsDir}`,
       '',
       'Mod loading is not implemented yet.',
     ];
