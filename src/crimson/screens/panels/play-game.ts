@@ -536,7 +536,7 @@ export class PlayGameMenuView extends PanelMenuView {
     const basePos = layout.basePos;
     const scale = layout.scale;
     const textScale = 1.0 * scale;
-    const textColor = wgl.makeColor(1, 1, 1, 0.8);
+    const textColor = wgl.makeColor(1, 1, 1, int(255 * 0.8) / 255);
 
     // `sub_44ed80`: title label at (xy - 64, var_1c - 8), size 128x32.
     const titleW = 128.0;
