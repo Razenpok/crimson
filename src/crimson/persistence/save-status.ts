@@ -37,6 +37,35 @@ const STATUS_FIELD_NAMES = new Set([
   'unknownTail',
 ]);
 
+function statusValueEquals<T, U>(left: T, right: U): boolean {
+  if (Object.is(left, right)) {
+    return true;
+  }
+  if (Array.isArray(left) && Array.isArray(right)) {
+    if (left.length !== right.length) {
+      return false;
+    }
+    for (let i = 0; i < left.length; i++) {
+      if (left[i] !== right[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (left instanceof Uint8Array && right instanceof Uint8Array) {
+    if (left.length !== right.length) {
+      return false;
+    }
+    for (let i = 0; i < left.length; i++) {
+      if (left[i] !== right[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 export const GAME_STATUS_STRUCT = [
   ['questUnlockIndex', 'Int16ul'],
   ['questUnlockIndexFull', 'Int16ul'],
@@ -124,7 +153,7 @@ export class GameStatus extends GameStatusData {
         const markDirty = STATUS_FIELD_NAMES.has(name);
         const current = markDirty ? Reflect.get(target, prop, receiver) : MISSING;
         const ok = Reflect.set(target, prop, value, receiver);
-        if (ok && markDirty && current !== MISSING && current !== value) {
+        if (ok && markDirty && current !== MISSING && !statusValueEquals(current, value)) {
           Reflect.set(target, 'dirty', true, receiver);
         }
         return ok;
