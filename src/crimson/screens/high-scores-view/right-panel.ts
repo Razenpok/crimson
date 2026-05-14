@@ -243,7 +243,7 @@ function drawRightPanelQuestOptions(
   const { resources, font, rightTopLeft, scale } = opts;
   const optionsShiftX = hsRightOptionsXShift(view.state.config.display.width);
   const optionsTopLeft = rightTopLeft.add(new Vec2(optionsShiftX * scale, 0.0));
-  const textColor = wgl.makeColor(1, 1, 1, 0.8);
+  const textColor = wgl.makeColor(1, 1, 1, int(255 * 0.8) / 255);
 
   // Checkbox: "Show internet scores"
   const checkTex = view.state.config.profile.showInternetScores
@@ -393,11 +393,11 @@ function drawRightPanelLocalScore(
   if (idx >= view.records.length) idx = view.records.length - 1;
   const entry = view.records[idx];
 
-  const textColor = wgl.makeColor(0.9, 0.9, 0.9, 0.8);
-  const valueColor = wgl.makeColor(0.9, 0.9, 1, 1);
-  const gameTimeColor = wgl.makeColor(1, 1, 1, 0.8);
-  const lowerSectionColor = wgl.makeColor(0.9, 0.9, 0.9, 0.7);
-  const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 0.7);
+  const textColor = wgl.makeColor(int(255 * 0.9) / 255, int(255 * 0.9) / 255, int(255 * 0.9) / 255, int(255 * 0.8) / 255);
+  const valueColor = wgl.makeColor(int(255 * 0.9) / 255, int(255 * 0.9) / 255, 1, 1);
+  const gameTimeColor = wgl.makeColor(1, 1, 1, int(255 * 0.8) / 255);
+  const lowerSectionColor = wgl.makeColor(int(255 * 0.9) / 255, int(255 * 0.9) / 255, int(255 * 0.9) / 255, int(255 * 0.7) / 255);
+  const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, int(255 * 0.7) / 255);
 
   let name = entry.name();
   if (!name) name = '???';
