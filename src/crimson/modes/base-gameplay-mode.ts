@@ -1015,6 +1015,9 @@ export class BaseGameplayMode {
     this.closeRequested = false;
     this._action = null;
     this._paused = false;
+    if (this._screenFade !== null && this._screenFade.resources !== null) {
+      this.renderResources.resources = this._screenFade.resources;
+    }
     this._small = loadSmallFont(this._assetsRoot);
     this._hudState = new HudState();
 

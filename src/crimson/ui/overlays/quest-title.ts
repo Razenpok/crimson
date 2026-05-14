@@ -4,28 +4,28 @@ import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type GrimMonoFont, drawGrimMonoText } from '@grim/fonts/grim-mono.ts';
 
-const QUEST_TITLE_ALPHA = 1.0;
-const QUEST_NUMBER_ALPHA_RATIO = 0.5;
+export const QUEST_TITLE_ALPHA = 1.0;
+export const QUEST_NUMBER_ALPHA_RATIO = 0.5;
 
 // Game base scale: 0.75 at 640px width, 0.8 at larger widths.
-const QUEST_TITLE_SCALE_SMALL = 0.75;
-const QUEST_TITLE_SCALE_LARGE = 0.8;
-const QUEST_TITLE_SCALE_THRESHOLD_PX = 640;
+export const QUEST_TITLE_SCALE_SMALL = 0.75;
+export const QUEST_TITLE_SCALE_LARGE = 0.8;
+export const QUEST_TITLE_SCALE_THRESHOLD_PX = 640;
 
 // Title overlay baseline is centered vertically and shifted up by 32px (0x20).
-const QUEST_TITLE_Y_OFFSET = 32.0;
+export const QUEST_TITLE_Y_OFFSET = 32.0;
 
 // Number is drawn at a slightly smaller scale.
-const QUEST_NUMBER_SCALE_DELTA = 0.2;
+export const QUEST_NUMBER_SCALE_DELTA = 0.2;
 
 // Game X formula: x = title_x - (strlen * scale * 8.0) - (scale * 32.0) - 4.0
 // where 8.0 = advance/2, 32.0 = base gap, 4.0 = fixed offset.
-const QUEST_NUMBER_HALF_ADVANCE = 8.0;
-const QUEST_NUMBER_BASE_GAP = 32.0;
-const QUEST_NUMBER_FIXED_OFFSET = 4.0;
+export const QUEST_NUMBER_HALF_ADVANCE = 8.0;
+export const QUEST_NUMBER_BASE_GAP = 32.0;
+export const QUEST_NUMBER_FIXED_OFFSET = 4.0;
 
 // Game Y formula: y = title_y + number_scale * (23.36 - 16.0) = title_y + number_scale * 7.36
-const QUEST_NUMBER_Y_MULTIPLIER = 7.36;
+export const QUEST_NUMBER_Y_MULTIPLIER = 7.36;
 
 export class QuestTitleOverlayLayout {
   readonly titlePos: Vec2;

@@ -4,15 +4,15 @@ import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
-const NAME_LABEL_SCALE = 1.0;
-const NAME_LABEL_BG_ALPHA = 0.67;
-const TYPING_PANEL_WIDTH = 182.0;
-const TYPING_PANEL_HEIGHT = 53.0;
-const TYPING_PANEL_ALPHA = 0.7;
-const TYPING_TEXT_X = 6.0;
-const TYPING_PROMPT = '>';
-const TYPING_CURSOR = '_';
-const TYPING_CURSOR_X_OFFSET = 14.0;
+export const NAME_LABEL_SCALE = 1.0;
+export const NAME_LABEL_BG_ALPHA = 0.67;
+export const TYPING_PANEL_WIDTH = 182.0;
+export const TYPING_PANEL_HEIGHT = 53.0;
+export const TYPING_PANEL_ALPHA = 0.7;
+export const TYPING_TEXT_X = 6.0;
+export const TYPING_PROMPT = '>';
+export const TYPING_CURSOR = '_';
+export const TYPING_CURSOR_X_OFFSET = 14.0;
 
 export type DrawUiText = (text: string, pos: Vec2, color: wgl.Color, scale: number) => void;
 export type MeasureUiTextWidth = (text: string, scale: number) => number;

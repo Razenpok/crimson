@@ -5,18 +5,18 @@ import { type GrimMonoFont } from '@grim/fonts/grim-mono.ts';
 import { clamp } from '@grim/math.ts';
 import { drawQuestTitleOverlay } from './quest-title.ts';
 
-const QUEST_TITLE_FADE_IN_MS = 500.0;
-const QUEST_TITLE_HOLD_MS = 1000.0;
-const QUEST_TITLE_FADE_OUT_MS = 500.0;
-const QUEST_TITLE_TOTAL_MS = QUEST_TITLE_FADE_IN_MS + QUEST_TITLE_HOLD_MS + QUEST_TITLE_FADE_OUT_MS;
+export const QUEST_TITLE_FADE_IN_MS = 500.0;
+export const QUEST_TITLE_HOLD_MS = 1000.0;
+export const QUEST_TITLE_FADE_OUT_MS = 500.0;
+export const QUEST_TITLE_TOTAL_MS = QUEST_TITLE_FADE_IN_MS + QUEST_TITLE_HOLD_MS + QUEST_TITLE_FADE_OUT_MS;
 
-const QUEST_COMPLETE_BANNER_BASE_W = 256.0;
-const QUEST_COMPLETE_BANNER_BASE_H = 32.0;
-const QUEST_COMPLETE_BANNER_SCALE_BASE = 0.95;
-const QUEST_COMPLETE_BANNER_SCALE_RATE = 0.0004 * 0.13;
-const QUEST_COMPLETE_BANNER_FADE_IN_MS = 500.0;
-const QUEST_COMPLETE_BANNER_HOLD_END_MS = 1500.0;
-const QUEST_COMPLETE_BANNER_FADE_OUT_END_MS = 2000.0;
+export const QUEST_COMPLETE_BANNER_BASE_W = 256.0;
+export const QUEST_COMPLETE_BANNER_BASE_H = 32.0;
+export const QUEST_COMPLETE_BANNER_SCALE_BASE = 0.95;
+export const QUEST_COMPLETE_BANNER_SCALE_RATE = 0.0004 * 0.13;
+export const QUEST_COMPLETE_BANNER_FADE_IN_MS = 500.0;
+export const QUEST_COMPLETE_BANNER_HOLD_END_MS = 1500.0;
+export const QUEST_COMPLETE_BANNER_FADE_OUT_END_MS = 2000.0;
 
 export function questTitleAlpha(timerMs: number): number {
   timerMs = Number(timerMs);

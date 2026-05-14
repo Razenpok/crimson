@@ -40,10 +40,9 @@ export class RenderResources {
   }
 
   get resources(): RuntimeResources {
-    let resources = this._resources;
+    const resources = this._resources;
     if (resources === null) {
-      resources = runtimeResourcesFor(this._assetsUrl);
-      this._resources = resources;
+      throw new Error('runtime resources must be loaded before use');
     }
     return resources;
   }
