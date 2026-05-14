@@ -2,30 +2,50 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
+import { runtimeResourcesFor, TextureId } from '@grim/assets.ts';
 
 export const GRIM_MONO_ADVANCE = 16.0;
 export const GRIM_MONO_DRAW_SIZE = 32.0;
 export const GRIM_MONO_LINE_HEIGHT = 28.0;
 export const GRIM_MONO_TEXTURE_FILTER = wgl.TextureFilter.BILINEAR;
 
-export interface GrimMonoFont {
+export class GrimMonoFont {
   texture: wgl.Texture;
   grid: number;
   cellWidth: number;
   cellHeight: number;
   advance: number;
+
+  constructor(opts: {
+    texture: wgl.Texture;
+    grid?: number;
+    cellWidth?: number;
+    cellHeight?: number;
+    advance?: number;
+  }) {
+    this.texture = opts.texture;
+    this.grid = opts.grid ?? 16;
+    this.cellWidth = opts.cellWidth ?? 16.0;
+    this.cellHeight = opts.cellHeight ?? 16.0;
+    this.advance = opts.advance ?? GRIM_MONO_ADVANCE;
+  }
 }
 
 export function createGrimMonoFont(texture: wgl.Texture): GrimMonoFont {
   wgl.setTextureFilter(texture, GRIM_MONO_TEXTURE_FILTER);
   const grid = 16;
-  return {
+  return new GrimMonoFont({
     texture,
     grid,
     cellWidth: texture.width / grid,
     cellHeight: texture.height / grid,
     advance: GRIM_MONO_ADVANCE,
-  };
+  });
+}
+
+export function loadGrimMonoFont(assetsRoot: string): GrimMonoFont {
+  const texture = runtimeResourcesFor(assetsRoot).texture(TextureId.DEFAULT_FONT_COURIER);
+  return createGrimMonoFont(texture);
 }
 
 export function drawGrimMonoText(
