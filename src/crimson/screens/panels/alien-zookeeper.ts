@@ -145,7 +145,6 @@ function toColor(r: number, g: number, b: number, a: number): wgl.Color {
 }
 
 function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
-  // WebGL replacement for raylib's `draw_rectangle_lines_ex`.
   const thick = Math.max(1, int(lineThick));
   const x = int(rect.x);
   const y = int(rect.y);
@@ -158,7 +157,6 @@ function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl
 }
 
 function drawRectangleRec(rect: wgl.Rectangle, color: wgl.Color): void {
-  // WebGL replacement for raylib's `draw_rectangle_rec`.
   wgl.drawRectangle(rect.x, rect.y, rect.w, rect.h, color);
 }
 
@@ -227,8 +225,8 @@ export class AlienZooKeeperView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._resetButton = new UiButtonState({ label: _RESET_LABEL, forceWide: false  });
-    this._backButton = new UiButtonState({ label: _BACK_LABEL, forceWide: false  });
+    this._resetButton = new UiButtonState({ label: _RESET_LABEL, forceWide: false });
+    this._backButton = new UiButtonState({ label: _BACK_LABEL, forceWide: false });
   }
 
   open(): void {
@@ -243,8 +241,8 @@ export class AlienZooKeeperView {
     this._pendingAction = null;
     this._action = null;
 
-    this._resetButton = new UiButtonState({ label: _RESET_LABEL, forceWide: false  });
-    this._backButton = new UiButtonState({ label: _BACK_LABEL, forceWide: false  });
+    this._resetButton = new UiButtonState({ label: _RESET_LABEL, forceWide: false });
+    this._backButton = new UiButtonState({ label: _BACK_LABEL, forceWide: false });
 
     this._animTimeMs = 0;
     this._resetState();
