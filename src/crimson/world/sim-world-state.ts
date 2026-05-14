@@ -6,17 +6,17 @@ import type { SpawnEnv } from '@crimson/creatures/spawn.ts';
 import { PlayerState } from '@crimson/sim/state-types.ts';
 import { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import {
-  type WorldEvents,
+  WorldEvents,
   WorldState,
 } from '@crimson/sim/world-state.ts';
 import { weaponAssignPlayer, initDefaultAltWeapon } from '@crimson/weapon-runtime/index.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
-import { GameplayState } from "@crimson/gameplay.ts";
+import { GameplayState } from '@crimson/gameplay.ts';
 
 function _weaponDamageScaleMap(): Map<number, number> {
   const table = new Map<number, number>();
   for (const entry of WEAPON_TABLE) {
-    const wid = entry.weaponId as number;
+    const wid = entry.weaponId;
     if (wid <= 0) continue;
     table.set(wid, Number(entry.damageScale));
   }
@@ -60,14 +60,12 @@ export function resetWorldPlayers(
 }
 
 function _emptyWorldEvents(): WorldEvents {
-  return {
+  return new WorldEvents({
     hits: [],
     deaths: [],
     pickups: [],
     sfx: [],
-    triggerGameTune: false,
-    hitSfx: [],
-  };
+  });
 }
 
 export class SimWorldState {
