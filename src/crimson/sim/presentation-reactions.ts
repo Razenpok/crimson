@@ -11,7 +11,6 @@ export class QuestPresentationReaction {
   } = {}) {
     this.playHitSfx = opts.playHitSfx ?? false;
     this.playCompletionMusic = opts.playCompletionMusic ?? false;
-    Object.freeze(this);
   }
 
   readonly playHitSfx: boolean;
@@ -28,7 +27,6 @@ export class PostApplyReaction {
   } = {}) {
     this.sfx = opts.sfx ?? [];
     this.quest = opts.quest ?? null;
-    Object.freeze(this);
   }
 }
 
