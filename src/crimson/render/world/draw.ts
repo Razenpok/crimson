@@ -8,7 +8,7 @@ import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
-import { EffectId, effectSrcRect } from '@crimson/effects-atlas.ts';
+import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import type { PlayerState } from '@crimson/sim/state-types.ts';
@@ -101,7 +101,6 @@ export class WorldDrawContext {
     this.monsterVision = opts.monsterVision ?? false;
     this.monsterVisionSrc = opts.monsterVisionSrc ?? null;
     this.poisonSrc = opts.poisonSrc ?? null;
-    Object.freeze(this);
   }
 }
 
@@ -186,7 +185,21 @@ function effectSrcRectFromTexture(
   texture: wgl.Texture,
   effectId: EffectId,
 ): wgl.Rectangle | null {
-  return effectSrcRect(effectId, { textureWidth: texture.width, textureHeight: texture.height }) as wgl.Rectangle | null;
+  const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(int(effectId));
+  if (atlas === undefined) return null;
+  const grid = SIZE_CODE_GRID[int(atlas.sizeCode)];
+  if (!grid) return null;
+  const frame = int(atlas.frame);
+  const col = frame % grid;
+  const row = Math.floor(frame / grid);
+  const cellW = texture.width / grid;
+  const cellH = texture.height / grid;
+  return wgl.makeRectangle(
+    cellW * col,
+    cellH * row,
+    Math.max(0.0, cellW - 2.0),
+    Math.max(0.0, cellH - 2.0),
+  );
 }
 
 function buildDrawContext(
@@ -306,7 +319,7 @@ function drawCreatureOverlays(
   if (
     ctx.particlesTexture !== null &&
     ctx.poisonSrc !== null &&
-    ((creature.flags as number) & CreatureFlags.SELF_DAMAGE_TICK)
+    (creature.flags & CreatureFlags.SELF_DAMAGE_TICK)
   ) {
     const poisonAlpha = fade * ctx.entityAlpha;
     if (poisonAlpha > 1e-3) {
@@ -322,7 +335,7 @@ function drawCreatureOverlays(
 function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext }): void {
   const ctx = opts.ctx;
   const frame = renderCtx.frame;
-  const creatureEntries = frame.creatures.entries as CreatureState[];
+  const creatureEntries = frame.creatures.entries;
 
   // Native `creature_render_all` batches all overlays across the active pool
   // before any species-specific sprite passes.
@@ -381,8 +394,8 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
     // and is disabled when the Monster Vision perk is active.
     const shadow = fxDetail && (!frame.players.length || !perkActive(frame.players[0], PerkId.MONSTER_VISION));
     const longStrip =
-      ((creature.flags as number) & CreatureFlags.ANIM_PING_PONG) === 0 ||
-      ((creature.flags as number) & CreatureFlags.ANIM_LONG_STRIP) !== 0;
+      (creature.flags & CreatureFlags.ANIM_PING_PONG) === 0 ||
+      (creature.flags & CreatureFlags.ANIM_LONG_STRIP) !== 0;
 
     let phase = creature.animPhase;
     if (longStrip) {
@@ -412,7 +425,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
       texture,
       {
         typeId: typeId || CreatureTypeId.ZOMBIE,
-        flags: creature.flags as CreatureFlags,
+        flags: creature.flags,
         phase,
         mirrorLong: info.mirror && lifecycleStage >= 16.0,
         shadowAlpha,
@@ -444,7 +457,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawCont
 
   const tint = wgl.makeColor(1, 1, 1, byteChannel(freezeAlpha));
   wgl.beginBlendMode(wgl.BlendMode.ALPHA);
-  const creatures = renderCtx.frame.creatures.entries as CreatureState[];
+  const creatures = renderCtx.frame.creatures.entries;
   for (let idx = 0; idx < creatures.length; idx++) {
     const creature = creatures[idx];
     if (!creature.active) continue;
