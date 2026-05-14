@@ -15,7 +15,7 @@ import {
 } from '@crimson/sim/presentation-reactions.ts';
 import { advanceTickRunnerFrame } from '@crimson/sim/frame-pump.ts';
 
-type WorldTickInputBuilder = (ctx: FrameContext) => readonly PlayerInput[];
+export type WorldTickInputBuilder = (ctx: FrameContext) => readonly PlayerInput[];
 
 // Standalone local runner for demo/debug screens outside BaseGameplayMode.
 export class StandaloneTickHarness {
