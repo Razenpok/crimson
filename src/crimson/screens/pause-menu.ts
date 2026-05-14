@@ -100,9 +100,9 @@ export class PauseMenuView {
       MENU_LABEL_BASE_Y + MENU_LABEL_STEP * 2.0 + this._widescreenYShift,
     ];
     this._menuEntries = [
-      new MenuEntry(0, MENU_LABEL_ROW_OPTIONS, ys[0]),
-      new MenuEntry(1, MENU_LABEL_ROW_QUIT, ys[1]),
-      new MenuEntry(2, MENU_LABEL_ROW_BACK, ys[2]),
+      new MenuEntry({ slot: 0, row: MENU_LABEL_ROW_OPTIONS, y: ys[0] }),
+      new MenuEntry({ slot: 1, row: MENU_LABEL_ROW_QUIT, y: ys[1] }),
+      new MenuEntry({ slot: 2, row: MENU_LABEL_ROW_BACK, y: ys[2] }),
     ];
     this._selectedIndex = this._menuEntries.length > 0 ? 0 : -1;
     this._focusTimerMs = 0;

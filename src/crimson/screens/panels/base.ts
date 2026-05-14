@@ -120,7 +120,7 @@ export class PanelMenuView {
     const layoutW = this.state.config.display.width;
     this._menuScreenWidth = int(layoutW);
     this._widescreenYShift = menuWidescreenYShift(layoutW);
-    this._entry = new MenuEntry(0, MENU_LABEL_ROW_BACK, this._backPos.y);
+    this._entry = new MenuEntry({ slot: 0, row: MENU_LABEL_ROW_BACK, y: this._backPos.y });
     this._hovered = false;
     this._timelineMs = 0;
     this._timelineMaxMs = PANEL_TIMELINE_START_MS;

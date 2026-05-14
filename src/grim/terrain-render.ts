@@ -47,10 +47,24 @@ export class GroundRenderer {
   private _renderTargetReady = false;
   private _scheduledSeed: number | null = null;
 
-  constructor(texture: wgl.Texture, overlay: wgl.Texture, overlayDetail: wgl.Texture) {
-    this.texture = texture;
-    this.overlay = overlay;
-    this.overlayDetail = overlayDetail;
+  constructor(opts: {
+    texture: wgl.Texture;
+    overlay: wgl.Texture;
+    overlayDetail: wgl.Texture;
+    width?: number;
+    height?: number;
+    textureScale?: number;
+    textureFailed?: boolean;
+    renderTarget?: wgl.RenderTarget | null;
+  }) {
+    this.texture = opts.texture;
+    this.overlay = opts.overlay;
+    this.overlayDetail = opts.overlayDetail;
+    this.width = opts.width ?? TERRAIN_TEXTURE_SIZE;
+    this.height = opts.height ?? TERRAIN_TEXTURE_SIZE;
+    this.textureScale = opts.textureScale ?? 1.0;
+    this.textureFailed = opts.textureFailed ?? false;
+    this.renderTarget = opts.renderTarget ?? null;
   }
 
   generationPending(): boolean {

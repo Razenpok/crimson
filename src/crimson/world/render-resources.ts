@@ -72,14 +72,14 @@ export class RenderResources {
     const { base, overlay, detail } = opts;
     this.clearPendingTerrainFx();
     if (this.ground === null) {
-      this.ground = new GroundRenderer(
-        base,
+      this.ground = new GroundRenderer({
+        texture: base,
         overlay,
-        detail,
-      );
-      this.ground.width = int(this.worldSize);
-      this.ground.height = int(this.worldSize);
-      this.ground.textureScale = 1.0;
+        overlayDetail: detail,
+        width: int(this.worldSize),
+        height: int(this.worldSize),
+        textureScale: 1.0,
+      });
     } else {
       this.ground.texture = base;
       this.ground.overlay = overlay;

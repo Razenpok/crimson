@@ -109,8 +109,14 @@ export function ensureMenuGround(
   }
 
   if (ground === null) {
-    ground = new GroundRenderer(base, overlay, detail);
-    ground.textureScale = state.config.display.textureScale;
+    ground = new GroundRenderer({
+      texture: base,
+      overlay,
+      overlayDetail: detail,
+      width: 1024,
+      height: 1024,
+      textureScale: state.config.display.textureScale,
+    });
     state.menuGround = ground;
   } else {
     ground.texture = base;
@@ -145,12 +151,18 @@ export class MenuEntry {
   hoverAmount: number;
   readyTimerMs: number;
 
-  constructor(slot: number, row: number, y: number) {
-    this.slot = slot;
-    this.row = row;
-    this.y = y;
-    this.hoverAmount = 0;
-    this.readyTimerMs = 0x100;
+  constructor(opts: {
+    slot: number;
+    row: number;
+    y: number;
+    hoverAmount?: number;
+    readyTimerMs?: number;
+  }) {
+    this.slot = opts.slot;
+    this.row = opts.row;
+    this.y = opts.y;
+    this.hoverAmount = opts.hoverAmount ?? 0;
+    this.readyTimerMs = opts.readyTimerMs ?? 0x100;
   }
 }
 
@@ -460,7 +472,7 @@ export class MenuView {
     const entries: MenuEntry[] = [];
     for (let slot = 0; slot < rows.length; slot++) {
       if (!active[slot]) continue;
-      entries.push(new MenuEntry(slot, rows[slot], slotYs[slot]));
+      entries.push(new MenuEntry({ slot, row: rows[slot], y: slotYs[slot] }));
     }
     return entries;
   }
