@@ -19,16 +19,32 @@ const MUSIC_MAX_DT = 0.1;
 const MUSIC_FADE_IN_PER_SEC = 1.0;
 const MUSIC_FADE_OUT_PER_SEC = 0.5;
 
-interface TrackPlayback {
+export class TrackPlayback {
   buffer: AudioBuffer;
   source: AudioBufferSourceNode | null;
   gainNode: GainNode | null;
   volume: number;
   muted: boolean;
   playing: boolean;
+
+  constructor(opts: {
+    buffer: AudioBuffer;
+    source?: AudioBufferSourceNode | null;
+    gainNode?: GainNode | null;
+    volume: number;
+    muted: boolean;
+    playing?: boolean;
+  }) {
+    this.buffer = opts.buffer;
+    this.source = opts.source ?? null;
+    this.gainNode = opts.gainNode ?? null;
+    this.volume = opts.volume;
+    this.muted = opts.muted;
+    this.playing = opts.playing ?? false;
+  }
 }
 
-export interface MusicState {
+export class MusicState {
   ready: boolean;
   enabled: boolean;
   volume: number;
@@ -42,13 +58,47 @@ export interface MusicState {
   trackIds: Map<string, number>;
   nextTrackId: number;
   paqEntries: Map<string, Uint8Array> | null;
+
+  constructor(opts: {
+    ready: boolean;
+    enabled: boolean;
+    volume: number;
+    tracks: Map<string, AudioBuffer>;
+    activeTrack: string | null;
+    playbacks?: Map<string, TrackPlayback>;
+    queue?: string[];
+    gameTuneStarted?: boolean;
+    gameTuneTrack?: string | null;
+    trackIds?: Map<string, number>;
+    nextTrackId?: number;
+    paqEntries?: Map<string, Uint8Array> | null;
+  }) {
+    this.ready = opts.ready;
+    this.enabled = opts.enabled;
+    this.volume = opts.volume;
+    this.tracks = opts.tracks;
+    this.activeTrack = opts.activeTrack;
+    this.playbacks = opts.playbacks ?? new Map();
+    this.queue = opts.queue ?? [];
+    this.gameTuneStarted = opts.gameTuneStarted ?? false;
+    this.gameTuneTrack = opts.gameTuneTrack ?? null;
+    this.trackIds = opts.trackIds ?? new Map();
+    this.nextTrackId = opts.nextTrackId ?? 0;
+    this.paqEntries = opts.paqEntries ?? null;
+  }
+}
+
+function arrayBufferFromBytes(data: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(data.byteLength);
+  new Uint8Array(buffer).set(data);
+  return buffer;
 }
 
 export function initMusicState(opts: { ready: boolean; enabled: boolean; volume: number }): MusicState {
   const ready = opts.ready;
   const enabled = opts.enabled;
   const volume = opts.volume;
-  return {
+  return new MusicState({
     ready,
     enabled,
     volume,
@@ -61,7 +111,7 @@ export function initMusicState(opts: { ready: boolean; enabled: boolean; volume:
     trackIds: new Map(),
     nextTrackId: 0,
     paqEntries: null,
-  };
+  });
 }
 
 export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext, assetsUrl: string): Promise<void> {
@@ -76,7 +126,7 @@ export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext,
       if (data) break;
     }
     if (!data) throw new Error(`Missing music entry for track '${trackName}'`);
-    const buffer = await audioCtx.decodeAudioData(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer);
+    const buffer = await audioCtx.decodeAudioData(arrayBufferFromBytes(data));
     state.tracks.set(trackName, buffer);
   }
 
@@ -108,7 +158,7 @@ export function playMusic(state: MusicState, audioCtx: AudioContext | null, trac
 
   let pb = state.playbacks.get(trackName);
   if (!pb) {
-    pb = { buffer, source: null, gainNode: null, volume: 0.0, muted: true, playing: false };
+    pb = new TrackPlayback({ buffer, volume: 0.0, muted: true, playing: false });
     state.playbacks.set(trackName, pb);
   }
 
@@ -224,7 +274,7 @@ export async function loadMusicTrack(
   let buffer: AudioBuffer;
   try {
     buffer = await audioCtx.decodeAudioData(
-      data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer,
+      arrayBufferFromBytes(data),
     );
   } catch {
     if (console !== null) {
