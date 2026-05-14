@@ -80,18 +80,18 @@ export function rectForIndex(
 }
 
 // PIL Image.crop is not available in the WebGL runtime.
-export function sliceIndex(_image: unknown, _grid: number, _index: number): never {
+export function sliceIndex(_image: ImageBitmap, _grid: number, _index: number): never {
   throw new Error('PIL Image.crop is not available in the WebGL runtime');
 }
 
-export function sliceGrid(image: unknown, grid: number): never[] {
-  const frames: never[] = [];
+export function sliceGrid(image: ImageBitmap, grid: number): ImageBitmap[] {
+  const frames: ImageBitmap[] = [];
   for (let idx = 0; idx < grid * grid; idx++) {
     frames.push(sliceIndex(image, grid, idx));
   }
   return frames;
 }
 
-export function sliceByIndices(image: unknown, grid: number, indices: Iterable<number>): never[] {
+export function sliceByIndices(image: ImageBitmap, grid: number, indices: Iterable<number>): ImageBitmap[] {
   return Array.from(indices, (idx) => sliceIndex(image, grid, idx));
 }
