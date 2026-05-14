@@ -8,11 +8,23 @@ const CRT_RAND_INC = 2531011;
 
 export type RngTraceSink = (stateBefore: number, stateAfter: number, value: number, caller: CallerStatic) => void;
 
-export interface RngDrawRecord {
+export class RngDrawRecord {
   readonly stateBefore: number;
   readonly stateAfter: number;
   readonly value: number;
   readonly caller: CallerStatic;
+
+  constructor(opts: {
+    stateBefore: number;
+    stateAfter: number;
+    value: number;
+    caller: CallerStatic;
+  }) {
+    this.stateBefore = opts.stateBefore;
+    this.stateAfter = opts.stateAfter;
+    this.value = opts.value;
+    this.caller = opts.caller;
+  }
 }
 
 // Raised when strict RNG tracing sees an untagged gameplay draw.
@@ -78,7 +90,7 @@ export class CrtRand implements CrandLike {
 
   setTraceSink(sink: RngTraceSink | null, opts?: { requireCaller?: boolean }): void {
     this._traceSink = sink;
-    this._traceRequireCaller = opts?.requireCaller ?? false;
+    this._traceRequireCaller = Boolean(opts?.requireCaller ?? false);
   }
 
   rand(opts?: { caller?: CallerStatic }): number {
@@ -119,7 +131,7 @@ export class RecordingCrand implements CrandLike {
   }
 
   get state(): number {
-    return this._shared.base.state;
+    return int(this._shared.base.state);
   }
 
   get calls(): number {
@@ -127,35 +139,36 @@ export class RecordingCrand implements CrandLike {
   }
 
   get records(): readonly RngDrawRecord[] {
-    return this._shared.records;
+    return this._shared.records.slice();
   }
 
   srand(seed: number): void {
-    this._shared.base.srand(seed);
+    this._shared.base.srand(int(seed));
     this._shared.records.length = 0;
   }
 
   rand(opts?: { caller?: CallerStatic }): number {
     const caller = opts?.caller ?? null;
-    const stateBefore = this._shared.base.state;
+    const stateBefore = int(this._shared.base.state);
     const value = this._shared.base.rand();
-    const stateAfter = this._shared.base.state;
-    this._shared.records.push({
+    const stateAfter = int(this._shared.base.state);
+    this._shared.records.push(new RngDrawRecord({
       stateBefore,
       stateAfter,
       value,
       caller,
-    });
+    }));
     return value;
   }
 
   advance(draws: number): void {
-    if (draws < 0) throw new Error(`draws must be >= 0, got ${draws}`);
-    this._shared.base.advance(draws);
+    const steps = int(draws);
+    if (steps < 0) throw new Error(`draws must be >= 0, got ${draws}`);
+    this._shared.base.advance(steps);
   }
 
   recordsSince(startCall: number = 0): RngDrawRecord[] {
-    const start = Math.max(0, startCall);
+    const start = Math.max(0, int(startCall));
     return this._shared.records.slice(start);
   }
 
