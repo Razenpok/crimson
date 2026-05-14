@@ -154,7 +154,7 @@ class LanRuntimeInputProvider {
   }
 
   pullTick(_tickIndex: number, _defaultDtSeconds: number): TickSupply {
-    return new TickSupply(InputStatus.STALLED, null);
+    return new TickSupply({ status: InputStatus.STALLED });
   }
 
   supportsCommandSubmission(): boolean {
@@ -681,7 +681,7 @@ export class BaseGameplayMode {
     }
 
     opts.menu.openMenu?.({ playSfx: perkCtx.playSfx });
-    this.enqueueInputCommand(new PerkMenuOpenCommand(0));
+    this.enqueueInputCommand(new PerkMenuOpenCommand({ playerIndex: 0 }));
   }
 
   protected _uiMousePos(): Vec2 {
@@ -763,7 +763,7 @@ export class BaseGameplayMode {
 
   recordPerkPickCommand(choiceIndex: number, opts?: { playerIndex?: number }): void {
     this.enqueueInputCommand(
-      new PerkPickCommand(opts?.playerIndex ?? 0, int(choiceIndex)),
+      new PerkPickCommand({ playerIndex: opts?.playerIndex ?? 0, choiceIndex: int(choiceIndex) }),
     );
   }
 

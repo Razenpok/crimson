@@ -146,18 +146,18 @@ export class TypoShooterMode extends BaseGameplayMode {
   private _enqueueTypingCommands(): void {
     const enterPressed = InputState.wasKeyPressed(13) || InputState.wasKeyPressed(0x100D);
     if (enterPressed && this.state.typo.typing.text) {
-      this.enqueueInputCommand(new TypoSubmitCommand(0));
+      this.enqueueInputCommand(new TypoSubmitCommand({ playerIndex: 0 }));
     }
 
     // Native processes at most one keychar per frame via `console_input_poll`.
     if (InputState.wasKeyPressed(8) || InputState.wasKeyPressedRepeat(8)) {
-      this.enqueueInputCommand(new TypoBackspaceCommand(0));
+      this.enqueueInputCommand(new TypoBackspaceCommand({ playerIndex: 0 }));
     } else {
       const codepoint = InputState.getCharPressed();
       if (codepoint !== 13 && codepoint !== 8 && codepoint >= 0x20 && codepoint <= 0xFF) {
         const ch = String.fromCharCode(codepoint);
         if (ch) {
-          this.enqueueInputCommand(new TypoCharCommand(0, ch[0]));
+          this.enqueueInputCommand(new TypoCharCommand({ playerIndex: 0, ch: ch[0] }));
         }
       }
     }

@@ -7,42 +7,50 @@ type TypoChar = string;
 
 export class PerkMenuOpenCommand {
   readonly tag = 'perk_menu_open' as const;
-  constructor(readonly playerIndex: number) {
-    Object.freeze(this);
+  readonly playerIndex: number;
+
+  constructor(opts: { playerIndex: number }) {
+    this.playerIndex = opts.playerIndex;
   }
 }
 
 export class PerkPickCommand {
   readonly tag = 'perk_pick' as const;
-  constructor(
-    readonly playerIndex: number,
-    readonly choiceIndex: number,
-  ) {
-    Object.freeze(this);
+  readonly playerIndex: number;
+  readonly choiceIndex: number;
+
+  constructor(opts: { playerIndex: number; choiceIndex: number }) {
+    this.playerIndex = opts.playerIndex;
+    this.choiceIndex = opts.choiceIndex;
   }
 }
 
 export class TypoCharCommand {
   readonly tag = 'typo_char' as const;
-  constructor(
-    readonly playerIndex: number,
-    readonly ch: TypoChar,
-  ) {
-    Object.freeze(this);
+  readonly playerIndex: number;
+  readonly ch: TypoChar;
+
+  constructor(opts: { playerIndex: number; ch: TypoChar }) {
+    this.playerIndex = opts.playerIndex;
+    this.ch = opts.ch;
   }
 }
 
 export class TypoBackspaceCommand {
   readonly tag = 'typo_backspace' as const;
-  constructor(readonly playerIndex: number) {
-    Object.freeze(this);
+  readonly playerIndex: number;
+
+  constructor(opts: { playerIndex: number }) {
+    this.playerIndex = opts.playerIndex;
   }
 }
 
 export class TypoSubmitCommand {
   readonly tag = 'typo_submit' as const;
-  constructor(readonly playerIndex: number) {
-    Object.freeze(this);
+  readonly playerIndex: number;
+
+  constructor(opts: { playerIndex: number }) {
+    this.playerIndex = opts.playerIndex;
   }
 }
 
@@ -75,7 +83,6 @@ export class FrameContext {
     this.candidateTicks = opts.candidateTicks;
     this.isNetworked = opts.isNetworked ?? false;
     this.isReplay = opts.isReplay ?? false;
-    Object.freeze(this);
   }
 }
 
@@ -101,7 +108,6 @@ export class ResolvedTick {
     this.dtSeconds = opts.dtSeconds;
     this.inputs = opts.inputs ?? [];
     this.commands = opts.commands ?? [];
-    Object.freeze(this);
   }
 }
 
@@ -109,10 +115,9 @@ export class TickSupply {
   readonly status: InputStatus;
   readonly tick: ResolvedTick | null;
 
-  constructor(status: InputStatus, tick: ResolvedTick | null = null) {
-    this.status = status;
-    this.tick = tick;
-    Object.freeze(this);
+  constructor(opts: { status: InputStatus; tick?: ResolvedTick | null }) {
+    this.status = opts.status;
+    this.tick = opts.tick ?? null;
   }
 }
 
@@ -160,17 +165,17 @@ export class LocalInputProvider implements InputProvider {
         this._playerCount <= 0 ? [] : Array.from(this._frameInputs);
       const commands = Array.from(this._commandsForNextTick);
       this._commandsForNextTick = [];
-      return new TickSupply(
-        InputStatus.READY,
-        new ResolvedTick({ tickIndex: ti, dtSeconds: dt, inputs, commands }),
-      );
+      return new TickSupply({
+        status: InputStatus.READY,
+        tick: new ResolvedTick({ tickIndex: ti, dtSeconds: dt, inputs, commands }),
+      });
     }
     const inputs =
       this._playerCount <= 0 ? [] : Array.from(this._edgeInputs);
-    return new TickSupply(
-      InputStatus.READY,
-      new ResolvedTick({ tickIndex: ti, dtSeconds: dt, inputs, commands: [] }),
-    );
+    return new TickSupply({
+      status: InputStatus.READY,
+      tick: new ResolvedTick({ tickIndex: ti, dtSeconds: dt, inputs, commands: [] }),
+    });
   }
 
   supportsCommandSubmission(): boolean {
