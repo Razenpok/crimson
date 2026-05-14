@@ -37,6 +37,24 @@ const STATUS_FIELD_NAMES = new Set([
   'unknownTail',
 ]);
 
+export const GAME_STATUS_STRUCT = [
+  ['questUnlockIndex', 'Int16ul'],
+  ['questUnlockIndexFull', 'Int16ul'],
+  ['weaponUsageCounts', `Array(${WEAPON_USAGE_COUNT}, Int32ul)`],
+  ['questPlayCounts', `Array(${QUEST_PLAY_COUNT}, Int32ul)`],
+  ['modePlaySurvival', 'Int32ul'],
+  ['modePlayRush', 'Int32ul'],
+  ['modePlayTypo', 'Int32ul'],
+  ['modePlayOther', 'Int32ul'],
+  ['gameSequenceId', 'Int32ul'],
+  ['unknownTail', `Bytes(${UNKNOWN_TAIL_SIZE})`],
+] as const;
+
+export const GAME_CFG_STRUCT = [
+  ['encoded', `Bytes(${BLOB_SIZE})`],
+  ['checksum', 'Int32ul'],
+] as const;
+
 export class GameStatusData {
   questUnlockIndex: number;
   questUnlockIndexFull: number;
@@ -74,6 +92,11 @@ export class GameStatusData {
   }
 }
 
+class Missing {
+}
+
+const MISSING = new Missing();
+
 export class GameStatus extends GameStatusData {
   path: string;
   dirty: boolean;
@@ -99,9 +122,9 @@ export class GameStatus extends GameStatusData {
       set(target, prop, value, receiver) {
         const name = String(prop);
         const markDirty = STATUS_FIELD_NAMES.has(name);
-        const current = markDirty ? Reflect.get(target, prop, receiver) : undefined;
+        const current = markDirty ? Reflect.get(target, prop, receiver) : MISSING;
         const ok = Reflect.set(target, prop, value, receiver);
-        if (ok && markDirty && current !== undefined && current !== value) {
+        if (ok && markDirty && current !== MISSING && current !== value) {
           Reflect.set(target, 'dirty', true, receiver);
         }
         return ok;
@@ -226,6 +249,21 @@ function requireIndex(index: number, opts: { size: number; field: string }): num
   throw new RangeError(`${opts.field} out of range: ${idx}`);
 }
 
+function statusBlobDict(data: GameStatusData): Record<string, number | number[] | Uint8Array> {
+  return {
+    questUnlockIndex: data.questUnlockIndex,
+    questUnlockIndexFull: data.questUnlockIndexFull,
+    weaponUsageCounts: Array.from(data.weaponUsageCounts),
+    questPlayCounts: Array.from(data.questPlayCounts),
+    modePlaySurvival: data.modePlaySurvival,
+    modePlayRush: data.modePlayRush,
+    modePlayTypo: data.modePlayTypo,
+    modePlayOther: data.modePlayOther,
+    gameSequenceId: data.gameSequenceId,
+    unknownTail: new Uint8Array(data.unknownTail),
+  };
+}
+
 export function defaultStatusData(): GameStatusData {
   return new GameStatusData();
 }
@@ -283,6 +321,7 @@ export function parseStatusBlob(decoded: Uint8Array): GameStatusData {
 }
 
 export function buildStatusBlob(data: GameStatusData): Uint8Array {
+  void statusBlobDict(data);
   const decoded = new Uint8Array(BLOB_SIZE);
   const view = new DataView(decoded.buffer);
   let offset = 0;
@@ -411,10 +450,84 @@ export function ensureGameStatus(baseDir: string): GameStatus {
 
 export function hashStatusData(status: GameStatusData): string {
   const blob = buildStatusBlob(status);
-  let hash = 0x811C9DC5;
-  for (const byte of blob) {
-    hash ^= byte;
-    hash = Math.imul(hash, 0x01000193) >>> 0;
+  return sha256Hex(blob);
+}
+
+function sha256Hex(data: Uint8Array): string {
+  const k = [
+    0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
+    0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
+    0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
+    0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
+    0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
+    0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
+    0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
+    0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2,
+  ];
+  let h0 = 0x6A09E667;
+  let h1 = 0xBB67AE85;
+  let h2 = 0x3C6EF372;
+  let h3 = 0xA54FF53A;
+  let h4 = 0x510E527F;
+  let h5 = 0x9B05688C;
+  let h6 = 0x1F83D9AB;
+  let h7 = 0x5BE0CD19;
+  const bitLen = data.length * 8;
+  const paddedLen = Math.floor((data.length + 9 + 63) / 64) * 64;
+  const msg = new Uint8Array(paddedLen);
+  msg.set(data);
+  msg[data.length] = 0x80;
+  const view = new DataView(msg.buffer);
+  view.setUint32(paddedLen - 8, Math.floor(bitLen / 0x100000000), false);
+  view.setUint32(paddedLen - 4, bitLen >>> 0, false);
+  const w = new Uint32Array(64);
+  for (let offset = 0; offset < paddedLen; offset += 64) {
+    for (let i = 0; i < 16; i++) {
+      w[i] = view.getUint32(offset + i * 4, false);
+    }
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+    }
+    let a = h0;
+    let b = h1;
+    let c = h2;
+    let d = h3;
+    let e = h4;
+    let f = h5;
+    let g = h6;
+    let h = h7;
+    for (let i = 0; i < 64; i++) {
+      const s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const temp1 = (h + s1 + ch + k[i] + w[i]) >>> 0;
+      const s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (s0 + maj) >>> 0;
+      h = g;
+      g = f;
+      f = e;
+      e = (d + temp1) >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) >>> 0;
+    }
+    h0 = (h0 + a) >>> 0;
+    h1 = (h1 + b) >>> 0;
+    h2 = (h2 + c) >>> 0;
+    h3 = (h3 + d) >>> 0;
+    h4 = (h4 + e) >>> 0;
+    h5 = (h5 + f) >>> 0;
+    h6 = (h6 + g) >>> 0;
+    h7 = (h7 + h) >>> 0;
   }
-  return hash.toString(16).padStart(8, '0');
+  return [h0, h1, h2, h3, h4, h5, h6, h7]
+    .map((value) => value.toString(16).padStart(8, '0'))
+    .join('');
+}
+
+function rotr(value: number, bits: number): number {
+  return (value >>> bits) | (value << (32 - bits));
 }
