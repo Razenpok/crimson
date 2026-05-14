@@ -29,6 +29,21 @@ export class JazImage {
     this.jpeg = opts.jpeg;
     this.alpha = opts.alpha;
   }
+
+  // PIL image conversion is unavailable in the WebGL build.
+  rgbImage(): never {
+    throw new Error('JAZ RGB image conversion is unavailable in the WebGL build');
+  }
+
+  // PIL image conversion is unavailable in the WebGL build.
+  alphaImage(): never {
+    throw new Error('JAZ alpha image conversion is unavailable in the WebGL build');
+  }
+
+  // PIL image conversion is unavailable in the WebGL build.
+  compositeImage(): never {
+    throw new Error('JAZ composite image conversion is unavailable in the WebGL build');
+  }
 }
 
 function blobFromBytes(data: Uint8Array, type: string): Blob {
@@ -53,9 +68,6 @@ export function decodeAlphaRle(data: Uint8Array, expected: number): Uint8Array {
 }
 
 async function decompressZlib(data: Uint8Array): Promise<Uint8Array> {
-  // JAZ files use zlib-wrapped streams (RFC 1950). Despite the name, browsers'
-  // DecompressionStream('deflate') handles both raw deflate AND zlib-wrapped
-  // data transparently, so no manual header stripping is needed.
   const ds = new DecompressionStream('deflate');
   const writer = ds.writable.getWriter();
   const reader = ds.readable.getReader();
@@ -65,7 +77,6 @@ async function decompressZlib(data: Uint8Array): Promise<Uint8Array> {
   writer.write(compressed);
   writer.close();
 
-  // Read all decompressed chunks
   const chunks: Uint8Array[] = [];
   let totalLength = 0;
   while (true) {
@@ -75,7 +86,6 @@ async function decompressZlib(data: Uint8Array): Promise<Uint8Array> {
     totalLength += value.length;
   }
 
-  // Concatenate
   const result = new Uint8Array(totalLength);
   let offset = 0;
   for (const chunk of chunks) {
@@ -107,7 +117,6 @@ export async function decodeJazBytes(data: Uint8Array): Promise<JazImage> {
   const jpegData = raw.subarray(4, 4 + jpegLen);
   const alphaRle = raw.subarray(4 + jpegLen);
 
-  // Decode JPEG to get dimensions
   const jpegBlob = blobFromBytes(jpegData, 'image/jpeg');
   const bitmap = await createImageBitmap(jpegBlob);
   const width = bitmap.width;
@@ -124,14 +133,9 @@ export function decodeJaz(_path: string): never {
   throw new Error('JAZ path loading is unavailable in the WebGL build');
 }
 
-/**
- * Decode a JAZ image and composite the JPEG RGB with the RLE alpha channel,
- * returning an ImageBitmap ready for WebGL texture upload.
- */
 export async function decodeJazToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
   const jaz = await decodeJazBytes(data);
 
-  // Decode JPEG to canvas to extract RGB pixels
   const jpegBlob = blobFromBytes(jaz.jpeg, 'image/jpeg');
   const jpegBitmap = await createImageBitmap(jpegBlob);
 
@@ -146,15 +150,9 @@ export async function decodeJazToImageBitmap(data: Uint8Array): Promise<ImageBit
   const imageData = ctx.getImageData(0, 0, jaz.width, jaz.height);
   const pixels = imageData.data;
 
-  // Apply alpha channel from RLE data
   for (let i = 0; i < jaz.alpha.length; i++) {
     pixels[i * 4 + 3] = jaz.alpha[i];
   }
 
-  // Build the bitmap directly from ImageData — do NOT round-trip through the
-  // OffscreenCanvas 2D context (putImageData → createImageBitmap(canvas)),
-  // because the canvas backing store premultiplies alpha, which is lossy for
-  // straight-alpha DX8 content and causes dark halos / double-darkening under
-  // SRC_ALPHA blending (see docs/cheatsheets/directx8.md §3B).
   return createImageBitmap(imageData, { premultiplyAlpha: 'none' });
 }
