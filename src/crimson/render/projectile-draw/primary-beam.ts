@@ -42,7 +42,14 @@ function drawBeamBodySprites(opts: {
       const pos = origin.add(direction.mul(s));
       const posScreen = renderer.worldToScreen(pos);
       const tint = new RGBA(streakRgb[0], streakRgb[1], streakRgb[2], segAlpha).toWgl();
-      renderer.drawAtlasSprite(texture, grid, frame, posScreen, spriteScale, 0.0, tint);
+      renderer.drawAtlasSprite(texture, {
+        grid,
+        frame,
+        pos: posScreen,
+        scale: spriteScale,
+        rotationRad: 0.0,
+        tint,
+      });
     }
     s += step;
   }
@@ -140,7 +147,14 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       });
     } else {
       const headTint = new RGBA(headRgb[0], headRgb[1], headRgb[2], baseAlpha).toWgl();
-      renderer.drawAtlasSprite(texture, grid, atlasFrame, ctx.screenPos, spriteScale, ctx.angle, headTint);
+      renderer.drawAtlasSprite(texture, {
+        grid,
+        frame: atlasFrame,
+        pos: ctx.screenPos,
+        scale: spriteScale,
+        rotationRad: ctx.angle,
+        tint: headTint,
+      });
     }
 
     // Fire Bullets renders an extra particles.png overlay in a later pass.
@@ -191,7 +205,14 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       });
     } else {
       const coreTint = new RGBA(coreRgb[0], coreRgb[1], coreRgb[2], baseAlpha).toWgl();
-      renderer.drawAtlasSprite(texture, grid, atlasFrame, ctx.screenPos, ctx.scale, ctx.angle, coreTint);
+      renderer.drawAtlasSprite(texture, {
+        grid,
+        frame: atlasFrame,
+        pos: ctx.screenPos,
+        scale: ctx.scale,
+        rotationRad: ctx.angle,
+        tint: coreTint,
+      });
     }
 
     if (isIon) {
@@ -275,7 +296,14 @@ export function drawBeamEffect(ctx: ProjectileDrawCtx): boolean {
       for (const creature of glowTargets) {
         const targetScreen = renderer.worldToScreen(creature.pos);
         const targetTint = new RGBA(0.5, 0.6, 1.0, baseAlpha).toWgl();
-        renderer.drawAtlasSprite(texture, grid, atlasFrame, targetScreen, spriteScale, 0.0, targetTint);
+        renderer.drawAtlasSprite(texture, {
+          grid,
+          frame: atlasFrame,
+          pos: targetScreen,
+          scale: spriteScale,
+          rotationRad: 0.0,
+          tint: targetTint,
+        });
       }
     }
   }

@@ -62,7 +62,7 @@ export function drawBonusPickups(
     const fade = bonusFade(bonus.timeLeft, bonus.timeMax);
     const bubbleAlpha = clamp(fade * 0.9, 0.0, 1.0) * alpha;
 
-    const screen = WorldRenderCtx.worldToScreenWith(bonus.pos, camera, viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(bonus.pos, { camera, viewScale });
     const bubbleDst = wgl.makeRectangle(screen.x, screen.y, bubbleSize, bubbleSize);
     const bubbleOrigin = wgl.makeVector2(bubbleSize * 0.5, bubbleSize * 0.5);
     const tint = wgl.makeColor(1, 1, 1, int(bubbleAlpha * 255.0 + 0.5) / 255);
@@ -136,7 +136,7 @@ export function drawBonusHoverLabels(
     if (!label) continue;
 
     const aim = player.aim;
-    const aimScreen = WorldRenderCtx.worldToScreenWith(aim, camera, viewScale);
+    const aimScreen = WorldRenderCtx.worldToScreenWith(aim, { camera, viewScale });
     let x = aimScreen.x + 16.0;
     const y = aimScreen.y - 7.0;
 

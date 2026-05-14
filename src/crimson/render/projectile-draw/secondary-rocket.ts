@@ -146,7 +146,14 @@ export function drawSecondaryRocket(ctx: SecondaryProjectileDrawCtx): boolean {
 
   drawSecondaryRocketGlow(ctx, style);
 
-  renderer.drawAtlasSprite(texture, 4, 3, ctx.screenPos, spriteScale, ctx.angle, baseTint);
+  renderer.drawAtlasSprite(texture, {
+    grid: 4,
+    frame: 3,
+    pos: ctx.screenPos,
+    scale: spriteScale,
+    rotationRad: ctx.angle,
+    tint: baseTint,
+  });
   return true;
 }
 

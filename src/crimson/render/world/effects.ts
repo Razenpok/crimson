@@ -72,7 +72,7 @@ export function drawParticlePool(
       radius = Math.max(radius, 16.0);
       const size = Math.max(0.0, radius * 2.0 * scale);
       if (size <= 0.0) continue;
-      const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
+      const screen = WorldRenderCtx.worldToScreenWith(entry.pos, { camera, viewScale });
       const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
       const origin = wgl.makeVector2(size * 0.5, size * 0.5);
       wgl.drawTexturePro(texture, srcLarge, dst, origin, 0.0, tint);
@@ -86,7 +86,7 @@ export function drawParticlePool(
     radius = Math.max(radius, 2.0);
     const size = Math.max(0.0, radius * 2.0 * scale);
     if (size <= 0.0) continue;
-    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, { camera, viewScale });
     const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = entry.spin * RAD_TO_DEG;
@@ -103,7 +103,7 @@ export function drawParticlePool(
     const w = Math.max(0.0, halfW * 2.0 * scale);
     const h = Math.max(0.0, halfH * 2.0 * scale);
     if (w <= 0.0 || h <= 0.0) continue;
-    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, { camera, viewScale });
     const dst = wgl.makeRectangle(screen.x, screen.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);
     const tint = wgl.makeColor(1, 1, 1, int(entry.age * alphaByte + 0.5) / 255);
@@ -148,7 +148,7 @@ export function drawSpriteEffectPool(
     if (!entry.active) continue;
     const size = entry.scale * scale;
     if (size <= 0.0) continue;
-    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, { camera, viewScale });
     const dst = wgl.makeRectangle(screen.x, screen.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = entry.rotation * RAD_TO_DEG;
@@ -205,7 +205,7 @@ export function drawEffectPool(
     const src = srcRect(effectId);
     if (src === null) return;
 
-    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, camera, viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(entry.pos, { camera, viewScale });
     const halfW = entry.halfWidth;
     const halfH = entry.halfHeight;
     const localScale = entry.scale;

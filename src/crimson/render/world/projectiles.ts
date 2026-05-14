@@ -72,7 +72,14 @@ export function drawProjectile(
   alpha = int(clamp(clamp(life / 0.4, 0.0, 1.0) * 255.0 * alpha, 0.0, 255.0) + 0.5) / 255;
   const [red, green, blue] = knownProjRgb(typeId);
   const tint = wgl.makeColor(red / 255, green / 255, blue / 255, alpha);
-  renderCtx.drawAtlasSprite(texture, grid, frame, screen, 0.6 * scale, angle, tint);
+  renderCtx.drawAtlasSprite(texture, {
+    grid,
+    frame,
+    pos: screen,
+    scale: 0.6 * scale,
+    rotationRad: angle,
+    tint,
+  });
 }
 
 export function isBulletTrailType(typeId: number): boolean {
@@ -80,7 +87,7 @@ export function isBulletTrailType(typeId: number): boolean {
 }
 
 export function bulletSpriteSize(typeId: number, opts: { scale: number }): number {
-  return WorldRenderCtx.bulletSpriteSize(typeId, opts.scale);
+  return WorldRenderCtx.bulletSpriteSize(typeId, { scale: opts.scale });
 }
 
 export function drawBulletTrail(
@@ -122,8 +129,8 @@ export function drawSharpshooterLaserSight(
     const start = playerPos.add(aimDir.mul(15.0));
     const end = playerPos.add(aimDir.mul(512.0));
 
-    const startScreen = WorldRenderCtx.worldToScreenWith(start, camera, viewScale);
-    const endScreen = WorldRenderCtx.worldToScreenWith(end, camera, viewScale);
+    const startScreen = WorldRenderCtx.worldToScreenWith(start, { camera, viewScale });
+    const endScreen = WorldRenderCtx.worldToScreenWith(end, { camera, viewScale });
     const segment = endScreen.sub(startScreen);
     const [direction, dist] = segment.normalizedWithLength();
     if (dist <= 1e-3) continue;

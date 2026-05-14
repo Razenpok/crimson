@@ -27,9 +27,9 @@ export class WorldRenderCtx {
     this.projectionViewScale = opts.projectionViewScale ?? null;
   }
 
-  cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
-    const outW = runtimeW ?? wgl.getScreenWidth();
-    const outH = runtimeH ?? wgl.getScreenHeight();
+  cameraScreenSize(opts: { runtimeW?: number | null; runtimeH?: number | null } = {}): Vec2 {
+    const outW = opts.runtimeW ?? wgl.getScreenWidth();
+    const outH = opts.runtimeH ?? wgl.getScreenHeight();
     return viewport.cameraScreenSize({
       worldSize: this.frame.worldSize,
       config: this.frame.config,
@@ -53,8 +53,8 @@ export class WorldRenderCtx {
     return [camera, viewScale];
   }
 
-  static worldToScreenWith(pos: Vec2, camera: Vec2, viewScale: Vec2): Vec2 {
-    return viewport.worldToScreenWith(pos, { camera, viewScale });
+  static worldToScreenWith(pos: Vec2, opts: { camera: Vec2; viewScale: Vec2 }): Vec2 {
+    return viewport.worldToScreenWith(pos, { camera: opts.camera, viewScale: opts.viewScale });
   }
 
   static viewScaleAvg(viewScale: Vec2): number {
@@ -63,24 +63,28 @@ export class WorldRenderCtx {
 
   drawAtlasSprite(
     texture: wgl.Texture,
-    grid: number,
-    frame: number,
-    pos: Vec2,
-    scale: number,
-    rotationRad: number = 0.0,
-    tint: wgl.Color = wgl.makeColor(1, 1, 1, 1),
+    opts: {
+      grid: number;
+      frame: number;
+      pos: Vec2;
+      scale: number;
+      rotationRad?: number;
+      tint?: wgl.Color;
+    },
   ): void {
-    grid = Math.max(1, int(grid));
-    frame = Math.max(0, int(frame));
+    let grid = Math.max(1, int(opts.grid));
+    let frame = Math.max(0, int(opts.frame));
     const cellW = texture.width / grid;
     const cellH = texture.height / grid;
     const col = frame % grid;
     const row = Math.floor(frame / grid);
     const src = wgl.makeRectangle(cellW * col, cellH * row, cellW, cellH);
-    const w = cellW * scale;
-    const h = cellH * scale;
-    const dst = wgl.makeRectangle(pos.x, pos.y, w, h);
+    const w = cellW * opts.scale;
+    const h = cellH * opts.scale;
+    const dst = wgl.makeRectangle(opts.pos.x, opts.pos.y, w, h);
     const origin = wgl.makeVector2(w * 0.5, h * 0.5);
+    const rotationRad = opts.rotationRad ?? 0.0;
+    const tint = opts.tint ?? wgl.makeColor(1, 1, 1, 1);
     wgl.drawTexturePro(texture, src, dst, origin, rotationRad * RAD_TO_DEG, tint);
   }
 
@@ -97,8 +101,8 @@ export class WorldRenderCtx {
     return isBulletTrailType(typeId);
   }
 
-  static bulletSpriteSize(typeId: number, scale: number): number {
-    return bulletSpriteSize(typeId, scale);
+  static bulletSpriteSize(typeId: number, opts: { scale: number }): number {
+    return bulletSpriteSize(typeId, { scale: opts.scale });
   }
 
   isBulletTrailType(typeId: number): boolean {
@@ -106,7 +110,7 @@ export class WorldRenderCtx {
   }
 
   bulletSpriteSize(typeId: number, opts: { scale: number }): number {
-    return WorldRenderCtx.bulletSpriteSize(typeId, opts.scale);
+    return WorldRenderCtx.bulletSpriteSize(typeId, { scale: opts.scale });
   }
 
   drawBulletTrail(
@@ -114,7 +118,7 @@ export class WorldRenderCtx {
     end: Vec2,
     opts: { typeId: number; alpha: number; scale: number; angle: number },
   ): boolean {
-    return drawBulletTrail(this, start, end, opts.typeId, opts.alpha, opts.scale, opts.angle);
+    return drawBulletTrail(this, start, end, opts);
   }
 
   worldToScreen(pos: Vec2): Vec2 {
@@ -123,7 +127,7 @@ export class WorldRenderCtx {
     if (camera === null || viewScale === null) {
       [camera, viewScale] = this.worldParams();
     }
-    return WorldRenderCtx.worldToScreenWith(pos, camera, viewScale);
+    return WorldRenderCtx.worldToScreenWith(pos, { camera, viewScale });
   }
 
   screenToWorld(pos: Vec2): Vec2 {
@@ -150,26 +154,25 @@ export function isBulletTrailType(typeId: number): boolean {
   return (0 <= typeId && typeId < 8) || typeId === ProjectileTemplateId.SPLITTER_GUN;
 }
 
-export function bulletSpriteSize(typeId: number, scale: number): number {
+export function bulletSpriteSize(typeId: number, opts: { scale: number }): number {
   let base = 4.0;
   if (typeId === ProjectileTemplateId.ASSAULT_RIFLE) {
     base = 6.0;
   } else if (typeId === ProjectileTemplateId.SUBMACHINE_GUN) {
     base = 8.0;
   }
-  return Math.max(2.0, base * scale);
+  return Math.max(2.0, base * opts.scale);
 }
 
 function drawBulletTrail(
   renderCtx: WorldRenderCtx,
   start: Vec2,
   end: Vec2,
-  typeId: number,
-  alpha: number,
-  scale: number,
-  angle: number,
+  opts: { typeId: number; alpha: number; scale: number; angle: number },
 ): boolean {
   const bulletTrailTexture = getTexture(renderCtx.frame.resources, TextureId.BULLET_TRAIL);
+  const typeId = opts.typeId;
+  const alpha = opts.alpha;
   if (alpha <= 0) return false;
 
   const segment = end.sub(start);
@@ -185,13 +188,13 @@ function drawBulletTrail(
   } else {
     sideMul = 0.7;
   }
-  const half = 1.5 * sideMul * scale;
+  const half = 1.5 * sideMul * opts.scale;
 
   let side: Vec2;
   if (dist > 1e-6) {
     side = direction.perpLeft();
   } else {
-    side = Vec2.fromAngle(angle);
+    side = Vec2.fromAngle(opts.angle);
   }
 
   const sideOffset = side.mul(half);

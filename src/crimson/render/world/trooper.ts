@@ -111,7 +111,7 @@ export function drawPlayerTrooperSprite(
   const cell = spriteGrid > 0 ? texture.width / spriteGrid : texture.width;
   if (cell <= 0.0) return;
 
-  const screenPos = WorldRenderCtx.worldToScreenWith(player.pos, camera, viewScale);
+  const screenPos = WorldRenderCtx.worldToScreenWith(player.pos, { camera, viewScale });
   const baseSize = player.size * scale;
   const baseScale = baseSize / cell;
 
@@ -161,12 +161,14 @@ export function drawPlayerTrooperSprite(
   function draw(frameIdx: number, opts: { pos: Vec2; scaleMul: number; rotation: number; color: wgl.Color }): void {
     renderCtx.drawAtlasSprite(
       texture,
-      spriteGrid,
-      Math.max(0, Math.min(63, int(frameIdx))),
-      opts.pos,
-      baseScale * opts.scaleMul,
-      opts.rotation,
-      opts.color,
+      {
+        grid: spriteGrid,
+        frame: Math.max(0, Math.min(63, int(frameIdx))),
+        pos: opts.pos,
+        scale: baseScale * opts.scaleMul,
+        rotationRad: opts.rotation,
+        tint: opts.color,
+      },
     );
   }
 

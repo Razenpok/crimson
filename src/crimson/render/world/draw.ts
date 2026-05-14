@@ -251,7 +251,7 @@ function drawPlayer(
     return;
   }
 
-  const screen = WorldRenderCtx.worldToScreenWith(player.pos, ctx.camera, ctx.viewScale);
+  const screen = WorldRenderCtx.worldToScreenWith(player.pos, { camera: ctx.camera, viewScale: ctx.viewScale });
   const r = Math.max(1.0, 14.0 * ctx.scale);
   const tint = wgl.makeColor(90 / 255, 190 / 255, 120 / 255, int(255 * ctx.entityAlpha + 0.5) / 255);
   drawFilledCircle(screen, r, tint);
@@ -340,14 +340,14 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
   // Native `creature_render_all` batches all overlays across the active pool
   // before any species-specific sprite passes.
   for (const creature of iterActiveCreatureOverlayPass(creatureEntries)) {
-    const screen = WorldRenderCtx.worldToScreenWith(creature.pos, ctx.camera, ctx.viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(creature.pos, { camera: ctx.camera, viewScale: ctx.viewScale });
     const lifecycleStage = creature.lifecycleStage;
     drawCreatureOverlays(renderCtx, creature, { screen, lifecycleStage, ctx });
   }
 
   const resources = frame.resources;
   for (const creature of iterNativeCreatureSpritePass(creatureEntries)) {
-    const screen = WorldRenderCtx.worldToScreenWith(creature.pos, ctx.camera, ctx.viewScale);
+    const screen = WorldRenderCtx.worldToScreenWith(creature.pos, { camera: ctx.camera, viewScale: ctx.viewScale });
     const lifecycleStage = creature.lifecycleStage;
 
     const typeId = creature.typeId;
@@ -463,7 +463,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawCont
     if (!creature.active) continue;
     const size = creature.size * ctx.scale;
     if (size <= 1e-3) continue;
-    const creatureScreen = WorldRenderCtx.worldToScreenWith(creature.pos, ctx.camera, ctx.viewScale);
+    const creatureScreen = WorldRenderCtx.worldToScreenWith(creature.pos, { camera: ctx.camera, viewScale: ctx.viewScale });
     const dst = wgl.makeRectangle(creatureScreen.x, creatureScreen.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = (idx * 0.01 + creature.heading) * RAD_TO_DEG;
@@ -535,7 +535,7 @@ export function drawAimIndicators(
 ): void {
   const ctx = opts.ctx;
   const transform = opts.worldToScreenWith ?? ((pos: Vec2, camera: Vec2, viewScale: Vec2) =>
-    WorldRenderCtx.worldToScreenWith(pos, camera, viewScale));
+    WorldRenderCtx.worldToScreenWith(pos, { camera, viewScale }));
 
   const drawCircle = opts.drawAimCircleFn ?? ((center: Vec2, radius: number, alpha: number) =>
     drawAimCircle(renderCtx, { center, radius, alpha }));
@@ -577,7 +577,7 @@ export function drawAimEnhancements(
 ): void {
   const ctx = opts.ctx;
   const transform = opts.worldToScreenWith ?? ((pos: Vec2, camera: Vec2, viewScale: Vec2) =>
-    WorldRenderCtx.worldToScreenWith(pos, camera, viewScale));
+    WorldRenderCtx.worldToScreenWith(pos, { camera, viewScale }));
 
   for (const player of iterVisibleAimPlayers(renderCtx)) {
     if (player.health <= 0.0) continue;
