@@ -14,10 +14,10 @@ export class EffectAtlasEntry {
   readonly sizeCode: number;
   readonly frame: number;
 
-  constructor(effectId: number, sizeCode: number, frame: number) {
-    this.effectId = effectId;
-    this.sizeCode = sizeCode;
-    this.frame = frame;
+  constructor(opts: { effectId: number; sizeCode: number; frame: number }) {
+    this.effectId = opts.effectId;
+    this.sizeCode = opts.sizeCode;
+    this.frame = opts.frame;
   }
 
   get grid(): number {
@@ -26,7 +26,7 @@ export class EffectAtlasEntry {
 }
 
 function entry(effectId: number, sizeCode: number, frame: number): EffectAtlasEntry {
-  return new EffectAtlasEntry(effectId, sizeCode, frame);
+  return new EffectAtlasEntry({ effectId, sizeCode, frame });
 }
 
 // Extracted from `effect_id_table` (`size_code`, `frame`) (see `docs/structs/effects.md`).
