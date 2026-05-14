@@ -16,14 +16,14 @@ export class PresentationRngTrace {
 }
 
 export class DeterministicStepResult {
-  readonly dtSim: number;
-  readonly timing: FrameTiming;
-  readonly events: WorldEvents;
-  readonly presentation: PresentationStepCommands;
-  readonly presentationPlanMs: number;
-  readonly presentationRngTrace: PresentationRngTrace;
-  readonly terrainFx: TerrainFxBatch;
-  readonly postApplySfx: readonly SfxId[];
+  dtSim: number;
+  timing: FrameTiming;
+  events: WorldEvents;
+  presentation: PresentationStepCommands;
+  presentationPlanMs: number;
+  presentationRngTrace: PresentationRngTrace;
+  terrainFx: TerrainFxBatch;
+  postApplySfx: readonly SfxId[];
 
   constructor(opts: {
     dtSim: number;
@@ -42,7 +42,7 @@ export class DeterministicStepResult {
     this.presentationPlanMs = opts.presentationPlanMs;
     this.presentationRngTrace = opts.presentationRngTrace;
     this.terrainFx = opts.terrainFx ?? new TerrainFxBatch();
-    this.postApplySfx = opts.postApplySfx ?? [];
+    this.postApplySfx = Array.from(opts.postApplySfx ?? []);
   }
 }
 
