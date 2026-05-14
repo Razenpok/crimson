@@ -3,9 +3,22 @@
 export class ActionMap {
   private bindings: Map<string, number[]> = new Map();
 
+  constructor(opts: { bindings?: Map<string, readonly number[]> | Record<string, readonly number[]> } = {}) {
+    const bindings = opts.bindings;
+    if (bindings instanceof Map) {
+      for (const [action, keys] of bindings) {
+        this.bindings.set(action, Array.from(keys, int));
+      }
+    } else if (bindings !== undefined) {
+      for (const [action, keys] of Object.entries(bindings)) {
+        this.bindings.set(action, Array.from(keys, int));
+      }
+    }
+  }
+
   bind(action: string, ...keys: number[]): void {
     if (keys.length === 0) throw new Error('bind requires at least one key');
-    this.bindings.set(action, keys.slice());
+    this.bindings.set(action, keys.map((key) => int(key)));
   }
 
   isDown(action: string): boolean {
@@ -148,4 +161,24 @@ export class InputState {
     this._mouseButtonsPressed.clear();
     this._wheelDelta = 0;
   }
+}
+
+export function isKeyDown(key: number): boolean {
+  return InputState.isKeyDown(key);
+}
+
+export function wasKeyPressed(key: number): boolean {
+  return InputState.wasKeyPressed(key);
+}
+
+export function isMouseButtonDown(button: number): boolean {
+  return InputState.isMouseButtonDown(button);
+}
+
+export function wasMouseButtonPressed(button: number): boolean {
+  return InputState.wasMouseButtonPressed(button);
+}
+
+export function mousePosition(): [number, number] {
+  return InputState.mousePosition();
 }
