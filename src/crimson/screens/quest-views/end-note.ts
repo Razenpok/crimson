@@ -72,10 +72,10 @@ export class EndNoteView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._survivalButton = new UiButtonState({ label: 'Survival', forceWide: true  });
-    this._rushButton = new UiButtonState({ label: '  Rush  ', forceWide: true  });
-    this._typoButton = new UiButtonState({ label: "Typ'o'Shooter", forceWide: true  });
-    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
+    this._survivalButton = new UiButtonState({ label: 'Survival', forceWide: true });
+    this._rushButton = new UiButtonState({ label: '  Rush  ', forceWide: true });
+    this._typoButton = new UiButtonState({ label: "Typ'o'Shooter", forceWide: true });
+    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true });
   }
 
   open(): void {
@@ -236,8 +236,8 @@ export class EndNoteView {
       END_NOTE_HEADER_X_OFFSET * scale,
       END_NOTE_HEADER_Y_OFFSET * scale,
     ));
-    const headerColor = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
-    const bodyColor = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
+    const headerColor = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.8) / 255);
+    const bodyColor = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.5) / 255);
 
     drawSmallText(font, header, headerPos, headerColor);
 
