@@ -98,7 +98,8 @@ const _CREATURE_CONTACT_SFX: Map<CreatureTypeId, [SfxId, SfxId]> = new Map([
 ]);
 
 function _wrapAngle(angle: number): number {
-  return f32((f32(angle) + NATIVE_PI) % NATIVE_TAU - NATIVE_PI);
+  const shifted = f32(angle) + NATIVE_PI;
+  return f32(shifted - Math.floor(shifted / NATIVE_TAU) * NATIVE_TAU - NATIVE_PI);
 }
 
 // Native `angle_approach` (0x0041f430).
