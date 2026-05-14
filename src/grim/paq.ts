@@ -9,7 +9,7 @@
 //       - size: u32 little-endian payload size
 //       - payload: raw file bytes of length `size`
 
-const MAGIC = new Uint8Array([0x70, 0x61, 0x71, 0x00]);
+export const MAGIC = new Uint8Array([0x70, 0x61, 0x71, 0x00]);
 
 export type PaqEntry = readonly [string, Uint8Array];
 
@@ -56,6 +56,7 @@ export function* iterEntriesBytes(data: ArrayBuffer): Generator<PaqEntry> {
 }
 
 export function* iterEntries(_source: string): Generator<PaqEntry> {
+  // Path-based PAQ reading is unavailable in WebGL.
   throw new Error('Path-based PAQ reading is unavailable in WebGL');
 }
 
@@ -97,6 +98,7 @@ export function buildEntries(entries: Iterable<readonly [string | { toString(): 
 }
 
 export function writePaq(_dest: string, _entries: Iterable<PaqEntry>): void {
+  // Path-based PAQ writing is unavailable in WebGL.
   throw new Error('Path-based PAQ writing is unavailable in WebGL');
 }
 
