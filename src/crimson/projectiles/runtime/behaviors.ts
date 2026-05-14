@@ -110,7 +110,7 @@ const CREATURE_FLAGS_SELF_DAMAGE_TICK = CreatureFlags.SELF_DAMAGE_TICK as number
 
 export function projectileHitPerkPoisonBullets(ctx: ProjectileHitPerkCtx): void {
   if (
-    ctx.ownerPerkActive(ctx.proj.owner, ctx.poisonIdx) &&
+    ctx.ownerPerkActive(ctx.proj.owner, int(ctx.poisonIdx)) &&
     (ctx.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_POISON_BULLETS_GATE }) & 7) === 1
   ) {
     ctx.creature.flags |= CREATURE_FLAGS_SELF_DAMAGE_TICK;
