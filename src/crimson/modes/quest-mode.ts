@@ -134,6 +134,7 @@ export class QuestMode extends BaseGameplayMode {
   constructor(opts: {
     worldSize?: number;
     assetsUrl?: string;
+    baseDir?: string;
     preserveBugs?: boolean;
     demoModeActive?: boolean;
     config: CrimsonConfig;
@@ -148,6 +149,7 @@ export class QuestMode extends BaseGameplayMode {
       questFailRetryCount: 0,
       hardcore: false,
       assetsUrl: opts.assetsUrl,
+      baseDir: opts.baseDir,
       preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,

@@ -16,7 +16,7 @@ import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
-import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { drawMenuCursorHelper, ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
@@ -310,18 +310,18 @@ export class QuestFailedView {
     const fired = Math.max(0, int(outcome.shotsFired));
     const hit = Math.max(0, Math.min(int(outcome.shotsHit), fired));
 
-    this._record = {
-      name: playerNameDefault(this.state.config) || 'Player',
-      gameModeId: GameMode.QUESTS,
-      questStageMajor: major,
-      questStageMinor: minor,
-      survivalElapsedMs: elapsed,
-      scoreXp: int(outcome.experience),
-      creatureKillCount: int(outcome.killCount),
-      mostUsedWeaponId: outcome.mostUsedWeaponId,
-      shotsFired: fired,
-      shotsHit: hit,
-    };
+    const record = HighScoreRecord.blank();
+    record.setName(playerNameDefault(this.state.config) || 'Player');
+    record.gameModeId = GameMode.QUESTS;
+    record.questStageMajor = major;
+    record.questStageMinor = minor;
+    record.survivalElapsedMs = elapsed;
+    record.scoreXp = int(outcome.experience);
+    record.creatureKillCount = int(outcome.killCount);
+    record.mostUsedWeaponId = outcome.mostUsedWeaponId;
+    record.shotsFired = fired;
+    record.shotsHit = hit;
+    this._record = record;
   }
 
   private _activateRetry(): void {

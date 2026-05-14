@@ -15,7 +15,7 @@ import { PERK_BY_ID, PerkId, perkDisplayName } from '@crimson/perks/ids.ts';
 import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { QuestResultsUi as QuestResultsUiImpl } from '@crimson/screens/results/quest-results.ts';
-import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { HighScoresRequest, type GameState } from '@crimson/game/types.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
 
@@ -79,18 +79,16 @@ export class QuestResultsView {
       }
     }
 
-    const record: HighScoreRecord = {
-      gameModeId: GameMode.QUESTS,
-      questStageMajor: int(major),
-      questStageMinor: int(minor),
-      scoreXp: int(outcome.experience),
-      survivalElapsedMs: 0,
-      mostUsedWeaponId: outcome.mostUsedWeaponId,
-      creatureKillCount: int(outcome.killCount),
-      shotsFired: 0,
-      shotsHit: 0,
-      name: '',
-    };
+    const record = HighScoreRecord.blank();
+    record.gameModeId = GameMode.QUESTS;
+    record.questStageMajor = int(major);
+    record.questStageMinor = int(minor);
+    record.scoreXp = int(outcome.experience);
+    record.survivalElapsedMs = 0;
+    record.mostUsedWeaponId = outcome.mostUsedWeaponId;
+    record.creatureKillCount = int(outcome.killCount);
+    record.shotsFired = 0;
+    record.shotsHit = 0;
     const fired = Math.max(0, int(outcome.shotsFired));
     const hit = Math.max(0, Math.min(int(outcome.shotsHit), fired));
     record.shotsFired = fired;
@@ -112,7 +110,7 @@ export class QuestResultsView {
     });
     record.survivalElapsedMs = int(breakdown.finalTimeMs);
     const defaultName = playerNameDefault(this.state.config) || 'Player';
-    record.name = defaultName;
+    record.setName(defaultName);
 
     const globalIndex = int(level.globalIndex);
     const completedIdx = trackedQuestCompletedCounterIndex(level);
@@ -150,6 +148,7 @@ export class QuestResultsView {
     }
 
     const ui = new QuestResultsUiImpl({
+      baseDir: this.state.baseDir,
       config: this.state.config,
       preserveBugs: Boolean(this.state.preserveBugs),
     });

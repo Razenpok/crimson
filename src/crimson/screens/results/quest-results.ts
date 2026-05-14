@@ -15,6 +15,16 @@ import {
   tickQuestResultsBreakdownAnim,
 } from '@crimson/quests/results.ts';
 import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import {
+  type HighScoreRecord,
+  TABLE_MAX,
+  NAME_MAX_EDIT,
+  rankIndex,
+  readHighscoreTable,
+  scoresPathForMode,
+  upsertHighscoreRecord,
+} from '@crimson/persistence/highscores.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
 import { menuWidescreenYShift, uiScale } from '@crimson/ui/layout.ts';
@@ -31,13 +41,6 @@ import {
   gameplayControlsHeld,
   updateNameEntryText,
 } from '@crimson/ui/text-input.ts';
-import {
-  type HighScoreRecord,
-  TABLE_MAX,
-  NAME_MAX_EDIT,
-  rankIndex,
-} from './game-over.ts';
-
 // `quest_results_screen_update` base layout (Crimsonland classic UI panel).
 // Values are derived from `ui_menu_assets_init` + `ui_menu_layout_init` and how
 // the quest results screen composes `ui_menuPanel` geometry:
@@ -151,6 +154,7 @@ function drawSmall(
 }
 
 export class QuestResultsUi {
+  baseDir: string;
   config: CrimsonConfig;
   preserveBugs = false;
 
@@ -165,6 +169,7 @@ export class QuestResultsUi {
 
   record: HighScoreRecord | null = null;
   breakdown: QuestFinalTime | null = null;
+  private _scoresPath: string | null = null;
   private _breakdownAnim: QuestResultsBreakdownAnim | null = null;
 
   inputText = '';
@@ -185,7 +190,8 @@ export class QuestResultsUi {
   private _highScoresButton = new UiButtonState({ label: 'High scores', forceWide: true });
   private _mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true });
 
-  constructor(opts: { config: CrimsonConfig; preserveBugs?: boolean }) {
+  constructor(opts: { baseDir?: string; config: CrimsonConfig; preserveBugs?: boolean }) {
+    this.baseDir = opts.baseDir ?? '';
     this.config = opts.config;
     this.preserveBugs = opts.preserveBugs ?? false;
   }
@@ -198,7 +204,6 @@ export class QuestResultsUi {
     unlockWeaponName: string;
     unlockPerkName: string;
     playerNameDefault: string;
-    existingRecords?: HighScoreRecord[];
   }): void {
     this.close();
     this.phase = -1;
@@ -208,7 +213,7 @@ export class QuestResultsUi {
     this.questTitle = opts.questTitle || '';
     this.unlockWeaponName = opts.unlockWeaponName || '';
     this.unlockPerkName = opts.unlockPerkName || '';
-    this.record = { ...opts.record };
+    this.record = opts.record.copy();
     this.breakdown = opts.breakdown;
     this._breakdownAnim = QuestResultsBreakdownAnim.start();
     this._saved = false;
@@ -220,8 +225,18 @@ export class QuestResultsUi {
       this._playNextButton.label = 'Play Next';
     }
 
-    const records = opts.existingRecords ?? [];
+    this._scoresPath = scoresPathForMode(
+      this.baseDir,
+      GameMode.QUESTS,
+      {
+        hardcore: this.config.gameplay.hardcore,
+        questStageMajor: int(this.questLevel.major),
+        questStageMinor: int(this.questLevel.minor),
+        playerCount: this.config.gameplay.playerCount,
+      },
+    );
     try {
+      const records = readHighscoreTable(this._scoresPath, { gameModeId: GameMode.QUESTS });
       this.rank = rankIndex(records, this.record);
     } catch {
       this.rank = TABLE_MAX;
@@ -528,13 +543,22 @@ export class QuestResultsUi {
       if (okClicked || InputState.wasKeyPressed(KEY_ENTER)) {
         if (this.inputText.trim()) {
           if (playSfx !== null) playSfx(SfxId.UI_TYPEENTER);
-          if (!this._saved) {
-            // Browser builds have no file-backed quest high-score table to update here.
-            this.highlightRank = this.rank < TABLE_MAX ? this.rank : null;
-            setPlayerNameInput(this.config.profile, this.inputText);
-            this.config.save();
+          if (!this._saved && this._scoresPath !== null) {
+            const candidate = this.record.copy();
+            candidate.setName(this.inputText);
+            try {
+              const [, idx] = upsertHighscoreRecord(this._scoresPath, candidate);
+              this.highlightRank = int(idx) < TABLE_MAX ? int(idx) : null;
+              if (int(idx) < TABLE_MAX) {
+                this.rank = int(idx);
+              }
+            } catch {
+              this.highlightRank = null;
+            }
             this._saved = true;
           }
+          setPlayerNameInput(this.config.profile, this.inputText);
+          this.config.save();
           this.phase = 2;
           return null;
         }

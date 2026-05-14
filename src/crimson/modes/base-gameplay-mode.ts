@@ -57,7 +57,7 @@ import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
 import { shotsFromState, buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 import { PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
 import { drawTargetHealthBar, HudState } from '@crimson/ui/hud.ts';
-import type { HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { GameOverUi } from '@crimson/screens/results/game-over.ts';
 import type { GameState, GameStateStatus } from '@crimson/game/types.ts';
 import { WorldRuntime } from '@crimson/world/runtime.ts';
@@ -265,6 +265,7 @@ export class BaseGameplayMode {
       demoModeActive?: boolean;
       questFailRetryCount?: number;
       hardcore?: boolean;
+      baseDir?: string;
       config: CrimsonConfig;
       console?: ConsoleState | null;
       audio?: AudioState | null;
@@ -279,13 +280,14 @@ export class BaseGameplayMode {
 
     this.config = opts.config;
     this._console = opts.console ?? null;
-    this._baseDir = '';
+    this._baseDir = opts.baseDir ?? '';
 
     this.closeRequested = false;
     this._action = null;
     this._paused = false;
     this._localInput = new LocalInputInterpreter();
     this._gameOverUi = new GameOverUi({
+      baseDir: this._baseDir,
       config: opts.config,
       preserveBugs: opts.preserveBugs ?? false,
     });

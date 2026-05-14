@@ -41,6 +41,7 @@ export class RushMode extends BaseGameplayMode {
 
   constructor(opts: {
     assetsUrl?: string;
+    baseDir?: string;
     preserveBugs?: boolean;
     config: CrimsonConfig;
     console?: ConsoleState | null;
@@ -54,6 +55,7 @@ export class RushMode extends BaseGameplayMode {
       questFailRetryCount: 0,
       hardcore: false,
       assetsUrl: opts.assetsUrl,
+      baseDir: opts.baseDir,
       preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,

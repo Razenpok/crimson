@@ -9,6 +9,15 @@ import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { Crand, type CrandLike } from '@grim/rand.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import {
+  NAME_MAX_EDIT,
+  TABLE_MAX,
+  HighScoreRecord,
+  rankIndex,
+  readHighscoreTable,
+  scoresPathForConfig,
+  upsertHighscoreRecord,
+} from '@crimson/persistence/highscores.ts';
 import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
@@ -27,46 +36,7 @@ import {
   updateNameEntryText,
 } from '@crimson/ui/text-input.ts';
 
-export const NAME_MAX_EDIT = 0x14;
-export const TABLE_MAX = 100;
-
-export interface HighScoreRecord {
-  gameModeId: number;
-  questStageMajor?: number;
-  questStageMinor?: number;
-  scoreXp: number;
-  survivalElapsedMs: number;
-  mostUsedWeaponId: number;
-  creatureKillCount: number;
-  shotsFired: number;
-  shotsHit: number;
-  name: string;
-}
-
-export function rankIndex(records: HighScoreRecord[], candidate: HighScoreRecord): number {
-  const mode = int(candidate.gameModeId);
-  if (mode === GameMode.RUSH) {
-    const score = int(candidate.survivalElapsedMs);
-    for (let i = 0; i < records.length; i++) {
-      if (score > int(records[i].survivalElapsedMs)) return i;
-    }
-    return records.length;
-  }
-  if (mode === GameMode.QUESTS) {
-    const score = int(candidate.survivalElapsedMs);
-    for (let i = 0; i < records.length; i++) {
-      const other = int(records[i].survivalElapsedMs);
-      if (other === 0) return i;
-      if (score < other) return i;
-    }
-    return records.length;
-  }
-  const score = int(candidate.scoreXp);
-  for (let i = 0; i < records.length; i++) {
-    if (score > int(records[i].scoreXp)) return i;
-  }
-  return records.length;
-}
+export { HighScoreRecord };
 
 const GAME_OVER_PANEL_X = -45.0;
 // `ui_menu_layout_init` sets game-over panel pos to (-45, 110):
@@ -186,6 +156,7 @@ function drawSmall(
 }
 
 export class GameOverUi {
+  baseDir: string;
   config: CrimsonConfig;
   preserveBugs = false;
 
@@ -215,7 +186,8 @@ export class GameOverUi {
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;
 
-  constructor(opts: { config: CrimsonConfig; preserveBugs?: boolean }) {
+  constructor(opts: { baseDir?: string; config: CrimsonConfig; preserveBugs?: boolean }) {
+    this.baseDir = opts.baseDir ?? '';
     this.config = opts.config;
     this.preserveBugs = opts.preserveBugs ?? false;
   }
@@ -306,7 +278,6 @@ export class GameOverUi {
       playSfx?: ((id: SfxId) => void) | null;
       rng?: CrandLike | null;
       mouse?: { x: number; y: number } | null;
-      existingRecords?: HighScoreRecord[];
     },
   ): string | null {
     this._dt = Math.min(dt, 0.1);
@@ -343,10 +314,12 @@ export class GameOverUi {
     if (this.phase === -1) {
       // If in the top 100, prompt for a name. Otherwise show score-too-low message and buttons.
       const gameModeId = this.config.gameplay.mode;
-      const candidate: HighScoreRecord = { ...opts.record, gameModeId };
+      const candidate = opts.record.copy();
+      candidate.gameModeId = gameModeId;
       this._candidateRecord = candidate;
 
-      const records = opts.existingRecords ?? [];
+      const path = scoresPathForConfig(this.baseDir, this.config);
+      const records = readHighscoreTable(path, { gameModeId });
       const idx = rankIndex(records, candidate);
       this.rank = idx;
       flushTextInputEvents();
@@ -402,12 +375,15 @@ export class GameOverUi {
           if (playSfx !== null) {
             playSfx(SfxId.UI_TYPEENTER);
           }
-          if (!this._saved) {
-            // Browser builds have no file-backed high-score table to update here.
-            this._saved = true;
-          }
+          const candidate = (this._candidateRecord ?? opts.record).copy();
+          candidate.setName(this.inputText);
           setPlayerNameInput(this.config.profile, this.inputText);
           this.config.save();
+          const path = scoresPathForConfig(this.baseDir, this.config);
+          if (!this._saved) {
+            upsertHighscoreRecord(path, candidate);
+            this._saved = true;
+          }
           this.phase = 1;
           return null;
         }

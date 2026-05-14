@@ -4,7 +4,7 @@ import { GameMode } from '@crimson/game-modes.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
 import { type PlayerState } from '@crimson/sim/state-types.ts';
 import { mostUsedWeaponIdForPlayer } from '@crimson/weapon-runtime/index.ts';
-import { type HighScoreRecord } from '@crimson/screens/results/game-over.ts';
+import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 
 export function clampShots(fired: number, hit: number): [number, number] {
   fired = Math.max(0, int(fired));
@@ -41,10 +41,16 @@ export function buildHighscoreRecordForGameOver(opts: {
     clampShotsHit = true,
   } = opts;
 
+  const record = HighScoreRecord.blank();
+  record.scoreXp = int(player.experience);
+  record.survivalElapsedMs = int(survivalElapsedMs);
+  record.creatureKillCount = int(creatureKillCount);
+
   const weaponId = mostUsedWeaponIdForPlayer(
     state,
     { playerIndex: int(player.index), fallbackWeaponId: player.weapon.weaponId },
   );
+  record.mostUsedWeaponId = weaponId;
 
   let fired: number;
   let hit: number;
@@ -59,14 +65,8 @@ export function buildHighscoreRecordForGameOver(opts: {
     }
   }
 
-  return {
-    gameModeId,
-    scoreXp: int(player.experience),
-    survivalElapsedMs: int(survivalElapsedMs),
-    creatureKillCount: int(creatureKillCount),
-    mostUsedWeaponId: weaponId,
-    shotsFired: fired,
-    shotsHit: hit,
-    name: '',
-  };
+  record.shotsFired = fired;
+  record.shotsHit = hit;
+  record.gameModeId = gameModeId;
+  return record;
 }

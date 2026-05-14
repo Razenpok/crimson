@@ -119,8 +119,8 @@ function setGammaRampGain(shader: GammaRampShader, _gainLoc: number, gain: numbe
   shader.setGain(Math.max(0.0, gain));
 }
 
-function modeViewOptions(state: GameState): { assetsUrl: string; preserveBugs: boolean } {
-  return { assetsUrl: state.assetsDir, preserveBugs: state.preserveBugs };
+function modeViewOptions(state: GameState): { assetsUrl: string; baseDir: string; preserveBugs: boolean } {
+  return { assetsUrl: state.assetsDir, baseDir: state.baseDir, preserveBugs: state.preserveBugs };
 }
 
 function isGameplayScreen(view: Screen | null): view is GameplayScreen {

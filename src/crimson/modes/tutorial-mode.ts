@@ -59,6 +59,7 @@ export class TutorialMode extends BaseGameplayMode {
 
   constructor(opts: {
     assetsUrl?: string;
+    baseDir?: string;
     preserveBugs?: boolean;
     demoModeActive?: boolean;
     config: CrimsonConfig;
@@ -73,6 +74,7 @@ export class TutorialMode extends BaseGameplayMode {
       questFailRetryCount: 0,
       hardcore: false,
       assetsUrl: opts.assetsUrl,
+      baseDir: opts.baseDir,
       preserveBugs: opts.preserveBugs ?? false,
       config: opts.config,
       console: opts.console ?? null,
