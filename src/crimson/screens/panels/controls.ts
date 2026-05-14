@@ -29,7 +29,7 @@ import {
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
 import {
-  type RebindRowSpec,
+  RebindRowSpec,
   RebindTarget,
   controlsAimMethodDropdownIds,
   controlsRebindPlan,
@@ -75,7 +75,7 @@ function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl
 function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; controls: CrimsonControlsConfig }): number {
   const playerIndex = opts.playerIndex;
   const controls = opts.controls;
-  const pc = controls.players[playerIndex];
+  const pc = controls.player(playerIndex);
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
       if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
@@ -111,7 +111,7 @@ function setRowBindingCode(
   const code = int(value);
   const playerIndex = opts.playerIndex;
   const controls = opts.controls;
-  const pc = controls.players[playerIndex];
+  const pc = controls.player(playerIndex);
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
       if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
@@ -395,11 +395,11 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _directionArrowEnabled(): boolean {
-    return this.state.config.controls.players[this._currentPlayerIndex()].showDirectionArrow;
+    return this.state.config.controls.player(this._currentPlayerIndex()).showDirectionArrow;
   }
 
   private _setDirectionArrowEnabled(enabled: boolean): void {
-    this.state.config.controls.players[this._currentPlayerIndex()].showDirectionArrow = enabled;
+    this.state.config.controls.player(this._currentPlayerIndex()).showDirectionArrow = enabled;
   }
 
   private _checkboxEnabled(): boolean {
@@ -518,7 +518,7 @@ export class ControlsMenuView extends PanelMenuView {
     const panelScale = opts.panelScale;
     const font = opts.font;
     const playerIdx = this._currentPlayerIndex();
-    const playerControls = this.state.config.controls.players[playerIdx];
+    const playerControls = this.state.config.controls.player(playerIdx);
     const aimScheme = playerControls.aimScheme;
     const moveMode = playerControls.movement;
     const sections = this._rebindSections({ playerIndex: playerIdx, aimScheme, moveMode });
@@ -531,8 +531,8 @@ export class ControlsMenuView extends PanelMenuView {
     });
 
     if (this._rebindActive()) {
-      const activeRow = this._rebindRow!;
-      const activePlayer = int(this._rebindPlayerIndex!);
+      const activeRow = this._rebindRow ?? new RebindRowSpec({ label: 'Fire:', target: RebindTarget.PLAYER_FIRE_CODE });
+      const activePlayer = int(this._rebindPlayerIndex ?? 0);
 
       if (InputState.wasKeyPressed(KEY_ESCAPE) || InputState.wasMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
         this._clearRebindCapture();
@@ -598,11 +598,11 @@ export class ControlsMenuView extends PanelMenuView {
   }
 
   private _setPlayerMoveMode(opts: { playerIndex: number; moveMode: MovementControlType }): void {
-    this.state.config.controls.players[opts.playerIndex].movement = opts.moveMode;
+    this.state.config.controls.player(opts.playerIndex).movement = opts.moveMode;
   }
 
   private _setPlayerAimScheme(opts: { playerIndex: number; aimScheme: AimScheme }): void {
-    this.state.config.controls.players[opts.playerIndex].aimScheme = opts.aimScheme;
+    this.state.config.controls.player(opts.playerIndex).aimScheme = opts.aimScheme;
   }
 
   private static _moveMethodIds(opts: { moveMode: MovementControlType }): MovementControlType[] {
@@ -700,7 +700,7 @@ export class ControlsMenuView extends PanelMenuView {
     const font = opts.font;
     const config = this.state.config;
     const playerIdx = this._currentPlayerIndex();
-    const playerControls = config.controls.players[playerIdx];
+    const playerControls = config.controls.player(playerIdx);
     const aimScheme = playerControls.aimScheme;
     const moveMode = playerControls.movement;
     const moveMethodIds = ControlsMenuView._moveMethodIds({ moveMode });
@@ -817,7 +817,7 @@ export class ControlsMenuView extends PanelMenuView {
 
     const config = this.state.config;
     const playerIdx = this._currentPlayerIndex();
-    const playerControls = config.controls.players[playerIdx];
+    const playerControls = config.controls.player(playerIdx);
     const aimScheme = playerControls.aimScheme;
     const moveMode = playerControls.movement;
     const moveMethodIds = ControlsMenuView._moveMethodIds({ moveMode });
