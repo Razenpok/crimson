@@ -14,7 +14,7 @@ import {
 import { registerQuest } from './registry.ts';
 import type { QuestContext, SpawnEntry as SpawnEntryType } from './types.ts';
 
-registerQuest({
+export const build4_1MajorAlienBreach = registerQuest({
   level: '4.1',
   title: 'Major Alien Breach',
   timeLimitMs: 300000,
@@ -35,7 +35,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_2ZombieTime = registerQuest({
   level: '4.2',
   title: 'Zombie Time',
   timeLimitMs: 300000,
@@ -53,7 +53,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_3LizardZombiePact = registerQuest({
   level: '4.3',
   title: 'Lizard Zombie Pact',
   timeLimitMs: 300000,
@@ -78,7 +78,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_4TheCollaboration = registerQuest({
   level: '4.4',
   title: 'The Collaboration',
   timeLimitMs: 360000,
@@ -101,7 +101,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_5TheMassacre = registerQuest({
   level: '4.5',
   title: 'The Massacre',
   timeLimitMs: 300000,
@@ -124,7 +124,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_6TheUnblitzkrieg = registerQuest({
   level: '4.6',
   title: 'The Unblitzkrieg',
   timeLimitMs: 600000,
@@ -220,7 +220,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_7Gauntlet = registerQuest({
   level: '4.7',
   title: 'Gauntlet',
   timeLimitMs: 300000,
@@ -263,7 +263,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_8SyntaxTerror = registerQuest({
   level: '4.8',
   title: 'Syntax Terror',
   timeLimitMs: 300000,
@@ -294,7 +294,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_9TheAnnihilation = registerQuest({
   level: '4.9',
   title: 'The Annihilation',
   timeLimitMs: 300000,
@@ -329,7 +329,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build4_10TheEndOfAll = registerQuest({
   level: '4.10',
   title: 'The End of All',
   timeLimitMs: 480000,
