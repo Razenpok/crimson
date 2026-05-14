@@ -15,8 +15,8 @@ export class WindowSink implements RenderSink {
   private _presentFrame: RenderPresent | null;
   private _opened = false;
 
-  constructor(presentFrame?: RenderPresent) {
-    this._presentFrame = presentFrame ?? null;
+  constructor(opts: { presentFrame?: RenderPresent } = {}) {
+    this._presentFrame = opts.presentFrame ?? null;
   }
 
   open(): void { this._opened = true; }
@@ -47,14 +47,14 @@ export class RenderPipeline {
     beginDraw?: () => void;
     endDraw?: () => void;
   }) {
+    if (Boolean(opts.beginEndDrawing ?? false) && (opts.beginDraw === undefined || opts.endDraw === undefined)) {
+      throw new Error('begin_draw and end_draw are required when begin_end_drawing=True');
+    }
     this._sink = opts.sink;
     this._onResize = opts.onResize ?? null;
-    this._beginEndDrawing = opts.beginEndDrawing ?? false;
+    this._beginEndDrawing = Boolean(opts.beginEndDrawing ?? false);
     this._beginDraw = opts.beginDraw ?? null;
     this._endDraw = opts.endDraw ?? null;
-    if (this._beginEndDrawing && (!this._beginDraw || !this._endDraw)) {
-      throw new Error('beginDraw and endDraw are required when beginEndDrawing=true');
-    }
   }
 
   open(opts: { width: number; height: number }): void {
@@ -93,11 +93,16 @@ export class RenderPipeline {
     this._ensureOpen(int(opts.width), int(opts.height));
     this._resizeIfNeeded(int(opts.width), int(opts.height));
     if (this._beginEndDrawing) {
-      this._beginDraw!();
+      const beginDraw = this._beginDraw;
+      const endDraw = this._endDraw;
+      if (beginDraw === null || endDraw === null) {
+        throw new Error('render pipeline missing begin/end draw callbacks');
+      }
+      beginDraw();
       try {
         opts.drawFrame();
       } finally {
-        this._endDraw!();
+        endDraw();
       }
       return;
     }
