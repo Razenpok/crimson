@@ -9,7 +9,7 @@ import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { Crand, type CrandLike } from '@grim/rand.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
 import { menuWidescreenYShift, uiScale } from '@crimson/ui/layout.ts';
@@ -98,7 +98,7 @@ const INPUT_BOX_H = 18.0;
 const PANEL_SLIDE_DURATION_MS = 250.0;
 
 const COLOR_TEXT = wgl.makeColor(1.0, 1.0, 1.0, 1.0);
-const COLOR_TEXT_MUTED = wgl.makeColor(1.0, 1.0, 1.0, 0.8);
+const COLOR_TEXT_MUTED = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.8) / 255);
 const COLOR_SCORE_LABEL = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 1.0);
 const COLOR_SCORE_VALUE = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
 
@@ -112,7 +112,7 @@ function weaponIconSrc(
   texture: wgl.Texture,
   weaponIdNative: number,
 ): wgl.Rectangle | null {
-  const weaponId = weaponIdNative as WeaponId;
+  const weaponId = int(weaponIdNative);
   const entry = WEAPON_BY_ID.get(weaponId);
   if (entry === undefined) throw new Error(`Unknown weapon id: ${weaponIdNative}`);
   const iconIndex = entry.iconIndex;
@@ -120,7 +120,7 @@ function weaponIconSrc(
   const grid = 8;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
-  const frame = iconIndex * 2;
+  const frame = int(iconIndex) * 2;
   const col = frame % grid;
   const row = Math.floor(frame / grid);
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
@@ -163,7 +163,7 @@ function drawTextureCentered(
   const src = wgl.makeRectangle(0.0, 0.0, tex.width, tex.height);
   const dst = wgl.makeRectangle(pos.x, pos.y, w, h);
   const a = Math.max(0.0, Math.min(1.0, alpha));
-  const tint = wgl.makeColor(1.0, 1.0, 1.0, a);
+  const tint = wgl.makeColor(1.0, 1.0, 1.0, int(255 * a) / 255);
   wgl.drawTexturePro(tex, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
 }
 
@@ -207,10 +207,10 @@ export class GameOverUi {
   private _closeAction: string | null = null;
 
   // Buttons (rendered via existing ui_button implementation)
-  private _okButton = new UiButtonState({ label: 'OK', forceWide: false  });
-  private _playAgainButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
-  private _highScoresButton = new UiButtonState({ label: 'High scores', forceWide: true  });
-  private _mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
+  private _okButton = new UiButtonState({ label: 'OK', forceWide: false });
+  private _playAgainButton = new UiButtonState({ label: 'Play Again', forceWide: true });
+  private _highScoresButton = new UiButtonState({ label: 'High scores', forceWide: true });
+  private _mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true });
 
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;
@@ -342,7 +342,7 @@ export class GameOverUi {
     }
     if (this.phase === -1) {
       // If in the top 100, prompt for a name. Otherwise show score-too-low message and buttons.
-      const gameModeId = this.config.gameplay.mode as number;
+      const gameModeId = this.config.gameplay.mode;
       const candidate: HighScoreRecord = { ...opts.record, gameModeId };
       this._candidateRecord = candidate;
 
@@ -475,19 +475,19 @@ export class GameOverUi {
     const dtHover = this._dt * 2.0;
     const labelColor = wgl.makeColor(
       COLOR_SCORE_LABEL.r, COLOR_SCORE_LABEL.g, COLOR_SCORE_LABEL.b,
-      alpha * 0.8,
+      int(255 * alpha * 0.8) / 255,
     );
     const valueColor = wgl.makeColor(
       COLOR_SCORE_VALUE.r, COLOR_SCORE_VALUE.g, COLOR_SCORE_VALUE.b,
-      alpha,
+      int(255 * alpha) / 255,
     );
     const hintColor = wgl.makeColor(
       COLOR_SCORE_LABEL.r, COLOR_SCORE_LABEL.g, COLOR_SCORE_LABEL.b,
-      alpha * 0.7,
+      int(255 * alpha * 0.7) / 255,
     );
 
     const cardOrigin = pos.offset({ dx: 4.0 * scale });
-    const modeRaw = record.gameModeId;
+    const modeRaw = int(record.gameModeId);
     let modeId: number;
     try {
       modeId = modeRaw;
@@ -518,7 +518,7 @@ export class GameOverUi {
       valueColor,
     );
 
-    const rankValue = formatOrdinal(this.rank + 1);
+    const rankValue = formatOrdinal(int(this.rank) + 1);
     const rankText = `Rank: ${rankValue}`;
     const rankW = textWidth(font, rankText);
     drawSmall(
@@ -561,7 +561,7 @@ export class GameOverUi {
       const clockTableSrc = wgl.makeRectangle(0.0, 0.0, clockTable.width, clockTable.height);
       const clockTablePos = col2Pos.add(new Vec2(8.0 * scale, 14.0 * scale));
       const clockTableDst = wgl.makeRectangle(clockTablePos.x, clockTablePos.y, 32.0 * scale, 32.0 * scale);
-      const texTint = wgl.makeColor(1.0, 1.0, 1.0, alpha);
+      const texTint = wgl.makeColor(1.0, 1.0, 1.0, int(255 * alpha) / 255);
       wgl.drawTexturePro(clockTable, clockTableSrc, clockTableDst, wgl.makeVector2(0.0, 0.0), 0.0, texTint);
 
       const clockPointer = getTexture(resources, TextureId.UI_CLOCK_POINTER);
@@ -594,11 +594,11 @@ export class GameOverUi {
       const src = weaponIconSrc(wicons, record.mostUsedWeaponId);
       if (src !== null) {
         const dst = wgl.makeRectangle(weaponPos.x, weaponPos.y, 64.0 * scale, 32.0 * scale);
-        const tint = wgl.makeColor(1.0, 1.0, 1.0, alpha);
+        const tint = wgl.makeColor(1.0, 1.0, 1.0, int(255 * alpha) / 255);
         wgl.drawTexturePro(wicons, src, dst, wgl.makeVector2(0.0, 0.0), 0.0, tint);
       }
 
-      const weaponId = record.mostUsedWeaponId as WeaponId;
+      const weaponId = record.mostUsedWeaponId;
       const weaponName = weaponDisplayName(weaponId, { preserveBugs: this.preserveBugs });
       const nameW = textWidth(font, weaponName);
       const namePos = new Vec2(
@@ -634,7 +634,7 @@ export class GameOverUi {
 
     if (this._hoverWeapon > 0.5) {
       const t = (this._hoverWeapon - 0.5) * 2.0;
-      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, alpha * t);
+      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, int(255 * alpha * t) / 255);
       drawSmall(
         font,
         'Most used weapon during the game',
@@ -644,7 +644,7 @@ export class GameOverUi {
     }
     if (this._hoverTime > 0.5) {
       const t = (this._hoverTime - 0.5) * 2.0;
-      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, alpha * t);
+      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, int(255 * alpha * t) / 255);
       drawSmall(
         font,
         'The time the game lasted',
@@ -654,7 +654,7 @@ export class GameOverUi {
     }
     if (this._hoverHitRatio > 0.5) {
       const t = (this._hoverHitRatio - 0.5) * 2.0;
-      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, alpha * t);
+      const col = wgl.makeColor(labelColor.r, labelColor.g, labelColor.b, int(255 * alpha * t) / 255);
       const hitRatioTooltip = this.preserveBugs
         ? 'The % of shot bullets hit the target'
         : 'The % of bullets that hit the target';
@@ -764,7 +764,7 @@ export class GameOverUi {
       if (Math.sin(performance.now() * 0.004) > 0.0) {
         caretAlpha = 0.4;
       }
-      const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
+      const caretColor = wgl.makeColor(1.0, 1.0, 1.0, int(255 * caretAlpha) / 255);
       const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
       wgl.drawRectangle(
         int(caretX),
