@@ -1,7 +1,7 @@
 // Port of grim/input.py
 
 export class ActionMap {
-  private bindings: Map<string, number[]> = new Map();
+  bindings: Map<string, number[]> = new Map();
 
   constructor(opts: { bindings?: Map<string, readonly number[]> | Record<string, readonly number[]> } = {}) {
     const bindings = opts.bindings;
@@ -34,11 +34,6 @@ export class ActionMap {
   }
 }
 
-/**
- * Global input state driven by DOM events.
- * Call InputState.init(canvas) once at startup.
- * Call InputState.endFrame() at the end of each frame to clear pressed/released sets.
- */
 export class InputState {
   private static _keysDown = new Set<number>();
   private static _keysPressed = new Set<number>();
@@ -65,8 +60,7 @@ export class InputState {
         this._keysRepeated.add(code);
       }
       this._keysDown.add(code);
-      // Prevent default for game keys (allow browser dev tools)
-      if (!e.metaKey && !e.ctrlKey && e.keyCode !== 123 /* F12 */) {
+      if (!e.metaKey && !e.ctrlKey && e.keyCode !== 123) {
         e.preventDefault();
       }
     });
@@ -100,14 +94,11 @@ export class InputState {
     });
 
     canvas.addEventListener('wheel', (e) => {
-      // Accumulate wheel delta; positive = scroll up, negative = scroll down
-      // Normalise to -1/0/+1 per raylib convention (positive = up)
       if (e.deltaY < 0) this._wheelDelta += 1;
       else if (e.deltaY > 0) this._wheelDelta -= 1;
       e.preventDefault();
     }, { passive: false });
 
-    // Prevent context menu on right-click
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
@@ -119,7 +110,6 @@ export class InputState {
     return this._keysPressed.has(key);
   }
 
-  /** Returns true if the key was auto-repeated this frame (held down). */
   static wasKeyPressedRepeat(key: number): boolean {
     return this._keysRepeated.has(key);
   }
@@ -132,7 +122,6 @@ export class InputState {
     return this._mouseButtonsPressed.has(button);
   }
 
-  /** Returns the first key pressed this frame (DOM keyCode), or null if none. */
   static firstKeyPressed(): number | null {
     if (this._keysPressed.size === 0) return null;
     return this._keysPressed.values().next().value ?? null;
@@ -150,7 +139,6 @@ export class InputState {
     return this._keyPressedQueue.shift() ?? 0;
   }
 
-  /** Returns accumulated mouse wheel delta since last endFrame (positive = up). */
   static mouseWheelDelta(): number {
     return this._wheelDelta;
   }
