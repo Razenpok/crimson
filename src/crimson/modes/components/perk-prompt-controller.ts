@@ -59,7 +59,7 @@ export class PerkPromptState {
       this.hover = rect.contains(ctx.mouse);
     }
 
-    if (this._promptOpenRequested(config, int(playerCount))) {
+    if (this._promptOpenRequested({ config, playerCount: int(playerCount) })) {
       this.pulse = 1000.0;
       return true;
     }
@@ -86,7 +86,7 @@ export class PerkPromptState {
 
   draw(
     opts: {
-      uiCtx: PerkMenuUiContext;
+      ctx: PerkMenuUiContext;
       pendingCount: number;
       anyAlive: boolean;
       menuActive: boolean;
@@ -97,7 +97,7 @@ export class PerkPromptState {
     },
   ): void {
     const {
-      uiCtx,
+      ctx,
       pendingCount,
       anyAlive,
       menuActive,
@@ -118,7 +118,7 @@ export class PerkPromptState {
       return;
     }
     PerkPromptUi.draw({
-      resources: uiCtx.resources,
+      resources: ctx.resources,
       label,
       timerMs: this.timerMs,
       pulse: this.pulse,
@@ -128,17 +128,19 @@ export class PerkPromptState {
     });
   }
 
-  private _promptOpenRequested(config: CrimsonConfig, playerCount: number): boolean {
-    const fireKey = config.controls.players[0].fireCode;
+  private _promptOpenRequested(opts: { config: CrimsonConfig; playerCount: number }): boolean {
+    const { config } = opts;
+    const playerCount = int(opts.playerCount);
+    const fireKey = config.controls.player(0).fireCode;
     const pickKey = config.controls.pickPerkCode;
     if (inputCodeIsPressed(pickKey, { playerIndex: 0 }) && !inputCodeIsDown(fireKey, { playerIndex: 0 })) {
       return true;
     }
     const fireCodes = [
-      config.controls.players[0].fireCode,
-      config.controls.players[1].fireCode,
-      config.controls.players[2].fireCode,
-      config.controls.players[3].fireCode,
+      config.controls.player(0).fireCode,
+      config.controls.player(1).fireCode,
+      config.controls.player(2).fireCode,
+      config.controls.player(3).fireCode,
     ];
     return this.hover && inputPrimaryJustPressed({ fireCodes, playerCount });
   }

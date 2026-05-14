@@ -227,7 +227,7 @@ export class SurvivalMode extends BaseGameplayMode {
     promptScale: number;
   }): void {
     this._perkPrompt.draw({
-      uiCtx: this._perkMenuUiContext(),
+      ctx: this._perkMenuUiContext(),
       pendingCount: opts.pendingCount,
       anyAlive: opts.anyAlive,
       menuActive: opts.menuActive,
