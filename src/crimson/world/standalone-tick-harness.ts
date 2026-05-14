@@ -19,36 +19,36 @@ type WorldTickInputBuilder = (ctx: FrameContext) => readonly PlayerInput[];
 
 // Standalone local runner for demo/debug screens outside BaseGameplayMode.
 export class StandaloneTickHarness {
-  private readonly _gameMode: GameMode;
-  private readonly _buildInputs: WorldTickInputBuilder;
-  private readonly _tickRate: number;
-  private _session: DeterministicSession | null = null;
-  private _runner: TickRunner | null = null;
-  private _worldState: object | null = null;
-  private _playerCount = 0;
-  private _clock: FixedStepClock;
-  private _frameIndex = 0;
-  private _nextTickIndex = 0;
+  gameMode: GameMode;
+  buildInputs: WorldTickInputBuilder;
+  tickRate: number;
+  session: DeterministicSession | null = null;
+  runner: TickRunner | null = null;
+  worldState: object | null = null;
+  playerCount = 0;
+  clock: FixedStepClock;
+  frameIndex = 0;
+  nextTickIndex = 0;
 
   constructor(opts: {
     gameMode: GameMode;
     buildInputs: WorldTickInputBuilder;
     tickRate?: number;
   }) {
-    this._gameMode = opts.gameMode;
-    this._buildInputs = opts.buildInputs;
-    this._tickRate = Math.max(1, int(opts.tickRate ?? 60));
-    this._clock = new FixedStepClock({ tickRate: this._tickRate });
+    this.gameMode = opts.gameMode;
+    this.buildInputs = opts.buildInputs;
+    this.tickRate = Math.max(1, int(opts.tickRate ?? 60));
+    this.clock = new FixedStepClock({ tickRate: this.tickRate });
   }
 
   reset(): void {
-    this._session = null;
-    this._runner = null;
-    this._worldState = null;
-    this._playerCount = 0;
-    this._clock = new FixedStepClock({ tickRate: this._tickRate });
-    this._frameIndex = 0;
-    this._nextTickIndex = 0;
+    this.session = null;
+    this.runner = null;
+    this.worldState = null;
+    this.playerCount = 0;
+    this.clock = new FixedStepClock({ tickRate: this.tickRate });
+    this.frameIndex = 0;
+    this.nextTickIndex = 0;
   }
 
   private _ensureRunner(runtime: WorldRuntime): [TickRunner, DeterministicSession] {
@@ -56,12 +56,12 @@ export class StandaloneTickHarness {
     const playerCount = runtime.simWorld.players.length;
 
     if (
-      this._session !== null &&
-      this._runner !== null &&
-      this._worldState === worldState &&
-      int(this._playerCount) === int(playerCount)
+      this.session !== null &&
+      this.runner !== null &&
+      this.worldState === worldState &&
+      int(this.playerCount) === int(playerCount)
     ) {
-      return [this._runner, this._session];
+      return [this.runner, this.session];
     }
 
     let detailPreset = 5;
@@ -76,7 +76,7 @@ export class StandaloneTickHarness {
       world: worldState,
       worldSize: runtime.worldSize,
       damageScaleByType: runtime.simWorld.damageScaleByType,
-      gameMode: this._gameMode,
+      gameMode: this.gameMode,
       detailPreset: int(detailPreset),
       violenceDisabled: int(violenceDisabled),
       gameTuneStarted: runtime.simWorld.gameTuneStarted,
@@ -87,7 +87,7 @@ export class StandaloneTickHarness {
 
     const provider = new LocalInputProvider({
       playerCount: int(playerCount),
-      buildInputs: this._buildInputs,
+      buildInputs: this.buildInputs,
     });
 
     const runner = new TickRunner({
@@ -96,13 +96,13 @@ export class StandaloneTickHarness {
       config: new TickRunnerConfig(),
     });
 
-    this._session = session;
-    this._runner = runner;
-    this._worldState = worldState;
-    this._playerCount = int(playerCount);
-    this._clock = new FixedStepClock({ tickRate: this._tickRate });
-    this._frameIndex = 0;
-    this._nextTickIndex = 0;
+    this.session = session;
+    this.runner = runner;
+    this.worldState = worldState;
+    this.playerCount = int(playerCount);
+    this.clock = new FixedStepClock({ tickRate: this.tickRate });
+    this.frameIndex = 0;
+    this.nextTickIndex = 0;
     return [runner, session];
   }
 
@@ -132,7 +132,7 @@ export class StandaloneTickHarness {
       outputs,
       syncAudioBridgeState: () => runtime.syncAudioBridgeState(),
       applyAudioPlan: (plan, shouldApplyAudio) =>
-        runtime.audioBridge.applyPlan({ plan, applyAudio: shouldApplyAudio }),
+        runtime.audioBridge.applyPlan({ plan, applyAudio: Boolean(shouldApplyAudio) }),
       applyTerrainFx: (batch) => runtime.renderResources.consumeTerrainFxBatch(batch),
       updateCamera: (dtSim) => runtime.updateCamera(dtSim),
       onOutputApplied: (output) => {
@@ -155,21 +155,21 @@ export class StandaloneTickHarness {
     const [runner, session] = this._ensureRunner(runtime);
     session.demoModeActive = runtime.demoModeActive;
 
-    const ticksRequested = int(this._clock.advance(dt));
+    const ticksRequested = int(this.clock.advance(dt));
     const advance = advanceTickRunnerFrame({
       runner,
-      startTick: int(this._nextTickIndex),
-      frameIndex: int(this._frameIndex),
+      startTick: int(this.nextTickIndex),
+      frameIndex: int(this.frameIndex),
       ticksRequested: int(ticksRequested),
       dtSeconds: dt,
-      tickDtSeconds: this._clock.dtTick,
+      tickDtSeconds: this.clock.dtTick,
       isNetworked: false,
       isReplay: false,
-      refundClock: this._clock,
+      refundClock: this.clock,
     });
 
-    this._frameIndex = int(advance.frameIndex);
-    this._nextTickIndex = int(advance.nextTickIndex);
+    this.frameIndex = int(advance.frameIndex);
+    this.nextTickIndex = int(advance.nextTickIndex);
 
     return this._applyTickBatch(runtime, { batch: advance.batch, session });
   }
