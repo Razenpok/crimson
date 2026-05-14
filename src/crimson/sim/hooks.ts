@@ -35,7 +35,6 @@ export class LanFrameSample {
     this.frameTickIndex = opts.frameTickIndex;
     this.frameInputs = opts.frameInputs;
     this.commands = opts.commands ?? [];
-    Object.freeze(this);
   }
 }
 
@@ -49,7 +48,6 @@ export class LanTickSync {
   }) {
     this.frameTickIndex = opts.frameTickIndex;
     this.frameInputs = opts.frameInputs;
-    Object.freeze(this);
   }
 }
 
