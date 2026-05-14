@@ -4,7 +4,7 @@ import { type CrandLike } from './rand.ts';
 import { fetchPaq } from './paq.ts';
 import { type ConsoleState } from './console.ts';
 
-const MUSIC_PAQ_NAME = 'music.paq';
+const MUSIC_PAK_NAME = 'music.paq';
 
 const MUSIC_TRACKS: Record<string, string[]> = {
   intro: ['music/intro.ogg', 'intro.ogg'],
@@ -114,11 +114,12 @@ export function initMusicState(opts: { ready: boolean; enabled: boolean; volume:
   });
 }
 
-export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext, assetsUrl: string): Promise<void> {
+export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext, assetsUrl: string, console: ConsoleState): Promise<void> {
   if (!state.ready || !state.enabled) return;
 
-  const entries = await fetchPaq(`${assetsUrl}/${MUSIC_PAQ_NAME}`);
+  const entries = await fetchPaq(`${assetsUrl}/${MUSIC_PAK_NAME}`);
 
+  let loaded = 0;
   for (const [trackName, candidates] of Object.entries(MUSIC_TRACKS)) {
     let data: Uint8Array | undefined;
     for (const candidate of candidates) {
@@ -128,6 +129,7 @@ export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext,
     if (!data) throw new Error(`Missing music entry for track '${trackName}'`);
     const buffer = await audioCtx.decodeAudioData(arrayBufferFromBytes(data));
     state.tracks.set(trackName, buffer);
+    loaded += 1;
   }
 
   let idx = 0;
@@ -136,6 +138,9 @@ export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext,
   }
   state.nextTrackId = idx;
   state.paqEntries = entries;
+
+  console.log.log(`audio: music tracks loaded ${loaded}/${Object.keys(MUSIC_TRACKS).length} from ${assetsUrl}/${MUSIC_PAK_NAME}`);
+  console.log.flush();
 }
 
 export function playMusic(state: MusicState, audioCtx: AudioContext | null, trackName?: string): void {
@@ -205,7 +210,7 @@ function _normalizeTrackKey(relPath: string): string {
 async function _ensureMusicEntries(state: MusicState, assetsUrl: string): Promise<Map<string, Uint8Array> | null> {
   if (state.paqEntries !== null) return state.paqEntries;
   try {
-    const entries = await fetchPaq(`${assetsUrl}/${MUSIC_PAQ_NAME}`);
+    const entries = await fetchPaq(`${assetsUrl}/${MUSIC_PAK_NAME}`);
     state.paqEntries = entries;
     return entries;
   } catch {
@@ -293,6 +298,7 @@ export async function loadMusicTrack(
 
 export function stopMusic(state: MusicState): void {
   if (!state.ready || !state.enabled) return;
+  // Mirror `sfx_mute_all`: mark everything muted and let `updateMusic` ramp it down.
   for (const pb of state.playbacks.values()) {
     pb.muted = true;
   }
@@ -302,6 +308,9 @@ export function stopMusic(state: MusicState): void {
 }
 
 export function triggerGameTune(state: MusicState, audioCtx: AudioContext | null, opts: { rng: CrandLike }): string | null {
+  // Start a random queued game tune, if it hasn't been triggered yet.
+  //
+  // Returns the track key if playback started, otherwise null.
   const rng = opts.rng;
   if (!state.ready || !state.enabled || !audioCtx) return null;
   if (state.gameTuneStarted) return null;

@@ -67,7 +67,7 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string, c
   });
 
   await loadSfxIndex(state.sfx, audioContext, assetsUrl, console);
-  await loadMusicTracks(state.music, audioContext, assetsUrl);
+  await loadMusicTracks(state.music, audioContext, assetsUrl, console);
 
   return state;
 }
