@@ -87,9 +87,11 @@ export class TutorialFrameActions {
     this.promptAlpha = opts.promptAlpha ?? 0.0;
     this.hintText = opts.hintText ?? '';
     this.hintAlpha = opts.hintAlpha ?? 0.0;
-    this.spawnTemplates = opts.spawnTemplates ?? [];
-    this.spawnBonuses = opts.spawnBonuses ?? [];
-    this.stage5BonusCarrierDrop = opts.stage5BonusCarrierDrop ?? null;
+    this.spawnTemplates = Array.from(opts.spawnTemplates ?? []);
+    this.spawnBonuses = Array.from(opts.spawnBonuses ?? []);
+    this.stage5BonusCarrierDrop = opts.stage5BonusCarrierDrop === undefined || opts.stage5BonusCarrierDrop === null
+      ? null
+      : [opts.stage5BonusCarrierDrop[0], opts.stage5BonusCarrierDrop[1]];
     this.playLevelupSfx = opts.playLevelupSfx ?? false;
     this.forcePlayerHealth = opts.forcePlayerHealth ?? 100.0;
     this.forcePlayerExperience = opts.forcePlayerExperience ?? null;
