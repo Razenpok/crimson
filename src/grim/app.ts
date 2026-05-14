@@ -3,6 +3,24 @@
 import * as wgl from '@wgl';
 import { type View } from './view.ts';
 import { InputState } from './input.ts';
+import { RenderPipeline, WindowSink } from './render-pipeline.ts';
+
+export const SCREENSHOT_DIR = 'screenshots';
+export const SCREENSHOT_KEY = 'F12';
+
+function _falseHook(): boolean {
+  return false;
+}
+
+export class RunViewHooks {
+  readonly shouldClose: () => boolean;
+  readonly consumeScreenshotRequest: () => boolean;
+
+  constructor(opts: { shouldClose?: () => boolean; consumeScreenshotRequest?: () => boolean } = {}) {
+    this.shouldClose = opts.shouldClose ?? _falseHook;
+    this.consumeScreenshotRequest = opts.consumeScreenshotRequest ?? _falseHook;
+  }
+}
 
 export interface AppConfig {
   width?: number;
@@ -78,4 +96,72 @@ export class App {
       throw e;
     }
   };
+}
+
+export function runView(
+  view: View,
+  opts: {
+    width?: number;
+    height?: number;
+    title?: string;
+    fps?: number;
+    configFlags?: number;
+    exitKey?: number | null;
+    hooks?: RunViewHooks | null;
+  } = {},
+): App {
+  void opts.configFlags;
+  void opts.exitKey;
+  const app = new App({
+    width: opts.width ?? 1280,
+    height: opts.height ?? 720,
+    title: opts.title ?? 'Crimsonland',
+    targetFps: opts.fps ?? 60,
+  });
+  const runHooks = opts.hooks ?? new RunViewHooks();
+  const renderPipeline = new RenderPipeline({
+    sink: new WindowSink(),
+    beginEndDrawing: false,
+  });
+  const wrappedView: View = {
+    open(): void {
+      view.open();
+    },
+    update(dt: number): void {
+      view.update(dt);
+      void runHooks.consumeScreenshotRequest();
+      if (runHooks.shouldClose()) {
+        app.stop();
+      }
+    },
+    draw(): void {
+      renderPipeline.draw({
+        drawFrame: () => view.draw(),
+        width: wgl.getScreenWidth(),
+        height: wgl.getScreenHeight(),
+      });
+      renderPipeline.present();
+    },
+    close(): void {
+      try {
+        view.close();
+      } finally {
+        renderPipeline.close();
+      }
+    },
+  };
+  app.run(wrappedView);
+  return app;
+}
+
+export function runWindow(width = 1280, height = 720, title = 'Crimsonland', fps = 60): App {
+  const emptyView: View = {
+    open(): void {},
+    update(_dt: number): void {},
+    draw(): void {
+      wgl.clearBackground(wgl.makeColor(0.0, 0.0, 0.0, 1.0));
+    },
+    close(): void {},
+  };
+  return runView(emptyView, { width, height, title, fps });
 }
