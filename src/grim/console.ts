@@ -32,10 +32,9 @@ export const FPS_COUNTER_CAP_TEXT = '400+';
 export const FPS_COUNTER_ALPHA = 0.6;
 export const CONSOLE_BORDER_HEIGHT = 4.0;
 export const CONSOLE_PROMPT_MONO = '>';
-export const CONSOLE_PROMPT_SMALL = '>';
+export const CONSOLE_PROMPT_SMALL_FMT = '>%s';
 export const CONSOLE_CARET_TEXT = '_';
 
-// DOM keyCodes
 const KEY_ENTER = 13;
 const KEY_BACKSPACE = 8;
 const KEY_DELETE = 46;
@@ -271,14 +270,12 @@ export class ConsoleState {
     const screenW = wgl.getScreenWidth();
     const offsetY = this._offsetY;
 
-    // Background
     wgl.drawRectangle(0, offsetY, screenW, height, wgl.makeColor(...CONSOLE_BG_COLOR, ratio));
     const borderY = offsetY + height - CONSOLE_BORDER_HEIGHT;
     wgl.drawRectangle(0, borderY, screenW, CONSOLE_BORDER_HEIGHT, wgl.makeColor(...CONSOLE_BORDER_COLOR, ratio));
 
     const useMono = this._useMonoFont() && monoFont !== null;
 
-    // Version text (top-right, faint)
     const versionX = screenW - CONSOLE_VERSION_OFFSET_X;
     const versionY = offsetY + height - CONSOLE_VERSION_OFFSET_Y;
     const versionColor = wgl.makeColor(1.0, 1.0, 1.0, ratio * 0.3);
@@ -289,10 +286,8 @@ export class ConsoleState {
       drawGrimMonoText(monoFont, CONSOLE_VERSION_TEXT, new Vec2(versionX - advance, versionY), CONSOLE_MONO_SCALE, versionColor);
     }
 
-    // Compute visible log block
     const [visible, visibleCount] = this._visibleLogBlock(height);
 
-    // Input prompt line
     const inputY = offsetY + (visibleCount + 1) * CONSOLE_LINE_HEIGHT;
     const textColor = wgl.makeColor(1.0, 1.0, 1.0, ratio);
     if (useMono && monoFont) {
@@ -300,11 +295,10 @@ export class ConsoleState {
       drawGrimMonoText(monoFont, CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X - advance, inputY), CONSOLE_MONO_SCALE, textColor);
       drawGrimMonoText(monoFont, this.inputBuffer, new Vec2(CONSOLE_INPUT_X_MONO - advance, inputY), CONSOLE_MONO_SCALE, textColor);
     } else if (smallFont) {
-      const prompt = `>${this.inputBuffer}`;
+      const prompt = CONSOLE_PROMPT_SMALL_FMT.replace('%s', this.inputBuffer);
       drawSmallText(smallFont, prompt, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
     }
 
-    // Log lines
     const logColor = wgl.makeColor(0.6, 0.6, 0.7, ratio);
     let y = offsetY + CONSOLE_LINE_HEIGHT;
     for (const line of visible) {
@@ -317,7 +311,6 @@ export class ConsoleState {
       y += CONSOLE_LINE_HEIGHT;
     }
 
-    // Blinking caret
     const caretAlpha = ratio * this._caretBlinkAlpha();
     const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
     const caretY = inputY + 2.0;
@@ -356,13 +349,10 @@ export class ConsoleState {
   }
 
   handleHotkey(): void {
-    // Grave/tilde key toggles the console
     if (InputState.wasKeyPressed(192)) {
       this.toggleOpen();
     }
   }
-
-  // --- Private helpers ---
 
   private _useMonoFont(): boolean {
     const cvar = this.cvars.get('con_monoFont');
@@ -391,7 +381,7 @@ export class ConsoleState {
   }
 
   private _smallCaretX(font: SmallFontData): number {
-    const promptW = measureSmallTextWidth(font, '>');
+    const promptW = measureSmallTextWidth(font, CONSOLE_PROMPT_SMALL_FMT.replace('%s', ''));
     const inputW = measureSmallTextWidth(font, this.inputBuffer.substring(0, this.inputCaret));
     return CONSOLE_TEXT_X + promptW + inputW;
   }
@@ -516,13 +506,11 @@ export class ConsoleState {
   }
 
   private _autocompleteName(prefix: string, names: Iterable<string>): string | null {
-    // Exact match first pass
     const nameList: string[] = [];
     for (const name of names) {
       nameList.push(name);
       if (name === prefix) return name;
     }
-    // Prefix match second pass
     for (const name of nameList) {
       if (name.startsWith(prefix)) return name;
     }
