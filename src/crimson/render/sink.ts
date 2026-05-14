@@ -37,6 +37,7 @@ export class VideoSink implements RenderSink {
   }
 
   open(): void {
+    // Browser/WebGL builds cannot create output_path.parent directories.
     if (this._openTransport !== null) {
       this._openTransport();
     }
