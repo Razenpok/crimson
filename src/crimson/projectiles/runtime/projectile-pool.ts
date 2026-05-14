@@ -66,7 +66,6 @@ export class ProjectileUpdateOptions {
     this.detailPreset = opts.detailPreset ?? 5;
     this.onHit = opts.onHit ?? null;
     this.onHitPost = opts.onHitPost ?? null;
-    Object.freeze(this);
   }
 }
 
@@ -83,7 +82,6 @@ export class PrimaryStepCtx {
     this.dt = opts.dt;
     this.creatures = opts.creatures;
     this.options = opts.options;
-    Object.freeze(this);
   }
 }
 
@@ -110,7 +108,8 @@ export class ProjectilePool {
   private _entries: Projectile[];
   private _creatureDamageApplier: CreatureDamageApplier | null = null;
 
-  constructor(size: number = MAIN_PROJECTILE_POOL_SIZE) {
+  constructor(opts: { size?: number } = {}) {
+    const size = opts.size ?? MAIN_PROJECTILE_POOL_SIZE;
     this._entries = Array.from({ length: size }, () => new Projectile());
   }
 
@@ -551,7 +550,7 @@ export class ProjectilePool {
           }
 
           if (
-            runtimeState.bonuses?.freeze > 0.0 &&
+            runtimeState.bonuses.freeze > 0.0 &&
             effects !== null &&
             rule.emitDefaultFreezeShard
           ) {
