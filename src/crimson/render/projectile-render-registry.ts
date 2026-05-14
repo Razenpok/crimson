@@ -33,9 +33,6 @@ export class PlasmaProjectileRenderConfig {
     this.auraRgb = opts.auraRgb;
     this.auraSize = opts.auraSize;
     this.auraAlphaMul = opts.auraAlphaMul;
-    Object.freeze(this.rgb);
-    Object.freeze(this.auraRgb);
-    Object.freeze(this);
   }
 }
 
