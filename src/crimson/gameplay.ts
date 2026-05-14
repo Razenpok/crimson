@@ -801,7 +801,6 @@ export function playerUpdate(
         f32(movementDt * moveDy),
       );
     } else {
-      // Dual action pad / mouse point-click
       const movingInput =
         rawMag > (moveMode === MovementControlType.MOUSE_POINT_CLICK ? 0.0 : 0.2);
       let turnAlignmentScale = 1.0;
