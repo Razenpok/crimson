@@ -66,7 +66,7 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string, c
     sfx: initSfxState({ ready: true, enabled: sfxEnabled, volume: sfxVolume }),
   });
 
-  await loadSfxIndex(state.sfx, audioContext, assetsUrl);
+  await loadSfxIndex(state.sfx, audioContext, assetsUrl, console ?? null);
   await loadMusicTracks(state.music, audioContext, assetsUrl);
 
   return state;
