@@ -66,8 +66,8 @@ export class TypoShooterMode extends BaseGameplayMode {
       detailPreset: 5,
       violenceDisabled: 0,
       gameTuneStarted: this.simWorld.gameTuneStarted,
-      dictionaryWords: typo != null ? (typo.dictionaryWords ?? []) : [],
-      highscoreNames: typo != null ? (typo.highscoreNames ?? []) : [],
+      dictionaryWords: typo.dictionaryWords,
+      highscoreNames: typo.highscoreNames,
     });
   }
 
@@ -88,19 +88,13 @@ export class TypoShooterMode extends BaseGameplayMode {
   }
 
   protected _replayClaimedShots(): [number, number] {
-    return this._typoShotCounts();
+    return typoShotCounts(this.state.typo);
   }
 
   protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
     const stamp = opts.stamp;
     const score = int(this.player.experience);
     return `typo_${stamp}_score${score}`;
-  }
-
-  private _typoShotCounts(): [number, number] {
-    const typo = this.state.typo;
-    if (typo == null) return [0, 0];
-    return typoShotCounts(typo);
   }
 
   open(): void {
@@ -151,8 +145,7 @@ export class TypoShooterMode extends BaseGameplayMode {
 
   private _enqueueTypingCommands(): void {
     const enterPressed = InputState.wasKeyPressed(13) || InputState.wasKeyPressed(0x100D);
-    const typo = this.state.typo;
-    if (enterPressed && typo != null && typo.typing != null && typo.typing.text) {
+    if (enterPressed && this.state.typo.typing.text) {
       this.enqueueInputCommand(new TypoSubmitCommand(0));
     }
 
@@ -173,7 +166,7 @@ export class TypoShooterMode extends BaseGameplayMode {
   protected _enterGameOver(): void {
     if (this._gameOverActive) return;
 
-    const [shotsFired, shotsHit] = this._typoShotCounts();
+    const [shotsFired, shotsHit] = typoShotCounts(this.state.typo);
     const record = buildHighscoreRecordForGameOver({
       state: this.state,
       player: this.player,
@@ -311,11 +304,9 @@ export class TypoShooterMode extends BaseGameplayMode {
   }
 
   private _drawNameLabels(): void {
-    const typo = this.state.typo;
-    if (typo == null || typo.names == null) return;
     drawTypoNameLabels({
       creatures: this.creatures.entries,
-      names: typo.names.names ?? [],
+      names: this.state.typo.names.names,
       worldToScreen: (worldPos: Vec2) => this.worldToScreen(worldPos),
       drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
         this._drawUiText(text, pos, color, scale),
@@ -324,14 +315,12 @@ export class TypoShooterMode extends BaseGameplayMode {
   }
 
   private _drawTypingBox(): void {
-    const typo = this.state.typo;
-    if (typo == null || typo.typing == null) return;
     const panelTexture = getTexture(this.renderResources.resources, TextureId.UI_IND_PANEL);
     if (panelTexture === null) return;
     drawTypingBox(
       panelTexture,
       {
-        text: typo.typing.text ?? '',
+        text: this.state.typo.typing.text,
         cursorPulseTime: this._cursorPulseTime,
         drawText: (text: string, pos: Vec2, color: wgl.Color, scale: number) =>
           this._drawUiText(text, pos, color, scale),
