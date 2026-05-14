@@ -89,7 +89,6 @@ export class App {
     this._lastTime = now;
     wgl.updateFps(now);
 
-    // Handle canvas resize
     const canvas = wgl.getCanvas();
     const displayWidth = canvas.clientWidth;
     const displayHeight = canvas.clientHeight;
