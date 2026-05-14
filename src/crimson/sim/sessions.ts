@@ -373,6 +373,7 @@ export class DeterministicSession {
     const postApplySfx: SfxId[] = [];
     if (commands !== null) {
       for (const cmd of commands) {
+        const commandTypeName = cmd.constructor.name;
         switch (cmd.tag) {
           case 'perk_pick': {
             const ci = cmd.choiceIndex;
@@ -413,7 +414,7 @@ export class DeterministicSession {
             break;
           }
           default:
-            throw new Error(`unhandled command type: ${(cmd as object).constructor.name}`);
+            throw new Error(`unhandled command type: ${commandTypeName}`);
         }
       }
     }
