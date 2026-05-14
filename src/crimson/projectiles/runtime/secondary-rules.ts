@@ -44,7 +44,7 @@ export class RocketRule {
     this.damageBase = opts.damageBase ?? 500.0;
     this.extraDecals = opts.extraDecals ?? 0x14;
     this.extraRadius = opts.extraRadius ?? 90.0;
-    this.burstScale = opts.burstScale ?? 0.4;
+    this.burstScale = opts.burstScale !== undefined ? opts.burstScale : 0.4;
     this.burstMinDetail = opts.burstMinDetail ?? 2;
     this.freezeShardTargetPos = opts.freezeShardTargetPos ?? false;
   }
