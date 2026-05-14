@@ -16,7 +16,7 @@ import {
 import { registerQuest } from './registry.ts';
 import type { QuestContext, SpawnEntry as SpawnEntryType } from './types.ts';
 
-registerQuest({
+export const build1_1LandHostile = registerQuest({
   level: '1.1',
   title: 'Land Hostile',
   timeLimitMs: 120000,
@@ -33,7 +33,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build1_2MinorAlienBreach = registerQuest({
   level: '1.2',
   title: 'Minor Alien Breach',
   timeLimitMs: 120000,
@@ -70,7 +70,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_3TargetPractice = registerQuest({
   level: '1.3',
   title: 'Target Practice',
   timeLimitMs: 65000,
@@ -98,7 +98,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_4FrontlineAssault = registerQuest({
   level: '1.4',
   title: 'Frontline Assault',
   timeLimitMs: 300000,
@@ -146,7 +146,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_5AlienDens = registerQuest({
   level: '1.5',
   title: 'Alien Dens',
   timeLimitMs: 180000,
@@ -162,7 +162,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build1_6TheRandomFactor = registerQuest({
   level: '1.6',
   title: 'The Random Factor',
   timeLimitMs: 300000,
@@ -190,7 +190,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_7SpiderWaveSyndrome = registerQuest({
   level: '1.7',
   title: 'Spider Wave Syndrome',
   timeLimitMs: 240000,
@@ -209,7 +209,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_8AlienSquads = registerQuest({
   level: '1.8',
   title: 'Alien Squads',
   timeLimitMs: 180000,
@@ -239,7 +239,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_9NestingGrounds = registerQuest({
   level: '1.9',
   title: 'Nesting Grounds',
   timeLimitMs: 240000,
@@ -265,7 +265,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build1_10EightLeggedTerror = registerQuest({
   level: '1.10',
   title: '8-legged Terror',
   timeLimitMs: 240000,
