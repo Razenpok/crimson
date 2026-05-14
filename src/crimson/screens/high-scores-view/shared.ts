@@ -1,21 +1,7 @@
 // Port of crimson/screens/high_scores_view/shared.py
 
 import { GameMode } from '@crimson/game-modes.ts';
-
-export interface HighScoreRecord {
-  name(): string;
-  day: number;
-  month: number;
-  yearOffset: number;
-  gameModeId: number;
-  scoreXp: number;
-  survivalElapsedMs: number;
-  creatureKillCount: number;
-  shotsFired: number;
-  shotsHit: number;
-  mostUsedWeaponId: number;
-  data: Uint8Array;
-}
+import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 
 export function formatScoreDate(entry: HighScoreRecord): string {
   const day = int(entry.day);

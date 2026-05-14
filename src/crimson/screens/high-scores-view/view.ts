@@ -72,7 +72,7 @@ import {
   hsRightPanelPosX,
   hsRightOptionsXShift,
 } from '@crimson/screens/high-scores-layout.ts';
-import type { HighScoreRecord } from './shared.ts';
+import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { drawMainPanel } from './main-panel.ts';
 import { drawRightPanel } from './right-panel.ts';
 import { resolveRequest, loadRecords } from './records.ts';

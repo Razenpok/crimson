@@ -3,25 +3,12 @@
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
-import type { HighScoreRecord } from './shared.ts';
-
-function highscoreDateChecksum(year: number, month: number, day: number): number {
-  let iVar1 = Math.floor((0x0E - int(month)) / 0x0C);
-  let iVar2 = (int(year) - iVar1) + 0x12C0;
-  iVar1 = (
-    Math.floor((iVar2 + ((iVar2 >> 31) & 3)) / 4)
-    - 0x7D2D
-    + int(day)
-    + (
-      Math.floor(iVar2 / 400)
-      + Math.floor((((int(month) + iVar1 * 0x0C) * 0x99 - 0x1C9) / 5) + iVar2 * 0x16D)
-      - Math.floor(iVar2 / 100)
-    )
-  );
-  iVar2 = (((iVar1 - iVar1 % 7) + 0x7BFD) % 0x23AB1) % 0x8EAC % 0x5B5;
-  iVar1 = Math.floor(iVar2 / 0x5B4);
-  return Math.floor((((iVar2 - iVar1) % 0x16D) + iVar1) / 7) + 1;
-}
+import {
+  type HighScoreRecord,
+  highscoreDateChecksum,
+  readHighscoreTable,
+  scoresPathForMode,
+} from '@crimson/persistence/highscores.ts';
 
 export function resolveRequest(state: GameState): HighScoresRequest {
   let request = state.pendingHighScores;
@@ -79,7 +66,27 @@ function passesDateFilter(entry: HighScoreRecord, dateMode: number, now: Date): 
   return true;
 }
 
-export function loadRecords(state: GameState, _request: HighScoresRequest): HighScoreRecord[] {
-  // WebGL has no file-backed high-score table path; the UI displays "No scores yet."
-  return [];
+export function loadRecords(state: GameState, request: HighScoresRequest): HighScoreRecord[] {
+  const path = scoresPathForMode(
+    state.baseDir,
+    request.gameModeId,
+    {
+      hardcore: state.config.gameplay.hardcore,
+      questStageMajor: request.questLevel === null ? 0 : int(request.questLevel.major),
+      questStageMinor: request.questLevel === null ? 0 : int(request.questLevel.minor),
+      playerCount: state.config.gameplay.playerCount,
+    },
+  );
+  let records: HighScoreRecord[];
+  try {
+    records = readHighscoreTable(path, { gameModeId: request.gameModeId });
+  } catch {
+    return [];
+  }
+  const dateMode = int(state.config.profile.scoreDateMode);
+  if (dateMode > 0) {
+    const now = new Date();
+    records = records.filter((entry) => passesDateFilter(entry, dateMode, now));
+  }
+  return records;
 }
