@@ -42,10 +42,10 @@ export class SliderState {
   minValue: number;
   maxValue: number;
 
-  constructor(value: number, minValue: number, maxValue: number) {
-    this.value = value;
-    this.minValue = minValue;
-    this.maxValue = maxValue;
+  constructor(opts: { value: number; minValue: number; maxValue: number }) {
+    this.value = opts.value;
+    this.minValue = opts.minValue;
+    this.maxValue = opts.maxValue;
   }
 }
 
@@ -72,10 +72,10 @@ export class OptionsMenuView extends PanelMenuView {
   ];
 
   private _controlsButton: UiButtonState = new UiButtonState('Controls', { forceWide: true });
-  private _sliderSfx: SliderState = new SliderState(10, 0, 10);
-  private _sliderMusic: SliderState = new SliderState(10, 0, 10);
-  private _sliderDetail: SliderState = new SliderState(5, 1, 5);
-  private _sliderMouse: SliderState = new SliderState(10, 1, 10);
+  private _sliderSfx: SliderState = new SliderState({ value: 10, minValue: 0, maxValue: 10 });
+  private _sliderMusic: SliderState = new SliderState({ value: 10, minValue: 0, maxValue: 10 });
+  private _sliderDetail: SliderState = new SliderState({ value: 5, minValue: 1, maxValue: 5 });
+  private _sliderMouse: SliderState = new SliderState({ value: 10, minValue: 1, maxValue: 10 });
   private _uiInfoTexts: boolean = true;
   private _activeSlider: string | null = null;
   private _dirty: boolean = false;
