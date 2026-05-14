@@ -47,6 +47,10 @@ function pyRound(value: number): number {
   return floorValue % 2 === 0 ? floorValue : floorValue + 1;
 }
 
+function alphaByte(alpha: number): number {
+  return int(255 * alpha) / 255;
+}
+
 export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   private static readonly _VISIBLE_ROWS = 10;
   private static readonly _LIST_WIDTH = 250.0;
@@ -106,7 +110,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const left = leftTopLeft;
     const right = rightTopLeft;
     const textColor = wgl.makeColor(1, 1, 1, 1);
-    const dimColor = wgl.makeColor(1, 1, 1, 0.7);
+    const dimColor = wgl.makeColor(1, 1, 1, alphaByte(0.7));
     const violenceDisabled = this._violenceDisabled();
     const detailShiftX = perksDbRightDetailXShift(this.state.config.display.width);
 
@@ -124,7 +128,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         Math.max(1.0, 1.0 * scale),
       ),
       1.0,
-      wgl.makeColor(1, 1, 1, 0.5),
+      wgl.makeColor(1, 1, 1, alphaByte(0.5)),
     );
 
     const perkIds = this._perkIds;
@@ -179,7 +183,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         font,
         this._perkName(perkId, { violenceDisabled, preserveBugs }),
         listTopLeft.offset({ dx: 0.0, dy: row * rowStep }),
-        wgl.makeColor(1, 1, 1, rowAlpha),
+        wgl.makeColor(1, 1, 1, alphaByte(rowAlpha)),
       );
     }
 
@@ -203,14 +207,14 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         int(pyRound(thumbTop)),
         Math.max(1, int(pyRound(8.0 * scale))),
         Math.max(1, int(pyRound(thumbH + 1.0 * scale))),
-        wgl.makeColor(1, 1, 1, 0.8),
+        wgl.makeColor(1, 1, 1, alphaByte(0.8)),
       );
       wgl.drawRectangle(
         int(pyRound(trackX + 2.0 * scale)),
         int(pyRound(thumbTop + 1.0 * scale)),
         Math.max(1, int(pyRound(6.0 * scale))),
         Math.max(1, int(pyRound(Math.max(1.0, thumbH - 1.0 * scale)))),
-        wgl.makeColor(51 / 255, 204 / 255, 1, 0.2),
+        wgl.makeColor(51 / 255, 204 / 255, 1, alphaByte(0.2)),
       );
     }
 
@@ -220,7 +224,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const perkName = this._perkName(perkId, { violenceDisabled, preserveBugs });
     const detailAnchor = right.add(new Vec2((34.0 + detailShiftX) * scale, 72.0 * scale));
     const perkNoLabel = preserveBugs ? 'perkno' : 'perk';
-    drawSmallText(font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
+    drawSmallText(font, `${perkNoLabel} #${perkId}`, detailAnchor.add(new Vec2(190.0 * scale, -40.0 * scale)), wgl.makeColor(1, 1, 1, alphaByte(0.4)));
     const nameW = measureSmallTextWidth(font, perkName);
     const perkNamePos = new Vec2(detailAnchor.x + 128.0 * scale - nameW * 0.5, detailAnchor.y - 22.0 * scale);
     drawSmallText(font, perkName, perkNamePos, textColor);
@@ -232,13 +236,13 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         Math.max(1.0, 1.0 * scale),
       ),
       1.0,
-      wgl.makeColor(1, 1, 1, 0.5),
+      wgl.makeColor(1, 1, 1, alphaByte(0.5)),
     );
 
     let descPos = detailAnchor.add(new Vec2(16.0 * scale, 0.0));
     const prereqName = this._perkPrereqName(perkId, { violenceDisabled, preserveBugs });
     if (prereqName) {
-      drawSmallText(font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, 0.8));
+      drawSmallText(font, `Requires: ${prereqName}`, descPos, wgl.makeColor(1, 204 / 255, 204 / 255, alphaByte(0.8)));
       descPos = descPos.offset({ dx: 0.0, dy: 18.0 * scale });
     }
 
@@ -438,10 +442,10 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const perkIds: PerkId[] = [];
     for (let idx = 1; idx < available.length; idx++) {
       if (available[idx]) {
-        perkIds.push(idx as PerkId);
+        perkIds.push(idx);
       }
     }
-    perkIds.sort((a, b) => (a as number) - (b as number));
+    perkIds.sort((a, b) => a - b);
     return perkIds;
   }
 
@@ -477,7 +481,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
 
   private _prewrappedPerkDesc(perkId: PerkId, font: SmallFontData, opts: { violenceDisabled: number }): string {
     const violenceDisabled = opts.violenceDisabled;
-    const key = `${perkId as number}:${violenceDisabled}:${this._preserveBugs() ? 1 : 0}`;
+    const key = `${perkId}:${violenceDisabled}:${this._preserveBugs() ? 1 : 0}`;
     const cached = this._wrappedDescCache.get(key);
     if (cached !== undefined) return cached;
     const desc = this._perkDesc(perkId, { violenceDisabled, preserveBugs: this._preserveBugs() });
