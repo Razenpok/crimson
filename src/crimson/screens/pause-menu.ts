@@ -16,7 +16,6 @@ import { drawScreenFade } from './transitions.ts';
 import {
   MENU_LABEL_WIDTH,
   MENU_LABEL_HEIGHT,
-  MENU_LABEL_BASE_X,
   MENU_LABEL_BASE_Y,
   MENU_LABEL_ROW_HEIGHT,
   MENU_LABEL_ROW_BACK,
