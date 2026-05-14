@@ -7,18 +7,9 @@ import type { PlayerInput } from '@crimson/sim/input.ts';
 import { WorldState } from '@crimson/sim/world-state.ts';
 import { TutorialOverlayState } from './state.ts';
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
-import type { DeterministicStepResult } from '@crimson/sim/step-pipeline.ts';
+import type { PostStepContext } from '@crimson/sim/sessions.ts';
 
 export type TutorialWorldState = WorldState;
-
-
-export interface TutorialStepContext {
-  world: TutorialWorldState;
-  stepResult: DeterministicStepResult;
-  dtSimMs: number;
-  worldSize: number;
-  detailPreset: number;
-}
 
 
 export function tutorialBeforeStep(world: TutorialWorldState): void {
@@ -61,7 +52,7 @@ function tutorialOverlayFromActions(actions: TutorialFrameActions): TutorialOver
 }
 
 
-export function tutorialPostStep(ctx: TutorialStepContext): void {
+export function tutorialPostStep(ctx: PostStepContext): void {
   const state = ctx.world.state;
   const tutorial = state.tutorial;
   const hintRef = tutorial.hintBonusCreatureRef;
