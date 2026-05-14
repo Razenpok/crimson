@@ -25,11 +25,12 @@ export function terrainStampingDraws(opts: { width: number; height: number }): n
 }
 
 export class TerrainSetup {
-  constructor(
-    public readonly terrainSlots: TerrainSlotTriplet,
-    public readonly terrainSeed: number,
-  ) {
-    Object.freeze(this);
+  public readonly terrainSlots: TerrainSlotTriplet;
+  public readonly terrainSeed: number;
+
+  constructor(opts: { terrainSlots: TerrainSlotTriplet; terrainSeed: number }) {
+    this.terrainSlots = opts.terrainSlots;
+    this.terrainSeed = opts.terrainSeed;
   }
 }
 
@@ -57,7 +58,7 @@ export function advanceUnlockTerrain(
   const terrainSlots = chooseUnlockTerrainSlots({ unlockIndex: opts.unlockIndex, rng });
   const terrainSeed = rng.state;
   advanceTerrainStampingRng(rng, opts.width, opts.height);
-  return new TerrainSetup(terrainSlots, terrainSeed);
+  return new TerrainSetup({ terrainSlots, terrainSeed });
 }
 
 export function advanceExplicitTerrain(
@@ -67,5 +68,5 @@ export function advanceExplicitTerrain(
   // Advance RNG through explicit terrain generation when slots are fixed.
   const terrainSeed = rng.state;
   advanceTerrainStampingRng(rng, opts.width, opts.height);
-  return new TerrainSetup(opts.terrainSlots, terrainSeed);
+  return new TerrainSetup({ terrainSlots: opts.terrainSlots, terrainSeed });
 }
