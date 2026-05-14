@@ -44,22 +44,8 @@ import { _AIM_JOYSTICK_TURN_RATE, _AIM_KEYBOARD_TURN_RATE } from './aim-constant
 import { AimScheme } from './aim-schemes.ts';
 import { MovementControlType } from './movement-controls.ts';
 import { QuestLevel } from './quests/level.ts';
-
-export interface GameStatus {
-  gameSequenceId: number;
-  questUnlockIndex: number;
-  questUnlockIndexFull: number;
-  questPlayCounts: number[];
-  modePlayOther: number;
-  unknownTail: Uint8Array;
-  saveIfDirty(): void;
-  incrementModePlayCountForMode(mode: GameMode): void;
-  modePlayCountForMode(mode: number): number;
-  questPlayCount(index: number): number;
-  incrementQuestPlayCount(idx: number): number;
-  weaponUsageCountSlot(slot: number): number;
-  incrementWeaponUsageSlot(slot: number): void;
-}
+import type { GameStatus } from './persistence/save-status.ts';
+export type { GameStatus } from './persistence/save-status.ts';
 
 const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((entry) => int(entry.weaponId))) + 1;
 

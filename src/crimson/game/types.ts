@@ -9,7 +9,7 @@ import type { ConsoleState } from '@grim/console.ts';
 import type { GroundRenderer } from '@grim/terrain-render.ts';
 import type { View } from '@grim/view.ts';
 import type { GameMode } from '@crimson/game-modes.ts';
-import type { GameStatus as GameStateStatus } from '@crimson/gameplay.ts';
+import type { GameStatus as GameStateStatus } from '@crimson/persistence/save-status.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import { RtxRenderMode as RtxRenderModeValue } from '@crimson/render/rtx/mode.ts';
 import type { QuestLevel } from '@crimson/quests/level.ts';
