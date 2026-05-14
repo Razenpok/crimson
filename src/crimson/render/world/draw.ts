@@ -52,7 +52,6 @@ function colorFromRgba(r: number, g: number, b: number, a: number): wgl.Color {
 }
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
-  // WebGL replacement for raylib's `draw_circle`.
   const segments = Math.max(24, int(radius * 1.5 + 0.5));
   const step = (Math.PI * 2.0) / segments;
   const white = wgl.getWhiteTexture();
@@ -254,7 +253,7 @@ function drawPlayer(
   const screen = WorldRenderCtx.worldToScreenWith(player.pos, { camera: ctx.camera, viewScale: ctx.viewScale });
   const r = Math.max(1.0, 14.0 * ctx.scale);
   const tint = wgl.makeColor(90 / 255, 190 / 255, 120 / 255, int(255 * ctx.entityAlpha + 0.5) / 255);
-  drawFilledCircle(screen, r, tint);
+  drawFilledCircle(new Vec2(int(screen.x), int(screen.y)), r, tint);
 }
 
 function drawPlayers(
@@ -357,7 +356,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
     if (texture === null) {
       const r = Math.max(1.0, creature.size * 0.5 * ctx.scale);
       const tint = wgl.makeColor(220 / 255, 90 / 255, 90 / 255, int(255 * ctx.entityAlpha + 0.5) / 255);
-      drawFilledCircle(screen, r, tint);
+      drawFilledCircle(new Vec2(int(screen.x), int(screen.y)), r, tint);
       continue;
     }
 
@@ -467,7 +466,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawCont
     const dst = wgl.makeRectangle(creatureScreen.x, creatureScreen.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
     const rotationDeg = (idx * 0.01 + creature.heading) * RAD_TO_DEG;
-    wgl.drawTexturePro(ctx.particlesTexture!, src, dst, origin, rotationDeg, tint);
+    wgl.drawTexturePro(ctx.particlesTexture, src, dst, origin, rotationDeg, tint);
   }
   wgl.endBlendMode();
 }
