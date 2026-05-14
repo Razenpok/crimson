@@ -11,22 +11,22 @@
 //   - u32 jpeg_len
 //   - jpeg bytes (length = jpeg_len)
 //   - alpha_rle: (count, value) byte pairs for alpha channel
+//
+// Notes from assets:
+//   - alpha runs expand to width*height for most files; one file is short by 1 pixel.
+//     We pad any remaining pixels with 0 (transparent).
 
 export class JazImage {
   width: number;
   height: number;
   jpeg: Uint8Array;
   alpha: Uint8Array;
-  jpegData: Uint8Array;
-  alphaData: Uint8Array;
 
   constructor(opts: { width: number; height: number; jpeg: Uint8Array; alpha: Uint8Array }) {
     this.width = opts.width;
     this.height = opts.height;
     this.jpeg = opts.jpeg;
     this.alpha = opts.alpha;
-    this.jpegData = opts.jpeg;
-    this.alphaData = opts.alpha;
   }
 }
 
