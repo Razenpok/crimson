@@ -15,15 +15,15 @@ export class TimerRef {
   readonly key: string;
   readonly playerIndex: number | null;
 
-  constructor(kind: string, key: string, playerIndex: number | null = null) {
-    this.kind = kind;
-    this.key = key;
-    this.playerIndex = playerIndex;
+  constructor(opts: { kind: string; key: string; playerIndex?: number | null }) {
+    this.kind = opts.kind;
+    this.key = opts.key;
+    this.playerIndex = opts.playerIndex ?? null;
   }
 }
 
 export function timerRef(kind: string, key: string, playerIndex: number | null = null): TimerRef {
-  return new TimerRef(kind, key, playerIndex);
+  return new TimerRef({ kind, key, playerIndex });
 }
 
 export class BonusHudSlot {
