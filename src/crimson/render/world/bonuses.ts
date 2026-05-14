@@ -7,7 +7,7 @@ import { clamp } from '@grim/math.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { BONUS_BY_ID, BonusId } from '@crimson/bonuses/ids.ts';
 import { bonusFindAimHoverEntry, bonusLabelForEntry } from '@crimson/bonuses/pool.ts';
-import { WEAPON_BY_ID, WeaponId } from '@crimson/weapons.ts';
+import { WEAPON_BY_ID } from '@crimson/weapons.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
@@ -70,8 +70,8 @@ export function drawBonusPickups(
 
     const bonusId = bonus.bonusId;
     if (bonusId === BonusId.WEAPON) {
-      if (!WEAPON_BY_ID.has(bonus.amount as WeaponId)) continue;
-      const weaponId = bonus.amount as WeaponId;
+      if (!WEAPON_BY_ID.has(bonus.amount)) continue;
+      const weaponId = bonus.amount;
       const weapon = WEAPON_BY_ID.get(weaponId);
       if (!weapon) continue;
       const iconIndex = weapon.iconIndex;
