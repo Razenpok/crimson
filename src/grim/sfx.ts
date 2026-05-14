@@ -73,6 +73,14 @@ function f32(value: number): number {
   return _f32buf[0];
 }
 
+function pyRound(value: number): number {
+  const floorValue = Math.floor(value);
+  const frac = value - floorValue;
+  if (frac < 0.5) return floorValue;
+  if (frac > 0.5) return floorValue + 1;
+  return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+}
+
 function nextRateScaleHz(opts: { currentRateScaleHz: number; reflexBoostTimer: number }): number {
   // Native `sfx_play` / `sfx_play_panned` update a global rate scalar from
   // `bonus_reflex_boost_timer` before each voice start.
@@ -84,7 +92,7 @@ function nextRateScaleHz(opts: { currentRateScaleHz: number; reflexBoostTimer: n
     if (reflexF32 < 1.0) {
       const rateExpr = f32((f32(1.0) - reflexF32 + f32(1.0)) * f32(SFX_RATE_MIN_HZ));
       // `__ftol` follows host FP rounding mode (nearest on native defaults).
-      return int(Math.round(rateExpr));
+      return int(pyRound(rateExpr));
     }
     // Native keeps prior `sfx_rate_scale` when timer is exactly 1.0.
     return int(opts.currentRateScaleHz);
