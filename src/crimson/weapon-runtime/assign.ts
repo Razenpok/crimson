@@ -14,9 +14,14 @@ export function weaponEntry(weaponId: WeaponId): Weapon {
   return entry;
 }
 
-interface WeaponAssignCtx {
+class WeaponAssignCtx {
   player: PlayerState;
   clipSize: number;
+
+  constructor(opts: { player: PlayerState; clipSize: number }) {
+    this.player = opts.player;
+    this.clipSize = opts.clipSize;
+  }
 }
 
 type WeaponAssignClipModifier = (ctx: WeaponAssignCtx) => void;
@@ -70,7 +75,7 @@ export function weaponAssignPlayer(
   player.weapon.weaponId = weaponId;
 
   let clipSize = int(weapon.clipSize);
-  const clipCtx: WeaponAssignCtx = { player, clipSize: Math.max(0, clipSize) };
+  const clipCtx = new WeaponAssignCtx({ player, clipSize: Math.max(0, clipSize) });
   for (const modifier of WEAPON_ASSIGN_CLIP_MODIFIERS) {
     modifier(clipCtx);
   }
