@@ -793,7 +793,7 @@ export class BaseGameplayMode {
     return shotsFromState(this.state, { playerIndex: this.player.index });
   }
 
-  protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
+  protected _replayOutputBasename(opts: { stamp: string; replay: object }): string {
     const modeName = this.constructor.name.replace('Mode', '').toLowerCase() || 'replay';
     return `${modeName}_${opts.stamp}`;
   }

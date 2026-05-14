@@ -115,7 +115,7 @@ export class SurvivalMode extends BaseGameplayMode {
     return int(this._sessionElapsedMs());
   }
 
-  protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
+  protected _replayOutputBasename(opts: { stamp: string; replay: object }): string {
     const stamp = opts.stamp;
     const score = int(this.player.experience);
     return `survival_${stamp}_score${score}`;

@@ -112,7 +112,7 @@ export class TutorialMode extends BaseGameplayMode {
     return int(session.elapsedMs);
   }
 
-  protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
+  protected _replayOutputBasename(opts: { stamp: string; replay: object }): string {
     return `tutorial_${opts.stamp}`;
   }
 

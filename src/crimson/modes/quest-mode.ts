@@ -337,7 +337,7 @@ export class QuestMode extends BaseGameplayMode {
     return int(this._questSpawnState.spawnTimelineMs);
   }
 
-  protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
+  protected _replayOutputBasename(opts: { stamp: string; replay: object }): string {
     const stamp = opts.stamp;
     const level = this._questLevel !== null ? this._questLevel.text : 'quest';
     const kind = this._outcome !== null ? this._outcome.kind : 'quest';
