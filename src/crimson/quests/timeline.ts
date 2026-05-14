@@ -1,7 +1,7 @@
 // Port of crimson/quests/timeline.py
 
 import { Vec2 } from '@grim/geom.ts';
-import type { SpawnTemplateCall } from '@crimson/creatures/spawn.ts';
+import { SpawnTemplateCall } from '@crimson/creatures/spawn.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { SpawnEntry } from './types.ts';
 
@@ -71,7 +71,7 @@ export function tickQuestSpawnTimeline(
       } else {
         pos = basePos.offset({ dx: offset });
       }
-      spawns.push({ templateId: entry.spawnId, pos, heading: f32(entry.heading) });
+      spawns.push(new SpawnTemplateCall({ templateId: entry.spawnId, pos, heading: f32(entry.heading) }));
     }
 
     if (entry.count !== 0) {
