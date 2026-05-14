@@ -609,6 +609,9 @@ export class WebGLContext {
     rotation: number,
     tint: { r: number; g: number; b: number; a: number },
   ): void {
+    if (this._colorQuadCount > 0) {
+      this._flushColorQuads();
+    }
     if (this._currentTexture !== null && this._currentTexture !== texture.id) {
       this.flush();
     }
@@ -670,6 +673,9 @@ export class WebGLContext {
   }
 
   drawRectangle(x: number, y: number, w: number, h: number, r: number, g: number, b: number, a: number): void {
+    if (this._quadCount > 0) {
+      this._flushTexturedQuads();
+    }
 
     if (this._colorQuadCount >= MAX_QUADS) {
       this._flushColorQuads();
