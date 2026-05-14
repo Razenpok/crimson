@@ -30,16 +30,19 @@ export class RGBA {
     this.a = optsOrR.a ?? 1.0;
   }
 
-  static fromRgba(value: RGBA | wgl.Color | readonly [number, number, number, number]): RGBA {
+  static fromRgba(value: RGBA | readonly [number, number, number, number]): RGBA {
     if (value instanceof RGBA) return value;
-    if ('length' in value) {
-      return new RGBA({ r: value[0], g: value[1], b: value[2], a: value[3] });
-    }
-    return new RGBA({ r: value.r, g: value.g, b: value.b, a: value.a });
+    return new RGBA({ r: value[0], g: value[1], b: value[2], a: value[3] });
   }
 
   static fromRl(value: wgl.Color): RGBA {
-    return new RGBA({ r: value.r, g: value.g, b: value.b, a: value.a });
+    const inv255 = 1.0 / 255.0;
+    return new RGBA({
+      r: value.r * inv255,
+      g: value.g * inv255,
+      b: value.b * inv255,
+      a: value.a * inv255,
+    });
   }
 
   static lerp(a: RGBA, b: RGBA, t: number): RGBA {
@@ -107,6 +110,12 @@ export class RGBA {
   }
 
   toRl(): wgl.Color {
-    return this.toWgl();
+    const c = this.clamped();
+    return wgl.makeColor(
+      int(c.r * 255.0 + 0.5) / 255.0,
+      int(c.g * 255.0 + 0.5) / 255.0,
+      int(c.b * 255.0 + 0.5) / 255.0,
+      int(c.a * 255.0 + 0.5) / 255.0,
+    );
   }
 }
