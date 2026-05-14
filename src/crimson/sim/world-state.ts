@@ -51,7 +51,7 @@ import {
 
 export class WorldEvents {
   hits: ProjectileHit[];
-  deaths: CreatureDeath[];
+  deaths: readonly CreatureDeath[];
   pickups: BonusPickupEvent[];
   sfx: SfxId[];
   triggerGameTune: boolean;
@@ -59,14 +59,14 @@ export class WorldEvents {
 
   constructor(opts: {
     hits: ProjectileHit[];
-    deaths: CreatureDeath[];
+    deaths: readonly CreatureDeath[];
     pickups: BonusPickupEvent[];
     sfx: SfxId[];
     triggerGameTune?: boolean;
     hitSfx?: SfxId[];
   }) {
     this.hits = opts.hits;
-    this.deaths = opts.deaths;
+    this.deaths = Array.from(opts.deaths);
     this.pickups = opts.pickups;
     this.sfx = opts.sfx;
     this.triggerGameTune = opts.triggerGameTune ?? false;
@@ -659,7 +659,9 @@ export class WorldState {
 
       const typeId = creature.typeId;
       const info = CREATURE_ANIM.get(typeId);
-      if (info === undefined) continue;
+      if (info === undefined) {
+        throw new Error(`missing creature animation info for type ${typeId}`);
+      }
 
       const [newPhase] = creatureAnimAdvancePhase(
         creature.animPhase,
