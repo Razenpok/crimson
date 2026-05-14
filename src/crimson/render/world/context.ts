@@ -15,9 +15,16 @@ export class WorldRenderCtx {
   projectionCamera: Vec2 | null = null;
   projectionViewScale: Vec2 | null = null;
 
-  constructor(renderer: WorldRenderer, frame: RenderFrame) {
-    this.renderer = renderer;
-    this.frame = frame;
+  constructor(opts: {
+    renderer: WorldRenderer;
+    frame: RenderFrame;
+    projectionCamera?: Vec2 | null;
+    projectionViewScale?: Vec2 | null;
+  }) {
+    this.renderer = opts.renderer;
+    this.frame = opts.frame;
+    this.projectionCamera = opts.projectionCamera ?? null;
+    this.projectionViewScale = opts.projectionViewScale ?? null;
   }
 
   cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
@@ -78,10 +85,12 @@ export class WorldRenderCtx {
   }
 
   withProjection(opts: { camera: Vec2; viewScale: Vec2 }): WorldRenderCtx {
-    const ctx = new WorldRenderCtx(this.renderer, this.frame);
-    ctx.projectionCamera = opts.camera;
-    ctx.projectionViewScale = opts.viewScale;
-    return ctx;
+    return new WorldRenderCtx({
+      renderer: this.renderer,
+      frame: this.frame,
+      projectionCamera: opts.camera,
+      projectionViewScale: opts.viewScale,
+    });
   }
 
   static isBulletTrailType(typeId: number): boolean {
@@ -123,7 +132,10 @@ export function buildWorldRenderCtx(
   renderer: WorldRenderer,
   opts: { renderFrame: RenderFrame },
 ): WorldRenderCtx {
-  return new WorldRenderCtx(renderer, opts.renderFrame);
+  return new WorldRenderCtx({
+    renderer,
+    frame: opts.renderFrame,
+  });
 }
 
 export function isBulletTrailType(typeId: number): boolean {
