@@ -9,6 +9,14 @@ const _LEVELS: Record<string, number> = {
 
 let _structlogLoggerFactoryConfigured = false;
 
+type StructlogConfig = {
+  processors: readonly string[];
+  wrapperLevel: number;
+  cacheLoggerOnFirstUse: boolean;
+};
+
+let _structlogConfig: StructlogConfig | null = null;
+
 export class ValueError extends Error {
   constructor(message: string) {
     super(message);
@@ -92,6 +100,31 @@ function _pathJoin(...parts: string[]): string {
   return cleaned.join('/');
 }
 
+function _expandUserPath(path: string): string {
+  if (path === '~' || path.startsWith('~/')) {
+    const home = globalThis.process?.env?.HOME;
+    if (home !== undefined && home.length > 0) {
+      return _pathJoin(home, path.slice(2));
+    }
+  }
+  return path;
+}
+
+function _dirname(path: string): string {
+  const idx = path.lastIndexOf('/');
+  if (idx < 0) {
+    return '.';
+  }
+  if (idx === 0) {
+    return '/';
+  }
+  return path.slice(0, idx);
+}
+
+function _mkdirParents(_path: string): void {
+  // Browser/WebGL runtime has no filesystem-backed log handlers; path creation is a no-op.
+}
+
 export function defaultComponentLogPath(opts: { baseDir: string; component: string }): string {
   const componentName = String(opts.component).trim().toLowerCase() || 'app';
   const timestamp = _strftimeUtcNow();
@@ -109,13 +142,23 @@ function _configureStructlog(opts: { level: number }): string[] {
     'structlog.stdlib.add_log_level',
     'structlog.processors.TimeStamper(fmt="iso", utc=True)',
   ];
+  _structlogConfig = {
+    processors: [
+      'structlog.contextvars.merge_contextvars',
+      ...processors,
+      'structlog.processors.StackInfoRenderer()',
+      'structlog.processors.format_exc_info',
+      'structlog.stdlib.ProcessorFormatter.wrap_for_formatter',
+    ],
+    wrapperLevel: int(opts.level),
+    cacheLoggerOnFirstUse: true,
+  };
   _structlogLoggerFactoryConfigured = true;
-  void int(opts.level);
   return processors;
 }
 
 export function ensureStructlogStdlibDefaults(): void {
-  if (_structlogLoggerFactoryConfigured) {
+  if (_structlogLoggerFactoryConfigured && _structlogConfig !== null) {
     return;
   }
   _configureStructlog({ level: _LEVELS.info });
@@ -128,9 +171,22 @@ export function configureComponentLogging(opts: {
   level?: string | number;
 }): string {
   const levelNo = resolveLogLevel(opts.level ?? 'info');
-  _configureStructlog({ level: int(levelNo) });
+  const processors = _configureStructlog({ level: int(levelNo) });
 
-  const resolvedLogFile = String(opts.logFile);
+  const resolvedLogFile = _expandUserPath(String(opts.logFile));
+  _mkdirParents(_dirname(resolvedLogFile));
+
+  const consoleFormatter = {
+    foreignPreChain: processors.slice(),
+    processor: 'structlog.dev.ConsoleRenderer',
+    colors: false,
+  };
+  const fileFormatter = {
+    foreignPreChain: processors.slice(),
+    processor: 'structlog.processors.JSONRenderer(sort_keys=True)',
+  };
+  void consoleFormatter;
+  void fileFormatter;
   console.info('logging_configured', {
     component: String(opts.component),
     logger_name: String(opts.loggerName),
