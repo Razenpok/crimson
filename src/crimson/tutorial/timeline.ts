@@ -4,7 +4,7 @@ import { Vec2 } from '@grim/geom.ts';
 import { BonusId } from '@crimson/bonuses/ids.ts';
 import {
   SpawnId,
-  type SpawnTemplateCall,
+  SpawnTemplateCall,
   buildTutorialStage3FireSpawns,
   buildTutorialStage4ClearSpawns,
   buildTutorialStage5RepeatSpawns,
@@ -55,7 +55,6 @@ export class BonusSpawnCall {
     this.bonusId = opts.bonusId;
     this.amount = opts.amount;
     this.pos = opts.pos;
-    Object.freeze(this);
   }
 }
 
@@ -94,7 +93,6 @@ export class TutorialFrameActions {
     this.playLevelupSfx = opts.playLevelupSfx ?? false;
     this.forcePlayerHealth = opts.forcePlayerHealth ?? 100.0;
     this.forcePlayerExperience = opts.forcePlayerExperience ?? null;
-    Object.freeze(this);
   }
 }
 
@@ -195,8 +193,12 @@ function tickHint(
     state.hintFadeIn = true;
     state.hintIndex = int(state.hintIndex) + 1;
     hintSpawns.push(
-      { templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(128.0, 128.0), heading: 3.1415927 },
-      { templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26, pos: new Vec2(152.0, 160.0), heading: 3.1415927 },
+      new SpawnTemplateCall({ templateId: SpawnId.ALIEN_CONST_GREEN_24, pos: new Vec2(128.0, 128.0), heading: 3.1415927 }),
+      new SpawnTemplateCall({
+        templateId: SpawnId.ALIEN_CONST_PALE_GREEN_26,
+        pos: new Vec2(152.0, 160.0),
+        heading: 3.1415927,
+      }),
     );
   }
 
@@ -217,20 +219,20 @@ function tickHint(
 
 
 function cloneState(s: TutorialState): TutorialState {
-  const c = new TutorialState();
-  c.stageIndex = s.stageIndex;
-  c.stageTimerMs = s.stageTimerMs;
-  c.stageTransitionTimerMs = s.stageTransitionTimerMs;
-  c.hintIndex = s.hintIndex;
-  c.hintAlpha = s.hintAlpha;
-  c.hintFadeIn = s.hintFadeIn;
-  c.repeatSpawnCount = s.repeatSpawnCount;
-  c.hintBonusCreatureRef = s.hintBonusCreatureRef;
-  c.preserveBugs = s.preserveBugs;
-  c.moveActiveThisTick = s.moveActiveThisTick;
-  c.fireActiveThisTick = s.fireActiveThisTick;
-  c.hintBonusAliveBeforeTick = s.hintBonusAliveBeforeTick;
-  return c;
+  return new TutorialState({
+    stageIndex: s.stageIndex,
+    stageTimerMs: s.stageTimerMs,
+    stageTransitionTimerMs: s.stageTransitionTimerMs,
+    hintIndex: s.hintIndex,
+    hintAlpha: s.hintAlpha,
+    hintFadeIn: s.hintFadeIn,
+    repeatSpawnCount: s.repeatSpawnCount,
+    hintBonusCreatureRef: s.hintBonusCreatureRef,
+    preserveBugs: s.preserveBugs,
+    moveActiveThisTick: s.moveActiveThisTick,
+    fireActiveThisTick: s.fireActiveThisTick,
+    hintBonusAliveBeforeTick: s.hintBonusAliveBeforeTick,
+  });
 }
 
 
