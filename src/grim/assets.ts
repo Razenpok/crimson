@@ -11,8 +11,6 @@ const FALLBACK_ASSETS_URL = 'https://refactoring.ninja/crimson-paq/v1.9.93';
 
 let _resolvedAssetsUrl: string | null = null;
 
-// Probe the relative asset path for local testing; if crimson.paq isn't reachable there,
-// fall back to the CDN-hosted assets. Caches the result for subsequent calls.
 export async function resolveAssetsUrl(primaryUrl: string): Promise<string> {
   if (_resolvedAssetsUrl !== null) return _resolvedAssetsUrl;
   try {
@@ -23,7 +21,6 @@ export async function resolveAssetsUrl(primaryUrl: string): Promise<string> {
       return _resolvedAssetsUrl;
     }
   } catch {
-    // primary unreachable
   }
   console.log(`Assets not found at ${primaryUrl}, falling back to ${FALLBACK_ASSETS_URL}`);
   _resolvedAssetsUrl = FALLBACK_ASSETS_URL;
@@ -237,25 +234,29 @@ export function unloadRuntimeResources(resources: RuntimeResources | null): void
   unloadResources(resources);
 }
 
-// --- Runtime resources registry (mirrors Python's _REGISTERED_RESOURCES) ---
-
 const _registeredResources = new Map<string, RuntimeResources>();
 
+function _normalizeAssetsDir(assetsUrl: string): string {
+  try {
+    return new URL(assetsUrl, globalThis.location?.href).href;
+  } catch {
+    return assetsUrl;
+  }
+}
+
 export function registerRuntimeResources(resources: RuntimeResources): void {
-  _registeredResources.set(resources.assetsUrl, resources);
+  _registeredResources.set(_normalizeAssetsDir(resources.assetsUrl), resources);
 }
 
 export function unregisterRuntimeResources(assetsUrl: string): void {
-  _registeredResources.delete(assetsUrl);
+  _registeredResources.delete(_normalizeAssetsDir(assetsUrl));
 }
 
 export function runtimeResourcesFor(assetsUrl: string): RuntimeResources {
-  const resources = _registeredResources.get(assetsUrl);
+  const resources = _registeredResources.get(_normalizeAssetsDir(assetsUrl));
   if (!resources) throw new Error(`runtime resources not loaded for ${assetsUrl}`);
   return resources;
 }
-
-// --- PAQ entry helpers ---
 
 export async function loadPaqEntries(assetsUrl: string): Promise<Map<string, Uint8Array>> {
   return loadPaqEntriesFromPath(`${assetsUrl}/${PAQ_NAME}`);
@@ -268,34 +269,25 @@ export async function loadPaqEntriesFromPath(paqUrl: string): Promise<Map<string
   return paqToMap(buffer);
 }
 
-/**
- * Load an image from PAQ entry data based on file extension.
- * Returns an ImageBitmap ready for WebGL upload.
- */
 async function loadImageFromPaqEntry(relPath: string, data: Uint8Array): Promise<ImageBitmap> {
   const lower = relPath.toLowerCase();
   if (lower.endsWith('.jaz')) {
     return decodeJazToImageBitmap(data);
   }
-  // TGA, JPG, PNG - decode via browser
   const mimeMap: Record<string, string> = {
     '.tga': 'image/x-tga',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.png': 'image/png',
   };
-  // TGA is decoded manually if the browser does not support it natively.
   const ext = lower.substring(lower.lastIndexOf('.'));
   const mime = mimeMap[ext] ?? 'application/octet-stream';
   const blobData = new ArrayBuffer(data.byteLength);
   new Uint8Array(blobData).set(data);
   const blob = new Blob([blobData], { type: mime });
   try {
-    // DX8 content uses straight alpha — prevent the browser from premultiplying,
-    // which would cause double-darkening under SRC_ALPHA blending (see cheatsheet §3B).
     return await createImageBitmap(blob, { premultiplyAlpha: 'none' });
   } catch {
-    // TGA fallback: parse manually
     if (ext === '.tga') {
       return decodeTgaToImageBitmap(data);
     }
@@ -303,7 +295,6 @@ async function loadImageFromPaqEntry(relPath: string, data: Uint8Array): Promise
   }
 }
 
-/** Minimal TGA decoder for uncompressed RGBA/RGB images */
 function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const idLength = view.getUint8(0);
@@ -320,20 +311,20 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
   const pixels = new Uint8ClampedArray(width * height * 4);
   const imageData = new ImageData(pixels, width, height);
 
-  if (imageType === 2) { // Uncompressed true-color
+  if (imageType === 2) {
     const bytesPerPixel = bpp / 8;
     for (let y = 0; y < height; y++) {
       const srcY = topToBottom ? y : (height - 1 - y);
       for (let x = 0; x < width; x++) {
         const srcIdx = (srcY * width + x) * bytesPerPixel;
         const dstIdx = (y * width + x) * 4;
-        pixels[dstIdx + 0] = pixelData[srcIdx + 2]; // R (TGA is BGR)
-        pixels[dstIdx + 1] = pixelData[srcIdx + 1]; // G
-        pixels[dstIdx + 2] = pixelData[srcIdx + 0]; // B
-        pixels[dstIdx + 3] = bytesPerPixel >= 4 ? pixelData[srcIdx + 3] : 255; // A
+        pixels[dstIdx + 0] = pixelData[srcIdx + 2];
+        pixels[dstIdx + 1] = pixelData[srcIdx + 1];
+        pixels[dstIdx + 2] = pixelData[srcIdx + 0];
+        pixels[dstIdx + 3] = bytesPerPixel >= 4 ? pixelData[srcIdx + 3] : 255;
       }
     }
-  } else if (imageType === 10) { // RLE compressed true-color
+  } else if (imageType === 10) {
     const bytesPerPixel = bpp / 8;
     let srcIdx = 0;
     let pixelIdx = 0;
@@ -342,7 +333,6 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
       const header = pixelData[srcIdx++];
       const count = (header & 0x7F) + 1;
       if (header & 0x80) {
-        // RLE packet
         const b = pixelData[srcIdx++];
         const g = pixelData[srcIdx++];
         const r = pixelData[srcIdx++];
@@ -358,7 +348,6 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
           pixelIdx++;
         }
       } else {
-        // Raw packet
         for (let i = 0; i < count && pixelIdx < totalPixels; i++) {
           const b = pixelData[srcIdx++];
           const g = pixelData[srcIdx++];
@@ -377,10 +366,43 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
     }
   }
 
-  // Bypass OffscreenCanvas 2D context — its putImageData + readback path
-  // premultiplies alpha, which is lossy for straight-alpha DX8 content.
-  // Construct an ImageData directly and let createImageBitmap keep it straight.
   return createImageBitmap(imageData, { premultiplyAlpha: 'none' });
+}
+
+function _loadTextureFromBytes(data: Uint8Array, fmt: string): Promise<wgl.Texture> {
+  void fmt;
+  return loadImageFromPaqEntry(fmt, data).then((bitmap) => {
+    const texture = wgl.loadTexture(bitmap);
+    bitmap.close();
+    wgl.setTextureFilter(texture, wgl.TextureFilter.BILINEAR);
+    return texture;
+  });
+}
+
+function _applyTextureSettings(texture: wgl.Texture, opts: { clamp: boolean; pointFilter: boolean }): void {
+  if (opts.clamp) {
+    wgl.setTextureWrap(texture, wgl.TextureWrap.CLAMP);
+  }
+  if (opts.pointFilter) {
+    wgl.setTextureFilter(texture, wgl.TextureFilter.POINT);
+  }
+}
+
+async function _loadTextureAssetFromBytes(relPath: string, data: Uint8Array | undefined): Promise<wgl.Texture | null> {
+  if (data === undefined) {
+    throw new Error(`Missing asset data: ${relPath}`);
+  }
+  let texture: wgl.Texture | null;
+  if (relPath.toLowerCase().endsWith('.jaz')) {
+    texture = await _loadTextureFromBytes(data, relPath);
+  } else if (relPath.toLowerCase().endsWith('.tga')) {
+    texture = await _loadTextureFromBytes(data, relPath);
+  } else if (relPath.toLowerCase().endsWith('.jpg') || relPath.toLowerCase().endsWith('.jpeg')) {
+    texture = await _loadTextureFromBytes(data, relPath);
+  } else {
+    texture = null;
+  }
+  return texture;
 }
 
 function _buildSmallFont(textures: Map<TextureId, wgl.Texture>, widthsData: Uint8Array): SmallFontData {
@@ -398,26 +420,18 @@ export async function loadRuntimeResources(
   assetsUrl: string,
 ): Promise<RuntimeResources> {
   const fetchUrl = await resolveAssetsUrl(assetsUrl);
-  // Fetch and parse the PAQ archive
-  const response = await fetch(`${fetchUrl}/${PAQ_NAME}`);
-  if (!response.ok) throw new Error(`Failed to fetch ${PAQ_NAME}: ${response.status}`);
-  const buffer = await response.arrayBuffer();
-  const entries = paqToMap(buffer);
+  const entries = await loadPaqEntries(fetchUrl);
 
   const textures = new Map<TextureId, wgl.Texture>();
   for (const [textureId, spec] of TEXTURE_SPECS) {
-    const data = entries.get(spec.relPath);
-    if (!data) throw new Error(`Missing runtime texture: ${spec.relPath}`);
-    const bitmap = await loadImageFromPaqEntry(spec.relPath, data);
-    const glTex = wgl.loadTexture(bitmap, {
-      clamp: spec.clamp,
-      pointFilter: spec.pointFilter,
-    });
-    bitmap.close();
-    textures.set(textureId, glTex);
+    const texture = await _loadTextureAssetFromBytes(spec.relPath, entries.get(spec.relPath));
+    if (texture === null) {
+      throw new Error(`Missing runtime texture: ${spec.relPath}`);
+    }
+    _applyTextureSettings(texture, { clamp: spec.clamp, pointFilter: spec.pointFilter });
+    textures.set(textureId, texture);
   }
 
-  // Load small font widths
   const widthsData = entries.get('load/smallFnt.dat');
   if (!widthsData) throw new Error('Missing runtime font widths: load/smallFnt.dat');
 
