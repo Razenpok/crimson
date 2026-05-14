@@ -1,4 +1,5 @@
 // Port of grim/jaz.py
+
 // JAZ texture format (Crimsonland).
 //
 // File layout:
@@ -36,7 +37,7 @@ function blobFromBytes(data: Uint8Array, type: string): Blob {
   return new Blob([blobData], { type });
 }
 
-function decodeAlphaRle(data: Uint8Array, expected: number): Uint8Array {
+export function decodeAlphaRle(data: Uint8Array, expected: number): Uint8Array {
   const out = new Uint8Array(expected);
   let filled = 0;
   for (let i = 0; i < data.length - 1; i += 2) {
@@ -119,6 +120,7 @@ export async function decodeJazBytes(data: Uint8Array): Promise<JazImage> {
 }
 
 export function decodeJaz(_path: string): never {
+  // JAZ path loading is unavailable in the WebGL build.
   throw new Error('JAZ path loading is unavailable in the WebGL build');
 }
 
