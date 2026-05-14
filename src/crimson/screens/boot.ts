@@ -1,7 +1,7 @@
 // Port of crimson/screens/boot.py
 
 import * as wgl from '@wgl';
-import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources, unloadResources, unregisterRuntimeResources } from '@grim/assets.ts';
+import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources, unloadRuntimeResources } from '@grim/assets.ts';
 import { audioPlayMusic, audioShutdown, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
 import { queueTrack } from '@grim/music.ts';
 import { InputState } from '@grim/input.ts';
@@ -82,7 +82,6 @@ export class BootView {
     ]).then(([resources, audio]) => {
       state.resources = resources;
       state.audio = audio;
-      // Queue game tunes (matches Python: exec music/game_tunes.txt)
       queueTrack(audio.music, 'gt1_ingame');
       queueTrack(audio.music, 'gt2_harppen');
       const loaded = resources.textures.size;
@@ -175,10 +174,7 @@ export class BootView {
       audioShutdown(this.state.audio);
       this.state.audio = null;
     }
-    if (this.state.resources !== null) {
-      unregisterRuntimeResources(this.state.resources.assetsUrl);
-      unloadResources(this.state.resources);
-    }
+    unloadRuntimeResources(this.state.resources);
     this.state.resources = null;
   }
 
