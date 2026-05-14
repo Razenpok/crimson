@@ -5,6 +5,7 @@ import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { PLASMA_PARTICLE_TYPES } from '@crimson/sim/world-defs.ts';
 import { plasmaProjectileRenderConfig } from '@crimson/render/projectile-render-registry.ts';
@@ -45,7 +46,7 @@ export function drawPlasmaParticles(ctx: ProjectileDrawCtx): boolean {
 
   const speedScale = ctx.proj.speedScale;
   const fxDetail1 = renderFrame.config !== null
-    ? (renderFrame.config.display.fxDetail[1] ?? true)
+    ? fxDetailEnabled(renderFrame.config.display, 1)
     : true;
 
   const plasmaCfg = plasmaProjectileRenderConfig(typeId);
