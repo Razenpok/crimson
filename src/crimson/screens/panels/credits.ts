@@ -300,7 +300,9 @@ export class CreditsView {
     this._backButton = new UiButtonState('Back', { forceWide: false });
     this._secretButton = new UiButtonState('Secret', { forceWide: false });
 
-    audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
+    if (this.state.audio !== null) {
+      audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
+    }
     this._isOpen = true;
   }
 
@@ -474,12 +476,12 @@ export class CreditsView {
       }
 
       if (line.text.indexOf('o') !== -1) {
-        if ((line.flags & _FLAG_CLICKED) === 0) {
+        if ((line.flags & _FLAG_CLICKED) === 0 && this.state.audio !== null) {
           audioPlaySfx(this.state.audio, SfxId.UI_BONUS);
         }
         line.flags |= _FLAG_CLICKED;
       } else {
-        if (creditsLineClearFlag(this._lines, index)) {
+        if (creditsLineClearFlag(this._lines, index) && this.state.audio !== null) {
           audioPlaySfx(this.state.audio, SfxId.TROOPER_INPAIN_01);
         }
       }
@@ -529,7 +531,9 @@ export class CreditsView {
 
     const interactive = this._timelineMs >= this._timelineMaxMs;
     if (InputState.wasKeyPressed(KEY_ESCAPE) && interactive) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) {
+        audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      }
       this._beginCloseTransition('back_to_previous');
       return;
     }
@@ -558,7 +562,9 @@ export class CreditsView {
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
     const backPos = panelTopLeft.add(new Vec2(_BACK_BUTTON_X * scale, _BACK_BUTTON_Y * scale));
     if (buttonUpdate(this._backButton, { pos: backPos, width: backW, dtMs: dtMsF, mouse, click })) {
-      audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      if (this.state.audio !== null) {
+        audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+      }
       this._beginCloseTransition('back_to_previous');
       return;
     }
@@ -567,7 +573,9 @@ export class CreditsView {
       const secretW = buttonWidth(resources, this._secretButton.label, { scale, forceWide: this._secretButton.forceWide });
       const secretPos = panelTopLeft.add(new Vec2(_SECRET_BUTTON_X * scale, _SECRET_BUTTON_Y * scale));
       if (buttonUpdate(this._secretButton, { pos: secretPos, width: secretW, dtMs: dtMsF, mouse, click })) {
-        audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+        if (this.state.audio !== null) {
+          audioPlaySfx(this.state.audio, SfxId.UI_BUTTONCLICK);
+        }
         this._beginCloseTransition('open_alien_zookeeper');
         return;
       }
