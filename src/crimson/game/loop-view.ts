@@ -320,9 +320,7 @@ export class GameLoopView implements View {
     inputBeginFrame();
 
     const con = this.state.console;
-    if (InputState.wasKeyPressed(192)) {
-      con.toggleOpen();
-    }
+    con.handleHotkey();
     con.update(dt);
     this._syncConsoleElapsedMs();
     this._handleConsoleRequests();
