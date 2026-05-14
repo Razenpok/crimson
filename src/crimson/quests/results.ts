@@ -36,6 +36,26 @@ export class QuestResultsBreakdownAnim {
   blinkTicks = 0;
   done = false;
 
+  constructor(opts: {
+    step?: number;
+    stepTimerMs?: number;
+    baseTimeMs?: number;
+    lifeBonusMs?: number;
+    unpickedPerkBonusS?: number;
+    finalTimeMs?: number;
+    blinkTicks?: number;
+    done?: boolean;
+  } = {}) {
+    this.step = opts.step ?? 0;
+    this.stepTimerMs = opts.stepTimerMs ?? 700;
+    this.baseTimeMs = opts.baseTimeMs ?? 0;
+    this.lifeBonusMs = opts.lifeBonusMs ?? 0;
+    this.unpickedPerkBonusS = opts.unpickedPerkBonusS ?? 0;
+    this.finalTimeMs = opts.finalTimeMs ?? 0;
+    this.blinkTicks = opts.blinkTicks ?? 0;
+    this.done = opts.done ?? false;
+  }
+
   static start(): QuestResultsBreakdownAnim {
     return new QuestResultsBreakdownAnim();
   }
