@@ -16,7 +16,7 @@ import {
 import {
   CreatureAiMode,
   CreatureTypeId,
-  type SpawnEnv,
+  SpawnEnv,
 } from '@crimson/creatures/spawn.ts';
 import type { FxQueue, FxQueueRotated } from '@crimson/effects.ts';
 import { GameMode } from '@crimson/game-modes.ts';
@@ -127,13 +127,13 @@ export class WorldState {
     questFailRetryCount: number;
     preserveBugs?: boolean;
   }): WorldState {
-    const spawnEnv: SpawnEnv = {
+    const spawnEnv = new SpawnEnv({
       terrainWidth: Number(opts.worldSize),
       terrainHeight: Number(opts.worldSize),
       demoModeActive: opts.demoModeActive,
       hardcore: opts.hardcore,
       questFailRetryCount: int(opts.questFailRetryCount),
-    };
+    });
     const state = buildGameplayState();
     state.demoModeActive = opts.demoModeActive;
     state.hardcore = opts.hardcore;
