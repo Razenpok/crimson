@@ -18,7 +18,7 @@ import {
 import { registerQuest } from './registry.ts';
 import type { QuestContext, SpawnEntry as SpawnEntryType } from './types.ts';
 
-registerQuest({
+export const build3_1TheBlighting = registerQuest({
   level: '3.1',
   title: 'The Blighting',
   timeLimitMs: 300000,
@@ -64,7 +64,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_2LizardKings = registerQuest({
   level: '3.2',
   title: 'Lizard Kings',
   timeLimitMs: 180000,
@@ -98,7 +98,7 @@ function theKillingRandomSpawner(
   return spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: opts.triggerMs, count: 3 });
 }
 
-registerQuest({
+export const build3_3TheKilling = registerQuest({
   level: '3.3',
   title: 'The Killing',
   timeLimitMs: 300000,
@@ -154,7 +154,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_4HiddenEvil = registerQuest({
   level: '3.4',
   title: 'Hidden Evil',
   timeLimitMs: 300000,
@@ -171,7 +171,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build3_5SurroundedByReptiles = registerQuest({
   level: '3.5',
   title: 'Surrounded By Reptiles',
   timeLimitMs: 300000,
@@ -195,7 +195,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_6TheLizquidation = registerQuest({
   level: '3.6',
   title: 'The Lizquidation',
   timeLimitMs: 300000,
@@ -217,7 +217,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_7SpidersInc = registerQuest({
   level: '3.7',
   title: 'Spiders Inc.',
   timeLimitMs: 300000,
@@ -244,7 +244,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_8LizardRaze = registerQuest({
   level: '3.8',
   title: 'Lizard Raze',
   timeLimitMs: 300000,
@@ -267,7 +267,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_9DejaVu = registerQuest({
   level: '3.9',
   title: 'Deja vu',
   timeLimitMs: 120000,
@@ -289,7 +289,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build3_10ZombieMasters = registerQuest({
   level: '3.10',
   title: 'Zombie Masters',
   timeLimitMs: 300000,
