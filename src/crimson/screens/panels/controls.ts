@@ -215,7 +215,14 @@ class ControlsDropdownLayout extends DropdownLayoutBase {
     textPos: Vec2;
     textScale: number;
   }) {
-    super(opts.pos, opts.width, opts.headerH, opts.rowH, opts.rowsY0, opts.fullH);
+    super({
+      pos: opts.pos,
+      width: opts.width,
+      headerH: opts.headerH,
+      rowH: opts.rowH,
+      rowsY0: opts.rowsY0,
+      fullH: opts.fullH,
+    });
     this.arrowPos = opts.arrowPos;
     this.arrowSize = opts.arrowSize;
     this.textPos = opts.textPos;

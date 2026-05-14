@@ -356,14 +356,14 @@ export class HighScoresView {
     const headerH = 16.0 * opts.scale;
     const rowH = 16.0 * opts.scale;
     const fullH = (opts.itemCount * 16.0 + 24.0) * opts.scale;
-    return new ScoresDropdownLayout(
-      opts.pos,
-      opts.width,
+    return new ScoresDropdownLayout({
+      pos: opts.pos,
+      width: opts.width,
       headerH,
       rowH,
-      opts.pos.y + 17.0 * opts.scale,
+      rowsY0: opts.pos.y + 17.0 * opts.scale,
       fullH,
-    );
+    });
   }
 
   private _updateDropdown(
