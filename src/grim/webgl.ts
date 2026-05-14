@@ -1,5 +1,9 @@
 // Port of grim/raylib_api.py
 
+// Browser/WebGL implementation backing the Raylib API facade. Python's
+// raylib_api.py only re-exports pyray/raylib; this file provides the equivalent
+// renderer for the browser port.
+
 export enum BlendMode {
   ALPHA,
   ADDITIVE,
@@ -488,7 +492,7 @@ export class WebGLContext {
     if (prev) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, prev.id);
       gl.viewport(0, 0, prev.width, prev.height);
-      this._mvp = orthoMatrix(0, prev.width, prev.height, 0);
+      this._mvp = orthoMatrix(0, prev.width, 0, prev.height);
     } else {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, this._screenWidth, this._screenHeight);
