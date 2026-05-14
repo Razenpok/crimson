@@ -17,7 +17,7 @@ import {
 import { registerQuest } from './registry.ts';
 import type { QuestContext, SpawnEntry as SpawnEntryType } from './types.ts';
 
-registerQuest({
+export const build2_1EverredPastures = registerQuest({
   level: '2.1',
   title: 'Everred Pastures',
   timeLimitMs: 300000,
@@ -41,7 +41,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build2_2SpiderSpawns = registerQuest({
   level: '2.2',
   title: 'Spider Spawns',
   timeLimitMs: 300000,
@@ -63,7 +63,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build2_3ArachnoidFarm = registerQuest({
   level: '2.3',
   title: 'Arachnoid Farm',
   timeLimitMs: 240000,
@@ -93,7 +93,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build2_4TwoFronts = registerQuest({
   level: '2.4',
   title: 'Two Fronts',
   timeLimitMs: 240000,
@@ -121,7 +121,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build2_5SweepStakes = registerQuest({
   level: '2.5',
   title: 'Sweep Stakes',
   timeLimitMs: 35000,
@@ -144,7 +144,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build2_6EvilZombiesAtLarge = registerQuest({
   level: '2.6',
   title: 'Evil Zombies At Large',
   timeLimitMs: 180000,
@@ -166,7 +166,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build2_7SurvivalOfTheFastest = registerQuest({
   level: '2.7',
   title: 'Survival Of The Fastest',
   timeLimitMs: 120000,
@@ -234,7 +234,7 @@ registerQuest({
   return entries.filter((e): e is SpawnEntryType => e !== null);
 });
 
-registerQuest({
+export const build2_8LandOfLizards = registerQuest({
   level: '2.8',
   title: 'Land Of Lizards',
   timeLimitMs: 180000,
@@ -249,7 +249,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build2_9GhostPatrols = registerQuest({
   level: '2.9',
   title: 'Ghost Patrols',
   timeLimitMs: 180000,
@@ -272,7 +272,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build2_10Spideroids = registerQuest({
   level: '2.10',
   title: 'Spideroids',
   timeLimitMs: 360000,
