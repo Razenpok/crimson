@@ -226,8 +226,6 @@ export interface GameplayScreen extends Screen, PauseBackground {
   setRtxMode(mode: RtxRenderMode): void;
   setRuntimeUpdatesPerFrame(value: number): void;
   frameTelemetry(): [number, number, number, number, number, number];
-  consumeOutcome?(): QuestRunOutcome | null;
-  startRun?(level: QuestLevel, opts: { status: GameStateStatus | null }): void;
 }
 
 export class GameState {
