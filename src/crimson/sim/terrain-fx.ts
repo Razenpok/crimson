@@ -19,7 +19,6 @@ export class TerrainDecalFx {
     this.width = opts.width ?? 0.0;
     this.height = opts.height ?? 0.0;
     this.color = opts.color ?? new RGBA();
-    Object.freeze(this);
   }
 
   readonly effectId: number;
@@ -43,7 +42,6 @@ export class TerrainCorpseFx {
     this.rotation = opts.rotation ?? 0.0;
     this.scale = opts.scale ?? 1.0;
     this.creatureTypeId = opts.creatureTypeId ?? 0;
-    Object.freeze(this);
   }
 
   readonly topLeft: Vec2;
@@ -60,7 +58,6 @@ export class TerrainFxBatch {
   constructor(opts: { decals?: readonly TerrainDecalFx[]; corpses?: readonly TerrainCorpseFx[] } = {}) {
     this.decals = opts.decals ?? [];
     this.corpses = opts.corpses ?? [];
-    Object.freeze(this);
   }
 
   isEmpty(): boolean {
