@@ -37,7 +37,6 @@ export class VideoSink implements RenderSink {
   }
 
   open(): void {
-    // Browser WebGL has no filesystem mkdir; callers provide transport setup.
     if (this._openTransport !== null) {
       this._openTransport();
     }
