@@ -14,7 +14,6 @@ import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { DatabaseBaseView } from './databases-base.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-const DIM_COLOR = wgl.makeColor(1, 1, 1, 0.7);
 
 function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl.Color): void {
   const thick = Math.max(1, int(lineThick));
@@ -34,6 +33,10 @@ function pyRound(value: number): number {
   if (frac < 0.5) return floorValue;
   if (frac > 0.5) return floorValue + 1;
   return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+}
+
+function alphaByte(alpha: number): number {
+  return int(255 * alpha) / 255;
 }
 
 export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
@@ -75,7 +78,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const right = rightTopLeft;
     const detailShiftX = weaponsDbRightDetailXShift(this.state.config.display.width);
     const detailTopLeft = right.add(new Vec2(detailShiftX * scale, 0.0));
-    const dimColor = wgl.makeColor(1, 1, 1, 0.7);
+    const dimColor = wgl.makeColor(1, 1, 1, alphaByte(0.7));
     const textColor = wgl.makeColor(1, 1, 1, 1);
 
     // state_15 title at (153,244) => relative to left panel (-98,194): (251,50)
@@ -92,7 +95,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
         Math.max(1.0, 1.0 * scale),
       ),
       1.0,
-      wgl.makeColor(1, 1, 1, 0.5),
+      wgl.makeColor(1, 1, 1, alphaByte(0.5)),
     );
 
     const weaponIds = this._weaponIds;
@@ -144,10 +147,10 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     const weapon = this._weaponEntry(weaponId);
     const preserveBugs = this.state.preserveBugs;
     const weaponNoLabel = preserveBugs ? 'wepno' : 'weapon';
-    drawSmallText(font, `${weaponNoLabel} #${weaponId}`, detailTopLeft.add(new Vec2(240.0 * scale, 32.0 * scale)), wgl.makeColor(1, 1, 1, 0.4));
+    drawSmallText(font, `${weaponNoLabel} #${weaponId}`, detailTopLeft.add(new Vec2(240.0 * scale, 32.0 * scale)), wgl.makeColor(1, 1, 1, alphaByte(0.4)));
     drawSmallText(font, name, detailTopLeft.add(new Vec2(50.0 * scale, 50.0 * scale)), textColor);
     if (iconIndex !== null) {
-      this._drawWicon(iconIndex, detailTopLeft.add(new Vec2(82.0 * scale, 82.0 * scale)), scale);
+      this._drawWicon(iconIndex, { pos: detailTopLeft.add(new Vec2(82.0 * scale, 82.0 * scale)), scale });
     }
 
     const reloadTime = weapon.reloadTime;
@@ -222,13 +225,13 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
     });
     const used: number[] = [];
     for (const weapon of WEAPON_TABLE) {
-      const weaponId = weapon.weaponId as number;
+      const weaponId = weapon.weaponId;
       let include = false;
       if (weaponId >= 0 && weaponId < available.length) {
         include = available[weaponId];
       }
       if (!include) {
-        if (weaponId === (WeaponId.PISTOL as number)) {
+        if (weaponId === WeaponId.PISTOL) {
           include = true;
         } else {
           const usageSlot = weaponUsageSlotForWeaponId(weaponId);
@@ -246,14 +249,17 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _weaponEntry(weaponId: number): Weapon {
-    return WEAPON_BY_ID.get(weaponId as WeaponId)!;
+    const weapon = WEAPON_BY_ID.get(weaponId);
+    if (weapon === undefined) throw new Error(`unknown weapon id ${weaponId}`);
+    return weapon;
   }
 
   private _weaponRpm(weapon: Weapon): number {
     return int(60.0 / weapon.shotCooldown);
   }
 
-  private _drawWicon(iconIndex: number, pos: Vec2, scale: number): void {
+  private _drawWicon(iconIndex: number, opts: { pos: Vec2; scale: number }): void {
+    const { pos, scale } = opts;
     const resources = requireRuntimeResources(this.state);
     const tex = getTexture(resources, TextureId.UI_WICONS);
     const idx = int(iconIndex);
@@ -277,7 +283,8 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   private _weaponLabelAndIcon(weaponId: number): [string, number | null] {
-    const weapon = WEAPON_BY_ID.get(weaponId as WeaponId)!;
+    const weapon = WEAPON_BY_ID.get(weaponId);
+    if (weapon === undefined) throw new Error(`unknown weapon id ${weaponId}`);
     const name = weaponDisplayName(weapon.weaponId, { preserveBugs: this.state.preserveBugs });
     return [name, weapon.iconIndex];
   }
