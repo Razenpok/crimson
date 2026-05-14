@@ -162,12 +162,12 @@ export function loadTypoHighscoreNames(_path: string): string[] {
 export class CreatureNameTable {
   names: string[];
 
-  constructor(names: string[]) {
-    this.names = names;
+  constructor(opts: { names: string[] }) {
+    this.names = opts.names;
   }
 
   static sized(size: number): CreatureNameTable {
-    return new CreatureNameTable(new Array(int(size)).fill(''));
+    return new CreatureNameTable({ names: new Array(int(size)).fill('') });
   }
 
   clear(idx: number): void {
