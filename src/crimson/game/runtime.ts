@@ -55,7 +55,8 @@ function parseFloatArg(value: string): number {
   return Number.isNaN(v) ? 0.0 : v;
 }
 
-function applyDebugConsoleDefaults(console: ConsoleState, debug: boolean): void {
+function applyDebugConsoleDefaults(console: ConsoleState, opts: { debug: boolean }): void {
+  const { debug } = opts;
   if (!debug) return;
   console.registerCvar('cv_showFPS', '1');
 }
@@ -315,7 +316,7 @@ export function runGame(
   const handlers = bootCommandHandlers(state);
   registerBootCommands(console, handlers);
   registerCoreCvars(console, width, height);
-  applyDebugConsoleDefaults(console, config.debug);
+  applyDebugConsoleDefaults(console, { debug: config.debug });
 
   console.log.log('crimson: boot start');
   console.log.log(
