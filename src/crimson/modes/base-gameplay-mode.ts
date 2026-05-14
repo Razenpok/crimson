@@ -1502,7 +1502,7 @@ export class BaseGameplayMode {
           [tickResult.sourceTick.inputs],
           tickResult.sourceTick.commands,
         );
-        (tickResult as { replayTickIndex: number | null }).replayTickIndex = replayTickIndex;
+        tickResult.replayTickIndex = replayTickIndex;
       }
 
       const applied: AppliedBatchTick = {

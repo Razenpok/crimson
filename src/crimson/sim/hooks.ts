@@ -4,10 +4,10 @@ import type { GameCommand, ResolvedTick } from './input-providers.ts';
 import type { DeterministicSessionTick } from './sessions.ts';
 
 export class TickResult {
-  readonly sourceTick: ResolvedTick;
-  readonly payload: DeterministicSessionTick;
-  readonly replayTickIndex: number | null;
-  readonly lanSync: LanTickSync | null;
+  sourceTick: ResolvedTick;
+  payload: DeterministicSessionTick;
+  replayTickIndex: number | null;
+  lanSync: LanTickSync | null;
 
   constructor(opts: {
     sourceTick: ResolvedTick;
@@ -24,12 +24,12 @@ export class TickResult {
 
 export class LanFrameSample {
   readonly frameTickIndex: number;
-  readonly frameInputs: readonly (readonly number[])[];
+  readonly frameInputs: readonly number[][];
   readonly commands: readonly GameCommand[];
 
   constructor(opts: {
     frameTickIndex: number;
-    frameInputs: readonly (readonly number[])[];
+    frameInputs: readonly number[][];
     commands?: readonly GameCommand[];
   }) {
     this.frameTickIndex = opts.frameTickIndex;
@@ -40,11 +40,11 @@ export class LanFrameSample {
 
 export class LanTickSync {
   readonly frameTickIndex: number;
-  readonly frameInputs: readonly (readonly number[])[];
+  readonly frameInputs: readonly number[][];
 
   constructor(opts: {
     frameTickIndex: number;
-    frameInputs: readonly (readonly number[])[];
+    frameInputs: readonly number[][];
   }) {
     this.frameTickIndex = opts.frameTickIndex;
     this.frameInputs = opts.frameInputs;
@@ -52,11 +52,11 @@ export class LanTickSync {
 }
 
 export class LanSyncCallbacks {
-  readonly role: string;
-  readonly takeFrameSample: (tickIndex: number) => LanFrameSample | null;
-  readonly broadcastTickFrame: ((
+  role: string;
+  takeFrameSample: (tickIndex: number) => LanFrameSample | null;
+  broadcastTickFrame: ((
     tickIndex: number,
-    frameInputs: readonly (readonly number[])[],
+    frameInputs: readonly number[][],
     commands: readonly GameCommand[],
   ) => void) | null;
 
@@ -65,7 +65,7 @@ export class LanSyncCallbacks {
     takeFrameSample: (tickIndex: number) => LanFrameSample | null;
     broadcastTickFrame?: ((
       tickIndex: number,
-      frameInputs: readonly (readonly number[])[],
+      frameInputs: readonly number[][],
       commands: readonly GameCommand[],
     ) => void) | null;
   }) {
