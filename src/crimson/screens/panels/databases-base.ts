@@ -70,7 +70,7 @@ export abstract class DatabaseBaseView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false });
   }
 
   open(): void {
@@ -87,7 +87,7 @@ export abstract class DatabaseBaseView {
     this._pendingAction = null;
     this._action = null;
 
-    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false });
 
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
@@ -220,7 +220,7 @@ export abstract class DatabaseBaseView {
     const [mx, my] = InputState.mousePosition();
     const mouse = { x: mx, y: my };
     const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    this._updateContentInteraction(leftTopLeft, scale, mouse);
+    this._updateContentInteraction({ leftTopLeft, scale, mouse });
 
     const backPos = this._backButtonPos();
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
@@ -291,7 +291,12 @@ export abstract class DatabaseBaseView {
     );
 
     const font = resources.smallFont;
-    this._drawContents(leftPanelTopLeft, rightPanelTopLeft, scale, font);
+    this._drawContents({
+      leftTopLeft: leftPanelTopLeft,
+      rightTopLeft: rightPanelTopLeft,
+      scale,
+      font,
+    });
 
     const backPos = this._backButtonPos();
     const backW = buttonWidth(resources, this._backButton.label, { scale, forceWide: this._backButton.forceWide });
@@ -309,16 +314,20 @@ export abstract class DatabaseBaseView {
   protected abstract _backButtonPos(): Vec2;
 
   protected abstract _drawContents(
-    leftTopLeft: Vec2,
-    rightTopLeft: Vec2,
-    scale: number,
-    font: SmallFontData,
+    opts: {
+      leftTopLeft: Vec2;
+      rightTopLeft: Vec2;
+      scale: number;
+      font: SmallFontData;
+    },
   ): void;
 
   protected _updateContentInteraction(
-    _leftTopLeft: Vec2,
-    _scale: number,
-    _mouse: { x: number; y: number },
+    _opts: {
+      leftTopLeft: Vec2;
+      scale: number;
+      mouse: { x: number; y: number };
+    },
   ): void {
   }
 }

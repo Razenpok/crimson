@@ -63,11 +63,14 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   protected override _drawContents(
-    leftTopLeft: Vec2,
-    rightTopLeft: Vec2,
-    scale: number,
-    font: SmallFontData,
+    opts: {
+      leftTopLeft: Vec2;
+      rightTopLeft: Vec2;
+      scale: number;
+      font: SmallFontData;
+    },
   ): void {
+    const { leftTopLeft, rightTopLeft, scale, font } = opts;
     const left = leftTopLeft;
     const right = rightTopLeft;
     const detailShiftX = weaponsDbRightDetailXShift(this.state.config.display.width);
@@ -163,10 +166,13 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
   }
 
   protected override _updateContentInteraction(
-    leftTopLeft: Vec2,
-    scale: number,
-    mouse: { x: number; y: number },
+    opts: {
+      leftTopLeft: Vec2;
+      scale: number;
+      mouse: { x: number; y: number };
+    },
   ): void {
+    const { leftTopLeft, scale, mouse } = opts;
     const weaponIds = this._weaponIds;
     if (weaponIds.length === 0) {
       this._selectedWeaponId = null;
