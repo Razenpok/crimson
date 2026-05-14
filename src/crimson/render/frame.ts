@@ -63,6 +63,5 @@ export class RenderFrame {
     this.lanLocalAimIndicatorsOnly = opts.lanLocalAimIndicatorsOnly;
     this.lanLocalPlayerSlotIndex = opts.lanLocalPlayerSlotIndex;
     this.rtxMode = opts.rtxMode;
-    Object.freeze(this);
   }
 }
