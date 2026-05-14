@@ -24,13 +24,14 @@ export class CreatureSpatialHash {
   private _cellByIndex: (string | null)[];
   private _maxFindMargin: number;
 
-  constructor(
-    creatures: readonly CreatureState[],
-    isCollidable: (creature: CreatureState) => boolean,
-    bucketSize: number = _SPATIAL_BUCKET_SIZE,
-  ) {
-    this.creatures = creatures;
-    this.isCollidable = isCollidable;
+  constructor(opts: {
+    creatures: readonly CreatureState[];
+    isCollidable: (creature: CreatureState) => boolean;
+    bucketSize?: number;
+  }) {
+    this.creatures = opts.creatures;
+    this.isCollidable = opts.isCollidable;
+    const bucketSize = opts.bucketSize ?? _SPATIAL_BUCKET_SIZE;
     this._bucketSize = bucketSize > 0.0 ? bucketSize : _SPATIAL_BUCKET_SIZE;
     this._cells = new Map();
     this._cellByIndex = [];

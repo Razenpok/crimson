@@ -261,7 +261,7 @@ export class ProjectilePool {
       return true;
     };
 
-    const creatureSpatial = new CreatureSpatialHash(creatures, _creatureIsCollidable);
+    const creatureSpatial = new CreatureSpatialHash({ creatures, isCollidable: _creatureIsCollidable });
 
     const _damageScale = (typeId: ProjectileTemplateId): number => {
       const value = damageScaleByType.get(typeId);

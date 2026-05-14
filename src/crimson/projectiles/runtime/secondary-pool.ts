@@ -249,7 +249,7 @@ export class SecondaryProjectilePool {
       return creatureLifecycleIsCollidable(creature.lifecycleStage);
     };
 
-    const creatureSpatial = new CreatureSpatialHash(creatures, _creatureIsCollidable);
+    const creatureSpatial = new CreatureSpatialHash({ creatures, isCollidable: _creatureIsCollidable });
 
     for (const entry of this._entries) {
       if (!entry.active) continue;
