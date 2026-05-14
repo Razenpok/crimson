@@ -542,7 +542,7 @@ export class MenuView {
       const entry = this._menuEntries[idx];
       const posX = MenuView._menuSlotPosX(entry.slot);
       const posY = entry.y;
-      const [angleRad, _slideX] = uiElementAnim(this, {
+      const [angleRad, _slideX] = this._uiElementAnim({
         index: entry.slot + 2,
         startMs: MenuView._menuSlotStartMs(entry.slot),
         endMs: MenuView._menuSlotEndMs(entry.slot),
@@ -747,6 +747,16 @@ export class MenuView {
     return maxMs;
   }
 
+  private _uiElementAnim(opts: {
+    index: number;
+    startMs: number;
+    endMs: number;
+    width: number;
+    directionFlag?: number;
+  }): [number, number] {
+    return uiElementAnim(this, opts);
+  }
+
   private static _drawUiQuad(
     opts: {
       texture: wgl.Texture;
@@ -783,7 +793,7 @@ export class MenuView {
     const signOffsetY = MENU_SIGN_OFFSET_Y * scale;
     let rotationDeg = 0.0;
     if (!this.state.menuSignLocked) {
-      const [angleRad, _slideX] = uiElementAnim(this, {
+      const [angleRad, _slideX] = this._uiElementAnim({
         index: 0,
         startMs: 300,
         endMs: 0,
