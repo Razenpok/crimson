@@ -91,7 +91,7 @@ export class ParticlePool {
     rng?: CrandLike | null;
     creatureDamageApplier?: CreatureDamageApplier | null;
   } = {}) {
-    const size = opts.size ?? PARTICLE_POOL_SIZE;
+    const size = Math.max(0, int(opts.size ?? PARTICLE_POOL_SIZE));
     this._entries = Array.from({ length: size }, () => new Particle());
     this._rng = opts.rng ?? new Crand(0);
     this._creatureDamageApplier = opts.creatureDamageApplier ?? null;
@@ -238,7 +238,7 @@ export class ParticlePool {
       const entry = this._entries[idx];
       if (!entry.active) continue;
 
-      const style = (entry.styleId as number) & 0xff;
+      const style = int(entry.styleId) & 0xff;
 
       if (style === ParticleStyleId.BUBBLEGUN) {
         entry.intensity = f32(entry.intensity - dt * 0.11);
@@ -260,7 +260,7 @@ export class ParticlePool {
         entry.active = false;
         expired.push(idx);
         if (style === ParticleStyleId.BUBBLEGUN && entry.targetId !== -1) {
-          const targetId = entry.targetId;
+          const targetId = int(entry.targetId);
           entry.targetId = -1;
           if (killCreature !== null) {
             killCreature(targetId, entry.owner);
@@ -312,7 +312,7 @@ export class ParticlePool {
         entry.targetId !== -1 &&
         creatures !== null
       ) {
-        const targetId = entry.targetId;
+        const targetId = int(entry.targetId);
         if (targetId >= 0 && targetId < creatures.length && creatures[targetId].active) {
           entry.pos = creatures[targetId].pos;
         }
@@ -324,7 +324,7 @@ export class ParticlePool {
           entry.renderFlag = false;
           const creature = creatures[hitIdx];
           if (style === ParticleStyleId.BUBBLEGUN) {
-            entry.targetId = hitIdx;
+            entry.targetId = int(hitIdx);
             entry.pos = creature.pos;
             entry.vel = new Vec2();
           } else {
@@ -354,7 +354,7 @@ export class ParticlePool {
             const damage = Math.max(0.0, entry.intensity * 10.0);
             if (damage > 0.0) {
               if (damageApplier !== null) {
-                damageApplier(hitIdx, damage, 4, new Vec2(), entry.owner);
+                damageApplier(int(hitIdx), damage, 4, new Vec2(), entry.owner);
               } else {
                 creature.hp -= damage;
               }
@@ -422,7 +422,7 @@ export class SpriteEffectPool {
   private _rng: CrandLike;
 
   constructor(opts: { size?: number; rng?: CrandLike | null } = {}) {
-    const size = opts.size ?? SPRITE_EFFECT_POOL_SIZE;
+    const size = Math.max(0, int(opts.size ?? SPRITE_EFFECT_POOL_SIZE));
     this._entries = Array.from({ length: size }, () => new SpriteEffect());
     this._rng = opts.rng ?? new Crand(0);
   }
@@ -527,8 +527,8 @@ export class FxQueue {
   constructor(opts: { capacity?: number; maxCount?: number } = {}) {
     let capacity = opts.capacity ?? FX_QUEUE_CAPACITY;
     let maxCount = opts.maxCount ?? FX_QUEUE_MAX_COUNT;
-    capacity = Math.max(0, capacity);
-    maxCount = Math.max(0, Math.min(maxCount, capacity));
+    capacity = Math.max(0, int(capacity));
+    maxCount = Math.max(0, Math.min(int(maxCount), capacity));
     this._entries = Array.from({ length: capacity }, () => new FxQueueEntry());
     this._maxCount = maxCount;
     // Mirrors native `config_violence_disabled` gate in `fx_queue_add_random`.
@@ -565,7 +565,7 @@ export class FxQueue {
     if (this._count >= this._maxCount) return false;
 
     const entry = this._entries[this._count];
-    entry.effectId = opts.effectId;
+    entry.effectId = int(opts.effectId);
     entry.rotation = opts.rotation;
     entry.pos = opts.pos;
     entry.height = opts.height;
@@ -578,7 +578,7 @@ export class FxQueue {
   addRandom(opts: { pos: Vec2; rng: CrandLike }): boolean {
     // Port of `fx_queue_add_random` (effect ids 3..7 with grayscale tint).
 
-    if (this.violenceDisabled !== 0) return false;
+    if (int(this.violenceDisabled) !== 0) return false;
     // Native `fx_queue_add_random` always consumes RNG even when the queue is
     // full, then lets `fx_queue_add` fail silently.
     const gray = (opts.rng.rand({ caller: RngCallerStatic.FX_QUEUE_ADD_RANDOM_GRAY }) & 0xf) * 0.01 + 0.84;
@@ -621,8 +621,8 @@ export class FxQueueRotated {
   constructor(opts: { capacity?: number; maxCount?: number } = {}) {
     let capacity = opts.capacity ?? FX_QUEUE_ROTATED_CAPACITY;
     let maxCount = opts.maxCount ?? FX_QUEUE_ROTATED_MAX_COUNT;
-    capacity = Math.max(0, capacity);
-    maxCount = Math.max(0, Math.min(maxCount, capacity));
+    capacity = Math.max(0, int(capacity));
+    maxCount = Math.max(0, Math.min(int(maxCount), capacity));
     this._entries = Array.from({ length: capacity }, () => new FxQueueRotatedEntry());
     this._maxCount = maxCount;
   }
@@ -671,7 +671,7 @@ export class FxQueueRotated {
     entry.color = opts.rgba.withAlpha(a);
     entry.rotation = opts.rotation;
     entry.scale = opts.scale;
-    entry.creatureTypeId = opts.creatureTypeId;
+    entry.creatureTypeId = int(opts.creatureTypeId);
 
     this._count++;
     return true;
@@ -737,7 +737,7 @@ export class EffectPool {
 
   constructor(opts: { size?: number } = {}) {
     let size = opts.size ?? EFFECT_POOL_SIZE;
-    size = Math.max(0, size);
+    size = Math.max(0, int(size));
     this._entries = Array.from({ length: size }, () => new EffectEntry());
     this._free = [];
     for (let i = size - 1; i >= 0; i--) this._free.push(i);
@@ -761,7 +761,7 @@ export class EffectPool {
 
   private _allocSlot(opts: { detailPreset: number }): number | null {
     // Native: if detail_preset < 3, skip every other spawn attempt.
-    const detailPreset = opts.detailPreset;
+    const detailPreset = int(opts.detailPreset);
     if (detailPreset < 3) {
       const skip = this._detailToggle & 1;
       this._detailToggle++;
@@ -793,12 +793,12 @@ export class EffectPool {
     scaleStep: number;
     detailPreset: number;
   }): number | null {
-    const idx = this._allocSlot({ detailPreset: opts.detailPreset });
+    const idx = this._allocSlot({ detailPreset: int(opts.detailPreset) });
     if (idx === null) return null;
 
     const entry = this._entries[idx];
     entry.pos = opts.pos;
-    entry.effectId = opts.effectId;
+    entry.effectId = int(opts.effectId);
     entry.vel = opts.vel;
     entry.rotation = opts.rotation;
     entry.scale = opts.scale;
@@ -806,7 +806,7 @@ export class EffectPool {
     entry.halfHeight = opts.halfHeight;
     entry.age = opts.age;
     entry.lifetime = opts.lifetime;
-    entry.flags = opts.flags;
+    entry.flags = int(opts.flags);
     entry.color = opts.color;
     entry.rotationStep = opts.rotationStep;
     entry.scaleStep = opts.scaleStep;
@@ -827,7 +827,7 @@ export class EffectPool {
 
     for (let idx = 0; idx < this._entries.length; idx++) {
       const entry = this._entries[idx];
-      const flags = entry.flags;
+      const flags = int(entry.flags);
       if (!flags) continue;
 
       const age = entry.age + dt;
@@ -851,7 +851,7 @@ export class EffectPool {
         // On expiry, the native code overrides alpha before queuing.
         const alpha = (flags & 0x100) ? 0.35 : 0.8;
         fxQueue.add({
-          effectId: entry.effectId,
+          effectId: int(entry.effectId),
           pos: entry.pos,
           width: entry.halfWidth * 2.0,
           height: entry.halfHeight * 2.0,
@@ -874,17 +874,17 @@ export class EffectPool {
 
     const [angleDraw, speedDraw, rotationDraw, rotationStepDraw] = opts.draws;
 
-    const angle = opts.aimHeading + (angleDraw & 0x3f) * 0.01;
-    const speed = (speedDraw & 0x3f) * 0.022727273 + 1.0;
+    const angle = opts.aimHeading + (int(angleDraw) & 0x3f) * 0.01;
+    const speed = (int(speedDraw) & 0x3f) * 0.022727273 + 1.0;
     const velocity = Vec2.fromAngle(angle).mul(speed * 100.0);
 
-    const rotation = ((rotationDraw & 0x3f) - 0x20) * 0.1;
-    const rotationStep = ((rotationStepDraw % 20) * 0.1 - 1.0) * 14.0;
+    const rotation = ((int(rotationDraw) & 0x3f) - 0x20) * 0.1;
+    const rotationStep = ((int(rotationStepDraw) % 20) * 0.1 - 1.0) * 14.0;
 
     this.spawn({
       effectId: EffectId.CASING, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
       halfWidth: 2.0, halfHeight: 2.0, age: 0.0, lifetime: 0.15, flags: 0x1c5,
-      color: new RGBA(1.0, 1.0, 1.0, 0.6), rotationStep, scaleStep: 0.0, detailPreset: opts.detailPreset,
+      color: new RGBA(1.0, 1.0, 1.0, 0.6), rotationStep, scaleStep: 0.0, detailPreset: int(opts.detailPreset),
     });
   }
 
@@ -898,7 +898,7 @@ export class EffectPool {
   }): void {
     // Port of `effect_spawn_blood_splatter` (0x0042eb10).
 
-    if (opts.violenceDisabled !== 0) return;
+    if (int(opts.violenceDisabled) !== 0) return;
 
     const lifetime = 0.25 - opts.age;
     const base = opts.angle + Math.PI;
@@ -920,7 +920,7 @@ export class EffectPool {
       this.spawn({
         effectId: EffectId.BLOOD_SPLATTER, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
         halfWidth: half, halfHeight: half, age: opts.age, lifetime, flags: 0xc9,
-        color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep: 0.0, scaleStep, detailPreset: opts.detailPreset,
+        color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep: 0.0, scaleStep, detailPreset: int(opts.detailPreset),
       });
     }
   }
@@ -939,7 +939,7 @@ export class EffectPool {
     const lifetime = opts.lifetime ?? 0.5;
     const scaleStep = opts.scaleStep ?? null;
     const color = opts.color ?? new RGBA(0.4, 0.5, 1.0, 0.5);
-    const count = Math.max(0, opts.count);
+    const count = Math.max(0, int(opts.count));
     for (let i = 0; i < count; i++) {
       const r0 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BURST_ROTATION });
       const r1 = opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_BURST_VEL_X });
@@ -950,7 +950,7 @@ export class EffectPool {
       }
 
       this.spawnBurstParticle({
-        pos: opts.pos, rotationDraw: r0, velXDraw: r1, velYDraw: r2, scaleStepDraw: sampledScaleStep, scaleStep, lifetime, color, detailPreset: opts.detailPreset,
+        pos: opts.pos, rotationDraw: r0, velXDraw: r1, velYDraw: r2, scaleStepDraw: sampledScaleStep, scaleStep, lifetime, color, detailPreset: int(opts.detailPreset),
       });
     }
   }
@@ -970,14 +970,14 @@ export class EffectPool {
     const scaleStep = opts.scaleStep ?? null;
     const lifetime = opts.lifetime ?? 0.5;
     const color = opts.color ?? new RGBA(0.4, 0.5, 1.0, 0.5);
-    const rotation = (opts.rotationDraw & 0x7f) * 0.049087387;
+    const rotation = (int(opts.rotationDraw) & 0x7f) * 0.049087387;
     const velocity = new Vec2(
-      (opts.velXDraw & 0x7f) - 0x40,
-      (opts.velYDraw & 0x7f) - 0x40,
+      (int(opts.velXDraw) & 0x7f) - 0x40,
+      (int(opts.velYDraw) & 0x7f) - 0x40,
     );
     let step: number;
     if (scaleStep === null) {
-      step = (scaleStepDraw! % 100) * 0.01 + 0.1;
+      step = (int(scaleStepDraw!) % 100) * 0.01 + 0.1;
     } else {
       step = scaleStep;
     }
@@ -985,7 +985,7 @@ export class EffectPool {
     this.spawn({
       effectId: EffectId.BURST, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
       halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime, flags: 0x1d,
-      color, rotationStep: 0.0, scaleStep: step, detailPreset: opts.detailPreset,
+      color, rotationStep: 0.0, scaleStep: step, detailPreset: int(opts.detailPreset),
     });
   }
 
@@ -1003,7 +1003,7 @@ export class EffectPool {
     this.spawn({
       effectId: EffectId.RING, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
       halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime, flags: 0x19,
-      color: opts.color, rotationStep: 0.0, scaleStep, detailPreset: opts.detailPreset,
+      color: opts.color, rotationStep: 0.0, scaleStep, detailPreset: int(opts.detailPreset),
     });
   }
 
@@ -1030,7 +1030,7 @@ export class EffectPool {
     this.spawn({
       effectId, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
       halfWidth: half, halfHeight: half, age: 0.0, lifetime, flags: 0x1cd,
-      color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep, detailPreset: opts.detailPreset,
+      color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep, detailPreset: int(opts.detailPreset),
     });
   }
 
@@ -1052,13 +1052,13 @@ export class EffectPool {
       this.spawn({
         effectId: EffectId.FREEZE_SHATTER, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
         halfWidth: half, halfHeight: half, age: 0.0, lifetime, flags: 0x5d,
-        color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep: 0.0, detailPreset: opts.detailPreset,
+        color: new RGBA(1.0, 1.0, 1.0, 0.5), rotationStep, scaleStep: 0.0, detailPreset: int(opts.detailPreset),
       });
     }
 
     for (let i = 0; i < 4; i++) {
       const shardAngle = (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_FREEZE_SHATTER_SHARD_ANGLE }) % 612) * 0.01;
-      this.spawnFreezeShard({ pos: opts.pos, angle: shardAngle, rng: opts.rng, detailPreset: opts.detailPreset });
+      this.spawnFreezeShard({ pos: opts.pos, angle: shardAngle, rng: opts.rng, detailPreset: int(opts.detailPreset) });
     }
   }
 
@@ -1070,15 +1070,18 @@ export class EffectPool {
   }): void {
     // Port of `effect_spawn_explosion_burst` (0x0042f6c0).
 
+    const detailPreset = int(opts.detailPreset);
+    const scale = opts.scale;
+
     // Shockwave ring.
     this.spawn({
       effectId: EffectId.RING, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
       halfWidth: 32.0, halfHeight: 32.0, age: -0.1, lifetime: 0.35, flags: 0x19,
-      color: new RGBA(0.6, 0.6, 0.6, 1.0), rotationStep: 0.0, scaleStep: opts.scale * 25.0, detailPreset: opts.detailPreset,
+      color: new RGBA(0.6, 0.6, 0.6, 1.0), rotationStep: 0.0, scaleStep: scale * 25.0, detailPreset,
     });
 
     // Dark explosion puffs (high detail only).
-    if (opts.detailPreset > 3) {
+    if (detailPreset > 3) {
       for (let i = 0; i < 2; i++) {
         const puffAge = i * 0.2 - 0.5;
         const puffLifetime = i * 0.2 + 0.6;
@@ -1087,7 +1090,7 @@ export class EffectPool {
         this.spawn({
           effectId: EffectId.EXPLOSION_PUFF, pos: opts.pos, vel: new Vec2(), rotation: puffRotation, scale: 1.0,
           halfWidth: 32.0, halfHeight: 32.0, age: puffAge, lifetime: puffLifetime, flags: 0x5d,
-          color: new RGBA(0.1, 0.1, 0.1, 1.0), rotationStep: 1.4, scaleStep: opts.scale * 5.0, detailPreset: opts.detailPreset,
+          color: new RGBA(0.1, 0.1, 0.1, 1.0), rotationStep: 1.4, scaleStep: scale * 5.0, detailPreset,
         });
       }
     }
@@ -1096,14 +1099,14 @@ export class EffectPool {
     this.spawn({
       effectId: EffectId.BURST, pos: opts.pos, vel: new Vec2(), rotation: 0.0, scale: 1.0,
       halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime: 0.3, flags: 0x19,
-      color: new RGBA(1.0, 1.0, 1.0, 1.0), rotationStep: 0.0, scaleStep: opts.scale * 45.0, detailPreset: opts.detailPreset,
+      color: new RGBA(1.0, 1.0, 1.0, 1.0), rotationStep: 0.0, scaleStep: scale * 45.0, detailPreset,
     });
 
     let count: number;
-    if (opts.detailPreset < 2) {
+    if (detailPreset < 2) {
       count = 1;
     } else {
-      count = 3 + (opts.detailPreset > 3 ? 1 : 0);
+      count = 3 + (detailPreset > 3 ? 1 : 0);
     }
 
     // Extra shockwave particles.
@@ -1115,13 +1118,13 @@ export class EffectPool {
         (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_VEL_Y }) & 0x3f) * 2 - 0x40,
       );
       const burstScaleStep =
-        ((opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_SCALE_STEP }) - 3) & 7) * opts.scale;
+        ((opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_SCALE_STEP }) - 3) & 7) * scale;
       const rotStep =
         (opts.rng.rand({ caller: RngCallerStatic.EFFECT_SPAWN_EXPLOSION_BURST_ROTATION_STEP }) + 3) & 7;
       this.spawn({
         effectId: EffectId.EXPLOSION_BURST, pos: opts.pos, vel: velocity, rotation, scale: 1.0,
         halfWidth: 32.0, halfHeight: 32.0, age: 0.0, lifetime: 0.7, flags: 0x1d,
-        color: new RGBA(1.0, 1.0, 1.0, 1.0), rotationStep: rotStep, scaleStep: burstScaleStep, detailPreset: opts.detailPreset,
+        color: new RGBA(1.0, 1.0, 1.0, 1.0), rotationStep: rotStep, scaleStep: burstScaleStep, detailPreset,
       });
     }
   }
