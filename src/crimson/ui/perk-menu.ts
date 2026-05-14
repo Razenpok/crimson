@@ -17,25 +17,25 @@ export const PERK_MENU_TRANSITION_MS = PERK_MENU_ANIM_START_MS;
 
 // Layout offsets from the classic game (perk selection screen), derived from
 // `perk_selection_screen_update` (see analysis/ghidra + BN).
-const MENU_PANEL_ANCHOR_X = 224.0;
-const MENU_PANEL_ANCHOR_Y = 40.0;
-const MENU_TITLE_X = 54.0;
-const MENU_TITLE_Y = 6.0;
-const MENU_TITLE_W = 128.0;
-const MENU_TITLE_H = 32.0;
-const MENU_SPONSOR_Y = -8.0;
-const MENU_SPONSOR_X_EXPERT = -26.0;
-const MENU_SPONSOR_X_MASTER = -28.0;
-const MENU_LIST_Y_NORMAL = 50.0;
-const MENU_LIST_Y_EXPERT = 40.0;
-const MENU_LIST_STEP_NORMAL = 19.0;
-const MENU_LIST_STEP_EXPERT = 18.0;
-const MENU_DESC_X = -12.0;
-const MENU_DESC_Y_AFTER_LIST = 32.0;
-const MENU_DESC_Y_EXTRA_TIGHTEN = 20.0;
-const MENU_BUTTON_X = 162.0;
-const MENU_BUTTON_Y = 276.0;
-const MENU_DESC_RIGHT_X = 480.0;
+export const MENU_PANEL_ANCHOR_X = 224.0;
+export const MENU_PANEL_ANCHOR_Y = 40.0;
+export const MENU_TITLE_X = 54.0;
+export const MENU_TITLE_Y = 6.0;
+export const MENU_TITLE_W = 128.0;
+export const MENU_TITLE_H = 32.0;
+export const MENU_SPONSOR_Y = -8.0;
+export const MENU_SPONSOR_X_EXPERT = -26.0;
+export const MENU_SPONSOR_X_MASTER = -28.0;
+export const MENU_LIST_Y_NORMAL = 50.0;
+export const MENU_LIST_Y_EXPERT = 40.0;
+export const MENU_LIST_STEP_NORMAL = 19.0;
+export const MENU_LIST_STEP_EXPERT = 18.0;
+export const MENU_DESC_X = -12.0;
+export const MENU_DESC_Y_AFTER_LIST = 32.0;
+export const MENU_DESC_Y_EXTRA_TIGHTEN = 20.0;
+export const MENU_BUTTON_X = 162.0;
+export const MENU_BUTTON_Y = 276.0;
+export const MENU_DESC_RIGHT_X = 480.0;
 
 export class PerkMenuLayout {
   // Coordinates live in the original 640x480 UI space.
@@ -245,9 +245,9 @@ export function drawWrappedUiTextInRect(
   }
 }
 
-const MENU_ITEM_RGB: [number, number, number] = [0x46, 0xB4, 0xF0]; // from ui_menu_item_update: rgb(70, 180, 240)
-const MENU_ITEM_ALPHA_IDLE = 0.6;
-const MENU_ITEM_ALPHA_HOVER = 1.0;
+export const MENU_ITEM_RGB: [number, number, number] = [0x46, 0xB4, 0xF0]; // from ui_menu_item_update: rgb(70, 180, 240)
+export const MENU_ITEM_ALPHA_IDLE = 0.6;
+export const MENU_ITEM_ALPHA_HOVER = 1.0;
 
 export function menuItemHitRect(
   resources: RuntimeResources,
