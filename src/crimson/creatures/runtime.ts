@@ -784,38 +784,45 @@ export class CreaturePool {
   }
 
   private _updatePlayerAutoTarget(
-    players: PlayerState[],
-    preserveBugs: boolean,
-    playerIndex: number,
-    creatureIndex: number,
-    creature: CreatureState,
+    opts: {
+      players: PlayerState[];
+      preserveBugs: boolean;
+      playerIndex: number;
+      creatureIndex: number;
+      creature: CreatureState;
+    },
   ): void {
-    if (!(playerIndex >= 0 && playerIndex < players.length)) return;
-    const player = players[playerIndex];
+    const players = opts.players;
+    const preserveBugs = opts.preserveBugs;
+    const playerIndex = opts.playerIndex;
+    const creatureIndex = opts.creatureIndex;
+    const creature = opts.creature;
+    if (!(int(playerIndex) >= 0 && int(playerIndex) < players.length)) return;
+    const player = players[int(playerIndex)];
     if (player.health <= 0.0) return;
 
-    const autoTarget = player.autoTarget;
+    const autoTarget = int(player.autoTarget);
     if (!(autoTarget >= 0 && autoTarget < this._entries.length)) {
-      player.autoTarget = creatureIndex;
+      player.autoTarget = int(creatureIndex);
       return;
     }
 
-    const current = this._entries[autoTarget];
+    const current = this._entries[int(autoTarget)];
     if (!current.active || current.hp <= 0.0) {
-      player.autoTarget = creatureIndex;
+      player.autoTarget = int(creatureIndex);
       return;
     }
 
     const distNew = Vec2.distanceSq(player.pos, creature.pos);
     let currentOrigin = player.pos;
-    if (preserveBugs && playerIndex !== 0 && players.length > 0) {
+    if (preserveBugs && int(playerIndex) !== 0 && players.length > 0) {
       // Native compares player 2 auto-target replacement against player 1's
       // coordinates here, which can block closer replacements for player 2.
       currentOrigin = players[0].pos;
     }
     const distCurrent = Vec2.distanceSq(currentOrigin, current.pos);
     if (distNew < distCurrent) {
-      player.autoTarget = creatureIndex;
+      player.autoTarget = int(creatureIndex);
     }
   }
 
@@ -831,14 +838,14 @@ export class CreaturePool {
 
     // Direct init does not have plan-local indices; preserve any raw linkage.
     if (init.aiTimer !== null) {
-      entry.linkIndex = init.aiTimer;
+      entry.linkIndex = int(init.aiTimer);
     } else if (init.aiLinkParent !== null) {
-      entry.linkIndex = init.aiLinkParent;
+      entry.linkIndex = int(init.aiLinkParent);
     }
     if (init.spawnSlot !== null) {
       // Plan-local slot ids must be remapped by `spawn_plan`; keep explicit.
-      entry.spawnSlotIndex = init.spawnSlot;
-      entry.linkIndex = init.spawnSlot;
+      entry.spawnSlotIndex = int(init.spawnSlot);
+      entry.linkIndex = int(init.spawnSlot);
     }
 
     this._entries[idx] = entry;
@@ -899,17 +906,17 @@ export class CreaturePool {
     // 2) Allocate and remap spawn slots.
     const slotMapping: number[] = [];
     for (const slot of plan.spawnSlots) {
-      const ownerPlan = slot.ownerCreature;
+      const ownerPlan = int(slot.ownerCreature);
       const ownerPool =
-        ownerPlan >= 0 && ownerPlan < mapping.length ? mapping[ownerPlan] : -1;
-      this.spawnSlots.push({
-        ownerCreature: ownerPool,
+        ownerPlan >= 0 && ownerPlan < mapping.length ? mapping[int(ownerPlan)] : -1;
+      this.spawnSlots.push(new SpawnSlotInit({
+        ownerCreature: int(ownerPool),
         timer: slot.timer,
-        count: slot.count,
-        limit: slot.limit,
+        count: int(slot.count),
+        limit: int(slot.limit),
         interval: slot.interval,
         childTemplateId: slot.childTemplateId,
-      });
+      }));
       slotMapping.push(this.spawnSlots.length - 1);
     }
 
@@ -920,34 +927,34 @@ export class CreaturePool {
 
       const slotPlan = pendingSpawnSlots[planIdx];
       if (slotPlan !== null) {
-        const globalSlot = slotMapping[slotPlan];
-        entry.spawnSlotIndex = globalSlot;
-        entry.linkIndex = globalSlot;
+        const globalSlot = slotMapping[int(slotPlan)];
+        entry.spawnSlotIndex = int(globalSlot);
+        entry.linkIndex = int(globalSlot);
         continue;
       }
 
       const timer = pendingAiTimers[planIdx];
       if (timer !== null) {
-        entry.linkIndex = timer;
+        entry.linkIndex = int(timer);
         continue;
       }
 
       const linkPlan = pendingAiLinks[planIdx];
       if (linkPlan !== null) {
-        entry.linkIndex = mapping[linkPlan];
+        entry.linkIndex = mapping[int(linkPlan)];
       }
     }
 
     let primaryPool: number | null = null;
-    if (plan.primary >= 0 && plan.primary < mapping.length) {
-      primaryPool = mapping[plan.primary];
+    if (int(plan.primary) >= 0 && int(plan.primary) < mapping.length) {
+      primaryPool = mapping[int(plan.primary)];
     }
 
     const effectPool = effects ?? this.effects;
     if (effectPool !== null && plan.effects.length > 0) {
       const fxRng = rng ?? new Crand(0);
       for (const fx of plan.effects) {
-        effectPool.spawnBurst({ pos: fx.pos, count: fx.count, rng: fxRng, detailPreset });
+        effectPool.spawnBurst({ pos: fx.pos, count: int(fx.count), rng: fxRng, detailPreset: int(detailPreset) });
       }
     }
     return [mapping, primaryPool];
@@ -976,7 +983,7 @@ export class CreaturePool {
       );
     }
     const plan = buildSpawnPlan(templateId, pos, heading, rng, spawnEnv);
-    return this.spawnPlan(plan, { rng, detailPreset, effects });
+    return this.spawnPlan(plan, { rng, detailPreset: int(detailPreset), effects });
   }
 
   update(dt: number, opts: { options: CreatureUpdateOptions }): CreatureUpdateResult {
@@ -992,8 +999,8 @@ export class CreaturePool {
     const state = options.state;
     const players = options.players;
     const rng = options.rng;
-    const detailPreset = options.detailPreset;
-    const violenceDisabled = options.violenceDisabled;
+    const detailPreset = int(options.detailPreset);
+    const violenceDisabled = int(options.violenceDisabled);
     const spawnEnv = options.env;
     const worldWidth = options.worldWidth;
     const worldHeight = options.worldHeight;
@@ -1020,7 +1027,7 @@ export class CreaturePool {
         // multiplayer runs.
         if (perkActive(players[0], PerkId.EVIL_EYES)) {
           const evilTarget = players[0].evilEyesTargetCreature;
-          if (evilTarget >= 0) evilTargets.add(evilTarget);
+          if (evilTarget >= 0) evilTargets.add(int(evilTarget));
         }
       } else {
         // Bug-fixed path: apply all alive Evil Eyes owners.
@@ -1028,7 +1035,7 @@ export class CreaturePool {
           if (player.health <= 0.0) continue;
           if (!perkActive(player, PerkId.EVIL_EYES)) continue;
           const evilTarget = player.evilEyesTargetCreature;
-          if (evilTarget >= 0) evilTargets.add(evilTarget);
+          if (evilTarget >= 0) evilTargets.add(int(evilTarget));
         }
       }
     }
@@ -1200,11 +1207,13 @@ export class CreaturePool {
       // `creature_update_tick % 0x46 != 0` retarget cadence block.
       if ((this._updateTick % _TARGET_REEVAL_PERIOD) !== 0) {
         this._updatePlayerAutoTarget(
-          players,
-          state.preserveBugs,
-          targetPlayer,
-          idx,
-          creature,
+          {
+            players,
+            preserveBugs: state.preserveBugs,
+            playerIndex: int(targetPlayer),
+            creatureIndex: int(idx),
+            creature,
+          },
         );
       }
       const player = players[targetPlayer];
