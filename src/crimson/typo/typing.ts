@@ -3,9 +3,19 @@
 const TYPING_MAX_CHARS = 17;
 
 export class TypingBuffer {
-  text = '';
-  submitCount = 0;
-  matchCount = 0;
+  text: string;
+  submitCount: number;
+  matchCount: number;
+
+  constructor(opts: {
+    text?: string;
+    submitCount?: number;
+    matchCount?: number;
+  } = {}) {
+    this.text = opts.text ?? '';
+    this.submitCount = opts.submitCount ?? 0;
+    this.matchCount = opts.matchCount ?? 0;
+  }
 
   clear(): void {
     this.text = '';
