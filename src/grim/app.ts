@@ -84,6 +84,7 @@ export class App {
 
   private _loop = (now: number): void => {
     if (!this._running || !this._view) return;
+    const view = this._view;
 
     const dt = Math.min((now - this._lastTime) / 1000.0, 0.1);
     this._lastTime = now;
@@ -97,11 +98,13 @@ export class App {
     }
 
     try {
-      this._view.update(dt);
-      this._view.draw();
+      view.update(dt);
+      if (!this._running) return;
+      view.draw();
       wgl.flush();
 
       InputState.endFrame();
+      if (!this._running) return;
 
       this._frameId = requestAnimationFrame(this._loop);
     } catch (e) {
@@ -137,6 +140,7 @@ export function runView(
   const screenshotDir = SCREENSHOT_DIR;
   let screenshotIndex = _nextScreenshotIndex(screenshotDir);
   let takeScreenshot = false;
+  let shouldClose = false;
   const renderPipeline = new RenderPipeline({
     sink: new WindowSink(),
     beginEndDrawing: false,
@@ -152,7 +156,7 @@ export function runView(
         takeScreenshot = true;
       }
       if (runHooks.shouldClose()) {
-        app.stop();
+        shouldClose = true;
       }
     },
     draw(): void {
@@ -167,6 +171,9 @@ export function runView(
         _takeScreenshot(filename);
         screenshotIndex += 1;
         takeScreenshot = false;
+      }
+      if (shouldClose) {
+        app.stop();
       }
     },
     close(): void {
