@@ -106,14 +106,12 @@ export class ProjectileHitPerkCtx {
 
 export type ProjectileHitPerkHook = (ctx: ProjectileHitPerkCtx) => void;
 
-const CREATURE_FLAGS_SELF_DAMAGE_TICK = CreatureFlags.SELF_DAMAGE_TICK as number;
-
 export function projectileHitPerkPoisonBullets(ctx: ProjectileHitPerkCtx): void {
   if (
     ctx.ownerPerkActive(ctx.proj.owner, int(ctx.poisonIdx)) &&
     (ctx.rng.rand({ caller: RngCallerStatic.PROJECTILE_UPDATE_POISON_BULLETS_GATE }) & 7) === 1
   ) {
-    ctx.creature.flags |= CREATURE_FLAGS_SELF_DAMAGE_TICK;
+    ctx.creature.flags |= CreatureFlags.SELF_DAMAGE_TICK;
   }
 }
 
@@ -130,9 +128,6 @@ export function lingerDefault(ctx: ProjectileUpdateCtx, proj: Projectile): void 
 export function lingerGaussGun(ctx: ProjectileUpdateCtx, proj: Projectile): void {
   proj.lifeTimer = lifeTimerSubF32(proj.lifeTimer, ctx.dt * 0.1);
 }
-
-const CREATURE_DAMAGE_TYPE_ION = CreatureDamageType.ION as number;
-const CREATURE_DAMAGE_TYPE_BULLET = CreatureDamageType.BULLET as number;
 
 function lingerIonAoe(
   ctx: ProjectileUpdateCtx,
@@ -163,7 +158,7 @@ function lingerIonAoe(
         creatureIdx,
         damage,
         {
-          damageType: CREATURE_DAMAGE_TYPE_ION,
+          damageType: CreatureDamageType.ION,
           impulse: new Vec2(),
           owner: proj.owner,
           applyCreatureDamage: ctx.pool.creatureDamageApplier,
@@ -338,7 +333,7 @@ export function postHitShrinkifier(ctx: ProjectileUpdateCtx, hit: ProjectileHitI
       int(hit.hitIdx),
       creature.hp + 1.0,
       {
-        damageType: CREATURE_DAMAGE_TYPE_BULLET,
+        damageType: CreatureDamageType.BULLET,
         impulse: new Vec2(),
         owner: hit.proj.owner,
         applyCreatureDamage: ctx.pool.creatureDamageApplier,
