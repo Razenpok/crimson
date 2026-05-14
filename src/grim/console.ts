@@ -6,6 +6,8 @@ import { clamp } from './math.ts';
 import { type SmallFontData, drawSmallText, measureSmallTextWidth } from './fonts/small.ts';
 import { type GrimMonoFont, drawGrimMonoText } from './fonts/grim-mono.ts';
 import { InputState } from './input.ts';
+import { fetchPaq } from './paq.ts';
+import { resolveAssetsUrl } from './assets.ts';
 
 export const MAX_CONSOLE_LINES = 0x1000;
 export const MAX_CONSOLE_INPUT = 0x3FF;
@@ -34,6 +36,7 @@ export const CONSOLE_BORDER_HEIGHT = 4.0;
 export const CONSOLE_PROMPT_MONO = '>';
 export const CONSOLE_PROMPT_SMALL_FMT = '>%s';
 export const CONSOLE_CARET_TEXT = '_';
+export const SCRIPT_PAQ_NAMES: readonly string[] = ['music.paq', 'crimson.paq', 'sfx.paq'];
 
 const KEY_ENTER = 13;
 const KEY_BACKSPACE = 8;
@@ -64,6 +67,127 @@ function parseConsoleFloat(value: string): number {
   return Number(stripped);
 }
 
+function _normalizeScriptPath(name: string): string {
+  const raw = name.trim().replace(/^["']|["']$/g, '');
+  return raw.replace(/\\/g, '/');
+}
+
+function _joinScriptPath(root: string, target: string): string {
+  if (root.length === 0) return target;
+  return `${root.replace(/\/+$/g, '')}/${target.replace(/^\/+/g, '')}`;
+}
+
+function _scriptPathIsAbsolute(target: string): boolean {
+  return target.startsWith('/') || /^[a-z][a-z0-9+.-]*:/i.test(target);
+}
+
+function _primaryScriptDirs(console: ConsoleState): readonly string[] {
+  const dirs: string[] = [console.baseDir];
+  if (console.assetsDir !== null && !dirs.includes(console.assetsDir)) {
+    dirs.push(console.assetsDir);
+  }
+  return dirs;
+}
+
+async function _fetchScriptText(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!response.ok || contentType.startsWith('text/html')) {
+      return null;
+    }
+    return await response.text();
+  } catch {
+    return null;
+  }
+}
+
+async function _resolveScriptTextIn(target: string, roots: Iterable<string>): Promise<string | null> {
+  if (_scriptPathIsAbsolute(target)) {
+    return _fetchScriptText(target);
+  }
+  for (const base of roots) {
+    const scriptText = await _fetchScriptText(_joinScriptPath(base, target));
+    if (scriptText !== null) {
+      return scriptText;
+    }
+  }
+  return null;
+}
+
+async function _iterScriptPaqUrls(console: ConsoleState): Promise<string[]> {
+  const roots: string[] = [];
+  if (console.assetsDir !== null) {
+    roots.push(console.assetsDir);
+    const resolvedAssetsDir = await resolveAssetsUrl(console.assetsDir);
+    if (!roots.includes(resolvedAssetsDir)) {
+      roots.push(resolvedAssetsDir);
+    }
+  }
+  if (!roots.includes(console.baseDir)) {
+    roots.push(console.baseDir);
+  }
+  const urls: string[] = [];
+  for (const root of roots) {
+    for (const name of SCRIPT_PAQ_NAMES) {
+      urls.push(_joinScriptPath(root, name));
+    }
+  }
+  return urls;
+}
+
+async function _loadScriptFromPaq(console: ConsoleState, target: string): Promise<string | null> {
+  if (_scriptPathIsAbsolute(target)) {
+    return null;
+  }
+  const normalized = target.replace(/\\/g, '/');
+  const normalizedLower = normalized.toLowerCase();
+  const decoder = new TextDecoder('utf-8');
+  for (const paqUrl of await _iterScriptPaqUrls(console)) {
+    try {
+      const entries = await fetchPaq(paqUrl);
+      for (const [name, data] of entries) {
+        const entryName = name.replace(/\\/g, '/');
+        if (entryName === normalized || entryName.toLowerCase() === normalizedLower) {
+          return decoder.decode(data);
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+async function _execScript(console: ConsoleState, arg: string): Promise<void> {
+  const target = _normalizeScriptPath(arg);
+  try {
+    let scriptText: string | null = null;
+    const primaryDirs = _primaryScriptDirs(console);
+    scriptText = await _resolveScriptTextIn(target, primaryDirs);
+    if (scriptText === null) {
+      scriptText = await _loadScriptFromPaq(console, target);
+    }
+    if (scriptText === null) {
+      const fallbackDirs = console.scriptDirs.filter((path) => !primaryDirs.includes(path));
+      scriptText = await _resolveScriptTextIn(target, fallbackDirs);
+    }
+    if (scriptText === null) {
+      console.log.log(`Cannot open file '${arg}'`);
+      return;
+    }
+    console.log.log(`Executing '${arg}'`);
+    for (const rawLine of scriptText.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (line) {
+        console.execLine(line);
+      }
+    }
+  } catch {
+    console.log.log(`Cannot open file '${arg}'`);
+  }
+}
+
 export class ConsoleLog {
   baseDir: string;
   lines: string[] = [];
@@ -88,7 +212,6 @@ export class ConsoleLog {
   }
 
   flush(): void {
-    // No-op in WebGL — Python flushes to a log file on disk.
   }
 }
 
@@ -325,7 +448,6 @@ export class ConsoleState {
   }
 
   flush(): void {
-    // No-op in WebGL — Python flushes to a log file on disk.
   }
 
   close(): void {}
@@ -518,8 +640,8 @@ export class ConsoleState {
   }
 
   private _flushInputQueue(): void {
-    while (InputState.getCharPressed()) { /* drain */ }
-    while (InputState.getKeyPressed()) { /* drain */ }
+    while (InputState.getCharPressed()) {}
+    while (InputState.getKeyPressed()) {}
   }
 
   private _updateSlide(dt: number): void {
@@ -605,8 +727,7 @@ export function registerCoreCommands(console: ConsoleState): void {
       console.log.log('exec <script>');
       return;
     }
-    // Browser/WebGL cannot synchronously read local console scripts.
-    console.log.log(`Cannot open file '${args[0]}'`);
+    void _execScript(console, args[0]);
   });
 }
 
