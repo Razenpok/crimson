@@ -2,7 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
-import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import type { SpawnId } from '@crimson/creatures/spawn.ts';
 import type { WeaponId } from '@crimson/weapons.ts';
 import type { QuestLevel } from './level.ts';
 import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
@@ -16,7 +16,6 @@ export class QuestContext {
     this.width = opts.width;
     this.height = opts.height;
     this.playerCount = opts.playerCount;
-    Object.freeze(this);
   }
 }
 
@@ -33,13 +32,12 @@ export class SpawnEntry {
     this.spawnId = opts.spawnId;
     this.triggerMs = opts.triggerMs;
     this.count = opts.count;
-    Object.freeze(this);
   }
 }
 
 export type QuestBuilder = (
   ctx: QuestContext,
-  opts: { rng: CrandLike; fullVersion: boolean },
+  opts: { rng: CrandLike; fullVersion?: boolean },
 ) => SpawnEntry[];
 
 export class QuestDefinition {
@@ -70,7 +68,6 @@ export class QuestDefinition {
     this.terrainSlots = opts.terrainSlots;
     this.unlockPerkId = opts.unlockPerkId ?? null;
     this.unlockWeaponId = opts.unlockWeaponId ?? null;
-    Object.freeze(this);
   }
 
   get major(): number {
