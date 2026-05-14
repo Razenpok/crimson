@@ -12,11 +12,28 @@
 //   - jpeg bytes (length = jpeg_len)
 //   - alpha_rle: (count, value) byte pairs for alpha channel
 
-export interface JazImage {
+export class JazImage {
   width: number;
   height: number;
+  jpeg: Uint8Array;
+  alpha: Uint8Array;
   jpegData: Uint8Array;
   alphaData: Uint8Array;
+
+  constructor(opts: { width: number; height: number; jpeg: Uint8Array; alpha: Uint8Array }) {
+    this.width = opts.width;
+    this.height = opts.height;
+    this.jpeg = opts.jpeg;
+    this.alpha = opts.alpha;
+    this.jpegData = opts.jpeg;
+    this.alphaData = opts.alpha;
+  }
+}
+
+function blobFromBytes(data: Uint8Array, type: string): Blob {
+  const blobData = new ArrayBuffer(data.byteLength);
+  new Uint8Array(blobData).set(data);
+  return new Blob([blobData], { type });
 }
 
 function decodeAlphaRle(data: Uint8Array, expected: number): Uint8Array {
@@ -42,8 +59,9 @@ async function decompressZlib(data: Uint8Array): Promise<Uint8Array> {
   const writer = ds.writable.getWriter();
   const reader = ds.readable.getReader();
 
-  // Write compressed data and close
-  writer.write(data as BufferSource);
+  const compressed = new ArrayBuffer(data.byteLength);
+  new Uint8Array(compressed).set(data);
+  writer.write(compressed);
   writer.close();
 
   // Read all decompressed chunks
@@ -89,7 +107,7 @@ export async function decodeJazBytes(data: Uint8Array): Promise<JazImage> {
   const alphaRle = raw.subarray(4 + jpegLen);
 
   // Decode JPEG to get dimensions
-  const jpegBlob = new Blob([jpegData as BlobPart], { type: 'image/jpeg' });
+  const jpegBlob = blobFromBytes(jpegData, 'image/jpeg');
   const bitmap = await createImageBitmap(jpegBlob);
   const width = bitmap.width;
   const height = bitmap.height;
@@ -97,7 +115,11 @@ export async function decodeJazBytes(data: Uint8Array): Promise<JazImage> {
 
   const alphaData = decodeAlphaRle(alphaRle, width * height);
 
-  return { width, height, jpegData, alphaData };
+  return new JazImage({ width, height, jpeg: jpegData, alpha: alphaData });
+}
+
+export function decodeJaz(_path: string): never {
+  throw new Error('JAZ path loading is unavailable in the WebGL build');
 }
 
 /**
@@ -108,11 +130,14 @@ export async function decodeJazToImageBitmap(data: Uint8Array): Promise<ImageBit
   const jaz = await decodeJazBytes(data);
 
   // Decode JPEG to canvas to extract RGB pixels
-  const jpegBlob = new Blob([jaz.jpegData as BlobPart], { type: 'image/jpeg' });
+  const jpegBlob = blobFromBytes(jaz.jpeg, 'image/jpeg');
   const jpegBitmap = await createImageBitmap(jpegBlob);
 
   const canvas = new OffscreenCanvas(jaz.width, jaz.height);
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (ctx === null) {
+    throw new Error('2D canvas context is unavailable');
+  }
   ctx.drawImage(jpegBitmap, 0, 0);
   jpegBitmap.close();
 
@@ -120,8 +145,8 @@ export async function decodeJazToImageBitmap(data: Uint8Array): Promise<ImageBit
   const pixels = imageData.data;
 
   // Apply alpha channel from RLE data
-  for (let i = 0; i < jaz.alphaData.length; i++) {
-    pixels[i * 4 + 3] = jaz.alphaData[i];
+  for (let i = 0; i < jaz.alpha.length; i++) {
+    pixels[i * 4 + 3] = jaz.alpha[i];
   }
 
   // Build the bitmap directly from ImageData — do NOT round-trip through the
