@@ -121,7 +121,7 @@ function setGammaRampGain(shader: GammaRampShader, _gainLoc: number, gain: numbe
 
 function modeViewContext(state: GameState): ViewContext {
   const preserveBugs = state.preserveBugs;
-  return new ViewContext(state.assetsDir, preserveBugs);
+  return new ViewContext({ assetsUrl: state.assetsDir, preserveBugs });
 }
 
 function isGameplayScreen(view: Screen | null): view is GameplayScreen {
