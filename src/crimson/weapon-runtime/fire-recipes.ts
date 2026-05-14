@@ -6,33 +6,31 @@ import { WeaponId, projectileTypeIdForWeaponId } from '@crimson/weapons.ts';
 
 export class NoJitter {
   readonly tag = 'NoJitter';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export class ModuloCenteredJitter {
   readonly tag = 'ModuloCenteredJitter';
+  readonly modulo: number;
+  readonly center: number;
+  readonly step: number;
 
-  constructor(
-    public readonly modulo: number,
-    public readonly center: number,
-    public readonly step: number,
-  ) {
-    Object.freeze(this);
+  constructor(opts: { modulo: number; center: number; step: number }) {
+    this.modulo = opts.modulo;
+    this.center = opts.center;
+    this.step = opts.step;
   }
 }
 
 export class MaskCenteredJitter {
   readonly tag = 'MaskCenteredJitter';
+  readonly mask: number;
+  readonly center: number;
+  readonly step: number;
 
-  constructor(
-    public readonly mask: number,
-    public readonly center: number,
-    public readonly step: number,
-  ) {
-    Object.freeze(this);
+  constructor(opts: { mask: number; center: number; step: number }) {
+    this.mask = opts.mask;
+    this.center = opts.center;
+    this.step = opts.step;
   }
 }
 
@@ -40,21 +38,18 @@ export type PelletJitterRule = NoJitter | ModuloCenteredJitter | MaskCenteredJit
 
 export class NoSpeedScale {
   readonly tag = 'NoSpeedScale';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export class ModuloSpeedScale {
   readonly tag = 'ModuloSpeedScale';
+  readonly base: number;
+  readonly modulo: number;
+  readonly step: number;
 
-  constructor(
-    public readonly base: number,
-    public readonly modulo: number,
-    public readonly step: number,
-  ) {
-    Object.freeze(this);
+  constructor(opts: { base: number; modulo: number; step: number }) {
+    this.base = opts.base;
+    this.modulo = opts.modulo;
+    this.step = opts.step;
   }
 }
 
@@ -62,18 +57,10 @@ export type SpeedScaleRule = NoSpeedScale | ModuloSpeedScale;
 
 export class NoTargetHint {
   readonly tag = 'NoTargetHint';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export class UseAimTargetHint {
   readonly tag = 'UseAimTargetHint';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export type SecondaryTargetingPolicy = NoTargetHint | UseAimTargetHint;
@@ -91,7 +78,6 @@ export class PrimaryPelletsMode {
     this.count = opts.count ?? null;
     this.jitter = opts.jitter ?? new NoJitter();
     this.speedScale = opts.speedScale ?? new NoSpeedScale();
-    Object.freeze(this);
   }
 
   readonly typeId: ProjectileTemplateId | null;
@@ -102,40 +88,32 @@ export class PrimaryPelletsMode {
 
 export class SecondaryShotMode {
   readonly tag = 'SecondaryShotMode';
+  readonly typeId: SecondaryProjectileTypeId;
+  readonly targeting: SecondaryTargetingPolicy;
 
-  constructor(
-    public readonly typeId: SecondaryProjectileTypeId,
-    public readonly targeting: SecondaryTargetingPolicy = new NoTargetHint(),
-  ) {
-    Object.freeze(this);
+  constructor(opts: { typeId: SecondaryProjectileTypeId; targeting?: SecondaryTargetingPolicy }) {
+    this.typeId = opts.typeId;
+    this.targeting = opts.targeting ?? new NoTargetHint();
   }
 }
 
 export class ParticleStreamMode {
   readonly tag = 'ParticleStreamMode';
+  readonly style: ParticleStyleId | null;
+  readonly slow: boolean;
 
-  constructor(
-    public readonly style: ParticleStyleId | null = null,
-    public readonly slow = false,
-  ) {
-    Object.freeze(this);
+  constructor(opts: { style?: ParticleStyleId | null; slow?: boolean } = {}) {
+    this.style = opts.style ?? null;
+    this.slow = opts.slow ?? false;
   }
 }
 
 export class MultiPlasmaFanMode {
   readonly tag = 'MultiPlasmaFanMode';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export class SwarmerDumpMode {
   readonly tag = 'SwarmerDumpMode';
-
-  constructor() {
-    Object.freeze(this);
-  }
 }
 
 export type FireMode =
@@ -146,11 +124,12 @@ export type FireMode =
   | SwarmerDumpMode;
 
 export class FireRecipe {
-  constructor(
-    public readonly mode: FireMode,
-    public readonly ammoCost = 1.0,
-  ) {
-    Object.freeze(this);
+  readonly mode: FireMode;
+  readonly ammoCost: number;
+
+  constructor(opts: { mode: FireMode; ammoCost?: number }) {
+    this.mode = opts.mode;
+    this.ammoCost = opts.ammoCost ?? 1.0;
   }
 }
 
@@ -167,41 +146,41 @@ const _SHOTGUN_SPEED_RANDOMIZE_WEAPONS: ReadonlySet<WeaponId> = new Set([
   WeaponId.JACKHAMMER,
 ]);
 
-const _DEFAULT_SPREAD_JITTER = new ModuloCenteredJitter(200, 100, 0.0015);
-const _DEFAULT_SPEED_SCALE = new ModuloSpeedScale(1.0, 100, 0.01);
-const _GAUSS_ION_SPEED_SCALE = new ModuloSpeedScale(1.4, 0x50, 0.01);
+const _DEFAULT_SPREAD_JITTER = new ModuloCenteredJitter({ modulo: 200, center: 100, step: 0.0015 });
+const _DEFAULT_SPEED_SCALE = new ModuloSpeedScale({ base: 1.0, modulo: 100, step: 0.01 });
+const _GAUSS_ION_SPEED_SCALE = new ModuloSpeedScale({ base: 1.4, modulo: 0x50, step: 0.01 });
 
 export const FIRE_RECIPE_BY_WEAPON: ReadonlyMap<WeaponId, FireRecipe> = new Map<WeaponId, FireRecipe>([
-  [WeaponId.ROCKET_LAUNCHER, new FireRecipe(new SecondaryShotMode(SecondaryProjectileTypeId.ROCKET))],
-  [WeaponId.SEEKER_ROCKETS, new FireRecipe(new SecondaryShotMode(
-    SecondaryProjectileTypeId.HOMING_ROCKET,
-    new UseAimTargetHint(),
-  ))],
-  [WeaponId.ROCKET_MINIGUN, new FireRecipe(new SecondaryShotMode(SecondaryProjectileTypeId.ROCKET_MINIGUN))],
-  [WeaponId.FLAMETHROWER, new FireRecipe(new ParticleStreamMode(null, false), 0.1)],
-  [WeaponId.BLOW_TORCH, new FireRecipe(new ParticleStreamMode(ParticleStyleId.BLOW_TORCH, false), 0.05)],
-  [WeaponId.HR_FLAMER, new FireRecipe(new ParticleStreamMode(ParticleStyleId.HR_FLAMER, false), 0.1)],
-  [WeaponId.BUBBLEGUN, new FireRecipe(new ParticleStreamMode(null, true), 0.15)],
-  [WeaponId.MULTI_PLASMA, new FireRecipe(new MultiPlasmaFanMode())],
-  [WeaponId.MINI_ROCKET_SWARMERS, new FireRecipe(new SwarmerDumpMode())],
-  [WeaponId.PLASMA_SHOTGUN, new FireRecipe(new PrimaryPelletsMode({
+  [WeaponId.ROCKET_LAUNCHER, new FireRecipe({ mode: new SecondaryShotMode({ typeId: SecondaryProjectileTypeId.ROCKET }) })],
+  [WeaponId.SEEKER_ROCKETS, new FireRecipe({ mode: new SecondaryShotMode({
+    typeId: SecondaryProjectileTypeId.HOMING_ROCKET,
+    targeting: new UseAimTargetHint(),
+  }) })],
+  [WeaponId.ROCKET_MINIGUN, new FireRecipe({ mode: new SecondaryShotMode({ typeId: SecondaryProjectileTypeId.ROCKET_MINIGUN }) })],
+  [WeaponId.FLAMETHROWER, new FireRecipe({ mode: new ParticleStreamMode({ style: null, slow: false }), ammoCost: 0.1 })],
+  [WeaponId.BLOW_TORCH, new FireRecipe({ mode: new ParticleStreamMode({ style: ParticleStyleId.BLOW_TORCH, slow: false }), ammoCost: 0.05 })],
+  [WeaponId.HR_FLAMER, new FireRecipe({ mode: new ParticleStreamMode({ style: ParticleStyleId.HR_FLAMER, slow: false }), ammoCost: 0.1 })],
+  [WeaponId.BUBBLEGUN, new FireRecipe({ mode: new ParticleStreamMode({ style: null, slow: true }), ammoCost: 0.15 })],
+  [WeaponId.MULTI_PLASMA, new FireRecipe({ mode: new MultiPlasmaFanMode() })],
+  [WeaponId.MINI_ROCKET_SWARMERS, new FireRecipe({ mode: new SwarmerDumpMode() })],
+  [WeaponId.PLASMA_SHOTGUN, new FireRecipe({ mode: new PrimaryPelletsMode({
     typeId: ProjectileTemplateId.PLASMA_MINIGUN,
     count: 14,
-    jitter: new MaskCenteredJitter(0xFF, 0x80, 0.002),
+    jitter: new MaskCenteredJitter({ mask: 0xFF, center: 0x80, step: 0.002 }),
     speedScale: _DEFAULT_SPEED_SCALE,
-  }))],
-  [WeaponId.GAUSS_SHOTGUN, new FireRecipe(new PrimaryPelletsMode({
+  }) })],
+  [WeaponId.GAUSS_SHOTGUN, new FireRecipe({ mode: new PrimaryPelletsMode({
     typeId: ProjectileTemplateId.GAUSS_GUN,
     count: 6,
-    jitter: new ModuloCenteredJitter(200, 100, 0.002),
+    jitter: new ModuloCenteredJitter({ modulo: 200, center: 100, step: 0.002 }),
     speedScale: _GAUSS_ION_SPEED_SCALE,
-  }))],
-  [WeaponId.ION_SHOTGUN, new FireRecipe(new PrimaryPelletsMode({
+  }) })],
+  [WeaponId.ION_SHOTGUN, new FireRecipe({ mode: new PrimaryPelletsMode({
     typeId: ProjectileTemplateId.ION_MINIGUN,
     count: 8,
-    jitter: new ModuloCenteredJitter(200, 100, 0.0026),
+    jitter: new ModuloCenteredJitter({ modulo: 200, center: 100, step: 0.0026 }),
     speedScale: _GAUSS_ION_SPEED_SCALE,
-  }))],
+  }) })],
 ]);
 
 export function resolveFireRecipe(
@@ -209,12 +188,12 @@ export function resolveFireRecipe(
   opts: { pelletCount: number; fireBulletsActive: boolean },
 ): FireRecipe {
   if (opts.fireBulletsActive) {
-    return new FireRecipe(new PrimaryPelletsMode({
+    return new FireRecipe({ mode: new PrimaryPelletsMode({
       typeId: ProjectileTemplateId.FIRE_BULLETS,
       count: Math.max(0, int(opts.pelletCount)),
       jitter: _DEFAULT_SPREAD_JITTER,
       speedScale: new NoSpeedScale(),
-    }));
+    }) });
   }
 
   const existing = FIRE_RECIPE_BY_WEAPON.get(weaponId);
@@ -225,11 +204,11 @@ export function resolveFireRecipe(
   const pellets = Math.max(1, int(opts.pelletCount));
   let jitter: PelletJitterRule = new NoJitter();
   if (pellets > 1) {
-    jitter = new ModuloCenteredJitter(
-      200,
-      100,
-      pelletJitterStepForWeapon(weaponId),
-    );
+    jitter = new ModuloCenteredJitter({
+      modulo: 200,
+      center: 100,
+      step: pelletJitterStepForWeapon(weaponId),
+    });
   }
 
   let speedScale: SpeedScaleRule = new NoSpeedScale();
@@ -237,10 +216,10 @@ export function resolveFireRecipe(
     speedScale = _DEFAULT_SPEED_SCALE;
   }
 
-  return new FireRecipe(new PrimaryPelletsMode({
+  return new FireRecipe({ mode: new PrimaryPelletsMode({
     typeId: projectileTypeIdForWeaponId(weaponId),
     count: pellets,
     jitter,
     speedScale,
-  }));
+  }) });
 }
