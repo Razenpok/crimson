@@ -105,8 +105,15 @@ export interface ShaderQuadVertex {
   a: number;
 }
 
+function required<T>(value: T | null, label: string): T {
+  if (value === null) {
+    throw new Error(`${label} failed`);
+  }
+  return value;
+}
+
 function compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
-  const shader = gl.createShader(type)!;
+  const shader = required(gl.createShader(type), 'createShader');
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -118,7 +125,7 @@ function compileShader(gl: WebGL2RenderingContext, type: number, source: string)
 }
 
 function linkProgram(gl: WebGL2RenderingContext, vs: WebGLShader, fs: WebGLShader): WebGLProgram {
-  const program = gl.createProgram()!;
+  const program = required(gl.createProgram(), 'createProgram');
   gl.attachShader(program, vs);
   gl.attachShader(program, fs);
   gl.linkProgram(program);
@@ -250,18 +257,18 @@ export class WebGLContext {
   private _initShaders(): void {
     const gl = this.gl;
     this._spriteProgram = createShaderProgram(gl, SPRITE_VS, SPRITE_FS);
-    this._spriteMvpLoc = gl.getUniformLocation(this._spriteProgram, 'uMVP')!;
-    this._spriteTexLoc = gl.getUniformLocation(this._spriteProgram, 'uTex')!;
-    this._spriteGammaGainLoc = gl.getUniformLocation(this._spriteProgram, 'uGammaGain')!;
+    this._spriteMvpLoc = required(gl.getUniformLocation(this._spriteProgram, 'uMVP'), 'getUniformLocation uMVP');
+    this._spriteTexLoc = required(gl.getUniformLocation(this._spriteProgram, 'uTex'), 'getUniformLocation uTex');
+    this._spriteGammaGainLoc = required(gl.getUniformLocation(this._spriteProgram, 'uGammaGain'), 'getUniformLocation uGammaGain');
 
     this._spriteAlphaTestProgram = createShaderProgram(gl, SPRITE_VS, ALPHA_TEST_FS);
-    this._spriteAtMvpLoc = gl.getUniformLocation(this._spriteAlphaTestProgram, 'uMVP')!;
-    this._spriteAtTexLoc = gl.getUniformLocation(this._spriteAlphaTestProgram, 'uTex')!;
-    this._spriteAtGammaGainLoc = gl.getUniformLocation(this._spriteAlphaTestProgram, 'uGammaGain')!;
+    this._spriteAtMvpLoc = required(gl.getUniformLocation(this._spriteAlphaTestProgram, 'uMVP'), 'getUniformLocation uMVP');
+    this._spriteAtTexLoc = required(gl.getUniformLocation(this._spriteAlphaTestProgram, 'uTex'), 'getUniformLocation uTex');
+    this._spriteAtGammaGainLoc = required(gl.getUniformLocation(this._spriteAlphaTestProgram, 'uGammaGain'), 'getUniformLocation uGammaGain');
 
     this._colorProgram = createShaderProgram(gl, COLOR_VS, COLOR_FS);
-    this._colorMvpLoc = gl.getUniformLocation(this._colorProgram, 'uMVP')!;
-    this._colorGammaGainLoc = gl.getUniformLocation(this._colorProgram, 'uGammaGain')!;
+    this._colorMvpLoc = required(gl.getUniformLocation(this._colorProgram, 'uMVP'), 'getUniformLocation uMVP');
+    this._colorGammaGainLoc = required(gl.getUniformLocation(this._colorProgram, 'uGammaGain'), 'getUniformLocation uGammaGain');
   }
 
   private _initBuffers(): void {
@@ -279,12 +286,12 @@ export class WebGLContext {
       indices[ii + 5] = vi + 0;
     }
 
-    this._vao = gl.createVertexArray()!;
+    this._vao = required(gl.createVertexArray(), 'createVertexArray');
     gl.bindVertexArray(this._vao);
-    this._vbo = gl.createBuffer()!;
+    this._vbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
     gl.bufferData(gl.ARRAY_BUFFER, this._vertexData.byteLength, gl.DYNAMIC_DRAW);
-    this._ebo = gl.createBuffer()!;
+    this._ebo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ebo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -294,12 +301,12 @@ export class WebGLContext {
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2, 4, gl.FLOAT, false, BYTES_PER_VERTEX, 16);
 
-    this._colorVao = gl.createVertexArray()!;
+    this._colorVao = required(gl.createVertexArray(), 'createVertexArray');
     gl.bindVertexArray(this._colorVao);
-    this._colorVbo = gl.createBuffer()!;
+    this._colorVbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ARRAY_BUFFER, this._colorVbo);
     gl.bufferData(gl.ARRAY_BUFFER, this._colorVertexData.byteLength, gl.DYNAMIC_DRAW);
-    this._colorEbo = gl.createBuffer()!;
+    this._colorEbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._colorEbo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -307,12 +314,12 @@ export class WebGLContext {
     gl.enableVertexAttribArray(1);
     gl.vertexAttribPointer(1, 4, gl.FLOAT, false, COLOR_FLOATS_PER_VERTEX * 4, 8);
 
-    this._immVao = gl.createVertexArray()!;
+    this._immVao = required(gl.createVertexArray(), 'createVertexArray');
     gl.bindVertexArray(this._immVao);
-    this._immVbo = gl.createBuffer()!;
+    this._immVbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ARRAY_BUFFER, this._immVbo);
     gl.bufferData(gl.ARRAY_BUFFER, this._immVertexData.byteLength, gl.DYNAMIC_DRAW);
-    this._immEbo = gl.createBuffer()!;
+    this._immEbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._immEbo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -322,12 +329,12 @@ export class WebGLContext {
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2, 4, gl.FLOAT, false, BYTES_PER_VERTEX, 16);
 
-    this._customVao = gl.createVertexArray()!;
+    this._customVao = required(gl.createVertexArray(), 'createVertexArray');
     gl.bindVertexArray(this._customVao);
-    this._customVbo = gl.createBuffer()!;
+    this._customVbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ARRAY_BUFFER, this._customVbo);
     gl.bufferData(gl.ARRAY_BUFFER, this._customVertexData.byteLength, gl.DYNAMIC_DRAW);
-    this._customEbo = gl.createBuffer()!;
+    this._customEbo = required(gl.createBuffer(), 'createBuffer');
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._customEbo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 2, 3, 0]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -342,7 +349,7 @@ export class WebGLContext {
 
   private _initWhiteTexture(): void {
     const gl = this.gl;
-    const tex = gl.createTexture()!;
+    const tex = required(gl.createTexture(), 'createTexture');
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -382,7 +389,7 @@ export class WebGLContext {
     pointFilter?: boolean;
   }): GlTexture {
     const gl = this.gl;
-    const tex = gl.createTexture()!;
+    const tex = required(gl.createTexture(), 'createTexture');
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
 
@@ -410,7 +417,7 @@ export class WebGLContext {
 
   createRenderTarget(width: number, height: number): RenderTarget {
     const gl = this.gl;
-    const tex = gl.createTexture()!;
+    const tex = required(gl.createTexture(), 'createTexture');
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -418,7 +425,7 @@ export class WebGLContext {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    const fbo = gl.createFramebuffer()!;
+    const fbo = required(gl.createFramebuffer(), 'createFramebuffer');
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
 
