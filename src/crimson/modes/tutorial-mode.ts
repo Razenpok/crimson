@@ -162,7 +162,7 @@ export class TutorialMode extends BaseGameplayMode {
   }
 
   private _buildInput(): PlayerInput {
-    const playerControls = this.config.controls.players[0];
+    const playerControls = this.config.controls.player(0);
     const [fwd, bwd, left, right] = playerControls.moveCodes;
     const fireKey = playerControls.fireCode;
 
@@ -212,16 +212,17 @@ export class TutorialMode extends BaseGameplayMode {
     }
   }
 
-  private _finishTutorialRun(restart: boolean): void {
+  private _finishTutorialRun(opts: { restart: boolean }): void {
     this._saveReplay();
-    if (restart) {
+    if (opts.restart) {
       this.open();
       return;
     }
     this.closeRequested = true;
   }
 
-  private _updatePromptButtons(dtMs: number, mouse: Vec2, click: boolean): void {
+  private _updatePromptButtons(opts: { dtMs: number; mouse: Vec2; click: boolean }): void {
+    const { dtMs, mouse, click } = opts;
     const tutorial = this.state.tutorial;
     const overlay = this.state.tutorialOverlay;
     const stage = int(tutorial.stageIndex);
@@ -258,14 +259,14 @@ export class TutorialMode extends BaseGameplayMode {
       const repeatW = buttonWidth(resources, this._repeatButton.label, { scale: 1.0, forceWide: true });
 
       if (buttonUpdate(this._playButton, { pos: buttonBasePos, width: playW, dtMs, mouse, click })) {
-        this._finishTutorialRun(false);
+        this._finishTutorialRun({ restart: false });
         return;
       }
       if (buttonUpdate(
         this._repeatButton,
         { pos: buttonBasePos.offset({ dx: playW + gap, dy: 0.0 }), width: repeatW, dtMs, mouse, click },
       )) {
-        this._finishTutorialRun(true);
+        this._finishTutorialRun({ restart: true });
         return;
       }
       return;
@@ -276,7 +277,7 @@ export class TutorialMode extends BaseGameplayMode {
       const y = screenH - 50.0;
       const w = buttonWidth(resources, this._skipButton.label, { scale: 1.0, forceWide: true });
       if (buttonUpdate(this._skipButton, { pos: new Vec2(10.0, y), width: w, dtMs, mouse, click })) {
-        this._finishTutorialRun(false);
+        this._finishTutorialRun({ restart: false });
       }
     }
   }
@@ -345,7 +346,7 @@ export class TutorialMode extends BaseGameplayMode {
 
     const mouse = this._uiMousePos();
     const click = InputState.wasMouseButtonPressed(0);
-    this._updatePromptButtons(dtUiMs, mouse, click);
+    this._updatePromptButtons({ dtMs: dtUiMs, mouse, click });
   }
 
   draw(): void {
@@ -382,7 +383,7 @@ export class TutorialMode extends BaseGameplayMode {
       });
     }
 
-    this._drawTutorialPrompts(hudBottom);
+    this._drawTutorialPrompts({ hudBottom });
 
     if (perkMenuActive) {
       this._perkMenu.draw(
@@ -393,7 +394,8 @@ export class TutorialMode extends BaseGameplayMode {
     }
   }
 
-  private _drawTutorialPrompts(hudBottom: number): void {
+  private _drawTutorialPrompts(opts: { hudBottom: number }): void {
+    const hudBottom = opts.hudBottom;
     const overlay = this.state.tutorialOverlay;
 
     drawTutorialOverlayPanels(
