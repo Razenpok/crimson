@@ -19,7 +19,7 @@ import { WorldRenderCtx } from './context.ts';
 import { drawCreatureSprite } from './creatures.ts';
 import { drawEffectPool, drawParticlePool, drawSpriteEffectPool } from './effects.ts';
 import { drawAimCircle, drawClockGauge, drawDirectionArrows } from './overlays.ts';
-import { beginPass, endPass } from './profile-hooks.ts';
+import { profilePass } from './profile-hooks.ts';
 import { drawProjectile, drawSecondaryProjectile, drawSharpshooterLaserSight } from './projectiles.ts';
 import { drawPlayerTrooperSprite } from './trooper.ts';
 import * as viewport from './viewport.ts';
@@ -112,9 +112,12 @@ export function drawWorld(
   entityAlpha = clamp(entityAlpha, 0.0, 1.0);
   const [camera, viewScale, scale, screenSize, outSize] = computeViewTransform(renderCtx);
 
-  const endBg = beginPass('background');
-  drawBackground(renderCtx, { camera, screenSize, outSize });
-  endPass('background');
+  const endBg = profilePass('background');
+  try {
+    drawBackground(renderCtx, { camera, screenSize, outSize });
+  } finally {
+    endBg();
+  }
 
   if (entityAlpha <= 1e-3) return;
 
@@ -122,29 +125,47 @@ export function drawWorld(
   try {
     const drawCtx = buildDrawContext(renderCtx, { camera, viewScale, scale, entityAlpha });
 
-    const endPlayersDead = beginPass('players_dead');
-    drawPlayers(renderCtx, { ctx: drawCtx, alive: false });
-    endPass('players_dead');
+    const endPlayersDead = profilePass('players_dead');
+    try {
+      drawPlayers(renderCtx, { ctx: drawCtx, alive: false });
+    } finally {
+      endPlayersDead();
+    }
 
-    const endCreatures = beginPass('creatures');
-    drawCreatures(renderCtx, { ctx: drawCtx });
-    endPass('creatures');
+    const endCreatures = profilePass('creatures');
+    try {
+      drawCreatures(renderCtx, { ctx: drawCtx });
+    } finally {
+      endCreatures();
+    }
 
-    const endFreeze = beginPass('freeze_overlay');
-    drawFreezeOverlay(renderCtx, { ctx: drawCtx });
-    endPass('freeze_overlay');
+    const endFreeze = profilePass('freeze_overlay');
+    try {
+      drawFreezeOverlay(renderCtx, { ctx: drawCtx });
+    } finally {
+      endFreeze();
+    }
 
-    const endPlayersAlive = beginPass('players_alive');
-    drawPlayers(renderCtx, { ctx: drawCtx, alive: true });
-    endPass('players_alive');
+    const endPlayersAlive = profilePass('players_alive');
+    try {
+      drawPlayers(renderCtx, { ctx: drawCtx, alive: true });
+    } finally {
+      endPlayersAlive();
+    }
 
-    const endProjEffects = beginPass('projectiles_effects');
-    drawProjectilesAndEffects(renderCtx, { ctx: drawCtx });
-    endPass('projectiles_effects');
+    const endProjEffects = profilePass('projectiles_effects');
+    try {
+      drawProjectilesAndEffects(renderCtx, { ctx: drawCtx });
+    } finally {
+      endProjEffects();
+    }
 
-    const endBonusUi = beginPass('bonus_ui');
-    drawBonusAndUi(renderCtx, { ctx: drawCtx, drawAimIndicatorsEnabled });
-    endPass('bonus_ui');
+    const endBonusUi = profilePass('bonus_ui');
+    try {
+      drawBonusAndUi(renderCtx, { ctx: drawCtx, drawAimIndicatorsEnabled });
+    } finally {
+      endBonusUi();
+    }
   } finally {
     wgl.setAlphaTest(false);
   }
@@ -475,44 +496,62 @@ function drawProjectilesAndEffects(renderCtx: WorldRenderCtx, opts: { ctx: World
   const ctx = opts.ctx;
   const frame = renderCtx.frame;
 
-  beginPass('laser_sight');
-  drawSharpshooterLaserSight(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
-  endPass('laser_sight');
-
-  beginPass('primary_projectiles');
-  const projectiles = frame.state.projectiles.entries;
-  for (let projIndex = 0; projIndex < projectiles.length; projIndex++) {
-    const proj = projectiles[projIndex];
-    if (!proj.active) continue;
-    drawProjectile(
-      renderCtx, proj,
-      { projIndex, camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
-    );
+  const endLaserSight = profilePass('laser_sight');
+  try {
+    drawSharpshooterLaserSight(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
+  } finally {
+    endLaserSight();
   }
-  endPass('primary_projectiles');
 
-  beginPass('particle_pool');
-  drawParticlePool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
-  endPass('particle_pool');
-
-  beginPass('secondary_projectiles');
-  const secondaryProjectiles = frame.state.secondaryProjectiles.entries;
-  for (const proj of secondaryProjectiles) {
-    if (!proj.active) continue;
-    drawSecondaryProjectile(
-      renderCtx, proj,
-      { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
-    );
+  const endPrimaryProjectiles = profilePass('primary_projectiles');
+  try {
+    const projectiles = frame.state.projectiles.entries;
+    for (let projIndex = 0; projIndex < projectiles.length; projIndex++) {
+      const proj = projectiles[projIndex];
+      if (!proj.active) continue;
+      drawProjectile(
+        renderCtx, proj,
+        { projIndex, camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
+      );
+    }
+  } finally {
+    endPrimaryProjectiles();
   }
-  endPass('secondary_projectiles');
 
-  beginPass('sprite_effect_pool');
-  drawSpriteEffectPool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
-  endPass('sprite_effect_pool');
+  const endParticlePool = profilePass('particle_pool');
+  try {
+    drawParticlePool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
+  } finally {
+    endParticlePool();
+  }
 
-  beginPass('effect_pool');
-  drawEffectPool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
-  endPass('effect_pool');
+  const endSecondaryProjectiles = profilePass('secondary_projectiles');
+  try {
+    const secondaryProjectiles = frame.state.secondaryProjectiles.entries;
+    for (const proj of secondaryProjectiles) {
+      if (!proj.active) continue;
+      drawSecondaryProjectile(
+        renderCtx, proj,
+        { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha },
+      );
+    }
+  } finally {
+    endSecondaryProjectiles();
+  }
+
+  const endSpriteEffectPool = profilePass('sprite_effect_pool');
+  try {
+    drawSpriteEffectPool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
+  } finally {
+    endSpriteEffectPool();
+  }
+
+  const endEffectPool = profilePass('effect_pool');
+  try {
+    drawEffectPool(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
+  } finally {
+    endEffectPool();
+  }
 }
 
 function iterVisibleAimPlayers(renderCtx: WorldRenderCtx): PlayerState[] {
@@ -601,28 +640,43 @@ function drawBonusAndUi(
   opts: { ctx: WorldDrawContext; drawAimIndicatorsEnabled: boolean },
 ): void {
   const { ctx, drawAimIndicatorsEnabled } = opts;
-  beginPass('bonus_pickups');
-  drawBonusPickups(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
-  endPass('bonus_pickups');
+  const endBonusPickups = profilePass('bonus_pickups');
+  try {
+    drawBonusPickups(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
+  } finally {
+    endBonusPickups();
+  }
 
-  beginPass('bonus_labels');
-  drawBonusHoverLabels(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
-  endPass('bonus_labels');
+  const endBonusLabels = profilePass('bonus_labels');
+  try {
+    drawBonusHoverLabels(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, alpha: ctx.entityAlpha });
+  } finally {
+    endBonusLabels();
+  }
 
   const drawWorldAim = drawAimIndicatorsEnabled && !renderCtx.frame.demoModeActive;
   if (drawWorldAim) {
-    beginPass('aim_indicators');
-    drawAimIndicators(renderCtx, { ctx });
-    endPass('aim_indicators');
+    const endAimIndicators = profilePass('aim_indicators');
+    try {
+      drawAimIndicators(renderCtx, { ctx });
+    } finally {
+      endAimIndicators();
+    }
   }
 
-  beginPass('direction_arrows');
-  drawDirectionArrows(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
-  endPass('direction_arrows');
+  const endDirectionArrows = profilePass('direction_arrows');
+  try {
+    drawDirectionArrows(renderCtx, { camera: ctx.camera, viewScale: ctx.viewScale, scale: ctx.scale, alpha: ctx.entityAlpha });
+  } finally {
+    endDirectionArrows();
+  }
 
   if (drawWorldAim) {
-    beginPass('aim_enhancements');
-    drawAimEnhancements(renderCtx, { ctx });
-    endPass('aim_enhancements');
+    const endAimEnhancements = profilePass('aim_enhancements');
+    try {
+      drawAimEnhancements(renderCtx, { ctx });
+    } finally {
+      endAimEnhancements();
+    }
   }
 }
