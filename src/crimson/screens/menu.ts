@@ -219,6 +219,18 @@ export function signLayoutScale(width: number): [number, number] {
   return MenuView._signLayoutScale(width);
 }
 
+export function menuSlotPosX(slot: number): number {
+  return MenuView._menuSlotPosX(slot);
+}
+
+export function menuSlotStartMs(slot: number): number {
+  return MenuView._menuSlotStartMs(slot);
+}
+
+export function menuSlotEndMs(slot: number): number {
+  return MenuView._menuSlotEndMs(slot);
+}
+
 export class MenuView {
   state: GameState;
   private _isOpen: boolean = false;
@@ -705,17 +717,17 @@ export class MenuView {
     return Rect.fromPosSize(topLeft, bottomRight.sub(topLeft));
   }
 
-  private static _menuSlotPosX(slot: number): number {
+  static _menuSlotPosX(slot: number): number {
     // ui_menu_layout_init: subtract 20, 40, ... from later menu items
     return MENU_LABEL_BASE_X - slot * 20;
   }
 
-  private static _menuSlotStartMs(slot: number): number {
+  static _menuSlotStartMs(slot: number): number {
     // ui_menu_layout_init: start_time_ms is the fully-visible time.
     return (slot + 2) * 100 + 300;
   }
 
-  private static _menuSlotEndMs(slot: number): number {
+  static _menuSlotEndMs(slot: number): number {
     // ui_menu_layout_init: end_time_ms is the fully-hidden time.
     return (slot + 2) * 100;
   }

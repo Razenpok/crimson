@@ -36,6 +36,9 @@ import {
   MENU_SIGN_POS_Y_SMALL,
   MENU_SIGN_POS_X_PAD,
   MenuEntry,
+  menuSlotEndMs,
+  menuSlotPosX,
+  menuSlotStartMs,
   uiElementAnim,
   labelAlpha,
   signLayoutScale,
@@ -52,21 +55,6 @@ const KEY_RIGHT_SHIFT = 345;
 const MOUSE_BUTTON_LEFT = 0;
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
-
-function menuSlotPosX(slot: number): number {
-  // ui_menu_layout_init: subtract 20, 40, ... from later menu items
-  return MENU_LABEL_BASE_X - slot * 20;
-}
-
-function menuSlotStartMs(slot: number): number {
-  // ui_menu_layout_init: start_time_ms is the fully-visible time.
-  return (slot + 2) * 100 + 300;
-}
-
-function menuSlotEndMs(slot: number): number {
-  // ui_menu_layout_init: end_time_ms is the fully-hidden time.
-  return (slot + 2) * 100;
-}
 
 export class PauseMenuView {
   state: GameState;
@@ -285,6 +273,8 @@ export class PauseMenuView {
     },
   ): [number, number] {
     const { index, startMs, endMs, width } = opts;
+    // Matches ui_element_update: angle lerps pi/2 -> 0 over [end_ms, start_ms].
+    // Direction flag (element+0x314) appears to be 0 for menu elements.
     return uiElementAnim(this, { index, startMs, endMs, width, directionFlag: 0 });
   }
 
@@ -373,7 +363,7 @@ export class PauseMenuView {
         endMs: menuSlotEndMs(entry.slot),
         width: itemW,
       });
-      // slideX is ignored for render_mode==0 (transform) elements
+      // slide is ignored for render_mode==0 (transform) elements
       const [itemScale, localYShift] = this._menuItemScale(entry.slot);
       const offsetX = MENU_ITEM_OFFSET_X * itemScale;
       const offsetY = MENU_ITEM_OFFSET_Y * itemScale - localYShift;
