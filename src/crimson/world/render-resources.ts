@@ -21,7 +21,7 @@ import {
 } from '@crimson/render/terrain-fx.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 import { terrainFxBatchIsEmpty } from '@crimson/sim/terrain-fx.ts';
-import type { GameplayState } from "@crimson/gameplay.ts";
+import type { GameplayState } from '@crimson/gameplay.ts';
 
 export class RenderResources {
   private _assetsUrl: string;
@@ -33,10 +33,10 @@ export class RenderResources {
   private _pendingTerrainFxBatches: TerrainFxBatch[] = [];
   private _resources: RuntimeResources | null = null;
 
-  constructor(worldSize: number = 1024.0, config: CrimsonConfig | null = null, assetsUrl: string = './assets') {
-    this._assetsUrl = assetsUrl;
-    this.worldSize = worldSize;
-    this.config = config;
+  constructor(opts: { assetsUrl?: string; worldSize?: number; config?: CrimsonConfig | null }) {
+    this._assetsUrl = opts.assetsUrl ?? './assets';
+    this.worldSize = opts.worldSize ?? 1024.0;
+    this.config = opts.config ?? null;
   }
 
   get resources(): RuntimeResources {

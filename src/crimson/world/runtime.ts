@@ -66,7 +66,7 @@ export class WorldRuntime {
       preserveBugs: this.preserveBugs,
     });
 
-    const renderResources = new RenderResources(this.worldSize, this.config);
+    const renderResources = new RenderResources({ worldSize: this.worldSize, config: this.config });
     this.renderResources = renderResources;
 
     this.audioBridge = new AudioBridge({
