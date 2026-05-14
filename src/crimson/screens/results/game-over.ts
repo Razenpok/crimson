@@ -403,6 +403,7 @@ export class GameOverUi {
             playSfx(SfxId.UI_TYPEENTER);
           }
           if (!this._saved) {
+            // Browser builds have no file-backed high-score table to update here.
             this._saved = true;
           }
           setPlayerNameInput(this.config.profile, this.inputText);

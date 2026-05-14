@@ -529,6 +529,7 @@ export class QuestResultsUi {
         if (this.inputText.trim()) {
           if (playSfx !== null) playSfx(SfxId.UI_TYPEENTER);
           if (!this._saved) {
+            // Browser builds have no file-backed quest high-score table to update here.
             this.highlightRank = this.rank < TABLE_MAX ? this.rank : null;
             setPlayerNameInput(this.config.profile, this.inputText);
             this.config.save();
