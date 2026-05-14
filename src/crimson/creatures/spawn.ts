@@ -320,30 +320,8 @@ export class FormationChildSpec {
   }
 }
 
-function childSpec(
-  typeId: CreatureTypeId,
-  health: number,
-  moveSpeed: number,
-  rewardValue: number,
-  size: number,
-  contactDamage: number,
-  tint: TintRGBA,
-  maxHealth: number | null = null,
-  orbitAngle: number | null = null,
-  orbitRadius: number | null = null,
-): FormationChildSpec {
-  return new FormationChildSpec({
-    typeId,
-    health,
-    moveSpeed,
-    rewardValue,
-    size,
-    contactDamage,
-    tint,
-    maxHealth,
-    orbitAngle,
-    orbitRadius,
-  });
+function childSpec(opts: FormationChildSpecInit): FormationChildSpec {
+  return new FormationChildSpec(opts);
 }
 
 
@@ -525,9 +503,15 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
       0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
     ),
     childAiMode: CreatureAiMode.FOLLOW_LINK_TETHERED,
-    childSpec: childSpec(
-      CreatureTypeId.ALIEN, 40.0, 2.0, 60.0, 50.0, 4.0, [0.4, 0.7, 0.11, 1.0],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.ALIEN,
+      health: 40.0,
+      moveSpeed: 2.0,
+      rewardValue: 60.0,
+      size: 50.0,
+      contactDamage: 4.0,
+      tint: [0.4, 0.7, 0.11, 1.0],
+    }),
     xRange: rangeArray(0, -576, -64),
     yRange: rangeArray(128, 257, 16),
     applyFallback: true,
@@ -539,9 +523,15 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
       0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
     ),
     childAiMode: CreatureAiMode.LINK_GUARD,
-    childSpec: childSpec(
-      CreatureTypeId.ALIEN, 40.0, 2.0, 60.0, 50.0, 4.0, [0.4, 0.7, 0.11, 1.0],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.ALIEN,
+      health: 40.0,
+      moveSpeed: 2.0,
+      rewardValue: 60.0,
+      size: 50.0,
+      contactDamage: 4.0,
+      tint: [0.4, 0.7, 0.11, 1.0],
+    }),
     xRange: rangeArray(0, -576, -64),
     yRange: rangeArray(128, 257, 16),
     applyFallback: true,
@@ -553,9 +543,15 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
       0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
     ),
     childAiMode: CreatureAiMode.LINK_GUARD,
-    childSpec: childSpec(
-      CreatureTypeId.LIZARD, 40.0, 2.0, 60.0, 60.0, 4.0, [0.4, 0.7, 0.11, 1.0],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.LIZARD,
+      health: 40.0,
+      moveSpeed: 2.0,
+      rewardValue: 60.0,
+      size: 60.0,
+      contactDamage: 4.0,
+      tint: [0.4, 0.7, 0.11, 1.0],
+    }),
     xRange: rangeArray(0, -576, -64),
     yRange: rangeArray(128, 257, 16),
     applyFallback: true,
@@ -567,9 +563,15 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
       0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
     ),
     childAiMode: CreatureAiMode.LINK_GUARD,
-    childSpec: childSpec(
-      CreatureTypeId.SPIDER_SP1, 40.0, 2.0, 60.0, 50.0, 4.0, [0.4, 0.7, 0.11, 1.0],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.SPIDER_SP1,
+      health: 40.0,
+      moveSpeed: 2.0,
+      rewardValue: 60.0,
+      size: 50.0,
+      contactDamage: 4.0,
+      tint: [0.4, 0.7, 0.11, 1.0],
+    }),
     xRange: rangeArray(0, -576, -64),
     yRange: rangeArray(128, 257, 16),
     applyFallback: true,
@@ -581,9 +583,15 @@ export const GRID_FORMATIONS: Map<SpawnId, GridFormationSpec> = new Map(
       0 as CreatureFlags, CreatureAiMode.CHASE_PLAYER,
     ),
     childAiMode: CreatureAiMode.FOLLOW_LINK,
-    childSpec: childSpec(
-      CreatureTypeId.ALIEN, 260.0, 3.8, 60.0, 50.0, 35.0, [0.7125, 0.4125, 0.2775, 0.6],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.ALIEN,
+      health: 260.0,
+      moveSpeed: 3.8,
+      rewardValue: 60.0,
+      size: 50.0,
+      contactDamage: 35.0,
+      tint: [0.7125, 0.4125, 0.2775, 0.6],
+    }),
     xRange: rangeArray(0, -576, -64),
     yRange: rangeArray(128, 257, 16),
     applyFallback: false,
@@ -602,9 +610,15 @@ export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map(
       CreatureTypeId.ALIEN, 200.0, 2.2, 600.0, [0.65, 0.85, 0.97, 1.0], 55.0, 14.0,
     ),
     childAiMode: CreatureAiMode.FOLLOW_LINK,
-    childSpec: childSpec(
-      CreatureTypeId.ALIEN, 40.0, 2.4, 60.0, 50.0, 4.0, [0.32, 0.588, 0.426, 1.0],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.ALIEN,
+      health: 40.0,
+      moveSpeed: 2.4,
+      rewardValue: 60.0,
+      size: 50.0,
+      contactDamage: 4.0,
+      tint: [0.32, 0.588, 0.426, 1.0],
+    }),
     count: 8,
     angleStep: Math.PI / 4.0,
     radius: 100.0,
@@ -617,9 +631,15 @@ export const RING_FORMATIONS: Map<SpawnId, RingFormationSpec> = new Map(
       CreatureTypeId.ALIEN, 50.0, 3.8, 300.0, [0.95, 0.55, 0.37, 1.0], 55.0, 40.0,
     ),
     childAiMode: CreatureAiMode.FOLLOW_LINK_TETHERED,
-    childSpec: childSpec(
-      CreatureTypeId.ALIEN, 220.0, 3.8, 60.0, 50.0, 35.0, [0.7125, 0.4125, 0.2775, 0.6],
-    ),
+    childSpec: childSpec({
+      typeId: CreatureTypeId.ALIEN,
+      health: 220.0,
+      moveSpeed: 3.8,
+      rewardValue: 60.0,
+      size: 50.0,
+      contactDamage: 35.0,
+      tint: [0.7125, 0.4125, 0.2775, 0.6],
+    }),
     count: 5,
     angleStep: Math.PI * 2.0 / 5.0,
     radius: 110.0,
@@ -1783,6 +1803,7 @@ export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): Spawn
   const spawns: SpawnTemplateCall[] = [];
 
   if ((n & 1) === 0) {
+    // Even: right-side spawn pack (with an off-screen bottom-right spawn).
     if (n < 6) {
       spawns.push(spawnCall(SpawnId.ALIEN_CONST_WEAPON_BONUS_27, new Vec2(1056.0, 1056.0), heading));
     }
@@ -1795,6 +1816,7 @@ export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): Spawn
     return spawns;
   }
 
+  // Odd: left-side spawn pack.
   if (n < 6) {
     spawns.push(spawnCall(SpawnId.ALIEN_CONST_WEAPON_BONUS_27, new Vec2(-32.0, 1056.0), heading));
   }
@@ -2088,9 +2110,15 @@ registerTemplate([SpawnId.ALIEN_SPAWNER_RING_24_0E], (ctx: PlanBuilder): void =>
   applyTint(parent, [0.9, 0.8, 0.4, 1.0]);
   parent.contactDamage = 0.0;
 
-  const cSpec = childSpec(
-    CreatureTypeId.ALIEN, 40.0, 4.0, 350.0, 35.0, 30.0, [1.0, 0.3, 0.3, 1.0],
-  );
+  const cSpec = childSpec({
+    typeId: CreatureTypeId.ALIEN,
+    health: 40.0,
+    moveSpeed: 4.0,
+    rewardValue: 350.0,
+    size: 35.0,
+    contactDamage: 30.0,
+    tint: [1.0, 0.3, 0.3, 1.0],
+  });
   ctx.primary = ctx.ringChildren(
     24,
     Math.PI / 12.0,
@@ -2118,9 +2146,15 @@ registerTemplate([SpawnId.FORMATION_CHAIN_LIZARD_4_11], (ctx: PlanBuilder): void
 
   // Spawns a linked chain of 4 children (link points to previous). The original also sets
   // the base creature's link_index to the last child after the loop.
-  const cSpec = childSpec(
-    CreatureTypeId.LIZARD, 60.0, 2.4, 60.0, 50.0, 14.0, [0.6, 0.6, 0.31, 1.0],
-  );
+  const cSpec = childSpec({
+    typeId: CreatureTypeId.LIZARD,
+    health: 60.0,
+    moveSpeed: 2.4,
+    rewardValue: 60.0,
+    size: 50.0,
+    contactDamage: 14.0,
+    tint: [0.6, 0.6, 0.31, 1.0],
+  });
 
   const setupChild = (child: CreatureInit, idx: number): void => {
     child.targetOffset = new Vec2(-256.0 + idx * 64.0, -256.0);
@@ -2149,10 +2183,17 @@ registerTemplate([SpawnId.FORMATION_CHAIN_ALIEN_10_13], (ctx: PlanBuilder): void
   parent.size = 40.0;
   parent.contactDamage = 20.0;
 
-  const cSpec = childSpec(
-    CreatureTypeId.ALIEN, 60.0, 2.0, 60.0, 50.0, 4.0, [0.4, 0.7, 0.11, 1.0],
-    null, Math.PI, 10.0,
-  );
+  const cSpec = childSpec({
+    typeId: CreatureTypeId.ALIEN,
+    health: 60.0,
+    moveSpeed: 2.0,
+    rewardValue: 60.0,
+    size: 50.0,
+    contactDamage: 4.0,
+    tint: [0.4, 0.7, 0.11, 1.0],
+    orbitAngle: Math.PI,
+    orbitRadius: 10.0,
+  });
 
   const degreesToRadians = 20.0 * Math.PI / 180.0;
   const setupChild = (child: CreatureInit, idx: number): void => {
