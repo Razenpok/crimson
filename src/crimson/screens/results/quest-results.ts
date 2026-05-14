@@ -2,7 +2,7 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { type RuntimeResources, TextureId, getTexture, runtimeResourcesFor } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig, setPlayerNameInput } from '@grim/config.ts';
@@ -113,7 +113,6 @@ function weaponIconSrc(
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
-// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   const ix1 = int(x1);
   const iy1 = int(y1);
@@ -154,6 +153,7 @@ function drawSmall(
 }
 
 export class QuestResultsUi {
+  assetsRoot: string;
   baseDir: string;
   config: CrimsonConfig;
   preserveBugs = false;
@@ -190,7 +190,8 @@ export class QuestResultsUi {
   private _highScoresButton = new UiButtonState({ label: 'High scores', forceWide: true });
   private _mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true });
 
-  constructor(opts: { baseDir?: string; config: CrimsonConfig; preserveBugs?: boolean }) {
+  constructor(opts: { assetsRoot: string; baseDir?: string; config: CrimsonConfig; preserveBugs?: boolean }) {
+    this.assetsRoot = opts.assetsRoot;
     this.baseDir = opts.baseDir ?? '';
     this.config = opts.config;
     this.preserveBugs = opts.preserveBugs ?? false;
@@ -255,9 +256,7 @@ export class QuestResultsUi {
     this.phase = 0;
   }
 
-  close(): void {
-    // no-op
-  }
+  close(): void {}
 
   private _beginCloseTransition(action: string): void {
     if (this._closing) return;
@@ -425,7 +424,6 @@ export class QuestResultsUi {
   update(
     dt: number,
     opts: {
-      resources: RuntimeResources;
       playSfx?: ((id: SfxId) => void) | null;
       rng?: CrandLike | null;
       mouse?: { x: number; y: number } | null;
@@ -436,7 +434,7 @@ export class QuestResultsUi {
     this._cursorPulseTime += dtS * 1.1;
     const mouse = opts.mouse ?? { x: InputState.mousePosition()[0], y: InputState.mousePosition()[1] };
     const playSfx = opts.playSfx ?? null;
-    const resources = opts.resources;
+    const resources = runtimeResourcesFor(this.assetsRoot);
 
     if (this.record === null || this.breakdown === null) return null;
 

@@ -148,6 +148,7 @@ export class QuestResultsView {
     }
 
     const ui = new QuestResultsUiImpl({
+      assetsRoot: this.state.assetsDir,
       baseDir: this.state.baseDir,
       config: this.state.config,
       preserveBugs: Boolean(this.state.preserveBugs),
@@ -192,7 +193,7 @@ export class QuestResultsView {
     const resources = this.state.resources;
     if (resources === null) return;
 
-    const action = ui.update(dt, { resources, playSfx: playSfxFn });
+    const action = ui.update(dt, { playSfx: playSfxFn });
     if (action === 'play_again') {
       if (this._questLevel === null) throw new Error('quest level must be set');
       this._setPendingQuestLevel(this._questLevel);
