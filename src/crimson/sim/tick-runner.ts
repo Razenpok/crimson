@@ -37,7 +37,7 @@ export class TickBatchResult {
     this.ticksCompleted = opts?.ticksCompleted ?? 0;
     this.batchStatus = opts?.batchStatus ?? InputStatus.READY;
     this.nextTickIndex = opts?.nextTickIndex ?? 0;
-    this.completedResults = opts?.completedResults ?? [];
+    this.completedResults = Array.from(opts?.completedResults ?? []);
   }
 }
 export class TickRunner {
