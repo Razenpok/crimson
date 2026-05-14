@@ -70,8 +70,8 @@ export class ConsoleLog {
   lines: string[] = [];
   flushedIndex = 0;
 
-  constructor(baseDir = '') {
-    this.baseDir = baseDir;
+  constructor(opts: { baseDir?: string } | string = {}) {
+    this.baseDir = typeof opts === 'string' ? opts : opts.baseDir ?? '';
   }
 
   log(message: string): void {
@@ -93,10 +93,20 @@ export class ConsoleLog {
   }
 }
 
-export interface ConsoleCvar {
+export class ConsoleCvar {
   name: string;
   value: string;
   valueF: number;
+
+  constructor(opts: { name: string; value: string; valueF: number }) {
+    this.name = opts.name;
+    this.value = opts.value;
+    this.valueF = opts.valueF;
+  }
+
+  static fromValue(name: string, value: string): ConsoleCvar {
+    return new ConsoleCvar({ name, value, valueF: parseConsoleFloat(value) });
+  }
 }
 
 export class ConsoleState {
@@ -126,7 +136,7 @@ export class ConsoleState {
 
   constructor(opts: { baseDir?: string; log?: ConsoleLog; assetsDir?: string | null; scriptDirs?: readonly string[] } = {}) {
     this.baseDir = opts.baseDir ?? '';
-    this.log = opts.log ?? new ConsoleLog(this.baseDir);
+    this.log = opts.log ?? new ConsoleLog({ baseDir: this.baseDir });
     this.assetsDir = opts.assetsDir ?? null;
     this.scriptDirs = opts.scriptDirs ?? [];
   }
@@ -136,7 +146,13 @@ export class ConsoleState {
   }
 
   registerCvar(name: string, value: string): void {
-    this.cvars.set(name, { name, value, valueF: parseConsoleFloat(value) });
+    this.cvars.set(name, ConsoleCvar.fromValue(name, value));
+  }
+
+  addScriptDir(path: string | null): void {
+    if (path === null) return;
+    if (this.scriptDirs.includes(path)) return;
+    this.scriptDirs = [...this.scriptDirs, path];
   }
 
   setOpen(open: boolean): void {
@@ -152,9 +168,8 @@ export class ConsoleState {
   }
 
   execLine(line: string): void {
-    const tokens = line.trim().split(/\s+/);
-    if (tokens.length === 0 || !tokens[0]) return;
-    if (tokens[0].startsWith('//')) return;
+    const tokens = this._tokenizeLine(line);
+    if (tokens.length === 0) return;
 
     const name = tokens[0];
     const args = tokens.slice(1);
@@ -320,6 +335,8 @@ export class ConsoleState {
     // No-op in WebGL — Python flushes to a log file on disk.
   }
 
+  close(): void {}
+
   drawFpsCounter(smallFont: SmallFontData | null): void {
     const cvar = this.cvars.get('cv_showFPS');
     if (cvar === undefined || cvar.valueF === 0.0) return;
@@ -351,6 +368,20 @@ export class ConsoleState {
     const cvar = this.cvars.get('con_monoFont');
     if (!cvar) return false;
     return cvar.valueF !== 0;
+  }
+
+  private _tokenizeLine(line: string): string[] {
+    const stripped = line.trim();
+    if (!stripped) return [];
+    if (stripped.startsWith('//')) return [];
+    return stripped.split(/\s+/);
+  }
+
+  private _promptText(line: string = this.inputBuffer): string {
+    if (this.promptString.includes('%s')) {
+      return this.promptString.replace('%s', line);
+    }
+    return `${this.promptString}${line}`;
   }
 
   private _caretBlinkAlpha(): number {
@@ -440,12 +471,7 @@ export class ConsoleState {
     this.historyIndex = null;
     if (!line) return;
     if (this.echoEnabled) {
-      const prompt = this.promptString;
-      if (prompt.includes('%s')) {
-        this.log.log(prompt.replace('%s', line));
-      } else {
-        this.log.log(`${prompt}${line}`);
-      }
+      this.log.log(this._promptText(line));
     }
     if (this.history.length === 0 || this.history[this.history.length - 1] !== line) {
       this.history.push(line);
