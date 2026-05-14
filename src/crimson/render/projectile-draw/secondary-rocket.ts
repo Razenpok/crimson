@@ -3,6 +3,7 @@
 import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
+import { fxDetailEnabled } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
@@ -50,7 +51,6 @@ const ROCKET_STYLE_BY_TYPE: Map<number, SecondaryRocketStyle> = new Map([
 ]);
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
-  // WebGL replacement for raylib's `draw_circle`.
   const segments = Math.max(24, int(radius * 1.5 + 0.5));
   const step = (Math.PI * 2.0) / segments;
   const white = wgl.getWhiteTexture();
@@ -72,7 +72,7 @@ function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: Seconda
   const renderer = ctx.renderer;
   const renderFrame = renderer.frame;
   const fxDetail1 = renderFrame.config !== null
-    ? (renderFrame.config.display.fxDetail[1] ?? true)
+    ? fxDetailEnabled(renderFrame.config.display, 1)
     : true;
 
   let particlesTexture;
