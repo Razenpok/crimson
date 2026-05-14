@@ -3,7 +3,7 @@
 import * as wgl from '@wgl';
 import { paqToMap } from './paq.ts';
 import { decodeJazToImageBitmap } from './jaz.ts';
-import { SmallFontData } from "@grim/fonts/small.js";
+import { SmallFontData } from '@grim/fonts/small.ts';
 
 export const PAQ_NAME = 'crimson.paq';
 
@@ -31,86 +31,92 @@ export async function resolveAssetsUrl(primaryUrl: string): Promise<string> {
 }
 
 export enum TextureId {
-  BACKPLASMA = 'BACKPLASMA',
-  MOCKUP = 'MOCKUP',
-  LOGO_ESRB = 'LOGO_ESRB',
-  LOADING = 'LOADING',
-  CL_LOGO = 'CL_LOGO',
-  SPLASH_10TONS = 'SPLASH_10TONS',
-  SPLASH_REFLEXIVE = 'SPLASH_REFLEXIVE',
-  DEFAULT_FONT_COURIER = 'DEFAULT_FONT_COURIER',
-  SMALL_WHITE = 'SMALL_WHITE',
-  TROOPER = 'TROOPER',
-  ZOMBIE = 'ZOMBIE',
-  SPIDER_SP1 = 'SPIDER_SP1',
-  SPIDER_SP2 = 'SPIDER_SP2',
-  ALIEN = 'ALIEN',
-  LIZARD = 'LIZARD',
-  ARROW = 'ARROW',
-  BULLET_I = 'BULLET_I',
-  BULLET_TRAIL = 'BULLET_TRAIL',
-  BODYSET = 'BODYSET',
-  PROJS = 'PROJS',
-  UI_ICON_AIM = 'UI_ICON_AIM',
-  UI_BUTTON_SM = 'UI_BUTTON_SM',
-  UI_BUTTON_MD = 'UI_BUTTON_MD',
-  UI_CHECK_ON = 'UI_CHECK_ON',
-  UI_CHECK_OFF = 'UI_CHECK_OFF',
-  UI_RECT_OFF = 'UI_RECT_OFF',
-  UI_RECT_ON = 'UI_RECT_ON',
-  BONUSES = 'BONUSES',
-  UI_IND_BULLET = 'UI_IND_BULLET',
-  UI_IND_ROCKET = 'UI_IND_ROCKET',
-  UI_IND_ELECTRIC = 'UI_IND_ELECTRIC',
-  UI_IND_FIRE = 'UI_IND_FIRE',
-  PARTICLES = 'PARTICLES',
-  UI_IND_LIFE = 'UI_IND_LIFE',
-  UI_IND_PANEL = 'UI_IND_PANEL',
-  UI_ARROW = 'UI_ARROW',
-  UI_CURSOR = 'UI_CURSOR',
-  UI_AIM = 'UI_AIM',
-  TER_Q1_BASE = 'TER_Q1_BASE',
-  TER_Q1_OVERLAY = 'TER_Q1_OVERLAY',
-  TER_Q2_BASE = 'TER_Q2_BASE',
-  TER_Q2_OVERLAY = 'TER_Q2_OVERLAY',
-  TER_Q3_BASE = 'TER_Q3_BASE',
-  TER_Q3_OVERLAY = 'TER_Q3_OVERLAY',
-  TER_Q4_BASE = 'TER_Q4_BASE',
-  TER_Q4_OVERLAY = 'TER_Q4_OVERLAY',
-  UI_TEXT_LEVEL_COMPLETE = 'UI_TEXT_LEVEL_COMPLETE',
-  UI_TEXT_QUEST = 'UI_TEXT_QUEST',
-  UI_NUM1 = 'UI_NUM1',
-  UI_NUM2 = 'UI_NUM2',
-  UI_NUM3 = 'UI_NUM3',
-  UI_NUM4 = 'UI_NUM4',
-  UI_NUM5 = 'UI_NUM5',
-  UI_WICONS = 'UI_WICONS',
-  UI_GAME_TOP = 'UI_GAME_TOP',
-  UI_LIFE_HEART = 'UI_LIFE_HEART',
-  UI_CLOCK_TABLE = 'UI_CLOCK_TABLE',
-  UI_CLOCK_POINTER = 'UI_CLOCK_POINTER',
-  MUZZLE_FLASH = 'MUZZLE_FLASH',
-  UI_DROP_ON = 'UI_DROP_ON',
-  UI_DROP_OFF = 'UI_DROP_OFF',
-  UI_SIGN_CRIMSON = 'UI_SIGN_CRIMSON',
-  UI_MENU_ITEM = 'UI_MENU_ITEM',
-  UI_MENU_PANEL = 'UI_MENU_PANEL',
-  UI_ITEM_TEXTS = 'UI_ITEM_TEXTS',
-  UI_TEXT_REAPER = 'UI_TEXT_REAPER',
-  UI_TEXT_WELL_DONE = 'UI_TEXT_WELL_DONE',
-  UI_TEXT_CONTROLS = 'UI_TEXT_CONTROLS',
-  UI_TEXT_PICK_A_PERK = 'UI_TEXT_PICK_A_PERK',
-  UI_TEXT_LEVEL_UP = 'UI_TEXT_LEVEL_UP',
+  BACKPLASMA = 1,
+  MOCKUP,
+  LOGO_ESRB,
+  LOADING,
+  CL_LOGO,
+  SPLASH_10TONS,
+  SPLASH_REFLEXIVE,
+  DEFAULT_FONT_COURIER,
+  SMALL_WHITE,
+  TROOPER,
+  ZOMBIE,
+  SPIDER_SP1,
+  SPIDER_SP2,
+  ALIEN,
+  LIZARD,
+  ARROW,
+  BULLET_I,
+  BULLET_TRAIL,
+  BODYSET,
+  PROJS,
+  UI_ICON_AIM,
+  UI_BUTTON_SM,
+  UI_BUTTON_MD,
+  UI_CHECK_ON,
+  UI_CHECK_OFF,
+  UI_RECT_OFF,
+  UI_RECT_ON,
+  BONUSES,
+  UI_IND_BULLET,
+  UI_IND_ROCKET,
+  UI_IND_ELECTRIC,
+  UI_IND_FIRE,
+  PARTICLES,
+  UI_IND_LIFE,
+  UI_IND_PANEL,
+  UI_ARROW,
+  UI_CURSOR,
+  UI_AIM,
+  TER_Q1_BASE,
+  TER_Q1_OVERLAY,
+  TER_Q2_BASE,
+  TER_Q2_OVERLAY,
+  TER_Q3_BASE,
+  TER_Q3_OVERLAY,
+  TER_Q4_BASE,
+  TER_Q4_OVERLAY,
+  UI_TEXT_LEVEL_COMPLETE,
+  UI_TEXT_QUEST,
+  UI_NUM1,
+  UI_NUM2,
+  UI_NUM3,
+  UI_NUM4,
+  UI_NUM5,
+  UI_WICONS,
+  UI_GAME_TOP,
+  UI_LIFE_HEART,
+  UI_CLOCK_TABLE,
+  UI_CLOCK_POINTER,
+  MUZZLE_FLASH,
+  UI_DROP_ON,
+  UI_DROP_OFF,
+  UI_SIGN_CRIMSON,
+  UI_MENU_ITEM,
+  UI_MENU_PANEL,
+  UI_ITEM_TEXTS,
+  UI_TEXT_REAPER,
+  UI_TEXT_WELL_DONE,
+  UI_TEXT_CONTROLS,
+  UI_TEXT_PICK_A_PERK,
+  UI_TEXT_LEVEL_UP,
 }
 
-export interface TextureSpec {
+export class TextureSpec {
   readonly relPath: string;
   readonly clamp: boolean;
   readonly pointFilter: boolean;
+
+  constructor(opts: { relPath: string; clamp?: boolean; pointFilter?: boolean }) {
+    this.relPath = opts.relPath;
+    this.clamp = opts.clamp ?? false;
+    this.pointFilter = opts.pointFilter ?? false;
+  }
 }
 
 function spec(relPath: string, clamp = false, pointFilter = false): TextureSpec {
-  return { relPath, clamp, pointFilter };
+  return new TextureSpec({ relPath, clamp, pointFilter });
 }
 
 export const TEXTURE_SPECS: ReadonlyMap<TextureId, TextureSpec> = new Map([
@@ -186,10 +192,24 @@ export const TEXTURE_SPECS: ReadonlyMap<TextureId, TextureSpec> = new Map([
   [TextureId.UI_TEXT_LEVEL_UP, spec('ui/ui_textLevelUp.jaz', true)],
 ]);
 
-export interface RuntimeResources {
+export class RuntimeResources {
   assetsUrl: string;
   textures: Map<TextureId, wgl.Texture>;
   smallFont: SmallFontData;
+
+  constructor(opts: { assetsUrl: string; textures: Map<TextureId, wgl.Texture>; smallFont: SmallFontData }) {
+    this.assetsUrl = opts.assetsUrl;
+    this.textures = opts.textures;
+    this.smallFont = opts.smallFont;
+  }
+
+  texture(textureId: TextureId): wgl.Texture {
+    return getTexture(this, textureId);
+  }
+
+  unload(): void {
+    unloadResources(this);
+  }
 }
 
 export function getTexture(res: RuntimeResources, id: TextureId): wgl.Texture {
@@ -270,7 +290,9 @@ async function loadImageFromPaqEntry(relPath: string, data: Uint8Array): Promise
   // For now, try creating a blob and letting createImageBitmap handle it
   const ext = lower.substring(lower.lastIndexOf('.'));
   const mime = mimeMap[ext] ?? 'application/octet-stream';
-  const blob = new Blob([data as BlobPart], { type: mime });
+  const blobData = new ArrayBuffer(data.byteLength);
+  new Uint8Array(blobData).set(data);
+  const blob = new Blob([blobData], { type: mime });
   try {
     // DX8 content uses straight alpha — prevent the browser from premultiplying,
     // which would cause double-darkening under SRC_ALPHA blending (see cheatsheet §3B).
@@ -398,7 +420,7 @@ export async function loadRuntimeResources(
     grid: 16,
   };
 
-  const resources: RuntimeResources = { assetsUrl, textures, smallFont };
+  const resources = new RuntimeResources({ assetsUrl, textures, smallFont });
   registerRuntimeResources(resources);
   return resources;
 }
