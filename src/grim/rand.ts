@@ -3,8 +3,8 @@
 // Exact static caller address when known.
 export type CallerStatic = number | null;
 
-const CRT_RAND_MULT = 214013;
-const CRT_RAND_INC = 2531011;
+export const CRT_RAND_MULT = 214013;
+export const CRT_RAND_INC = 2531011;
 
 export type RngTraceSink = (stateBefore: number, stateAfter: number, value: number, caller: CallerStatic) => void;
 
