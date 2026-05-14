@@ -1,7 +1,7 @@
 // Port of crimson/quests/helpers.py
 
 import { Vec2 } from '@grim/geom.ts';
-import type { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import type { SpawnId } from '@crimson/creatures/spawn.ts';
 import { SpawnEntry } from './types.ts';
 
 export class EdgePoints {
@@ -15,7 +15,6 @@ export class EdgePoints {
     this.right = opts.right;
     this.top = opts.top;
     this.bottom = opts.bottom;
-    Object.freeze(this);
   }
 }
 
