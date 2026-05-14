@@ -110,7 +110,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 1000.0,
     moveSpeed: 2.0,
     rewardValue: 3000.0,
-    tint: [1.0, 1.0, 1.0, 1.0] as TintRGBA,
+    tint: [1.0, 1.0, 1.0, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_1D_SLOW_08, {
     timer: 1.0,
@@ -121,7 +121,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 1000.0,
     moveSpeed: 2.0,
     rewardValue: 3000.0,
-    tint: [1.0, 1.0, 1.0, 1.0] as TintRGBA,
+    tint: [1.0, 1.0, 1.0, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_1D_LIMITED_09, {
     timer: 1.0,
@@ -132,7 +132,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 450.0,
     moveSpeed: 2.0,
     rewardValue: 1000.0,
-    tint: [1.0, 1.0, 1.0, 1.0] as TintRGBA,
+    tint: [1.0, 1.0, 1.0, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_32_SLOW_0A, {
     timer: 2.0,
@@ -143,7 +143,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 1000.0,
     moveSpeed: 1.5,
     rewardValue: 3000.0,
-    tint: [0.8, 0.7, 0.4, 1.0] as TintRGBA,
+    tint: [0.8, 0.7, 0.4, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_3C_SLOW_0B, {
     timer: 2.0,
@@ -154,7 +154,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 3500.0,
     moveSpeed: 1.5,
     rewardValue: 5000.0,
-    tint: [0.9, 0.1, 0.1, 1.0] as TintRGBA,
+    tint: [0.9, 0.1, 0.1, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_31_FAST_0C, {
     timer: 1.5,
@@ -165,7 +165,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 50.0,
     moveSpeed: 2.8,
     rewardValue: 1000.0,
-    tint: [0.9, 0.8, 0.4, 1.0] as TintRGBA,
+    tint: [0.9, 0.8, 0.4, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_31_SLOW_0D, {
     timer: 2.0,
@@ -176,7 +176,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 50.0,
     moveSpeed: 1.3,
     rewardValue: 1000.0,
-    tint: [0.9, 0.8, 0.4, 1.0] as TintRGBA,
+    tint: [0.9, 0.8, 0.4, 1.0],
   }],
   [SpawnId.ALIEN_SPAWNER_CHILD_32_FAST_10, {
     timer: 1.5,
@@ -187,7 +187,7 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
     health: 50.0,
     moveSpeed: 2.8,
     rewardValue: 800.0,
-    tint: [0.9, 0.8, 0.4, 1.0] as TintRGBA,
+    tint: [0.9, 0.8, 0.4, 1.0],
   }],
   ] satisfies readonly (readonly [SpawnId, AlienSpawnerSpecInit])[]).map(
     ([spawnId, spec]) => [spawnId, new AlienSpawnerSpec(spec)],
