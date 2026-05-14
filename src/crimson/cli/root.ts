@@ -203,16 +203,44 @@ export function formatCfgValue(value: object): string {
     const ascii = prefix.length > 0 && [...prefix].every((byte) => 32 <= byte && byte < 127);
     if (ascii) {
       const text = String.fromCharCode(...prefix);
-      return `${JSON.stringify(text)} (len=${length})`;
+      return `${pythonAsciiRepr(text)} (len=${length})`;
     }
     return `0x${[...value].map((byte) => byte.toString(16).padStart(2, '0')).join('')} (len=${length})`;
   }
   return String(value);
 }
 
+function pythonAsciiRepr(text: string): string {
+  const quote = text.includes("'") && !text.includes('"') ? '"' : "'";
+  let out = quote;
+  for (const ch of text) {
+    if (ch === '\\' || ch === quote) {
+      out += '\\' + ch;
+    } else {
+      out += ch;
+    }
+  }
+  return out + quote;
+}
+
 export function parseIntAuto(text: string): number {
   const raw = String(text).trim();
-  const value = Number.parseInt(raw, raw.toLowerCase().startsWith('0x') ? 16 : 10);
+  const sign = raw.startsWith('-') || raw.startsWith('+') ? raw[0] : '';
+  const unsigned = sign ? raw.slice(1) : raw;
+  let radix = 10;
+  let digits = unsigned;
+  const lower = unsigned.toLowerCase();
+  if (lower.startsWith('0x')) {
+    radix = 16;
+    digits = unsigned.slice(2);
+  } else if (lower.startsWith('0b')) {
+    radix = 2;
+    digits = unsigned.slice(2);
+  } else if (lower.startsWith('0o')) {
+    radix = 8;
+    digits = unsigned.slice(2);
+  }
+  const value = Number.parseInt(sign + digits, radix);
   if (Number.isNaN(value)) {
     throw new Error(`invalid integer: ${JSON.stringify(text)}`);
   }
@@ -224,7 +252,9 @@ export function parseVec2(text: string): Vec2 {
   let left: string;
   let right: string;
   if (raw.includes(',')) {
-    [left, right] = raw.split(',', 2);
+    const comma = raw.indexOf(',');
+    left = raw.slice(0, comma);
+    right = raw.slice(comma + 1);
   } else {
     const parts = raw.split(/\s+/);
     if (parts.length !== 2) {
