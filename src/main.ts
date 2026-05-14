@@ -1,4 +1,4 @@
-// Crimsonland WebGL — Entry Point
+// Crimsonland WebGL entry point.
 
 import * as wgl from '@wgl';
 import { WebGLContext } from './grim/webgl.ts';
@@ -13,7 +13,7 @@ import { GameConfig, GameState } from './crimson/game/types.ts';
  * real game loop once resources are available.
  *
  * Since App doesn't have a setView method, we wrap the game loop view and
- * forward calls once it's ready.
+ * delegate calls once it's ready.
  */
 class BootStrapView implements View {
   private _config: GameConfig;
@@ -98,19 +98,19 @@ function main(): void {
     if (winAspect > TARGET_ASPECT) {
       // Window is wider — letterbox sides
       h = winH;
-      w = Math.round(winH * TARGET_ASPECT);
+      w = int(winH * TARGET_ASPECT + 0.5);
     } else {
       // Window is taller — letterbox top/bottom
       w = winW;
-      h = Math.round(winW / TARGET_ASPECT);
+      h = int(winW / TARGET_ASPECT + 0.5);
     }
     cvs.width = w;
     cvs.height = h;
     cvs.style.width = `${w}px`;
     cvs.style.height = `${h}px`;
     cvs.style.position = 'absolute';
-    cvs.style.left = `${Math.round((winW - w) / 2)}px`;
-    cvs.style.top = `${Math.round((winH - h) / 2)}px`;
+    cvs.style.left = `${int((winW - w) / 2 + 0.5)}px`;
+    cvs.style.top = `${int((winH - h) / 2 + 0.5)}px`;
   }
 
   fitCanvas();
