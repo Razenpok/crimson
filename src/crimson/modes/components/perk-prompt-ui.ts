@@ -7,28 +7,28 @@ import { type CrimsonConfig } from '@grim/config.ts';
 import { drawUiText } from '@crimson/ui/perk-menu.ts';
 
 export const PERK_PROMPT_MAX_TIMER_MS = 200.0;
-const PERK_PROMPT_OUTSET_X = 50.0;
+export const PERK_PROMPT_OUTSET_X = 50.0;
 
 // Perk prompt bar geometry comes from `ui_menu_assets_init` + `ui_menu_layout_init`:
 // - `ui_menu_item_element` is set_rect(512x64, offset -72,-60)
 // - the perk prompt mutates quad coords: x = (x - 300) * 0.75, y = y * 0.75
-const PERK_PROMPT_BAR_SCALE = 0.75;
-const PERK_PROMPT_BAR_BASE_OFFSET_X = -72.0;
-const PERK_PROMPT_BAR_BASE_OFFSET_Y = -60.0;
-const PERK_PROMPT_BAR_SHIFT_X = -300.0;
+export const PERK_PROMPT_BAR_SCALE = 0.75;
+export const PERK_PROMPT_BAR_BASE_OFFSET_X = -72.0;
+export const PERK_PROMPT_BAR_BASE_OFFSET_Y = -60.0;
+export const PERK_PROMPT_BAR_SHIFT_X = -300.0;
 
 // `ui_textLevelUp` is set_rect(75x25, offset -230,-27), then its quad coords are:
 // x = x * 0.85 - 46, y = y * 0.85 - 4
-const PERK_PROMPT_LEVEL_UP_SCALE = 0.85;
-const PERK_PROMPT_LEVEL_UP_BASE_OFFSET_X = -230.0;
-const PERK_PROMPT_LEVEL_UP_BASE_OFFSET_Y = -27.0;
-const PERK_PROMPT_LEVEL_UP_BASE_W = 75.0;
-const PERK_PROMPT_LEVEL_UP_BASE_H = 25.0;
-const PERK_PROMPT_LEVEL_UP_SHIFT_X = -46.0;
-const PERK_PROMPT_LEVEL_UP_SHIFT_Y = -4.0;
+export const PERK_PROMPT_LEVEL_UP_SCALE = 0.85;
+export const PERK_PROMPT_LEVEL_UP_BASE_OFFSET_X = -230.0;
+export const PERK_PROMPT_LEVEL_UP_BASE_OFFSET_Y = -27.0;
+export const PERK_PROMPT_LEVEL_UP_BASE_W = 75.0;
+export const PERK_PROMPT_LEVEL_UP_BASE_H = 25.0;
+export const PERK_PROMPT_LEVEL_UP_SHIFT_X = -46.0;
+export const PERK_PROMPT_LEVEL_UP_SHIFT_Y = -4.0;
 
-const PERK_PROMPT_TEXT_MARGIN_X = 16.0;
-const PERK_PROMPT_TEXT_OFFSET_Y = 8.0;
+export const PERK_PROMPT_TEXT_MARGIN_X = 16.0;
+export const PERK_PROMPT_TEXT_OFFSET_Y = 8.0;
 
 export type UiTextWidthFn = (text: string, scale: number) => number;
 
