@@ -23,8 +23,16 @@ const _BULLET_HIT_SFX: readonly SfxId[] = [
 ];
 
 export class PresentationStepCommands {
-  triggerGameTune = false;
-  sfx: SfxId[] = [];
+  constructor(opts: {
+    triggerGameTune?: boolean;
+    sfx?: readonly SfxId[];
+  } = {}) {
+    this.triggerGameTune = opts.triggerGameTune ?? false;
+    this.sfx = Array.from(opts.sfx ?? []);
+  }
+
+  triggerGameTune: boolean;
+  sfx: SfxId[];
 }
 
 export interface PresentationAudioSink {
@@ -118,7 +126,6 @@ export class ProjectileDecalPostCtx {
     this.typeId = opts.typeId;
     this.freezeActive = opts.freezeActive;
     this.freezeShardSpawn = opts.freezeShardSpawn ?? null;
-    Object.freeze(this);
   }
 
   readonly hit: ProjectileHit;
