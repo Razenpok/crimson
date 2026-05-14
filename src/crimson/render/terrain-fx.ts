@@ -28,26 +28,26 @@ export function bakeTerrainFxBatch(
       { textureWidth: opts.textures.particles.width, textureHeight: opts.textures.particles.height },
     );
     if (src === null) continue;
-    decals.push({
+    decals.push(new GroundDecal({
       texture: opts.textures.particles,
-      srcRect: src,
+      src,
       pos: entry.pos,
       width: entry.width,
       height: entry.height,
       rotationRad: entry.rotation,
       tint: entry.color.toWgl(),
-    });
+    }));
   }
 
   const corpseDecals: GroundCorpseDecal[] = [];
   for (const entry of opts.batch.corpses) {
-    corpseDecals.push({
+    corpseDecals.push(new GroundCorpseDecal({
       bodysetFrame: opts.corpseFrameForType(entry.creatureTypeId),
       topLeft: entry.topLeft,
       size: entry.scale,
       rotationRad: entry.rotation,
       tint: entry.color.toWgl(),
-    });
+    }));
   }
 
   const bakedFx = ground.bakeDecals(decals);
