@@ -1,6 +1,6 @@
 // Port of crimson/quests/timeline.py
 
-import { Vec2 } from '@grim/geom.ts';
+import type { Vec2 } from '@grim/geom.ts';
 import { SpawnTemplateCall } from '@crimson/creatures/spawn.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { SpawnEntry } from './types.ts';
