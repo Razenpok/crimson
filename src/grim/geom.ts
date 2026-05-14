@@ -8,11 +8,38 @@ export interface SupportsXY {
   y: number;
 }
 
+function roundToDigits(value: number, ndigits: number): number {
+  const factor = Math.pow(10, ndigits);
+  const scaled = value * factor;
+  const sign = scaled < 0 ? -1 : 1;
+  const absScaled = Math.abs(scaled);
+  const floorValue = Math.floor(absScaled);
+  const fraction = absScaled - floorValue;
+  let rounded: number;
+  if (Math.abs(fraction - 0.5) <= Number.EPSILON) {
+    rounded = floorValue % 2 === 0 ? floorValue : floorValue + 1;
+  } else if (fraction > 0.5) {
+    rounded = floorValue + 1;
+  } else {
+    rounded = floorValue;
+  }
+  return sign * rounded / factor;
+}
+
 export class Vec2 {
-  constructor(
-    public readonly x: number = 0.0,
-    public readonly y: number = 0.0
-  ) {
+  readonly x: number;
+  readonly y: number;
+
+  constructor(opts?: { x?: number; y?: number });
+  constructor(x?: number, y?: number);
+  constructor(optsOrX: { x?: number; y?: number } | number = {}, y: number = 0.0) {
+    if (typeof optsOrX === 'number') {
+      this.x = optsOrX;
+      this.y = y;
+      return;
+    }
+    this.x = optsOrX.x ?? 0.0;
+    this.y = optsOrX.y ?? 0.0;
   }
 
   lengthSq() {
@@ -120,15 +147,18 @@ export class Vec2 {
     return wgl.makeVector2(this.x, this.y);
   }
 
+  toRl() {
+    return this.toWgl();
+  }
+
   toDict(opts: { ndigits?: number } = {}) {
     const ndigits = opts.ndigits;
     if (ndigits === undefined) {
       return { x: this.x, y: this.y };
     }
-    const factor = Math.pow(10, ndigits);
     return {
-      x: Math.round(this.x * factor) / factor,
-      y: Math.round(this.y * factor) / factor,
+      x: roundToDigits(this.x, ndigits),
+      y: roundToDigits(this.y, ndigits),
     };
   }
 
@@ -163,12 +193,30 @@ export class Vec2 {
 }
 
 export class Rect {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+
+  constructor(opts?: { x?: number; y?: number; w?: number; h?: number });
+  constructor(x?: number, y?: number, w?: number, h?: number);
   constructor(
-    public readonly x: number = 0.0,
-    public readonly y: number = 0.0,
-    public readonly w: number = 0.0,
-    public readonly h: number = 0.0
+    optsOrX: { x?: number; y?: number; w?: number; h?: number } | number = {},
+    y: number = 0.0,
+    w: number = 0.0,
+    h: number = 0.0,
   ) {
+    if (typeof optsOrX === 'number') {
+      this.x = optsOrX;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+      return;
+    }
+    this.x = optsOrX.x ?? 0.0;
+    this.y = optsOrX.y ?? 0.0;
+    this.w = optsOrX.w ?? 0.0;
+    this.h = optsOrX.h ?? 0.0;
   }
 
   static fromXywh(value: { x: number; y: number; width: number; height: number }) {
@@ -236,5 +284,9 @@ export class Rect {
 
   toWgl() {
     return wgl.makeRectangle(this.x, this.y, this.w, this.h);
+  }
+
+  toRl() {
+    return this.toWgl();
   }
 }
