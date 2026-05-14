@@ -45,8 +45,14 @@ function requireRuntimeAssets(_assetsDir: string): void {
 }
 
 function parseFloatArg(value: string): number {
-  const v = parseFloat(value);
-  return Number.isFinite(v) ? v : 0.0;
+  const stripped = value.trim();
+  if (/^[+-]?nan$/i.test(stripped)) return Number.NaN;
+  if (/^[+-]?inf(?:inity)?$/i.test(stripped)) {
+    return stripped.startsWith('-') ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+  }
+  if (stripped.length === 0) return 0.0;
+  const v = Number(stripped);
+  return Number.isNaN(v) ? 0.0 : v;
 }
 
 function applyDebugConsoleDefaults(console: ConsoleState, debug: boolean): void {
@@ -150,7 +156,7 @@ function bootCommandHandlers(
     }
     let value: number;
     try {
-      value = int(parseFloat(args[0]));
+      value = int(parseFloatArg(args[0]));
     } catch {
       value = 0;
     }
@@ -169,7 +175,7 @@ function bootCommandHandlers(
     }
     let value: number;
     try {
-      value = int(parseFloat(args[0]));
+      value = int(parseFloatArg(args[0]));
     } catch {
       value = 0;
     }
@@ -283,8 +289,7 @@ export function runGame(
   cfg.display.height = height;
   wgl.resize(width, height);
 
-  const seed = config.seed ?? ((Date.now() * 0xDEAD + 0xBEEF) >>> 0);
-  const rng = new Crand(seed);
+  const rng = config.seed === null ? new Crand() : new Crand(config.seed);
   const assetsDir = resolveAssetsDir(config);
 
   const console = createConsole(config.baseDir, assetsDir);
