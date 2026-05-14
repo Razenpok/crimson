@@ -177,7 +177,7 @@ function damageLethalRangedShockBurst(
     const scaleStep = (rng.rand({ caller: RngCallerStatic.CREATURE_APPLY_DAMAGE_SHOCK_BURST_SCALE_STEP }) % 140) * 0.01 + 0.3;
     if (effects === null) continue;
     effects.spawn({
-      effectId: EffectId.BURST,
+      effectId: int(EffectId.BURST),
       pos: creature.pos,
       vel,
       rotation,
