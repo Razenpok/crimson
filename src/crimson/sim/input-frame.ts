@@ -5,10 +5,10 @@
 import { PlayerInput } from './input.ts';
 
 export class InputFrame {
-  constructor(
-    public readonly players: readonly PlayerInput[]
-  ) {
-    Object.freeze(this);
+  public readonly players: readonly PlayerInput[];
+
+  constructor(opts: { players: readonly PlayerInput[] }) {
+    this.players = opts.players;
   }
 
   asList(): PlayerInput[] {
@@ -47,5 +47,5 @@ export function normalizeInputFrame(
       });
     }
   }
-  return new InputFrame(frame);
+  return new InputFrame({ players: frame });
 }
