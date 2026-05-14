@@ -1,7 +1,7 @@
 // Port of crimson/game/runtime.py
 
 import * as wgl from '@wgl';
-import { defaultCrimsonConfig } from '@grim/config.ts';
+import { ensureCrimsonCfg } from '@grim/config.ts';
 import {
   type ConsoleState,
   type CommandHandler,
@@ -282,7 +282,7 @@ export function runGame(
   if (config.debug) {
     setDebugEnabled(true);
   }
-  const cfg = defaultCrimsonConfig();
+  const cfg = ensureCrimsonCfg(config.baseDir);
   const width = config.width ?? cfg.display.width;
   const height = config.height ?? cfg.display.height;
   cfg.display.width = width;
