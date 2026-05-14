@@ -48,6 +48,8 @@ import {
   playerNameDefault,
 } from './shared.ts';
 
+export { QUEST_FAILED_PANEL_SLIDE_DURATION_MS, QUEST_FAILED_PANEL_W } from './shared.ts';
+
 const KEY_ESCAPE = 27;
 const KEY_ENTER = 13;
 const KEY_Q = 81;
