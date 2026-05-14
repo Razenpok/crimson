@@ -14,8 +14,11 @@ export const Q4_TERRAIN_SLOTS: TerrainSlotTriplet = [6, 7, 6] as const;
 export const DEFAULT_TERRAIN_SLOTS: TerrainSlotTriplet = Q1_TERRAIN_SLOTS;
 
 export const UNLOCK_TERRAIN_SLOTS: ReadonlyArray<readonly [number, TerrainSlotTriplet]> = [
+  // after quest 4.10 "The End of All"
   [40, Q4_TERRAIN_SLOTS],
+  // after quest 3.10 "Zombie Masters"
   [30, Q3_TERRAIN_SLOTS],
+  // after quest 2.10 "Spideroids"
   [20, Q2_TERRAIN_SLOTS],
 ];
 
