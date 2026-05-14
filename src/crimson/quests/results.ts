@@ -1,10 +1,22 @@
 // Port of crimson/quests/results.py
 
-export interface QuestFinalTime {
+export class QuestFinalTime {
   readonly baseTimeMs: number;
   readonly lifeBonusMs: number;
   readonly unpickedPerkBonusMs: number;
   readonly finalTimeMs: number;
+
+  constructor(opts: {
+    baseTimeMs: number;
+    lifeBonusMs: number;
+    unpickedPerkBonusMs: number;
+    finalTimeMs: number;
+  }) {
+    this.baseTimeMs = opts.baseTimeMs;
+    this.lifeBonusMs = opts.lifeBonusMs;
+    this.unpickedPerkBonusMs = opts.unpickedPerkBonusMs;
+    this.finalTimeMs = opts.finalTimeMs;
+  }
 }
 
 export class QuestResultsBreakdownAnim {
@@ -83,12 +95,12 @@ export function computeQuestFinalTime(opts: {
   let finalMs = baseMs - int(lifeBonusMs) - int(unpickedPerkBonusMs);
   if (finalMs < 1) finalMs = 1;
 
-  return {
+  return new QuestFinalTime({
     baseTimeMs: baseMs,
     lifeBonusMs: int(lifeBonusMs),
     unpickedPerkBonusMs: int(unpickedPerkBonusMs),
     finalTimeMs: int(finalMs),
-  };
+  });
 }
 
 export function tickQuestResultsBreakdownAnim(
