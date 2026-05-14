@@ -18,7 +18,6 @@ export class TickRunnerConfig {
 
   constructor(opts: { traceRng?: boolean } = {}) {
     this.traceRng = opts.traceRng ?? false;
-    Object.freeze(this);
   }
 }
 
