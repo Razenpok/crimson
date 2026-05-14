@@ -1027,9 +1027,9 @@ export class BaseGameplayMode {
     if (this._lanSeedOverride !== null) {
       seed = this._lanSeedOverride;
     } else {
-      seed = Number((this.state).rng?.state ?? 0);
+      seed = Number(this.state.rng.state);
     }
-    this._runResetSeed = (seed >>> 0) & 0xFFFFFFFF;
+    this._runResetSeed = int(seed) >>> 0;
 
     // Reset LAN sim status at the start of each run so per-session usage
     // counts (weapon bias) start from a consistent baseline across peers.
@@ -1161,8 +1161,8 @@ export class BaseGameplayMode {
   regenerateTerrainForConsole(): void {
     if (this.renderResources.ground === null) return;
     // Keep this deterministic without consuming gameplay RNG.
-    this._terrainRegenCounter = ((this._terrainRegenCounter + 1) >>> 0) & 0xFFFFFFFF;
-    const terrainSeed = (Number((this.state).rng?.state ?? 0) + this._terrainRegenCounter) & 0xFFFFFFFF;
+    this._terrainRegenCounter = (int(this._terrainRegenCounter) + 1) >>> 0;
+    const terrainSeed = (int(this.state.rng.state) + int(this._terrainRegenCounter)) >>> 0;
     this.renderResources.ground.scheduleGenerate(terrainSeed);
   }
 
