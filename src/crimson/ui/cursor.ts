@@ -4,7 +4,7 @@ import * as wgl from '@wgl';
 import { Vec2 } from "@grim/geom.ts";
 import { effectSrcRect, EffectId } from "@crimson/effects-atlas.ts";
 
-const CURSOR_EFFECT_ID: number = EffectId.GLOW;
+const CURSOR_EFFECT_ID: number = int(EffectId.GLOW);
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
@@ -70,7 +70,7 @@ export function drawCursorGlow(
   const effectId = opts.effectId ?? CURSOR_EFFECT_ID;
 
   const src = effectSrcRect(
-    effectId,
+    int(effectId),
     { textureWidth: particles.width, textureHeight: particles.height },
   );
   if (src === null) return;
