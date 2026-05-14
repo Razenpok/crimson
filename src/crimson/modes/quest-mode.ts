@@ -48,6 +48,7 @@ import {
   type LanSession,
   type LanStepAction,
 } from './base-gameplay-mode.ts';
+import { shotsFromState } from './components/highscore-record-builder.ts';
 import { PerkMenuController } from './components/perk-menu-controller.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { PerkPromptState } from './components/perk-prompt-controller.ts';
@@ -116,7 +117,6 @@ export class QuestRunOutcome {
     this.shotsHit = opts.shotsHit;
     this.mostUsedWeaponId = opts.mostUsedWeaponId;
     this.playerHealthValues = opts.playerHealthValues ?? [];
-    Object.freeze(this);
   }
 }
 
@@ -167,6 +167,9 @@ export class QuestMode extends BaseGameplayMode {
     this._perkMenu.reset();
     this._resetGameplayFrameClock();
     this._resetLanCaptureClock();
+    this._replayRecorder = null;
+    this._replayCheckpoints.length = 0;
+    this._replayCheckpointsLastTick = null;
     this._simSession = null;
   }
 
@@ -387,7 +390,31 @@ export class QuestMode extends BaseGameplayMode {
 
     if (spawnState.completed) {
       if (this._outcome === null) {
-        this._buildCompletedOutcome();
+        if (this._questLevel === null) {
+          throw new Error('quest outcome requires active quest level');
+        }
+        const [fired, hit] = shotsFromState(this.state, { playerIndex: int(this.player.index) });
+        const mostUsedWeaponId = mostUsedWeaponIdForPlayer(
+          this.state,
+          { playerIndex: int(this.player.index), fallbackWeaponId: this.player.weapon.weaponId },
+        );
+        const playerHealthValues = this.simWorld.players.map((player) => player.health);
+        const player2Health = playerHealthValues.length >= 2 ? playerHealthValues[1] : null;
+        this._outcome = new QuestRunOutcome({
+          kind: 'completed',
+          level: this._questLevel,
+          baseTimeMs: int(spawnState.spawnTimelineMs),
+          playerHealth: playerHealthValues.length > 0 ? playerHealthValues[0] : this.player.health,
+          player2Health,
+          playerHealthValues,
+          pendingPerkCount: int(this.state.perkSelection.pendingCount),
+          experience: int(this.player.experience),
+          killCount: int(this.creatures.killCount),
+          weaponId: this.player.weapon.weaponId,
+          shotsFired: fired,
+          shotsHit: hit,
+          mostUsedWeaponId,
+        });
       }
       this._saveReplay();
       this.closeRequested = true;
@@ -593,60 +620,32 @@ export class QuestMode extends BaseGameplayMode {
     }
   }
 
-  private _buildCompletedOutcome(): void {
-    if (this._questLevel === null) {
-      throw new Error('quest outcome requires active quest level');
-    }
-    const [fired, hit] = this._shotsFromState(this.player.index);
-    const mostUsed = mostUsedWeaponIdForPlayer(
-      this.state,
-      { playerIndex: this.player.index, fallbackWeaponId: this.player.weapon.weaponId },
-    );
-    const healthValues = this.simWorld.players.map((p) => p.health);
-    const player2Health = healthValues.length >= 2 ? healthValues[1] : null;
-    this._outcome = new QuestRunOutcome({
-      kind: 'completed',
-      level: this._questLevel,
-      baseTimeMs: int(this._questSpawnState.spawnTimelineMs),
-      playerHealth: healthValues.length > 0 ? healthValues[0] : this.player.health,
-      player2Health,
-      playerHealthValues: healthValues,
-      pendingPerkCount: this.state.perkSelection.pendingCount,
-      experience: this.player.experience,
-      killCount: this.creatures.killCount,
-      weaponId: this.player.weapon.weaponId,
-      shotsFired: fired,
-      shotsHit: hit,
-      mostUsedWeaponId: mostUsed,
-    });
-  }
-
   private _closeFailedRun(): void {
     if (this._outcome === null) {
       if (this._questLevel === null) {
         throw new Error('quest outcome requires active quest level');
       }
-      const [fired, hit] = this._shotsFromState(this.player.index);
-      const mostUsed = mostUsedWeaponIdForPlayer(
+      const [fired, hit] = shotsFromState(this.state, { playerIndex: int(this.player.index) });
+      const mostUsedWeaponId = mostUsedWeaponIdForPlayer(
         this.state,
-        { playerIndex: this.player.index, fallbackWeaponId: this.player.weapon.weaponId },
+        { playerIndex: int(this.player.index), fallbackWeaponId: this.player.weapon.weaponId },
       );
-      const healthValues = this.simWorld.players.map((p) => p.health);
-      const player2Health = healthValues.length >= 2 ? healthValues[1] : null;
+      const playerHealthValues = this.simWorld.players.map((player) => player.health);
+      const player2Health = playerHealthValues.length >= 2 ? playerHealthValues[1] : null;
       this._outcome = new QuestRunOutcome({
         kind: 'failed',
         level: this._questLevel,
         baseTimeMs: int(this._questSpawnState.spawnTimelineMs),
-        playerHealth: healthValues.length > 0 ? healthValues[0] : this.player.health,
+        playerHealth: playerHealthValues.length > 0 ? playerHealthValues[0] : this.player.health,
         player2Health,
-        playerHealthValues: healthValues,
-        pendingPerkCount: this.state.perkSelection.pendingCount,
-        experience: this.player.experience,
-        killCount: this.creatures.killCount,
+        playerHealthValues,
+        pendingPerkCount: int(this.state.perkSelection.pendingCount),
+        experience: int(this.player.experience),
+        killCount: int(this.creatures.killCount),
         weaponId: this.player.weapon.weaponId,
         shotsFired: fired,
         shotsHit: hit,
-        mostUsedWeaponId: mostUsed,
+        mostUsedWeaponId,
       });
     }
     this._saveReplay();
