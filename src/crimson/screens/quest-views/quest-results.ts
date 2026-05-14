@@ -84,11 +84,8 @@ export class QuestResultsView {
     record.questStageMajor = int(major);
     record.questStageMinor = int(minor);
     record.scoreXp = int(outcome.experience);
-    record.survivalElapsedMs = 0;
-    record.mostUsedWeaponId = outcome.mostUsedWeaponId;
     record.creatureKillCount = int(outcome.killCount);
-    record.shotsFired = 0;
-    record.shotsHit = 0;
+    record.mostUsedWeaponId = outcome.mostUsedWeaponId;
     const fired = Math.max(0, int(outcome.shotsFired));
     const hit = Math.max(0, Math.min(int(outcome.shotsHit), fired));
     record.shotsFired = fired;
@@ -190,8 +187,6 @@ export class QuestResultsView {
     const audio = this.state.audio;
     const playSfxFn: ((sfxId: SfxId) => void) | null =
       audio !== null ? (name: SfxId) => { audioPlaySfx(audio, name); } : null;
-    const resources = this.state.resources;
-    if (resources === null) return;
 
     const action = ui.update(dt, { playSfx: playSfxFn });
     if (action === 'play_again') {
@@ -246,12 +241,8 @@ export class QuestResultsView {
       return;
     }
 
-    // Fallback when no UI is available — draw visible indicator rectangles.
-    // Python uses rl.draw_text; WebGL has no built-in text, so draw colored bars.
-    const textColor = wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0);
-    const subColor = wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1.0);
-    wgl.drawRectangle(32, 140, 400, 28, textColor);
-    wgl.drawRectangle(32, 180, 400, 18, subColor);
+    wgl.drawText('Quest results unavailable.', 32, 140, 28, wgl.makeColor(235 / 255, 235 / 255, 235 / 255, 1.0));
+    wgl.drawText('Press ESC to return to the menu.', 32, 180, 18, wgl.makeColor(190 / 255, 190 / 255, 200 / 255, 1.0));
   }
 
   takeAction(): string | null {
