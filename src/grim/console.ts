@@ -3,6 +3,7 @@
 import * as wgl from '@wgl';
 import { Vec2 } from './geom.ts';
 import { clamp } from './math.ts';
+import { RGBA } from './color.ts';
 import { type SmallFontData, drawSmallText, loadSmallFont, measureSmallTextWidth } from './fonts/small.ts';
 import { type GrimMonoFont, drawGrimMonoText, loadGrimMonoFont } from './fonts/grim-mono.ts';
 import { InputState } from './input.ts';
@@ -55,6 +56,10 @@ const KEY_RIGHT_CONTROL = 345;
 
 export type CommandHandler = (args: string[]) => void;
 
+export function gameBuildPath(baseDir: string, name: string): string {
+  return _joinScriptPath(baseDir, name);
+}
+
 function parseConsoleFloat(value: string): number {
   const stripped = value.trim();
   if (stripped.length === 0) return 0.0;
@@ -68,7 +73,7 @@ function parseConsoleFloat(value: string): number {
 }
 
 function _normalizeScriptPath(name: string): string {
-  const raw = name.trim().replace(/^["']|["']$/g, '');
+  const raw = name.trim().replace(/^["']+|["']+$/g, '');
   return raw.replace(/\\/g, '/');
 }
 
@@ -113,6 +118,10 @@ async function _resolveScriptTextIn(target: string, roots: Iterable<string>): Pr
     }
   }
   return null;
+}
+
+async function _resolveScriptText(console: ConsoleState, target: string): Promise<string | null> {
+  return _resolveScriptTextIn(target, console.scriptDirs);
 }
 
 async function _iterScriptPaqUrls(console: ConsoleState): Promise<string[]> {
@@ -186,6 +195,16 @@ async function _execScript(console: ConsoleState, arg: string): Promise<void> {
   } catch {
     console.log.log(`Cannot open file '${arg}'`);
   }
+}
+
+function _rgba(r: number, g: number, b: number, a: number): wgl.Color {
+  const c = new RGBA(r, g, b, a).clamped();
+  return wgl.makeColor(
+    int(c.r * 255.0) / 255.0,
+    int(c.g * 255.0) / 255.0,
+    int(c.b * 255.0) / 255.0,
+    int(c.a * 255.0) / 255.0,
+  );
 }
 
 export class ConsoleLog {
@@ -395,18 +414,18 @@ export class ConsoleState {
     const screenW = wgl.getScreenWidth();
     const offsetY = this._offsetY;
 
-    wgl.drawRectangle(0, offsetY, screenW, height, wgl.makeColor(...CONSOLE_BG_COLOR, ratio));
-    const borderY = offsetY + height - CONSOLE_BORDER_HEIGHT;
-    wgl.drawRectangle(0, borderY, screenW, CONSOLE_BORDER_HEIGHT, wgl.makeColor(...CONSOLE_BORDER_COLOR, ratio));
+    wgl.drawRectangle(0, int(offsetY), int(screenW), int(height), _rgba(...CONSOLE_BG_COLOR, ratio));
+    const borderY = int(offsetY + height - CONSOLE_BORDER_HEIGHT);
+    wgl.drawRectangle(0, borderY, int(screenW), int(CONSOLE_BORDER_HEIGHT), _rgba(...CONSOLE_BORDER_COLOR, ratio));
 
     const versionX = screenW - CONSOLE_VERSION_OFFSET_X;
     const versionY = offsetY + height - CONSOLE_VERSION_OFFSET_Y;
-    this._drawVersionText(new Vec2(versionX, versionY), wgl.makeColor(1.0, 1.0, 1.0, ratio * 0.3));
+    this._drawVersionText(new Vec2(versionX, versionY), _rgba(1.0, 1.0, 1.0, ratio * 0.3));
 
     const [visible, visibleCount] = this._visibleLogBlock(height);
 
     const inputY = offsetY + (visibleCount + 1) * CONSOLE_LINE_HEIGHT;
-    const textColor = wgl.makeColor(1.0, 1.0, 1.0, ratio);
+    const textColor = _rgba(1.0, 1.0, 1.0, ratio);
     const useMono = this._useMonoFont();
     if (useMono) {
       this._drawMonoText(CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
@@ -416,7 +435,7 @@ export class ConsoleState {
       this._drawSmallText(prompt, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
     }
 
-    const logColor = wgl.makeColor(0.6, 0.6, 0.7, ratio);
+    const logColor = _rgba(0.6, 0.6, 0.7, ratio);
     let y = offsetY + CONSOLE_LINE_HEIGHT;
     for (const line of visible) {
       if (useMono) {
@@ -428,7 +447,7 @@ export class ConsoleState {
     }
 
     const caretAlpha = ratio * this._caretBlinkAlpha();
-    const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
+    const caretColor = _rgba(1.0, 1.0, 1.0, caretAlpha);
     const caretY = inputY + 2.0;
     if (useMono) {
       const caretX = CONSOLE_INPUT_X_MONO + this.inputCaret * 8.0;
@@ -461,7 +480,7 @@ export class ConsoleState {
       posX = wgl.getScreenWidth() - FPS_COUNTER_X_LONG;
     }
     const posY = wgl.getScreenHeight() - FPS_COUNTER_Y;
-    this._drawSmallText(text, new Vec2(posX, posY), wgl.makeColor(1.0, 1.0, 1.0, FPS_COUNTER_ALPHA));
+    this._drawSmallText(text, new Vec2(posX, posY), _rgba(1.0, 1.0, 1.0, FPS_COUNTER_ALPHA));
   }
 
   handleHotkey(): void {
