@@ -1037,10 +1037,13 @@ class PlanBuilder {
 type TemplateFn = (ctx: PlanBuilder) => void;
 const TEMPLATE_BUILDERS: Map<SpawnId, TemplateFn> = new Map();
 
-function registerTemplate(templateIds: SpawnId[], fn: TemplateFn): void {
-  for (const templateId of templateIds) {
-    TEMPLATE_BUILDERS.set(templateId, fn);
-  }
+function registerTemplate(...templateIds: SpawnId[]): (fn: TemplateFn) => TemplateFn {
+  return (fn: TemplateFn): TemplateFn => {
+    for (const templateId of templateIds) {
+      TEMPLATE_BUILDERS.set(templateId, fn);
+    }
+    return fn;
+  };
 }
 
 
@@ -1922,7 +1925,7 @@ function template00ZombieBossSpawner(ctx: PlanBuilder): void {
   c.contactDamage = 50.0;
 }
 
-registerTemplate([SpawnId.ZOMBIE_BOSS_SPAWNER_00], template00ZombieBossSpawner);
+registerTemplate(SpawnId.ZOMBIE_BOSS_SPAWNER_00)(template00ZombieBossSpawner);
 
 
 const BASIC_RANDOM_TYPE_IDS: Map<SpawnId, CreatureTypeId> = new Map([
@@ -1968,9 +1971,10 @@ function template030506BasicRandom(ctx: PlanBuilder): void {
 }
 
 registerTemplate(
-  [SpawnId.SPIDER_SP1_RANDOM_03, SpawnId.SPIDER_SP2_RANDOM_05, SpawnId.ALIEN_RANDOM_06],
-  template030506BasicRandom,
-);
+  SpawnId.SPIDER_SP1_RANDOM_03,
+  SpawnId.SPIDER_SP2_RANDOM_05,
+  SpawnId.ALIEN_RANDOM_06,
+)(template030506BasicRandom);
 
 
 function template04LizardRandom(ctx: PlanBuilder): void {
@@ -1990,7 +1994,7 @@ function template04LizardRandom(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.LIZARD_RANDOM_04], template04LizardRandom);
+registerTemplate(SpawnId.LIZARD_RANDOM_04)(template04LizardRandom);
 
 
 function template0eAlienSpawnerRing24(ctx: PlanBuilder): void {
@@ -2026,7 +2030,7 @@ function template0eAlienSpawnerRing24(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.ALIEN_SPAWNER_RING_24_0E], template0eAlienSpawnerRing24);
+registerTemplate(SpawnId.ALIEN_SPAWNER_RING_24_0E)(template0eAlienSpawnerRing24);
 
 
 function template11FormationChainLizard4(ctx: PlanBuilder): void {
@@ -2066,7 +2070,7 @@ function template11FormationChainLizard4(ctx: PlanBuilder): void {
   applyUnhandledCreatureTypeFallback(ctx.creatures, ctx.primary);
 }
 
-registerTemplate([SpawnId.FORMATION_CHAIN_LIZARD_4_11], template11FormationChainLizard4);
+registerTemplate(SpawnId.FORMATION_CHAIN_LIZARD_4_11)(template11FormationChainLizard4);
 
 
 function template13FormationChainAlien10(ctx: PlanBuilder): void {
@@ -2108,7 +2112,7 @@ function template13FormationChainAlien10(ctx: PlanBuilder): void {
   applyUnhandledCreatureTypeFallback(ctx.creatures, ctx.primary);
 }
 
-registerTemplate([SpawnId.FORMATION_CHAIN_ALIEN_10_13], template13FormationChainAlien10);
+registerTemplate(SpawnId.FORMATION_CHAIN_ALIEN_10_13)(template13FormationChainAlien10);
 
 
 const AI1_BLUE_TINT_TEMPLATES: Map<SpawnId, [CreatureTypeId, number]> = new Map([
@@ -2141,9 +2145,10 @@ function template1a1b1cAi1BlueTint(ctx: PlanBuilder): void {
 }
 
 registerTemplate(
-  [SpawnId.AI1_ALIEN_BLUE_TINT_1A, SpawnId.AI1_SPIDER_SP1_BLUE_TINT_1B, SpawnId.AI1_LIZARD_BLUE_TINT_1C],
-  template1a1b1cAi1BlueTint,
-);
+  SpawnId.AI1_ALIEN_BLUE_TINT_1A,
+  SpawnId.AI1_SPIDER_SP1_BLUE_TINT_1B,
+  SpawnId.AI1_LIZARD_BLUE_TINT_1C,
+)(template1a1b1cAi1BlueTint);
 
 
 function template1dAlienRandom(ctx: PlanBuilder): void {
@@ -2162,7 +2167,7 @@ function template1dAlienRandom(ctx: PlanBuilder): void {
   c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_CONTACT_DAMAGE }) % 10) + 4.0;
 }
 
-registerTemplate([SpawnId.ALIEN_RANDOM_1D], template1dAlienRandom);
+registerTemplate(SpawnId.ALIEN_RANDOM_1D)(template1dAlienRandom);
 
 
 function template1eAlienRandom(ctx: PlanBuilder): void {
@@ -2181,7 +2186,7 @@ function template1eAlienRandom(ctx: PlanBuilder): void {
   c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_CONTACT_DAMAGE }) % 30) + 4.0;
 }
 
-registerTemplate([SpawnId.ALIEN_RANDOM_1E], template1eAlienRandom);
+registerTemplate(SpawnId.ALIEN_RANDOM_1E)(template1eAlienRandom);
 
 
 function template1fAlienRandom(ctx: PlanBuilder): void {
@@ -2200,7 +2205,7 @@ function template1fAlienRandom(ctx: PlanBuilder): void {
   c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_CONTACT_DAMAGE }) % 35) + 8.0;
 }
 
-registerTemplate([SpawnId.ALIEN_RANDOM_1F], template1fAlienRandom);
+registerTemplate(SpawnId.ALIEN_RANDOM_1F)(template1fAlienRandom);
 
 
 function template20AlienRandomGreen(ctx: PlanBuilder): void {
@@ -2223,7 +2228,7 @@ function template20AlienRandomGreen(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.ALIEN_RANDOM_GREEN_20], template20AlienRandomGreen);
+registerTemplate(SpawnId.ALIEN_RANDOM_GREEN_20)(template20AlienRandomGreen);
 
 
 function template2eLizardRandom(ctx: PlanBuilder): void {
@@ -2248,7 +2253,7 @@ function template2eLizardRandom(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.LIZARD_RANDOM_2E], template2eLizardRandom);
+registerTemplate(SpawnId.LIZARD_RANDOM_2E)(template2eLizardRandom);
 
 
 function template31LizardRandom(ctx: PlanBuilder): void {
@@ -2262,7 +2267,7 @@ function template31LizardRandom(ctx: PlanBuilder): void {
   c.contactDamage = size * 0.14 + 4.0;
 }
 
-registerTemplate([SpawnId.LIZARD_RANDOM_31], template31LizardRandom);
+registerTemplate(SpawnId.LIZARD_RANDOM_31)(template31LizardRandom);
 
 
 function template32SpiderSp1Random(ctx: PlanBuilder): void {
@@ -2279,7 +2284,7 @@ function template32SpiderSp1Random(ctx: PlanBuilder): void {
   c.contactDamage = size * 0.14 + 4.0;
 }
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_32], template32SpiderSp1Random);
+registerTemplate(SpawnId.SPIDER_SP1_RANDOM_32)(template32SpiderSp1Random);
 
 
 function template33SpiderSp1RandomRed(ctx: PlanBuilder): void {
@@ -2303,7 +2308,7 @@ function template33SpiderSp1RandomRed(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_RED_33], template33SpiderSp1RandomRed);
+registerTemplate(SpawnId.SPIDER_SP1_RANDOM_RED_33)(template33SpiderSp1RandomRed);
 
 
 function template34SpiderSp1RandomGreen(ctx: PlanBuilder): void {
@@ -2327,7 +2332,7 @@ function template34SpiderSp1RandomGreen(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_GREEN_34], template34SpiderSp1RandomGreen);
+registerTemplate(SpawnId.SPIDER_SP1_RANDOM_GREEN_34)(template34SpiderSp1RandomGreen);
 
 
 function template35SpiderSp2Random(ctx: PlanBuilder): void {
@@ -2351,7 +2356,7 @@ function template35SpiderSp2Random(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.SPIDER_SP2_RANDOM_35], template35SpiderSp2Random);
+registerTemplate(SpawnId.SPIDER_SP2_RANDOM_35)(template35SpiderSp2Random);
 
 
 function template36AlienAi7Orbiter(ctx: PlanBuilder): void {
@@ -2368,7 +2373,7 @@ function template36AlienAi7Orbiter(ctx: PlanBuilder): void {
   c.contactDamage = 40.0;
 }
 
-registerTemplate([SpawnId.ALIEN_AI7_ORBITER_36], template36AlienAi7Orbiter);
+registerTemplate(SpawnId.ALIEN_AI7_ORBITER_36)(template36AlienAi7Orbiter);
 
 
 function template37SpiderSp2RangedVariant(ctx: PlanBuilder): void {
@@ -2383,7 +2388,7 @@ function template37SpiderSp2RangedVariant(ctx: PlanBuilder): void {
   c.contactDamage = 10.0;
 }
 
-registerTemplate([SpawnId.SPIDER_SP2_RANGED_VARIANT_37], template37SpiderSp2RangedVariant);
+registerTemplate(SpawnId.SPIDER_SP2_RANGED_VARIANT_37)(template37SpiderSp2RangedVariant);
 
 
 function template38SpiderSp1Ai7Timer(ctx: PlanBuilder): void {
@@ -2399,7 +2404,7 @@ function template38SpiderSp1Ai7Timer(ctx: PlanBuilder): void {
   c.contactDamage = 10.0;
 }
 
-registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_38], template38SpiderSp1Ai7Timer);
+registerTemplate(SpawnId.SPIDER_SP1_AI7_TIMER_38)(template38SpiderSp1Ai7Timer);
 
 
 function template39SpiderSp1Ai7TimerWeak(ctx: PlanBuilder): void {
@@ -2415,7 +2420,7 @@ function template39SpiderSp1Ai7TimerWeak(ctx: PlanBuilder): void {
   c.contactDamage = 10.0;
 }
 
-registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_WEAK_39], template39SpiderSp1Ai7TimerWeak);
+registerTemplate(SpawnId.SPIDER_SP1_AI7_TIMER_WEAK_39)(template39SpiderSp1Ai7TimerWeak);
 
 
 function template3dSpiderSp1Random(ctx: PlanBuilder): void {
@@ -2431,7 +2436,7 @@ function template3dSpiderSp1Random(ctx: PlanBuilder): void {
   c.contactDamage = size * 0.22;
 }
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_3D], template3dSpiderSp1Random);
+registerTemplate(SpawnId.SPIDER_SP1_RANDOM_3D)(template3dSpiderSp1Random);
 
 
 function template41ZombieRandom(ctx: PlanBuilder): void {
@@ -2448,7 +2453,7 @@ function template41ZombieRandom(ctx: PlanBuilder): void {
   );
 }
 
-registerTemplate([SpawnId.ZOMBIE_RANDOM_41], template41ZombieRandom);
+registerTemplate(SpawnId.ZOMBIE_RANDOM_41)(template41ZombieRandom);
 
 
 export function buildSpawnPlan(
