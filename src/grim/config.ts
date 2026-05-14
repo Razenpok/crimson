@@ -75,7 +75,7 @@ export class CrimsonDisplayConfig {
     this.textureScale = opts.textureScale;
     this.mouseSensitivity = opts.mouseSensitivity;
     this.detailPreset = opts.detailPreset;
-    this.fxDetail = opts.fxDetail;
+    this.fxDetail = [opts.fxDetail[0], opts.fxDetail[1], opts.fxDetail[2]];
     this.violenceDisabled = opts.violenceDisabled;
   }
 
@@ -148,7 +148,7 @@ export class CrimsonProfileConfig {
     this.playerNameInputLen = opts.playerNameInputLen;
     this.savedNameCount = opts.savedNameCount;
     this.selectedSavedNameSlot = opts.selectedSavedNameSlot;
-    this.savedNames = opts.savedNames;
+    this.savedNames = [...opts.savedNames];
     this.showInternetScores = opts.showInternetScores;
     this.scoreDateMode = opts.scoreDateMode;
   }
@@ -210,11 +210,11 @@ export class CrimsonPlayerControls {
     this.movement = opts.movement;
     this.aimScheme = opts.aimScheme;
     this.showDirectionArrow = opts.showDirectionArrow;
-    this.moveCodes = opts.moveCodes;
+    this.moveCodes = [opts.moveCodes[0], opts.moveCodes[1], opts.moveCodes[2], opts.moveCodes[3]];
     this.fireCode = opts.fireCode;
-    this.keyboardAimCodes = opts.keyboardAimCodes;
-    this.aimAxisCodes = opts.aimAxisCodes;
-    this.moveAxisCodes = opts.moveAxisCodes;
+    this.keyboardAimCodes = [opts.keyboardAimCodes[0], opts.keyboardAimCodes[1]];
+    this.aimAxisCodes = [opts.aimAxisCodes[0], opts.aimAxisCodes[1]];
+    this.moveAxisCodes = [opts.moveAxisCodes[0], opts.moveAxisCodes[1]];
   }
 }
 
@@ -228,7 +228,7 @@ export class CrimsonControlsConfig {
     pickPerkCode: number;
     reloadCode: number;
   }) {
-    this.players = opts.players;
+    this.players = [opts.players[0], opts.players[1], opts.players[2], opts.players[3]];
     this.pickPerkCode = opts.pickPerkCode;
     this.reloadCode = opts.reloadCode;
   }
