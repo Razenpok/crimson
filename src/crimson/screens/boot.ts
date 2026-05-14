@@ -25,6 +25,18 @@ export const DEBUG_LOADING_HOLD_ENV = 'CRIMSON_DEBUG_LOADING_HOLD_SECONDS';
 const MOUSE_BUTTON_LEFT = 0;
 const MOUSE_BUTTON_RIGHT = 2;
 
+function pyRound(value: number): number {
+  const floorValue = Math.floor(value);
+  const frac = value - floorValue;
+  if (frac < 0.5) return floorValue;
+  if (frac > 0.5) return floorValue + 1;
+  return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+}
+
+function colorAlpha(value: number): number {
+  return int(pyRound(value * 255.0)) / 255;
+}
+
 function debugLoadingHoldSeconds(): number {
   const processLike = (globalThis as typeof globalThis & {
     process?: { env?: Record<string, string | undefined> };
@@ -243,7 +255,7 @@ export class BootView {
     const texH = tex.height;
     const x = (wgl.getScreenWidth() - texW) * 0.5;
     const y = (wgl.getScreenHeight() - texH) * 0.5;
-    const tint = wgl.makeColor(1, 1, 1, alpha);
+    const tint = wgl.makeColor(1, 1, 1, colorAlpha(alpha));
     wgl.drawTexturePro(
       tex,
       wgl.makeRectangle(0, 0, texW, texH),
@@ -287,35 +299,35 @@ export class BootView {
     const lb = 198 / 255;
 
     wgl.drawRectangle(
-      int(Math.round(bandLeft)),
-      int(Math.round(bandTop)),
-      int(Math.round(bandRight - bandLeft)),
+      int(pyRound(bandLeft)),
+      int(pyRound(bandTop)),
+      int(pyRound(bandRight - bandLeft)),
       1,
-      wgl.makeColor(lr, lg, lb, lineAlpha),
+      wgl.makeColor(lr, lg, lb, colorAlpha(lineAlpha)),
     );
     wgl.drawRectangle(
-      int(Math.round(bandLeft)),
-      int(Math.round(bandBottom)),
-      int(Math.round(bandRight - bandLeft)),
+      int(pyRound(bandLeft)),
+      int(pyRound(bandBottom)),
+      int(pyRound(bandRight - bandLeft)),
       1,
-      wgl.makeColor(lr, lg, lb, lineAlpha),
+      wgl.makeColor(lr, lg, lb, colorAlpha(lineAlpha)),
     );
     wgl.drawRectangle(
-      int(Math.round(bandLeft)),
-      int(Math.round(bandTop)),
+      int(pyRound(bandLeft)),
+      int(pyRound(bandTop)),
       1,
-      int(Math.round(bandHeight)),
-      wgl.makeColor(lr, lg, lb, lineAlpha),
+      int(pyRound(bandHeight)),
+      wgl.makeColor(lr, lg, lb, colorAlpha(lineAlpha)),
     );
     wgl.drawRectangle(
-      int(Math.round(bandRight)),
-      int(Math.round(bandTop)),
+      int(pyRound(bandRight)),
+      int(pyRound(bandTop)),
       1,
-      int(Math.round(bandHeight)),
-      wgl.makeColor(lr, lg, lb, lineAlpha),
+      int(pyRound(bandHeight)),
+      wgl.makeColor(lr, lg, lb, colorAlpha(lineAlpha)),
     );
 
-    const tint = wgl.makeColor(1, 1, 1, alpha);
+    const tint = wgl.makeColor(1, 1, 1, colorAlpha(alpha));
 
     const logoW = logo.width;
     const logoHf = logo.height;
