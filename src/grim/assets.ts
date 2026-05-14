@@ -115,81 +115,77 @@ export class TextureSpec {
   }
 }
 
-function spec(relPath: string, clamp = false, pointFilter = false): TextureSpec {
-  return new TextureSpec({ relPath, clamp, pointFilter });
-}
-
 export const TEXTURE_SPECS: ReadonlyMap<TextureId, TextureSpec> = new Map([
-  [TextureId.BACKPLASMA, spec('load/backplasma.jaz')],
-  [TextureId.MOCKUP, spec('load/mockup.jaz')],
-  [TextureId.LOGO_ESRB, spec('load/esrb_mature.jaz')],
-  [TextureId.LOADING, spec('load/loading.jaz')],
-  [TextureId.CL_LOGO, spec('load/logo_crimsonland.tga')],
-  [TextureId.SPLASH_10TONS, spec('load/splash10tons.jaz')],
-  [TextureId.SPLASH_REFLEXIVE, spec('load/splashReflexive.jpg')],
-  [TextureId.DEFAULT_FONT_COURIER, spec('load/default_font_courier.tga')],
-  [TextureId.SMALL_WHITE, spec('load/smallWhite.tga', false, true)],
-  [TextureId.TROOPER, spec('game/trooper.jaz')],
-  [TextureId.ZOMBIE, spec('game/zombie.jaz')],
-  [TextureId.SPIDER_SP1, spec('game/spider_sp1.jaz')],
-  [TextureId.SPIDER_SP2, spec('game/spider_sp2.jaz')],
-  [TextureId.ALIEN, spec('game/alien.jaz')],
-  [TextureId.LIZARD, spec('game/lizard.jaz')],
-  [TextureId.ARROW, spec('load/arrow.tga')],
-  [TextureId.BULLET_I, spec('load/bullet16.tga')],
-  [TextureId.BULLET_TRAIL, spec('load/bulletTrail.tga')],
-  [TextureId.BODYSET, spec('game/bodyset.jaz')],
-  [TextureId.PROJS, spec('game/projs.jaz')],
-  [TextureId.UI_ICON_AIM, spec('ui/ui_iconAim.jaz', true)],
-  [TextureId.UI_BUTTON_SM, spec('ui/ui_button_64x32.jaz', true)],
-  [TextureId.UI_BUTTON_MD, spec('ui/ui_button_128x32.jaz', true)],
-  [TextureId.UI_CHECK_ON, spec('ui/ui_checkOn.jaz', true)],
-  [TextureId.UI_CHECK_OFF, spec('ui/ui_checkOff.jaz', true)],
-  [TextureId.UI_RECT_OFF, spec('ui/ui_rectOff.jaz', true)],
-  [TextureId.UI_RECT_ON, spec('ui/ui_rectOn.jaz', true)],
-  [TextureId.BONUSES, spec('game/bonuses.jaz')],
-  [TextureId.UI_IND_BULLET, spec('ui/ui_indBullet.jaz', true)],
-  [TextureId.UI_IND_ROCKET, spec('ui/ui_indRocket.jaz', true)],
-  [TextureId.UI_IND_ELECTRIC, spec('ui/ui_indElectric.jaz', true)],
-  [TextureId.UI_IND_FIRE, spec('ui/ui_indFire.jaz', true)],
-  [TextureId.PARTICLES, spec('game/particles.jaz')],
-  [TextureId.UI_IND_LIFE, spec('ui/ui_indLife.jaz', true)],
-  [TextureId.UI_IND_PANEL, spec('ui/ui_indPanel.jaz', true)],
-  [TextureId.UI_ARROW, spec('ui/ui_arrow.jaz', true)],
-  [TextureId.UI_CURSOR, spec('ui/ui_cursor.jaz', true)],
-  [TextureId.UI_AIM, spec('ui/ui_aim.jaz', true)],
-  [TextureId.TER_Q1_BASE, spec('ter/ter_q1_base.jaz')],
-  [TextureId.TER_Q1_OVERLAY, spec('ter/ter_q1_tex1.jaz')],
-  [TextureId.TER_Q2_BASE, spec('ter/ter_q2_base.jaz')],
-  [TextureId.TER_Q2_OVERLAY, spec('ter/ter_q2_tex1.jaz')],
-  [TextureId.TER_Q3_BASE, spec('ter/ter_q3_base.jaz')],
-  [TextureId.TER_Q3_OVERLAY, spec('ter/ter_q3_tex1.jaz')],
-  [TextureId.TER_Q4_BASE, spec('ter/ter_q4_base.jaz')],
-  [TextureId.TER_Q4_OVERLAY, spec('ter/ter_q4_tex1.jaz')],
-  [TextureId.UI_TEXT_LEVEL_COMPLETE, spec('ui/ui_textLevComp.jaz', true)],
-  [TextureId.UI_TEXT_QUEST, spec('ui/ui_textQuest.jaz', true)],
-  [TextureId.UI_NUM1, spec('ui/ui_num1.jaz', true)],
-  [TextureId.UI_NUM2, spec('ui/ui_num2.jaz', true)],
-  [TextureId.UI_NUM3, spec('ui/ui_num3.jaz', true)],
-  [TextureId.UI_NUM4, spec('ui/ui_num4.jaz', true)],
-  [TextureId.UI_NUM5, spec('ui/ui_num5.jaz', true)],
-  [TextureId.UI_WICONS, spec('ui/ui_wicons.jaz', true)],
-  [TextureId.UI_GAME_TOP, spec('ui/ui_gameTop.jaz', true)],
-  [TextureId.UI_LIFE_HEART, spec('ui/ui_lifeHeart.jaz', true)],
-  [TextureId.UI_CLOCK_TABLE, spec('ui/ui_clockTable.jaz', true)],
-  [TextureId.UI_CLOCK_POINTER, spec('ui/ui_clockPointer.jaz', true)],
-  [TextureId.MUZZLE_FLASH, spec('game/muzzleFlash.jaz')],
-  [TextureId.UI_DROP_ON, spec('ui/ui_dropDownOn.jaz', true)],
-  [TextureId.UI_DROP_OFF, spec('ui/ui_dropDownOff.jaz', true)],
-  [TextureId.UI_SIGN_CRIMSON, spec('ui/ui_signCrimson.jaz', true)],
-  [TextureId.UI_MENU_ITEM, spec('ui/ui_menuItem.jaz', true)],
-  [TextureId.UI_MENU_PANEL, spec('ui/ui_menuPanel.jaz', true)],
-  [TextureId.UI_ITEM_TEXTS, spec('ui/ui_itemTexts.jaz', true)],
-  [TextureId.UI_TEXT_REAPER, spec('ui/ui_textReaper.jaz', true)],
-  [TextureId.UI_TEXT_WELL_DONE, spec('ui/ui_textWellDone.jaz', true)],
-  [TextureId.UI_TEXT_CONTROLS, spec('ui/ui_textControls.jaz', true)],
-  [TextureId.UI_TEXT_PICK_A_PERK, spec('ui/ui_textPickAPerk.jaz', true)],
-  [TextureId.UI_TEXT_LEVEL_UP, spec('ui/ui_textLevelUp.jaz', true)],
+  [TextureId.BACKPLASMA, new TextureSpec({ relPath: 'load/backplasma.jaz' })],
+  [TextureId.MOCKUP, new TextureSpec({ relPath: 'load/mockup.jaz' })],
+  [TextureId.LOGO_ESRB, new TextureSpec({ relPath: 'load/esrb_mature.jaz' })],
+  [TextureId.LOADING, new TextureSpec({ relPath: 'load/loading.jaz' })],
+  [TextureId.CL_LOGO, new TextureSpec({ relPath: 'load/logo_crimsonland.tga' })],
+  [TextureId.SPLASH_10TONS, new TextureSpec({ relPath: 'load/splash10tons.jaz' })],
+  [TextureId.SPLASH_REFLEXIVE, new TextureSpec({ relPath: 'load/splashReflexive.jpg' })],
+  [TextureId.DEFAULT_FONT_COURIER, new TextureSpec({ relPath: 'load/default_font_courier.tga' })],
+  [TextureId.SMALL_WHITE, new TextureSpec({ relPath: 'load/smallWhite.tga', pointFilter: true })],
+  [TextureId.TROOPER, new TextureSpec({ relPath: 'game/trooper.jaz' })],
+  [TextureId.ZOMBIE, new TextureSpec({ relPath: 'game/zombie.jaz' })],
+  [TextureId.SPIDER_SP1, new TextureSpec({ relPath: 'game/spider_sp1.jaz' })],
+  [TextureId.SPIDER_SP2, new TextureSpec({ relPath: 'game/spider_sp2.jaz' })],
+  [TextureId.ALIEN, new TextureSpec({ relPath: 'game/alien.jaz' })],
+  [TextureId.LIZARD, new TextureSpec({ relPath: 'game/lizard.jaz' })],
+  [TextureId.ARROW, new TextureSpec({ relPath: 'load/arrow.tga' })],
+  [TextureId.BULLET_I, new TextureSpec({ relPath: 'load/bullet16.tga' })],
+  [TextureId.BULLET_TRAIL, new TextureSpec({ relPath: 'load/bulletTrail.tga' })],
+  [TextureId.BODYSET, new TextureSpec({ relPath: 'game/bodyset.jaz' })],
+  [TextureId.PROJS, new TextureSpec({ relPath: 'game/projs.jaz' })],
+  [TextureId.UI_ICON_AIM, new TextureSpec({ relPath: 'ui/ui_iconAim.jaz', clamp: true })],
+  [TextureId.UI_BUTTON_SM, new TextureSpec({ relPath: 'ui/ui_button_64x32.jaz', clamp: true })],
+  [TextureId.UI_BUTTON_MD, new TextureSpec({ relPath: 'ui/ui_button_128x32.jaz', clamp: true })],
+  [TextureId.UI_CHECK_ON, new TextureSpec({ relPath: 'ui/ui_checkOn.jaz', clamp: true })],
+  [TextureId.UI_CHECK_OFF, new TextureSpec({ relPath: 'ui/ui_checkOff.jaz', clamp: true })],
+  [TextureId.UI_RECT_OFF, new TextureSpec({ relPath: 'ui/ui_rectOff.jaz', clamp: true })],
+  [TextureId.UI_RECT_ON, new TextureSpec({ relPath: 'ui/ui_rectOn.jaz', clamp: true })],
+  [TextureId.BONUSES, new TextureSpec({ relPath: 'game/bonuses.jaz' })],
+  [TextureId.UI_IND_BULLET, new TextureSpec({ relPath: 'ui/ui_indBullet.jaz', clamp: true })],
+  [TextureId.UI_IND_ROCKET, new TextureSpec({ relPath: 'ui/ui_indRocket.jaz', clamp: true })],
+  [TextureId.UI_IND_ELECTRIC, new TextureSpec({ relPath: 'ui/ui_indElectric.jaz', clamp: true })],
+  [TextureId.UI_IND_FIRE, new TextureSpec({ relPath: 'ui/ui_indFire.jaz', clamp: true })],
+  [TextureId.PARTICLES, new TextureSpec({ relPath: 'game/particles.jaz' })],
+  [TextureId.UI_IND_LIFE, new TextureSpec({ relPath: 'ui/ui_indLife.jaz', clamp: true })],
+  [TextureId.UI_IND_PANEL, new TextureSpec({ relPath: 'ui/ui_indPanel.jaz', clamp: true })],
+  [TextureId.UI_ARROW, new TextureSpec({ relPath: 'ui/ui_arrow.jaz', clamp: true })],
+  [TextureId.UI_CURSOR, new TextureSpec({ relPath: 'ui/ui_cursor.jaz', clamp: true })],
+  [TextureId.UI_AIM, new TextureSpec({ relPath: 'ui/ui_aim.jaz', clamp: true })],
+  [TextureId.TER_Q1_BASE, new TextureSpec({ relPath: 'ter/ter_q1_base.jaz' })],
+  [TextureId.TER_Q1_OVERLAY, new TextureSpec({ relPath: 'ter/ter_q1_tex1.jaz' })],
+  [TextureId.TER_Q2_BASE, new TextureSpec({ relPath: 'ter/ter_q2_base.jaz' })],
+  [TextureId.TER_Q2_OVERLAY, new TextureSpec({ relPath: 'ter/ter_q2_tex1.jaz' })],
+  [TextureId.TER_Q3_BASE, new TextureSpec({ relPath: 'ter/ter_q3_base.jaz' })],
+  [TextureId.TER_Q3_OVERLAY, new TextureSpec({ relPath: 'ter/ter_q3_tex1.jaz' })],
+  [TextureId.TER_Q4_BASE, new TextureSpec({ relPath: 'ter/ter_q4_base.jaz' })],
+  [TextureId.TER_Q4_OVERLAY, new TextureSpec({ relPath: 'ter/ter_q4_tex1.jaz' })],
+  [TextureId.UI_TEXT_LEVEL_COMPLETE, new TextureSpec({ relPath: 'ui/ui_textLevComp.jaz', clamp: true })],
+  [TextureId.UI_TEXT_QUEST, new TextureSpec({ relPath: 'ui/ui_textQuest.jaz', clamp: true })],
+  [TextureId.UI_NUM1, new TextureSpec({ relPath: 'ui/ui_num1.jaz', clamp: true })],
+  [TextureId.UI_NUM2, new TextureSpec({ relPath: 'ui/ui_num2.jaz', clamp: true })],
+  [TextureId.UI_NUM3, new TextureSpec({ relPath: 'ui/ui_num3.jaz', clamp: true })],
+  [TextureId.UI_NUM4, new TextureSpec({ relPath: 'ui/ui_num4.jaz', clamp: true })],
+  [TextureId.UI_NUM5, new TextureSpec({ relPath: 'ui/ui_num5.jaz', clamp: true })],
+  [TextureId.UI_WICONS, new TextureSpec({ relPath: 'ui/ui_wicons.jaz', clamp: true })],
+  [TextureId.UI_GAME_TOP, new TextureSpec({ relPath: 'ui/ui_gameTop.jaz', clamp: true })],
+  [TextureId.UI_LIFE_HEART, new TextureSpec({ relPath: 'ui/ui_lifeHeart.jaz', clamp: true })],
+  [TextureId.UI_CLOCK_TABLE, new TextureSpec({ relPath: 'ui/ui_clockTable.jaz', clamp: true })],
+  [TextureId.UI_CLOCK_POINTER, new TextureSpec({ relPath: 'ui/ui_clockPointer.jaz', clamp: true })],
+  [TextureId.MUZZLE_FLASH, new TextureSpec({ relPath: 'game/muzzleFlash.jaz' })],
+  [TextureId.UI_DROP_ON, new TextureSpec({ relPath: 'ui/ui_dropDownOn.jaz', clamp: true })],
+  [TextureId.UI_DROP_OFF, new TextureSpec({ relPath: 'ui/ui_dropDownOff.jaz', clamp: true })],
+  [TextureId.UI_SIGN_CRIMSON, new TextureSpec({ relPath: 'ui/ui_signCrimson.jaz', clamp: true })],
+  [TextureId.UI_MENU_ITEM, new TextureSpec({ relPath: 'ui/ui_menuItem.jaz', clamp: true })],
+  [TextureId.UI_MENU_PANEL, new TextureSpec({ relPath: 'ui/ui_menuPanel.jaz', clamp: true })],
+  [TextureId.UI_ITEM_TEXTS, new TextureSpec({ relPath: 'ui/ui_itemTexts.jaz', clamp: true })],
+  [TextureId.UI_TEXT_REAPER, new TextureSpec({ relPath: 'ui/ui_textReaper.jaz', clamp: true })],
+  [TextureId.UI_TEXT_WELL_DONE, new TextureSpec({ relPath: 'ui/ui_textWellDone.jaz', clamp: true })],
+  [TextureId.UI_TEXT_CONTROLS, new TextureSpec({ relPath: 'ui/ui_textControls.jaz', clamp: true })],
+  [TextureId.UI_TEXT_PICK_A_PERK, new TextureSpec({ relPath: 'ui/ui_textPickAPerk.jaz', clamp: true })],
+  [TextureId.UI_TEXT_LEVEL_UP, new TextureSpec({ relPath: 'ui/ui_textLevelUp.jaz', clamp: true })],
 ]);
 
 export class RuntimeResources {
@@ -221,10 +217,14 @@ export function getTexture(res: RuntimeResources, id: TextureId): wgl.Texture {
   return tex;
 }
 
-// Unused in WebGL port: browser handles resource cleanup on page unload
 export function unloadResources(res: RuntimeResources): void {
+  const seen = new Set<WebGLTexture>();
   for (const tex of res.textures.values()) {
+    if (seen.has(tex.id)) {
+      continue;
+    }
     wgl.unloadTexture(tex);
+    seen.add(tex.id);
   }
   res.textures.clear();
 }
@@ -245,7 +245,6 @@ export function registerRuntimeResources(resources: RuntimeResources): void {
   _registeredResources.set(resources.assetsUrl, resources);
 }
 
-// Unused in WebGL port: browser handles resource cleanup on page unload
 export function unregisterRuntimeResources(assetsUrl: string): void {
   _registeredResources.delete(assetsUrl);
 }
@@ -258,7 +257,6 @@ export function runtimeResourcesFor(assetsUrl: string): RuntimeResources {
 
 // --- PAQ entry helpers ---
 
-// Unused in WebGL port: loadPaqEntriesFromPath called directly
 export async function loadPaqEntries(assetsUrl: string): Promise<Map<string, Uint8Array>> {
   return loadPaqEntriesFromPath(`${assetsUrl}/${PAQ_NAME}`);
 }
@@ -279,15 +277,14 @@ async function loadImageFromPaqEntry(relPath: string, data: Uint8Array): Promise
   if (lower.endsWith('.jaz')) {
     return decodeJazToImageBitmap(data);
   }
-  // TGA, JPG, PNG — decode via browser
+  // TGA, JPG, PNG - decode via browser
   const mimeMap: Record<string, string> = {
     '.tga': 'image/x-tga',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.png': 'image/png',
   };
-  // For TGA: browsers don't natively support TGA; we'll need a fallback
-  // For now, try creating a blob and letting createImageBitmap handle it
+  // TGA is decoded manually if the browser does not support it natively.
   const ext = lower.substring(lower.lastIndexOf('.'));
   const mime = mimeMap[ext] ?? 'application/octet-stream';
   const blobData = new ArrayBuffer(data.byteLength);
@@ -386,6 +383,17 @@ function decodeTgaToImageBitmap(data: Uint8Array): Promise<ImageBitmap> {
   return createImageBitmap(imageData, { premultiplyAlpha: 'none' });
 }
 
+function _buildSmallFont(textures: Map<TextureId, wgl.Texture>, widthsData: Uint8Array): SmallFontData {
+  const texture = textures.get(TextureId.SMALL_WHITE);
+  if (texture === undefined) {
+    throw new Error(`runtime texture is not available: ${TEXTURE_SPECS.get(TextureId.SMALL_WHITE)?.relPath ?? TextureId.SMALL_WHITE}`);
+  }
+  return new SmallFontData({
+    widths: Array.from(widthsData),
+    texture,
+  });
+}
+
 export async function loadRuntimeResources(
   assetsUrl: string,
 ): Promise<RuntimeResources> {
@@ -413,12 +421,7 @@ export async function loadRuntimeResources(
   const widthsData = entries.get('load/smallFnt.dat');
   if (!widthsData) throw new Error('Missing runtime font widths: load/smallFnt.dat');
 
-  const smallFont = new SmallFontData({
-    widths: Array.from(widthsData),
-    texture: textures.get(TextureId.SMALL_WHITE)!,
-    cellSize: 16,
-    grid: 16,
-  });
+  const smallFont = _buildSmallFont(textures, widthsData);
 
   const resources = new RuntimeResources({ assetsUrl, textures, smallFont });
   registerRuntimeResources(resources);
