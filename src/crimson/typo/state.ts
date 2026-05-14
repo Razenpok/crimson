@@ -5,13 +5,31 @@ import { CreatureNameTable } from './names.ts';
 import { TypingBuffer } from './typing.ts';
 
 export class TypoState {
-  typing = new TypingBuffer();
-  names = CreatureNameTable.sized(0);
-  spawnCooldownMs = 0;
-  dictionaryWords: readonly string[] = [];
-  highscoreNames: readonly string[] = [];
-  pendingFireTarget: Vec2 | null = null;
-  pendingReload = false;
+  typing: TypingBuffer;
+  names: CreatureNameTable;
+  spawnCooldownMs: number;
+  dictionaryWords: readonly string[];
+  highscoreNames: readonly string[];
+  pendingFireTarget: Vec2 | null;
+  pendingReload: boolean;
+
+  constructor(opts: {
+    typing?: TypingBuffer;
+    names?: CreatureNameTable;
+    spawnCooldownMs?: number;
+    dictionaryWords?: readonly string[];
+    highscoreNames?: readonly string[];
+    pendingFireTarget?: Vec2 | null;
+    pendingReload?: boolean;
+  } = {}) {
+    this.typing = opts.typing ?? new TypingBuffer();
+    this.names = opts.names ?? CreatureNameTable.sized(0);
+    this.spawnCooldownMs = opts.spawnCooldownMs ?? 0;
+    this.dictionaryWords = opts.dictionaryWords ?? [];
+    this.highscoreNames = opts.highscoreNames ?? [];
+    this.pendingFireTarget = opts.pendingFireTarget ?? null;
+    this.pendingReload = opts.pendingReload ?? false;
+  }
 }
 
 export function resetTypoState(
