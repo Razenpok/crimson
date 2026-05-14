@@ -272,8 +272,8 @@ export class CreditsView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
-    this._secretButton = new UiButtonState({ label: 'Secret', forceWide: false  });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false });
+    this._secretButton = new UiButtonState({ label: 'Secret', forceWide: false });
   }
 
   open(): void {
@@ -297,8 +297,8 @@ export class CreditsView {
     this._scrollLineStartIndex = 0;
     this._scrollLineEndIndex = 0;
 
-    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
-    this._secretButton = new UiButtonState({ label: 'Secret', forceWide: false  });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false });
+    this._secretButton = new UiButtonState({ label: 'Secret', forceWide: false });
 
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
@@ -415,7 +415,12 @@ export class CreditsView {
       }
     }
     const a = Math.max(0.0, Math.min(1.0, alpha));
-    return wgl.makeColor(r, g, b, a);
+    return wgl.makeColor(
+      int(r * 255.0 + 0.5) / 255,
+      int(g * 255.0 + 0.5) / 255,
+      int(b * 255.0 + 0.5) / 255,
+      int(a * 255.0 + 0.5) / 255,
+    );
   }
 
   private _lineAlpha(opts: {
