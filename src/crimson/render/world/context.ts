@@ -101,6 +101,14 @@ export class WorldRenderCtx {
     return bulletSpriteSize(typeId, scale);
   }
 
+  isBulletTrailType(typeId: number): boolean {
+    return WorldRenderCtx.isBulletTrailType(typeId);
+  }
+
+  bulletSpriteSize(typeId: number, opts: { scale: number }): number {
+    return WorldRenderCtx.bulletSpriteSize(typeId, opts.scale);
+  }
+
   drawBulletTrail(
     start: Vec2,
     end: Vec2,

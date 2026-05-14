@@ -3,7 +3,6 @@
 import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { clamp } from '@grim/math.ts';
-import { WorldRenderCtx } from '@crimson/render/world/context.ts';
 import { RAD_TO_DEG, projOrigin } from './common.ts';
 import type { ProjectileDrawCtx } from './types.ts';
 
@@ -11,7 +10,7 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
   const renderer = ctx.renderer;
   const resources = renderer.frame.resources;
   const typeId = int(ctx.typeId);
-  if (!WorldRenderCtx.isBulletTrailType(typeId)) {
+  if (!renderer.isBulletTrailType(typeId)) {
     return false;
   }
 
@@ -42,7 +41,7 @@ export function drawBulletTrail(ctx: ProjectileDrawCtx): boolean {
     bullet = null;
   }
   if (bullet !== null && ctx.life >= 0.39) {
-    const size = WorldRenderCtx.bulletSpriteSize(typeId, ctx.scale);
+    const size = renderer.bulletSpriteSize(typeId, { scale: ctx.scale });
     const src = wgl.makeRectangle(0.0, 0.0, bullet.width, bullet.height);
     const dst = wgl.makeRectangle(ctx.screenPos.x, ctx.screenPos.y, size, size);
     const origin = wgl.makeVector2(size * 0.5, size * 0.5);
