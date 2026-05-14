@@ -66,6 +66,13 @@ const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
 const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.5) / 255);
 
+const KEY_ESCAPE = 27;
+const KEY_TAB = 9;
+const KEY_F2 = 113;
+const KEY_F3 = 114;
+const KEY_LEFT_BRACKET = 219;
+const KEY_RIGHT_BRACKET = 221;
+
 const _DEBUG_WEAPON_IDS: WeaponId[] = (() => {
   const ids: WeaponId[] = [];
   for (const id of WEAPON_BY_ID.keys()) {
@@ -463,14 +470,24 @@ export class QuestMode extends BaseGameplayMode {
     }
   }
 
-  protected _applyResyncSnapshot(snapshot: unknown): void {
-    const rs = snapshot as {
-      spawnEntries: SpawnEntry[];
-      spawnTimelineMs: number;
-      noCreaturesTimerMs: number;
-      completionTransitionMs: number;
-      elapsedMs: number;
-    };
+  protected _applyResyncSnapshot(snapshot: {
+    spawnEntries?: SpawnEntry[];
+    spawnTimelineMs?: number;
+    noCreaturesTimerMs?: number;
+    completionTransitionMs?: number;
+    elapsedMs?: number;
+  } | null): void {
+    const rs = snapshot;
+    if (
+      rs === null ||
+      rs.spawnEntries === undefined ||
+      rs.spawnTimelineMs === undefined ||
+      rs.noCreaturesTimerMs === undefined ||
+      rs.completionTransitionMs === undefined ||
+      rs.elapsedMs === undefined
+    ) {
+      return;
+    }
     this._questSpawnState.spawnEntries = [...rs.spawnEntries];
     this._questSpawnState.spawnTimelineMs = rs.spawnTimelineMs;
     this._questSpawnState.noCreaturesTimerMs = rs.noCreaturesTimerMs;
@@ -558,41 +575,41 @@ export class QuestMode extends BaseGameplayMode {
     if (opts.status !== null) {
       const idx = trackedQuestGamesCounterIndex(quest.level);
       if (idx !== null) {
-        opts.status.incrementQuestPlayCount?.(idx);
+        opts.status.incrementQuestPlayCount(idx);
       }
     }
   }
 
   protected _handleInput(): void {
-    if (this._perkMenu.open && InputState.wasKeyPressed(27)) {
-      this.audioBridge.router.playSfx?.(SfxId.UI_BUTTONCLICK);
+    if (this._perkMenu.open && InputState.wasKeyPressed(KEY_ESCAPE)) {
+      this.audioBridge.router.playSfx(SfxId.UI_BUTTONCLICK);
       this._perkMenu.close();
       return;
     }
 
-    if (!this._lanEnabled && InputState.wasKeyPressed(9)) {
+    if (!this._lanEnabled && InputState.wasKeyPressed(KEY_TAB)) {
       this._paused = !this._paused;
     }
 
     if (this._debugEnabled && !this._perkMenu.open) {
-      if (InputState.wasKeyPressed(113)) {
+      if (InputState.wasKeyPressed(KEY_F2)) {
         this.state.debugGodMode = !this.state.debugGodMode;
-        this.audioBridge.router.playSfx?.(SfxId.UI_BUTTONCLICK);
+        this.audioBridge.router.playSfx(SfxId.UI_BUTTONCLICK);
       }
-      if (InputState.wasKeyPressed(114)) {
+      if (InputState.wasKeyPressed(KEY_F3)) {
         this.state.perkSelection.pendingCount += 1;
         this.state.perkSelection.choicesDirty = true;
-        this.audioBridge.router.playSfx?.(SfxId.UI_LEVELUP);
+        this.audioBridge.router.playSfx(SfxId.UI_LEVELUP);
       }
-      if (InputState.wasKeyPressed(219)) {
+      if (InputState.wasKeyPressed(KEY_LEFT_BRACKET)) {
         this._debugCycleWeapon(-1);
       }
-      if (InputState.wasKeyPressed(221)) {
+      if (InputState.wasKeyPressed(KEY_RIGHT_BRACKET)) {
         this._debugCycleWeapon(1);
       }
     }
 
-    if (InputState.wasKeyPressed(27)) {
+    if (InputState.wasKeyPressed(KEY_ESCAPE)) {
       this._action = 'open_pause_menu';
       return;
     }
