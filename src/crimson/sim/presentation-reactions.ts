@@ -23,9 +23,9 @@ export class PostApplyReaction {
 
   constructor(opts: {
     sfx?: readonly SfxId[];
-    quest?: QuestPresentationReaction;
+    quest?: QuestPresentationReaction | null;
   } = {}) {
-    this.sfx = opts.sfx ?? [];
+    this.sfx = Array.from(opts.sfx ?? []);
     this.quest = opts.quest ?? null;
   }
 }
