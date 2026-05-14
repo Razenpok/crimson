@@ -15,7 +15,6 @@ import { GameMode } from '@crimson/game-modes.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
-
 } from '@crimson/sim/sessions.ts';
 import { buildTutorialSession } from '@crimson/sim/session-builders.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
@@ -27,7 +26,6 @@ import { PlayerInput } from '@crimson/sim/input.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import {
-  type TutorialOverlayState,
   TUTORIAL_PANEL_POS,
   tutorialPromptPanelRect,
   drawTutorialOverlayPanels,
@@ -47,6 +45,10 @@ import { PerkMenuController } from './components/perk-menu-controller.ts';
 const WORLD_SIZE = 1024.0;
 
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
+
+const KEY_ESCAPE = 27;
+const KEY_TAB = 9;
+const MOUSE_BUTTON_LEFT = 0;
 
 export class TutorialMode extends BaseGameplayMode {
   private _perkMenu = new PerkMenuController();
@@ -81,9 +83,9 @@ export class TutorialMode extends BaseGameplayMode {
       audio: opts.audio ?? null,
       audioRng: opts.audioRng,
     });
-    this._skipButton = new UiButtonState({ label: 'Skip tutorial', forceWide: true  });
-    this._playButton = new UiButtonState({ label: 'Play a game', forceWide: true  });
-    this._repeatButton = new UiButtonState({ label: 'Repeat tutorial', forceWide: true  });
+    this._skipButton = new UiButtonState({ label: 'Skip tutorial', forceWide: true });
+    this._playButton = new UiButtonState({ label: 'Play a game', forceWide: true });
+    this._repeatButton = new UiButtonState({ label: 'Repeat tutorial', forceWide: true });
   }
 
   private _newSimSession(): DeterministicSession {
@@ -120,9 +122,9 @@ export class TutorialMode extends BaseGameplayMode {
     super.open();
     this._perkMenu.reset();
 
-    this._skipButton = new UiButtonState({ label: 'Skip tutorial', forceWide: true  });
-    this._playButton = new UiButtonState({ label: 'Play a game', forceWide: true  });
-    this._repeatButton = new UiButtonState({ label: 'Repeat tutorial', forceWide: true  });
+    this._skipButton = new UiButtonState({ label: 'Skip tutorial', forceWide: true });
+    this._playButton = new UiButtonState({ label: 'Play a game', forceWide: true });
+    this._repeatButton = new UiButtonState({ label: 'Repeat tutorial', forceWide: true });
 
     this._perkPickPending = false;
     this._frameInputState = null;
@@ -145,6 +147,9 @@ export class TutorialMode extends BaseGameplayMode {
     weaponAssignPlayer(this.player, WeaponId.PISTOL, { state: this.state });
     this._simSession = this._newSimSession();
     this._replayRecorder = null;
+    this._replayCheckpointsSampleRate = 1;
+    this._replayCheckpoints.length = 0;
+    this._replayCheckpointsLastTick = null;
   }
 
   close(): void {
@@ -199,16 +204,16 @@ export class TutorialMode extends BaseGameplayMode {
   }
 
   protected _handleInput(): void {
-    if (this._perkMenu.open && InputState.wasKeyPressed(27)) {
+    if (this._perkMenu.open && InputState.wasKeyPressed(KEY_ESCAPE)) {
       this._perkMenu.close();
       return;
     }
 
-    if (InputState.wasKeyPressed(9)) {
+    if (InputState.wasKeyPressed(KEY_TAB)) {
       this._paused = !this._paused;
     }
 
-    if (InputState.wasKeyPressed(27)) {
+    if (InputState.wasKeyPressed(KEY_ESCAPE)) {
       this._action = 'open_pause_menu';
       return;
     }
@@ -245,9 +250,8 @@ export class TutorialMode extends BaseGameplayMode {
     const resources = this.renderResources.resources;
 
     if (stage === 8) {
-      const promptText = overlay != null ? overlay.promptText : '';
       const { rect } = tutorialPromptPanelRect(
-        promptText,
+        overlay.promptText,
         {
           measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
           measureLineHeight: (scale: number) => this._uiLineHeight(scale),
@@ -347,7 +351,7 @@ export class TutorialMode extends BaseGameplayMode {
     }
 
     const mouse = this._uiMousePos();
-    const click = InputState.wasMouseButtonPressed(0);
+    const click = InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT);
     this._updatePromptButtons({ dtMs: dtUiMs, mouse, click });
   }
 
