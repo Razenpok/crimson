@@ -932,10 +932,8 @@ export class GameLoopView implements View {
     if (info !== null && info.visible) {
       this._demoTrialOverlayView()?.draw(info);
     }
-    const res = this.state.resources;
-    const smallFont = res !== null ? res.smallFont : null;
-    this.state.console.draw(smallFont, null);
-    this.state.console.drawFpsCounter(smallFont);
+    this.state.console.draw();
+    this.state.console.drawFpsCounter();
   }
 
   private _drawWithGamma(): void {

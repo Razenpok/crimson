@@ -3,8 +3,8 @@
 import * as wgl from '@wgl';
 import { Vec2 } from './geom.ts';
 import { clamp } from './math.ts';
-import { type SmallFontData, drawSmallText, measureSmallTextWidth } from './fonts/small.ts';
-import { type GrimMonoFont, drawGrimMonoText } from './fonts/grim-mono.ts';
+import { type SmallFontData, drawSmallText, loadSmallFont, measureSmallTextWidth } from './fonts/small.ts';
+import { type GrimMonoFont, drawGrimMonoText, loadGrimMonoFont } from './fonts/grim-mono.ts';
 import { InputState } from './input.ts';
 import { fetchPaq } from './paq.ts';
 import { resolveAssetsUrl } from './assets.ts';
@@ -255,6 +255,8 @@ export class ConsoleState {
   _slideT = 1.0;
   _offsetY = 0.0;
   _blinkTime = 0.0;
+  private _monoFont: GrimMonoFont | null = null;
+  private _smallFont: SmallFontData | null = null;
 
   constructor(opts: { baseDir?: string; log?: ConsoleLog; assetsDir?: string | null; scriptDirs?: readonly string[] } = {}) {
     this.baseDir = opts.baseDir ?? '';
@@ -384,7 +386,7 @@ export class ConsoleState {
     this._pollTextInput();
   }
 
-  draw(smallFont: SmallFontData | null, monoFont: GrimMonoFont | null): void {
+  draw(): void {
     const height = this.heightPx;
     if (height <= 0) return;
     const ratio = this._openRatio(height);
@@ -397,39 +399,30 @@ export class ConsoleState {
     const borderY = offsetY + height - CONSOLE_BORDER_HEIGHT;
     wgl.drawRectangle(0, borderY, screenW, CONSOLE_BORDER_HEIGHT, wgl.makeColor(...CONSOLE_BORDER_COLOR, ratio));
 
-    const useMono = this._useMonoFont() && monoFont !== null;
-
     const versionX = screenW - CONSOLE_VERSION_OFFSET_X;
     const versionY = offsetY + height - CONSOLE_VERSION_OFFSET_Y;
-    const versionColor = wgl.makeColor(1.0, 1.0, 1.0, ratio * 0.3);
-    if (smallFont) {
-      drawSmallText(smallFont, CONSOLE_VERSION_TEXT, new Vec2(versionX, versionY), versionColor);
-    } else if (monoFont) {
-      const advance = monoFont.advance * CONSOLE_MONO_SCALE;
-      drawGrimMonoText(monoFont, CONSOLE_VERSION_TEXT, new Vec2(versionX - advance, versionY), CONSOLE_MONO_SCALE, versionColor);
-    }
+    this._drawVersionText(new Vec2(versionX, versionY), wgl.makeColor(1.0, 1.0, 1.0, ratio * 0.3));
 
     const [visible, visibleCount] = this._visibleLogBlock(height);
 
     const inputY = offsetY + (visibleCount + 1) * CONSOLE_LINE_HEIGHT;
     const textColor = wgl.makeColor(1.0, 1.0, 1.0, ratio);
-    if (useMono && monoFont) {
-      const advance = monoFont.advance * CONSOLE_MONO_SCALE;
-      drawGrimMonoText(monoFont, CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X - advance, inputY), CONSOLE_MONO_SCALE, textColor);
-      drawGrimMonoText(monoFont, this.inputBuffer, new Vec2(CONSOLE_INPUT_X_MONO - advance, inputY), CONSOLE_MONO_SCALE, textColor);
-    } else if (smallFont) {
+    const useMono = this._useMonoFont();
+    if (useMono) {
+      this._drawMonoText(CONSOLE_PROMPT_MONO, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
+      this._drawMonoText(this.inputBuffer, new Vec2(CONSOLE_INPUT_X_MONO, inputY), textColor);
+    } else {
       const prompt = CONSOLE_PROMPT_SMALL_FMT.replace('%s', this.inputBuffer);
-      drawSmallText(smallFont, prompt, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
+      this._drawSmallText(prompt, new Vec2(CONSOLE_TEXT_X, inputY), textColor);
     }
 
     const logColor = wgl.makeColor(0.6, 0.6, 0.7, ratio);
     let y = offsetY + CONSOLE_LINE_HEIGHT;
     for (const line of visible) {
-      if (useMono && monoFont) {
-        const advance = monoFont.advance * CONSOLE_MONO_SCALE;
-        drawGrimMonoText(monoFont, line, new Vec2(CONSOLE_TEXT_X - advance, y), CONSOLE_MONO_SCALE, logColor);
-      } else if (smallFont) {
-        drawSmallText(smallFont, line, new Vec2(CONSOLE_TEXT_X, y), logColor);
+      if (useMono) {
+        this._drawMonoText(line, new Vec2(CONSOLE_TEXT_X, y), logColor);
+      } else {
+        this._drawSmallText(line, new Vec2(CONSOLE_TEXT_X, y), logColor);
       }
       y += CONSOLE_LINE_HEIGHT;
     }
@@ -437,25 +430,26 @@ export class ConsoleState {
     const caretAlpha = ratio * this._caretBlinkAlpha();
     const caretColor = wgl.makeColor(1.0, 1.0, 1.0, caretAlpha);
     const caretY = inputY + 2.0;
-    if (useMono && monoFont) {
-      const advance = monoFont.advance * CONSOLE_MONO_SCALE;
+    if (useMono) {
       const caretX = CONSOLE_INPUT_X_MONO + this.inputCaret * 8.0;
-      drawGrimMonoText(monoFont, CONSOLE_CARET_TEXT, new Vec2(caretX - advance, caretY), CONSOLE_MONO_SCALE, caretColor);
-    } else if (smallFont) {
-      const caretX = this._smallCaretX(smallFont);
-      drawSmallText(smallFont, CONSOLE_CARET_TEXT, new Vec2(caretX, caretY), caretColor);
+      this._drawMonoText(CONSOLE_CARET_TEXT, new Vec2(caretX, caretY), caretColor);
+    } else {
+      const caretX = this._smallCaretX();
+      this._drawSmallText(CONSOLE_CARET_TEXT, new Vec2(caretX, caretY), caretColor);
     }
   }
 
   flush(): void {
   }
 
-  close(): void {}
+  close(): void {
+    this._monoFont = null;
+    this._smallFont = null;
+  }
 
-  drawFpsCounter(smallFont: SmallFontData | null): void {
+  drawFpsCounter(): void {
     const cvar = this.cvars.get('cv_showFPS');
     if (cvar === undefined || cvar.valueF === 0.0) return;
-    if (smallFont === null) return;
     const fps = Math.max(0, int(wgl.getFps()));
     let text: string;
     let posX: number;
@@ -467,7 +461,7 @@ export class ConsoleState {
       posX = wgl.getScreenWidth() - FPS_COUNTER_X_LONG;
     }
     const posY = wgl.getScreenHeight() - FPS_COUNTER_Y;
-    drawSmallText(smallFont, text, new Vec2(posX, posY), wgl.makeColor(1.0, 1.0, 1.0, FPS_COUNTER_ALPHA));
+    this._drawSmallText(text, new Vec2(posX, posY), wgl.makeColor(1.0, 1.0, 1.0, FPS_COUNTER_ALPHA));
   }
 
   handleHotkey(): void {
@@ -502,7 +496,61 @@ export class ConsoleState {
     return clamp(value, 0.0, 1.0);
   }
 
-  private _smallCaretX(font: SmallFontData): number {
+  private _ensureMonoFont(): GrimMonoFont | null {
+    if (this._monoFont !== null) {
+      return this._monoFont;
+    }
+    if (this.assetsDir === null) {
+      throw new Error('missing assets dir');
+    }
+    this._monoFont = loadGrimMonoFont(this.assetsDir);
+    return this._monoFont;
+  }
+
+  private _ensureSmallFont(): SmallFontData | null {
+    if (this._smallFont !== null) {
+      return this._smallFont;
+    }
+    if (this.assetsDir === null) {
+      throw new Error('missing assets dir');
+    }
+    this._smallFont = loadSmallFont(this.assetsDir);
+    return this._smallFont;
+  }
+
+  private _drawMonoText(text: string, pos: Vec2, color: wgl.Color): void {
+    const font = this._ensureMonoFont();
+    if (font === null) {
+      wgl.drawText(text, int(pos.x), int(pos.y), int(16 * CONSOLE_MONO_SCALE), color);
+      return;
+    }
+    const advance = font.advance * CONSOLE_MONO_SCALE;
+    drawGrimMonoText(font, text, new Vec2(pos.x - advance, pos.y), CONSOLE_MONO_SCALE, color);
+  }
+
+  private _drawSmallText(text: string, pos: Vec2, color: wgl.Color): void {
+    const font = this._ensureSmallFont();
+    if (font === null) {
+      wgl.drawText(text, int(pos.x), int(pos.y), int(16 * CONSOLE_SMALL_SCALE), color);
+      return;
+    }
+    drawSmallText(font, text, pos, color);
+  }
+
+  private _drawVersionText(pos: Vec2, color: wgl.Color): void {
+    const font = this._ensureSmallFont();
+    if (font === null) {
+      this._drawMonoText(CONSOLE_VERSION_TEXT, pos, color);
+      return;
+    }
+    drawSmallText(font, CONSOLE_VERSION_TEXT, pos, color);
+  }
+
+  private _smallCaretX(): number {
+    const font = this._ensureSmallFont();
+    if (font === null) {
+      return CONSOLE_TEXT_X + 16.0 + this.inputCaret * 8.0;
+    }
     const promptW = measureSmallTextWidth(font, CONSOLE_PROMPT_SMALL_FMT.replace('%s', ''));
     const inputW = measureSmallTextWidth(font, this.inputBuffer.substring(0, this.inputCaret));
     return CONSOLE_TEXT_X + promptW + inputW;
