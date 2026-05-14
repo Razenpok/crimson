@@ -116,7 +116,7 @@ export function typoMidStep(ctx: MidStepContext): void {
       size *= 0.8;
     }
 
-    const init = new CreatureInit(0, call.pos, heading, 0.0);
+    const init = new CreatureInit({ originTemplateId: 0, pos: call.pos, heading, phaseSeed: 0.0 });
     init.typeId = call.typeId;
     init.flags = flags;
     init.aiMode = CreatureAiMode.CHASE_PLAYER;

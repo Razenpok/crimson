@@ -195,23 +195,54 @@ export const ALIEN_SPAWNER_TEMPLATES: Map<SpawnId, AlienSpawnerSpec> = new Map(
 );
 
 
+type ConstantSpawnSpecInit = {
+  typeId: CreatureTypeId;
+  health: number;
+  moveSpeed: number;
+  rewardValue: number;
+  tint: TintRGBA;
+  size: number;
+  contactDamage: number;
+  flags?: CreatureFlags;
+  aiMode?: number;
+  orbitAngle?: number | null;
+  orbitRadius?: number | null;
+  rangedProjectileType?: number | null;
+  bonusId?: BonusId | null;
+  bonusDurationOverride?: number | null;
+};
+
 export class ConstantSpawnSpec {
-  constructor(
-    public readonly typeId: CreatureTypeId,
-    public readonly health: number,
-    public readonly moveSpeed: number,
-    public readonly rewardValue: number,
-    public readonly tint: TintRGBA,
-    public readonly size: number,
-    public readonly contactDamage: number,
-    public readonly flags: CreatureFlags = 0 as CreatureFlags,
-    public readonly aiMode: number = CreatureAiMode.ORBIT_PLAYER,
-    public readonly orbitAngle: number | null = null,
-    public readonly orbitRadius: number | null = null,
-    public readonly rangedProjectileType: number | null = null,
-    public readonly bonusId: BonusId | null = null,
-    public readonly bonusDurationOverride: number | null = null,
-  ) {
+  readonly typeId: CreatureTypeId;
+  readonly health: number;
+  readonly moveSpeed: number;
+  readonly rewardValue: number;
+  readonly tint: TintRGBA;
+  readonly size: number;
+  readonly contactDamage: number;
+  readonly flags: CreatureFlags;
+  readonly aiMode: number;
+  readonly orbitAngle: number | null;
+  readonly orbitRadius: number | null;
+  readonly rangedProjectileType: number | null;
+  readonly bonusId: BonusId | null;
+  readonly bonusDurationOverride: number | null;
+
+  constructor(opts: ConstantSpawnSpecInit) {
+    this.typeId = opts.typeId;
+    this.health = opts.health;
+    this.moveSpeed = opts.moveSpeed;
+    this.rewardValue = opts.rewardValue;
+    this.tint = opts.tint;
+    this.size = opts.size;
+    this.contactDamage = opts.contactDamage;
+    this.flags = opts.flags ?? (0 as CreatureFlags);
+    this.aiMode = opts.aiMode ?? CreatureAiMode.ORBIT_PLAYER;
+    this.orbitAngle = opts.orbitAngle ?? null;
+    this.orbitRadius = opts.orbitRadius ?? null;
+    this.rangedProjectileType = opts.rangedProjectileType ?? null;
+    this.bonusId = opts.bonusId ?? null;
+    this.bonusDurationOverride = opts.bonusDurationOverride ?? null;
   }
 }
 
@@ -231,7 +262,7 @@ function constSpec(
   bonusId: BonusId | null = null,
   bonusDurationOverride: number | null = null,
 ): ConstantSpawnSpec {
-  return new ConstantSpawnSpec(
+  return new ConstantSpawnSpec({
     typeId,
     health,
     moveSpeed,
@@ -246,23 +277,46 @@ function constSpec(
     rangedProjectileType,
     bonusId,
     bonusDurationOverride,
-  );
+  });
 }
 
 
+type FormationChildSpecInit = {
+  typeId: CreatureTypeId;
+  health: number;
+  moveSpeed: number;
+  rewardValue: number;
+  size: number;
+  contactDamage: number;
+  tint: TintRGBA;
+  maxHealth?: number | null;
+  orbitAngle?: number | null;
+  orbitRadius?: number | null;
+};
+
 export class FormationChildSpec {
-  constructor(
-    public readonly typeId: CreatureTypeId,
-    public readonly health: number,
-    public readonly moveSpeed: number,
-    public readonly rewardValue: number,
-    public readonly size: number,
-    public readonly contactDamage: number,
-    public readonly tint: TintRGBA,
-    public readonly maxHealth: number | null = null,
-    public readonly orbitAngle: number | null = null,
-    public readonly orbitRadius: number | null = null,
-  ) {
+  readonly typeId: CreatureTypeId;
+  readonly health: number;
+  readonly moveSpeed: number;
+  readonly rewardValue: number;
+  readonly size: number;
+  readonly contactDamage: number;
+  readonly tint: TintRGBA;
+  readonly maxHealth: number | null;
+  readonly orbitAngle: number | null;
+  readonly orbitRadius: number | null;
+
+  constructor(opts: FormationChildSpecInit) {
+    this.typeId = opts.typeId;
+    this.health = opts.health;
+    this.moveSpeed = opts.moveSpeed;
+    this.rewardValue = opts.rewardValue;
+    this.size = opts.size;
+    this.contactDamage = opts.contactDamage;
+    this.tint = opts.tint;
+    this.maxHealth = opts.maxHealth ?? null;
+    this.orbitAngle = opts.orbitAngle ?? null;
+    this.orbitRadius = opts.orbitRadius ?? null;
   }
 }
 
@@ -278,7 +332,7 @@ function childSpec(
   orbitAngle: number | null = null,
   orbitRadius: number | null = null,
 ): FormationChildSpec {
-  return new FormationChildSpec(
+  return new FormationChildSpec({
     typeId,
     health,
     moveSpeed,
@@ -289,7 +343,7 @@ function childSpec(
     maxHealth,
     orbitAngle,
     orbitRadius,
-  );
+  });
 }
 
 
@@ -588,23 +642,43 @@ export function spawnIdLabel(spawnId: SpawnId): string {
 }
 
 
+type SpawnEnvInit = {
+  terrainWidth: number;
+  terrainHeight: number;
+  demoModeActive: boolean;
+  hardcore: boolean;
+  questFailRetryCount: number;
+};
+
 export class SpawnEnv {
-  constructor(
-    public readonly terrainWidth: number,
-    public readonly terrainHeight: number,
-    public readonly demoModeActive: boolean,
-    public readonly hardcore: boolean,
-    public readonly questFailRetryCount: number,
-  ) {
+  readonly terrainWidth: number;
+  readonly terrainHeight: number;
+  readonly demoModeActive: boolean;
+  readonly hardcore: boolean;
+  readonly questFailRetryCount: number;
+
+  constructor(opts: SpawnEnvInit) {
+    this.terrainWidth = opts.terrainWidth;
+    this.terrainHeight = opts.terrainHeight;
+    this.demoModeActive = opts.demoModeActive;
+    this.hardcore = opts.hardcore;
+    this.questFailRetryCount = opts.questFailRetryCount;
   }
 }
 
 
+type BurstEffectInit = {
+  pos: Vec2;
+  count: number;
+};
+
 export class BurstEffect {
-  constructor(
-    public readonly pos: Vec2,
-    public readonly count: number,
-  ) {
+  readonly pos: Vec2;
+  readonly count: number;
+
+  constructor(opts: BurstEffectInit) {
+    this.pos = opts.pos;
+    this.count = opts.count;
   }
 }
 
@@ -645,11 +719,16 @@ export class CreatureInit {
   bonusId: BonusId | null = null;
   bonusDurationOverride: number | null = null;
 
-  constructor(originTemplateId: number, pos: Vec2, heading: number | null, phaseSeed: number) {
-    this.originTemplateId = originTemplateId;
-    this.pos = pos;
-    this.heading = heading;
-    this.phaseSeed = phaseSeed;
+  constructor(opts: {
+    originTemplateId: number;
+    pos: Vec2;
+    heading: number | null;
+    phaseSeed: number;
+  }) {
+    this.originTemplateId = opts.originTemplateId;
+    this.pos = opts.pos;
+    this.heading = opts.heading;
+    this.phaseSeed = opts.phaseSeed;
   }
 }
 
@@ -662,31 +741,42 @@ export class SpawnSlotInit {
   interval: number;
   childTemplateId: SpawnId;
 
-  constructor(
-    ownerCreature: number,
-    timer: number,
-    count: number,
-    limit: number,
-    interval: number,
-    childTemplateId: SpawnId,
-  ) {
-    this.ownerCreature = ownerCreature;
-    this.timer = timer;
-    this.count = count;
-    this.limit = limit;
-    this.interval = interval;
-    this.childTemplateId = childTemplateId;
+  constructor(opts: {
+    ownerCreature: number;
+    timer: number;
+    count: number;
+    limit: number;
+    interval: number;
+    childTemplateId: SpawnId;
+  }) {
+    this.ownerCreature = opts.ownerCreature;
+    this.timer = opts.timer;
+    this.count = opts.count;
+    this.limit = opts.limit;
+    this.interval = opts.interval;
+    this.childTemplateId = opts.childTemplateId;
   }
 }
 
 
+type SpawnPlanInit = {
+  creatures: readonly CreatureInit[];
+  spawnSlots: readonly SpawnSlotInit[];
+  effects: readonly BurstEffect[];
+  primary: number;
+};
+
 export class SpawnPlan {
-  constructor(
-    public readonly creatures: readonly CreatureInit[] = [],
-    public readonly spawnSlots: readonly SpawnSlotInit[] = [],
-    public readonly effects: readonly BurstEffect[] = [],
-    public readonly primary: number = 0,
-  ) {
+  readonly creatures: readonly CreatureInit[];
+  readonly spawnSlots: readonly SpawnSlotInit[];
+  readonly effects: readonly BurstEffect[];
+  readonly primary: number;
+
+  constructor(opts: SpawnPlanInit) {
+    this.creatures = opts.creatures;
+    this.spawnSlots = opts.spawnSlots;
+    this.effects = opts.effects;
+    this.primary = opts.primary;
   }
 }
 
@@ -702,7 +792,14 @@ function addSpawnSlot(
   },
 ): number {
   const slotIdx = spawnSlots.length;
-  spawnSlots.push(new SpawnSlotInit(opts.ownerCreature, opts.timer, 0, opts.limit, opts.interval, opts.childTemplateId));
+  spawnSlots.push(new SpawnSlotInit({
+    ownerCreature: opts.ownerCreature,
+    timer: opts.timer,
+    count: 0,
+    limit: opts.limit,
+    interval: opts.interval,
+    childTemplateId: opts.childTemplateId,
+  }));
   return slotIdx;
 }
 
@@ -911,24 +1008,24 @@ class PlanBuilder {
   effects: BurstEffect[];
   primary: number = 0;
 
-  constructor(
-    templateId: SpawnId,
-    pos: Vec2,
-    rng: CrandLike,
-    env: SpawnEnv,
-    creatures: CreatureInit[],
-    spawnSlots: SpawnSlotInit[],
-    effects: BurstEffect[],
-    primary: number,
-  ) {
-    this.templateId = templateId;
-    this.pos = pos;
-    this.rng = rng;
-    this.env = env;
-    this.creatures = creatures;
-    this.spawnSlots = spawnSlots;
-    this.effects = effects;
-    this.primary = primary;
+  constructor(opts: {
+    templateId: SpawnId;
+    pos: Vec2;
+    rng: CrandLike;
+    env: SpawnEnv;
+    creatures: CreatureInit[];
+    spawnSlots: SpawnSlotInit[];
+    effects: BurstEffect[];
+    primary?: number;
+  }) {
+    this.templateId = opts.templateId;
+    this.pos = opts.pos;
+    this.rng = opts.rng;
+    this.env = opts.env;
+    this.creatures = opts.creatures;
+    this.spawnSlots = opts.spawnSlots;
+    this.effects = opts.effects;
+    this.primary = opts.primary ?? 0;
   }
 
   static start(
@@ -953,7 +1050,7 @@ class PlanBuilder {
     creatures[0].heading = (rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_BASE_HEADING }) % 314) * 0.01;
 
     return [
-      new PlanBuilder(templateId, pos, rng, env, creatures, spawnSlots, effects, 0),
+      new PlanBuilder({ templateId, pos, rng, env, creatures, spawnSlots, effects, primary: 0 }),
       finalHeading,
     ];
   }
@@ -1018,12 +1115,12 @@ class PlanBuilder {
       finalHeading,
       this.env,
     );
-    return new SpawnPlan(
-      this.creatures.slice(),
-      this.spawnSlots.slice(),
-      this.effects.slice(),
-      this.primary,
-    );
+    return new SpawnPlan({
+      creatures: this.creatures.slice(),
+      spawnSlots: this.spawnSlots.slice(),
+      effects: this.effects.slice(),
+      primary: this.primary,
+    });
   }
 }
 
@@ -1079,7 +1176,7 @@ function allocCreature(
   const phaseSeed = rng.rand({ caller: RngCallerStatic.CREATURE_ALLOC_SLOT_PHASE_SEED }) & 0x17F;
   // Native `creature_alloc_slot` does not clear heading; some template child paths
   // intentionally keep stale heading from the recycled slot.
-  return new CreatureInit(templateId, pos, null, phaseSeed);
+  return new CreatureInit({ originTemplateId: templateId, pos, heading: null, phaseSeed });
 }
 
 
@@ -1091,32 +1188,43 @@ function clamp01(value: number): number {
 
 
 export class SurvivalSpawnPosCallers {
-  constructor(
-    public readonly edge: RngCallerStatic,
-    public readonly topX: RngCallerStatic,
-    public readonly bottomX: RngCallerStatic,
-    public readonly leftY: RngCallerStatic,
-    public readonly rightY: RngCallerStatic,
-  ) {
+  readonly edge: RngCallerStatic;
+  readonly topX: RngCallerStatic;
+  readonly bottomX: RngCallerStatic;
+  readonly leftY: RngCallerStatic;
+  readonly rightY: RngCallerStatic;
+
+  constructor(opts: {
+    edge: RngCallerStatic;
+    topX: RngCallerStatic;
+    bottomX: RngCallerStatic;
+    leftY: RngCallerStatic;
+    rightY: RngCallerStatic;
+  }) {
+    this.edge = opts.edge;
+    this.topX = opts.topX;
+    this.bottomX = opts.bottomX;
+    this.leftY = opts.leftY;
+    this.rightY = opts.rightY;
   }
 }
 
 
-export const SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS = new SurvivalSpawnPosCallers(
-  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_EDGE,
-  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_TOP_X,
-  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_BOTTOM_X,
-  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_LEFT_Y,
-  RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_RIGHT_Y,
-);
+export const SURVIVAL_UPDATE_EXTRA_SPAWN_POS_CALLERS = new SurvivalSpawnPosCallers({
+  edge: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_EDGE,
+  topX: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_TOP_X,
+  bottomX: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_BOTTOM_X,
+  leftY: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_LEFT_Y,
+  rightY: RngCallerStatic.SURVIVAL_UPDATE_EXTRA_SPAWN_RIGHT_Y,
+});
 
-export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS = new SurvivalSpawnPosCallers(
-  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_EDGE,
-  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_TOP_X,
-  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_BOTTOM_X,
-  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_LEFT_Y,
-  RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_RIGHT_Y,
-);
+export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS = new SurvivalSpawnPosCallers({
+  edge: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_EDGE,
+  topX: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_TOP_X,
+  bottomX: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_BOTTOM_X,
+  leftY: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_LEFT_Y,
+  rightY: RngCallerStatic.SURVIVAL_UPDATE_MAIN_SPAWN_RIGHT_Y,
+});
 
 
 /**
@@ -1405,16 +1513,23 @@ export function tickSurvivalWaveSpawns(
 
 
 export class SpawnTemplateCall {
-  constructor(
-    public readonly templateId: SpawnId,
-    public readonly pos: Vec2,
-    public readonly heading: number,
-  ) {
+  readonly templateId: SpawnId;
+  readonly pos: Vec2;
+  readonly heading: number;
+
+  constructor(opts: {
+    templateId: SpawnId;
+    pos: Vec2;
+    heading: number;
+  }) {
+    this.templateId = opts.templateId;
+    this.pos = opts.pos;
+    this.heading = opts.heading;
   }
 }
 
 function spawnCall(templateId: SpawnId, pos: Vec2, heading: number): SpawnTemplateCall {
-  return new SpawnTemplateCall(templateId, pos, heading);
+  return new SpawnTemplateCall({ templateId, pos, heading });
 }
 
 
@@ -1712,7 +1827,7 @@ function applyTail(
 
   // Demo-burst effect (skipped when demo_mode_active != 0).
   if (!env.demoModeActive && 0.0 < c.pos.x && c.pos.x < env.terrainWidth && 0.0 < c.pos.y && c.pos.y < env.terrainHeight) {
-    planEffects.push(new BurstEffect(c.pos, 8));
+    planEffects.push(new BurstEffect({ pos: c.pos, count: 8 }));
   }
 
   if (c.health !== null) {
