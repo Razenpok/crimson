@@ -30,14 +30,12 @@ export class RGBA {
     this.a = optsOrR.a ?? 1.0;
   }
 
-  static fromRgba(value: RGBA | wgl.Color): RGBA {
+  static fromRgba(value: RGBA | wgl.Color | readonly [number, number, number, number]): RGBA {
     if (value instanceof RGBA) return value;
+    if ('length' in value) {
+      return new RGBA({ r: value[0], g: value[1], b: value[2], a: value[3] });
+    }
     return new RGBA({ r: value.r, g: value.g, b: value.b, a: value.a });
-  }
-
-  static fromBytes(r: number, g: number, b: number, a: number): RGBA {
-    const inv255 = 1.0 / 255.0;
-    return new RGBA({ r: r * inv255, g: g * inv255, b: b * inv255, a: a * inv255 });
   }
 
   static fromRl(value: wgl.Color): RGBA {
@@ -106,17 +104,6 @@ export class RGBA {
 
   scaledAlpha(factor: number): RGBA {
     return this.withAlpha(this.a * factor);
-  }
-
-  /** Convert to [r255, g255, b255, a255] byte values */
-  toBytes(): [number, number, number, number] {
-    const c = this.clamped();
-    return [
-      int(c.r * 255.0 + 0.5),
-      int(c.g * 255.0 + 0.5),
-      int(c.b * 255.0 + 0.5),
-      int(c.a * 255.0 + 0.5),
-    ];
   }
 
   toRl(): wgl.Color {
