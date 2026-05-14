@@ -40,7 +40,7 @@ export function resolveRequest(state: GameState): HighScoresRequest {
       level = state.config.gameplay.questLevel;
     }
     // Native screen always has a valid quest stage selected (defaults to 1.1).
-    request.questLevel = level ?? new QuestLevel(1, 1);
+    request.questLevel = level ?? new QuestLevel({ major: 1, minor: 1 });
   }
 
   return request;

@@ -587,7 +587,7 @@ export class DemoView {
     const weaponId = 18;
     const rng = this._runtime.simWorld.state.rng;
     this._setupWorldPlayers([[new Vec2(512.0, 512.0), weaponId]]);
-    const quest = questByLevel(new QuestLevel(1, 1));
+    const quest = questByLevel(new QuestLevel({ major: 1, minor: 1 }));
     if (quest === null) throw new Error("quest 1.1 must exist");
     // Native variant 3 calls terrain_generate(&quest_selected_meta), which is the
     // base of the quest metadata array in this build, so it resolves to quest 1.1.

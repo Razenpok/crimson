@@ -154,14 +154,14 @@ export class QuestMode extends BaseGameplayMode {
       audio: opts.audio ?? null,
       audioRng: opts.audioRng,
     });
-    this._questLevel = opts.config.gameplay.questLevel ?? new QuestLevel(1, 1);
+    this._questLevel = opts.config.gameplay.questLevel ?? new QuestLevel({ major: 1, minor: 1 });
   }
 
   open(): void {
     super.open();
     this._questDef = null;
     const cfgLevel = this.config.gameplay.questLevel;
-    this._questLevel = cfgLevel ?? new QuestLevel(1, 1);
+    this._questLevel = cfgLevel ?? new QuestLevel({ major: 1, minor: 1 });
     this._questTotalSpawnCount = 0;
     this._outcome = null;
     const courierTex = getTexture(this.renderResources.resources, TextureId.DEFAULT_FONT_COURIER);

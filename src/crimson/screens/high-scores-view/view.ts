@@ -528,7 +528,7 @@ export class HighScoresView {
       } else if (modeId === GameMode.QUESTS) {
         // Ensure quest selection exists when switching into quests.
         if (request.questLevel === null) {
-          request.questLevel = this.state.config.gameplay.questLevel ?? new QuestLevel(1, 1);
+          request.questLevel = this.state.config.gameplay.questLevel ?? new QuestLevel({ major: 1, minor: 1 });
         }
       }
       this._dirty = true;

@@ -13,7 +13,9 @@ export class QuestLevel {
   public readonly major: number;
   public readonly minor: number;
 
-  constructor(major: number, minor: number) {
+  constructor(opts: { major: number; minor: number }) {
+    const major = opts.major;
+    const minor = opts.minor;
     if (
       !Number.isInteger(major) || !Number.isInteger(minor) ||
       major < 1 || major > QUEST_STAGE_COUNT ||
@@ -39,7 +41,7 @@ export class QuestLevel {
     const major = int(Number(majorText));
     const minor = int(Number(minorText));
     try {
-      return new QuestLevel(major, minor);
+      return new QuestLevel({ major, minor });
     } catch {
       throw new Error(`invalid quest level: '${value}'`);
     }
@@ -51,7 +53,7 @@ export class QuestLevel {
     }
     const major = Math.floor(index / QUESTS_PER_STAGE) + 1;
     const minor = (index % QUESTS_PER_STAGE) + 1;
-    return new QuestLevel(major, minor);
+    return new QuestLevel({ major, minor });
   }
 
   get text(): string {

@@ -455,13 +455,13 @@ export class QuestsMenuView {
     if (config.gameplay.hardcore) {
       unlock = int(status.questUnlockIndexFull);
     }
-    const level = new QuestLevel(int(stage), int(row) + 1);
+    const level = new QuestLevel({ major: int(stage), minor: int(row) + 1 });
     return unlock >= level.globalIndex;
   }
 
   private _tryStartQuest(stage: number, row: number): void {
     if (!this._questUnlocked(stage, row)) return;
-    const level = new QuestLevel(int(stage), int(row) + 1);
+    const level = new QuestLevel({ major: int(stage), minor: int(row) + 1 });
     this.state.pendingQuestLevel = level;
     this.state.config.gameplay.mode = GameMode.QUESTS;
     this.state.config.gameplay.questLevel = level;
@@ -470,7 +470,7 @@ export class QuestsMenuView {
   }
 
   private _questTitle(stage: number, row: number): string {
-    const level = new QuestLevel(int(stage), int(row) + 1);
+    const level = new QuestLevel({ major: int(stage), minor: int(row) + 1 });
     const quest = questByLevel(level);
     if (quest === null) return '???';
     return quest.title;
@@ -502,7 +502,7 @@ export class QuestsMenuView {
     //   the decoded payload.
     //
     // We emulate this layout so the debug `F1` overlay matches the classic build.
-    const level = new QuestLevel(int(stage), int(row) + 1);
+    const level = new QuestLevel({ major: int(stage), minor: int(row) + 1 });
     const globalIndex = level.globalIndex;
     const status = this.state.status;
     const gamesIdx = questGamesCounterIndex(level);

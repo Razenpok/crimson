@@ -158,7 +158,7 @@ export function perkGenerateChoices(
   // force Monster Vision as the first choice if not owned.
   if (
     state.questLevel !== null &&
-    state.questLevel.equal(new QuestLevel(3, 4)) &&
+    state.questLevel.equal(new QuestLevel({ major: 3, minor: 4 })) &&
     int(playerPerkCounts[PerkId.MONSTER_VISION]) === 0
   ) {
     choices[0] = PerkId.MONSTER_VISION;

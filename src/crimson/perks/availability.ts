@@ -73,7 +73,7 @@ export function perkCanOffer(
   if (
     opts.gameMode === GameMode.QUESTS &&
     state.hardcore &&
-    state.questLevel !== null && state.questLevel.equal(new QuestLevel(2, 10)) &&
+    state.questLevel !== null && state.questLevel.equal(new QuestLevel({ major: 2, minor: 10 })) &&
     (perkId === PerkId.POISON_BULLETS || perkId === PerkId.VEINS_OF_POISON || perkId === PerkId.PLAGUEBEARER)
   ) {
     return false;

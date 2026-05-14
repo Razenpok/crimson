@@ -202,7 +202,7 @@ export class QuestResultsView {
       return;
     }
     if (action === 'play_next') {
-      if (this._questLevel !== null && this._questLevel.equal(new QuestLevel(5, 10))) {
+      if (this._questLevel !== null && this._questLevel.equal(new QuestLevel({ major: 5, minor: 10 }))) {
         this._action = 'end_note';
         return;
       }

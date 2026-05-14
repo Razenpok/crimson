@@ -214,7 +214,7 @@ export class QuestResultsUi {
     this._saved = false;
 
     // Native behavior: the final quest replaces "Play Next" with "Show End Note".
-    if (this.questLevel && this.questLevel.equal(new QuestLevel(5, 10))) {
+    if (this.questLevel && this.questLevel.equal(new QuestLevel({ major: 5, minor: 10 }))) {
       this._playNextButton.label = 'Show End Note';
     } else {
       this._playNextButton.label = 'Play Next';

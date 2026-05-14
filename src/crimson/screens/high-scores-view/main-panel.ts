@@ -79,7 +79,7 @@ export function drawMainPanel(
     } else {
       questColor = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 0.7);
     }
-    const questLevel = new QuestLevel(int(questMajor), int(questMinor));
+    const questLevel = new QuestLevel({ major: int(questMajor), minor: int(questMinor) });
     const quest = questByLevel(questLevel);
     const questLabel = `${questLevel.text}: ${quest !== null ? quest.title : '???'}`;
     drawSmallText(font, questLabel, leftPanelTopLeft.add(new Vec2(236.0 * scale, 63.0 * scale)), questColor);
