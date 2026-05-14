@@ -15,11 +15,11 @@ function _f32(value: number): number {
 }
 
 function _u32(value: number): number {
-    return value & 0xFFFFFFFF;
+    return value >>> 0;
 }
 
 function _i32(value: number): number {
-    value &= 0xFFFFFFFF;
+    value = value >>> 0;
     if (value & 0x80000000) {
         return value - 0x100000000;
     }
