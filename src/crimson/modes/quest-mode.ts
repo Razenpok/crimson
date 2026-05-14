@@ -183,7 +183,8 @@ export class QuestMode extends BaseGameplayMode {
     super.close();
   }
 
-  private _newSimSession(spawnEntries: readonly SpawnEntry[]): DeterministicSession {
+  private _newSimSession(opts: { spawnEntries: readonly SpawnEntry[] }): DeterministicSession {
+    const spawnEntries = opts.spawnEntries;
     const questDef = this._questDef;
     const [session, questSpawnState] = buildQuestSession({
       world: this.simWorld.worldState,
@@ -216,12 +217,14 @@ export class QuestMode extends BaseGameplayMode {
     this._perkPrompt.resetIfPending({ pendingCount: this.state.perkSelection.pendingCount });
   }
 
-  private _updatePerkUi(dtUiMs: number): void {
-    const pendingCount = this.state.perkSelection.pendingCount;
+  private _updatePerkUi(opts: { dtUiMs: number }): void {
+    const dtUiMs = opts.dtUiMs;
+    const pendingCount = int(this.state.perkSelection.pendingCount);
     const choices = perkSelectionPreparedChoices(
       this.simWorld.players,
       this.state.perkSelection,
     );
+    this._perkPrompt.beginFrame();
 
     if (this._perkMenu.open) {
       const choiceIndex = this._handlePerkMenuInput(choices, dtUiMs);
@@ -260,7 +263,6 @@ export class QuestMode extends BaseGameplayMode {
     paused: boolean;
     menuActive: boolean;
   }): boolean {
-    this._perkPrompt.beginFrame();
     return this._perkPrompt.pollOpenRequest({
       ctx: this._perkMenuUiContext(),
       config: this.config,
@@ -356,7 +358,7 @@ export class QuestMode extends BaseGameplayMode {
   }
 
   protected _lanOnPaused(dt: number): void {
-    this._tickDeathTimers(dt, 1.0);
+    this._tickDeathTimers(dt, { rate: 1.0 });
     if (this._deathTransitionReady()) {
       this._closeFailedRun();
     }
@@ -549,7 +551,7 @@ export class QuestMode extends BaseGameplayMode {
     this._questLevel = quest.level;
     this._questTotalSpawnCount = totalSpawnCount;
     this._resetGameplayFrameClock();
-    this._simSession = this._newSimSession(entries);
+    this._simSession = this._newSimSession({ spawnEntries: entries });
 
     if (opts.status !== null) {
       const idx = trackedQuestGamesCounterIndex(quest.level);
@@ -614,7 +616,8 @@ export class QuestMode extends BaseGameplayMode {
     return deadPlayers > 0;
   }
 
-  private _tickDeathTimers(dt: number, rate: number = 20.0): void {
+  private _tickDeathTimers(dt: number, opts: { rate?: number } = {}): void {
+    const rate = opts.rate ?? 20.0;
     const delta = dt * rate;
     if (delta <= 0.0) return;
     for (const player of this.simWorld.players) {
@@ -666,7 +669,7 @@ export class QuestMode extends BaseGameplayMode {
       return;
     }
 
-    this._updatePerkUi(frame.dtUiMs);
+    this._updatePerkUi({ dtUiMs: frame.dtUiMs });
 
     const simDt = (this._paused || this._perkMenu.active) ? 0.0 : frame.dt;
     const session = this._simSession;
@@ -679,7 +682,7 @@ export class QuestMode extends BaseGameplayMode {
       this._resetGameplayFrameClock();
       // Match legacy transition behavior: keep countdown moving, but at
       // real-time pace while perk-menu transition is holding world ticks.
-      this._tickDeathTimers(frame.dt, 1.0);
+      this._tickDeathTimers(frame.dt, { rate: 1.0 });
       if (this._deathTransitionReady()) {
         this._closeFailedRun();
       }
