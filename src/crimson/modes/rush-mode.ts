@@ -153,7 +153,7 @@ export class RushMode extends BaseGameplayMode {
     return int(this._sessionElapsedMs());
   }
 
-  protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
+  protected _replayOutputBasename(opts: { stamp: string; replay: object }): string {
     const stamp = opts.stamp;
     const kills = int(this.creatures.killCount);
     return `rush_${stamp}_kills${kills}`;
