@@ -12,7 +12,6 @@ export class WorldViewportState {
     this.worldSize = opts.worldSize;
     this.config = opts.config;
     this.camera = opts.camera;
-    Object.freeze(this);
   }
 }
 
