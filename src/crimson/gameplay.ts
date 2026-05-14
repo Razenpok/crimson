@@ -141,8 +141,8 @@ export class GameplayState {
   constructor() {
     this.rng = new Crand(0xBEEF);
     this.effects = new EffectPool();
-    this.particles = new ParticlePool(undefined, this.rng);
-    this.spriteEffects = new SpriteEffectPool(undefined, this.rng);
+    this.particles = new ParticlePool({ rng: this.rng });
+    this.spriteEffects = new SpriteEffectPool({ rng: this.rng });
     this.projectiles = new ProjectilePool();
     this.secondaryProjectiles = new SecondaryProjectilePool();
     this.bonuses = new BonusTimers();

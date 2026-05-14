@@ -33,20 +33,52 @@ export enum ParticleStyleId {
 export type CreatureKillHandler = (creatureIndex: number, owner: OwnerRef) => void;
 
 export class Particle {
-  active = false;
-  renderFlag = false;
-  pos = new Vec2();
-  vel = new Vec2();
-  scaleX = 1.0;
-  scaleY = 1.0;
-  scaleZ = 1.0;
-  age = 0.0;
-  intensity = 0.0;
-  angle = 0.0;
-  spin = 0.0;
-  styleId: ParticleStyleId = ParticleStyleId.FLAMETHROWER;
-  targetId = -1;
-  owner: OwnerRef = OwnerRef.fromLocalPlayer(0);
+  active: boolean;
+  renderFlag: boolean;
+  pos: Vec2;
+  vel: Vec2;
+  scaleX: number;
+  scaleY: number;
+  scaleZ: number;
+  age: number;
+  intensity: number;
+  angle: number;
+  spin: number;
+  styleId: ParticleStyleId;
+  targetId: number;
+  owner: OwnerRef;
+
+  constructor(opts: {
+    active?: boolean;
+    renderFlag?: boolean;
+    pos?: Vec2;
+    vel?: Vec2;
+    scaleX?: number;
+    scaleY?: number;
+    scaleZ?: number;
+    age?: number;
+    intensity?: number;
+    angle?: number;
+    spin?: number;
+    styleId?: ParticleStyleId;
+    targetId?: number;
+    owner?: OwnerRef;
+  } = {}) {
+    this.active = opts.active ?? false;
+    this.renderFlag = opts.renderFlag ?? false;
+    this.pos = opts.pos ?? new Vec2();
+    this.vel = opts.vel ?? new Vec2();
+    this.scaleX = opts.scaleX ?? 1.0;
+    this.scaleY = opts.scaleY ?? 1.0;
+    this.scaleZ = opts.scaleZ ?? 1.0;
+    this.age = opts.age ?? 0.0;
+    this.intensity = opts.intensity ?? 0.0;
+    this.angle = opts.angle ?? 0.0;
+    this.spin = opts.spin ?? 0.0;
+    this.styleId = opts.styleId ?? ParticleStyleId.FLAMETHROWER;
+    this.targetId = opts.targetId ?? -1;
+    this.owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
+  }
 }
 
 export class ParticlePool {
@@ -54,14 +86,15 @@ export class ParticlePool {
   private _rng: CrandLike;
   private _creatureDamageApplier: CreatureDamageApplier | null;
 
-  constructor(
-    size: number = PARTICLE_POOL_SIZE,
-    rng: CrandLike | null = null,
-    creatureDamageApplier: CreatureDamageApplier | null = null,
-  ) {
+  constructor(opts: {
+    size?: number;
+    rng?: CrandLike | null;
+    creatureDamageApplier?: CreatureDamageApplier | null;
+  } = {}) {
+    const size = opts.size ?? PARTICLE_POOL_SIZE;
     this._entries = Array.from({ length: size }, () => new Particle());
-    this._rng = rng ?? new Crand(0);
-    this._creatureDamageApplier = creatureDamageApplier;
+    this._rng = opts.rng ?? new Crand(0);
+    this._creatureDamageApplier = opts.creatureDamageApplier ?? null;
   }
 
   get entries(): Particle[] {
@@ -359,21 +392,38 @@ export class ParticlePool {
 }
 
 export class SpriteEffect {
-  active = false;
-  color: RGBA = new RGBA(1.0, 1.0, 1.0, 0.0);
-  rotation = 0.0;
-  pos = new Vec2();
-  vel = new Vec2();
-  scale = 1.0;
+  active: boolean;
+  color: RGBA;
+  rotation: number;
+  pos: Vec2;
+  vel: Vec2;
+  scale: number;
+
+  constructor(opts: {
+    active?: boolean;
+    color?: RGBA;
+    rotation?: number;
+    pos?: Vec2;
+    vel?: Vec2;
+    scale?: number;
+  } = {}) {
+    this.active = opts.active ?? false;
+    this.color = opts.color ?? new RGBA(1.0, 1.0, 1.0, 0.0);
+    this.rotation = opts.rotation ?? 0.0;
+    this.pos = opts.pos ?? new Vec2();
+    this.vel = opts.vel ?? new Vec2();
+    this.scale = opts.scale ?? 1.0;
+  }
 }
 
 export class SpriteEffectPool {
   private _entries: SpriteEffect[];
   private _rng: CrandLike;
 
-  constructor(size: number = SPRITE_EFFECT_POOL_SIZE, rng: CrandLike | null = null) {
+  constructor(opts: { size?: number; rng?: CrandLike | null } = {}) {
+    const size = opts.size ?? SPRITE_EFFECT_POOL_SIZE;
     this._entries = Array.from({ length: size }, () => new SpriteEffect());
-    this._rng = rng ?? new Crand(0);
+    this._rng = opts.rng ?? new Crand(0);
   }
 
   get entries(): SpriteEffect[] {
@@ -441,12 +491,28 @@ export class SpriteEffectPool {
 }
 
 export class FxQueueEntry {
-  effectId = 0;
-  rotation = 0.0;
-  pos = new Vec2();
-  height = 0.0;
-  width = 0.0;
-  color: RGBA = new RGBA();
+  effectId: number;
+  rotation: number;
+  pos: Vec2;
+  height: number;
+  width: number;
+  color: RGBA;
+
+  constructor(opts: {
+    effectId?: number;
+    rotation?: number;
+    pos?: Vec2;
+    height?: number;
+    width?: number;
+    color?: RGBA;
+  } = {}) {
+    this.effectId = opts.effectId ?? 0;
+    this.rotation = opts.rotation ?? 0.0;
+    this.pos = opts.pos ?? new Vec2();
+    this.height = opts.height ?? 0.0;
+    this.width = opts.width ?? 0.0;
+    this.color = opts.color ?? new RGBA();
+  }
 }
 
 export class FxQueue {
@@ -457,7 +523,9 @@ export class FxQueue {
   private _maxCount: number;
   violenceDisabled: number;
 
-  constructor(capacity: number = FX_QUEUE_CAPACITY, maxCount: number = FX_QUEUE_MAX_COUNT) {
+  constructor(opts: { capacity?: number; maxCount?: number } = {}) {
+    let capacity = opts.capacity ?? FX_QUEUE_CAPACITY;
+    let maxCount = opts.maxCount ?? FX_QUEUE_MAX_COUNT;
     capacity = Math.max(0, capacity);
     maxCount = Math.max(0, Math.min(maxCount, capacity));
     this._entries = Array.from({ length: capacity }, () => new FxQueueEntry());
@@ -521,11 +589,25 @@ export class FxQueue {
 }
 
 export class FxQueueRotatedEntry {
-  topLeft = new Vec2();
-  color: RGBA = new RGBA();
-  rotation = 0.0;
-  scale = 1.0;
-  creatureTypeId = 0;
+  topLeft: Vec2;
+  color: RGBA;
+  rotation: number;
+  scale: number;
+  creatureTypeId: number;
+
+  constructor(opts: {
+    topLeft?: Vec2;
+    color?: RGBA;
+    rotation?: number;
+    scale?: number;
+    creatureTypeId?: number;
+  } = {}) {
+    this.topLeft = opts.topLeft ?? new Vec2();
+    this.color = opts.color ?? new RGBA();
+    this.rotation = opts.rotation ?? 0.0;
+    this.scale = opts.scale ?? 1.0;
+    this.creatureTypeId = opts.creatureTypeId ?? 0;
+  }
 }
 
 export class FxQueueRotated {
@@ -535,10 +617,9 @@ export class FxQueueRotated {
   private _count = 0;
   private _maxCount: number;
 
-  constructor(
-    capacity: number = FX_QUEUE_ROTATED_CAPACITY,
-    maxCount: number = FX_QUEUE_ROTATED_MAX_COUNT,
-  ) {
+  constructor(opts: { capacity?: number; maxCount?: number } = {}) {
+    let capacity = opts.capacity ?? FX_QUEUE_ROTATED_CAPACITY;
+    let maxCount = opts.maxCount ?? FX_QUEUE_ROTATED_MAX_COUNT;
     capacity = Math.max(0, capacity);
     maxCount = Math.max(0, Math.min(maxCount, capacity));
     this._entries = Array.from({ length: capacity }, () => new FxQueueRotatedEntry());
@@ -597,19 +678,49 @@ export class FxQueueRotated {
 }
 
 export class EffectEntry {
-  pos = new Vec2();
-  effectId = 0;
-  vel = new Vec2();
-  rotation = 0.0;
-  scale = 1.0;
-  halfWidth = 0.0;
-  halfHeight = 0.0;
-  age = 0.0;
-  lifetime = 0.0;
-  flags = 0;
-  color: RGBA = new RGBA();
-  rotationStep = 0.0;
-  scaleStep = 0.0;
+  pos: Vec2;
+  effectId: number;
+  vel: Vec2;
+  rotation: number;
+  scale: number;
+  halfWidth: number;
+  halfHeight: number;
+  age: number;
+  lifetime: number;
+  flags: number;
+  color: RGBA;
+  rotationStep: number;
+  scaleStep: number;
+
+  constructor(opts: {
+    pos?: Vec2;
+    effectId?: number;
+    vel?: Vec2;
+    rotation?: number;
+    scale?: number;
+    halfWidth?: number;
+    halfHeight?: number;
+    age?: number;
+    lifetime?: number;
+    flags?: number;
+    color?: RGBA;
+    rotationStep?: number;
+    scaleStep?: number;
+  } = {}) {
+    this.pos = opts.pos ?? new Vec2();
+    this.effectId = opts.effectId ?? 0;
+    this.vel = opts.vel ?? new Vec2();
+    this.rotation = opts.rotation ?? 0.0;
+    this.scale = opts.scale ?? 1.0;
+    this.halfWidth = opts.halfWidth ?? 0.0;
+    this.halfHeight = opts.halfHeight ?? 0.0;
+    this.age = opts.age ?? 0.0;
+    this.lifetime = opts.lifetime ?? 0.0;
+    this.flags = opts.flags ?? 0;
+    this.color = opts.color ?? new RGBA();
+    this.rotationStep = opts.rotationStep ?? 0.0;
+    this.scaleStep = opts.scaleStep ?? 0.0;
+  }
 }
 
 export class EffectPool {
@@ -623,7 +734,8 @@ export class EffectPool {
   private _detailToggle = 0;
   private _overwriteCursor = 0;
 
-  constructor(size: number = EFFECT_POOL_SIZE) {
+  constructor(opts: { size?: number } = {}) {
+    let size = opts.size ?? EFFECT_POOL_SIZE;
     size = Math.max(0, size);
     this._entries = Array.from({ length: size }, () => new EffectEntry());
     this._free = [];
