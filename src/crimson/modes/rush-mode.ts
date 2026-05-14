@@ -159,7 +159,7 @@ export class RushMode extends BaseGameplayMode {
     return `rush_${stamp}_kills${kills}`;
   }
 
-  protected _lanModeName(): 'survival' | 'rush' | 'quests' {
+  protected _lanModeName(): 'rush' {
     return 'rush';
   }
 
