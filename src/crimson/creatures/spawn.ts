@@ -973,44 +973,50 @@ class PlanBuilder {
   }
 
   ringChildren(
-    count: number,
-    angleStep: number,
-    radius: number,
-    aiMode: number,
-    spec: FormationChildSpec,
-    linkParent: number = 0,
-    setPosition: boolean = false,
-    headingOverride: number | null = null,
+    opts: {
+      count: number;
+      angleStep: number;
+      radius: number;
+      aiMode: number;
+      childSpec: FormationChildSpec;
+      linkParent?: number;
+      setPosition?: boolean;
+      headingOverride?: number | null;
+    },
   ): number {
     return spawnRingChildren(
       this.creatures, this.templateId, this.pos, this.rng,
-      { count, angleStep, radius, aiMode, childSpec: spec, linkParent, setPosition, headingOverride },
+      opts,
     );
   }
 
   gridChildren(
-    xRange: readonly number[],
-    yRange: readonly number[],
-    aiMode: number,
-    spec: FormationChildSpec,
-    linkParent: number = 0,
+    opts: {
+      xRange: readonly number[];
+      yRange: readonly number[];
+      aiMode: number;
+      childSpec: FormationChildSpec;
+      linkParent?: number;
+    },
   ): number {
     return spawnGridChildren(
       this.creatures, this.templateId, this.pos, this.rng,
-      { xRange, yRange, aiMode, childSpec: spec, linkParent },
+      opts,
     );
   }
 
   chainChildren(
-    count: number,
-    aiMode: number,
-    spec: FormationChildSpec,
-    setupChild: (child: CreatureInit, idx: number) => void,
-    linkParentStart: number = 0,
+    opts: {
+      count: number;
+      aiMode: number;
+      childSpec: FormationChildSpec;
+      setupChild: (child: CreatureInit, idx: number) => void;
+      linkParentStart?: number;
+    },
   ): number {
     return spawnChainChildren(
       this.creatures, this.templateId, this.pos, this.rng,
-      { count, aiMode, childSpec: spec, setupChild, linkParentStart },
+      opts,
     );
   }
 
@@ -1879,12 +1885,12 @@ function applyGridFormation(ctx: PlanBuilder, spec: GridFormationSpec): void {
   if (spec.setParentMaxHealth && parent.health !== null) {
     parent.maxHealth = parent.health;
   }
-  ctx.primary = ctx.gridChildren(
-    spec.xRange,
-    spec.yRange,
-    spec.childAiMode,
-    spec.childSpec,
-  );
+  ctx.primary = ctx.gridChildren({
+    xRange: spec.xRange,
+    yRange: spec.yRange,
+    aiMode: spec.childAiMode,
+    childSpec: spec.childSpec,
+  });
   if (spec.applyFallback) {
     applyUnhandledCreatureTypeFallback(ctx.creatures, ctx.primary);
   }
@@ -1897,15 +1903,14 @@ function applyRingFormation(ctx: PlanBuilder, spec: RingFormationSpec): void {
   if (spec.setParentMaxHealth && parent.health !== null) {
     parent.maxHealth = parent.health;
   }
-  ctx.primary = ctx.ringChildren(
-    spec.count,
-    spec.angleStep,
-    spec.radius,
-    spec.childAiMode,
-    spec.childSpec,
-    0,
-    spec.setPosition,
-  );
+  ctx.primary = ctx.ringChildren({
+    count: spec.count,
+    angleStep: spec.angleStep,
+    radius: spec.radius,
+    aiMode: spec.childAiMode,
+    childSpec: spec.childSpec,
+    setPosition: spec.setPosition,
+  });
   if (spec.applyFallback) {
     applyUnhandledCreatureTypeFallback(ctx.creatures, ctx.primary);
   }
@@ -2018,16 +2023,14 @@ function template0eAlienSpawnerRing24(ctx: PlanBuilder): void {
     contactDamage: 30.0,
     tint: [1.0, 0.3, 0.3, 1.0],
   });
-  ctx.primary = ctx.ringChildren(
-    24,
-    Math.PI / 12.0,
-    100.0,
-    CreatureAiMode.FOLLOW_LINK,
-    cSpec,
-    0,
-    false,
-    0.0,
-  );
+  ctx.primary = ctx.ringChildren({
+    count: 24,
+    angleStep: Math.PI / 12.0,
+    radius: 100.0,
+    aiMode: CreatureAiMode.FOLLOW_LINK,
+    childSpec: cSpec,
+    headingOverride: 0.0,
+  });
 }
 
 registerTemplate(SpawnId.ALIEN_SPAWNER_RING_24_0E)(template0eAlienSpawnerRing24);
@@ -2063,7 +2066,12 @@ function template11FormationChainLizard4(ctx: PlanBuilder): void {
     child.pos = Vec2.fromAngle(angle).mul(256.0).add(ctx.pos);
   };
 
-  const chainPrev = ctx.chainChildren(4, CreatureAiMode.FOLLOW_LINK, cSpec, setupChild);
+  const chainPrev = ctx.chainChildren({
+    count: 4,
+    aiMode: CreatureAiMode.FOLLOW_LINK,
+    childSpec: cSpec,
+    setupChild,
+  });
 
   parent.aiLinkParent = chainPrev;
   ctx.primary = chainPrev;
@@ -2105,7 +2113,12 @@ function template13FormationChainAlien10(ctx: PlanBuilder): void {
     child.pos = Vec2.fromAngle(angle).mul(256.0).add(ctx.pos);
   };
 
-  const chainPrev = ctx.chainChildren(10, CreatureAiMode.ORBIT_LINK, cSpec, setupChild);
+  const chainPrev = ctx.chainChildren({
+    count: 10,
+    aiMode: CreatureAiMode.ORBIT_LINK,
+    childSpec: cSpec,
+    setupChild,
+  });
 
   parent.aiLinkParent = chainPrev;
   ctx.primary = chainPrev;
