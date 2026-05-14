@@ -585,6 +585,15 @@ export function registerCoreCommands(console: ConsoleState): void {
   console.registerCommand('minimizeconsole', (_args: string[]) => {
     console.heightPx = DEFAULT_CONSOLE_HEIGHT;
   });
+
+  console.registerCommand('exec', (args: string[]) => {
+    if (args.length === 0) {
+      console.log.log('exec <script>');
+      return;
+    }
+    // Browser/WebGL cannot synchronously read local console scripts.
+    console.log.log(`Cannot open file '${args[0]}'`);
+  });
 }
 
 export function createConsole(baseDir = '', assetsDir: string | null = null): ConsoleState {
@@ -600,7 +609,43 @@ export function createConsole(baseDir = '', assetsDir: string | null = null): Co
   });
   console.registerCvar('version', CONSOLE_VERSION_TEXT);
   console.registerCvar('con_monoFont', '1');
-  console.registerCvar('cv_showFPS', '0');
+  console._slideT = 1.0;
+  console._offsetY = -console.heightPx;
+  registerCoreCommands(console);
+  return console;
+}
+
+function makeNoopCommand(console: ConsoleState, name: string): CommandHandler {
+  return (args: string[]): void => {
+    console.log.log(`command ${name} called with ${args.length} args`);
+  };
+}
+
+export function registerBootCommands(
+  console: ConsoleState,
+  handlers: Record<string, CommandHandler> | null = null,
+): void {
+  const resolved = handlers ?? {};
+  const commands = [
+    'setGammaRamp',
+    'snd_addGameTune',
+    'generateterrain',
+    'telltimesurvived',
+    'setresourcepaq',
+    'loadtexture',
+    'openurl',
+    'sndfreqadjustment',
+    'rendermode',
+    'togglertx',
+  ];
+  for (const name of commands) {
+    const handler = resolved[name] ?? makeNoopCommand(console, name);
+    console.registerCommand(name, handler);
+  }
+}
+
+export function registerCoreCvars(console: ConsoleState, width: number, height: number): void {
+  // Defaults match `register_core_cvars` (0x00402c00) in `crimsonland.exe`.
   console.registerCvar('cv_silentloads', '1');
   console.registerCvar('cv_bodiesFade', '1');
   console.registerCvar('cv_uiTransparency', '1');
@@ -613,11 +658,8 @@ export function createConsole(baseDir = '', assetsDir: string | null = null): Co
   console.registerCvar('cv_friendlyFire', '0');
   console.registerCvar('cv_lanLockstepEnabled', '0');
   console.registerCvar('cv_lanPlayerRings', '0');
+  console.registerCvar('cv_showFPS', '0');
   console.registerCvar('cv_padAimDistMul', '96');
-  console.registerCvar('v_width', '1024');
-  console.registerCvar('v_height', '768');
-  console._slideT = 1.0;
-  console._offsetY = -console.heightPx;
-  registerCoreCommands(console);
-  return console;
+  console.registerCvar('v_width', String(width));
+  console.registerCvar('v_height', String(height));
 }

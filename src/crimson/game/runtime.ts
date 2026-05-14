@@ -2,7 +2,13 @@
 
 import * as wgl from '@wgl';
 import { defaultCrimsonConfig } from '@grim/config.ts';
-import { type ConsoleState, type CommandHandler, createConsole } from '@grim/console.ts';
+import {
+  type ConsoleState,
+  type CommandHandler,
+  createConsole,
+  registerBootCommands,
+  registerCoreCvars,
+} from '@grim/console.ts';
 import { Crand } from '@grim/rand.ts';
 import { loadMusicTrack, queueTrack } from '@grim/music.ts';
 
@@ -27,6 +33,15 @@ export const REQUIRED_RUNTIME_PAQS: readonly string[] = [
   MUSIC_PAQ_NAME,
   SFX_PAQ_NAME,
 ];
+
+function runtimeDownloadTargets(_assetsDir: string): readonly string[] {
+  // WebGL loads PAQ assets through URL fetches during boot; there is no synchronous filesystem scan.
+  return [];
+}
+
+function requireRuntimeAssets(_assetsDir: string): void {
+  // WebGL cannot synchronously stat local archives; boot/resource loading reports fetch failures.
+}
 
 function parseFloatArg(value: string): number {
   const v = parseFloat(value);
@@ -382,30 +397,6 @@ function bootCommandHandlers(
   };
 }
 
-function registerCoreCvars(console: ConsoleState, width: number, height: number): void {
-  console.registerCvar('cv_uiPointFilterPanels', '0');
-  console.registerCvar('cv_enableMousePointAndClickMovement', '0');
-  console.registerCvar('cv_verbose', '0');
-  console.registerCvar('cv_terrainBodiesTransparency', '0');
-  console.registerCvar('cv_uiSmallIndicators', '0');
-  console.registerCvar('cv_aimEnhancementFade', '0.7');
-  console.registerCvar('cv_friendlyFire', '0');
-  console.registerCvar('cv_lanLockstepEnabled', '0');
-  console.registerCvar('cv_lanPlayerRings', '0');
-  console.registerCvar('cv_padAimDistMul', '96');
-  console.registerCvar('v_width', String(width));
-  console.registerCvar('v_height', String(height));
-}
-
-function registerBootCommands(
-  console: ConsoleState,
-  handlers: Record<string, CommandHandler>,
-): void {
-  for (const [name, handler] of Object.entries(handlers)) {
-    console.registerCommand(name, handler);
-  }
-}
-
 export function runGame(
   config: GameConfig,
 ): { view: GameLoopView; state: GameState } {
@@ -423,7 +414,7 @@ export function runGame(
   const rng = new Crand(seed);
   const assetsDir = config.assetsDir ?? config.baseDir;
 
-  const console = createConsole();
+  const console = createConsole(config.baseDir, assetsDir);
   const status = createGameStatus();
 
   const state = new GameState({
@@ -453,8 +444,13 @@ export function runGame(
     `config: ${cfg.display.width}x${cfg.display.height} windowed=${cfg.display.windowed}`,
   );
   console.log.log(`assets: ${assetsDir}`);
+  void runtimeDownloadTargets(assetsDir);
+  requireRuntimeAssets(assetsDir);
+  console.log.log(`assets: required archives ready (${REQUIRED_RUNTIME_PAQS.join(', ')})`);
   console.log.log(`commands: ${console.commands.size} registered`);
   console.log.log(`cvars: ${console.cvars.size} registered`);
+  console.execLine(`exec ${AUTOEXEC_NAME}`);
+  console.log.flush();
 
   const view = new GameLoopView(state, status);
 
