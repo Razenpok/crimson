@@ -2,7 +2,7 @@
 
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
-import { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import { SpawnId } from '@crimson/creatures/spawn.ts';
 import { SpawnEntry, type QuestContext, type QuestDefinition } from './types.ts';
 
 const QUEST_COMPLETION_HIT_SFX_START_MS = 800.0;
@@ -62,6 +62,9 @@ export function tickQuestCompletionTransition(
   // The quest-mode update loop waits for a short delay after the quest is "idle complete"
   // (no active creatures + no remaining spawn table entries) before transitioning to the
   // results screen.
+  //
+  // Returns:
+  //   (completion_transition_ms, completed, play_hit_sfx, play_completion_music)
 
   const dtMs = frameDtMs;
   let timerMs = completionTransitionMs;
