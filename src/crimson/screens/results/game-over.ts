@@ -215,8 +215,9 @@ export class GameOverUi {
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;
 
-  constructor(config: CrimsonConfig) {
-    this.config = config;
+  constructor(opts: { config: CrimsonConfig; preserveBugs?: boolean }) {
+    this.config = opts.config;
+    this.preserveBugs = opts.preserveBugs ?? false;
   }
 
   open(): void {

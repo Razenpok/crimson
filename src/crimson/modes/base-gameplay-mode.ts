@@ -285,7 +285,10 @@ export class BaseGameplayMode {
     this._action = null;
     this._paused = false;
     this._localInput = new LocalInputInterpreter();
-    this._gameOverUi = new GameOverUi(opts.config);
+    this._gameOverUi = new GameOverUi({
+      config: opts.config,
+      preserveBugs: opts.preserveBugs ?? false,
+    });
 
     this.assetsDir = opts.assetsUrl ?? '';
     this.worldSize = opts.worldSize;
