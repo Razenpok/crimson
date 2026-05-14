@@ -42,7 +42,6 @@ export class ProjectileDrawCtx {
     this.angle = opts.angle;
     this.scale = opts.scale;
     this.alpha = opts.alpha;
-    Object.freeze(this);
   }
 }
 
@@ -71,6 +70,5 @@ export class SecondaryProjectileDrawCtx {
     this.angle = opts.angle;
     this.scale = opts.scale;
     this.alpha = opts.alpha;
-    Object.freeze(this);
   }
 }
