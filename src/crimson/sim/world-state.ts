@@ -12,12 +12,12 @@ import {
   CreatureDeath,
   CreaturePool,
   CreatureUpdateOptions,
-  type SpawnEnv,
 } from '@crimson/creatures/runtime.ts';
 import {
   CreatureAiMode,
   CreatureFlags,
   CreatureTypeId,
+  type SpawnEnv,
 } from '@crimson/creatures/spawn.ts';
 import type { FxQueue, FxQueueRotated } from '@crimson/effects.ts';
 import { GameMode } from '@crimson/game-modes.ts';
