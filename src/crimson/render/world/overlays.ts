@@ -7,12 +7,12 @@ import { clamp } from '@grim/math.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
-function circleSegmentsFilled(radius: number): number {
+function grim2dCircleSegmentsFilled(radius: number): number {
   // grim_draw_circle_filled (grim.dll): segments = trunc(radius * 0.125 + 12.0)
   return Math.max(3, int(radius * 0.125 + 12.0));
 }
 
-function circleSegmentsOutline(radius: number): number {
+function grim2dCircleSegmentsOutline(radius: number): number {
   // grim_draw_circle_outline (grim.dll): segments = trunc(radius * 0.2 + 14.0)
   return Math.max(3, int(radius * 0.2 + 14.0));
 }
@@ -28,8 +28,8 @@ export function drawAimCircle(
   alpha = clamp(alpha, 0.0, 1.0);
   if (alpha <= 1e-3) return;
 
-  const fillA = clamp((77 / 255) * alpha, 0, 1); // ui_render_aim_indicators: rgba(0,0,0.1,0.3)
-  const outlineA = clamp((255 * 0.55 / 255) * alpha, 0, 1);
+  const fillA = int(77 * alpha + 0.5) / 255; // ui_render_aim_indicators: rgba(0,0,0.1,0.3)
+  const outlineA = int(255 * 0.55 * alpha + 0.5) / 255;
 
   wgl.beginBlendMode(wgl.BlendMode.ALPHA);
 
@@ -38,7 +38,7 @@ export function drawAimCircle(
   // The original uses a triangle fan (polygons). Raylib provides circle
   // primitives that still use triangles internally, but allow higher
   // segment counts for a smoother result when scaled.
-  const fillSegs = Math.max(circleSegmentsFilled(radius), 64, int(radius));
+  const fillSegs = Math.max(grim2dCircleSegmentsFilled(radius), 64, int(radius));
   const step = (Math.PI * 2) / fillSegs;
 
   wgl.beginQuads(white);
@@ -55,7 +55,7 @@ export function drawAimCircle(
   }
   wgl.endQuads();
 
-  const outlineSegs = Math.max(circleSegmentsOutline(radius), fillSegs);
+  const outlineSegs = Math.max(grim2dCircleSegmentsOutline(radius), fillSegs);
   // grim_draw_circle_outline draws a 2px-thick ring (outer radius = r + 2).
   // The exe binds bulletTrail, but that texture is white; the visual intent is
   // a subtle white outline around the filled spread circle.
@@ -98,7 +98,7 @@ export function drawClockGauge(
   const size = 32.0 * scale;
   if (size <= 1e-3) return;
 
-  const tintA = clamp(alpha, 0.0, 1.0);
+  const tintA = int(clamp(alpha, 0.0, 1.0) * 255.0 + 0.5) / 255;
   const tint = wgl.makeColor(1, 1, 1, tintA);
   const half = size * 0.5;
 
@@ -117,7 +117,7 @@ export function drawClockGauge(
 export function directionArrowEnabled(renderCtx: WorldRenderCtx, playerIndex: number): boolean {
   const config = renderCtx.frame.config;
   if (config === null) return true;
-  return config.controls.players[int(playerIndex)].showDirectionArrow;
+  return config.controls.player(playerIndex).showDirectionArrow;
 }
 
 export function directionArrowTint(
@@ -129,11 +129,11 @@ export function directionArrowTint(
   alpha = clamp(alpha, 0.0, 1.0);
   if (renderCtx.frame.players.length === 2) {
     if (playerIndex === 0) {
-      return wgl.makeColor(204 / 255, 230 / 255, 255 / 255, (153 / 255) * alpha);
+      return wgl.makeColor(204 / 255, 230 / 255, 255 / 255, int(153.0 * alpha + 0.5) / 255);
     }
-    return wgl.makeColor(255 / 255, 230 / 255, 204 / 255, (153 / 255) * alpha);
+    return wgl.makeColor(255 / 255, 230 / 255, 204 / 255, int(153.0 * alpha + 0.5) / 255);
   }
-  return wgl.makeColor(1, 1, 1, (77 / 255) * alpha);
+  return wgl.makeColor(1, 1, 1, int(77.0 * alpha + 0.5) / 255);
 }
 
 export function drawDirectionArrows(
