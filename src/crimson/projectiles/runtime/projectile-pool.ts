@@ -198,7 +198,7 @@ export class ProjectilePool {
     const worldSize = f32(options.worldSize);
     const damageScaleByType = options.damageScaleByType;
     const ionAoeScale = options.ionAoeScale ?? 1.0;
-    const detailPreset = options.detailPreset ?? 5;
+    const detailPreset = int(options.detailPreset ?? 5);
     const rng = options.rng;
     const runtimeState = options.runtimeState;
     const players = options.players;
@@ -214,16 +214,16 @@ export class ProjectilePool {
     let barrelGreaserActive = false;
     let ionGunMasterActive = false;
     let ionScale = ionAoeScale;
-    const poisonIdx = PerkId.POISON_BULLETS;
-    const barrelIdx = PerkId.BARREL_GREASER;
-    const ionIdx = PerkId.ION_GUN_MASTER;
+    const poisonIdx = int(PerkId.POISON_BULLETS);
+    const barrelIdx = int(PerkId.BARREL_GREASER);
+    const ionIdx = int(PerkId.ION_GUN_MASTER);
     for (const player of players) {
       const perkCounts = player.perkCounts;
 
-      if (barrelIdx >= 0 && barrelIdx < perkCounts.length && perkCounts[barrelIdx] > 0) {
+      if (barrelIdx >= 0 && barrelIdx < perkCounts.length && int(perkCounts[barrelIdx]) > 0) {
         barrelGreaserActive = true;
       }
-      if (ionIdx >= 0 && ionIdx < perkCounts.length && perkCounts[ionIdx] > 0) {
+      if (ionIdx >= 0 && ionIdx < perkCounts.length && int(perkCounts[ionIdx]) > 0) {
         ionGunMasterActive = true;
       }
       if (barrelGreaserActive && ionGunMasterActive) {
@@ -241,7 +241,7 @@ export class ProjectilePool {
         return false;
       }
       const perkCounts = players[playerIndex].perkCounts;
-      return perkIdx >= 0 && perkIdx < perkCounts.length && perkCounts[perkIdx] > 0;
+      return perkIdx >= 0 && perkIdx < perkCounts.length && int(perkCounts[perkIdx]) > 0;
     };
 
     const effects: EffectPool | null = runtimeState.effects ?? null;
@@ -407,7 +407,7 @@ export class ProjectilePool {
 
           if (hitIdx === null) {
             let canHitPlayers = true;
-            if (projIndex === runtimeState.shockChainProjectileId) {
+            if (int(projIndex) === int(runtimeState.shockChainProjectileId)) {
               // Native skips `player_find_in_radius` for the currently tracked
               // shock-chain projectile slot in this branch.
               canHitPlayers = false;
@@ -441,7 +441,7 @@ export class ProjectilePool {
               }
 
               proj.lifeTimer = 0.25;
-              applyPlayerDamage(hitPlayerIdx, 10.0);
+              applyPlayerDamage(int(hitPlayerIdx), 10.0);
 
               step += 3;
               continue;
@@ -465,7 +465,7 @@ export class ProjectilePool {
             hook(perkCtx);
           }
 
-          rule.preHit(updateCtx, proj, hitIdx);
+          rule.preHit(updateCtx, proj, int(hitIdx));
 
           const ownerPlayerIndex = proj.owner.playerIndexInBounds(
             runtimeState.shotsHit.length,
@@ -501,9 +501,9 @@ export class ProjectilePool {
           rule.postHit(
             updateCtx,
             new ProjectileHitInfo({
-              projIndex,
+              projIndex: int(projIndex),
               proj,
-              hitIdx,
+              hitIdx: int(hitIdx),
               move,
               target,
             }),
@@ -532,7 +532,7 @@ export class ProjectilePool {
                   applyCreatureDamage,
                 },
               );
-              creatureSpatial.syncIndex(hitIdx);
+              creatureSpatial.syncIndex(int(hitIdx));
               if (proj.lifeTimer !== 0.25) {
                 proj.lifeTimer = 0.25;
               }
@@ -548,7 +548,7 @@ export class ProjectilePool {
                   applyCreatureDamage,
                 },
               );
-              creatureSpatial.syncIndex(hitIdx);
+              creatureSpatial.syncIndex(int(hitIdx));
               proj.damagePool -= creature.hp;
             }
           }
