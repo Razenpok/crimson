@@ -46,7 +46,12 @@ export function drawProjectile(
   if (alpha <= 1e-3) return;
 
   const projectileRenderCtx = renderCtx.withProjection({ camera, viewScale });
-  const texture = getTexture(projectileRenderCtx.frame.resources, TextureId.PROJS);
+  let texture: wgl.Texture | null;
+  try {
+    texture = getTexture(projectileRenderCtx.frame.resources, TextureId.PROJS);
+  } catch {
+    texture = null;
+  }
   const typeId = proj.typeId;
   const projPos = proj.pos;
   const screen = projectileRenderCtx.worldToScreen(projPos);
@@ -68,6 +73,7 @@ export function drawProjectile(
   });
   if (drawProjectileFromRegistry(registryCtx)) return;
 
+  if (texture === null) return;
   const mapping = KNOWN_PROJ_FRAMES.get(typeId);
   if (mapping === undefined) return;
   const [grid, frame] = mapping;
