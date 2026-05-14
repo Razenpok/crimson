@@ -588,7 +588,7 @@ export class LocalInputInterpreter {
       fireDown = true;
     }
     const reloadPressed = inputCodeIsPressed(reloadKey, { playerIndex: idx });
-    const _reloadDown = inputCodeIsDown(reloadKey, { playerIndex: idx });
+    const reloadDown = inputCodeIsDown(reloadKey, { playerIndex: idx });
 
     return new PlayerInput({
       move: moveVec,
@@ -598,7 +598,7 @@ export class LocalInputInterpreter {
       fireDown,
       firePressed,
       reloadPressed,
-      reloadDown: _reloadDown,
+      reloadDown,
       moveToCursorPressed,
       moveForwardPressed,
       moveBackwardPressed,
