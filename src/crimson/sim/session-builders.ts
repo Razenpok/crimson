@@ -13,12 +13,12 @@ import {
   QuestSpawnState,
   RushSpawnState,
   SurvivalSpawnState,
-  type WorldState,
   questPostStep,
   rushInputTransform,
   rushMidStep,
   survivalMidStep,
 } from './sessions.ts';
+import type { WorldState } from './world-state.ts';
 import { resetTutorialState } from '@crimson/tutorial/state.ts';
 import {
   tutorialBeforeStep,
