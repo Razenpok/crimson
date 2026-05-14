@@ -154,7 +154,7 @@ export class SfxState {
   sample(sfxId: SfxId): SfxSample {
     const sample = this.samples.get(sfxId);
     if (sample === undefined) {
-      const entryName = SFX_SPECS.get(sfxId)?.entryName ?? `${sfxId}`;
+      const entryName = SFX_SPECS.get(sfxId)!.entryName;
       throw new Error(`runtime sfx is not available: ${entryName}`);
     }
     return sample;
@@ -193,7 +193,7 @@ export async function loadSfxIndex(
   state: SfxState,
   audioCtx: AudioContext,
   assetsUrl: string,
-  console: ConsoleState | null = null,
+  console: ConsoleState,
 ): Promise<void> {
   if (!state.ready || !state.enabled) {
     return;
@@ -237,8 +237,8 @@ export async function loadSfxIndex(
     state.samples.set(sfxId, sample);
   }
 
-  console?.log.log(`audio: sfx loaded ${loadedByEntryName.size} samples for ${state.samples.size} ids from ${SFX_PAK_NAME}`);
-  console?.log.flush();
+  console.log.log(`audio: sfx loaded ${loadedByEntryName.size} samples for ${state.samples.size} ids from ${SFX_PAK_NAME}`);
+  console.log.flush();
 }
 
 function playSound(audioCtx: AudioContext, voice: SfxVoice): void {
