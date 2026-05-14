@@ -6,12 +6,12 @@ import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import {
-  AimScheme,
-  MovementControlType,
   type CrimsonControlsConfig,
   defaultCrimsonConfig,
   fxDetailEnabled,
 } from '@grim/config.ts';
+import { AimScheme } from '@crimson/aim-schemes.ts';
+import { MovementControlType } from '@crimson/movement-controls.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { DropdownLayoutBase } from '@crimson/ui/layout.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
@@ -77,16 +77,24 @@ function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; control
   const controls = opts.controls;
   const pc = controls.players[playerIndex];
   switch (row.target) {
-    case RebindTarget.PLAYER_MOVE_CODES:
-      return pc.moveCodes[row.targetIndex!];
+    case RebindTarget.PLAYER_MOVE_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      return pc.moveCodes[row.targetIndex];
+    }
     case RebindTarget.PLAYER_FIRE_CODE:
       return pc.fireCode;
-    case RebindTarget.PLAYER_KEYBOARD_AIM_CODES:
-      return pc.keyboardAimCodes[row.targetIndex!];
-    case RebindTarget.PLAYER_AIM_AXIS_CODES:
-      return pc.aimAxisCodes[row.targetIndex!];
-    case RebindTarget.PLAYER_MOVE_AXIS_CODES:
-      return pc.moveAxisCodes[row.targetIndex!];
+    case RebindTarget.PLAYER_KEYBOARD_AIM_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      return pc.keyboardAimCodes[row.targetIndex];
+    }
+    case RebindTarget.PLAYER_AIM_AXIS_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      return pc.aimAxisCodes[row.targetIndex];
+    }
+    case RebindTarget.PLAYER_MOVE_AXIS_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      return pc.moveAxisCodes[row.targetIndex];
+    }
     case RebindTarget.GLOBAL_PICK_PERK_CODE:
       return controls.pickPerkCode;
     case RebindTarget.GLOBAL_RELOAD_CODE:
@@ -106,8 +114,9 @@ function setRowBindingCode(
   const pc = controls.players[playerIndex];
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
       const values: [number, number, number, number] = [...pc.moveCodes];
-      values[row.targetIndex!] = code;
+      values[row.targetIndex] = code;
       pc.moveCodes = values;
       break;
     }
@@ -115,20 +124,23 @@ function setRowBindingCode(
       pc.fireCode = code;
       break;
     case RebindTarget.PLAYER_KEYBOARD_AIM_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
       const values: [number, number] = [...pc.keyboardAimCodes];
-      values[row.targetIndex!] = code;
+      values[row.targetIndex] = code;
       pc.keyboardAimCodes = values;
       break;
     }
     case RebindTarget.PLAYER_AIM_AXIS_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
       const values: [number, number] = [...pc.aimAxisCodes];
-      values[row.targetIndex!] = code;
+      values[row.targetIndex] = code;
       pc.aimAxisCodes = values;
       break;
     }
     case RebindTarget.PLAYER_MOVE_AXIS_CODES: {
+      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
       const values: [number, number] = [...pc.moveAxisCodes];
-      values[row.targetIndex!] = code;
+      values[row.targetIndex] = code;
       pc.moveAxisCodes = values;
       break;
     }
@@ -982,6 +994,7 @@ export class ControlsMenuView extends PanelMenuView {
           && this._rebindRow.label === rowLayout.row.label
           && this._rebindRow.target === rowLayout.row.target
           && this._rebindRow.targetIndex === rowLayout.row.targetIndex
+          && this._rebindRow.axis === rowLayout.row.axis
           && (this._rebindPlayerIndex ?? -1) === playerIdx;
         const hoveredRow = !rebindActive && !dropdownBlocked && rowLayout.valueRect.contains(mouse);
 
