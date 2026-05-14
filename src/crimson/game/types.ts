@@ -8,17 +8,16 @@ import type { AudioState } from '@grim/audio.ts';
 import type { ConsoleState } from '@grim/console.ts';
 import type { GroundRenderer } from '@grim/terrain-render.ts';
 import type { GameMode } from '@crimson/game-modes.ts';
+import type { GameStatus as GameStateStatus } from '@crimson/gameplay.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import { RtxRenderMode as RtxRenderModeValue } from '@crimson/render/rtx/mode.ts';
 import type { QuestLevel } from '@crimson/quests/level.ts';
 import type { QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import type { PauseBackground } from '@crimson/pause-background.ts';
+import { defaultRuntimeDir } from '@crimson/paths.ts';
 
 export type { PauseBackground } from '@crimson/pause-background.ts';
-
-function defaultRuntimeDir(): string {
-  return '';
-}
+export type { GameStateStatus };
 
 function defaultRtxRenderMode(): RtxRenderMode {
   return RtxRenderModeValue.CLASSIC;
@@ -187,22 +186,6 @@ export class HighScoresRequest {
     this.questLevel = opts.questLevel ?? null;
     this.highlightRank = opts.highlightRank ?? null;
   }
-}
-
-export interface GameStateStatus {
-  readonly gameSequenceId: number;
-  questUnlockIndex: number;
-  questUnlockIndexFull: number;
-  questPlayCounts: number[];
-  modePlayOther: number;
-  unknownTail: Uint8Array;
-  saveIfDirty(): void;
-  incrementModePlayCountForMode(mode: GameMode): void;
-  modePlayCountForMode(mode: number): number;
-  questPlayCount(index: number): number;
-  incrementQuestPlayCount(index: number): number;
-  weaponUsageCountSlot(slot: number): number;
-  incrementWeaponUsageSlot(slot: number): void;
 }
 
 export interface Screen {
