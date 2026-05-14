@@ -110,7 +110,6 @@ export function gameplayControlsHeld(config: CrimsonConfig): boolean {
     }
   }
 
-  // Single-player alt movement (arrow keys in DirectInput codes)
   for (const code of _SINGLE_PLAYER_ALT_MOVE_CODES) {
     if (inputCodeIsDown(code, { playerIndex: 0 })) return true;
   }
