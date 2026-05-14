@@ -81,14 +81,14 @@ export class GameStatusData {
   } = {}) {
     this.questUnlockIndex = opts.questUnlockIndex ?? 0;
     this.questUnlockIndexFull = opts.questUnlockIndexFull ?? 0;
-    this.weaponUsageCounts = opts.weaponUsageCounts ?? ZERO_WEAPON_USAGE_COUNTS;
-    this.questPlayCounts = opts.questPlayCounts ?? ZERO_QUEST_PLAY_COUNTS;
+    this.weaponUsageCounts = opts.weaponUsageCounts ?? ZERO_WEAPON_USAGE_COUNTS.slice();
+    this.questPlayCounts = opts.questPlayCounts ?? ZERO_QUEST_PLAY_COUNTS.slice();
     this.modePlaySurvival = opts.modePlaySurvival ?? 0;
     this.modePlayRush = opts.modePlayRush ?? 0;
     this.modePlayTypo = opts.modePlayTypo ?? 0;
     this.modePlayOther = opts.modePlayOther ?? 0;
     this.gameSequenceId = opts.gameSequenceId ?? 0;
-    this.unknownTail = opts.unknownTail ?? ZERO_UNKNOWN_TAIL;
+    this.unknownTail = opts.unknownTail ?? new Uint8Array(ZERO_UNKNOWN_TAIL);
   }
 }
 
@@ -228,7 +228,7 @@ export class GameStatus extends GameStatusData {
 type ModeCountField = 'modePlaySurvival' | 'modePlayRush' | 'modePlayTypo' | 'modePlayOther';
 
 function modeCountFieldForMode(gameMode: GameMode): ModeCountField {
-  const mode = gameMode as GameMode;
+  const mode = int(gameMode) as GameMode;
   switch (mode) {
     case GameMode.SURVIVAL:
       return 'modePlaySurvival';
@@ -439,13 +439,12 @@ export function saveStatus(path: string, status: GameStatusData | GameStatus): v
 
 export function ensureGameStatus(baseDir: string): GameStatus {
   const path = `${baseDir.replace(/\/+$/g, '')}/${GAME_CFG_NAME}`;
-  try {
+  if (localStorage.getItem(storageKey(path)) !== null) {
     return loadStatus(path);
-  } catch {
-    const status = GameStatus.fromData({ path, data: defaultStatusData(), dirty: false });
-    status.save();
-    return status;
   }
+  const status = GameStatus.fromData({ path, data: defaultStatusData(), dirty: false });
+  status.save();
+  return status;
 }
 
 export function hashStatusData(status: GameStatusData): string {
