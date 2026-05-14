@@ -10,14 +10,24 @@ export function ftolMsI32(dtSeconds: number): number {
 }
 
 export class FrameTiming {
-  private constructor(
-    public readonly dt: number,
-    public readonly timeScaleActiveEntry: boolean,
-    public readonly timeScaleFactor: number,
-    public readonly zeroGateActive: boolean,
-    public readonly dtSim: number,
-  ) {
-    Object.freeze(this);
+  readonly dt: number;
+  readonly timeScaleActiveEntry: boolean;
+  readonly timeScaleFactor: number;
+  readonly zeroGateActive: boolean;
+  readonly dtSim: number;
+
+  private constructor(opts: {
+    dt: number;
+    timeScaleActiveEntry: boolean;
+    timeScaleFactor: number;
+    zeroGateActive: boolean;
+    dtSim: number;
+  }) {
+    this.dt = opts.dt;
+    this.timeScaleActiveEntry = opts.timeScaleActiveEntry;
+    this.timeScaleFactor = opts.timeScaleFactor;
+    this.zeroGateActive = opts.zeroGateActive;
+    this.dtSim = opts.dtSim;
   }
 
   get dtMsI32(): number {
@@ -61,12 +71,12 @@ export class FrameTiming {
     if (opts.zeroGateActive) {
       dtSim = 0.0;
     }
-    return new FrameTiming(
-      dtF32,
-      active,
-      factor,
-      Boolean(opts.zeroGateActive),
+    return new FrameTiming({
+      dt: dtF32,
+      timeScaleActiveEntry: active,
+      timeScaleFactor: factor,
+      zeroGateActive: Boolean(opts.zeroGateActive),
       dtSim,
-    );
+    });
   }
 }
