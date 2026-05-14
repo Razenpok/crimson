@@ -516,16 +516,16 @@ export class DeterministicSession {
 
     const terrainFxBatch = this.terrainFx.takeBatch();
 
-    const step = new DeterministicStepResult(
-      timing.dtSim,
+    const step = new DeterministicStepResult({
+      dtSim: timing.dtSim,
       timing,
       events,
       presentation,
       presentationPlanMs,
       presentationRngTrace,
-      terrainFxBatch,
-      postApplySfx.length > 0 ? postApplySfx : [],
-    );
+      terrainFx: terrainFxBatch,
+      postApplySfx: postApplySfx.length > 0 ? postApplySfx : [],
+    });
 
     if (step.presentation.triggerGameTune) {
       this.gameTuneStarted = true;

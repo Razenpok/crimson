@@ -8,20 +8,41 @@ import { FrameTiming } from './timing.ts';
 import { WorldEvents } from './world-state.ts';
 
 export class PresentationRngTrace {
-  drawsTotal = 0;
+  constructor(opts: { drawsTotal?: number } = {}) {
+    this.drawsTotal = opts.drawsTotal ?? 0;
+  }
+
+  drawsTotal: number;
 }
 
 export class DeterministicStepResult {
-  constructor(
-    public dtSim: number,
-    public timing: FrameTiming,
-    public events: WorldEvents,
-    public presentation: PresentationStepCommands,
-    public presentationPlanMs: number,
-    public presentationRngTrace: PresentationRngTrace,
-    public terrainFx: TerrainFxBatch = new TerrainFxBatch(),
-    public postApplySfx: readonly SfxId[] = [],
-  ) {
+  readonly dtSim: number;
+  readonly timing: FrameTiming;
+  readonly events: WorldEvents;
+  readonly presentation: PresentationStepCommands;
+  readonly presentationPlanMs: number;
+  readonly presentationRngTrace: PresentationRngTrace;
+  readonly terrainFx: TerrainFxBatch;
+  readonly postApplySfx: readonly SfxId[];
+
+  constructor(opts: {
+    dtSim: number;
+    timing: FrameTiming;
+    events: WorldEvents;
+    presentation: PresentationStepCommands;
+    presentationPlanMs: number;
+    presentationRngTrace: PresentationRngTrace;
+    terrainFx?: TerrainFxBatch;
+    postApplySfx?: readonly SfxId[];
+  }) {
+    this.dtSim = opts.dtSim;
+    this.timing = opts.timing;
+    this.events = opts.events;
+    this.presentation = opts.presentation;
+    this.presentationPlanMs = opts.presentationPlanMs;
+    this.presentationRngTrace = opts.presentationRngTrace;
+    this.terrainFx = opts.terrainFx ?? new TerrainFxBatch();
+    this.postApplySfx = opts.postApplySfx ?? [];
   }
 }
 
