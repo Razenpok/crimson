@@ -3,22 +3,6 @@
 import { GameMode } from '@crimson/game-modes.ts';
 import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 
-export function formatScoreDate(entry: HighScoreRecord): string {
-  const day = int(entry.day);
-  const month = int(entry.month);
-  const yearOff = int(entry.yearOffset);
-  if (day <= 0 || month <= 0) {
-    return '';
-  }
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  const monthName = (month >= 1 && month <= 12) ? months[month - 1] : `${month}`;
-  const year = yearOff >= 0 ? 2000 + yearOff : 2000;
-  return `${day}. ${monthName} ${year}`;
-}
-
 export function ordinal(value: number): string {
   const n = int(value);
   const suffix = (n % 100 >= 10 && n % 100 <= 20) ? 'th'
@@ -34,6 +18,22 @@ export function formatElapsedMmSs(valueMs: number): string {
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
   return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+export function formatScoreDate(entry: HighScoreRecord): string {
+  const day = int(entry.day);
+  const month = int(entry.month);
+  const yearOff = int(entry.yearOffset);
+  if (day <= 0 || month <= 0) {
+    return '';
+  }
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  const monthName = (month >= 1 && month <= 12) ? months[month - 1] : `${month}`;
+  const year = yearOff >= 0 ? 2000 + yearOff : 2000;
+  return `${day}. ${monthName} ${year}`;
 }
 
 export function modeLabel(modeId: GameMode, questMajor: number, questMinor: number): string {
