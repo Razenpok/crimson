@@ -1,19 +1,19 @@
 // Port of crimson/world/standalone_tick_harness.py
 
-import { WorldRuntime } from "@crimson/world/runtime.js";
-import { GameMode } from "@crimson/game-modes.js";
-import { FrameContext, LocalInputProvider } from "@crimson/sim/input-providers.js";
-import { PlayerInput } from "@crimson/sim/input.js";
-import { DeterministicSession } from "@crimson/sim/sessions.js";
-import { TickBatchResult, TickRunner, TickRunnerConfig } from "@crimson/sim/tick-runner.js";
-import { FixedStepClock } from "@crimson/sim/clock.js";
-import { applyPresentationOutputs, applySimMetadataBatch } from "@crimson/sim/batch-apply.js";
+import { WorldRuntime } from '@crimson/world/runtime.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { FrameContext, LocalInputProvider } from '@crimson/sim/input-providers.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
+import { DeterministicSession } from '@crimson/sim/sessions.ts';
+import { TickBatchResult, TickRunner, TickRunnerConfig } from '@crimson/sim/tick-runner.ts';
+import { FixedStepClock } from '@crimson/sim/clock.ts';
+import { applyPresentationOutputs, applySimMetadataBatch } from '@crimson/sim/batch-apply.ts';
 import {
   applyPostApplyReaction,
   buildPostApplyReaction,
   PostApplyReaction
-} from "@crimson/sim/presentation-reactions.js";
-import { advanceTickRunnerFrame } from "@crimson/sim/frame-pump.js";
+} from '@crimson/sim/presentation-reactions.ts';
+import { advanceTickRunnerFrame } from '@crimson/sim/frame-pump.ts';
 
 type WorldTickInputBuilder = (ctx: FrameContext) => readonly PlayerInput[];
 
@@ -78,7 +78,7 @@ export class StandaloneTickHarness {
       damageScaleByType: runtime.simWorld.damageScaleByType,
       gameMode: this._gameMode,
       detailPreset: int(detailPreset),
-      violenceDisabled,
+      violenceDisabled: int(violenceDisabled),
       gameTuneStarted: runtime.simWorld.gameTuneStarted,
       demoModeActive: runtime.demoModeActive,
       perkProgressionEnabled: false,
