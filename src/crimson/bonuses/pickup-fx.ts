@@ -10,15 +10,15 @@ import { applyReflexBoostPickupFx } from './reflex-boost.ts';
 
 export type BonusPickupFxHook = (state: GameplayState, pickup: BonusPickupEvent, detailPreset: number) => void;
 
-function _applyDefaultPickupBurst(state: GameplayState, pickup: BonusPickupEvent, detailPreset: number): void {
-  if (pickup.bonusId === BonusId.NUKE) {
+function _applyDefaultPickupBurst(opts: { state: GameplayState; pickup: BonusPickupEvent; detailPreset: number }): void {
+  if (opts.pickup.bonusId === BonusId.NUKE) {
     return;
   }
-  state.effects.spawnBurst({
-    pos: pickup.pos,
+  opts.state.effects.spawnBurst({
+    pos: opts.pickup.pos,
     count: 12,
-    rng: state.rng,
-    detailPreset: int(detailPreset),
+    rng: opts.state.rng,
+    detailPreset: int(opts.detailPreset),
     lifetime: 0.4,
     scaleStep: 0.1,
     color: new RGBA(0.4, 0.5, 1.0, 0.5),
@@ -41,7 +41,7 @@ const _BONUS_PICKUP_HOOKS: Map<BonusId, BonusPickupFxHook> = new Map([
 export function emitBonusPickupEffects(opts: { state: GameplayState; pickups: BonusPickupEvent[]; detailPreset: number }): void {
   // Emit deterministic pickup FX for the provided pickup list.
   for (const pickup of opts.pickups) {
-    _applyDefaultPickupBurst(opts.state, pickup, int(opts.detailPreset));
+    _applyDefaultPickupBurst({ state: opts.state, pickup, detailPreset: int(opts.detailPreset) });
     const hook = _BONUS_PICKUP_HOOKS.get(pickup.bonusId);
     if (hook !== undefined) {
       hook(opts.state, pickup, int(opts.detailPreset));
