@@ -1,7 +1,7 @@
 // Port of crimson/quests/tier2.py
 
 import { Vec2 } from '@grim/geom.ts';
-import { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import { SpawnId } from '@crimson/creatures/spawn.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WeaponId } from '@crimson/weapons.ts';
