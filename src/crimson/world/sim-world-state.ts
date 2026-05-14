@@ -59,15 +59,6 @@ export function resetWorldPlayers(
   state.sfxQueue.length = 0;
 }
 
-function _emptyWorldEvents(): WorldEvents {
-  return new WorldEvents({
-    hits: [],
-    deaths: [],
-    pickups: [],
-    sfx: [],
-  });
-}
-
 export class SimWorldState {
   worldSize: number;
   demoModeActive: boolean;
@@ -101,7 +92,7 @@ export class SimWorldState {
     this.hardcore = opts?.hardcore ?? false;
     this.preserveBugs = opts?.preserveBugs ?? false;
     this.damageScaleByType = _weaponDamageScaleMap();
-    this.lastEvents = _emptyWorldEvents();
+    this.lastEvents = new WorldEvents({ hits: [], deaths: [], pickups: [], sfx: [] });
     this.lastPresentation = new PresentationStepCommands();
     this.reset({ seed: 0xBEEF, playerCount: 1 });
   }
@@ -123,7 +114,7 @@ export class SimWorldState {
     this.creatures = this.worldState.creatures;
     this.state.rng.srand(int(seed));
 
-    this.lastEvents = _emptyWorldEvents();
+    this.lastEvents = new WorldEvents({ hits: [], deaths: [], pickups: [], sfx: [] });
     this.lastPresentation = new PresentationStepCommands();
 
     this.presentationElapsedMs = 0.0;
@@ -142,7 +133,7 @@ export class SimWorldState {
     this.state = this.worldState.state;
     this.players = this.worldState.players;
     this.creatures = this.worldState.creatures;
-    this.lastEvents = _emptyWorldEvents();
+    this.lastEvents = new WorldEvents({ hits: [], deaths: [], pickups: [], sfx: [] });
     this.lastPresentation = new PresentationStepCommands();
   }
 
@@ -164,7 +155,7 @@ export class SimWorldState {
   }
 
   closeSession(): void {
-    this.lastEvents = _emptyWorldEvents();
+    this.lastEvents = new WorldEvents({ hits: [], deaths: [], pickups: [], sfx: [] });
     this.lastPresentation = new PresentationStepCommands();
 
     this.gameTuneStarted = false;
