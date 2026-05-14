@@ -79,6 +79,18 @@ function _processPid(): number {
   return globalThis.process?.pid ?? 0;
 }
 
+function _stdoutIsAtty(): boolean {
+  return globalThis.process?.stdout?.isTTY === true;
+}
+
+function _levelNameLower(levelNo: number): string {
+  const entry = Object.entries(_LEVELS).find(([, value]) => value === levelNo);
+  if (entry !== undefined) {
+    return entry[0];
+  }
+  return `level ${levelNo}`;
+}
+
 function _pathJoin(...parts: string[]): string {
   const cleaned = parts.map((part, idx) => {
     const text = String(part);
@@ -179,7 +191,7 @@ export function configureComponentLogging(opts: {
   const consoleFormatter = {
     foreignPreChain: processors.slice(),
     processor: 'structlog.dev.ConsoleRenderer',
-    colors: false,
+    colors: _stdoutIsAtty(),
   };
   const fileFormatter = {
     foreignPreChain: processors.slice(),
@@ -191,7 +203,7 @@ export function configureComponentLogging(opts: {
     component: String(opts.component),
     logger_name: String(opts.loggerName),
     log_file: resolvedLogFile,
-    level: Object.entries(_LEVELS).find(([, value]) => value === levelNo)?.[0] ?? String(levelNo),
+    level: _levelNameLower(levelNo),
   });
   return resolvedLogFile;
 }
