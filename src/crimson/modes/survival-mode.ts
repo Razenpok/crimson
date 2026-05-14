@@ -132,8 +132,15 @@ export class SurvivalMode extends BaseGameplayMode {
     this._perkPrompt.resetIfPending({ pendingCount: this.state.perkSelection.pendingCount });
   }
 
-  private _updatePerkUi(dtUiMs: number, allowInput = true, allowPulse = true): void {
-    const pendingCount = this.state.perkSelection.pendingCount;
+  private _updatePerkUi(opts: {
+    dtUiMs: number;
+    allowInput?: boolean;
+    allowPulse?: boolean;
+  }): void {
+    const dtUiMs = opts.dtUiMs;
+    const allowInput = opts.allowInput ?? true;
+    const allowPulse = opts.allowPulse ?? true;
+    const pendingCount = int(this.state.perkSelection.pendingCount);
     const anyAlive = this._anyPlayerAlive();
     const choices = perkSelectionPreparedChoices(
       this.simWorld.players,
@@ -238,7 +245,9 @@ export class SurvivalMode extends BaseGameplayMode {
     });
   }
 
-  private _wrapUiText(text: string, maxWidth: number, scale: number = UI_TEXT_SCALE): string[] {
+  private _wrapUiText(text: string, opts: { maxWidth: number; scale?: number }): string[] {
+    const maxWidth = opts.maxWidth;
+    const scale = opts.scale ?? UI_TEXT_SCALE;
     const lines: string[] = [];
     const rawLines = text.match(/[^\r\n]*(?:\r\n|\r|\n|$)/g)
       ?.map((line) => line.replace(/\r\n|\r|\n$/, ''))
@@ -410,7 +419,11 @@ export class SurvivalMode extends BaseGameplayMode {
   ): boolean {
     session.detailPreset = this._deterministicDetailPreset();
     session.violenceDisabled = this._deterministicViolenceDisabled();
-    this._updatePerkUi(dtUiMs, role === 'host', !this._paused && !this._gameOverActive);
+    this._updatePerkUi({
+      dtUiMs,
+      allowInput: role === 'host',
+      allowPulse: !this._paused && !this._gameOverActive,
+    });
     if (this._perkMenu.active) {
       this._hudFadeMs = 0.0;
     } else {
@@ -491,11 +504,10 @@ export class SurvivalMode extends BaseGameplayMode {
       return;
     }
 
-    this._updatePerkUi(
-      frame.dtUiMs,
-      true,
-      !this._paused && !this._gameOverActive,
-    );
+    this._updatePerkUi({
+      dtUiMs: frame.dtUiMs,
+      allowPulse: !this._paused && !this._gameOverActive,
+    });
     if (this._perkMenu.active) {
       this._hudFadeMs = 0.0;
     } else {
