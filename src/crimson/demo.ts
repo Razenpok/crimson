@@ -17,7 +17,7 @@ import { PlayerInput } from "./sim/input.ts";
 import { FrameContext } from "./sim/input-providers.ts";
 import type { PlayerState } from "./sim/state-types.ts";
 import { QuestLevel } from "./quests/level.ts";
-import { questByLevel } from "./quests/registry.ts";
+import { questByLevel } from "./quests/index.ts";
 import { advanceExplicitTerrain } from "./sim/bootstrap.ts";
 import { Q2_TERRAIN_SLOTS, type TerrainSlotTriplet } from "./terrain-slots.ts";
 import type { GameState } from "./game/types.ts";
