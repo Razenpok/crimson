@@ -250,7 +250,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
 
   private _weaponEntry(weaponId: number): Weapon {
     const weapon = WEAPON_BY_ID.get(weaponId);
-    if (weapon === undefined) throw new Error(`unknown weapon id ${weaponId}`);
+    if (weapon === undefined) throw new Error(`No weapon entry for id ${weaponId}`);
     return weapon;
   }
 
@@ -284,7 +284,7 @@ export class UnlockedWeaponsDatabaseView extends DatabaseBaseView {
 
   private _weaponLabelAndIcon(weaponId: number): [string, number | null] {
     const weapon = WEAPON_BY_ID.get(weaponId);
-    if (weapon === undefined) throw new Error(`unknown weapon id ${weaponId}`);
+    if (weapon === undefined) throw new Error(`No weapon entry for id ${weaponId}`);
     const name = weaponDisplayName(weapon.weaponId, { preserveBugs: this.state.preserveBugs });
     return [name, weapon.iconIndex];
   }
