@@ -38,18 +38,18 @@ import {
 } from './controls-labels.ts';
 
 // Measured from ui_render_trace_oracle_1024x768.json (state_3:Configure for:, timeline=300).
-const CONTROLS_LEFT_PANEL_POS_X = -165.0;
-const CONTROLS_LEFT_PANEL_POS_Y = 200.0;
-const CONTROLS_RIGHT_PANEL_POS_X = 590.0;
-const CONTROLS_RIGHT_PANEL_POS_Y = 110.0;
-const CONTROLS_RIGHT_PANEL_HEIGHT = 378.0;
-const CONTROLS_BACK_POS_X = -155.0;
-const CONTROLS_BACK_POS_Y = 420.0;
+export const CONTROLS_LEFT_PANEL_POS_X = -165.0;
+export const CONTROLS_LEFT_PANEL_POS_Y = 200.0;
+export const CONTROLS_RIGHT_PANEL_POS_X = 590.0;
+export const CONTROLS_RIGHT_PANEL_POS_Y = 110.0;
+export const CONTROLS_RIGHT_PANEL_HEIGHT = 378.0;
+export const CONTROLS_BACK_POS_X = -155.0;
+export const CONTROLS_BACK_POS_Y = 420.0;
 
 // `ui_menu_item_update`: idle rebind value tint (rgb 70,180,240 @ alpha 0.6).
-const CONTROLS_REBIND_VALUE_COLOR = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 153 / 255);
-const CONTROLS_REBIND_HOVER_COLOR = wgl.makeColor(200 / 255, 230 / 255, 250 / 255, 230 / 255);
-const CONTROLS_REBIND_ACTIVE_COLOR = wgl.makeColor(255 / 255, 228 / 255, 170 / 255, 1.0);
+export const CONTROLS_REBIND_VALUE_COLOR = wgl.makeColor(70 / 255, 180 / 255, 240 / 255, 153 / 255);
+export const CONTROLS_REBIND_HOVER_COLOR = wgl.makeColor(200 / 255, 230 / 255, 250 / 255, 230 / 255);
+export const CONTROLS_REBIND_ACTIVE_COLOR = wgl.makeColor(255 / 255, 228 / 255, 170 / 255, 1.0);
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
