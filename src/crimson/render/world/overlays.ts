@@ -74,7 +74,6 @@ export function drawAimCircle(
     const sin0 = Math.sin(a0);
     const cos1 = Math.cos(a1);
     const sin1 = Math.sin(a1);
-    // Quad: inner[i], outer[i], outer[i+1], inner[i+1]
     wgl.rlVertex2f(center.x + cos0 * innerR, center.y + sin0 * innerR);
     wgl.rlVertex2f(center.x + cos0 * outerR, center.y + sin0 * outerR);
     wgl.rlVertex2f(center.x + cos1 * outerR, center.y + sin1 * outerR);
