@@ -31,7 +31,8 @@ export function normalizeWeaponUsageCounts(values: object): WeaponUsageCounts {
   const limit = Math.min(values.length, WEAPON_USAGE_SLOT_COUNT);
   for (let idx = 0; idx < limit; idx++) {
     try {
-      normalized[idx] = (int(values[idx]) & 0xFFFFFFFF) >>> 0;
+      const value = int(values[idx]);
+      normalized[idx] = ((value % 0x100000000) + 0x100000000) % 0x100000000;
     } catch {
       normalized[idx] = 0;
     }
