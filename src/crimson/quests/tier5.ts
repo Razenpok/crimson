@@ -12,7 +12,7 @@ import {
 import { registerQuest } from './registry.ts';
 import type { QuestContext, SpawnEntry as SpawnEntryType } from './types.ts';
 
-registerQuest({
+export const build5_1TheBeating = registerQuest({
   level: '5.1',
   title: 'The Beating',
   timeLimitMs: 480000,
@@ -61,7 +61,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_2TheSpankingOfTheDead = registerQuest({
   level: '5.2',
   title: 'The Spanking Of The Dead',
   timeLimitMs: 480000,
@@ -90,7 +90,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_3TheFortress = registerQuest({
   level: '5.3',
   title: 'The Fortress',
   timeLimitMs: 480000,
@@ -129,7 +129,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_4TheGangWars = registerQuest({
   level: '5.4',
   title: 'The Gang Wars',
   timeLimitMs: 480000,
@@ -159,7 +159,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_5KneeDeepInTheDead = registerQuest({
   level: '5.5',
   title: 'Knee-deep in the Dead',
   timeLimitMs: 480000,
@@ -197,7 +197,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_6CrossFire = registerQuest({
   level: '5.6',
   title: 'Cross Fire',
   timeLimitMs: 480000,
@@ -215,7 +215,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build5_7ArmyOfThree = registerQuest({
   level: '5.7',
   title: 'Army of Three',
   timeLimitMs: 480000,
@@ -236,7 +236,7 @@ registerQuest({
   ];
 });
 
-registerQuest({
+export const build5_8MonsterBlues = registerQuest({
   level: '5.8',
   title: 'Monster Blues',
   timeLimitMs: 480000,
@@ -267,7 +267,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_9Nagolipoli = registerQuest({
   level: '5.9',
   title: 'Nagolipoli',
   timeLimitMs: 480000,
@@ -322,7 +322,7 @@ registerQuest({
   return entries;
 });
 
-registerQuest({
+export const build5_10TheGathering = registerQuest({
   level: '5.10',
   title: 'The Gathering',
   timeLimitMs: 480000,
