@@ -100,7 +100,6 @@ const MOUSE_BUTTON_LEFT = 0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
-// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   if (x1 === x2) {
     const y = Math.min(y1, y2);
