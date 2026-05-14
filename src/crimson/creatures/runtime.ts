@@ -153,14 +153,19 @@ function _angleApproach(current: number, target: number, rate: number, dt: numbe
 
 function _movementDeltaFromHeadingF32(
   heading: number,
-  dt: number,
-  moveScale: number,
-  moveSpeed: number,
+  opts: {
+    dt: number;
+    moveScale: number;
+    moveSpeed: number;
+  },
 ): Vec2 {
   // Native movement path computes cos/sin in x87 precision and rounds only on the
   // final velocity write (`creature_update_all` around 0x00426b85..0x00426bb1).
   // Avoid pre-rounding direction components to float32 here.
   const radians = f32(heading) - NATIVE_HALF_PI;
+  const dt = opts.dt;
+  const moveScale = opts.moveScale;
+  const moveSpeed = opts.moveSpeed;
 
   // Preserve native multiply order:
   // `vel = trig(heading - half_pi) * frame_dt * move_scale * move_speed * 30.0`
@@ -179,7 +184,8 @@ function _movementDeltaFromHeadingF32(
   return new Vec2(f32(vx), f32(vy));
 }
 
-function _velocityFromDeltaF32(delta: Vec2, dt: number): Vec2 {
+function _velocityFromDeltaF32(delta: Vec2, opts: { dt: number }): Vec2 {
+  const dt = opts.dt;
   if (dt <= 0.0) return new Vec2();
   const invDt = 1.0 / dt;
   return new Vec2(f32(delta.x * invDt), f32(delta.y * invDt));
@@ -532,13 +538,15 @@ function _creatureInteractionContactDamage(ctx: _CreatureInteractionCtx): void {
       if (creature.active) {
         ctx.pool._tickDead(
           creature,
-          ctx.dt,
-          ctx.worldWidth,
-          ctx.worldHeight,
-          ctx.fxQueueRotated,
-          ctx.rng,
-          int(ctx.detailPreset),
-          int(ctx.violenceDisabled),
+          {
+            dt: ctx.dt,
+            worldWidth: ctx.worldWidth,
+            worldHeight: ctx.worldHeight,
+            fxQueueRotated: ctx.fxQueueRotated,
+            rng: ctx.rng,
+            detailPreset: int(ctx.detailPreset),
+            violenceDisabled: int(ctx.violenceDisabled),
+          },
         );
       }
     };
@@ -1123,13 +1131,15 @@ export class CreaturePool {
         if (dt > 0.0) {
           this._tickDead(
             creature,
-            dt,
-            worldWidth,
-            worldHeight,
-            fxQueueRotated,
-            rng,
-            detailPreset,
-            violenceDisabled,
+            {
+              dt,
+              worldWidth,
+              worldHeight,
+              fxQueueRotated,
+              rng,
+              detailPreset: int(detailPreset),
+              violenceDisabled: int(violenceDisabled),
+            },
           );
         }
         continue;
@@ -1145,13 +1155,15 @@ export class CreaturePool {
         if (creature.active) {
           this._tickDead(
             creature,
-            dt,
-            worldWidth,
-            worldHeight,
-            fxQueueRotated,
-            rng,
-            detailPreset,
-            violenceDisabled,
+            {
+              dt,
+              worldWidth,
+              worldHeight,
+              fxQueueRotated,
+              rng,
+              detailPreset: int(detailPreset),
+              violenceDisabled: int(violenceDisabled),
+            },
           );
         }
         continue;
@@ -1258,13 +1270,15 @@ export class CreaturePool {
           if (creature.active) {
             this._tickDead(
               creature,
-              dt,
-              worldWidth,
-              worldHeight,
-              fxQueueRotated,
-              rng,
-              detailPreset,
-              violenceDisabled,
+              {
+                dt,
+                worldWidth,
+                worldHeight,
+                fxQueueRotated,
+                rng,
+                detailPreset: int(detailPreset),
+                violenceDisabled: int(violenceDisabled),
+              },
             );
           }
           continue;
@@ -1289,9 +1303,7 @@ export class CreaturePool {
           );
           const moveDelta = _movementDeltaFromHeadingF32(
             creature.heading,
-            dt,
-            creature.moveScale,
-            creature.moveSpeed,
+            { dt, moveScale: creature.moveScale, moveSpeed: creature.moveSpeed },
           );
           creature.vel = moveDelta;
           // Native path (flags without 0x4): no bounds clamp here; offscreen spawns
@@ -1316,9 +1328,7 @@ export class CreaturePool {
           );
           const moveDelta = _movementDeltaFromHeadingF32(
             creature.heading,
-            dt,
-            creature.moveScale,
-            creature.moveSpeed,
+            { dt, moveScale: creature.moveScale, moveSpeed: creature.moveSpeed },
           );
           creature.vel = moveDelta;
           creature.pos = f32Vec2(
@@ -1474,7 +1484,7 @@ export class CreaturePool {
                 rng,
                 spawnEnv,
               );
-              const [mapping] = this.spawnPlan(plan, { rng, detailPreset });
+              const [mapping] = this.spawnPlan(plan, { rng, detailPreset: int(detailPreset) });
               spawned.push(...mapping);
             }
           }
@@ -1539,14 +1549,16 @@ export class CreaturePool {
       });
     }
     const death = this._startDeath(
-      idx,
+      int(idx),
       creature,
-      state,
-      players,
-      rng,
-      detailPreset,
-      worldWidth,
-      worldHeight,
+      {
+        state,
+        players,
+        rng,
+        detailPreset: int(detailPreset),
+        worldWidth,
+        worldHeight,
+      },
     );
 
     if (keepCorpse) {
@@ -1646,13 +1658,15 @@ export class CreaturePool {
 
   _tickDead(
     creature: CreatureState,
-    dt: number,
-    worldWidth: number,
-    worldHeight: number,
-    fxQueueRotated: FxQueueRotated | null,
-    rng: CrandLike | null = null,
-    detailPreset: number = 5,
-    violenceDisabled: number = 0,
+    opts: {
+      dt: number;
+      worldWidth: number;
+      worldHeight: number;
+      fxQueueRotated: FxQueueRotated | null;
+      rng?: CrandLike | null;
+      detailPreset?: number;
+      violenceDisabled?: number;
+    },
   ): void {
     /** Advance the post-death lifecycle_stage ramp and queue corpse decals.
      *
@@ -1660,6 +1674,16 @@ export class CreaturePool {
      * - while lifecycle_stage > 0: decrement quickly and slide backwards
      * - once lifecycle_stage <= 0: queue a corpse decal and fade out until < -10, then deactivate.
      */
+
+    const dt = opts.dt;
+    const worldWidth = opts.worldWidth;
+    const worldHeight = opts.worldHeight;
+    const fxQueueRotated = opts.fxQueueRotated;
+    const rng = opts.rng ?? null;
+    const detailPreset = opts.detailPreset ?? 5;
+    const violenceDisabled = opts.violenceDisabled ?? 0;
+    void worldWidth;
+    void worldHeight;
 
     if (dt <= 0.0) return;
 
@@ -1768,15 +1792,23 @@ export class CreaturePool {
   private _startDeath(
     idx: number,
     creature: CreatureState,
-    state: GameplayState,
-    players: PlayerState[],
-    rng: CrandLike,
-    detailPreset: number = 5,
-    worldWidth: number,
-    worldHeight: number,
+    opts: {
+      state: GameplayState;
+      players: PlayerState[];
+      rng: CrandLike;
+      detailPreset?: number;
+      worldWidth: number;
+      worldHeight: number;
+    },
   ): CreatureDeath {
+    const state = opts.state;
+    const players = opts.players;
+    const rng = opts.rng;
+    const detailPreset = opts.detailPreset ?? 5;
+    const worldWidth = opts.worldWidth;
+    const worldHeight = opts.worldHeight;
     if (creature.spawnSlotIndex !== null) {
-      this._disableSpawnSlot(creature.spawnSlotIndex);
+      this._disableSpawnSlot(int(creature.spawnSlotIndex));
     }
 
     if (
