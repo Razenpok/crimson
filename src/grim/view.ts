@@ -1,11 +1,11 @@
 // Port of grim/view.py
 
 export class ViewContext {
-  readonly assetsUrl: string;
+  readonly assetsDir: string;
   readonly preserveBugs: boolean;
 
-  constructor(opts: { assetsUrl?: string; preserveBugs?: boolean } = {}) {
-    this.assetsUrl = opts.assetsUrl ?? 'artifacts/assets';
+  constructor(opts: { assetsDir?: string; preserveBugs?: boolean } = {}) {
+    this.assetsDir = opts.assetsDir ?? 'artifacts/assets';
     this.preserveBugs = opts.preserveBugs ?? false;
   }
 }
