@@ -39,7 +39,7 @@ import {
   queueProjectileDecalsPostHit,
   queueProjectileDecalsPreHit,
 } from './presentation-step.ts';
-import type { BonusPickupEvent, PlayerState } from './state-types.ts';
+import type { BonusPickupEvent, GameplayState, PlayerState } from './state-types.ts';
 import { CREATURE_ANIM } from './world-defs.ts';
 import {
   buildGameplayState,
@@ -47,8 +47,7 @@ import {
   playerFrameDtAfterRoundtrip,
   survivalProgressionUpdate,
   survivalEnforceRewardWeaponGuard,
-  GameplayState,
-} from "@crimson/gameplay.ts";
+} from '@crimson/gameplay.ts';
 
 export class WorldEvents {
   hits: ProjectileHit[];
@@ -615,7 +614,7 @@ export class WorldState {
       keepCorpse: opts.keepCorpse ?? true,
     });
     opts.deaths.push(death);
-    if (opts.deathSfx !== undefined && opts.deathSfx.length > 0 && opts.sfx !== undefined) {
+    if (opts.deathSfx !== undefined && opts.deathSfx.length > 0) {
       opts.sfx.push(...opts.deathSfx);
     }
   }
