@@ -552,72 +552,6 @@ function _playerUpdateAimByScheme(opts: {
   }
 }
 
-function _normalizeHeadingAngle(value: number): number {
-  const tau = NATIVE_TAU;
-  let angle = f32(value);
-  while (angle < 0.0) {
-    angle = f32(angle + tau);
-  }
-  while (angle > tau) {
-    angle = f32(angle - tau);
-  }
-  return angle;
-}
-
-function _playerHeadingApproachTargetWithDelta(
-  player: PlayerState,
-  targetHeading: number,
-  dt: number,
-): [number, number] {
-  // Native `player_heading_approach_target`: ease heading and return (diff, turn_delta).
-  // Native runs this through float32 temporaries (`var_8`/`edx_1`) before the
-  // direct-vs-wrapped compare and turn-sign branch. That quantization matters
-  // near opposite-heading ties.
-  let heading = f32(_normalizeHeadingAngle(player.heading));
-  player.heading = heading;
-  const target = f32(targetHeading);
-
-  const direct = f32(Math.abs(f32(target - heading)));
-  let high = heading;
-  if (target > high) high = target;
-  let low = heading;
-  if (target < low) low = target;
-  const wrapped = f32(Math.abs(f32(NATIVE_TAU - high + low)));
-  const diff = direct >= wrapped ? wrapped : direct;
-
-  // Native computes `player_heading_turn_delta = frame_dt * diff * 5.0` via
-  // float32 temporaries/spills. Quantize `frame_dt * diff` to float32 before
-  // applying the `* 5.0` to match x87 store boundaries.
-  const dtF32 = f32(dt);
-  const scaled = f32(dtF32 * diff);
-  let turnDelta: number;
-  if (direct <= wrapped) {
-    if (target > heading) {
-      turnDelta = f32(scaled * 5.0);
-    } else {
-      turnDelta = f32(scaled * -5.0);
-    }
-  } else {
-    if (target >= heading) {
-      turnDelta = f32(scaled * -5.0);
-    } else {
-      turnDelta = f32(scaled * 5.0);
-    }
-  }
-
-  player.heading = f32(heading + turnDelta);
-  return [diff, turnDelta];
-}
-
-function _playerHeadingApproachTarget(
-  player: PlayerState,
-  targetHeading: number,
-  dt: number,
-): number {
-  const [diff] = _playerHeadingApproachTargetWithDelta(player, targetHeading, dt);
-  return diff;
-}
-
 export function playerUpdate(
   player: PlayerState,
   inputState: PlayerInput,
@@ -1141,4 +1075,70 @@ export function playerUpdate(
   if (player.muzzleFlashAlpha > 0.8) {
     player.muzzleFlashAlpha = 0.8;
   }
+}
+
+function _playerHeadingApproachTargetWithDelta(
+  player: PlayerState,
+  targetHeading: number,
+  dt: number,
+): [number, number] {
+  // Native `player_heading_approach_target`: ease heading and return (diff, turn_delta).
+  // Native runs this through float32 temporaries (`var_8`/`edx_1`) before the
+  // direct-vs-wrapped compare and turn-sign branch. That quantization matters
+  // near opposite-heading ties.
+  let heading = f32(_normalizeHeadingAngle(player.heading));
+  player.heading = heading;
+  const target = f32(targetHeading);
+
+  const direct = f32(Math.abs(f32(target - heading)));
+  let high = heading;
+  if (target > high) high = target;
+  let low = heading;
+  if (target < low) low = target;
+  const wrapped = f32(Math.abs(f32(NATIVE_TAU - high + low)));
+  const diff = direct >= wrapped ? wrapped : direct;
+
+  const dtF32 = f32(dt);
+  // Native computes `player_heading_turn_delta = frame_dt * diff * 5.0` via
+  // float32 temporaries/spills. Quantize `frame_dt * diff` to float32 before
+  // applying the `* 5.0` to match x87 store boundaries.
+  const scaled = f32(dtF32 * diff);
+  let turnDelta: number;
+  if (direct <= wrapped) {
+    if (target > heading) {
+      turnDelta = f32(scaled * 5.0);
+    } else {
+      turnDelta = f32(scaled * -5.0);
+    }
+  } else {
+    if (target >= heading) {
+      turnDelta = f32(scaled * -5.0);
+    } else {
+      turnDelta = f32(scaled * 5.0);
+    }
+  }
+
+  player.heading = f32(heading + turnDelta);
+  return [diff, turnDelta];
+}
+
+function _playerHeadingApproachTarget(
+  player: PlayerState,
+  targetHeading: number,
+  dt: number,
+): number {
+  const [diff] = _playerHeadingApproachTargetWithDelta(player, targetHeading, dt);
+  return diff;
+}
+
+function _normalizeHeadingAngle(value: number): number {
+  const tau = NATIVE_TAU;
+  let angle = f32(value);
+  while (angle < 0.0) {
+    angle = f32(angle + tau);
+  }
+  while (angle > tau) {
+    angle = f32(angle - tau);
+  }
+  return angle;
 }
