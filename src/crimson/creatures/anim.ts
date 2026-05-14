@@ -48,7 +48,7 @@ export function creatureCorpseFrameForType(typeId: number): number {
 }
 
 
-export function creatureAnimIsLongStrip(flags: CreatureFlags): boolean {
+export function creatureAnimIsLongStrip(flags: number): boolean {
     // From creature_update_all / creature_render_type:
     // long strip when (flags & 4) == 0 OR (flags & 0x40) != 0
     const flagsBits = int(flags);
@@ -62,13 +62,13 @@ export function creatureAnimPhaseStep(opts: {
     dt: number;
     size: number;
     localScale?: number;
-    flags?: CreatureFlags;
+    flags?: number;
     aiMode?: number;
     quantizeF32?: boolean;
 }): number {
     let { animRate, moveSpeed, dt, size } = opts;
     let localScale = opts.localScale ?? 1.0;
-    const flags = opts.flags ?? (0 as CreatureFlags);
+    const flags = opts.flags ?? 0;
     const aiMode = opts.aiMode ?? CreatureAiMode.ORBIT_PLAYER;
     const quantizeF32 = opts.quantizeF32 ?? true;
 
@@ -109,7 +109,7 @@ export function creatureAnimAdvancePhase(
         dt: number;
         size: number;
         localScale?: number;
-        flags?: CreatureFlags;
+        flags?: number;
         aiMode?: number;
         quantizeF32?: boolean;
     },

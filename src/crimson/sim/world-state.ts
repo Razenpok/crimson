@@ -15,7 +15,6 @@ import {
 } from '@crimson/creatures/runtime.ts';
 import {
   CreatureAiMode,
-  CreatureFlags,
   CreatureTypeId,
   type SpawnEnv,
 } from '@crimson/creatures/spawn.ts';
@@ -699,7 +698,7 @@ export class WorldState {
           dt,
           size: Number(player.size),
           localScale: 1.0,
-          flags: 0 as CreatureFlags,
+          flags: 0,
           aiMode: CreatureAiMode.ORBIT_PLAYER,
         },
       );
