@@ -126,7 +126,7 @@ class LanRuntimeInputProvider {
 
   constructor(opts: { playerCount: number; tickRate: number }) {
     this._captureClockRate = Math.max(1, int(opts.tickRate));
-    this._captureClock = new FixedStepClock(this._captureClockRate);
+    this._captureClock = new FixedStepClock({ tickRate: this._captureClockRate });
   }
 
   get popBlocked(): boolean {
@@ -1289,7 +1289,7 @@ export class BaseGameplayMode {
         provider.setBeforePop(null);
         this._tickRunnerLocalClock = null;
       } else if (this._tickRunnerLocalClock === null) {
-        this._tickRunnerLocalClock = new FixedStepClock(this._gameplayTickRate());
+        this._tickRunnerLocalClock = new FixedStepClock({ tickRate: this._gameplayTickRate() });
       }
       return [runner, provider];
     }
@@ -1322,7 +1322,7 @@ export class BaseGameplayMode {
     this._tickRunnerNextTickIndex = 0;
     this._tickRunnerLocalClock = opts.isNetworked
       ? null
-      : new FixedStepClock(this._gameplayTickRate());
+      : new FixedStepClock({ tickRate: this._gameplayTickRate() });
     return [newRunner, newProvider];
   }
 
@@ -1596,7 +1596,7 @@ export class BaseGameplayMode {
     }
     let localClock = this._tickRunnerLocalClock;
     if (localClock === null) {
-      localClock = new FixedStepClock(this._gameplayTickRate());
+      localClock = new FixedStepClock({ tickRate: this._gameplayTickRate() });
       this._tickRunnerLocalClock = localClock;
     }
 

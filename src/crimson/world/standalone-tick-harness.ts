@@ -38,7 +38,7 @@ export class StandaloneTickHarness {
     this._gameMode = opts.gameMode;
     this._buildInputs = opts.buildInputs;
     this._tickRate = Math.max(1, int(opts.tickRate ?? 60));
-    this._clock = new FixedStepClock(this._tickRate);
+    this._clock = new FixedStepClock({ tickRate: this._tickRate });
   }
 
   reset(): void {
@@ -46,7 +46,7 @@ export class StandaloneTickHarness {
     this._runner = null;
     this._worldState = null;
     this._playerCount = 0;
-    this._clock = new FixedStepClock(this._tickRate);
+    this._clock = new FixedStepClock({ tickRate: this._tickRate });
     this._frameIndex = 0;
     this._nextTickIndex = 0;
   }
@@ -100,7 +100,7 @@ export class StandaloneTickHarness {
     this._runner = runner;
     this._worldState = worldState;
     this._playerCount = int(playerCount);
-    this._clock = new FixedStepClock(this._tickRate);
+    this._clock = new FixedStepClock({ tickRate: this._tickRate });
     this._frameIndex = 0;
     this._nextTickIndex = 0;
     return [runner, session];

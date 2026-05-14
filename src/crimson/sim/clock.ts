@@ -4,13 +4,13 @@ export class FixedStepClock {
   tickRate: number;
   accum: number;
 
-  constructor(tickRate: number = 60, accum: number = 0.0) {
-    tickRate = int(tickRate);
+  constructor(opts: { tickRate?: number; accum?: number } = {}) {
+    let tickRate = int(opts.tickRate ?? 60);
     if (tickRate <= 0) {
       throw new Error(`tick_rate must be positive, got ${tickRate}`);
     }
     this.tickRate = tickRate;
-    this.accum = accum;
+    this.accum = opts.accum ?? 0.0;
   }
 
   get dtTick(): number {
