@@ -76,7 +76,6 @@ function _overlayBodyLines(info: DemoTrialOverlayInfo): BodyLine[] {
       [197.0, _UPGRADE_TRAILER_TEXT],
     ];
   }
-  // time_up (default)
   return [
     [80.0, _TIME_UP_TEXT],
     [98.0, _TIME_UP_ALL_FEATURES_TEXT],
