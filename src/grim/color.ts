@@ -9,34 +9,59 @@ export class RGBA {
   readonly b: number;
   readonly a: number;
 
-  constructor(r: number = 1.0, g: number = 1.0, b: number = 1.0, a: number = 1.0) {
-    this.r = r;
-    this.g = g;
-    this.b = b;
-    this.a = a;
+  constructor(opts?: { r?: number; g?: number; b?: number; a?: number });
+  constructor(r?: number, g?: number, b?: number, a?: number);
+  constructor(
+    optsOrR: { r?: number; g?: number; b?: number; a?: number } | number = {},
+    g: number = 1.0,
+    b: number = 1.0,
+    a: number = 1.0,
+  ) {
+    if (typeof optsOrR === 'number') {
+      this.r = optsOrR;
+      this.g = g;
+      this.b = b;
+      this.a = a;
+      return;
+    }
+    this.r = optsOrR.r ?? 1.0;
+    this.g = optsOrR.g ?? 1.0;
+    this.b = optsOrR.b ?? 1.0;
+    this.a = optsOrR.a ?? 1.0;
   }
 
   static fromRgba(value: RGBA | wgl.Color): RGBA {
     if (value instanceof RGBA) return value;
-    return new RGBA(value.r, value.g, value.b, value.a);
+    return new RGBA({ r: value.r, g: value.g, b: value.b, a: value.a });
   }
 
   static fromBytes(r: number, g: number, b: number, a: number): RGBA {
     const inv255 = 1.0 / 255.0;
-    return new RGBA(r * inv255, g * inv255, b * inv255, a * inv255);
+    return new RGBA({ r: r * inv255, g: g * inv255, b: b * inv255, a: a * inv255 });
+  }
+
+  static fromRl(value: wgl.Color): RGBA {
+    return new RGBA({ r: value.r, g: value.g, b: value.b, a: value.a });
   }
 
   static lerp(a: RGBA, b: RGBA, t: number): RGBA {
-    return new RGBA(
-      a.r + (b.r - a.r) * t,
-      a.g + (b.g - a.g) * t,
-      a.b + (b.b - a.b) * t,
-      a.a + (b.a - a.a) * t,
-    );
+    return new RGBA({
+      r: a.r + (b.r - a.r) * t,
+      g: a.g + (b.g - a.g) * t,
+      b: a.b + (b.b - a.b) * t,
+      a: a.a + (b.a - a.a) * t,
+    });
   }
 
   toTuple(): [number, number, number, number] {
     return [this.r, this.g, this.b, this.a];
+  }
+
+  *[Symbol.iterator](): Iterator<number> {
+    yield this.r;
+    yield this.g;
+    yield this.b;
+    yield this.a;
   }
 
   toWgl(): wgl.Color {
@@ -49,21 +74,21 @@ export class RGBA {
   }
 
   clamped(): RGBA {
-    return new RGBA(
-      clamp(this.r, 0.0, 1.0),
-      clamp(this.g, 0.0, 1.0),
-      clamp(this.b, 0.0, 1.0),
-      clamp(this.a, 0.0, 1.0),
-    );
+    return new RGBA({
+      r: clamp(this.r, 0.0, 1.0),
+      g: clamp(this.g, 0.0, 1.0),
+      b: clamp(this.b, 0.0, 1.0),
+      a: clamp(this.a, 0.0, 1.0),
+    });
   }
 
   replace(opts: { r?: number; g?: number; b?: number; a?: number }): RGBA {
-    return new RGBA(
-      opts.r !== undefined ? opts.r : this.r,
-      opts.g !== undefined ? opts.g : this.g,
-      opts.b !== undefined ? opts.b : this.b,
-      opts.a !== undefined ? opts.a : this.a,
-    );
+    return new RGBA({
+      r: opts.r !== undefined ? opts.r : this.r,
+      g: opts.g !== undefined ? opts.g : this.g,
+      b: opts.b !== undefined ? opts.b : this.b,
+      a: opts.a !== undefined ? opts.a : this.a,
+    });
   }
 
   withAlpha(alpha: number): RGBA {
@@ -71,12 +96,12 @@ export class RGBA {
   }
 
   scaled(factor: number): RGBA {
-    return new RGBA(
-      this.r * factor,
-      this.g * factor,
-      this.b * factor,
-      this.a * factor,
-    );
+    return new RGBA({
+      r: this.r * factor,
+      g: this.g * factor,
+      b: this.b * factor,
+      a: this.a * factor,
+    });
   }
 
   scaledAlpha(factor: number): RGBA {
@@ -92,5 +117,9 @@ export class RGBA {
       int(c.b * 255.0 + 0.5),
       int(c.a * 255.0 + 0.5),
     ];
+  }
+
+  toRl(): wgl.Color {
+    return this.toWgl();
   }
 }
