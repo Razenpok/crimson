@@ -120,17 +120,37 @@ void main() {
 `;
 
 class _BeamFastStampedShader {
-  constructor(
-    readonly shader: WebGLProgram,
-    readonly mvpLoc: WebGLUniformLocation | null,
-    readonly colorLoc: WebGLUniformLocation | null,
-    readonly stepUvLoc: WebGLUniformLocation | null,
-    readonly stampScaleLoc: WebGLUniformLocation | null,
-    readonly stampDecayLoc: WebGLUniformLocation | null,
-    readonly stampQuadLoc: WebGLUniformLocation | null,
-    readonly stampOffsetLoc: WebGLUniformLocation | null,
-    readonly intensityGainLoc: WebGLUniformLocation | null,
-  ) {}
+  readonly shader: WebGLProgram;
+  readonly mvpLoc: WebGLUniformLocation | null;
+  readonly colorLoc: WebGLUniformLocation | null;
+  readonly stepUvLoc: WebGLUniformLocation | null;
+  readonly stampScaleLoc: WebGLUniformLocation | null;
+  readonly stampDecayLoc: WebGLUniformLocation | null;
+  readonly stampQuadLoc: WebGLUniformLocation | null;
+  readonly stampOffsetLoc: WebGLUniformLocation | null;
+  readonly intensityGainLoc: WebGLUniformLocation | null;
+
+  constructor(opts: {
+    shader: WebGLProgram;
+    mvpLoc: WebGLUniformLocation | null;
+    colorLoc: WebGLUniformLocation | null;
+    stepUvLoc: WebGLUniformLocation | null;
+    stampScaleLoc: WebGLUniformLocation | null;
+    stampDecayLoc: WebGLUniformLocation | null;
+    stampQuadLoc: WebGLUniformLocation | null;
+    stampOffsetLoc: WebGLUniformLocation | null;
+    intensityGainLoc: WebGLUniformLocation | null;
+  }) {
+    this.shader = opts.shader;
+    this.mvpLoc = opts.mvpLoc;
+    this.colorLoc = opts.colorLoc;
+    this.stepUvLoc = opts.stepUvLoc;
+    this.stampScaleLoc = opts.stampScaleLoc;
+    this.stampDecayLoc = opts.stampDecayLoc;
+    this.stampQuadLoc = opts.stampQuadLoc;
+    this.stampOffsetLoc = opts.stampOffsetLoc;
+    this.intensityGainLoc = opts.intensityGainLoc;
+  }
 }
 
 let _BEAM_FAST_STAMPED_SHADER_TRIED = false;
@@ -171,17 +191,17 @@ function _getBeamFastStampedShader(): _BeamFastStampedShader | null {
     return null;
   }
 
-  _BEAM_FAST_STAMPED_SHADER = new _BeamFastStampedShader(
+  _BEAM_FAST_STAMPED_SHADER = new _BeamFastStampedShader({
     shader,
-    wgl.getShaderLocation(shader, 'mvp'),
-    wgl.getShaderLocation(shader, 'colDiffuse'),
-    wgl.getShaderLocation(shader, 'u_step_uv'),
-    wgl.getShaderLocation(shader, 'u_stamp_scale'),
-    wgl.getShaderLocation(shader, 'u_stamp_decay'),
-    wgl.getShaderLocation(shader, 'u_stamp_quad'),
-    wgl.getShaderLocation(shader, 'u_stamp_offset'),
-    wgl.getShaderLocation(shader, 'u_intensity_gain'),
-  );
+    mvpLoc: wgl.getShaderLocation(shader, 'mvp'),
+    colorLoc: wgl.getShaderLocation(shader, 'colDiffuse'),
+    stepUvLoc: wgl.getShaderLocation(shader, 'u_step_uv'),
+    stampScaleLoc: wgl.getShaderLocation(shader, 'u_stamp_scale'),
+    stampDecayLoc: wgl.getShaderLocation(shader, 'u_stamp_decay'),
+    stampQuadLoc: wgl.getShaderLocation(shader, 'u_stamp_quad'),
+    stampOffsetLoc: wgl.getShaderLocation(shader, 'u_stamp_offset'),
+    intensityGainLoc: wgl.getShaderLocation(shader, 'u_intensity_gain'),
+  });
   return _BEAM_FAST_STAMPED_SHADER;
 }
 
