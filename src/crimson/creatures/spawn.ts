@@ -1909,7 +1909,7 @@ function applyRingFormation(ctx: PlanBuilder, spec: RingFormationSpec): void {
 }
 
 
-registerTemplate([SpawnId.ZOMBIE_BOSS_SPAWNER_00], (ctx: PlanBuilder): void => {
+function template00ZombieBossSpawner(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ZOMBIE;
   c.flags = CreatureFlags.ANIM_PING_PONG | CreatureFlags.ANIM_LONG_STRIP;
@@ -1920,7 +1920,9 @@ registerTemplate([SpawnId.ZOMBIE_BOSS_SPAWNER_00], (ctx: PlanBuilder): void => {
   c.rewardValue = 6600.0;
   applyTint(c, [0.6, 0.6, 1.0, 0.8]);
   c.contactDamage = 50.0;
-});
+}
+
+registerTemplate([SpawnId.ZOMBIE_BOSS_SPAWNER_00], template00ZombieBossSpawner);
 
 
 const BASIC_RANDOM_TYPE_IDS: Map<SpawnId, CreatureTypeId> = new Map([
@@ -1954,22 +1956,24 @@ const BASIC_RANDOM_CONTACT_DAMAGE_CALLERS: Map<SpawnId, RngCallerStatic> = new M
 ]);
 
 
+function template030506BasicRandom(ctx: PlanBuilder): void {
+  const c = ctx.base;
+  c.typeId = BASIC_RANDOM_TYPE_IDS.get(ctx.templateId)!;
+  const size = (ctx.rng.rand({ caller: BASIC_RANDOM_SIZE_CALLERS.get(ctx.templateId)! }) % 15) + 38.0;
+  applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
+  c.moveSpeed = (ctx.rng.rand({ caller: BASIC_RANDOM_MOVE_SPEED_CALLERS.get(ctx.templateId)! }) % 18) * 0.1 + 1.1;
+  const tintB = (ctx.rng.rand({ caller: BASIC_RANDOM_TINT_B_CALLERS.get(ctx.templateId)! }) % 25) * 0.01 + 0.8;
+  applyTint(c, [0.6, 0.6, clamp01(tintB), 1.0]);
+  c.contactDamage = (ctx.rng.rand({ caller: BASIC_RANDOM_CONTACT_DAMAGE_CALLERS.get(ctx.templateId)! }) % 10) + 4.0;
+}
+
 registerTemplate(
   [SpawnId.SPIDER_SP1_RANDOM_03, SpawnId.SPIDER_SP2_RANDOM_05, SpawnId.ALIEN_RANDOM_06],
-  (ctx: PlanBuilder): void => {
-    const c = ctx.base;
-    c.typeId = BASIC_RANDOM_TYPE_IDS.get(ctx.templateId)!;
-    const size = (ctx.rng.rand({ caller: BASIC_RANDOM_SIZE_CALLERS.get(ctx.templateId)! }) % 15) + 38.0;
-    applySizeHealthReward(c, size, { healthScale: 8.0 / 7.0, healthAdd: 20.0 });
-    c.moveSpeed = (ctx.rng.rand({ caller: BASIC_RANDOM_MOVE_SPEED_CALLERS.get(ctx.templateId)! }) % 18) * 0.1 + 1.1;
-    const tintB = (ctx.rng.rand({ caller: BASIC_RANDOM_TINT_B_CALLERS.get(ctx.templateId)! }) % 25) * 0.01 + 0.8;
-    applyTint(c, [0.6, 0.6, clamp01(tintB), 1.0]);
-    c.contactDamage = (ctx.rng.rand({ caller: BASIC_RANDOM_CONTACT_DAMAGE_CALLERS.get(ctx.templateId)! }) % 10) + 4.0;
-  },
+  template030506BasicRandom,
 );
 
 
-registerTemplate([SpawnId.LIZARD_RANDOM_04], (ctx: PlanBuilder): void => {
+function template04LizardRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.LIZARD;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_SIZE }) % 15) + 38.0;
@@ -1984,10 +1988,12 @@ registerTemplate([SpawnId.LIZARD_RANDOM_04], (ctx: PlanBuilder): void => {
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_04_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.LIZARD_RANDOM_04], template04LizardRandom);
 
 
-registerTemplate([SpawnId.ALIEN_SPAWNER_RING_24_0E], (ctx: PlanBuilder): void => {
+function template0eAlienSpawnerRing24(ctx: PlanBuilder): void {
   const parent = ctx.base;
   parent.typeId = CreatureTypeId.ALIEN;
   parent.flags = CreatureFlags.ANIM_PING_PONG;
@@ -2018,10 +2024,12 @@ registerTemplate([SpawnId.ALIEN_SPAWNER_RING_24_0E], (ctx: PlanBuilder): void =>
     false,
     0.0,
   );
-});
+}
+
+registerTemplate([SpawnId.ALIEN_SPAWNER_RING_24_0E], template0eAlienSpawnerRing24);
 
 
-registerTemplate([SpawnId.FORMATION_CHAIN_LIZARD_4_11], (ctx: PlanBuilder): void => {
+function template11FormationChainLizard4(ctx: PlanBuilder): void {
   const parent = ctx.base;
   parent.typeId = CreatureTypeId.LIZARD;
   parent.aiMode = CreatureAiMode.ORBIT_PLAYER_TIGHT;
@@ -2056,10 +2064,12 @@ registerTemplate([SpawnId.FORMATION_CHAIN_LIZARD_4_11], (ctx: PlanBuilder): void
   parent.aiLinkParent = chainPrev;
   ctx.primary = chainPrev;
   applyUnhandledCreatureTypeFallback(ctx.creatures, ctx.primary);
-});
+}
+
+registerTemplate([SpawnId.FORMATION_CHAIN_LIZARD_4_11], template11FormationChainLizard4);
 
 
-registerTemplate([SpawnId.FORMATION_CHAIN_ALIEN_10_13], (ctx: PlanBuilder): void => {
+function template13FormationChainAlien10(ctx: PlanBuilder): void {
   const parent = ctx.base;
   parent.typeId = CreatureTypeId.ALIEN;
   parent.aiMode = CreatureAiMode.ORBIT_LINK;
@@ -2096,7 +2106,9 @@ registerTemplate([SpawnId.FORMATION_CHAIN_ALIEN_10_13], (ctx: PlanBuilder): void
   parent.aiLinkParent = chainPrev;
   ctx.primary = chainPrev;
   applyUnhandledCreatureTypeFallback(ctx.creatures, ctx.primary);
-});
+}
+
+registerTemplate([SpawnId.FORMATION_CHAIN_ALIEN_10_13], template13FormationChainAlien10);
 
 
 const AI1_BLUE_TINT_TEMPLATES: Map<SpawnId, [CreatureTypeId, number]> = new Map([
@@ -2112,27 +2124,29 @@ const AI1_BLUE_TINT_CALLERS: Map<SpawnId, RngCallerStatic> = new Map([
 ]);
 
 
+function template1a1b1cAi1BlueTint(ctx: PlanBuilder): void {
+  const c = ctx.base;
+  c.aiMode = CreatureAiMode.ORBIT_PLAYER_TIGHT;
+  c.size = 50.0;
+  c.moveSpeed = 2.4;
+  c.rewardValue = 125.0;
+
+  const [tid, hp] = AI1_BLUE_TINT_TEMPLATES.get(ctx.templateId)!;
+  c.typeId = tid;
+  c.health = hp;
+
+  const tint = (ctx.rng.rand({ caller: AI1_BLUE_TINT_CALLERS.get(ctx.templateId)! }) % 40) * 0.01 + 0.5;
+  applyTint(c, [tint, tint, 1.0, 1.0]);
+  c.contactDamage = 5.0;
+}
+
 registerTemplate(
   [SpawnId.AI1_ALIEN_BLUE_TINT_1A, SpawnId.AI1_SPIDER_SP1_BLUE_TINT_1B, SpawnId.AI1_LIZARD_BLUE_TINT_1C],
-  (ctx: PlanBuilder): void => {
-    const c = ctx.base;
-    c.aiMode = CreatureAiMode.ORBIT_PLAYER_TIGHT;
-    c.size = 50.0;
-    c.moveSpeed = 2.4;
-    c.rewardValue = 125.0;
-
-    const [tid, hp] = AI1_BLUE_TINT_TEMPLATES.get(ctx.templateId)!;
-    c.typeId = tid;
-    c.health = hp;
-
-    const tint = (ctx.rng.rand({ caller: AI1_BLUE_TINT_CALLERS.get(ctx.templateId)! }) % 40) * 0.01 + 0.5;
-    applyTint(c, [tint, tint, 1.0, 1.0]);
-    c.contactDamage = 5.0;
-  },
+  template1a1b1cAi1BlueTint,
 );
 
 
-registerTemplate([SpawnId.ALIEN_RANDOM_1D], (ctx: PlanBuilder): void => {
+function template1dAlienRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_SIZE }) % 20) + 35.0;
@@ -2146,10 +2160,12 @@ registerTemplate([SpawnId.ALIEN_RANDOM_1D], (ctx: PlanBuilder): void => {
     1.0,
   ]);
   c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1D_CONTACT_DAMAGE }) % 10) + 4.0;
-});
+}
+
+registerTemplate([SpawnId.ALIEN_RANDOM_1D], template1dAlienRandom);
 
 
-registerTemplate([SpawnId.ALIEN_RANDOM_1E], (ctx: PlanBuilder): void => {
+function template1eAlienRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_SIZE }) % 30) + 35.0;
@@ -2163,10 +2179,12 @@ registerTemplate([SpawnId.ALIEN_RANDOM_1E], (ctx: PlanBuilder): void => {
     1.0,
   ]);
   c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1E_CONTACT_DAMAGE }) % 30) + 4.0;
-});
+}
+
+registerTemplate([SpawnId.ALIEN_RANDOM_1E], template1eAlienRandom);
 
 
-registerTemplate([SpawnId.ALIEN_RANDOM_1F], (ctx: PlanBuilder): void => {
+function template1fAlienRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_SIZE }) % 30) + 45.0;
@@ -2180,10 +2198,12 @@ registerTemplate([SpawnId.ALIEN_RANDOM_1F], (ctx: PlanBuilder): void => {
     1.0,
   ]);
   c.contactDamage = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_1F_CONTACT_DAMAGE }) % 35) + 8.0;
-});
+}
+
+registerTemplate([SpawnId.ALIEN_RANDOM_1F], template1fAlienRandom);
 
 
-registerTemplate([SpawnId.ALIEN_RANDOM_GREEN_20], (ctx: PlanBuilder): void => {
+function template20AlienRandomGreen(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_SIZE }) % 30) + 40.0;
@@ -2201,10 +2221,12 @@ registerTemplate([SpawnId.ALIEN_RANDOM_GREEN_20], (ctx: PlanBuilder): void => {
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ALIEN_RANDOM_GREEN_20_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.ALIEN_RANDOM_GREEN_20], template20AlienRandomGreen);
 
 
-registerTemplate([SpawnId.LIZARD_RANDOM_2E], (ctx: PlanBuilder): void => {
+function template2eLizardRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.LIZARD;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_SIZE }) % 30) + 40.0;
@@ -2224,10 +2246,12 @@ registerTemplate([SpawnId.LIZARD_RANDOM_2E], (ctx: PlanBuilder): void => {
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_2E_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.LIZARD_RANDOM_2E], template2eLizardRandom);
 
 
-registerTemplate([SpawnId.LIZARD_RANDOM_31], (ctx: PlanBuilder): void => {
+function template31LizardRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.LIZARD;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_SIZE }) % 30) + 40.0;
@@ -2236,10 +2260,12 @@ registerTemplate([SpawnId.LIZARD_RANDOM_31], (ctx: PlanBuilder): void => {
   const tint = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_LIZARD_RANDOM_31_TINT }) % 30) * 0.01 + 0.6;
   applyTint(c, [tint, tint, 0.38, 1.0]);
   c.contactDamage = size * 0.14 + 4.0;
-});
+}
+
+registerTemplate([SpawnId.LIZARD_RANDOM_31], template31LizardRandom);
 
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_32], (ctx: PlanBuilder): void => {
+function template32SpiderSp1Random(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_SIZE }) % 25) + 40.0;
@@ -2251,10 +2277,12 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_32], (ctx: PlanBuilder): void => {
   const tint = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_32_TINT }) % 40) * 0.01 + 0.6;
   applyTint(c, [tint, tint, tint, 1.0]);
   c.contactDamage = size * 0.14 + 4.0;
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP1_RANDOM_32], template32SpiderSp1Random);
 
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_RED_33], (ctx: PlanBuilder): void => {
+function template33SpiderSp1RandomRed(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_SIZE }) % 15) + 45.0;
@@ -2273,10 +2301,12 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_RED_33], (ctx: PlanBuilder): void =>
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_RED_33_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP1_RANDOM_RED_33], template33SpiderSp1RandomRed);
 
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_GREEN_34], (ctx: PlanBuilder): void => {
+function template34SpiderSp1RandomGreen(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_SIZE }) % 20) + 40.0;
@@ -2295,10 +2325,12 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_GREEN_34], (ctx: PlanBuilder): void 
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_GREEN_34_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP1_RANDOM_GREEN_34], template34SpiderSp1RandomGreen);
 
 
-registerTemplate([SpawnId.SPIDER_SP2_RANDOM_35], (ctx: PlanBuilder): void => {
+function template35SpiderSp2Random(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP2;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_SIZE }) % 10) + 30.0;
@@ -2317,10 +2349,12 @@ registerTemplate([SpawnId.SPIDER_SP2_RANDOM_35], (ctx: PlanBuilder): void => {
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANDOM_35_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP2_RANDOM_35], template35SpiderSp2Random);
 
 
-registerTemplate([SpawnId.ALIEN_AI7_ORBITER_36], (ctx: PlanBuilder): void => {
+function template36AlienAi7Orbiter(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ALIEN;
   c.size = 50.0;
@@ -2332,10 +2366,12 @@ registerTemplate([SpawnId.ALIEN_AI7_ORBITER_36], (ctx: PlanBuilder): void => {
   const tintG = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_AI7_ORBITER_TINT_G }) % 5) * 0.01 + 0.65;
   applyTint(c, [0.65, tintG, 0.95, 1.0]);
   c.contactDamage = 40.0;
-});
+}
+
+registerTemplate([SpawnId.ALIEN_AI7_ORBITER_36], template36AlienAi7Orbiter);
 
 
-registerTemplate([SpawnId.SPIDER_SP2_RANGED_VARIANT_37], (ctx: PlanBuilder): void => {
+function template37SpiderSp2RangedVariant(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP2;
   c.flags = CreatureFlags.RANGED_ATTACK_VARIANT;
@@ -2345,10 +2381,12 @@ registerTemplate([SpawnId.SPIDER_SP2_RANGED_VARIANT_37], (ctx: PlanBuilder): voi
   applyTint(c, [1.0, 0.75, 0.1, 1.0]);
   c.size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP2_RANGED_VARIANT_37_SIZE }) & 3) + 41;
   c.contactDamage = 10.0;
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP2_RANGED_VARIANT_37], template37SpiderSp2RangedVariant);
 
 
-registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_38], (ctx: PlanBuilder): void => {
+function template38SpiderSp1Ai7Timer(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
   c.flags = CreatureFlags.AI7_LINK_TIMER;
@@ -2359,10 +2397,12 @@ registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_38], (ctx: PlanBuilder): void => 
   applyTint(c, [1.0, 0.75, 0.1, 1.0]);
   c.size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_AI7_TIMER_38_SIZE }) & 3) + 41;
   c.contactDamage = 10.0;
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_38], template38SpiderSp1Ai7Timer);
 
 
-registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_WEAK_39], (ctx: PlanBuilder): void => {
+function template39SpiderSp1Ai7TimerWeak(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
   c.flags = CreatureFlags.AI7_LINK_TIMER;
@@ -2373,10 +2413,12 @@ registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_WEAK_39], (ctx: PlanBuilder): voi
   applyTint(c, [0.8, 0.65, 0.1, 1.0]);
   c.size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_AI7_TIMER_WEAK_39_SIZE }) % 4) + 26;
   c.contactDamage = 10.0;
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP1_AI7_TIMER_WEAK_39], template39SpiderSp1Ai7TimerWeak);
 
 
-registerTemplate([SpawnId.SPIDER_SP1_RANDOM_3D], (ctx: PlanBuilder): void => {
+function template3dSpiderSp1Random(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.SPIDER_SP1;
   c.health = 70.0;
@@ -2387,10 +2429,12 @@ registerTemplate([SpawnId.SPIDER_SP1_RANDOM_3D], (ctx: PlanBuilder): void => {
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_SPIDER_SP1_RANDOM_3D_SIZE }) % 7) + 45;
   c.size = size;
   c.contactDamage = size * 0.22;
-});
+}
+
+registerTemplate([SpawnId.SPIDER_SP1_RANDOM_3D], template3dSpiderSp1Random);
 
 
-registerTemplate([SpawnId.ZOMBIE_RANDOM_41], (ctx: PlanBuilder): void => {
+function template41ZombieRandom(ctx: PlanBuilder): void {
   const c = ctx.base;
   c.typeId = CreatureTypeId.ZOMBIE;
   const size = (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_SIZE }) % 30) + 40.0;
@@ -2402,7 +2446,9 @@ registerTemplate([SpawnId.ZOMBIE_RANDOM_41], (ctx: PlanBuilder): void => {
     (ctx.rng.rand({ caller: RngCallerStatic.CREATURE_SPAWN_TEMPLATE_ZOMBIE_RANDOM_41_CONTACT_DAMAGE }) % 10)
     + 4.0
   );
-});
+}
+
+registerTemplate([SpawnId.ZOMBIE_RANDOM_41], template41ZombieRandom);
 
 
 export function buildSpawnPlan(
