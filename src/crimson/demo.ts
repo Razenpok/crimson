@@ -9,7 +9,7 @@ import { Vec2 } from "@grim/geom.ts";
 import { InputState } from "@grim/input.ts";
 import { clamp } from "@grim/math.ts";
 import type { CreatureState } from "./creatures/runtime.ts";
-import { RANDOM_HEADING_SENTINEL, SpawnId } from "./creatures/spawn-ids.ts";
+import { RANDOM_HEADING_SENTINEL, SpawnId } from "./creatures/spawn.ts";
 import { GameMode } from "./game-modes.ts";
 import { RngCallerStatic } from "./rng-caller-static.ts";
 import { requireRuntimeResources } from "./screens/assets.ts";
