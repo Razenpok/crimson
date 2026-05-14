@@ -9,7 +9,8 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
 
-function awardExperienceOnceFromReward(player: PlayerState, rewardValue: number): number {
+function awardExperienceOnceFromReward(opts: { player: PlayerState; rewardValue: number }): number {
+  const { player, rewardValue } = opts;
   const rewardF32 = f32(rewardValue);
   if (rewardF32 <= 0.0) {
     return 0;
@@ -22,17 +23,18 @@ function awardExperienceOnceFromReward(player: PlayerState, rewardValue: number)
   return int(after - before);
 }
 
-function awardExperienceFromReward(ctx: PerksUpdateEffectsCtx, rewardValue: number): number {
+function awardExperienceFromReward(ctx: PerksUpdateEffectsCtx, opts: { rewardValue: number }): number {
+  const { rewardValue } = opts;
   if (!ctx.players.length) {
     return 0;
   }
   const player = ctx.players[0];
-  let gained = awardExperienceOnceFromReward(player, rewardValue);
+  let gained = awardExperienceOnceFromReward({ player, rewardValue });
   if (gained <= 0) {
     return 0;
   }
   if (ctx.state.bonuses.doubleExperience > 0.0) {
-    gained += awardExperienceOnceFromReward(player, rewardValue);
+    gained += awardExperienceOnceFromReward({ player, rewardValue });
   }
   return int(gained);
 }
@@ -124,7 +126,7 @@ export function updateJinxed(ctx: PerksUpdateEffectsCtx): void {
     const creature = ctx.creatures[idx];
     creature.hp = -1.0;
     creature.lifecycleStage = creature.lifecycleStage - ctx.dt * 20.0;
-    awardExperienceFromReward(ctx, creature.rewardValue);
+    awardExperienceFromReward(ctx, { rewardValue: creature.rewardValue });
     ctx.state.sfxQueue.push(SfxId.TROOPER_INPAIN_01);
   }
 }
