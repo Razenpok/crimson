@@ -9,9 +9,12 @@ import { perkActive } from '@crimson/perks/helpers.ts';
 import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
 import type { Projectile, SecondaryProjectile } from '@crimson/projectiles/types.ts';
 import { knownProjRgb } from '@crimson/render/projectile-render-registry.ts';
-import { drawProjectileFromRegistry } from '@crimson/render/projectile-draw/primary-dispatch.ts';
-import { drawSecondaryProjectileFromRegistry } from '@crimson/render/projectile-draw/secondary-dispatch.ts';
-import { ProjectileDrawCtx, SecondaryProjectileDrawCtx } from '@crimson/render/projectile-draw/types.ts';
+import {
+  ProjectileDrawCtx,
+  SecondaryProjectileDrawCtx,
+  drawProjectileFromRegistry,
+  drawSecondaryProjectileFromRegistry,
+} from '@crimson/render/projectile-draw/index.ts';
 import { WorldRenderCtx } from './context.ts';
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
