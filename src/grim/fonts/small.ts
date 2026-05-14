@@ -5,10 +5,10 @@ import { Vec2 } from '@grim/geom.ts';
 import { runtimeResourcesFor } from '@grim/assets.ts';
 
 export class SmallFontData {
-  widths: number[];
-  texture: wgl.Texture;
-  cellSize: number;
-  grid: number;
+  readonly widths: number[];
+  readonly texture: wgl.Texture;
+  readonly cellSize: number;
+  readonly grid: number;
 
   constructor(opts: { widths: number[]; texture: wgl.Texture; cellSize?: number; grid?: number }) {
     this.widths = opts.widths;
@@ -36,16 +36,17 @@ export function drawSmallText(
   const lineHeight = font.cellSize;
   const origin = wgl.makeVector2(0, 0);
 
-  for (let i = 0; i < text.length; i++) {
-    const value = text.charCodeAt(i);
-    if (value === 0x0A) { // newline
+  for (const ch of text) {
+    const rawValue = ch.codePointAt(0) ?? 0;
+    const value = rawValue > 255 ? 63 : rawValue;
+    if (value === 0x0A) {
       xPos = baseX;
       yPos += lineHeight;
       continue;
     }
-    if (value === 0x0D) continue; // carriage return
+    if (value === 0x0D) continue;
 
-    const charCode = value > 255 ? 63 : value; // '?' for out of range
+    const charCode = value;
     const width = font.widths[charCode];
     if (width <= 0) continue;
 
@@ -75,17 +76,19 @@ export function measureSmallTextHeight(font: SmallFontData, text: string): numbe
 }
 
 export function measureSmallTextWidth(font: SmallFontData, text: string): number {
+  // Return the maximum line width for `text` when rendered with `draw_small_text`.
   let x = 0;
   let best = 0;
-  for (let i = 0; i < text.length; i++) {
-    const value = text.charCodeAt(i);
+  for (const ch of text) {
+    const rawValue = ch.codePointAt(0) ?? 0;
+    const value = rawValue > 255 ? 63 : rawValue;
     if (value === 0x0A) {
       best = Math.max(best, x);
       x = 0;
       continue;
     }
     if (value === 0x0D) continue;
-    const charCode = value > 255 ? 63 : value;
+    const charCode = value;
     const width = font.widths[charCode];
     if (width <= 0) continue;
     x += width;
