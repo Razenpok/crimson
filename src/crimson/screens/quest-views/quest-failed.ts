@@ -88,9 +88,9 @@ export class QuestFailedView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._retryButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
-    this._questListButton = new UiButtonState({ label: 'Play Another', forceWide: true  });
-    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
+    this._retryButton = new UiButtonState({ label: 'Play Again', forceWide: true });
+    this._questListButton = new UiButtonState({ label: 'Play Another', forceWide: true });
+    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true });
   }
 
   open(): void {
@@ -104,9 +104,9 @@ export class QuestFailedView {
     this.state.questOutcome = null;
     this._questTitle = '';
     this._record = null;
-    this._retryButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
-    this._questListButton = new UiButtonState({ label: 'Play Another', forceWide: true  });
-    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
+    this._retryButton = new UiButtonState({ label: 'Play Again', forceWide: true });
+    this._questListButton = new UiButtonState({ label: 'Play Another', forceWide: true });
+    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true });
 
     const outcome = this._outcome;
     if (outcome !== null) {
@@ -228,7 +228,7 @@ export class QuestFailedView {
     const msgPos = panelTopLeft.add(new Vec2(QUEST_FAILED_MESSAGE_X_OFFSET, QUEST_FAILED_MESSAGE_Y_OFFSET));
     drawSmallText(font, this._failureMessage(), msgPos, textColor);
 
-    this._drawScorePreview(font, panelTopLeft);
+    this._drawScorePreview(font, { panelTopLeft });
 
     const scale = 1.0;
     let buttonPos = panelTopLeft.add(new Vec2(QUEST_FAILED_BUTTON_X_OFFSET, QUEST_FAILED_BUTTON_Y_OFFSET));
@@ -367,16 +367,17 @@ export class QuestFailedView {
     return measureSmallTextWidth(requireRuntimeResources(this.state).smallFont, text);
   }
 
-  private _drawScorePreview(font: SmallFontData, panelTopLeft: Vec2): void {
+  private _drawScorePreview(font: SmallFontData, opts: { panelTopLeft: Vec2 }): void {
+    const panelTopLeft = opts.panelTopLeft;
     const record = this._record;
     if (record === null) return;
 
     const scorePos = panelTopLeft.add(new Vec2(QUEST_FAILED_SCORE_X_OFFSET, QUEST_FAILED_SCORE_Y_OFFSET));
 
-    const labelColor = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, 0.8);
+    const labelColor = wgl.makeColor(230 / 255, 230 / 255, 230 / 255, int(255 * 0.8) / 255);
     const valueColor = wgl.makeColor(230 / 255, 230 / 255, 255 / 255, 1.0);
     // `ui_text_input_render`: data_4965f8/5fc/600 = (149,175,198)/255.
-    const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, 0.7);
+    const separatorColor = wgl.makeColor(149 / 255, 175 / 255, 198 / 255, int(255 * 0.7) / 255);
 
     const scoreLabel = 'Score';
     const scoreLabelW = this._textWidth(scoreLabel, 1.0);
