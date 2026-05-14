@@ -25,7 +25,6 @@ export class SecondaryRocketStyle {
     this.glowSize = opts.glowSize;
     this.glowRgb = opts.glowRgb;
     this.glowAlphaMul = opts.glowAlphaMul;
-    Object.freeze(this);
   }
 }
 
@@ -49,6 +48,25 @@ const ROCKET_STYLE_BY_TYPE: Map<number, SecondaryRocketStyle> = new Map([
     glowAlphaMul: 0.158,
   })],
 ]);
+
+function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
+  // WebGL replacement for raylib's `draw_circle`.
+  const segments = Math.max(24, int(radius * 1.5 + 0.5));
+  const step = (Math.PI * 2.0) / segments;
+  const white = wgl.getWhiteTexture();
+  wgl.beginQuads(white);
+  wgl.rlTexCoord2f(0.5, 0.5);
+  wgl.rlColor4f(color.r, color.g, color.b, color.a);
+  for (let i = 0; i < segments; i++) {
+    const a0 = i * step;
+    const a1 = (i + 1) * step;
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x, center.y);
+    wgl.rlVertex2f(center.x + Math.cos(a0) * radius, center.y + Math.sin(a0) * radius);
+    wgl.rlVertex2f(center.x + Math.cos(a1) * radius, center.y + Math.sin(a1) * radius);
+  }
+  wgl.endQuads();
+}
 
 function drawSecondaryRocketGlow(ctx: SecondaryProjectileDrawCtx, style: SecondaryRocketStyle): void {
   const renderer = ctx.renderer;
@@ -136,10 +154,8 @@ export function drawSecondaryType4Fallback(ctx: SecondaryProjectileDrawCtx): boo
   if (int(ctx.projType) !== SecondaryProjectileTypeId.ROCKET_MINIGUN) return false;
   const scale = ctx.scale;
   const radius = Math.max(1.0, 12.0 * scale);
-  const size = radius * 2.0;
   const sp = ctx.screenPos;
   const tint = wgl.makeColor(200 / 255, 120 / 255, 1.0, int(255 * ctx.alpha + 0.5) / 255);
-  // WebGL replacement for raylib's `draw_circle` fallback.
-  wgl.drawTexturePro(wgl.getWhiteTexture(), wgl.makeRectangle(0, 0, 1, 1), wgl.makeRectangle(sp.x, sp.y, size, size), wgl.makeVector2(size * 0.5, size * 0.5), 0, tint);
+  drawFilledCircle(new Vec2(int(sp.x), int(sp.y)), radius, tint);
   return true;
 }
