@@ -1,7 +1,7 @@
 // Port of crimson/perks/availability.py
 
 import { GameMode } from '@crimson/game-modes.ts';
-import type { GameStatus } from '@crimson/gameplay.ts';
+import type { GameStatus } from '@crimson/persistence/save-status.ts';
 import { allQuests } from '@crimson/quests/index.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { PERK_COUNT_SIZE, type GameplayState, type PlayerState } from '@crimson/sim/state-types.ts';

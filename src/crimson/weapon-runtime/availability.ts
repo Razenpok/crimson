@@ -5,7 +5,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
 import { allQuests } from '@crimson/quests/index.ts';
-import type { GameStatus } from '@crimson/gameplay.ts';
+import type { GameStatus } from '@crimson/persistence/save-status.ts';
 import type { GameplayState } from '@crimson/sim/state-types.ts';
 
 export const WEAPON_DROP_ID_COUNT = 0x21; // weapon ids 1..33

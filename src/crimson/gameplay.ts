@@ -45,7 +45,6 @@ import { AimScheme } from './aim-schemes.ts';
 import { MovementControlType } from './movement-controls.ts';
 import { QuestLevel } from './quests/level.ts';
 import type { GameStatus } from './persistence/save-status.ts';
-export type { GameStatus } from './persistence/save-status.ts';
 
 const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((entry) => int(entry.weaponId))) + 1;
 
