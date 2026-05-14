@@ -14,7 +14,6 @@ export class TypoSpawnCall {
     this.pos = opts.pos;
     this.typeId = opts.typeId;
     this.tintRgba = opts.tintRgba;
-    Object.freeze(this);
   }
 }
 
