@@ -139,19 +139,6 @@ class QuestResultsPanelLayout {
   }
 }
 
-function textWidth(font: SmallFontData, text: string): number {
-  return measureSmallTextWidth(font, text);
-}
-
-function drawSmall(
-  font: SmallFontData,
-  text: string,
-  pos: Vec2,
-  color: wgl.Color,
-): void {
-  drawSmallText(font, text, pos, color);
-}
-
 export class QuestResultsUi {
   assetsRoot: string;
   baseDir: string;
@@ -357,29 +344,32 @@ export class QuestResultsUi {
     const rightLabelX = x + 100.0 * scale;
     const rightCenterX = rightLabelX + 32.0 * scale;
 
-    const scoreW = textWidth(font, 'Score');
-    drawSmall(font, 'Score', new Vec2(leftCenterX - scoreW * 0.5, y), colLabel);
-    const scoreValueW = textWidth(font, scoreValue);
-    drawSmall(
+    const scoreW = this._textWidth(font, 'Score', 1.0 * scale);
+    this._drawSmall(font, 'Score', new Vec2(leftCenterX - scoreW * 0.5, y), 1.0 * scale, colLabel);
+    const scoreValueW = this._textWidth(font, scoreValue, 1.0 * scale);
+    this._drawSmall(
       font, scoreValue,
       new Vec2(leftCenterX - scoreValueW * 0.5, y + 15.0 * scale),
+      1.0 * scale,
       colScoreValue,
     );
     const rankLabel = `Rank: ${rankText}`;
-    const rankW = textWidth(font, rankLabel);
-    drawSmall(
+    const rankW = this._textWidth(font, rankLabel, 1.0 * scale);
+    this._drawSmall(
       font, rankLabel,
       new Vec2(leftCenterX - rankW * 0.5, y + 30.0 * scale),
+      1.0 * scale,
       colLabel,
     );
 
     // Native path: FUN_00441220 sets current color from DAT_004ccca8 just before
     // drawing "Experience", so it uses the accent-blue tint (alpha*0.7).
-    drawSmall(font, 'Experience', new Vec2(rightLabelX, y), colLine);
-    const xpValueW = textWidth(font, xpValue);
-    drawSmall(
+    this._drawSmall(font, 'Experience', new Vec2(rightLabelX, y), 1.0 * scale, colLine);
+    const xpValueW = this._textWidth(font, xpValue, 1.0 * scale);
+    this._drawSmall(
       font, xpValue,
       new Vec2(rightCenterX - xpValueW * 0.5, y + 15.0 * scale),
+      1.0 * scale,
       colLabel,
     );
 
@@ -401,18 +391,18 @@ export class QuestResultsUi {
 
     const weaponId = record.mostUsedWeaponId;
     const weaponName = weaponDisplayName(weaponId, { preserveBugs: this.preserveBugs });
-    const nameW = textWidth(font, weaponName);
+    const nameW = this._textWidth(font, weaponName, 1.0 * scale);
     const nameX = Math.max(x + 4.0 * scale, leftCenterX - nameW * 0.5);
-    drawSmall(font, weaponName, new Vec2(nameX, rowY + 32.0 * scale), colRow);
+    this._drawSmall(font, weaponName, new Vec2(nameX, rowY + 32.0 * scale), 1.0 * scale, colRow);
 
     const fragsText = `Frags: ${int(record.creatureKillCount)}`;
-    drawSmall(font, fragsText, new Vec2(x + 114.0 * scale, rowY + 1.0 * scale), colRow);
+    this._drawSmall(font, fragsText, new Vec2(x + 114.0 * scale, rowY + 1.0 * scale), 1.0 * scale, colRow);
 
     const fired = Math.max(0, int(record.shotsFired));
     const hit = Math.max(0, Math.min(int(record.shotsHit), fired));
     const ratio = fired > 0 ? int((hit * 100) / fired) : 0;
     const hitText = `Hit %: ${ratio}%`;
-    drawSmall(font, hitText, new Vec2(x + 114.0 * scale, rowY + 15.0 * scale), colRow);
+    this._drawSmall(font, hitText, new Vec2(x + 114.0 * scale, rowY + 15.0 * scale), 1.0 * scale, colRow);
 
     drawLine(
       int(x - 12.0 * scale), int(rowY + 48.0 * scale),
@@ -724,16 +714,16 @@ export class QuestResultsUi {
       const perkValue = formatTimeMmSs(perkBonusMs);
       const finalValue = formatTimeMmSs(finalTimeMs);
 
-      drawSmall(font, 'Base Time:', new Vec2(labelX, y), rowColor(0));
-      drawSmall(font, baseValue, new Vec2(valueX, y), rowColor(0));
+      this._drawSmall(font, 'Base Time:', new Vec2(labelX, y), 1.0 * scale, rowColor(0));
+      this._drawSmall(font, baseValue, new Vec2(valueX, y), 1.0 * scale, rowColor(0));
       y += 20.0 * scale;
 
-      drawSmall(font, 'Life Bonus:', new Vec2(labelX, y), rowColor(1));
-      drawSmall(font, lifeValue, new Vec2(valueX, y), rowColor(1));
+      this._drawSmall(font, 'Life Bonus:', new Vec2(labelX, y), 1.0 * scale, rowColor(1));
+      this._drawSmall(font, lifeValue, new Vec2(valueX, y), 1.0 * scale, rowColor(1));
       y += 20.0 * scale;
 
-      drawSmall(font, 'Unpicked Perk Bonus:', new Vec2(labelX, y), rowColor(2));
-      drawSmall(font, perkValue, new Vec2(valueX, y), rowColor(2));
+      this._drawSmall(font, 'Unpicked Perk Bonus:', new Vec2(labelX, y), 1.0 * scale, rowColor(2));
+      this._drawSmall(font, perkValue, new Vec2(valueX, y), 1.0 * scale, rowColor(2));
       y += 20.0 * scale;
 
       // Final time underline + row (matches the extra quad draw in native).
@@ -746,15 +736,16 @@ export class QuestResultsUi {
       );
 
       y += 8.0 * scale;
-      drawSmall(font, 'Final Time:', new Vec2(labelX, y), rowColor(3, true));
-      drawSmall(font, finalValue, new Vec2(valueX, y), rowColor(3, true));
+      this._drawSmall(font, 'Final Time:', new Vec2(labelX, y), 1.0 * scale, rowColor(3, true));
+      this._drawSmall(font, finalValue, new Vec2(valueX, y), 1.0 * scale, rowColor(3, true));
 
     } else if (this.phase === 1) {
       const textY = panelLayout.topLeft.y + 118.0 * scale;
       const namePrompt = this.preserveBugs ? 'State your name trooper!' : 'State your name, trooper!';
-      drawSmall(
+      this._drawSmall(
         font, namePrompt,
         new Vec2(contentPos.x + 42.0 * scale, textY),
+        1.0 * scale,
         COLOR_UI_ACCENT,
       );
 
@@ -794,7 +785,7 @@ export class QuestResultsUi {
         caretAlpha = 0.4;
       }
       const caretColor = wgl.makeColor(1.0, 1.0, 1.0, int(255 * caretAlpha) / 255);
-      const caretX = inputPos.x + 4.0 * scale + textWidth(font, this.inputText.slice(0, this.inputCaret));
+      const caretX = inputPos.x + 4.0 * scale + this._textWidth(font, this.inputText.slice(0, this.inputCaret), 1.0 * scale);
       wgl.drawRectangle(
         int(caretX), int(inputPos.y + 2.0 * scale),
         int(1.0 * scale), int(14.0 * scale),
@@ -820,10 +811,11 @@ export class QuestResultsUi {
       const scoreCardPos = contentPos.offset({ dx: QUEST_RESULTS_SCORE_CARD_X_FROM_CONTENT * scale });
       let varC12 = panelLayout.topLeft.y + (qualifies ? 96.0 : 108.0) * scale;
       if (!qualifies) {
-        drawSmall(
+        this._drawSmall(
           font,
           'Score too low for top100.',
           new Vec2(scoreCardPos.x + 8.0 * scale, panelLayout.topLeft.y + 102.0 * scale),
+          1.0 * scale,
           wgl.makeColor(200 / 255, 200 / 255, 200 / 255, 1.0),
         );
       }
@@ -841,31 +833,35 @@ export class QuestResultsUi {
       // Unlock lines (their presence shifts the buttons down in native).
       let varC14 = varC12 + 84.0 * scale;
       if (this.unlockWeaponName) {
-        drawSmall(
+        this._drawSmall(
           font,
           'Weapon unlocked:',
           new Vec2(scoreCardPos.x, varC14 + 1.0 * scale),
+          1.0 * scale,
           COLOR_TEXT_SUBTLE,
         );
-        drawSmall(
+        this._drawSmall(
           font,
           this.unlockWeaponName,
           new Vec2(scoreCardPos.x, varC14 + 14.0 * scale),
+          1.0 * scale,
           COLOR_TEXT,
         );
         varC14 += 30.0 * scale;
       }
       if (this.unlockPerkName) {
-        drawSmall(
+        this._drawSmall(
           font,
           'Perk unlocked:',
           new Vec2(scoreCardPos.x, varC14 + 1.0 * scale),
+          1.0 * scale,
           COLOR_TEXT_SUBTLE,
         );
-        drawSmall(
+        this._drawSmall(
           font,
           this.unlockPerkName,
           new Vec2(scoreCardPos.x, varC14 + 14.0 * scale),
+          1.0 * scale,
           COLOR_TEXT,
         );
         varC14 += 30.0 * scale;
