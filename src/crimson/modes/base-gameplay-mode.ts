@@ -73,7 +73,7 @@ interface ReplayRecorder {
   tickIndex: number;
   recordedTickCount: number;
   recordTick(inputs: readonly (readonly PlayerInput[])[], commands?: readonly GameCommand[]): number;
-  finish(): unknown;
+  finish(): object;
 }
 
 interface ReplayCheckpoint {
@@ -82,6 +82,10 @@ interface ReplayCheckpoint {
   deaths: readonly CreatureDeath[] | null;
   events: WorldEvents | null;
 }
+
+type LanRuntimeHandle = object;
+type NetReplaySnapshotState = object | null;
+type NetRuntimeSnapshotPayload = Record<string, string | number | boolean | object | null>;
 
 export type GameStatus = GameStateStatus;
 type GameStatusData = GameStateStatus;
@@ -163,7 +167,7 @@ class LanRuntimeInputProvider {
 
   submitCommand(_command: GameCommand): void {}
 
-  bindRuntime(_runtime: unknown): void {}
+  bindRuntime(_runtime: LanRuntimeHandle | null | undefined): void {}
   setRole(_role: string): void {}
   setBeforePop(_callback: (() => boolean) | null): void {}
 }
@@ -221,8 +225,8 @@ export class BaseGameplayMode {
   protected _replayCheckpoints: ReplayCheckpoint[] = [];
   protected _replayCheckpointsSampleRate = 60;
   protected _replayCheckpointsLastTick: number | null = null;
-  protected _lanRuntime: unknown = null;
-  protected _rollbackRuntime: unknown = null;
+  protected _lanRuntime: LanRuntimeHandle | null = null;
+  protected _rollbackRuntime: LanRuntimeHandle | null = null;
   protected _lanLocalSlotIndex = 0;
   protected _lanSeedOverride: number | null = null;
   protected _lanStartTick = 0;
@@ -472,11 +476,11 @@ export class BaseGameplayMode {
   }
 
 
-  bindLanRuntime(_runtime: unknown): void {
+  bindLanRuntime(_runtime: LanRuntimeHandle | null): void {
     // No LAN in WebGL port
   }
 
-  setLanMatchStart(_opts: { seed: number; startTick?: number; status?: unknown }): void {
+  setLanMatchStart(_opts: { seed: number; startTick?: number; status?: GameStatusData | null }): void {
     // No LAN in WebGL port
   }
 
@@ -898,15 +902,15 @@ export class BaseGameplayMode {
   }
 
 
-  protected _netReplaySnapshotState(): unknown {
+  protected _netReplaySnapshotState(): NetReplaySnapshotState {
     return null;
   }
 
-  protected _storeNetRuntimeSnapshot(_opts: Record<string, unknown>): void {}
+  protected _storeNetRuntimeSnapshot(_opts: NetRuntimeSnapshotPayload): void {}
 
   protected _consumeNetRuntimeRecovery(_opts: { modeName: string }): void {}
 
-  protected _applyResyncSnapshot(_snapshot: unknown): void {
+  protected _applyResyncSnapshot(_snapshot: NetRuntimeSnapshotPayload): void {
     throw new Error(`${this.constructor.name}._applyResyncSnapshot() must be implemented`);
   }
 
@@ -1255,8 +1259,8 @@ export class BaseGameplayMode {
 
 
   protected _buildLanSyncCallbacks(_opts: {
-    runtime: unknown;
-    lockstepRuntime: unknown;
+    runtime: LanRuntimeHandle | null;
+    lockstepRuntime: LanRuntimeHandle | null;
     role: string;
     provider: LanRuntimeInputProvider;
   }): LanSyncCallbacks {
@@ -1271,8 +1275,8 @@ export class BaseGameplayMode {
   protected _ensureTickRunner(opts: {
     session: DeterministicSession;
     isNetworked: boolean;
-    lanRuntime?: unknown;
-    lockstepRuntime?: unknown;
+    lanRuntime?: LanRuntimeHandle | null;
+    lockstepRuntime?: LanRuntimeHandle | null;
     role?: string;
   }): [TickRunner, LocalInputProvider | LanRuntimeInputProvider] {
     const runner = this._tickRunner;
@@ -1401,7 +1405,7 @@ export class BaseGameplayMode {
   }
 
   protected _queueLanLocalInputs(_opts: {
-    runtime: unknown;
+    runtime: LanRuntimeHandle | null;
     ticksToCapture: number;
     dt: number;
   }): void {
@@ -1409,8 +1413,8 @@ export class BaseGameplayMode {
   }
 
   protected _consumeLanTickFrames(_opts: {
-    runtime: unknown;
-    lockstepRuntime: unknown;
+    runtime: LanRuntimeHandle | null;
+    lockstepRuntime: LanRuntimeHandle | null;
     session: DeterministicSession;
     role: string;
     dtTick: number;

@@ -35,6 +35,12 @@ const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
 const UI_HINT_COLOR = wgl.makeColor(140 / 255, 140 / 255, 140 / 255, 1.0);
 const UI_ERROR_COLOR = wgl.makeColor(240 / 255, 80 / 255, 80 / 255, 1.0);
 
+type RushResyncSnapshot = {
+  elapsedMs: number;
+  spawnCooldownMs: number;
+  killCount: number;
+};
+
 export class RushMode extends BaseGameplayMode {
   private _spawnState = new RushSpawnState();
   protected _simSession: DeterministicSession | null = null;
@@ -202,12 +208,7 @@ export class RushMode extends BaseGameplayMode {
     return 'continue';
   }
 
-  protected _applyResyncSnapshot(snapshot: unknown): void {
-    const rs = snapshot as {
-      elapsedMs: number;
-      spawnCooldownMs: number;
-      killCount: number;
-    };
+  protected _applyResyncSnapshot(rs: RushResyncSnapshot): void {
     if (this._simSession !== null) {
       this._simSession.elapsedMs = rs.elapsedMs;
     }
