@@ -2,7 +2,7 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
-import { SpawnId } from '@crimson/creatures/spawn-ids.ts';
+import { SpawnId } from '@crimson/creatures/spawn.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { WeaponId } from '@crimson/weapons.ts';
@@ -86,14 +86,16 @@ registerQuest({
 });
 
 function theKillingRandomSpawner(
-  rng: CrandLike,
-  triggerMs: number,
-  yCaller: number,
-  xCaller: number,
+  opts: {
+    rng: CrandLike;
+    triggerMs: number;
+    yCaller: number;
+    xCaller: number;
+  },
 ): SpawnEntryType {
-  const y = (rng.rand({ caller: yCaller }) % 768) + 128.0;
-  const x = (rng.rand({ caller: xCaller }) % 768) + 128.0;
-  return spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs, count: 3 });
+  const y = (opts.rng.rand({ caller: opts.yCaller }) % 768) + 128.0;
+  const x = (opts.rng.rand({ caller: opts.xCaller }) % 768) + 128.0;
+  return spawn(new Vec2(x, y), { heading: 0.0, spawnId: SpawnId.ALIEN_SPAWNER_CHILD_1D_FAST_07, triggerMs: opts.triggerMs, count: 3 });
 }
 
 registerQuest({
@@ -127,9 +129,24 @@ registerQuest({
     } else if (edge === 3) {
       entries.push(spawnAt(edges.top, { heading: 0.0, spawnId: sid, triggerMs: trigger, count: 12 }));
     } else {
-      entries.push(theKillingRandomSpawner(rng, trigger, RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_1_Y, RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_1_X));
-      entries.push(theKillingRandomSpawner(rng, trigger + 1000, RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_2_Y, RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_2_X));
-      entries.push(theKillingRandomSpawner(rng, trigger + 2000, RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_3_Y, RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_3_X));
+      entries.push(theKillingRandomSpawner({
+        rng,
+        triggerMs: trigger,
+        yCaller: RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_1_Y,
+        xCaller: RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_1_X,
+      }));
+      entries.push(theKillingRandomSpawner({
+        rng,
+        triggerMs: trigger + 1000,
+        yCaller: RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_2_Y,
+        xCaller: RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_2_X,
+      }));
+      entries.push(theKillingRandomSpawner({
+        rng,
+        triggerMs: trigger + 2000,
+        yCaller: RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_3_Y,
+        xCaller: RngCallerStatic.QUEST_BUILD_THE_KILLING_SPAWNER_3_X,
+      }));
     }
 
     trigger += 6000;
