@@ -244,7 +244,7 @@ export class QuestFailedView {
     const mainMenuW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainMenuW, scale });
 
-    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
+    drawMenuCursorHelper(this.state, { resources, pulseTime: this._cursorPulseTime });
   }
 
   takeAction(): string | null {

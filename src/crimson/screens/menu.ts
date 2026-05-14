@@ -134,9 +134,9 @@ export function ensureMenuGround(
 
 export function drawMenuCursorHelper(
   state: GameState,
-  resources: RuntimeResources,
-  pulseTime: number,
+  opts: { resources: RuntimeResources; pulseTime: number },
 ): void {
+  const { resources, pulseTime } = opts;
   const particles = getTexture(resources, TextureId.PARTICLES);
   const cursorTex = getTexture(resources, TextureId.UI_CURSOR);
   const [mx, my] = InputState.mousePosition();
@@ -177,12 +177,15 @@ interface TimelineView {
 
 export function uiElementAnim(
   view: TimelineView,
-  index: number,
-  startMs: number,
-  endMs: number,
-  width: number,
-  directionFlag: number = 0,
+  opts: {
+    index: number;
+    startMs: number;
+    endMs: number;
+    width: number;
+    directionFlag?: number;
+  },
 ): [number, number] {
+  const { index, startMs, endMs, width, directionFlag = 0 } = opts;
   // Matches ui_element_update: angle lerps pi/2 -> 0 over [end_ms, start_ms].
   // direction_flag=0 slides from left  (-width -> 0)
   // direction_flag=1 slides from right (+width -> 0)
@@ -405,7 +408,7 @@ export class MenuView {
     const resources = requireRuntimeResources(this.state);
     this._drawMenuItems(resources);
     this._drawMenuSign(resources);
-    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
+    drawMenuCursorHelper(this.state, { resources, pulseTime: this._cursorPulseTime });
   }
 
   takeAction(): string | null {
@@ -527,13 +530,12 @@ export class MenuView {
       const entry = this._menuEntries[idx];
       const posX = MenuView._menuSlotPosX(entry.slot);
       const posY = entry.y;
-      const [angleRad, _slideX] = uiElementAnim(
-        this,
-        entry.slot + 2,
-        MenuView._menuSlotStartMs(entry.slot),
-        MenuView._menuSlotEndMs(entry.slot),
-        itemW,
-      );
+      const [angleRad, _slideX] = uiElementAnim(this, {
+        index: entry.slot + 2,
+        startMs: MenuView._menuSlotStartMs(entry.slot),
+        endMs: MenuView._menuSlotEndMs(entry.slot),
+        width: itemW,
+      });
       // slide is ignored for render_mode==0 (transform) elements
       const [itemScale, localYShift] = this._menuItemScale(entry.slot);
       const offsetX = MENU_ITEM_OFFSET_X * itemScale;
@@ -591,7 +593,7 @@ export class MenuView {
       if (this._menuEntryEnabled(entry)) {
         let glowAlpha = alpha;
         if (0 <= entry.readyTimerMs && entry.readyTimerMs < 0x100) {
-          glowAlpha = 0xFF - int(entry.readyTimerMs / 2);
+          glowAlpha = 0xFF - Math.floor(entry.readyTimerMs / 2);
         }
         const glowAlphaNorm = glowAlpha / 255;
         wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
@@ -769,13 +771,12 @@ export class MenuView {
     const signOffsetY = MENU_SIGN_OFFSET_Y * scale;
     let rotationDeg = 0.0;
     if (!this.state.menuSignLocked) {
-      const [angleRad, _slideX] = uiElementAnim(
-        this,
-        0,
-        300,
-        0,
-        signW,
-      );
+      const [angleRad, _slideX] = uiElementAnim(this, {
+        index: 0,
+        startMs: 300,
+        endMs: 0,
+        width: signW,
+      });
       // slide is ignored for render_mode==0 (transform) elements
       rotationDeg = angleRad * (180.0 / Math.PI);
     }

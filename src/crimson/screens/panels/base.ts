@@ -217,11 +217,10 @@ export class PanelMenuView {
     this._drawEntry(entry);
     this._drawSign();
     this._drawContents();
-    drawMenuCursorHelper(
-      this.state,
-      requireRuntimeResources(this.state),
-      this._cursorPulseTime,
-    );
+    drawMenuCursorHelper(this.state, {
+      resources: requireRuntimeResources(this.state),
+      pulseTime: this._cursorPulseTime,
+    });
   }
 
   takeAction(): string | null {
@@ -290,13 +289,12 @@ export class PanelMenuView {
   protected _drawPanel(): void {
     const resources = requireRuntimeResources(this.state);
     const panel = getTexture(resources, TextureId.UI_MENU_PANEL);
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      MENU_PANEL_WIDTH * this._menuItemScale(0)[0],
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: MENU_PANEL_WIDTH * this._menuItemScale(0)[0],
+    });
     const [itemScale, _localYShift] = this._menuItemScale(0);
     const panelW = MENU_PANEL_WIDTH * itemScale;
     const panelH = this._panelHeight * itemScale;
@@ -315,13 +313,12 @@ export class PanelMenuView {
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const itemW = item.width;
     const itemH = item.height;
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      2,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      itemW * this._menuItemScale(entry.slot)[0],
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 2,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: itemW * this._menuItemScale(entry.slot)[0],
+    });
     const pos = new Vec2(this._backPos.x + slideX, entry.y + this._widescreenYShift);
     const [itemScale, localYShift] = this._menuItemScale(entry.slot);
     const offsetX = MENU_ITEM_OFFSET_X * itemScale;
@@ -443,13 +440,12 @@ export class PanelMenuView {
       (MENU_ITEM_OFFSET_Y + itemH) * itemScale - localYShift,
     );
     const size = offsetMax.sub(offsetMin);
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      2,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      itemW * itemScale,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 2,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: itemW * itemScale,
+    });
     const pos = new Vec2(this._backPos.x + slideX, entry.y + this._widescreenYShift);
     const topLeft = pos.add(new Vec2(
       offsetMin.x + size.x * 0.54,

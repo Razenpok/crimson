@@ -312,11 +312,10 @@ export class QuestsMenuView {
     this._drawSign();
     this._drawContents();
 
-    drawMenuCursorHelper(
-      this.state,
-      requireRuntimeResources(this.state),
-      this._cursorPulseTime,
-    );
+    drawMenuCursorHelper(this.state, {
+      resources: requireRuntimeResources(this.state),
+      pulseTime: this._cursorPulseTime,
+    });
   }
 
   takeAction(): string | null {
@@ -333,13 +332,12 @@ export class QuestsMenuView {
   }
 
   private _layout(): QuestMenuLayout {
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      MENU_PANEL_WIDTH,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: MENU_PANEL_WIDTH,
+    });
     // `sub_447d40` base sums:
     //   x_sum = <ui_element_x> + <ui_element_offset_x>  (x=-5)
     //   y_sum = <ui_element_y> + <ui_element_offset_y>  (y=185 + widescreen shift via ui_menu_layout_init)
@@ -681,13 +679,12 @@ export class QuestsMenuView {
     let rotationDeg = 0.0;
 
     if (!this.state.menuSignLocked) {
-      const [angleRad, _slideX] = uiElementAnim(
-        this,
-        0,
-        300,
-        0,
-        signW,
-      );
+      const [angleRad, _slideX] = uiElementAnim(this, {
+        index: 0,
+        startMs: 300,
+        endMs: 0,
+        width: signW,
+      });
       rotationDeg = angleRad * (180.0 / Math.PI);
     }
 
@@ -714,13 +711,12 @@ export class QuestsMenuView {
 
   private _drawPanel(): void {
     const resources = requireRuntimeResources(this.state);
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      MENU_PANEL_WIDTH,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: MENU_PANEL_WIDTH,
+    });
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panelTex = getTexture(resources, TextureId.UI_MENU_PANEL);
     drawClassicMenuPanel(

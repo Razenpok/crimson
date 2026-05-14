@@ -177,11 +177,10 @@ export class OptionsMenuView extends PanelMenuView {
     this._drawEntry(entry);
     this._drawSign();
     this._drawOptionsContents();
-    drawMenuCursorHelper(
-      this.state,
-      requireRuntimeResources(this.state),
-      this._cursorPulseTime,
-    );
+    drawMenuCursorHelper(this.state, {
+      resources: requireRuntimeResources(this.state),
+      pulseTime: this._cursorPulseTime,
+    });
   }
 
   protected override _beginCloseTransition(action: string): void {
@@ -229,13 +228,12 @@ export class OptionsMenuView extends PanelMenuView {
   private _contentLayout(): OptionsContentLayout {
     const [panelScale, _localShift] = this._menuItemScale(0);
     const panelW = MENU_PANEL_WIDTH * panelScale;
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      panelW,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+    });
     const panelTopLeft = new Vec2(
       this._panelPos.x + slideX,
       this._panelPos.y + this._widescreenYShift,

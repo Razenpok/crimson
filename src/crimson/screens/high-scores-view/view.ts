@@ -244,12 +244,20 @@ export class HighScoresView {
 
     // Compute animated panel positions so hit-tests match the draw path even while sliding.
     const panelW = MENU_PANEL_WIDTH * scale;
-    const [, leftSlideX] = uiElementAnim(
-      this, 1, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 0,
-    );
-    const [, rightSlideX] = uiElementAnim(
-      this, 2, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 1,
-    );
+    const [, leftSlideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 0,
+    });
+    const [, rightSlideX] = uiElementAnim(this, {
+      index: 2,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 1,
+    });
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
     const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, HS_LEFT_PANEL_POS_Y), scale });
     const rightPanelPosX = hsRightPanelPosX(screenWidth);
@@ -684,8 +692,20 @@ export class HighScoresView {
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const panelW = MENU_PANEL_WIDTH * scale;
 
-    const [, leftSlideX] = uiElementAnim(this, 1, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 0);
-    const [, rightSlideX] = uiElementAnim(this, 2, PANEL_TIMELINE_START_MS, PANEL_TIMELINE_END_MS, panelW, 1);
+    const [, leftSlideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 0,
+    });
+    const [, rightSlideX] = uiElementAnim(this, {
+      index: 2,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 1,
+    });
 
     const leftPanelPosX = hsLeftPanelPosX(screenWidth);
     const leftTopLeft = this._panelTopLeft({ pos: new Vec2(leftPanelPosX, HS_LEFT_PANEL_POS_Y), scale });

@@ -377,14 +377,13 @@ export class CreditsView {
   private _panelSlideX(opts: { scale: number }): number {
     const scale = opts.scale;
     const panelW = MENU_PANEL_WIDTH * scale;
-    const [_angleRad, slideX] = uiElementAnim(
-      this,
-      1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      panelW,
-      0,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 0,
+    });
     return slideX;
   }
 
@@ -641,7 +640,7 @@ export class CreditsView {
     }
 
     this._drawSign();
-    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
+    drawMenuCursorHelper(this.state, { resources, pulseTime: this._cursorPulseTime });
   }
 
   private _drawSign(): void {

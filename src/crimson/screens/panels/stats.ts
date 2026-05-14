@@ -265,12 +265,13 @@ export class StatisticsMenuView {
 
     const scale = this.state.config.display.width < 641 ? 0.9 : 1.0;
     const panelW = MENU_PANEL_WIDTH * scale;
-    const [_angleRad, slideX] = uiElementAnim(
-      this, 1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      panelW, 0,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 0,
+    });
     const panelTopLeft = this._panelTopLeft({ scale }).offset({ dx: slideX, dy: 0 });
     const resources = requireRuntimeResources(this.state);
 
@@ -331,12 +332,13 @@ export class StatisticsMenuView {
 
     const scale = this.state.config.display.width < 641 ? 0.9 : 1.0;
     const panelW = MENU_PANEL_WIDTH * scale;
-    const [_angleRad, slideX] = uiElementAnim(
-      this, 1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      panelW, 0,
-    );
+    const [_angleRad, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 0,
+    });
     const panelTopLeft = this._panelTopLeft({ scale }).offset({ dx: slideX, dy: 0 });
     const dst = wgl.makeRectangle(panelTopLeft.x, panelTopLeft.y, panelW, STATISTICS_PANEL_HEIGHT * scale);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
@@ -387,7 +389,7 @@ export class StatisticsMenuView {
     buttonDraw(resources, this._btnBack, { pos: backPos, width: backW, scale });
 
     this._drawSign({ scale });
-    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
+    drawMenuCursorHelper(this.state, { resources, pulseTime: this._cursorPulseTime });
   }
 
   private _drawSign(_opts: { scale: number }): void {

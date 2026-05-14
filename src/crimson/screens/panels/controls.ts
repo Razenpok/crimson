@@ -366,12 +366,12 @@ export class ControlsMenuView extends PanelMenuView {
 
   private _leftPanelTopLeft(panelScale: number): Vec2 {
     const panelW = MENU_PANEL_WIDTH * panelScale;
-    const [, slideX] = uiElementAnim(
-      this, 1,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      panelW,
-    );
+    const [, slideX] = uiElementAnim(this, {
+      index: 1,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+    });
     return new Vec2(
       controlsLeftPanelPosX(this.state.config.display.width) + slideX,
       this._panelPos.y + this._widescreenYShift,
@@ -380,13 +380,13 @@ export class ControlsMenuView extends PanelMenuView {
 
   private _rightPanelTopLeft(panelScale: number): Vec2 {
     const panelW = MENU_PANEL_WIDTH * panelScale;
-    const [, slideX] = uiElementAnim(
-      this, 3,
-      PANEL_TIMELINE_START_MS,
-      PANEL_TIMELINE_END_MS,
-      panelW,
-      1,
-    );
+    const [, slideX] = uiElementAnim(this, {
+      index: 3,
+      startMs: PANEL_TIMELINE_START_MS,
+      endMs: PANEL_TIMELINE_END_MS,
+      width: panelW,
+      directionFlag: 1,
+    });
     const sw = this.state.config.display.width;
     return new Vec2(
       controlsRightPanelPosX(sw) + slideX,

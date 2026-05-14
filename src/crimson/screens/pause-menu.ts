@@ -284,7 +284,7 @@ export class PauseMenuView {
     endMs: number,
     width: number,
   ): [number, number] {
-    return uiElementAnim(this, index, startMs, endMs, width, 0);
+    return uiElementAnim(this, { index, startMs, endMs, width, directionFlag: 0 });
   }
 
   private _menuItemBounds(entry: MenuEntry): Rect {

@@ -270,7 +270,7 @@ export class EndNoteView {
     const mainW = buttonWidth(resources, this._mainMenuButton.label, { scale, forceWide: this._mainMenuButton.forceWide });
     buttonDraw(resources, this._mainMenuButton, { pos: buttonPos, width: mainW, scale });
 
-    drawMenuCursorHelper(this.state, resources, this._cursorPulseTime);
+    drawMenuCursorHelper(this.state, { resources, pulseTime: this._cursorPulseTime });
   }
 
   takeAction(): string | null {
