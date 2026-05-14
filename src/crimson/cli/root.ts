@@ -240,7 +240,25 @@ export function parseIntAuto(text: string): number {
     radix = 8;
     digits = unsigned.slice(2);
   }
-  const value = Number.parseInt(sign + digits, radix);
+  const normalizedDigits = digits.replaceAll('_', '');
+  const digitPattern = radix === 16
+    ? /^[0-9a-fA-F]+$/
+    : radix === 10
+      ? /^[0-9]+$/
+      : radix === 8
+        ? /^[0-7]+$/
+        : /^[01]+$/;
+  const validUnderscores = /^[0-9a-fA-F]+(?:_[0-9a-fA-F]+)*$/.test(digits);
+  const decimalWithInvalidLeadingZero = radix === 10 && normalizedDigits.length > 1 && normalizedDigits.startsWith('0');
+  if (
+    normalizedDigits.length === 0 ||
+    !digitPattern.test(normalizedDigits) ||
+    !validUnderscores ||
+    decimalWithInvalidLeadingZero
+  ) {
+    throw new Error(`invalid integer: ${JSON.stringify(text)}`);
+  }
+  const value = Number.parseInt(sign + normalizedDigits, radix);
   if (Number.isNaN(value)) {
     throw new Error(`invalid integer: ${JSON.stringify(text)}`);
   }
