@@ -10,11 +10,11 @@ export const GRIM_MONO_LINE_HEIGHT = 28.0;
 export const GRIM_MONO_TEXTURE_FILTER = wgl.TextureFilter.BILINEAR;
 
 export class GrimMonoFont {
-  texture: wgl.Texture;
-  grid: number;
-  cellWidth: number;
-  cellHeight: number;
-  advance: number;
+  readonly texture: wgl.Texture;
+  readonly grid: number;
+  readonly cellWidth: number;
+  readonly cellHeight: number;
+  readonly advance: number;
 
   constructor(opts: {
     texture: wgl.Texture;
@@ -63,8 +63,9 @@ export function drawGrimMonoText(
   const origin = wgl.makeVector2(0, 0);
   let skipAdvance = false;
 
-  for (let i = 0; i < text.length; i++) {
-    const value = text.charCodeAt(i);
+  for (const ch of text) {
+    const rawValue = ch.codePointAt(0) ?? 0;
+    const value = rawValue > 255 ? 63 : rawValue;
     if (value === 0x0A) {
       xPos = pos.x;
       yPos += lineHeight;
