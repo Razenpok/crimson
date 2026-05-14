@@ -336,7 +336,7 @@ export function drawTargetHealthBar(
 }
 
 function _weaponIconIndex(weaponId: number): number | null {
-  const entry = WEAPON_BY_ID.get(weaponId as WeaponId);
+  const entry = WEAPON_BY_ID.get(weaponId);
   if (entry === undefined) throw new Error();
   const iconIndex = int(entry.iconIndex);
   if (iconIndex < 0 || iconIndex > 31) return null;
@@ -344,7 +344,7 @@ function _weaponIconIndex(weaponId: number): number | null {
 }
 
 function _weaponAmmoClass(weaponId: number): number {
-  const entry = WEAPON_BY_ID.get(weaponId as WeaponId);
+  const entry = WEAPON_BY_ID.get(weaponId);
   if (entry === undefined) throw new Error();
   const value = entry.ammoClass;
   return value !== null ? int(value) : 0;
