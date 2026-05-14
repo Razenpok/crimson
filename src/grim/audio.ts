@@ -23,7 +23,6 @@ export class AudioState {
 }
 
 export async function initAudioState(config: CrimsonConfig, assetsUrl: string, console: ConsoleState): Promise<AudioState> {
-  // Resolve to local or CDN fallback (cached after first call)
   assetsUrl = await resolveAssetsUrl(assetsUrl);
 
   const musicDisabled = config.audio.musicDisabled;
