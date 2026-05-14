@@ -42,7 +42,7 @@ import {
 import {
   BaseGameplayMode,
 } from './base-gameplay-mode.ts';
-import { PerkMenuController, PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
+import { PerkMenuController } from './components/perk-menu-controller.ts';
 
 const WORLD_SIZE = 1024.0;
 
@@ -277,16 +277,6 @@ export class TutorialMode extends BaseGameplayMode {
     }
   }
 
-  private _fullPerkMenuUiContext(): FullPerkMenuUiContext {
-    return new FullPerkMenuUiContext({
-      player: this.player,
-      violenceDisabled: this._deterministicViolenceDisabled(),
-      preserveBugs: this.preserveBugs,
-      resources: this.renderResources.resources,
-      mouse: this._uiMousePos(),
-    });
-  }
-
   update(dt: number): void {
     this._updateAudio(dt);
     const [frameDt, dtUiMs] = this._tickFrame(dt, { clampCursorPulse: true });
@@ -307,7 +297,7 @@ export class TutorialMode extends BaseGameplayMode {
     }
     if (this._perkMenu.open) {
       const choiceIndex = this._perkMenu.handleInput(
-        this._fullPerkMenuUiContext(),
+        this._perkMenuUiContext(),
         choices,
         { dtUiMs },
       );
@@ -392,7 +382,7 @@ export class TutorialMode extends BaseGameplayMode {
 
     if (perkMenuActive) {
       this._perkMenu.draw(
-        this._fullPerkMenuUiContext(),
+        this._perkMenuUiContext(),
         perkSelectionPreparedChoices(this.simWorld.players, this.state.perkSelection),
       );
       this._drawMenuCursor();
