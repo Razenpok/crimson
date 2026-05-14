@@ -6,7 +6,7 @@ import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
 import { type AudioState, audioUpdate, audioStopMusic } from '@grim/audio.ts';
 import { type ConsoleState } from '@grim/console.ts';
 import { type CrandLike } from '@grim/rand.ts';
-import { type SmallFontData, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { type SmallFontData, loadSmallFont, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { InputState } from '@grim/input.ts';
@@ -1008,8 +1008,7 @@ export class BaseGameplayMode {
     this.closeRequested = false;
     this._action = null;
     this._paused = false;
-    // Font is loaded as part of RuntimeResources; bind it if available.
-    this._small = this.renderResources.resources?.smallFont ?? null;
+    this._small = loadSmallFont(this._assetsRoot);
     this._hudState = new HudState();
 
     this._gameOverActive = false;
