@@ -22,7 +22,7 @@ export class AudioState {
   }
 }
 
-export async function initAudioState(config: CrimsonConfig, assetsUrl: string, console?: ConsoleState | null): Promise<AudioState> {
+export async function initAudioState(config: CrimsonConfig, assetsUrl: string, console: ConsoleState): Promise<AudioState> {
   // Resolve to local or CDN fallback (cached after first call)
   assetsUrl = await resolveAssetsUrl(assetsUrl);
 
@@ -35,8 +35,8 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string, c
   const sfxEnabled = !soundDisabled;
 
   if (!musicEnabled && !sfxEnabled) {
-    console?.log.log('audio: disabled (music + sfx)');
-    console?.log.flush();
+    console.log.log('audio: disabled (music + sfx)');
+    console.log.flush();
     return new AudioState({
       ready: false,
       audioContext: null,
@@ -49,8 +49,8 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string, c
   try {
     audioContext = new AudioContext();
   } catch {
-    console?.log.log('audio: device init failed');
-    console?.log.flush();
+    console.log.log('audio: device init failed');
+    console.log.flush();
     return new AudioState({
       ready: false,
       audioContext: null,
@@ -66,7 +66,7 @@ export async function initAudioState(config: CrimsonConfig, assetsUrl: string, c
     sfx: initSfxState({ ready: true, enabled: sfxEnabled, volume: sfxVolume }),
   });
 
-  await loadSfxIndex(state.sfx, audioContext, assetsUrl, console ?? null);
+  await loadSfxIndex(state.sfx, audioContext, assetsUrl, console);
   await loadMusicTracks(state.music, audioContext, assetsUrl);
 
   return state;
@@ -105,7 +105,6 @@ export function updateAudio(state: AudioState, dt: number): void {
   updateMusic(state.music, state.audioContext, dt);
 }
 
-// Unused in WebGL port: browser handles AudioContext cleanup on page unload
 export function shutdownAudio(state: AudioState): void {
   if (!state.ready) return;
   shutdownSfx(state.sfx);
