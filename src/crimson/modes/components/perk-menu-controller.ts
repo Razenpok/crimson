@@ -133,7 +133,7 @@ export class PerkMenuController {
       font,
       desc,
       PerkMenuController._DESC_WRAP_WIDTH_PX,
-      1.0,
+      { scale: 1.0 },
     );
     this._wrappedDescCache.set(key, wrapped);
     return wrapped;
@@ -143,7 +143,7 @@ export class PerkMenuController {
     font: SmallFontData,
     text: string,
     maxWidthPx: number,
-    _scale: number,
+    _opts: { scale: number },
   ): string {
     const wrapped = Array.from(text);
     if (wrapped.length === 0) {
