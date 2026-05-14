@@ -49,7 +49,7 @@ export function resetWorldPlayers(
 
   for (let idx = 0; idx < count; idx++) {
     const pos = base.add(offsets[idx]).clampRect(0.0, 0.0, worldSize, worldSize);
-    const player = new PlayerState(idx, pos);
+    const player = new PlayerState({ index: idx, pos });
     weaponAssignPlayer(player, WeaponId.PISTOL, { state });
     initDefaultAltWeapon(player);
     players.push(player);
