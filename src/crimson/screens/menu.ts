@@ -678,7 +678,7 @@ export class MenuView {
     return this._timelineMs >= MenuView._menuSlotStartMs(entry.slot);
   }
 
-  private static _menuWidescreenYShift(screenW: number): number {
+  static _menuWidescreenYShift(screenW: number): number {
     // ((screen_width / 640.0) * 150.0) - 150.0
     return (screenW * 0.0015625 * 150.0) - 150.0;
   }

@@ -15,10 +15,9 @@ import { type GameState } from '@crimson/game/types.ts';
 import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
-import { drawMenuCursorHelper, ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
+import { drawMenuCursorHelper, ensureMenuGround, MenuView, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
   UiButtonState,
   buttonDraw,
@@ -58,7 +57,6 @@ const MOUSE_BUTTON_LEFT = 0;
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);
 
-// WebGL replacement for raylib's draw_line.
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
   if (x1 === x2) {
     const y = Math.min(y1, y2);
@@ -257,7 +255,7 @@ export class QuestFailedView {
 
   private _panelOrigin(): Vec2 {
     const screenW = wgl.getScreenWidth();
-    const widescreenShiftY = menuWidescreenYShift(screenW);
+    const widescreenShiftY = MenuView._menuWidescreenYShift(screenW);
     return new Vec2(
       QUEST_FAILED_PANEL_GEOM_X0 + QUEST_FAILED_PANEL_POS_X,
       QUEST_FAILED_PANEL_GEOM_Y0 + QUEST_FAILED_PANEL_POS_Y + widescreenShiftY,
