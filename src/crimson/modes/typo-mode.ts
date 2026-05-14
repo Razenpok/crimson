@@ -97,7 +97,7 @@ export class TypoShooterMode extends BaseGameplayMode {
     return typoShotCounts(this.state.typo);
   }
 
-  protected _replayOutputBasename(opts: { stamp: string; replay: unknown }): string {
+  protected _replayOutputBasename(opts: { stamp: string; replay: object }): string {
     const stamp = opts.stamp;
     const score = int(this.player.experience);
     return `typo_${stamp}_score${score}`;
