@@ -78,7 +78,7 @@ export class ModsMenuView extends PanelMenuView {
 
     const font = resources.smallFont;
     const titleColor = wgl.makeColor(1, 1, 1, 1);
-    const textColor = wgl.makeColor(1, 1, 1, 0.8);
+    const textColor = wgl.makeColor(1, 1, 1, int(255 * 0.8) / 255);
 
     drawSmallText(font, 'MODS', basePos, titleColor);
     let linePos = labelPos.offset({ dy: 44.0 * scale });
