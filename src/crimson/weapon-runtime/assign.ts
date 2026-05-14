@@ -109,7 +109,7 @@ export function mostUsedWeaponIdForPlayer(
         }
       }
       if (int(counts[best]) > 0) {
-        return best as WeaponId;
+        return best;
       }
     }
   }

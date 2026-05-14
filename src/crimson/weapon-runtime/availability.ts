@@ -78,7 +78,7 @@ export function weaponPickRandomAvailable(
 
   for (let attempt = 0; attempt < 1000; attempt++) {
     const baseRand = state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_PICK });
-    let weaponId: WeaponId = (baseRand % WEAPON_DROP_ID_COUNT + 1) as WeaponId;
+    let weaponId: WeaponId = baseRand % WEAPON_DROP_ID_COUNT + 1;
 
     // Bias: used weapons have a 50% chance to reroll once.
     if (status !== null) {
@@ -88,7 +88,7 @@ export function weaponPickRandomAvailable(
           (state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_GATE }) & 1) === 0
         ) {
           const rerollRand = state.rng.rand({ caller: RngCallerStatic.WEAPON_PICK_RANDOM_AVAILABLE_REROLL_PICK });
-          weaponId = (rerollRand % WEAPON_DROP_ID_COUNT + 1) as WeaponId;
+          weaponId = rerollRand % WEAPON_DROP_ID_COUNT + 1;
         }
       }
     }
