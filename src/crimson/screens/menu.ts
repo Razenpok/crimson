@@ -623,14 +623,13 @@ export class MenuView {
   }
 
   private _modsAvailable(): boolean {
-    // WebGL has no filesystem access for state.base_dir / "mods".
     return false;
   }
 
   private _otherGamesEnabled(): boolean {
     // Original game checks a config string via grim_get_config_var(100).
-    // Browser builds do not expose os.getenv("CRIMSON_GRIM_CONFIG_VAR_100").
-    return false;
+    // Our config-var system is not implemented yet; allow a simple env opt-in.
+    return typeof process !== 'undefined' && String(process.env?.CRIMSON_GRIM_CONFIG_VAR_100 ?? '').trim() !== '';
   }
 
   private _hoveredEntryIndex(resources: RuntimeResources): number | null {
