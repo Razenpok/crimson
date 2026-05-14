@@ -1260,7 +1260,6 @@ export class CreaturePool {
                 players,
                 rng,
                 dt,
-                detailPreset,
                 worldWidth,
                 worldHeight,
                 fxQueue,
