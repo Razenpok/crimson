@@ -143,11 +143,8 @@ export async function loadMusicTracks(state: MusicState, audioCtx: AudioContext,
   console.log.flush();
 }
 
-export function playMusic(state: MusicState, audioCtx: AudioContext | null, trackName?: string): void {
+export function playMusic(state: MusicState, audioCtx: AudioContext | null, trackName: string): void {
   if (!state.ready || !state.enabled || !audioCtx) return;
-  if (trackName === undefined) {
-    trackName = state.activeTrack ?? undefined;
-  }
   if (!trackName) return;
 
   const buffer = state.tracks.get(trackName);
