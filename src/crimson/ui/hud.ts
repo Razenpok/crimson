@@ -420,7 +420,7 @@ export function drawHudOverlay(
   const bonusesTexture = getTexture(resources, TextureId.BONUSES);
 
   if (frameDtMs === null) {
-    frameDtMs = 16.0; // ~60fps fallback
+    frameDtMs = Math.max(0.0, wgl.getFrameTime() * 1000.0);
   }
   const hudPlayers: PlayerState[] =
     players !== null && players.length > 0 ? [...players] : [player];

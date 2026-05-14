@@ -116,6 +116,7 @@ export function getCanvas(): HTMLCanvasElement { return ctx.canvas; }
 export function destroy(): void { ctx.destroy(); }
 
 let _lastFrameTime = 0;
+let _currentFrameTime = 0;
 let _currentFps = 0;
 let _textCanvas: HTMLCanvasElement | null = null;
 let _textCtx: CanvasRenderingContext2D | null = null;
@@ -131,10 +132,12 @@ function textContext(): CanvasRenderingContext2D | null {
 export function updateFps(now: number): void {
   if (_lastFrameTime > 0) {
     const dt = (now - _lastFrameTime) * 0.001;
+    _currentFrameTime = Math.max(0, dt);
     _currentFps = dt > 0 ? 1.0 / dt : 0;
   }
   _lastFrameTime = now;
 }
+export function getFrameTime(): number { return _currentFrameTime; }
 export function getFps(): number { return _currentFps; }
 
 export const enum TextureFilter {
