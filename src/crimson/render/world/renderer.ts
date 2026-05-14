@@ -37,9 +37,9 @@ export class WorldRenderer {
     drawWorld(renderCtx, { drawAimIndicators, entityAlpha });
   }
 
-  private cameraScreenSize(runtimeW?: number, runtimeH?: number): Vec2 {
-    const outW = runtimeW ?? wgl.getScreenWidth();
-    const outH = runtimeH ?? wgl.getScreenHeight();
+  private cameraScreenSize(opts: { runtimeW?: number | null; runtimeH?: number | null } = {}): Vec2 {
+    const outW = opts.runtimeW ?? wgl.getScreenWidth();
+    const outH = opts.runtimeH ?? wgl.getScreenHeight();
     return viewport.cameraScreenSize({ worldSize: this.worldSize, config: this.config, runtimeW: outW, runtimeH: outH });
   }
 
