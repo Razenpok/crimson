@@ -398,7 +398,7 @@ export class GameLoopView implements View {
             this.state.pauseBackground = null;
           } else {
             if (this._frontActive instanceof StatisticsMenuView) {
-              (this._frontActive as StatisticsMenuView).reopenFromChild();
+              this._frontActive.reopenFromChild();
             }
           }
           this._active = this._frontActive;
@@ -980,8 +980,6 @@ export class GameLoopView implements View {
       wgl.unloadRenderTexture(this.state.menuGround.renderTarget);
       this.state.menuGround.renderTarget = null;
     }
-    this.state.menuGround = null;
-    this.state.menuGroundCamera = null;
     this._boot.close();
     this.state.console.close();
   }
