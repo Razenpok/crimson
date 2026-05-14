@@ -440,7 +440,7 @@ function _creatureInteractionPlaguebearerSpread(ctx: _CreatureInteractionCtx): v
   if (
     ctx.players.length > 0 &&
     perkActive(ctx.players[0], PerkId.PLAGUEBEARER) &&
-    ctx.state.plaguebearerInfectionCount < 0x3C
+    int(ctx.state.plaguebearerInfectionCount) < 0x3C
   ) {
     ctx.pool._plaguebearerSpreadInfection(ctx.creatureIndex);
   }
@@ -619,7 +619,7 @@ function _creatureInteractionPlaguebearerContactFlag(ctx: _CreatureInteractionCt
   if (
     ctx.player.plaguebearerActive &&
     creature.hp < 150.0 &&
-    ctx.state.plaguebearerInfectionCount < 0x32
+    int(ctx.state.plaguebearerInfectionCount) < 0x32
   ) {
     if (ctx.contactDistSq < 30.0 * 30.0) {
       creature.plagueInfected = true;
@@ -1034,7 +1034,7 @@ export class CreaturePool {
         // `evil_eyes_target_creature` slot (player-0 storage), even in
         // multiplayer runs.
         if (perkActive(players[0], PerkId.EVIL_EYES)) {
-          const evilTarget = players[0].evilEyesTargetCreature;
+          const evilTarget = int(players[0].evilEyesTargetCreature);
           if (evilTarget >= 0) evilTargets.add(int(evilTarget));
         }
       } else {
@@ -1042,7 +1042,7 @@ export class CreaturePool {
         for (const player of players) {
           if (player.health <= 0.0) continue;
           if (!perkActive(player, PerkId.EVIL_EYES)) continue;
-          const evilTarget = player.evilEyesTargetCreature;
+          const evilTarget = int(player.evilEyesTargetCreature);
           if (evilTarget >= 0) evilTargets.add(int(evilTarget));
         }
       }
@@ -1068,13 +1068,13 @@ export class CreaturePool {
       const onLethal = (deathSfx: SfxId[]): void => {
         deaths.push(
           this.handleDeath(
-            creatureIndex,
+            int(creatureIndex),
             {
               state,
               players,
               rng,
               dt,
-              detailPreset,
+              detailPreset: int(detailPreset),
               worldWidth,
               worldHeight,
               fxQueue,
@@ -1197,7 +1197,7 @@ export class CreaturePool {
             const contactSfxOptions = _CREATURE_CONTACT_SFX.get(creature.typeId);
             if (contactSfxOptions !== undefined) {
               const sfxIndex =
-                rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_PLAGUE_KILL_SFX }) & 1;
+                int(rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_PLAGUE_KILL_SFX })) & 1;
               sfx.push(contactSfxOptions[sfxIndex]);
             }
             plagueKilled = true;
@@ -1345,9 +1345,9 @@ export class CreaturePool {
       if (
         players.length > 0 &&
         perkActive(players[0], PerkId.PLAGUEBEARER) &&
-        state.plaguebearerInfectionCount < 0x3C
+        int(state.plaguebearerInfectionCount) < 0x3C
       ) {
-        this._plaguebearerSpreadInfection(idx);
+        this._plaguebearerSpreadInfection(int(idx));
       }
 
       // Native decrements contact/ranged cooldown before interaction checks,
@@ -1406,7 +1406,7 @@ export class CreaturePool {
               pos: creature.pos,
               angle: creature.heading,
               typeId,
-              owner: OwnerRef.fromCreature(idx),
+              owner: OwnerRef.fromCreature(int(idx)),
               travelBudget: _travelBudgetForTypeId(typeId),
               hitsPlayers: true,
             });
@@ -1423,13 +1423,13 @@ export class CreaturePool {
               pos: creature.pos,
               angle: creature.heading,
               typeId: projectileType,
-              owner: OwnerRef.fromCreature(idx),
+              owner: OwnerRef.fromCreature(int(idx)),
               travelBudget: _travelBudgetForTypeId(projectileType),
               hitsPlayers: true,
             });
             sfx.push(SfxId.PLASMAMINIGUN_FIRE);
             creature.attackCooldown =
-              (rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_PLASMAMINIGUN_COOLDOWN }) & 3) *
+              (int(rng.rand({ caller: RngCallerStatic.CREATURE_UPDATE_ALL_PLASMAMINIGUN_COOLDOWN })) & 3) *
                 0.1 +
               creature.orbitAngle +
               creature.attackCooldown;
@@ -1439,7 +1439,7 @@ export class CreaturePool {
 
       const interactionCtx = new _CreatureInteractionCtx({
         pool: this,
-        creatureIndex: idx,
+        creatureIndex: int(idx),
         creature,
         state,
         players,
@@ -1472,9 +1472,9 @@ export class CreaturePool {
         ((int(creature.flags)) & int(HAS_SPAWN_SLOT_FLAG)) !== 0
       ) {
         const slotIndex = creature.spawnSlotIndex;
-        if (slotIndex !== null && slotIndex >= 0 && slotIndex < this.spawnSlots.length) {
-          const slot = this.spawnSlots[slotIndex];
-          if (slot.ownerCreature === idx) {
+        if (slotIndex !== null && int(slotIndex) >= 0 && int(slotIndex) < this.spawnSlots.length) {
+          const slot = this.spawnSlots[int(slotIndex)];
+          if (int(slot.ownerCreature) === int(idx)) {
             const childTemplateId = tickSpawnSlot(slot, dt);
             if (childTemplateId !== null) {
               const plan = buildSpawnPlan(
@@ -1526,7 +1526,7 @@ export class CreaturePool {
       state.bonusPool.spawnAt(
         creature.pos,
         creature.bonusId,
-        creature.bonusDurationOverride !== null ? creature.bonusDurationOverride : -1,
+        creature.bonusDurationOverride !== null ? int(creature.bonusDurationOverride) : -1,
         { state, worldWidth, worldHeight },
       );
       if (!state.preserveBugs) {
@@ -1636,7 +1636,7 @@ export class CreaturePool {
 
     entry.bonusId = init.bonusId;
     entry.bonusDurationOverride =
-      init.bonusDurationOverride !== null ? init.bonusDurationOverride : null;
+      init.bonusDurationOverride !== null ? int(init.bonusDurationOverride) : null;
 
     const resolved = resolveTint(init.tint);
     entry.tint = new RGBA(resolved[0], resolved[1], resolved[2], resolved[3]);
@@ -1650,8 +1650,8 @@ export class CreaturePool {
   }
 
   private _disableSpawnSlot(slotIndex: number): void {
-    if (!(slotIndex >= 0 && slotIndex < this.spawnSlots.length)) return;
-    const slot = this.spawnSlots[slotIndex];
+    if (!(int(slotIndex) >= 0 && int(slotIndex) < this.spawnSlots.length)) return;
+    const slot = this.spawnSlots[int(slotIndex)];
     slot.ownerCreature = -1;
     slot.limit = 0;
   }
@@ -1721,7 +1721,7 @@ export class CreaturePool {
     }
 
     // lifecycle_stage just crossed <= 0: bake a persistent corpse decal into the ground.
-    if (violenceDisabled === 0 && fxQueueRotated !== null) {
+    if (int(violenceDisabled) === 0 && fxQueueRotated !== null) {
       const corpseSize = Math.max(1.0, creature.size);
       // Native uses a special fallback corpse id for ping-pong strip creatures.
       const corpseTypeId = longStrip ? int(creature.typeId) : 7;
@@ -1743,7 +1743,7 @@ export class CreaturePool {
     // Native `creature_update_all` emits a 19-splatter blood burst when a
     // ping-pong corpse first reaches this staged kill point.
     if (
-      violenceDisabled === 0 &&
+      int(violenceDisabled) === 0 &&
       ((int(creature.flags)) & CreatureFlags.ANIM_PING_PONG) !== 0 &&
       rng !== null &&
       this.effects !== null
@@ -1783,7 +1783,7 @@ export class CreaturePool {
         continue;
       }
       if (creature.spawnSlotIndex !== null) {
-        this._disableSpawnSlot(creature.spawnSlotIndex);
+        this._disableSpawnSlot(int(creature.spawnSlotIndex));
       }
       creature.active = false;
     }
@@ -1869,7 +1869,7 @@ export class CreaturePool {
       pos: creature.pos,
       typeId: creature.typeId,
       rewardValue: creature.rewardValue,
-      xpAwarded,
+      xpAwarded: int(xpAwarded),
       owner: creature.lastHitOwner,
     });
   }
