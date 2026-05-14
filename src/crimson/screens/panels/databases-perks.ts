@@ -39,6 +39,14 @@ function drawRectangleLinesEx(rect: wgl.Rectangle, lineThick: number, color: wgl
   wgl.drawRectangle(x + w - thick, y, thick, h, color);
 }
 
+function pyRound(value: number): number {
+  const floorValue = Math.floor(value);
+  const frac = value - floorValue;
+  if (frac < 0.5) return floorValue;
+  if (frac > 0.5) return floorValue + 1;
+  return floorValue % 2 === 0 ? floorValue : floorValue + 1;
+}
+
 export class UnlockedPerksDatabaseView extends DatabaseBaseView {
   private static readonly _VISIBLE_ROWS = 10;
   private static readonly _LIST_WIDTH = 250.0;
@@ -135,15 +143,15 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
     const frameW = LW * scale;
     const frameH = (VR * LRH + 4.0) * scale;
     wgl.drawRectangle(
-      int(Math.round(frameX)), int(Math.round(frameY)),
-      int(Math.round(frameW)), int(Math.round(frameH)),
+      int(pyRound(frameX)), int(pyRound(frameY)),
+      int(pyRound(frameW)), int(pyRound(frameH)),
       wgl.makeColor(1, 1, 1, 1),
     );
     wgl.drawRectangle(
-      int(Math.round(frameX + 1.0 * scale)),
-      int(Math.round(frameY + 1.0 * scale)),
-      Math.max(0, int(Math.round(frameW - 2.0 * scale))),
-      Math.max(0, int(Math.round(frameH - 2.0 * scale))),
+      int(pyRound(frameX + 1.0 * scale)),
+      int(pyRound(frameY + 1.0 * scale)),
+      Math.max(0, int(pyRound(frameW - 2.0 * scale))),
+      Math.max(0, int(pyRound(frameH - 2.0 * scale))),
       wgl.makeColor(0, 0, 0, 1),
     );
 
@@ -181,24 +189,24 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
         start,
       });
       wgl.drawRectangle(
-        int(Math.round(trackX)),
-        int(Math.round(trackY)),
-        Math.max(1, int(Math.round(1.0 * scale))),
-        int(Math.round(trackH)),
+        int(pyRound(trackX)),
+        int(pyRound(trackY)),
+        Math.max(1, int(pyRound(1.0 * scale))),
+        int(pyRound(trackH)),
         wgl.makeColor(1, 1, 1, 1),
       );
       wgl.drawRectangle(
-        int(Math.round(trackX + 1.0 * scale)),
-        int(Math.round(thumbTop)),
-        Math.max(1, int(Math.round(8.0 * scale))),
-        Math.max(1, int(Math.round(thumbH + 1.0 * scale))),
+        int(pyRound(trackX + 1.0 * scale)),
+        int(pyRound(thumbTop)),
+        Math.max(1, int(pyRound(8.0 * scale))),
+        Math.max(1, int(pyRound(thumbH + 1.0 * scale))),
         wgl.makeColor(1, 1, 1, 0.8),
       );
       wgl.drawRectangle(
-        int(Math.round(trackX + 2.0 * scale)),
-        int(Math.round(thumbTop + 1.0 * scale)),
-        Math.max(1, int(Math.round(6.0 * scale))),
-        Math.max(1, int(Math.round(Math.max(1.0, thumbH - 1.0 * scale)))),
+        int(pyRound(trackX + 2.0 * scale)),
+        int(pyRound(thumbTop + 1.0 * scale)),
+        Math.max(1, int(pyRound(6.0 * scale))),
+        Math.max(1, int(pyRound(Math.max(1.0, thumbH - 1.0 * scale)))),
         wgl.makeColor(51 / 255, 204 / 255, 1, 0.2),
       );
     }
@@ -330,7 +338,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
           const travel = Math.max(1.0, trackH - 3.0 * scale - thumbH);
           let target = mouse.y - trackY - 1.0 * scale - thumbH * 0.5;
           target = Math.max(0.0, Math.min(travel, target));
-          this._listScrollIndex = int(Math.round((target / travel) * scrollSpan));
+          this._listScrollIndex = int(pyRound((target / travel) * scrollSpan));
           this._scrollDragActive = true;
           this._scrollDragOffset = thumbH * 0.5;
         }
@@ -341,7 +349,7 @@ export class UnlockedPerksDatabaseView extends DatabaseBaseView {
           const travel = Math.max(1.0, trackH - 3.0 * scale - thumbH);
           let target = mouse.y - trackY - 1.0 * scale - this._scrollDragOffset;
           target = Math.max(0.0, Math.min(travel, target));
-          this._listScrollIndex = int(Math.round((target / travel) * scrollSpan));
+          this._listScrollIndex = int(pyRound((target / travel) * scrollSpan));
         } else {
           this._scrollDragActive = false;
         }
