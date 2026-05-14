@@ -186,11 +186,11 @@ export class SecondaryProjectilePool {
       // `creature_find_nearest(&player_aim_x, -1, 0.0)`.
       if (creatures !== null) {
         const origin = targetHint !== null ? targetHint : pos;
-        entry.targetId = creatureFindNearestForSecondary(
+        entry.targetId = creatureFindNearestForSecondary({
           creatures,
           origin,
           preserveBugs,
-        );
+        });
       }
     }
 
@@ -224,10 +224,12 @@ export class SecondaryProjectilePool {
         creatures,
         int(creatureIndex),
         damage,
-        CreatureDamageType.EXPLOSION,
-        opts.impulse ?? new Vec2(),
-        opts.owner,
-        this._creatureDamageApplier,
+        {
+          damageType: CreatureDamageType.EXPLOSION,
+          impulse: opts.impulse ?? new Vec2(),
+          owner: opts.owner,
+          applyCreatureDamage: this._creatureDamageApplier,
+        },
       );
     };
 
@@ -335,11 +337,11 @@ export class SecondaryProjectilePool {
         // Type 2: homing projectile.
         let targetId = entry.targetId;
         if (!(targetId >= 0 && targetId < creatures.length) || !creatures[targetId].active) {
-          entry.targetId = creatureFindNearestForSecondary(
+          entry.targetId = creatureFindNearestForSecondary({
             creatures,
-            entry.pos,
-            runtimeState !== null ? runtimeState.preserveBugs : false,
-          );
+            origin: entry.pos,
+            preserveBugs: runtimeState !== null ? runtimeState.preserveBugs : false,
+          });
           targetId = entry.targetId;
         }
 
@@ -383,12 +385,12 @@ export class SecondaryProjectilePool {
       for (const idx of creatureSpatial.candidateIndices({ pos: entry.pos, radius: 8.0 })) {
         const creature = creatures[int(idx)];
         if (!_creatureIsCollidable(creature)) continue;
-        if (withinNativeFindRadius(
-          entry.pos,
-          creature.pos,
-          8.0,
-          creature.size,
-        )) {
+        if (withinNativeFindRadius({
+          origin: entry.pos,
+          target: creature.pos,
+          radius: 8.0,
+          targetSize: creature.size,
+        })) {
           hitIdx = idx;
           break;
         }

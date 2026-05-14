@@ -18,11 +18,14 @@ export function hitRadiusFor(creature: CreatureState): number {
 }
 
 export function withinNativeFindRadius(
-  origin: Vec2,
-  target: Vec2,
-  radius: number,
-  targetSize: number,
+  opts: {
+    origin: Vec2;
+    target: Vec2;
+    radius: number;
+    targetSize: number;
+  },
 ): boolean {
+  const { origin, target, radius, targetSize } = opts;
   // Mirror native `creature_find_in_radius` / `player_find_in_radius` predicate.
   //
   // Native uses:
@@ -44,10 +47,13 @@ export function withinNativeFindRadius(
 }
 
 export function creatureFindNearestForSecondary(
-  creatures: readonly CreatureState[],
-  origin: Vec2,
-  preserveBugs: boolean = false,
+  opts: {
+    creatures: readonly CreatureState[];
+    origin: Vec2;
+    preserveBugs?: boolean;
+  },
 ): number {
+  const { creatures, origin, preserveBugs = false } = opts;
   // Port of `creature_find_nearest(origin, -1, 0.0)` for homing secondary targets.
   let bestIdx = preserveBugs ? 0 : -1;
   let bestDistSq = 1_000_000.0;
@@ -73,11 +79,14 @@ export function applyDamageToCreature(
   creatures: readonly CreatureState[],
   creatureIndex: number,
   damage: number,
-  damageType: number,
-  impulse: Vec2,
-  owner: OwnerRef,
-  applyCreatureDamage: CreatureDamageApplier | null = null,
+  opts: {
+    damageType: number;
+    impulse: Vec2;
+    owner: OwnerRef;
+    applyCreatureDamage?: CreatureDamageApplier | null;
+  },
 ): void {
+  const { damageType, impulse, owner, applyCreatureDamage = null } = opts;
   if (damage <= 0.0) {
     return;
   }

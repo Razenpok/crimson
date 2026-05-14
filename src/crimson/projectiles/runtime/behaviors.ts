@@ -162,10 +162,12 @@ function lingerIonAoe(
         ctx.creatures,
         creatureIdx,
         damage,
-        CREATURE_DAMAGE_TYPE_ION,
-        new Vec2(),
-        proj.owner,
-        ctx.pool.creatureDamageApplier,
+        {
+          damageType: CREATURE_DAMAGE_TYPE_ION,
+          impulse: new Vec2(),
+          owner: proj.owner,
+          applyCreatureDamage: ctx.pool.creatureDamageApplier,
+        },
       );
     }
   }
@@ -335,10 +337,12 @@ export function postHitShrinkifier(ctx: ProjectileUpdateCtx, hit: ProjectileHitI
       ctx.creatures,
       int(hit.hitIdx),
       creature.hp + 1.0,
-      CREATURE_DAMAGE_TYPE_BULLET,
-      new Vec2(),
-      hit.proj.owner,
-      ctx.pool.creatureDamageApplier,
+      {
+        damageType: CREATURE_DAMAGE_TYPE_BULLET,
+        impulse: new Vec2(),
+        owner: hit.proj.owner,
+        applyCreatureDamage: ctx.pool.creatureDamageApplier,
+      },
     );
   }
   hit.proj.lifeTimer = 0.25;

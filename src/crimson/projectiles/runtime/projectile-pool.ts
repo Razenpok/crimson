@@ -385,12 +385,12 @@ export class ProjectilePool {
             if (!_creatureIsCollidable(creature)) {
               continue;
             }
-            if (withinNativeFindRadius(
-              proj.pos,
-              creature.pos,
-              proj.hitRadius,
-              creature.size,
-            )) {
+            if (withinNativeFindRadius({
+              origin: proj.pos,
+              target: creature.pos,
+              radius: proj.hitRadius,
+              targetSize: creature.size,
+            })) {
               hitIdx = idx;
               break;
             }
@@ -424,12 +424,12 @@ export class ProjectilePool {
                 if (player.health <= 0.0) {
                   continue;
                 }
-                if (withinNativeFindRadius(
-                  proj.pos,
-                  player.pos,
-                  proj.hitRadius,
-                  player.size,
-                )) {
+                if (withinNativeFindRadius({
+                  origin: proj.pos,
+                  target: player.pos,
+                  radius: proj.hitRadius,
+                  targetSize: player.size,
+                })) {
                   hitPlayerIdx = idx;
                   break;
                 }
@@ -525,10 +525,12 @@ export class ProjectilePool {
                 creatures,
                 hitIdx,
                 damageAmount,
-                damageType,
-                impulse,
-                proj.owner,
-                applyCreatureDamage,
+                {
+                  damageType,
+                  impulse,
+                  owner: proj.owner,
+                  applyCreatureDamage,
+                },
               );
               creatureSpatial.syncIndex(hitIdx);
               if (proj.lifeTimer !== 0.25) {
@@ -539,10 +541,12 @@ export class ProjectilePool {
                 creatures,
                 hitIdx,
                 remaining,
-                damageType,
-                impulse,
-                proj.owner,
-                applyCreatureDamage,
+                {
+                  damageType,
+                  impulse,
+                  owner: proj.owner,
+                  applyCreatureDamage,
+                },
               );
               creatureSpatial.syncIndex(hitIdx);
               proj.damagePool -= creature.hp;
