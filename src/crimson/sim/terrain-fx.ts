@@ -56,8 +56,8 @@ export class TerrainFxBatch {
   readonly corpses: readonly TerrainCorpseFx[];
 
   constructor(opts: { decals?: readonly TerrainDecalFx[]; corpses?: readonly TerrainCorpseFx[] } = {}) {
-    this.decals = opts.decals ?? [];
-    this.corpses = opts.corpses ?? [];
+    this.decals = Array.from(opts.decals ?? []);
+    this.corpses = Array.from(opts.corpses ?? []);
   }
 
   isEmpty(): boolean {
@@ -82,7 +82,7 @@ export class TerrainFxScratch {
 
   takeBatch(): TerrainFxBatch {
     const decals: TerrainDecalFx[] = this.decals.iterActive().map((entry) => new TerrainDecalFx({
-      effectId: entry.effectId,
+      effectId: int(entry.effectId),
       rotation: entry.rotation,
       pos: entry.pos,
       width: entry.width,
@@ -95,7 +95,7 @@ export class TerrainFxScratch {
       color: entry.color,
       rotation: entry.rotation,
       scale: entry.scale,
-      creatureTypeId: entry.creatureTypeId,
+      creatureTypeId: int(entry.creatureTypeId),
     }));
 
     this.clear();
