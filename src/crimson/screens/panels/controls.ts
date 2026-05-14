@@ -78,21 +78,21 @@ function rowBindingCode(row: RebindRowSpec, opts: { playerIndex: number; control
   const pc = controls.player(playerIndex);
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       return pc.moveCodes[row.targetIndex];
     }
     case RebindTarget.PLAYER_FIRE_CODE:
       return pc.fireCode;
     case RebindTarget.PLAYER_KEYBOARD_AIM_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       return pc.keyboardAimCodes[row.targetIndex];
     }
     case RebindTarget.PLAYER_AIM_AXIS_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       return pc.aimAxisCodes[row.targetIndex];
     }
     case RebindTarget.PLAYER_MOVE_AXIS_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       return pc.moveAxisCodes[row.targetIndex];
     }
     case RebindTarget.GLOBAL_PICK_PERK_CODE:
@@ -114,7 +114,7 @@ function setRowBindingCode(
   const pc = controls.player(playerIndex);
   switch (row.target) {
     case RebindTarget.PLAYER_MOVE_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       const values: [number, number, number, number] = [...pc.moveCodes];
       values[row.targetIndex] = code;
       pc.moveCodes = values;
@@ -124,21 +124,21 @@ function setRowBindingCode(
       pc.fireCode = code;
       break;
     case RebindTarget.PLAYER_KEYBOARD_AIM_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       const values: [number, number] = [...pc.keyboardAimCodes];
       values[row.targetIndex] = code;
       pc.keyboardAimCodes = values;
       break;
     }
     case RebindTarget.PLAYER_AIM_AXIS_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       const values: [number, number] = [...pc.aimAxisCodes];
       values[row.targetIndex] = code;
       pc.aimAxisCodes = values;
       break;
     }
     case RebindTarget.PLAYER_MOVE_AXIS_CODES: {
-      if (row.targetIndex === null) throw new Error('row.targetIndex must not be null');
+      if (row.targetIndex === null) throw new Error();
       const values: [number, number] = [...pc.moveAxisCodes];
       values[row.targetIndex] = code;
       pc.moveAxisCodes = values;
