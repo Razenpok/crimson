@@ -12,5 +12,5 @@ export function applyPoints(ctx: BonusApplyCtx): void {
   if (ctx.players.length > 0) {
     target = ctx.players[0];
   }
-  target.experience += amount;
+  target.experience += int(amount);
 }
