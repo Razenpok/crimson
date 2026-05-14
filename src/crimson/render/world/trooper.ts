@@ -117,7 +117,6 @@ export function drawPlayerTrooperSprite(
 
   drawLanPlayerRing(renderCtx, { player, screenPos, baseSize, scale, alpha });
 
-  // Radioactive aura
   if (perkActive(player, PerkId.RADIOACTIVE) && alpha > 1e-3) {
     const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(EffectId.AURA);
     if (atlas !== undefined) {
@@ -202,7 +201,6 @@ export function drawPlayerTrooperSprite(
     draw(legFrame, { pos: screenPos, scaleMul: 1.0, rotation: player.heading, color: tint });
     draw(torsoFrame, { pos: screenPos.add(recoilOffset), scaleMul: 1.0, rotation: player.aimHeading, color: overlayTint });
 
-    // Shield ring
     if (player.shieldTimer > 1e-3 && alpha > 1e-3) {
       const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(EffectId.SHIELD_RING);
       if (atlas !== undefined) {
@@ -251,38 +249,34 @@ export function drawPlayerTrooperSprite(
       }
     }
 
-    // Muzzle flash
     if (player.muzzleFlashAlpha > 1e-3 && alpha > 1e-3) {
-      const weapon = WEAPON_BY_ID.get(player.weapon.weaponId);
-      if (weapon) {
-        const flags = weapon.flags ?? 0;
-        if ((flags & 0x8) === 0) {
-          const flashAlpha = clamp(player.muzzleFlashAlpha * 0.8, 0.0, 1.0) * alpha;
-          if (flashAlpha > 1e-3) {
-            const size = baseSize * ((flags & 0x4) ? 0.5 : 1.0);
-            const heading = player.aimHeading + Math.PI / 2.0;
-            const offset = (player.muzzleFlashAlpha * 12.0 - 21.0) * scale;
-            const flashPos = screenPos.add(Vec2.fromAngle(heading).mul(offset));
-            const src = wgl.makeRectangle(
-              0.0, 0.0, muzzleFlashTexture.width, muzzleFlashTexture.height,
-            );
-            const dst = wgl.makeRectangle(flashPos.x, flashPos.y, size, size);
-            const origin = wgl.makeVector2(size * 0.5, size * 0.5);
-            const tintFlash = wgl.makeColor(1, 1, 1, int(flashAlpha * 255.0 + 0.5) / 255);
-            wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
-            wgl.drawTexturePro(
-              muzzleFlashTexture, src, dst, origin,
-              player.aimHeading * RAD_TO_DEG, tintFlash,
-            );
-            wgl.endBlendMode();
-          }
+      const weapon = WEAPON_BY_ID.get(player.weapon.weaponId)!;
+      const flags = weapon.flags ?? 0;
+      if ((flags & 0x8) === 0) {
+        const flashAlpha = clamp(player.muzzleFlashAlpha * 0.8, 0.0, 1.0) * alpha;
+        if (flashAlpha > 1e-3) {
+          const size = baseSize * ((flags & 0x4) ? 0.5 : 1.0);
+          const heading = player.aimHeading + Math.PI / 2.0;
+          const offset = (player.muzzleFlashAlpha * 12.0 - 21.0) * scale;
+          const flashPos = screenPos.add(Vec2.fromAngle(heading).mul(offset));
+          const src = wgl.makeRectangle(
+            0.0, 0.0, muzzleFlashTexture.width, muzzleFlashTexture.height,
+          );
+          const dst = wgl.makeRectangle(flashPos.x, flashPos.y, size, size);
+          const origin = wgl.makeVector2(size * 0.5, size * 0.5);
+          const tintFlash = wgl.makeColor(1, 1, 1, int(flashAlpha * 255.0 + 0.5) / 255);
+          wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
+          wgl.drawTexturePro(
+            muzzleFlashTexture, src, dst, origin,
+            player.aimHeading * RAD_TO_DEG, tintFlash,
+          );
+          wgl.endBlendMode();
         }
       }
     }
     return;
   }
 
-  // Dead player
   let deadFrame: number;
   if (player.deathTimer >= 0.0) {
     // Matches the observed frame ramp (32..52) in player_sprite_trace.jsonl.
