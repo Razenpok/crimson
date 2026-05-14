@@ -31,6 +31,7 @@ export async function initViewAudio(assetsDir: string, opts: { seed?: number } =
   const seed = opts.seed ?? 0xBEEF;
   const audioRng = new Crand(seed);
   const runtimeDir = defaultRuntimeDir();
+  // Browser/WebGL builds cannot create the runtime_dir filesystem directory.
   let config: CrimsonConfig;
   try {
     config = ensureCrimsonCfg(runtimeDir);
