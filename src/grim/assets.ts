@@ -413,12 +413,12 @@ export async function loadRuntimeResources(
   const widthsData = entries.get('load/smallFnt.dat');
   if (!widthsData) throw new Error('Missing runtime font widths: load/smallFnt.dat');
 
-  const smallFont: SmallFontData = {
+  const smallFont = new SmallFontData({
     widths: Array.from(widthsData),
     texture: textures.get(TextureId.SMALL_WHITE)!,
     cellSize: 16,
     grid: 16,
-  };
+  });
 
   const resources = new RuntimeResources({ assetsUrl, textures, smallFont });
   registerRuntimeResources(resources);

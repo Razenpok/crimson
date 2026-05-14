@@ -2,12 +2,26 @@
 
 import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
+import { runtimeResourcesFor } from '@grim/assets.ts';
 
-export interface SmallFontData {
+export class SmallFontData {
   widths: number[];
   texture: wgl.Texture;
   cellSize: number;
   grid: number;
+
+  constructor(opts: { widths: number[]; texture: wgl.Texture; cellSize?: number; grid?: number }) {
+    this.widths = opts.widths;
+    this.texture = opts.texture;
+    this.cellSize = opts.cellSize ?? 16;
+    this.grid = opts.grid ?? 16;
+  }
+}
+
+export const SMALL_FONT_FILTER = wgl.TextureFilter.POINT;
+
+export function loadSmallFont(assetsRoot: string): SmallFontData {
+  return runtimeResourcesFor(assetsRoot).smallFont;
 }
 
 export function drawSmallText(
