@@ -23,14 +23,14 @@ export class TypingBuffer {
 
   backspace(): void {
     if (this.text) {
-      this.text = this.text.slice(0, -1);
+      this.text = Array.from(this.text).slice(0, -1).join('');
     }
   }
 
   pushChar(ch: string): void {
     if (!ch) return;
-    if (this.text.length >= TYPING_MAX_CHARS) return;
-    this.text += ch[0];
+    if (Array.from(this.text).length >= TYPING_MAX_CHARS) return;
+    this.text += Array.from(ch)[0];
   }
 
   submit(opts: { matched: boolean }): string | null {
