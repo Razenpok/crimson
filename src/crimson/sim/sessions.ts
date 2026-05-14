@@ -29,7 +29,6 @@ import { preparePerkAvailability } from '@crimson/perks/availability.ts';
 import { prepareWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
 import { applyTypoCommand } from '@crimson/typo/runtime.ts';
 import type { WorldState } from './world-state.ts';
-export type { WorldState };
 
 // ---------------------------------------------------------------------------
 // Tick result types
@@ -40,14 +39,14 @@ export class DeterministicSessionTick {
   readonly elapsedMs: number;
   readonly creatureCountWorldStep: number;
 
-  constructor(
-    step: DeterministicStepResult,
-    elapsedMs: number,
-    creatureCountWorldStep: number,
-  ) {
-    this.step = step;
-    this.elapsedMs = elapsedMs;
-    this.creatureCountWorldStep = creatureCountWorldStep;
+  constructor(opts: {
+    step: DeterministicStepResult;
+    elapsedMs: number;
+    creatureCountWorldStep: number;
+  }) {
+    this.step = opts.step;
+    this.elapsedMs = opts.elapsedMs;
+    this.creatureCountWorldStep = opts.creatureCountWorldStep;
   }
 }
 
@@ -64,19 +63,18 @@ export class MidStepContext {
   readonly dtRawMs: number;
   readonly worldSize: number;
 
-  constructor(
-    world: WorldState,
-    elapsedBeforeMs: number,
-    dtSimMs: number,
-    dtRawMs: number,
-    worldSize: number,
-  ) {
-    this.world = world;
-    this.elapsedBeforeMs = elapsedBeforeMs;
-    this.dtSimMs = dtSimMs;
-    this.dtRawMs = dtRawMs;
-    this.worldSize = worldSize;
-    Object.freeze(this);
+  constructor(opts: {
+    world: WorldState;
+    elapsedBeforeMs: number;
+    dtSimMs: number;
+    dtRawMs: number;
+    worldSize: number;
+  }) {
+    this.world = opts.world;
+    this.elapsedBeforeMs = opts.elapsedBeforeMs;
+    this.dtSimMs = opts.dtSimMs;
+    this.dtRawMs = opts.dtRawMs;
+    this.worldSize = opts.worldSize;
   }
 }
 
@@ -91,19 +89,18 @@ export class PostStepContext {
   readonly worldSize: number;
   readonly detailPreset: number;
 
-  constructor(
-    world: WorldState,
-    stepResult: DeterministicStepResult,
-    dtSimMs: number,
-    worldSize: number,
-    detailPreset: number,
-  ) {
-    this.world = world;
-    this.stepResult = stepResult;
-    this.dtSimMs = dtSimMs;
-    this.worldSize = worldSize;
-    this.detailPreset = detailPreset;
-    Object.freeze(this);
+  constructor(opts: {
+    world: WorldState;
+    stepResult: DeterministicStepResult;
+    dtSimMs: number;
+    worldSize: number;
+    detailPreset: number;
+  }) {
+    this.world = opts.world;
+    this.stepResult = opts.stepResult;
+    this.dtSimMs = opts.dtSimMs;
+    this.worldSize = opts.worldSize;
+    this.detailPreset = opts.detailPreset;
   }
 }
 
@@ -434,13 +431,13 @@ export class DeterministicSession {
 
     let hook: (() => void) | null = null;
     if (this.midStepHook !== null) {
-      const ctx = new MidStepContext(
-        this.world,
+      const ctx = new MidStepContext({
+        world: this.world,
         elapsedBeforeMs,
         dtSimMs,
         dtRawMs,
-        this.worldSize,
-      );
+        worldSize: this.worldSize,
+      });
       const mid = this.midStepHook;
       hook = () => mid(ctx);
     }
@@ -478,7 +475,7 @@ export class DeterministicSession {
       damageScaleByType: this.damageScaleByType,
       detailPreset: this.detailPreset,
       gameMode: this.gameMode,
-      perkProgressionEnabled: this.perkProgressionEnabled ?? true,
+      perkProgressionEnabled: this.perkProgressionEnabled,
       gameTuneStarted: this.gameTuneStarted,
       midStepHook: hook,
       dtPlayerLocal: timing.dtPlayerLocal,
@@ -535,13 +532,13 @@ export class DeterministicSession {
     }
 
     if (this.postStepHook !== null) {
-      this.postStepHook(new PostStepContext(
-        this.world,
-        step,
+      this.postStepHook(new PostStepContext({
+        world: this.world,
+        stepResult: step,
         dtSimMs,
-        this.worldSize,
-        this.detailPreset,
-      ));
+        worldSize: this.worldSize,
+        detailPreset: this.detailPreset,
+      }));
     }
 
     const creatureCountWorldStep = this.world.creatures.entries.filter(c => c.active).length;
@@ -553,6 +550,10 @@ export class DeterministicSession {
     const dtElapsed = this.elapsedUsesRawDt ? dtRawMs : dtSimMs;
     this.elapsedMs = elapsedBeforeMs + dtElapsed;
 
-    return new DeterministicSessionTick(step, this.elapsedMs, creatureCountWorldStep);
+    return new DeterministicSessionTick({
+      step,
+      elapsedMs: this.elapsedMs,
+      creatureCountWorldStep,
+    });
   }
 }
