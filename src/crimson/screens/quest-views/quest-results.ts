@@ -150,8 +150,10 @@ export class QuestResultsView {
       this._logNonfatal('failed to save status', String(exc));
     }
 
-    const ui = new QuestResultsUiImpl(this.state.config);
-    ui.preserveBugs = Boolean(this.state.preserveBugs);
+    const ui = new QuestResultsUiImpl({
+      config: this.state.config,
+      preserveBugs: Boolean(this.state.preserveBugs),
+    });
     ui.open({
       record,
       breakdown,

@@ -185,8 +185,9 @@ export class QuestResultsUi {
   private _highScoresButton = new UiButtonState('High scores', { forceWide: true });
   private _mainMenuButton = new UiButtonState('Main Menu', { forceWide: true });
 
-  constructor(config: CrimsonConfig) {
-    this.config = config;
+  constructor(opts: { config: CrimsonConfig; preserveBugs?: boolean }) {
+    this.config = opts.config;
+    this.preserveBugs = opts.preserveBugs ?? false;
   }
 
   open(opts: {
