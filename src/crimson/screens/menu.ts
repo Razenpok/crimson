@@ -623,6 +623,7 @@ export class MenuView {
   }
 
   private _modsAvailable(): boolean {
+    // WebGL cannot synchronously scan base_dir/mods/*.dll; native mod loading is unavailable.
     return false;
   }
 
