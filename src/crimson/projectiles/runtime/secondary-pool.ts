@@ -207,7 +207,7 @@ export class SecondaryProjectilePool {
     const creatures = ctx.creatures;
     const runtimeState = ctx.runtimeState ?? null;
     const fxQueue = ctx.fxQueue ?? null;
-    const detailPreset = ctx.detailPreset ?? 5;
+    const detailPreset = int(ctx.detailPreset ?? 5);
     const onDetonationKill = ctx.onDetonationKill ?? null;
 
     if (dt <= 0.0) return;
