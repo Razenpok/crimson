@@ -5,16 +5,14 @@ import { type WebGLContext, type RenderTarget, type ShaderQuadVertex, BlendMode 
 export { BlendMode };
 export type { RenderTarget, ShaderQuadVertex };
 
-export type Brand<K, T extends string> = K & { readonly __brand: T };
+export type Color = { r: number; g: number; b: number; a: number };
+export function makeColor(r: number, g: number, b: number, a: number): Color { return { r, g, b, a }; }
 
-export type Color = Brand<{ r: number; g: number; b: number; a: number }, 'Color'>;
-export function makeColor(r: number, g: number, b: number, a: number): Color { return { r, g, b, a } as Color; }
+export type Rectangle = { x: number; y: number; w: number; h: number };
+export function makeRectangle(x: number, y: number, w: number, h: number): Rectangle { return { x, y, w, h }; }
 
-export type Rectangle = Brand<{ x: number; y: number; w: number; h: number }, 'Rectangle'>;
-export function makeRectangle(x: number, y: number, w: number, h: number): Rectangle { return { x, y, w, h } as Rectangle; }
-
-export type Vector2 = Brand<{ x: number; y: number }, 'Vector2'>;
-export function makeVector2(x: number, y: number): Vector2 { return { x, y } as Vector2; }
+export type Vector2 = { x: number; y: number };
+export function makeVector2(x: number, y: number): Vector2 { return { x, y }; }
 
 export interface Texture {
   id: WebGLTexture;
