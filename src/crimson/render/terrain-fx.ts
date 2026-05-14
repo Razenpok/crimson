@@ -12,7 +12,6 @@ export class FxQueueTextures {
   constructor(opts: { particles: wgl.Texture; bodyset: wgl.Texture }) {
     this.particles = opts.particles;
     this.bodyset = opts.bodyset;
-    Object.freeze(this);
   }
 }
 
