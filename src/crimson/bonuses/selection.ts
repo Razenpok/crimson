@@ -68,12 +68,12 @@ export function bonusPickRandomType(pool: BonusPool, state: GameplayState, playe
       }
     } else {
       let bucketOffset = roll - 14;
-      let bonusValue = BonusId.WEAPON;
+      let bonusValue = int(BonusId.WEAPON);
       while (bucketOffset > 10) {
         bucketOffset -= 10;
         bonusValue += 1;
         if (bonusValue >= 15) {
-          bonusValue = BonusId.UNUSED;
+          bonusValue = int(BonusId.UNUSED);
           break;
         }
       }
