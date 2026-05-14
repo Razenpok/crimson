@@ -4,8 +4,8 @@ import { type ConsoleState } from './console.ts';
 import { fetchPaq } from './paq.ts';
 import { SFX_NATIVE_ORDER, SFX_SPECS, type SfxId } from './sfx-map.ts';
 
-const SFX_PAK_NAME = 'sfx.paq';
-const DEFAULT_VOICE_COUNT = 4;
+export const SFX_PAK_NAME = 'sfx.paq';
+export const DEFAULT_VOICE_COUNT = 4;
 const SFX_RATE_BASE_HZ = 44100;
 const SFX_RATE_MIN_HZ = 22050;
 
