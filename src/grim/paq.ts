@@ -31,25 +31,28 @@ function readCString(view: DataView, offset: number): [string, number] {
   return [textDecoder.decode(new Uint8Array(bytes)), pos];
 }
 
-export function* iterEntriesBytes(data: ArrayBuffer): Generator<PaqEntry> {
-  const view = new DataView(data);
+export function* iterEntriesBytes(data: ArrayBuffer | ArrayBufferView): Generator<PaqEntry> {
+  const bytes = data instanceof ArrayBuffer
+    ? new Uint8Array(data)
+    : new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   for (let i = 0; i < 4; i++) {
     if (view.getUint8(i) !== MAGIC[i]) {
       throw new Error('Invalid PAQ magic');
     }
   }
   let offset = 4;
-  while (offset < data.byteLength) {
+  while (offset < bytes.byteLength) {
     const [name, afterName] = readCString(view, offset);
-    if (afterName + 4 > data.byteLength) {
+    if (afterName + 4 > bytes.byteLength) {
       throw new Error('Invalid PAQ entry size');
     }
     const size = view.getUint32(afterName, true);
     const payloadStart = afterName + 4;
-    if (payloadStart + size > data.byteLength) {
+    if (payloadStart + size > bytes.byteLength) {
       throw new Error('Invalid PAQ entry payload');
     }
-    const payload = new Uint8Array(data, payloadStart, size);
+    const payload = new Uint8Array(bytes.buffer, bytes.byteOffset + payloadStart, size);
     yield [name, payload];
     offset = payloadStart + size;
   }
@@ -64,7 +67,7 @@ export function readPaq(source: string): PaqEntry[] {
   return [...iterEntries(source)];
 }
 
-export function decodeBytes(data: ArrayBuffer): PaqEntry[] {
+export function decodeBytes(data: ArrayBuffer | ArrayBufferView): PaqEntry[] {
   return [...iterEntriesBytes(data)];
 }
 
@@ -106,11 +109,11 @@ export function encodeBytes(entries: Iterable<PaqEntry>): Uint8Array {
   return buildEntries(entries);
 }
 
-export function decodePaq(data: ArrayBuffer): PaqEntry[] {
+export function decodePaq(data: ArrayBuffer | ArrayBufferView): PaqEntry[] {
   return decodeBytes(data);
 }
 
-export function paqToMap(data: ArrayBuffer): Map<string, Uint8Array> {
+export function paqToMap(data: ArrayBuffer | ArrayBufferView): Map<string, Uint8Array> {
   const map = new Map<string, Uint8Array>();
   for (const [name, payload] of iterEntriesBytes(data)) {
     map.set(name.replace(/\\/g, '/'), payload);
