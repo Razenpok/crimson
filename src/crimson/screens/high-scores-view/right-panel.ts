@@ -6,7 +6,7 @@ import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { savedNameLabels } from '@grim/config.ts';
-import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { formatElapsedMmSs, formatScoreDate, ordinal } from './shared.ts';
 import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
 import { InputState } from '@grim/input.ts';
@@ -89,7 +89,6 @@ function savedScoreNames(view: HighScoresView): string[] {
 }
 
 function drawLine(x1: number, y1: number, x2: number, y2: number, color: wgl.Color): void {
-  // WebGL replacement for raylib's `draw_line`.
   const ix1 = int(x1);
   const iy1 = int(y1);
   const ix2 = int(x2);
@@ -587,7 +586,7 @@ function drawWicon(
 }
 
 function weaponLabelAndIcon(view: HighScoresView, weaponId: number): [string, number | null] {
-  const weapon = WEAPON_BY_ID.get(weaponId as WeaponId);
+  const weapon = WEAPON_BY_ID.get(weaponId);
   if (weapon === undefined) {
     throw new Error(`unknown weapon id: ${weaponId}`);
   }
