@@ -2,12 +2,11 @@
 
 import * as wgl from '@wgl';
 import { Vec2, Rect } from '@grim/geom.ts';
-import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
 import { InputState } from '@grim/input.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { type GameState } from '@crimson/game/types.ts';
@@ -40,6 +39,7 @@ import {
   uiElementAnim,
   labelAlpha,
   signLayoutScale,
+  drawMenuCursorHelper,
 } from './menu.ts';
 
 export const PAUSE_MENU_TO_MAIN_MENU_FADE_MS = 500;
@@ -210,14 +210,12 @@ export class PauseMenuView {
 
     drawScreenFade(this.state);
 
-    const resources = requireRuntimeResources(this.state);
-    this._drawMenuItems(resources);
-    this._drawMenuSign(resources);
-    drawMenuCursor(
-      getTexture(resources, TextureId.PARTICLES),
-      getTexture(resources, TextureId.UI_CURSOR),
-      { pos: new Vec2(...InputState.mousePosition()), pulseTime: this._cursorPulseTime },
-    );
+    this._drawMenuItems();
+    this._drawMenuSign();
+    drawMenuCursorHelper(this.state, {
+      resources: requireRuntimeResources(this.state),
+      pulseTime: this._cursorPulseTime,
+    });
   }
 
   takeAction(): string | null {
@@ -279,11 +277,14 @@ export class PauseMenuView {
   }
 
   private _uiElementAnim(
-    index: number,
-    startMs: number,
-    endMs: number,
-    width: number,
+    opts: {
+      index: number;
+      startMs: number;
+      endMs: number;
+      width: number;
+    },
   ): [number, number] {
+    const { index, startMs, endMs, width } = opts;
     return uiElementAnim(this, { index, startMs, endMs, width, directionFlag: 0 });
   }
 
@@ -354,8 +355,9 @@ export class PauseMenuView {
     return this._timelineMs >= menuSlotStartMs(entry.slot);
   }
 
-  private _drawMenuItems(resources: RuntimeResources): void {
+  private _drawMenuItems(): void {
     if (this._menuEntries.length === 0) return;
+    const resources = requireRuntimeResources(this.state);
     const item = getTexture(resources, TextureId.UI_MENU_ITEM);
     const labelTex = getTexture(resources, TextureId.UI_ITEM_TEXTS);
     const itemW = item.width;
@@ -365,12 +367,12 @@ export class PauseMenuView {
     for (let idx = this._menuEntries.length - 1; idx >= 0; idx--) {
       const entry = this._menuEntries[idx];
       const pos = new Vec2(menuSlotPosX(entry.slot), entry.y);
-      const [angleRad, _slideX] = this._uiElementAnim(
-        entry.slot + 2,
-        menuSlotStartMs(entry.slot),
-        menuSlotEndMs(entry.slot),
-        itemW,
-      );
+      const [angleRad, _slideX] = this._uiElementAnim({
+        index: entry.slot + 2,
+        startMs: menuSlotStartMs(entry.slot),
+        endMs: menuSlotEndMs(entry.slot),
+        width: itemW,
+      });
       // slideX is ignored for render_mode==0 (transform) elements
       const [itemScale, localYShift] = this._menuItemScale(entry.slot);
       const offsetX = MENU_ITEM_OFFSET_X * itemScale;
@@ -439,7 +441,7 @@ export class PauseMenuView {
     }
   }
 
-  private _drawMenuSign(resources: RuntimeResources): void {
+  private _drawMenuSign(): void {
     const screenW = this.state.config.display.width;
     const [scale, shiftX] = signLayoutScale(int(screenW));
     const signPosY = screenW > MENU_SCALE_SMALL_THRESHOLD ? MENU_SIGN_POS_Y : MENU_SIGN_POS_Y_SMALL;
@@ -450,14 +452,15 @@ export class PauseMenuView {
     const offsetY = MENU_SIGN_OFFSET_Y * scale;
     let rotationDeg = 0.0;
     if (!this.state.menuSignLocked) {
-      const [angleRad, _slideX] = this._uiElementAnim(
-        0,
-        300,
-        0,
-        signW,
-      );
+      const [angleRad, _slideX] = this._uiElementAnim({
+        index: 0,
+        startMs: 300,
+        endMs: 0,
+        width: signW,
+      });
       rotationDeg = angleRad * (180.0 / Math.PI);
     }
+    const resources = requireRuntimeResources(this.state);
     const sign = getTexture(resources, TextureId.UI_SIGN_CRIMSON);
     const fxDetail = fxDetailEnabled(this.state.config.display, 0);
     const signSrc = wgl.makeRectangle(0.0, 0.0, sign.width, sign.height);
