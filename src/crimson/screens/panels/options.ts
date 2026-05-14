@@ -71,7 +71,7 @@ export class OptionsMenuView extends PanelMenuView {
     'Mouse sensitivity:',
   ];
 
-  private _controlsButton: UiButtonState = new UiButtonState('Controls', { forceWide: true });
+  private _controlsButton: UiButtonState = new UiButtonState({ label: 'Controls', forceWide: true  });
   private _sliderSfx: SliderState = new SliderState({ value: 10, minValue: 0, maxValue: 10 });
   private _sliderMusic: SliderState = new SliderState({ value: 10, minValue: 0, maxValue: 10 });
   private _sliderDetail: SliderState = new SliderState({ value: 5, minValue: 1, maxValue: 5 });
@@ -89,7 +89,7 @@ export class OptionsMenuView extends PanelMenuView {
 
   override open(): void {
     super.open();
-    this._controlsButton = new UiButtonState('Controls', { forceWide: true });
+    this._controlsButton = new UiButtonState({ label: 'Controls', forceWide: true  });
     this._activeSlider = null;
     this._dirty = false;
     this._syncFromConfig();

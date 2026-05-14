@@ -405,7 +405,7 @@ export class PlayGameMenuView extends PanelMenuView {
   private _modeButtonState(mode: PlayGameModeEntry): UiButtonState {
     let state = this._modeButtons.get(mode.key);
     if (state === undefined) {
-      state = new UiButtonState(mode.label);
+      state = new UiButtonState({ label: mode.label });
       this._modeButtons.set(mode.key, state);
     } else {
       state.label = mode.label;

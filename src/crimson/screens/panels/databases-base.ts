@@ -70,7 +70,7 @@ export abstract class DatabaseBaseView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._backButton = new UiButtonState('Back', { forceWide: false });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
   }
 
   open(): void {
@@ -87,7 +87,7 @@ export abstract class DatabaseBaseView {
     this._pendingAction = null;
     this._action = null;
 
-    this._backButton = new UiButtonState('Back', { forceWide: false });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
 
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);

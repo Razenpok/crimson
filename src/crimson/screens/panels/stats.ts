@@ -125,11 +125,11 @@ export class StatisticsMenuView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._btnHighScores = new UiButtonState('High scores', { forceWide: true });
-    this._btnWeapons = new UiButtonState('Weapons', { forceWide: true });
-    this._btnPerks = new UiButtonState('Perks', { forceWide: true });
-    this._btnCredits = new UiButtonState('Credits', { forceWide: true });
-    this._btnBack = new UiButtonState('Back', { forceWide: false });
+    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true  });
+    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true  });
+    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true  });
+    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true  });
+    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false  });
   }
 
   open(): void {
@@ -144,11 +144,11 @@ export class StatisticsMenuView {
     this._closeAction = null;
     this._pendingAction = null;
 
-    this._btnHighScores = new UiButtonState('High scores', { forceWide: true });
-    this._btnWeapons = new UiButtonState('Weapons', { forceWide: true });
-    this._btnPerks = new UiButtonState('Perks', { forceWide: true });
-    this._btnCredits = new UiButtonState('Credits', { forceWide: true });
-    this._btnBack = new UiButtonState('Back', { forceWide: false });
+    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true  });
+    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true  });
+    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true  });
+    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true  });
+    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false  });
 
     if (this.state.audio !== null) {
       if (this.state.audio.music.activeTrack !== 'shortie_monk') {
@@ -176,11 +176,11 @@ export class StatisticsMenuView {
     this._closing = false;
     this._closeAction = null;
     this._pendingAction = null;
-    this._btnHighScores = new UiButtonState('High scores', { forceWide: true });
-    this._btnWeapons = new UiButtonState('Weapons', { forceWide: true });
-    this._btnPerks = new UiButtonState('Perks', { forceWide: true });
-    this._btnCredits = new UiButtonState('Credits', { forceWide: true });
-    this._btnBack = new UiButtonState('Back', { forceWide: false });
+    this._btnHighScores = new UiButtonState({ label: 'High scores', forceWide: true  });
+    this._btnWeapons = new UiButtonState({ label: 'Weapons', forceWide: true  });
+    this._btnPerks = new UiButtonState({ label: 'Perks', forceWide: true  });
+    this._btnCredits = new UiButtonState({ label: 'Credits', forceWide: true  });
+    this._btnBack = new UiButtonState({ label: 'Back', forceWide: false  });
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);
     }

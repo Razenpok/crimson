@@ -141,9 +141,9 @@ export class HighScoresView {
 
   constructor(state: GameState) {
     this.state = state;
-    this.updateButton = new UiButtonState('Update scores', { forceWide: true });
-    this.playButton = new UiButtonState('Play a game', { forceWide: true });
-    this.backButton = new UiButtonState('Back', { forceWide: false });
+    this.updateButton = new UiButtonState({ label: 'Update scores', forceWide: true  });
+    this.playButton = new UiButtonState({ label: 'Play a game', forceWide: true  });
+    this.backButton = new UiButtonState({ label: 'Back', forceWide: false  });
   }
 
   get records(): HighScoreRecord[] {
@@ -166,9 +166,9 @@ export class HighScoresView {
     this._closeAction = null;
     this._scrollIndex = 0;
     this._dirty = false;
-    this.updateButton = new UiButtonState('Update scores', { forceWide: true });
-    this.playButton = new UiButtonState('Play a game', { forceWide: true });
-    this.backButton = new UiButtonState('Back', { forceWide: false });
+    this.updateButton = new UiButtonState({ label: 'Update scores', forceWide: true  });
+    this.playButton = new UiButtonState({ label: 'Play a game', forceWide: true  });
+    this.backButton = new UiButtonState({ label: 'Back', forceWide: false  });
 
     this.playerCountOpen = false;
     this.gameModeOpen = false;

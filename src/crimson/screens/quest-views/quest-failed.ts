@@ -88,9 +88,9 @@ export class QuestFailedView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._retryButton = new UiButtonState('Play Again', { forceWide: true });
-    this._questListButton = new UiButtonState('Play Another', { forceWide: true });
-    this._mainMenuButton = new UiButtonState('Main Menu', { forceWide: true });
+    this._retryButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
+    this._questListButton = new UiButtonState({ label: 'Play Another', forceWide: true  });
+    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
   }
 
   open(): void {
@@ -104,9 +104,9 @@ export class QuestFailedView {
     this.state.questOutcome = null;
     this._questTitle = '';
     this._record = null;
-    this._retryButton = new UiButtonState('Play Again', { forceWide: true });
-    this._questListButton = new UiButtonState('Play Another', { forceWide: true });
-    this._mainMenuButton = new UiButtonState('Main Menu', { forceWide: true });
+    this._retryButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
+    this._questListButton = new UiButtonState({ label: 'Play Another', forceWide: true  });
+    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
 
     const outcome = this._outcome;
     if (outcome !== null) {

@@ -143,7 +143,7 @@ export class QuestsMenuView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._backButton = new UiButtonState('Back');
+    this._backButton = new UiButtonState({ label: 'Back' });
   }
 
   open(): void {
@@ -161,7 +161,7 @@ export class QuestsMenuView {
     this._closing = false;
     this._closeAction = null;
     this._panelOpenSfxPlayed = false;
-    this._backButton = new UiButtonState('Back');
+    this._backButton = new UiButtonState({ label: 'Back' });
     this._isOpen = true;
   }
 

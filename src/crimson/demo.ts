@@ -104,8 +104,8 @@ export class DemoView {
     });
     this._runtime.reset();
 
-    this._purchaseButton = new UiButtonState('Purchase', { forceWide: true });
-    this._maybeLaterButton = new UiButtonState('Maybe later', { forceWide: true });
+    this._purchaseButton = new UiButtonState({ label: 'Purchase', forceWide: true  });
+    this._maybeLaterButton = new UiButtonState({ label: 'Maybe later', forceWide: true  });
     this._tickHarness = new StandaloneTickHarness({
       gameMode: GameMode.DEMO,
       buildInputs: (ctx: FrameContext) => this._buildRunnerInputs(ctx),
@@ -169,8 +169,8 @@ export class DemoView {
     this._upsellMessageIndex = 0;
     this._upsellPulseMs = 0;
     this._purchaseActive = false;
-    this._purchaseButton = new UiButtonState('Purchase', { forceWide: true });
-    this._maybeLaterButton = new UiButtonState('Maybe later', { forceWide: true });
+    this._purchaseButton = new UiButtonState({ label: 'Purchase', forceWide: true  });
+    this._maybeLaterButton = new UiButtonState({ label: 'Maybe later', forceWide: true  });
     this._variantIndex = 0;
     this._demoVariantIndex = 0;
     this._questSpawnTimelineMs = 0;
@@ -268,8 +268,8 @@ export class DemoView {
       this._questSpawnTimelineMs = 0;
     }
     this._demoTimeLimitMs = Math.max(0, int(limitMs));
-    this._purchaseButton = new UiButtonState('Purchase', { forceWide: true });
-    this._maybeLaterButton = new UiButtonState('Maybe later', { forceWide: true });
+    this._purchaseButton = new UiButtonState({ label: 'Purchase', forceWide: true  });
+    this._maybeLaterButton = new UiButtonState({ label: 'Maybe later', forceWide: true  });
   }
 
   private _purchaseLayoutWideShift(): number {

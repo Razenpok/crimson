@@ -179,11 +179,11 @@ export class QuestResultsUi {
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;
 
-  private _okButton = new UiButtonState('OK', { forceWide: false });
-  private _playNextButton = new UiButtonState('Play Next', { forceWide: true });
-  private _playAgainButton = new UiButtonState('Play Again', { forceWide: true });
-  private _highScoresButton = new UiButtonState('High scores', { forceWide: true });
-  private _mainMenuButton = new UiButtonState('Main Menu', { forceWide: true });
+  private _okButton = new UiButtonState({ label: 'OK', forceWide: false  });
+  private _playNextButton = new UiButtonState({ label: 'Play Next', forceWide: true  });
+  private _playAgainButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
+  private _highScoresButton = new UiButtonState({ label: 'High scores', forceWide: true  });
+  private _mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
 
   constructor(opts: { config: CrimsonConfig; preserveBugs?: boolean }) {
     this.config = opts.config;

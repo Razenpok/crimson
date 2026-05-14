@@ -72,10 +72,10 @@ export class EndNoteView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._survivalButton = new UiButtonState('Survival', { forceWide: true });
-    this._rushButton = new UiButtonState('  Rush  ', { forceWide: true });
-    this._typoButton = new UiButtonState("Typ'o'Shooter", { forceWide: true });
-    this._mainMenuButton = new UiButtonState('Main Menu', { forceWide: true });
+    this._survivalButton = new UiButtonState({ label: 'Survival', forceWide: true  });
+    this._rushButton = new UiButtonState({ label: '  Rush  ', forceWide: true  });
+    this._typoButton = new UiButtonState({ label: "Typ'o'Shooter", forceWide: true  });
+    this._mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
   }
 
   open(): void {

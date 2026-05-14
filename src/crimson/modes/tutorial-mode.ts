@@ -75,9 +75,9 @@ export class TutorialMode extends BaseGameplayMode {
       audio: opts.audio ?? null,
       audioRng: opts.audioRng,
     });
-    this._skipButton = new UiButtonState('Skip tutorial', { forceWide: true });
-    this._playButton = new UiButtonState('Play a game', { forceWide: true });
-    this._repeatButton = new UiButtonState('Repeat tutorial', { forceWide: true });
+    this._skipButton = new UiButtonState({ label: 'Skip tutorial', forceWide: true  });
+    this._playButton = new UiButtonState({ label: 'Play a game', forceWide: true  });
+    this._repeatButton = new UiButtonState({ label: 'Repeat tutorial', forceWide: true  });
   }
 
   private _newSimSession(): DeterministicSession {
@@ -114,9 +114,9 @@ export class TutorialMode extends BaseGameplayMode {
     super.open();
     this._perkMenu.reset();
 
-    this._skipButton = new UiButtonState('Skip tutorial', { forceWide: true });
-    this._playButton = new UiButtonState('Play a game', { forceWide: true });
-    this._repeatButton = new UiButtonState('Repeat tutorial', { forceWide: true });
+    this._skipButton = new UiButtonState({ label: 'Skip tutorial', forceWide: true  });
+    this._playButton = new UiButtonState({ label: 'Play a game', forceWide: true  });
+    this._repeatButton = new UiButtonState({ label: 'Repeat tutorial', forceWide: true  });
 
     this._perkPickPending = false;
     this._frameInputState = null;

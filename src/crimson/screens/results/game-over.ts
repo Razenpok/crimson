@@ -207,10 +207,10 @@ export class GameOverUi {
   private _closeAction: string | null = null;
 
   // Buttons (rendered via existing ui_button implementation)
-  private _okButton = new UiButtonState('OK', { forceWide: false });
-  private _playAgainButton = new UiButtonState('Play Again', { forceWide: true });
-  private _highScoresButton = new UiButtonState('High scores', { forceWide: true });
-  private _mainMenuButton = new UiButtonState('Main Menu', { forceWide: true });
+  private _okButton = new UiButtonState({ label: 'OK', forceWide: false  });
+  private _playAgainButton = new UiButtonState({ label: 'Play Again', forceWide: true  });
+  private _highScoresButton = new UiButtonState({ label: 'High scores', forceWide: true  });
+  private _mainMenuButton = new UiButtonState({ label: 'Main Menu', forceWide: true  });
 
   private _consumeEnter = false;
   private _deferNameInputUntilControlsReleased = false;

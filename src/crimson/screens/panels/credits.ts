@@ -272,8 +272,8 @@ export class CreditsView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._backButton = new UiButtonState('Back', { forceWide: false });
-    this._secretButton = new UiButtonState('Secret', { forceWide: false });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._secretButton = new UiButtonState({ label: 'Secret', forceWide: false  });
   }
 
   open(): void {
@@ -297,8 +297,8 @@ export class CreditsView {
     this._scrollLineStartIndex = 0;
     this._scrollLineEndIndex = 0;
 
-    this._backButton = new UiButtonState('Back', { forceWide: false });
-    this._secretButton = new UiButtonState('Secret', { forceWide: false });
+    this._backButton = new UiButtonState({ label: 'Back', forceWide: false  });
+    this._secretButton = new UiButtonState({ label: 'Secret', forceWide: false  });
 
     if (this.state.audio !== null) {
       audioPlaySfx(this.state.audio, SfxId.UI_PANELCLICK);

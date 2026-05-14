@@ -227,8 +227,8 @@ export class AlienZooKeeperView {
 
   constructor(state: GameState) {
     this.state = state;
-    this._resetButton = new UiButtonState(_RESET_LABEL, { forceWide: false });
-    this._backButton = new UiButtonState(_BACK_LABEL, { forceWide: false });
+    this._resetButton = new UiButtonState({ label: _RESET_LABEL, forceWide: false  });
+    this._backButton = new UiButtonState({ label: _BACK_LABEL, forceWide: false  });
   }
 
   open(): void {
@@ -243,8 +243,8 @@ export class AlienZooKeeperView {
     this._pendingAction = null;
     this._action = null;
 
-    this._resetButton = new UiButtonState(_RESET_LABEL, { forceWide: false });
-    this._backButton = new UiButtonState(_BACK_LABEL, { forceWide: false });
+    this._resetButton = new UiButtonState({ label: _RESET_LABEL, forceWide: false  });
+    this._backButton = new UiButtonState({ label: _BACK_LABEL, forceWide: false  });
 
     this._animTimeMs = 0;
     this._resetState();

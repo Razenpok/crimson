@@ -292,26 +292,24 @@ export class UiButtonState {
   alpha: number;
   forceWide: boolean;
 
-  constructor(
-    label: string,
-    opts?: {
-      enabled?: boolean;
-      hovered?: boolean;
-      activated?: boolean;
-      hoverT?: number;
-      pressT?: number;
-      alpha?: number;
-      forceWide?: boolean;
-    },
-  ) {
-    this.label = label;
-    this.enabled = opts?.enabled ?? true;
-    this.hovered = opts?.hovered ?? false;
-    this.activated = opts?.activated ?? false;
-    this.hoverT = opts?.hoverT ?? 0;
-    this.pressT = opts?.pressT ?? 0;
-    this.alpha = opts?.alpha ?? 1.0;
-    this.forceWide = opts?.forceWide ?? false;
+  constructor(opts: {
+    label: string;
+    enabled?: boolean;
+    hovered?: boolean;
+    activated?: boolean;
+    hoverT?: number;
+    pressT?: number;
+    alpha?: number;
+    forceWide?: boolean;
+  }) {
+    this.label = opts.label;
+    this.enabled = opts.enabled ?? true;
+    this.hovered = opts.hovered ?? false;
+    this.activated = opts.activated ?? false;
+    this.hoverT = opts.hoverT ?? 0;
+    this.pressT = opts.pressT ?? 0;
+    this.alpha = opts.alpha ?? 1.0;
+    this.forceWide = opts.forceWide ?? false;
   }
 }
 

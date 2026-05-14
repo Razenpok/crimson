@@ -111,7 +111,7 @@ export class PerkMenuController {
 
   reset(): void {
     this._layout = new PerkMenuLayout();
-    this._cancelButton = new UiButtonState(this._cancelLabel);
+    this._cancelButton = new UiButtonState({ label: this._cancelLabel });
     this._open = false;
     this._selectedIndex = 0;
     this._timelineMs = 0.0;

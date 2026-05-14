@@ -95,8 +95,8 @@ export class DemoTrialOverlayUi {
 
   constructor(resources: RuntimeResources) {
     this._resources = resources;
-    this._purchaseButton = new UiButtonState('Purchase', { forceWide: true });
-    this._maybeLaterButton = new UiButtonState('Maybe later', { forceWide: true });
+    this._purchaseButton = new UiButtonState({ label: 'Purchase', forceWide: true  });
+    this._maybeLaterButton = new UiButtonState({ label: 'Maybe later', forceWide: true  });
   }
 
   close(): void {
