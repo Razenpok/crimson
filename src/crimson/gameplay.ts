@@ -342,11 +342,14 @@ function _distanceF32Xy(ax: number, ay: number, bx: number, by: number): number 
 
 function _playerApplyMoveWithSpawnAvoidance(
   player: PlayerState,
-  delta: Vec2,
-  spawnSlots: readonly SpawnSlotInit[] | null,
-  creatures: readonly CreatureState[] | null,
+  opts: {
+    delta: Vec2;
+    spawnSlots: readonly SpawnSlotInit[] | null;
+    creatures: readonly CreatureState[] | null;
+  },
 ): void {
   // Port of native `player_apply_move_with_spawn_avoidance` (0x0041e290).
+  const { delta, spawnSlots, creatures } = opts;
   let dx = delta.x;
   let dy = delta.y;
   if (perkActive(player, PerkId.ALTERNATE_WEAPON)) {
@@ -460,10 +463,13 @@ function _playerApplyMoveSpeedCaps(player: PlayerState): void {
 }
 
 function _playerMoveDeltaFromHeading(
-  player: PlayerState,
-  movementDt: number,
-  speedScale: number,
+  opts: {
+    player: PlayerState;
+    movementDt: number;
+    speedScale: number;
+  },
 ): Vec2 {
+  const { player, movementDt, speedScale } = opts;
   const move = _directionFromHeadingNative(player.heading);
   const moveDx = f32(move.x * player.moveSpeed * speedScale);
   const moveDy = f32(move.y * player.moveSpeed * speedScale);
@@ -476,8 +482,9 @@ function _playerMoveDeltaFromHeading(
 function _playerAimPointFromHeading(
   player: PlayerState,
   heading: number,
-  radius: number = _AIM_POINT_RADIUS,
+  opts: { radius?: number } = {},
 ): Vec2 {
+  const radius = opts.radius ?? _AIM_POINT_RADIUS;
   const aimDir = _directionFromHeadingNative(heading);
   return new Vec2(
     f32(player.pos.x + aimDir.x * radius),
@@ -702,15 +709,27 @@ export function playerUpdate(
       if (movingForward) {
         _playerAccelerateMoveSpeed(player, movementDt);
         _playerApplyMoveSpeedCaps(player);
-        moveDeltaOverride = _playerMoveDeltaFromHeading(player, movementDt, 25.0);
+        moveDeltaOverride = _playerMoveDeltaFromHeading({
+          player,
+          movementDt,
+          speedScale: 25.0,
+        });
       } else if (movingBackward) {
         _playerAccelerateMoveSpeed(player, movementDt);
         phaseSign = -1.0;
-        moveDeltaOverride = _playerMoveDeltaFromHeading(player, movementDt, -25.0);
+        moveDeltaOverride = _playerMoveDeltaFromHeading({
+          player,
+          movementDt,
+          speedScale: -25.0,
+        });
       } else {
         if (!turned) player.turnSpeed = 1.0;
         _playerDecelerateMoveSpeed(player, movementDt);
-        moveDeltaOverride = _playerMoveDeltaFromHeading(player, movementDt, 25.0);
+        moveDeltaOverride = _playerMoveDeltaFromHeading({
+          player,
+          movementDt,
+          speedScale: 25.0,
+        });
       }
     } else if (moveMode === MovementControlType.STATIC) {
       const movingForward =
@@ -851,9 +870,11 @@ export function playerUpdate(
 
   _playerApplyMoveWithSpawnAvoidance(
     player,
-    moveDelta,
-    spawnSlots,
-    creatures,
+    {
+      delta: moveDelta,
+      spawnSlots,
+      creatures,
+    },
   );
 
   player.movePhase += phaseSign * movementDt * player.moveSpeed * 19.0;
