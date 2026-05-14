@@ -177,6 +177,7 @@ export class HudLayout {
 }
 
 export function hudFlagsForGameMode(gameModeId: GameMode): HudRenderFlags {
+  // Match `hud_update_and_render` (0x0041ca90) flag mapping.
   switch (gameModeId) {
     case GameMode.QUESTS:
       return new HudRenderFlags({
