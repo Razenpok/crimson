@@ -113,13 +113,13 @@ export class ParticlePool {
     for (const entry of this._entries) entry.active = false;
   }
 
-  private _allocSlot(caller: CallerStatic = null): number {
+  private _allocSlot(opts: { caller?: CallerStatic } = {}): number {
     for (let i = 0; i < this._entries.length; i++) {
       if (!this._entries[i].active) return i;
     }
     if (this._entries.length === 0) throw new Error('Particle pool has zero entries');
     // Native: `crt_rand() & 0x7f` (pool size is 0x80).
-    return this._rng.rand({ caller }) % this._entries.length;
+    return this._rng.rand({ caller: opts.caller ?? null }) % this._entries.length;
   }
 
   spawnParticle(opts: {
@@ -132,7 +132,7 @@ export class ParticlePool {
 
     const intensity = opts.intensity ?? 1.0;
     const owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
-    const idx = this._allocSlot(RngCallerStatic.FX_SPAWN_PARTICLE_ALLOC);
+    const idx = this._allocSlot({ caller: RngCallerStatic.FX_SPAWN_PARTICLE_ALLOC });
     const entry = this._entries[idx];
     entry.active = true;
     entry.renderFlag = true;
@@ -159,7 +159,7 @@ export class ParticlePool {
     // Port of `fx_spawn_particle_slow` (0x00420240).
 
     const owner = opts.owner ?? OwnerRef.fromLocalPlayer(0);
-    const idx = this._allocSlot(RngCallerStatic.FX_SPAWN_PARTICLE_SLOW_ALLOC);
+    const idx = this._allocSlot({ caller: RngCallerStatic.FX_SPAWN_PARTICLE_SLOW_ALLOC });
     const entry = this._entries[idx];
     entry.active = true;
     entry.renderFlag = true;
@@ -205,10 +205,11 @@ export class ParticlePool {
     dt = f32(dt);
     const damageApplier = (opts?.applyCreatureDamage ?? null) ?? this._creatureDamageApplier;
 
-    const creatureFindInRadius = (pos: Vec2, radius: number): number => {
+    const creatureFindInRadius = (opts: { pos: Vec2; radius: number }): number => {
       if (creatures === null) return -1;
       const maxIndex = Math.min(creatures.length, 0x180);
-      radius = f32(radius);
+      const pos = opts.pos;
+      const radius = f32(opts.radius);
 
       for (let ci = 0; ci < maxIndex; ci++) {
         const creature = creatures[ci];
@@ -318,7 +319,7 @@ export class ParticlePool {
       }
 
       if (entry.renderFlag && creatures !== null) {
-        const hitIdx = creatureFindInRadius(entry.pos, Math.max(entry.intensity, 0.0) * 8.0);
+        const hitIdx = creatureFindInRadius({ pos: entry.pos, radius: Math.max(entry.intensity, 0.0) * 8.0 });
         if (hitIdx !== -1) {
           entry.renderFlag = false;
           const creature = creatures[hitIdx];
@@ -758,8 +759,9 @@ export class EffectPool {
     return this._entries.filter((e) => e.flags !== 0);
   }
 
-  private _allocSlot(detailPreset: number): number | null {
+  private _allocSlot(opts: { detailPreset: number }): number | null {
     // Native: if detail_preset < 3, skip every other spawn attempt.
+    const detailPreset = opts.detailPreset;
     if (detailPreset < 3) {
       const skip = this._detailToggle & 1;
       this._detailToggle++;
@@ -791,7 +793,7 @@ export class EffectPool {
     scaleStep: number;
     detailPreset: number;
   }): number | null {
-    const idx = this._allocSlot(opts.detailPreset);
+    const idx = this._allocSlot({ detailPreset: opts.detailPreset });
     if (idx === null) return null;
 
     const entry = this._entries[idx];
