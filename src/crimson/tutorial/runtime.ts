@@ -52,12 +52,12 @@ export function tutorialInputTransform(
 
 
 function tutorialOverlayFromActions(actions: TutorialFrameActions): TutorialOverlayState {
-  const overlay = new TutorialOverlayState();
-  overlay.promptText = String(actions.promptText);
-  overlay.promptAlpha = actions.promptAlpha;
-  overlay.hintText = String(actions.hintText);
-  overlay.hintAlpha = actions.hintAlpha;
-  return overlay;
+  return new TutorialOverlayState({
+    promptText: String(actions.promptText),
+    promptAlpha: actions.promptAlpha,
+    hintText: String(actions.hintText),
+    hintAlpha: actions.hintAlpha,
+  });
 }
 
 

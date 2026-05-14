@@ -1,26 +1,66 @@
 // Port of crimson/tutorial/state.py
 
 export class TutorialState {
-  stageIndex = -1;
-  stageTimerMs = 0;
-  stageTransitionTimerMs = -1000;
-  hintIndex = -1;
-  hintAlpha = 0;
-  hintFadeIn = false;
-  repeatSpawnCount = 0;
-  hintBonusCreatureRef: number | null = null;
-  preserveBugs = false;
-  moveActiveThisTick = false;
-  fireActiveThisTick = false;
-  hintBonusAliveBeforeTick = false;
+  stageIndex: number;
+  stageTimerMs: number;
+  stageTransitionTimerMs: number;
+  hintIndex: number;
+  hintAlpha: number;
+  hintFadeIn: boolean;
+  repeatSpawnCount: number;
+  hintBonusCreatureRef: number | null;
+  preserveBugs: boolean;
+  moveActiveThisTick: boolean;
+  fireActiveThisTick: boolean;
+  hintBonusAliveBeforeTick: boolean;
+
+  constructor(opts: {
+    stageIndex?: number;
+    stageTimerMs?: number;
+    stageTransitionTimerMs?: number;
+    hintIndex?: number;
+    hintAlpha?: number;
+    hintFadeIn?: boolean;
+    repeatSpawnCount?: number;
+    hintBonusCreatureRef?: number | null;
+    preserveBugs?: boolean;
+    moveActiveThisTick?: boolean;
+    fireActiveThisTick?: boolean;
+    hintBonusAliveBeforeTick?: boolean;
+  } = {}) {
+    this.stageIndex = opts.stageIndex ?? -1;
+    this.stageTimerMs = opts.stageTimerMs ?? 0;
+    this.stageTransitionTimerMs = opts.stageTransitionTimerMs ?? -1000;
+    this.hintIndex = opts.hintIndex ?? -1;
+    this.hintAlpha = opts.hintAlpha ?? 0;
+    this.hintFadeIn = opts.hintFadeIn ?? false;
+    this.repeatSpawnCount = opts.repeatSpawnCount ?? 0;
+    this.hintBonusCreatureRef = opts.hintBonusCreatureRef ?? null;
+    this.preserveBugs = opts.preserveBugs ?? false;
+    this.moveActiveThisTick = opts.moveActiveThisTick ?? false;
+    this.fireActiveThisTick = opts.fireActiveThisTick ?? false;
+    this.hintBonusAliveBeforeTick = opts.hintBonusAliveBeforeTick ?? false;
+  }
 }
 
 
 export class TutorialOverlayState {
-  promptText = '';
-  promptAlpha = 0.0;
-  hintText = '';
-  hintAlpha = 0.0;
+  promptText: string;
+  promptAlpha: number;
+  hintText: string;
+  hintAlpha: number;
+
+  constructor(opts: {
+    promptText?: string;
+    promptAlpha?: number;
+    hintText?: string;
+    hintAlpha?: number;
+  } = {}) {
+    this.promptText = opts.promptText ?? '';
+    this.promptAlpha = opts.promptAlpha ?? 0.0;
+    this.hintText = opts.hintText ?? '';
+    this.hintAlpha = opts.hintAlpha ?? 0.0;
+  }
 }
 
 
