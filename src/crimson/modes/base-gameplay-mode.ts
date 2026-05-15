@@ -674,7 +674,6 @@ export class BaseGameplayMode {
     gameMode: GameMode;
     playerCount: number;
   }): void {
-    // If menu is already active, do nothing
     if (opts.menu.active) return;
 
     const perkCtx = this._perkMenuUiContext();
