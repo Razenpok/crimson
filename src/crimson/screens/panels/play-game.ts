@@ -516,7 +516,7 @@ export class PlayGameMenuView extends PanelMenuView {
     for (let idx = 0; idx < PlayGameMenuView._PLAYER_COUNT_LABELS.length; idx++) {
       const itemY = layout.rowsY0 + layout.rowH * idx;
       const itemHovered = mouseInsideRectWithPadding(
-        mouse, { pos: { x: layout.pos.x, y: itemY }, width: layout.width, height: 14.0 * scale },
+        mouse, { pos: new Vec2(layout.pos.x, itemY), width: layout.width, height: 14.0 * scale },
       );
       if (itemHovered && InputState.wasMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         config.gameplay.playerCount = idx + 1;
@@ -649,7 +649,7 @@ export class PlayGameMenuView extends PanelMenuView {
       const item = PlayGameMenuView._PLAYER_COUNT_LABELS[idx];
       const itemY = layout.rowsY0 + layout.rowH * idx;
       const hovered = mouseInsideRectWithPadding(
-        mouse, { pos: { x: layout.pos.x, y: itemY }, width: layout.width, height: 14.0 * scale },
+        mouse, { pos: new Vec2(layout.pos.x, itemY), width: layout.width, height: 14.0 * scale },
       );
       let alpha = 153; // 0x3f19999a
       if (hovered) {

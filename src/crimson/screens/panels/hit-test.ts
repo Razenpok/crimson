@@ -1,11 +1,11 @@
 // Port of crimson/screens/panels/hit_test.py
 
-import { type SupportsXY } from '@grim/geom.ts';
+import { type SupportsXY, Vec2 } from '@grim/geom.ts';
 
 /** Port of `ui_mouse_inside_rect_with_padding` (0x00403430). */
 export function mouseInsideRectWithPadding(
   mouse: SupportsXY,
-  opts: { pos: SupportsXY; width: number; height: number; leftPad?: number; topPad?: number },
+  opts: { pos: Vec2; width: number; height: number; leftPad?: number; topPad?: number },
 ): boolean {
   const leftPad = opts.leftPad ?? 10.0;
   const topPad = opts.topPad ?? 2.0;
