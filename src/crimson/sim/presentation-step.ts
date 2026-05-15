@@ -71,7 +71,7 @@ export function planPlayerAudioSfx(
 }
 
 function _hitSfxForType(
-  typeId: ProjectileTemplateId,
+  typeId: number,
   _beamTypes: ReadonlySet<number>,
   rng: CrandLike,
 ): SfxId {
@@ -106,7 +106,7 @@ export function planHitSfx(
       opts.rng.rand({ caller: RngCallerStatic.SFX_PLAY_EXCLUSIVE_PLAYLIST_PICK });
       continue;
     }
-    const typeId = hits[idx].typeId;
+    const typeId = int(hits[idx].typeId);
     sfx.push(_hitSfxForType(typeId, beamTypes, opts.rng));
   }
 
@@ -216,7 +216,7 @@ export function queueProjectileDecalsPreHit(
   return new ProjectileDecalPostCtx({
     hit: opts.hit,
     baseAngle,
-    typeId,
+    typeId: int(typeId),
     freezeActive,
     freezeShardSpawn,
   });
