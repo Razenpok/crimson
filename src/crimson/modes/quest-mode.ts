@@ -379,8 +379,8 @@ export class QuestMode extends BaseGameplayMode {
     session: LanSession,
     _dtTick: number,
   ): boolean {
-    session.detailPreset = this._deterministicDetailPreset();
-    session.violenceDisabled = this._deterministicViolenceDisabled();
+    session.detailPreset = int(this._deterministicDetailPreset());
+    session.violenceDisabled = int(this._deterministicViolenceDisabled());
     return true;
   }
 
@@ -537,7 +537,7 @@ export class QuestMode extends BaseGameplayMode {
     this.bindStatus(opts.status);
 
     const boundStatus = this.state.status;
-    const genericUnlockIndex = boundStatus != null ? (boundStatus.questUnlockIndex ?? 0) : 0;
+    const genericUnlockIndex = boundStatus != null ? int(boundStatus.questUnlockIndex ?? 0) : 0;
 
     advanceUnlockTerrain(
       this.state.rng,
@@ -565,10 +565,10 @@ export class QuestMode extends BaseGameplayMode {
       fullVersion: !this.demoModeActive,
     });
     this.simWorld.state.rng.srand(int(this.state.rng.state));
-    const totalSpawnCount = entries.reduce((sum, e) => sum + e.count, 0);
+    const totalSpawnCount = entries.reduce((sum, e) => sum + int(e.count), 0);
     this._questDef = quest;
     this._questLevel = quest.level;
-    this._questTotalSpawnCount = totalSpawnCount;
+    this._questTotalSpawnCount = int(totalSpawnCount);
     this._resetGameplayFrameClock();
     this._simSession = this._newSimSession({ spawnEntries: entries });
 
@@ -715,8 +715,8 @@ export class QuestMode extends BaseGameplayMode {
       return;
     }
 
-    session.detailPreset = this._deterministicDetailPreset();
-    session.violenceDisabled = this._deterministicViolenceDisabled();
+    session.detailPreset = int(this._deterministicDetailPreset());
+    session.violenceDisabled = int(this._deterministicViolenceDisabled());
 
     this._worldRuntime.syncAudioBridgeState();
     if (this.renderResources.ground !== null) {
