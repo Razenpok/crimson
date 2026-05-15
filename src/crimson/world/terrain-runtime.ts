@@ -8,9 +8,9 @@ export class TerrainRuntime {
   worldSize: number;
   renderResources: RenderResources;
 
-  constructor(opts: { worldSize?: number; renderResources: RenderResources }) {
+  constructor(opts: { worldSize?: number; renderResources?: RenderResources } = {}) {
     this.worldSize = opts.worldSize ?? 1024.0;
-    this.renderResources = opts.renderResources;
+    this.renderResources = opts.renderResources!;
   }
 
   applyTerrainSetup(opts: { terrainSlots: TerrainSlotTriplet; seed: number }): void {
