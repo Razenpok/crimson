@@ -8,7 +8,6 @@ import { type EffectEntry, ParticleStyleId } from '@crimson/effects.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
-import { fxDetailEnabled } from '@grim/config.ts';
 
 function byteChannel(value: number): number {
   return int(clamp(value, 0.0, 1.0) * 255.0 + 0.5) / 255;
@@ -23,11 +22,11 @@ function srcRectForEffect(
   texWidth: number,
   texHeight: number,
 ): wgl.Rectangle | null {
-  const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(effectId);
+  const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(int(effectId));
   if (atlas === undefined) return null;
-  const grid = SIZE_CODE_GRID[atlas.sizeCode];
+  const grid = SIZE_CODE_GRID[int(atlas.sizeCode)];
   if (!grid) return null;
-  const frame = atlas.frame;
+  const frame = int(atlas.frame);
   const col = frame % grid;
   const row = Math.floor(frame / grid);
   const cellW = texWidth / grid;
@@ -58,7 +57,7 @@ export function drawParticlePool(
   if (srcNormal === null || srcStyle8 === null) return;
 
   const config = frame.config;
-  const fxDetail1 = config !== null ? fxDetailEnabled(config.display, 1) : true;
+  const fxDetail1 = config !== null ? config.display.fxDetailEnabled(1, true) : true;
 
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
 
@@ -67,7 +66,7 @@ export function drawParticlePool(
     const tint = wgl.makeColor(1, 1, 1, alphaByte / 255);
     for (let idx = 0; idx < particles.length; idx++) {
       const entry = particles[idx];
-      if (!entry.active || (idx % 2) || entry.styleId === ParticleStyleId.BUBBLEGUN) continue;
+      if (!entry.active || (idx % 2) || int(entry.styleId) === int(ParticleStyleId.BUBBLEGUN)) continue;
       let radius = (Math.sin((1.0 - entry.intensity) * 1.5707964) + 0.1) * 55.0 + 4.0;
       radius = Math.max(radius, 16.0);
       const size = Math.max(0.0, radius * 2.0 * scale);
@@ -80,9 +79,9 @@ export function drawParticlePool(
   }
 
   for (const entry of particles) {
-    if (!entry.active || entry.styleId === ParticleStyleId.BUBBLEGUN) continue;
+    if (!entry.active || int(entry.styleId) === int(ParticleStyleId.BUBBLEGUN)) continue;
     let radius = Math.sin((1.0 - entry.intensity) * 1.5707964) * 24.0;
-    if (entry.styleId === ParticleStyleId.BLOW_TORCH) radius *= 0.8;
+    if (int(entry.styleId) === int(ParticleStyleId.BLOW_TORCH)) radius *= 0.8;
     radius = Math.max(radius, 2.0);
     const size = Math.max(0.0, radius * 2.0 * scale);
     if (size <= 0.0) continue;
@@ -96,7 +95,7 @@ export function drawParticlePool(
 
   const alphaByte = int(clamp(alpha, 0.0, 1.0) * 255.0 + 0.5);
   for (const entry of particles) {
-    if (!entry.active || entry.styleId !== ParticleStyleId.BUBBLEGUN) continue;
+    if (!entry.active || int(entry.styleId) !== int(ParticleStyleId.BUBBLEGUN)) continue;
     const wobble = Math.sin(entry.spin) * 3.0;
     const halfH = (wobble + 15.0) * entry.scaleX * 7.0;
     const halfW = (15.0 - wobble) * entry.scaleX * 7.0;
@@ -125,7 +124,7 @@ export function drawSpriteEffectPool(
 
   const frame = renderCtx.frame;
   const config = frame.config;
-  if (config !== null && !fxDetailEnabled(config.display, 2)) return;
+  if (config !== null && !config.display.fxDetailEnabled(2, false)) return;
 
   const texture = getTexture(frame.resources, TextureId.PARTICLES);
   const effects = frame.state.spriteEffects.entries;
@@ -133,9 +132,9 @@ export function drawSpriteEffectPool(
 
   const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(EffectId.EXPLOSION_PUFF);
   if (atlas === undefined) return;
-  const grid = SIZE_CODE_GRID[atlas.sizeCode];
+  const grid = SIZE_CODE_GRID[int(atlas.sizeCode)];
   if (!grid) return;
-  const atlasFrame = atlas.frame;
+  const atlasFrame = int(atlas.frame);
   const col = atlasFrame % grid;
   const row = Math.floor(atlasFrame / grid);
   const cellW = texture.width / grid;
@@ -182,11 +181,11 @@ export function drawEffectPool(
     const cached = srcCache.get(effectId);
     if (cached !== undefined) return cached;
 
-    const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(effectId);
+    const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(int(effectId));
     if (atlas === undefined) return null;
-    const grid = SIZE_CODE_GRID[atlas.sizeCode];
+    const grid = SIZE_CODE_GRID[int(atlas.sizeCode)];
     if (!grid) return null;
-    const f = atlas.frame;
+    const f = int(atlas.frame);
     const col = f % grid;
     const row = Math.floor(f / grid);
     const cellW = texture.width / grid;
@@ -201,7 +200,7 @@ export function drawEffectPool(
   }
 
   function drawEntry(entry: EffectEntry): void {
-    const effectId = entry.effectId;
+    const effectId = int(entry.effectId);
     const src = srcRect(effectId);
     if (src === null) return;
 
@@ -225,14 +224,14 @@ export function drawEffectPool(
   wgl.beginBlendMode(wgl.BlendMode.ALPHA);
   for (const entry of effects) {
     if (!entry.flags || entry.age < 0.0) continue;
-    if (entry.flags & 0x40) drawEntry(entry);
+    if (int(entry.flags) & 0x40) drawEntry(entry);
   }
 
   wgl.endBlendMode();
   wgl.beginBlendMode(wgl.BlendMode.ADDITIVE);
   for (const entry of effects) {
     if (!entry.flags || entry.age < 0.0) continue;
-    if (!(entry.flags & 0x40)) drawEntry(entry);
+    if (!(int(entry.flags) & 0x40)) drawEntry(entry);
   }
 
   wgl.endBlendMode();
