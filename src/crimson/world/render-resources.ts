@@ -32,18 +32,16 @@ export class RenderResources {
   private _pendingTerrainFxBatches: TerrainFxBatch[] = [];
   private _resources: RuntimeResources | null = null;
 
-  constructor(opts: { assetsUrl?: string; worldSize?: number; config?: CrimsonConfig | null }) {
-    this._assetsUrl = opts.assetsUrl ?? './assets';
+  constructor(opts: { assetsUrl: string; worldSize?: number; config?: CrimsonConfig | null }) {
+    this._assetsUrl = opts.assetsUrl;
     this.worldSize = opts.worldSize ?? 1024.0;
     this.config = opts.config ?? null;
   }
 
   get resources(): RuntimeResources {
-    let resources = this._resources;
+    const resources = this._resources;
     if (resources === null) {
-      // WebGL asset loading can finish before gameplay resource wiring runs; keep this lazy fallback instead of Python's assertion.
-      resources = runtimeResourcesFor(this._assetsUrl);
-      this._resources = resources;
+      throw new Error('runtime resources must be loaded before use');
     }
     return resources;
   }
@@ -114,8 +112,8 @@ export class RenderResources {
 
   open(opts: { terrainSeed: number }): void {
     const { terrainSeed } = opts;
-    const resources = this.resources;
     this.close();
+    const resources = runtimeResourcesFor(this._assetsUrl);
     this._resources = resources;
 
     const base = getTexture(resources, TextureId.TER_Q1_BASE);
@@ -129,8 +127,9 @@ export class RenderResources {
   }
 
   close(): void {
-    if (this.ground !== null) {
-      this.ground.destroy();
+    if (this.ground !== null && this.ground.renderTarget !== null) {
+      wgl.unloadRenderTexture(this.ground.renderTarget);
+      this.ground.renderTarget = null;
     }
     this.ground = null;
 
