@@ -52,8 +52,12 @@ function parseFloatArg(value: string): number {
     return stripped.startsWith('-') ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
   }
   if (stripped.length === 0) return 0.0;
-  const v = Number(stripped);
-  return Number.isNaN(v) ? 0.0 : v;
+  const digits = String.raw`\d(?:_?\d)*`;
+  const decimalPattern = new RegExp(
+    String.raw`^[+-]?(?:(?:${digits}(?:\.(?:${digits})?)?|\.(?:${digits}))(?:[eE][+-]?${digits})?)$`,
+  );
+  if (!decimalPattern.test(stripped)) return 0.0;
+  return Number(stripped.replaceAll('_', ''));
 }
 
 function parseDemoTrialMsArg(value: string): number {
