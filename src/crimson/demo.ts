@@ -712,14 +712,18 @@ export class DemoView {
 
     const TAU = Math.PI * 2;
 
+    function pyMod(value: number, modulus: number): number {
+      return value - Math.floor(value / modulus) * modulus;
+    }
+
     function turnTowardsHeading(cur: number, target: number): [number, number] {
-      let c = cur % TAU;
-      let t = target % TAU;
-      let delta = (t - c + Math.PI) % TAU - Math.PI;
+      let c = pyMod(cur, TAU);
+      const t = pyMod(target, TAU);
+      const delta = pyMod(t - c + Math.PI, TAU) - Math.PI;
       const diff = Math.abs(delta);
       if (diff <= 1e-9) return [c, 0.0];
       const step = dt * diff * 5.0;
-      c = delta > 0.0 ? (c + step) % TAU : (c - step) % TAU;
+      c = delta > 0.0 ? pyMod(c + step, TAU) : pyMod(c - step, TAU);
       return [c, diff];
     }
 
