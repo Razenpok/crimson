@@ -87,14 +87,42 @@ export function drawClassicMenuPanel(
   const dstBot = wgl.makeRectangle(dstX, dstY + topH + midH, dstW, bottomH);
 
   if (shadow) {
-    const slices: [typeof srcTop, typeof dstTop][] = [[srcTop, dstTop], [srcMid, dstMid], [srcBot, dstBot]];
-    for (const [s, d] of slices) {
-      drawUiQuadShadow({
-        texture, src: s,
-        dst: wgl.makeRectangle(d.x + UI_SHADOW_OFFSET, d.y + UI_SHADOW_OFFSET, d.w, d.h),
-        origin, rotationDeg: 0.0,
-      });
-    }
+    drawUiQuadShadow({
+      texture,
+      src: srcTop,
+      dst: wgl.makeRectangle(
+        dstTop.x + UI_SHADOW_OFFSET,
+        dstTop.y + UI_SHADOW_OFFSET,
+        dstTop.w,
+        dstTop.h,
+      ),
+      origin,
+      rotationDeg: 0.0,
+    });
+    drawUiQuadShadow({
+      texture,
+      src: srcMid,
+      dst: wgl.makeRectangle(
+        dstMid.x + UI_SHADOW_OFFSET,
+        dstMid.y + UI_SHADOW_OFFSET,
+        dstMid.w,
+        dstMid.h,
+      ),
+      origin,
+      rotationDeg: 0.0,
+    });
+    drawUiQuadShadow({
+      texture,
+      src: srcBot,
+      dst: wgl.makeRectangle(
+        dstBot.x + UI_SHADOW_OFFSET,
+        dstBot.y + UI_SHADOW_OFFSET,
+        dstBot.w,
+        dstBot.h,
+      ),
+      origin,
+      rotationDeg: 0.0,
+    });
   }
 
   wgl.drawTexturePro(texture, srcTop, dstTop, origin, 0.0, tint);
