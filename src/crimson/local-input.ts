@@ -1,18 +1,18 @@
 // Port of crimson/local_input.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
+import { _AIM_KEYBOARD_TURN_RATE, _AIM_JOYSTICK_TURN_RATE } from './aim-constants';
+import { AimScheme } from './aim-schemes.ts';
 import {
   inputCodeIsDown,
   inputCodeIsPressed,
   inputAxisValue,
 } from './input-codes.ts';
+import { MovementControlType } from './movement-controls.ts';
 import { PlayerInput } from './sim/input.ts';
 import type { PlayerState } from './sim/state-types.ts';
-import { _AIM_KEYBOARD_TURN_RATE, _AIM_JOYSTICK_TURN_RATE } from './aim-constants';
-import { AimScheme } from './aim-schemes.ts';
-import { MovementControlType } from './movement-controls.ts';
 
 const _AIM_RADIUS_KEYBOARD = 60.0;
 const _AIM_RADIUS_PAD_BASE = 42.0;

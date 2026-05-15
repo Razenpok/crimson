@@ -1,6 +1,5 @@
 // Port of crimson/modes/rush_mode.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -8,19 +7,17 @@ import { type ConsoleState } from '@grim/console.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { InputState } from '@grim/input.ts';
 import { Crand } from '@grim/rand.ts';
-
+import * as wgl from '@wgl';
 import { GameMode } from '@crimson/game-modes.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
+import { buildRushSession, enforceRushLoadout } from '@crimson/sim/session-builders.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
   RushSpawnState,
 } from '@crimson/sim/sessions.ts';
-import { buildRushSession, enforceRushLoadout } from '@crimson/sim/session-builders.ts';
-import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
-
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
-
 import {
   BaseGameplayMode,
   type LanSession,

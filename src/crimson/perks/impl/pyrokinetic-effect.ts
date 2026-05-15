@@ -1,10 +1,10 @@
 // Port of crimson/perks/impl/pyrokinetic_effect.py
 
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
-import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PerksUpdateEffectsCtx } from '@crimson/perks/runtime/effects-context.ts';
+import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 
 export function updatePyrokinetic(ctx: PerksUpdateEffectsCtx): void {
   if (ctx.creatures === null) {

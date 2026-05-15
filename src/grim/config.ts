@@ -1,9 +1,9 @@
 // Port of grim/config.py
 
-import { QuestLevel } from '@crimson/quests/level.ts';
-import { GameMode } from '@crimson/game-modes.ts';
 import { AimScheme } from '@crimson/aim-schemes.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import { MovementControlType } from '@crimson/movement-controls.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 
 export { AimScheme, GameMode, MovementControlType };
 

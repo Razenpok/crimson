@@ -1,17 +1,17 @@
 // Port of crimson/screens/panels/databases_weapons.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { InputState } from '@grim/input.ts';
 import { type GameState } from '@crimson/game/types.ts';
-import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { buildWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
-import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { weaponsDbRightDetailXShift } from '@crimson/screens/high-scores-layout.ts';
 import { DatabaseBaseView } from './databases-base.ts';
+import { type Weapon, WeaponId, WEAPON_TABLE, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 

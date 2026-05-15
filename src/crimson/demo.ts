@@ -1,28 +1,28 @@
 // Port of crimson/demo.py
 
-import * as wgl from "@wgl";
 import { getTexture, TextureId } from "@grim/assets.ts";
 import { audioUpdate } from "@grim/audio.ts";
-import { drawSmallText, measureSmallTextWidth } from "@grim/fonts/small.ts";
 import { createGrimMonoFont, drawGrimMonoText, type GrimMonoFont } from "@grim/fonts/grim-mono.ts";
+import { drawSmallText, measureSmallTextWidth } from "@grim/fonts/small.ts";
 import { Vec2 } from "@grim/geom.ts";
 import { InputState } from "@grim/input.ts";
 import { clamp } from "@grim/math.ts";
+import * as wgl from "@wgl";
 import type { CreatureState } from "./creatures/runtime.ts";
 import { RANDOM_HEADING_SENTINEL, SpawnId } from "./creatures/spawn.ts";
+import type { GameState } from "./game/types.ts";
 import { GameMode } from "./game-modes.ts";
+import { questByLevel } from "./quests/index.ts";
+import { QuestLevel } from "./quests/level.ts";
 import { RngCallerStatic } from "./rng-caller-static.ts";
 import { requireRuntimeResources } from "./screens/assets.ts";
+import { advanceExplicitTerrain } from "./sim/bootstrap.ts";
 import { PlayerInput } from "./sim/input.ts";
 import { FrameContext } from "./sim/input-providers.ts";
 import type { PlayerState } from "./sim/state-types.ts";
-import { QuestLevel } from "./quests/level.ts";
-import { questByLevel } from "./quests/index.ts";
-import { advanceExplicitTerrain } from "./sim/bootstrap.ts";
 import { Q2_TERRAIN_SLOTS, type TerrainSlotTriplet } from "./terrain-slots.ts";
-import type { GameState } from "./game/types.ts";
-import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "./ui/perk-menu.ts";
 import { drawMenuCursor } from "./ui/cursor.ts";
+import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "./ui/perk-menu.ts";
 import { weaponAssignPlayer } from "./weapon-runtime/assign.ts";
 import { weaponDisplayName, WeaponId } from "./weapons.ts";
 import { WorldRuntime } from "./world/runtime.ts";

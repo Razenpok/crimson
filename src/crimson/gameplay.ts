@@ -1,20 +1,19 @@
 // Port of crimson/gameplay.py
 
+import { QuestLevel } from './quests/level.ts';
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-
+import { _AIM_JOYSTICK_TURN_RATE, _AIM_KEYBOARD_TURN_RATE } from './aim-constants.ts';
+import { AimScheme } from './aim-schemes.ts';
+import type { DeferredFreezeCorpseFx } from './bonuses/freeze.ts';
 import { BonusHudState } from './bonuses/hud.ts';
 import { BonusPool } from './bonuses/pool.ts';
-import type { DeferredFreezeCorpseFx } from './bonuses/freeze.ts';
-import type { CreatureState } from './creatures/runtime.ts';
-import type { SpawnSlotInit } from './creatures/spawn.ts';
-import { TutorialState, TutorialOverlayState } from './tutorial/state.ts';
-import { TypoState } from './typo/state.ts';
 import { EffectPool, ParticlePool, SpriteEffectPool } from './effects.ts';
 import { GameMode } from './game-modes.ts';
 import { f32, NATIVE_HALF_PI, NATIVE_PI, NATIVE_TAU } from './math-parity.ts';
+import { MovementControlType } from './movement-controls.ts';
 import { PerkId } from './perks/ids.ts';
 import { perkActive } from './perks/helpers.ts';
 import { applyPlayerPerkTicks } from './perks/runtime/player-ticks.ts';
@@ -23,11 +22,10 @@ import { ProjectilePool } from './projectiles/runtime/projectile-pool.ts';
 import { SecondaryProjectilePool } from './projectiles/runtime/secondary-pool.ts';
 import { ProjectileTemplateId } from './projectiles/types.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
-import type { PlayerInput } from './sim/input.ts';
 import { PERK_COUNT_SIZE, type PlayerState } from './sim/state-types.ts';
 import { ftolMsI32 } from './sim/timing.ts';
-import { WEAPON_TABLE, WeaponId } from './weapons.ts';
-import { fireWeapon, WeaponFireCtx } from './weapon-runtime/fire.ts';
+import { TutorialState, TutorialOverlayState } from './tutorial/state.ts';
+import { TypoState } from './typo/state.ts';
 import {
   ownerRefForPlayer,
   ownerRefForPlayerProjectiles,
@@ -40,11 +38,12 @@ import {
   weaponAssignPlayer,
   weaponEntry,
 } from './weapon-runtime/assign.ts';
-import { _AIM_JOYSTICK_TURN_RATE, _AIM_KEYBOARD_TURN_RATE } from './aim-constants.ts';
-import { AimScheme } from './aim-schemes.ts';
-import { MovementControlType } from './movement-controls.ts';
-import { QuestLevel } from './quests/level.ts';
+import { fireWeapon, WeaponFireCtx } from './weapon-runtime/fire.ts';
+import { WEAPON_TABLE, WeaponId } from './weapons.ts';
+import type { CreatureState } from './creatures/runtime.ts';
+import type { SpawnSlotInit } from './creatures/spawn.ts';
 import type { GameStatus } from './persistence/save-status.ts';
+import type { PlayerInput } from './sim/input.ts';
 
 const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((entry) => int(entry.weaponId))) + 1;
 

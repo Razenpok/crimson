@@ -1,10 +1,10 @@
 // Port of crimson/screens/panels/databases_perks.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
-import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx } from '@grim/audio.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import {

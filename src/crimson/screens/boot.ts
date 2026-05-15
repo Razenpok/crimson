@@ -1,8 +1,8 @@
 // Port of crimson/screens/boot.py
 
-import * as wgl from '@wgl';
 import { type RuntimeResources, TextureId, getTexture, loadRuntimeResources, unloadRuntimeResources } from '@grim/assets.ts';
 import { type AudioState, audioPlayMusic, audioShutdown, audioStopMusic, audioUpdate, initAudioState } from '@grim/audio.ts';
+import * as wgl from '@wgl';
 import { InputState } from '@grim/input.ts';
 import { type GameState } from '@crimson/game/types.ts';
 

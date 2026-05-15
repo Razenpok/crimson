@@ -1,47 +1,24 @@
 // Port of crimson/screens/high_scores_view/view.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
+import { measureSmallTextWidth, SmallFontData } from "@grim/fonts/small.ts";
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { InputState } from '@grim/input.ts';
-import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
-import { QuestLevel } from '@crimson/quests/level.ts';
-import { fxDetailEnabled, savedNameLabels } from '@grim/config.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
+import { DropdownLayoutBase, menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { UiButtonState, buttonUpdate, buttonWidth } from '@crimson/ui/perk-menu.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { DropdownLayoutBase, menuWidescreenYShift } from '@crimson/ui/layout.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
-import { drawScreenFade } from '@crimson/screens/transitions.ts';
-import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
-import {
-  MENU_PANEL_WIDTH,
-  MENU_PANEL_OFFSET_X,
-  MENU_PANEL_OFFSET_Y,
-  MENU_SCALE_SMALL_THRESHOLD,
-  MENU_SIGN_WIDTH,
-  MENU_SIGN_HEIGHT,
-  MENU_SIGN_OFFSET_X,
-  MENU_SIGN_OFFSET_Y,
-  MENU_SIGN_POS_X_PAD,
-  MENU_SIGN_POS_Y,
-  MENU_SIGN_POS_Y_SMALL,
-  ensureMenuGround,
-  menuGroundCamera,
-  signLayoutScale,
-  uiElementAnim,
-} from '@crimson/screens/menu.ts';
-import {
-  FADE_TO_GAME_ACTIONS,
-  PANEL_TIMELINE_START_MS,
-  PANEL_TIMELINE_END_MS,
-} from '@crimson/screens/panels/base.ts';
 import {
   HS_LEFT_PANEL_POS_Y,
   HS_LEFT_PANEL_HEIGHT,
@@ -72,10 +49,33 @@ import {
   hsRightPanelPosX,
   hsRightOptionsXShift,
 } from '@crimson/screens/high-scores-layout.ts';
-import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
+import {
+  MENU_PANEL_WIDTH,
+  MENU_PANEL_OFFSET_X,
+  MENU_PANEL_OFFSET_Y,
+  MENU_SCALE_SMALL_THRESHOLD,
+  MENU_SIGN_WIDTH,
+  MENU_SIGN_HEIGHT,
+  MENU_SIGN_OFFSET_X,
+  MENU_SIGN_OFFSET_Y,
+  MENU_SIGN_POS_X_PAD,
+  MENU_SIGN_POS_Y,
+  MENU_SIGN_POS_Y_SMALL,
+  ensureMenuGround,
+  menuGroundCamera,
+  signLayoutScale,
+  uiElementAnim,
+} from '@crimson/screens/menu.ts';
+import {
+  FADE_TO_GAME_ACTIONS,
+  PANEL_TIMELINE_START_MS,
+  PANEL_TIMELINE_END_MS,
+} from '@crimson/screens/panels/base.ts';
+import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { drawMainPanel } from './main-panel.ts';
-import { drawRightPanel } from './right-panel.ts';
 import { resolveRequest, loadRecords } from './records.ts';
+import { drawRightPanel } from './right-panel.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);
 const ORIGIN = wgl.makeVector2(0, 0);

@@ -1,6 +1,5 @@
 // Port of crimson/modes/tutorial_mode.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -9,20 +8,17 @@ import { Vec2 } from '@grim/geom.ts';
 import { InputState } from '@grim/input.ts';
 import { clamp } from '@grim/math.ts';
 import { Crand } from '@grim/rand.ts';
-
-import { inputCodeIsDown, inputCodeIsPressed } from '@crimson/input-codes.ts';
+import * as wgl from '@wgl';
 import { GameMode } from '@crimson/game-modes.ts';
+import { inputCodeIsDown, inputCodeIsPressed } from '@crimson/input-codes.ts';
+import { perkSelectionPreparedChoices } from '@crimson/perks/selection.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
+import { buildTutorialSession } from '@crimson/sim/session-builders.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
 } from '@crimson/sim/sessions.ts';
-import { buildTutorialSession } from '@crimson/sim/session-builders.ts';
-import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
-import { perkSelectionPreparedChoices } from '@crimson/perks/selection.ts';
-import { WeaponId } from '@crimson/weapons.ts';
-import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
-
-import { PlayerInput } from '@crimson/sim/input.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import {
@@ -36,7 +32,8 @@ import {
   buttonUpdate,
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
-
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import {
   BaseGameplayMode,
 } from './base-gameplay-mode.ts';

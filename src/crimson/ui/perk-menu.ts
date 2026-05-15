@@ -1,10 +1,10 @@
 // Port of crimson/ui/perk_menu.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { menuWidescreenYShift } from './layout.ts';
 
 // Perk selection screen panel uses ui_element-style timeline animation:

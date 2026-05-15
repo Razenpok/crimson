@@ -1,10 +1,10 @@
 // Port of crimson/perks/runtime/effects.py
 
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { FxQueue } from '@crimson/effects.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { PerksUpdateEffectsCtx, creatureFindInRadius } from './effects-context.ts';
 import { PERKS_UPDATE_EFFECT_STEPS } from './manifest.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 // Backward-compatible re-export used by HUD target hover wiring.
 const _creatureFindInRadius = creatureFindInRadius;

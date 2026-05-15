@@ -1,18 +1,18 @@
 // Port of crimson/screens/menu.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { audioPlaySfx, audioPlayMusic, audioStopMusic, audioUpdate } from '@grim/audio.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
 import { InputState } from '@grim/input.ts';
 import { GroundRenderer } from '@grim/terrain-render.ts';
-import { drawMenuCursor } from '@crimson/ui/cursor.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { type GameState } from '@crimson/game/types.ts';
 import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
 import { resolveTerrainSlots } from '@crimson/terrain-slots.ts';
+import { drawMenuCursor } from '@crimson/ui/cursor.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { requireRuntimeResources } from './assets.ts';
 import { drawScreenFade } from './transitions.ts';
 

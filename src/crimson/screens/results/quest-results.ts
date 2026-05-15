@@ -1,20 +1,13 @@
 // Port of crimson/screens/results/quest_results.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture, runtimeResourcesFor } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig, fxDetailEnabled, setPlayerNameInput } from '@grim/config.ts';
-import { SfxId } from '@grim/sfx-map.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
 import { Crand, type CrandLike } from '@grim/rand.ts';
-import { QuestLevel } from '@crimson/quests/level.ts';
-import {
-  type QuestFinalTime,
-  QuestResultsBreakdownAnim,
-  tickQuestResultsBreakdownAnim,
-} from '@crimson/quests/results.ts';
-import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import * as wgl from '@wgl';
+import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import {
   type HighScoreRecord,
@@ -25,6 +18,12 @@ import {
   scoresPathForMode,
   upsertHighscoreRecord,
 } from '@crimson/persistence/highscores.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
+import {
+  type QuestFinalTime,
+  QuestResultsBreakdownAnim,
+  tickQuestResultsBreakdownAnim,
+} from '@crimson/quests/results.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
 import { menuWidescreenYShift, uiScale } from '@crimson/ui/layout.ts';
@@ -41,6 +40,8 @@ import {
   gameplayControlsHeld,
   updateNameEntryText,
 } from '@crimson/ui/text-input.ts';
+import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+
 // `quest_results_screen_update` base layout (Crimsonland classic UI panel).
 // Values are derived from `ui_menu_assets_init` + `ui_menu_layout_init` and how
 // the quest results screen composes `ui_menuPanel` geometry:

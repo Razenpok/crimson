@@ -2,7 +2,6 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import type { SfxId } from '@grim/sfx-map.ts';
-
 import { emitBonusPickupEffects } from '@crimson/bonuses/pickup-fx.ts';
 import { bonusUpdate, bonusUpdatePrePickupTimers } from '@crimson/bonuses/update.ts';
 import { cameraShakeUpdate } from '@crimson/camera.ts';
@@ -20,6 +19,13 @@ import {
 } from '@crimson/creatures/spawn.ts';
 import type { FxQueue, FxQueueRotated } from '@crimson/effects.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import {
+  buildGameplayState,
+  playerUpdate,
+  playerFrameDtAfterRoundtrip,
+  survivalProgressionUpdate,
+  survivalEnforceRewardWeaponGuard,
+} from '@crimson/gameplay.ts';
 import type { OwnerRef } from '@crimson/owner-ref.ts';
 import { perksUpdateEffects } from '@crimson/perks/runtime/effects.ts';
 import { PLAYER_DEATH_HOOKS, WORLD_DT_STEPS } from '@crimson/perks/runtime/manifest.ts';
@@ -40,13 +46,6 @@ import {
 } from './presentation-step.ts';
 import type { BonusPickupEvent, GameplayState, PlayerState } from './state-types.ts';
 import { CREATURE_ANIM } from './world-defs.ts';
-import {
-  buildGameplayState,
-  playerUpdate,
-  playerFrameDtAfterRoundtrip,
-  survivalProgressionUpdate,
-  survivalEnforceRewardWeaponGuard,
-} from '@crimson/gameplay.ts';
 
 export class WorldEvents {
   hits: ProjectileHit[];

@@ -1,8 +1,8 @@
 // Port of grim/fonts/grim_mono.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 import { runtimeResourcesFor, TextureId } from '@grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 
 export const GRIM_MONO_ADVANCE = 16.0;
 export const GRIM_MONO_DRAW_SIZE = 32.0;

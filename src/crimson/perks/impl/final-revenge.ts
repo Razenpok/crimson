@@ -2,14 +2,14 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import { OwnerRef } from '@crimson/owner-ref.ts';
 import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
-import type { CreaturePool, CreatureDeath } from '@crimson/creatures/runtime.ts';
 import type { FxQueue } from '@crimson/effects.ts';
+import { OwnerRef } from '@crimson/owner-ref.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
+import type { CreaturePool, CreatureDeath } from '@crimson/creatures/runtime.ts';
 import { creatureApplyDamageWithLethalFollowup } from '@crimson/creatures/damage.ts';
 
 export function applyFinalRevengeOnPlayerDeath(opts: {

@@ -8,7 +8,6 @@ import { SfxId } from '@grim/sfx-map.ts';
 import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import { creatureLifecycleIsAlive, creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import type { EffectPool, FxQueue, SpriteEffectPool } from '@crimson/effects.ts';
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { EffectId } from '@crimson/effects-atlas.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
@@ -30,8 +29,9 @@ import {
 import {
   secondaryRuleForTypeId,
 } from './secondary-rules.ts';
-import type { GameplayState } from '@crimson/gameplay.ts';
 import { CreatureSpatialHash } from './spatial-hash.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 
 const _SECONDARY_PRE_HIT_DECAL_CALLERS: readonly [number, number][] = [
   [

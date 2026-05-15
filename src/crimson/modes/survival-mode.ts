@@ -1,6 +1,5 @@
 // Port of crimson/modes/survival_mode.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { type AudioState } from '@grim/audio.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
@@ -9,25 +8,23 @@ import { Vec2 } from '@grim/geom.ts';
 import { InputState } from '@grim/input.ts';
 import { clamp } from '@grim/math.ts';
 import { Crand } from '@grim/rand.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
-
 import { GameMode } from '@crimson/game-modes.ts';
 import { survivalCheckLevelUp } from '@crimson/gameplay.ts';
+import { perkSelectionPreparedChoices } from '@crimson/perks/selection.ts';
+import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
+import { buildSurvivalSession } from '@crimson/sim/session-builders.ts';
 import {
   DeterministicSession,
   type DeterministicSessionTick,
   SurvivalSpawnState,
 } from '@crimson/sim/sessions.ts';
-import { buildSurvivalSession } from '@crimson/sim/session-builders.ts';
-import { advanceUnlockTerrain } from '@crimson/sim/bootstrap.ts';
-import { perkSelectionPreparedChoices } from '@crimson/perks/selection.ts';
-import { WeaponId, WEAPON_BY_ID } from '@crimson/weapons.ts';
-import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
-
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { drawHudOverlay, HudRenderContext, hudFlagsForGameMode } from '@crimson/ui/hud.ts';
 import { PERK_MENU_TRANSITION_MS } from '@crimson/ui/perk-menu.ts';
-
+import { weaponAssignPlayer } from '@crimson/weapon-runtime/index.ts';
+import { WeaponId, WEAPON_BY_ID } from '@crimson/weapons.ts';
 import {
   BaseGameplayMode,
   type LanSession,

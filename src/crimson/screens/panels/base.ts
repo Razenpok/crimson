@@ -1,19 +1,18 @@
 // Port of crimson/screens/panels/base.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
 import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { GameState } from '@crimson/game/types.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
-import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import {
   MENU_ITEM_OFFSET_X,
   MENU_ITEM_OFFSET_Y,
@@ -43,6 +42,7 @@ import {
   signLayoutScale,
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 
 const PANEL_POS_X = -45.0;
 const PANEL_POS_Y = 210.0;

@@ -1,34 +1,34 @@
 // Port of crimson/modes/base_gameplay_mode.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
-import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
 import { type AudioState, audioUpdate, audioStopMusic } from '@grim/audio.ts';
+import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
 import type { RuntimeResources } from '@grim/assets.ts';
 import { type ConsoleState } from '@grim/console.ts';
-import { type CrandLike } from '@grim/rand.ts';
 import { type SmallFontData, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { type CrandLike } from '@grim/rand.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { InputState } from '@grim/input.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
-
 import { debugEnabled } from '@crimson/debug.ts';
-import type { CreatureDeath, CreaturePool } from '@crimson/creatures/runtime.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { LocalInputInterpreter, clearInputEdges } from '@crimson/local-input.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkCountGet } from '@crimson/perks/helpers.ts';
-import { perkSelectionOpenChoices } from '@crimson/perks/selection.ts';
 import { creatureFindInRadius } from '@crimson/perks/runtime/effects-context.ts';
-import { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import { perkSelectionOpenChoices } from '@crimson/perks/selection.ts';
 import { WorldRenderer } from '@crimson/render/world/renderer.ts';
-import { FixedStepClock } from '@crimson/sim/clock.ts';
+import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
+import { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import { GameOverUi } from '@crimson/screens/results/game-over.ts';
 import {
   type PresentationTickOutput,
   applyPresentationOutputs,
   applySimMetadataTickResult,
 } from '@crimson/sim/batch-apply.ts';
+import { FixedStepClock } from '@crimson/sim/clock.ts';
 import { advanceTickRunnerFrame } from '@crimson/sim/frame-pump.ts';
 import {
   type LanFrameSample,
@@ -51,17 +51,14 @@ import {
   buildPostApplyReaction,
 } from '@crimson/sim/presentation-reactions.ts';
 import type { DeterministicSession, DeterministicSessionTick } from '@crimson/sim/sessions.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { TickBatchResult, TickRunner } from '@crimson/sim/tick-runner.ts';
-import type { WorldEvents } from '@crimson/sim/world-state.ts';
 import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
+import { drawTargetHealthBar, HudState } from '@crimson/ui/hud.ts';
+import { WorldRuntime } from '@crimson/world/runtime.ts';
 import { shotsFromState, buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 import { PerkMenuUiContext as FullPerkMenuUiContext } from './components/perk-menu-controller.ts';
-import { drawTargetHealthBar, HudState } from '@crimson/ui/hud.ts';
-import type { HighScoreRecord } from '@crimson/persistence/highscores.ts';
-import { GameOverUi } from '@crimson/screens/results/game-over.ts';
+import type { CreatureDeath, CreaturePool } from '@crimson/creatures/runtime.ts';
 import type { GameState, GameStateStatus } from '@crimson/game/types.ts';
-import { WorldRuntime } from '@crimson/world/runtime.ts';
 import type { SimWorldState } from '@crimson/world/sim-world-state.ts';
 import type { RenderResources } from '@crimson/world/render-resources.ts';
 import type { AudioBridge } from '@crimson/world/audio-bridge.ts';
@@ -69,6 +66,8 @@ import type { TerrainRuntime } from '@crimson/world/terrain-runtime.ts';
 import type { PresentationStepCommands } from '@crimson/sim/presentation-step.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { WorldEvents } from '@crimson/sim/world-state.ts';
 
 interface ReplayRecorder {
   tickIndex: number;

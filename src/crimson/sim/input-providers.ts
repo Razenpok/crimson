@@ -1,7 +1,7 @@
 // Port of crimson/sim/input_providers.py
 
-import { PlayerInput } from './input.ts';
 import { clearInputEdges } from '@crimson/local-input.ts';
+import { PlayerInput } from './input.ts';
 
 type TypoChar = string;
 

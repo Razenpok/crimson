@@ -1,7 +1,7 @@
 // Port of crimson/ui/overlays/tutorial_run.py
 
-import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { TutorialOverlayState } from '@crimson/tutorial/state.ts';
 
 export type { TutorialOverlayState };

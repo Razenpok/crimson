@@ -12,8 +12,8 @@ import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { PlayerState } from '@crimson/sim/state-types.ts';
-import type { CreatureState } from './runtime.ts';
 import { CreatureDamageType } from './damage-types.ts';
+import type { CreatureState } from './runtime.ts';
 import { CREATURE_LIFECYCLE_ALIVE } from './lifecycle.ts';
 import { CreatureFlags, CreatureTypeId } from './spawn.ts';
 

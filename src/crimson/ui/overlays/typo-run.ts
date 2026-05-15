@@ -1,7 +1,7 @@
 // Port of crimson/ui/overlays/typo_run.py
 
-import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 export const NAME_LABEL_SCALE = 1.0;

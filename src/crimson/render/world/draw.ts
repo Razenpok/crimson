@@ -1,17 +1,17 @@
 // Port of crimson/render/world/draw.py
 
-import * as wgl from '@wgl';
 import { RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { CREATURE_ANIM, CREATURE_ASSET } from '@crimson/sim/world-defs.ts';
+import { drawAimCursor } from '@crimson/ui/cursor.ts';
+import * as viewport from './viewport.ts';
 import { drawBonusHoverLabels, drawBonusPickups } from './bonuses.ts';
 import { monsterVisionFadeAlpha, RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
@@ -21,9 +21,8 @@ import { drawAimCircle, drawClockGauge, drawDirectionArrows } from './overlays.t
 import { profilePass } from './profile-hooks.ts';
 import { drawProjectile, drawSecondaryProjectile, drawSharpshooterLaserSight } from './projectiles.ts';
 import { drawPlayerTrooperSprite } from './trooper.ts';
-import * as viewport from './viewport.ts';
-
-import { drawAimCursor } from '@crimson/ui/cursor.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 
 const _CREATURE_TEXTURE_IDS: Record<string, TextureId> = {
   alien: TextureId.ALIEN,

@@ -1,29 +1,30 @@
 // Port of crimson/screens/quest_views/quests_menu.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
-
-import { TextureId, getTexture } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
-import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
-import { SfxId } from '@grim/sfx-map.ts';
-import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
-import { debugEnabled } from '@crimson/debug.ts';
-import { GameMode } from '@crimson/game-modes.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { questGamesCounterIndex, questCompletedCounterIndex } from '@crimson/quests/status.ts';
-import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { TextureId, getTexture } from '@grim/assets.ts';
+import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
+import { SfxId } from '@grim/sfx-map.ts';
+import { type GroundRenderer } from '@grim/terrain-render.ts';
+import { debugEnabled } from '@crimson/debug.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
-import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
+import type { GameState } from '@crimson/game/types.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import {
   MENU_PANEL_OFFSET_Y,
   MENU_PANEL_WIDTH,
@@ -46,9 +47,7 @@ import {
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';
-import { UI_SHADOW_OFFSET, drawUiQuadShadow } from '@crimson/ui/shadow.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
-import type { GameState } from '@crimson/game/types.ts';
 import {
   QUEST_MENU_BASE_X,
   QUEST_MENU_BASE_Y,

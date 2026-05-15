@@ -1,29 +1,26 @@
 // Port of crimson/screens/quest_views/quest_failed.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
-
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
-import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { GameMode } from '@crimson/game-modes.ts';
 import { type GameState } from '@crimson/game/types.ts';
-import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
-import { requireRuntimeResources } from '@crimson/screens/assets.ts';
-import { drawMenuCursorHelper, ensureMenuGround, MenuView, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
   UiButtonState,
   buttonDraw,
   buttonUpdate,
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { drawMenuCursorHelper, ensureMenuGround, MenuView, menuGroundCamera } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import {
   QUEST_FAILED_BANNER_H,
@@ -46,6 +43,8 @@ import {
   QUEST_FAILED_SCORE_Y_OFFSET,
   playerNameDefault,
 } from './shared.ts';
+import { type QuestRunOutcome } from '@crimson/modes/quest-mode.ts';
+import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 
 export { QUEST_FAILED_PANEL_SLIDE_DURATION_MS, QUEST_FAILED_PANEL_W } from './shared.ts';
 

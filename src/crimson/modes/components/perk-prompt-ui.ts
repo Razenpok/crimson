@@ -1,9 +1,9 @@
 // Port of crimson/modes/components/perk_prompt_ui.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { type CrimsonConfig } from '@grim/config.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { drawUiText } from '@crimson/ui/perk-menu.ts';
 
 export const PERK_PROMPT_MAX_TIMER_MS = 200.0;

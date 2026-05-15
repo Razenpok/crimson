@@ -5,10 +5,14 @@ import { RecordingCrand } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { advanceSurvivalSpawnStage, tickRushModeSpawns, tickSurvivalWaveSpawns } from '@crimson/creatures/spawn.ts';
 import { GameMode } from '@crimson/game-modes.ts';
+import { survivalUpdateWeaponHandouts } from '@crimson/gameplay.ts';
+import { preparePerkAvailability } from '@crimson/perks/availability.ts';
 import { perkSelectionOpenChoices, perkSelectionPick } from '@crimson/perks/selection.ts';
-import type { SpawnEntry } from '@crimson/quests/types.ts';
 import { tickQuestCompletionTransition } from '@crimson/quests/runtime.ts';
 import { questSpawnTableEmpty, tickQuestModeSpawns } from '@crimson/quests/timeline.ts';
+import type { SpawnEntry } from '@crimson/quests/types.ts';
+import { applyTypoCommand } from '@crimson/typo/runtime.ts';
+import { prepareWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
 import { PlayerInput } from './input.ts';
 import { normalizeInputFrame } from './input-frame.ts';
 import type {
@@ -22,11 +26,6 @@ import {
 } from './step-pipeline.ts';
 import { TerrainFxScratch } from './terrain-fx.ts';
 import { FrameTiming } from './timing.ts';
-
-import { survivalUpdateWeaponHandouts } from '@crimson/gameplay.ts';
-import { preparePerkAvailability } from '@crimson/perks/availability.ts';
-import { prepareWeaponAvailability } from '@crimson/weapon-runtime/availability.ts';
-import { applyTypoCommand } from '@crimson/typo/runtime.ts';
 import type { WorldState } from './world-state.ts';
 
 // ---------------------------------------------------------------------------

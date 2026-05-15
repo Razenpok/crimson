@@ -1,10 +1,10 @@
 // Port of crimson/render/world/bonuses.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
-import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import * as wgl from '@wgl';
 import { BONUS_BY_ID, BonusId } from '@crimson/bonuses/ids.ts';
 import { bonusFindAimHoverEntry, bonusLabelForEntry } from '@crimson/bonuses/pool.ts';
 import { WEAPON_BY_ID } from '@crimson/weapons.ts';

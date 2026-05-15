@@ -1,14 +1,12 @@
 // Port of crimson/screens/high_scores_view/right_panel.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { GameMode } from '@crimson/game-modes.ts';
 import { savedNameLabels } from '@grim/config.ts';
 import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
-import { formatElapsedMmSs, formatScoreDate, ordinal } from './shared.ts';
-import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
 import { InputState } from '@grim/input.ts';
 import {
   HS_LOCAL_CLOCK_X,
@@ -79,6 +77,8 @@ import {
   hsRightLocalCardXShift,
   hsRightOptionsXShift,
 } from '@crimson/screens/high-scores-layout.ts';
+import { mouseInsideRectWithPadding } from '@crimson/screens/panels/hit-test.ts';
+import { formatElapsedMmSs, formatScoreDate, ordinal } from './shared.ts';
 import type { HighScoresView } from './view.ts';
 
 const WHITE = wgl.makeColor(1, 1, 1, 1);

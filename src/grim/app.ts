@@ -1,9 +1,9 @@
 // Port of grim/app.py
 
 import * as wgl from '@wgl';
-import { type View } from './view.ts';
 import { InputState } from './input.ts';
 import { RenderPipeline, WindowSink } from './render-pipeline.ts';
+import { type View } from './view.ts';
 
 export const SCREENSHOT_DIR = 'screenshots';
 export const SCREENSHOT_KEY = 123;

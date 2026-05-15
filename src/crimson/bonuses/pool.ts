@@ -7,11 +7,11 @@ import { perkActive } from '@crimson/perks/helpers.ts';
 import type { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { BonusPickupEvent, type GameplayState, type PlayerState } from '@crimson/sim/state-types.ts';
+import { weaponPickRandomAvailable } from '@crimson/weapon-runtime/availability.ts';
 import { WeaponId, WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
+import { bonusApply } from './apply.ts';
 import { BONUS_BY_ID, BonusId, bonusDisplayName } from './ids.ts';
 import { bonusPickRandomType } from './selection.ts';
-import { weaponPickRandomAvailable } from '@crimson/weapon-runtime/availability.ts';
-import { bonusApply } from './apply.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 export const BONUS_POOL_SIZE = 16;

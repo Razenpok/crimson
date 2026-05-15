@@ -1,22 +1,21 @@
 // Port of crimson/screens/quest_views/quest_results.py
 
-import * as wgl from '@wgl';
-
+import { QuestLevel } from '@crimson/quests/level.ts';
+import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
-import { GameMode } from '@crimson/game-modes.ts';
-import { QuestLevel } from '@crimson/quests/level.ts';
-import { questByLevel } from '@crimson/quests/index.ts';
-import { trackedQuestCompletedCounterIndex } from '@crimson/quests/status.ts';
-import { computeQuestFinalTime } from '@crimson/quests/results.ts';
 import { weaponDisplayName } from '@crimson/weapons.ts';
 import { PERK_BY_ID, PerkId, perkDisplayName } from '@crimson/perks/ids.ts';
-import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
-import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { QuestResultsUi as QuestResultsUiImpl } from '@crimson/screens/results/quest-results.ts';
 import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { HighScoresRequest, type GameState } from '@crimson/game/types.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { computeQuestFinalTime } from '@crimson/quests/results.ts';
+import { questByLevel } from '@crimson/quests/index.ts';
+import { ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
+import { drawScreenFade } from '@crimson/screens/transitions.ts';
 import { nextQuestLevel, playerNameDefault } from './shared.ts';
 
 export class QuestResultsView {

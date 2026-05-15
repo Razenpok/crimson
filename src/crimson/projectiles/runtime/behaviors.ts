@@ -7,7 +7,6 @@ import { CreatureDamageType } from '@crimson/creatures/damage-types.ts';
 import { creatureLifecycleIsCollidable } from '@crimson/creatures/lifecycle.ts';
 import { CreatureFlags } from '@crimson/creatures/spawn.ts';
 import type { EffectPool } from '@crimson/effects.ts';
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { f32 } from '@crimson/math-parity.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
@@ -22,8 +21,9 @@ import {
   Projectile,
   ProjectileTemplateId,
 } from '@crimson/projectiles/types.ts';
-import type { GameplayState } from '@crimson/gameplay.ts';
 import { applyDamageToCreature, hitRadiusFor } from './collision.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 import type { ProjectilePool } from './projectile-pool.ts';
 
 export class ProjectileUpdateCtx {

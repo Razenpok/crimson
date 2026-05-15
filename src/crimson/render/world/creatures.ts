@@ -1,8 +1,8 @@
 // Port of crimson/render/world/creatures.py
 
-import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { creatureAnimSelectFrame } from '@crimson/creatures/anim.ts';
 import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
 import { CREATURE_ANIM } from '@crimson/sim/world-defs.ts';

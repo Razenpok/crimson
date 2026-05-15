@@ -1,21 +1,21 @@
 // Port of crimson/render/world/projectiles.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
-import type { Projectile, SecondaryProjectile } from '@crimson/projectiles/types.ts';
-import { knownProjRgb } from '@crimson/render/projectile-render-registry.ts';
 import {
   ProjectileDrawCtx,
   SecondaryProjectileDrawCtx,
   drawProjectileFromRegistry,
   drawSecondaryProjectileFromRegistry,
 } from '@crimson/render/projectile-draw/index.ts';
+import { knownProjRgb } from '@crimson/render/projectile-render-registry.ts';
 import { WorldRenderCtx } from './context.ts';
+import type { Projectile, SecondaryProjectile } from '@crimson/projectiles/types.ts';
 
 function drawFilledCircle(center: Vec2, radius: number, color: wgl.Color): void {
   const segments = Math.max(24, int(radius * 1.5 + 0.5));

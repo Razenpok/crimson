@@ -1,10 +1,11 @@
 // Port of crimson/sim/batch_apply.py
 
+import type { TickResult } from './hooks.ts';
 import type { PresentationStepCommands } from './presentation-step.ts';
 import type { DeterministicStepResult } from './step-pipeline.ts';
 import { TerrainFxBatch } from './terrain-fx.ts';
 import type { WorldEvents } from './world-state.ts';
-import type { TickResult } from './hooks.ts';
+
 export interface SimMetadataSink {
   applyStepMetadata(opts: {
     events: WorldEvents;

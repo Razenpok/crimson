@@ -1,33 +1,32 @@
 // Port of crimson/screens/panels/controls.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import {
   type CrimsonControlsConfig,
   defaultCrimsonConfig,
   fxDetailEnabled,
 } from '@grim/config.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { AimScheme } from '@crimson/aim-schemes.ts';
-import { MovementControlType } from '@crimson/movement-controls.ts';
-import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
-import { DropdownLayoutBase } from '@crimson/ui/layout.ts';
-import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { type GameState } from '@crimson/game/types.ts';
-import { mouseInsideRectWithPadding } from './hit-test.ts';
 import { INPUT_CODE_UNBOUND, captureFirstPressedInputCode, inputCodeName } from '@crimson/input-codes.ts';
-import {
-  PanelMenuView,
-  PANEL_TIMELINE_START_MS,
-  PANEL_TIMELINE_END_MS,
-} from './base.ts';
+import { MovementControlType } from '@crimson/movement-controls.ts';
+import { DropdownLayoutBase } from '@crimson/ui/layout.ts';
+import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import {
   MENU_PANEL_WIDTH,
   MENU_PANEL_HEIGHT,
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
+import {
+  PanelMenuView,
+  PANEL_TIMELINE_START_MS,
+  PANEL_TIMELINE_END_MS,
+} from './base.ts';
 import {
   RebindRowSpec,
   RebindTarget,
@@ -36,6 +35,7 @@ import {
   inputConfigureForLabel,
   inputSchemeLabel,
 } from './controls-labels.ts';
+import { mouseInsideRectWithPadding } from './hit-test.ts';
 
 // Measured from ui_render_trace_oracle_1024x768.json (state_3:Configure for:, timeline=300).
 export const CONTROLS_LEFT_PANEL_POS_X = -165.0;

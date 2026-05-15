@@ -1,11 +1,11 @@
 // Port of grim/console.py
 
-import * as wgl from '@wgl';
+import { RGBA } from './color.ts';
+import { type GrimMonoFont, drawGrimMonoText, loadGrimMonoFont } from './fonts/grim-mono.ts';
+import { type SmallFontData, drawSmallText, loadSmallFont, measureSmallTextWidth } from './fonts/small.ts';
 import { Vec2 } from './geom.ts';
 import { clamp } from './math.ts';
-import { RGBA } from './color.ts';
-import { type SmallFontData, drawSmallText, loadSmallFont, measureSmallTextWidth } from './fonts/small.ts';
-import { type GrimMonoFont, drawGrimMonoText, loadGrimMonoFont } from './fonts/grim-mono.ts';
+import * as wgl from '@wgl';
 import { InputState } from './input.ts';
 import { fetchPaq } from './paq.ts';
 import { resolveAssetsUrl } from './assets.ts';

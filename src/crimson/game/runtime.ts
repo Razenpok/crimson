@@ -1,6 +1,6 @@
 // Port of crimson/game/runtime.py
 
-import * as wgl from '@wgl';
+import { loadMusicTrack, queueTrack } from '@grim/music.ts';
 import { ensureCrimsonCfg } from '@grim/config.ts';
 import {
   type ConsoleState,
@@ -10,21 +10,20 @@ import {
   registerCoreCvars,
 } from '@grim/console.ts';
 import { Crand } from '@grim/rand.ts';
-import { loadMusicTrack, queueTrack } from '@grim/music.ts';
-
-import { GameMode } from '@crimson/game-modes.ts';
-import { setDebugEnabled } from '@crimson/debug.ts';
+import * as wgl from '@wgl';
 import { downloadMissingPaqs } from '@crimson/assets-fetch.ts';
-import { ensureGameStatus } from '@crimson/persistence/save-status.ts';
-import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '@crimson/render/rtx/mode.ts';
+import { setDebugEnabled } from '@crimson/debug.ts';
 import {
   DEMO_QUEST_GRACE_TIME_MS,
   DEMO_TOTAL_PLAY_TIME_MS,
   demoTrialOverlayInfo,
   formatDemoTrialTime,
 } from '@crimson/demo-trial.ts';
-import { type GameConfig, GameState } from './types.ts';
+import { GameMode } from '@crimson/game-modes.ts';
+import { ensureGameStatus } from '@crimson/persistence/save-status.ts';
+import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import { GameLoopView } from './loop-view.ts';
+import { type GameConfig, GameState } from './types.ts';
 
 export const CRIMSON_PAQ_NAME = 'crimson.paq';
 export const MUSIC_PAQ_NAME = 'music.paq';

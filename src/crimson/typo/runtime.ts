@@ -10,10 +10,10 @@ import {
   TypoBackspaceCommand,
   TypoSubmitCommand,
 } from '@crimson/sim/input-providers.ts';
-import type { MidStepContext, PostStepContext } from '@crimson/sim/sessions.ts';
 import type { WorldState } from '@crimson/sim/world-state.ts';
 import { enforceTypoPlayerFrame } from './player.ts';
 import { tickTypoSpawns } from './spawns.ts';
+import type { MidStepContext, PostStepContext } from '@crimson/sim/sessions.ts';
 
 function _requireSinglePlayerTypo(command: { playerIndex: number }): void {
   if (int(command.playerIndex) !== 0) {

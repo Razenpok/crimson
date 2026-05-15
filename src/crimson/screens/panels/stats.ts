@@ -1,23 +1,21 @@
 // Port of crimson/screens/panels/stats.py
 
-import * as wgl from "@wgl";
-import { Vec2 } from "@grim/geom.ts";
-
 import { getTexture, TextureId } from "@grim/assets.ts";
-import { drawSmallText } from "@grim/fonts/small.ts";
 import { audioPlayMusic, audioPlaySfx, audioStopMusic, audioUpdate } from "@grim/audio.ts";
+import { drawSmallText } from "@grim/fonts/small.ts";
+import { Vec2 } from "@grim/geom.ts";
+import * as wgl from "@wgl";
 import { SfxId } from "@grim/sfx-map.ts";
 import { fxDetailEnabled } from "@grim/config.ts";
 import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
-import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
 import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
-import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "@crimson/ui/perk-menu.ts";
 import { type GameState } from "@crimson/game/types.ts";
 import { RngCallerStatic } from "@crimson/rng-caller-static.ts";
+import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
+import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState } from "@crimson/ui/perk-menu.ts";
 import { requireRuntimeResources } from "@crimson/screens/assets.ts";
-import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import {
   MENU_LABEL_ROW_HEIGHT,
   MENU_LABEL_ROW_STATISTICS,
@@ -38,6 +36,7 @@ import {
   signLayoutScale,
   uiElementAnim,
 } from "@crimson/screens/menu.ts";
+import { drawScreenFade } from "@crimson/screens/transitions.ts";
 import { PANEL_TIMELINE_END_MS, PANEL_TIMELINE_START_MS } from "./base.ts";
 
 // Measured from ui_render_trace_oracle_1024x768.json (state_4:played for # hours # minutes, timeline=300).

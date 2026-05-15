@@ -1,13 +1,13 @@
 // Port of crimson/screens/high_scores_view/main_panel.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
+import { InputState } from '@grim/input.ts';
+import { QuestLevel } from '@crimson/quests/level.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
-import { InputState } from '@grim/input.ts';
-import { GameMode } from '@crimson/game-modes.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import type { HighScoresRequest } from '@crimson/game/types.ts';
-import { QuestLevel } from '@crimson/quests/level.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import { questByLevel } from '@crimson/quests/index.ts';
 import { buttonDraw, buttonWidth } from '@crimson/ui/perk-menu.ts';
 import {

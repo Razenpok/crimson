@@ -1,12 +1,12 @@
 // Port of crimson/weapon_runtime/availability.py
 
 import { GameMode } from '@crimson/game-modes.ts';
-import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
-import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
-import { allQuests } from '@crimson/quests/index.ts';
 import type { GameStatus } from '@crimson/persistence/save-status.ts';
+import { allQuests } from '@crimson/quests/index.ts';
+import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import type { GameplayState } from '@crimson/sim/state-types.ts';
+import { weaponUsageSlotForWeaponId } from '@crimson/weapon-usage.ts';
+import { WEAPON_TABLE, WeaponId } from '@crimson/weapons.ts';
 
 export const WEAPON_DROP_ID_COUNT = 0x21; // weapon ids 1..33
 export const WEAPON_AVAILABLE_COUNT = Math.max(...WEAPON_TABLE.map((e) => e.weaponId)) + 1;

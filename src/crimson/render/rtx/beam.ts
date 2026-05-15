@@ -1,8 +1,8 @@
 // Port of crimson/render/rtx/beam.py
 
-import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 
 export const SHADER_STAMP_ANALYTIC_RADIUS_SCALE = 16.0;
 export const SHADER_STAMP_VIRTUAL_PROFILE_A = 1.3;

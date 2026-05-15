@@ -1,9 +1,9 @@
 // Port of crimson/render/world/effects.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { type EffectEntry, ParticleStyleId } from '@crimson/effects.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { RAD_TO_DEG } from './constants.ts';

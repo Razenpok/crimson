@@ -1,11 +1,11 @@
 // Port of crimson/quests/types.py
 
+import type { QuestLevel } from './level.ts';
 import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import type { SpawnId } from '@crimson/creatures/spawn.ts';
-import type { WeaponId } from '@crimson/weapons.ts';
-import type { QuestLevel } from './level.ts';
 import type { TerrainSlotTriplet } from '@crimson/terrain-slots.ts';
+import type { WeaponId } from '@crimson/weapons.ts';
 
 export class QuestContext {
   readonly width: number;

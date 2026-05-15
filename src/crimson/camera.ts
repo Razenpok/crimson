@@ -6,8 +6,8 @@
 // global state in the original game.
 
 import { Vec2 } from '@grim/geom.ts';
-import { RngCallerStatic } from './rng-caller-static.ts';
 import type { GameplayState } from './gameplay.ts';
+import { RngCallerStatic } from './rng-caller-static.ts';
 
 export function cameraShakeStart(state: GameplayState, opts: { pulses: number; timer: number }): void {
   // Start a camera shake sequence.

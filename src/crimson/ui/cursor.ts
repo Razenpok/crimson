@@ -1,7 +1,7 @@
 // Port of crimson/ui/cursor.py
 
-import * as wgl from '@wgl';
 import { Vec2 } from "@grim/geom.ts";
+import * as wgl from '@wgl';
 import { effectSrcRect, EffectId } from "@crimson/effects-atlas.ts";
 
 export const CURSOR_EFFECT_ID: number = int(EffectId.GLOW);

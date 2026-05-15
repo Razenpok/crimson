@@ -2,9 +2,9 @@
 
 import { GameMode } from '@crimson/game-modes.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
+import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 import { type PlayerState } from '@crimson/sim/state-types.ts';
 import { mostUsedWeaponIdForPlayer } from '@crimson/weapon-runtime/index.ts';
-import { HighScoreRecord } from '@crimson/persistence/highscores.ts';
 
 export function clampShots(fired: number, hit: number): [number, number] {
   fired = Math.max(0, int(fired));

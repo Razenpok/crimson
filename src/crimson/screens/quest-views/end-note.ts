@@ -1,17 +1,16 @@
 // Port of crimson/screens/quest_views/end_note.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
-
 import { TextureId, getTexture } from '@grim/assets.ts';
-import { drawSmallText } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioPlaySfx, audioUpdate } from '@grim/audio.ts';
+import { drawSmallText } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { SfxId } from '@grim/sfx-map.ts';
 import { type GroundRenderer } from '@grim/terrain-render.ts';
 import { fxDetailEnabled } from '@grim/config.ts';
-import { GameMode } from '@crimson/game-modes.ts';
 import { type GameState } from '@crimson/game/types.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import { drawClassicMenuPanel } from '@crimson/ui/menu-panel.ts';
 import { menuWidescreenYShift } from '@crimson/ui/layout.ts';
 import {
@@ -20,13 +19,13 @@ import {
   buttonUpdate,
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
+import { requireRuntimeResources } from '@crimson/screens/assets.ts';
+import { drawMenuCursorHelper, ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
   PANEL_TIMELINE_START_MS,
   PANEL_TIMELINE_END_MS,
 } from '@crimson/screens/panels/base.ts';
-import { requireRuntimeResources } from '@crimson/screens/assets.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
-import { drawMenuCursorHelper, ensureMenuGround, menuGroundCamera } from '@crimson/screens/menu.ts';
 import {
   END_NOTE_AFTER_BODY_Y_GAP,
   END_NOTE_BODY_X_OFFSET,

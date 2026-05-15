@@ -14,9 +14,13 @@ import { Vec2 } from '@grim/geom.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-
 import type { BonusId } from '@crimson/bonuses/ids.ts';
 import type { EffectPool, FxQueue, FxQueueRotated } from '@crimson/effects.ts';
+import {
+  awardExperience,
+  awardExperienceFromReward,
+  survivalRecordRecentDeath,
+} from '@crimson/gameplay.ts';
 import {
   NATIVE_HALF_PI,
   NATIVE_PI,
@@ -33,11 +37,6 @@ import { perkActive } from '@crimson/perks/helpers.ts';
 import { playerTakeDamage } from '@crimson/player-damage.ts';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import {
-  awardExperience,
-  awardExperienceFromReward,
-  survivalRecordRecentDeath,
-} from '@crimson/gameplay.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { ftolMsI32 } from '@crimson/sim/timing.ts';
 import { weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';

@@ -4,10 +4,10 @@ import { RuntimeResources } from '@grim/assets.ts';
 import { CrimsonConfig } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { GroundRenderer } from '@grim/terrain-render.ts';
-import { PlayerState } from '@crimson/sim/state-types.ts';
 import { CreaturePool } from '@crimson/creatures/runtime.ts';
-import { RtxRenderMode } from './rtx/mode.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
+import { PlayerState } from '@crimson/sim/state-types.ts';
+import { RtxRenderMode } from './rtx/mode.ts';
 
 export class RenderFrame {
   // Typed world snapshot consumed by render code.

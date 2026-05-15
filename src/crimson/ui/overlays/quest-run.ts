@@ -1,8 +1,8 @@
 // Port of crimson/ui/overlays/quest_run.py
 
-import * as wgl from '@wgl';
 import { type GrimMonoFont } from '@grim/fonts/grim-mono.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { drawQuestTitleOverlay } from './quest-title.ts';
 
 export const QUEST_TITLE_FADE_IN_MS = 500.0;

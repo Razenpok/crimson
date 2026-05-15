@@ -3,9 +3,9 @@
 import { Vec2 } from '@grim/geom.ts';
 import { nativeFindSizeMargin } from '@crimson/collision-math.ts';
 import { creatureLifecycleIsAlive } from '@crimson/creatures/lifecycle.ts';
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { OwnerRef } from '@crimson/owner-ref.ts';
 import { CreatureDamageApplier } from '@crimson/projectiles/types.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 // Keep strict native boundary semantics for collision acceptance.
 const _NATIVE_FIND_RADIUS_MARGIN_EPS = 0.0;

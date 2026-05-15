@@ -1,8 +1,8 @@
 // Port of crimson/sim/state_types.py
 
 import { Vec2 } from '@grim/geom.ts';
-import { WeaponId } from '@crimson/weapons.ts';
 import type { BonusId } from '@crimson/bonuses/ids.ts';
+import { WeaponId } from '@crimson/weapons.ts';
 import type { GameplayState as GameplayStateType } from '@crimson/gameplay.ts';
 
 export const PERK_COUNT_SIZE = 0x80;

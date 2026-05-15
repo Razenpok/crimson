@@ -1,27 +1,21 @@
 // Port of crimson/screens/panels/databases_base.py
 
-import * as wgl from "@wgl";
-import { Vec2 } from "@grim/geom.ts";
-
 import { getTexture, TextureId } from "@grim/assets.ts";
-import { SmallFontData } from "@grim/fonts/small.ts";
 import { audioPlaySfx, audioUpdate } from "@grim/audio.ts";
+import { SmallFontData } from "@grim/fonts/small.ts";
+import { Vec2 } from "@grim/geom.ts";
+import * as wgl from "@wgl";
 import { SfxId } from "@grim/sfx-map.ts";
 import { InputState } from "@grim/input.ts";
 import { type GroundRenderer } from "@grim/terrain-render.ts";
-import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
 import { menuWidescreenYShift } from "@crimson/ui/layout.ts";
 import { drawUiQuadShadow, UI_SHADOW_OFFSET } from "@crimson/ui/shadow.ts";
-import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState, } from "@crimson/ui/perk-menu.ts";
 import { type GameState } from "@crimson/game/types.ts";
+import { drawClassicMenuPanel } from "@crimson/ui/menu-panel.ts";
+import { buttonDraw, buttonUpdate, buttonWidth, UiButtonState, } from "@crimson/ui/perk-menu.ts";
 import { fxDetailEnabled } from "@grim/config.ts";
-import { hsLeftPanelPosX, hsRightPanelPosX, } from "@crimson/screens/high-scores-layout.ts";
 import { requireRuntimeResources } from "@crimson/screens/assets.ts";
-import { drawScreenFade } from "@crimson/screens/transitions.ts";
-import {
-  PANEL_TIMELINE_END_MS,
-  PANEL_TIMELINE_START_MS,
-} from "./base.ts";
+import { hsLeftPanelPosX, hsRightPanelPosX, } from "@crimson/screens/high-scores-layout.ts";
 import {
   MENU_PANEL_OFFSET_X,
   MENU_PANEL_OFFSET_Y,
@@ -40,6 +34,11 @@ import {
   signLayoutScale,
   uiElementAnim,
 } from "@crimson/screens/menu.ts";
+import { drawScreenFade } from "@crimson/screens/transitions.ts";
+import {
+  PANEL_TIMELINE_END_MS,
+  PANEL_TIMELINE_START_MS,
+} from "./base.ts";
 
 // Shared panel layout (state_14/15/16 in the oracle): tall left panel + short right panel.
 export const LEFT_PANEL_POS_Y = 185.0;

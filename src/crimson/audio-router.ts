@@ -4,11 +4,11 @@ import type { AudioState } from '@grim/audio.ts';
 import { audioPlaySfx, audioTriggerGameTune } from '@grim/audio.ts';
 import type { CrandLike } from '@grim/rand.ts';
 import { SfxId } from '@grim/sfx-map.ts';
-import type { PlayerState } from './sim/state-types.ts';
-import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from './weapons.ts';
+import { GameMode } from './game-modes.ts';
 import { type ProjectileHit } from './projectiles/types.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
-import { GameMode } from './game-modes.ts';
+import { WEAPON_BY_ID, WeaponId, weaponEntryForProjectileTypeId } from './weapons.ts';
+import type { PlayerState } from './sim/state-types.ts';
 
 const _MAX_HIT_SFX_PER_FRAME = 4;
 

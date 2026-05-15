@@ -1,9 +1,9 @@
 // Port of crimson/render/projectile_draw/primary_special.py
 
-import * as wgl from '@wgl';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
 import { KNOWN_PROJ_FRAMES } from '@crimson/sim/world-defs.ts';
 import { projOrigin } from './common.ts';

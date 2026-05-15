@@ -1,12 +1,12 @@
 // Port of grim/audio.py
 
-import { type CrimsonConfig } from './config.ts';
-import { type CrandLike } from './rand.ts';
-import { type SfxId } from './sfx-map.ts';
 import { type MusicState, initMusicState, loadMusicTracks, playMusic as musicPlayMusic, stopMusic as musicStopMusic, triggerGameTune as musicTriggerGameTune, updateMusic, setMusicVolume as musicSetMusicVolume, shutdownMusic } from './music.ts';
 import { type SfxState, initSfxState, loadSfxIndex, playSfx as sfxPlaySfx, setSfxVolume as sfxSetSfxVolume, shutdownSfx } from './sfx.ts';
+import { type CrimsonConfig } from './config.ts';
 import { resolveAssetsUrl } from './assets.ts';
 import { type ConsoleState } from './console.ts';
+import { type CrandLike } from './rand.ts';
+import { type SfxId } from './sfx-map.ts';
 
 export class AudioState {
   ready: boolean;

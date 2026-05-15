@@ -1,8 +1,8 @@
 // Port of crimson/persistence/highscores.py
 
+import { QuestLevel } from '@crimson/quests/level.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import { QuestLevel } from '@crimson/quests/level.ts';
 import { WeaponId } from '@crimson/weapons.ts';
 
 export const RECORD_SIZE = 0x48;

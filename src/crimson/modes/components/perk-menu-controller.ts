@@ -1,10 +1,10 @@
 // Port of crimson/modes/components/perk_menu_controller.py
 
-import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { InputState } from '@grim/input.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { PerkId, perkDisplayName, perkDisplayDescription } from '@crimson/perks/ids.ts';

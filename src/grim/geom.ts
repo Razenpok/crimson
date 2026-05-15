@@ -1,7 +1,7 @@
 // Port of grim/geom.py
 
-import * as wgl from '@wgl';
 import { clamp } from './math.ts';
+import * as wgl from '@wgl';
 
 export interface SupportsXY {
   x: number;

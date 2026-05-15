@@ -1,8 +1,8 @@
 // Port of grim/fonts/small.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 import { runtimeResourcesFor } from '@grim/assets.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 
 export class SmallFontData {
   readonly widths: number[];

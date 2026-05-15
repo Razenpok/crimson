@@ -1,13 +1,13 @@
 // Port of crimson/screens/results/game_over.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
 import { type RuntimeResources, TextureId, getTexture, runtimeResourcesFor } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { type CrimsonConfig, fxDetailEnabled, setPlayerNameInput } from '@grim/config.ts';
-import { SfxId } from '@grim/sfx-map.ts';
+import { drawSmallText, measureSmallTextWidth, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
 import { Crand, type CrandLike } from '@grim/rand.ts';
+import * as wgl from '@wgl';
+import { SfxId } from '@grim/sfx-map.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import {
   NAME_MAX_EDIT,
@@ -18,7 +18,6 @@ import {
   scoresPathForConfig,
   upsertHighscoreRecord,
 } from '@crimson/persistence/highscores.ts';
-import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 import { drawMenuCursor } from '@crimson/ui/cursor.ts';
 import { formatOrdinal, formatTimeMmSs } from '@crimson/ui/formatting.ts';
 import { menuWidescreenYShift, uiScale } from '@crimson/ui/layout.ts';
@@ -35,6 +34,7 @@ import {
   gameplayControlsHeld,
   updateNameEntryText,
 } from '@crimson/ui/text-input.ts';
+import { WEAPON_BY_ID, weaponDisplayName } from '@crimson/weapons.ts';
 
 export { HighScoreRecord };
 

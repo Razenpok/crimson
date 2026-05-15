@@ -4,11 +4,11 @@ import { f32 } from '@crimson/math-parity.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { BonusPickupEvent, type GameplayState, type PlayerState } from '@crimson/sim/state-types.ts';
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import { bonusApply } from './apply.ts';
 import { bonusHudUpdate } from './hud.ts';
 import { BonusId } from './ids.ts';
 import { bonusFindAimHoverEntry, BONUS_PICKUP_LINGER, BONUS_TELEKINETIC_PICKUP_MS } from './pool.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 const _REFLEX_TIMER_SUBTRACT_BIAS = 4e-9;
 

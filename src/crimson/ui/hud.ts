@@ -1,10 +1,10 @@
 // Port of crimson/ui/hud.py
 
-import * as wgl from '@wgl';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
-import { Vec2 } from '@grim/geom.ts';
 import { drawSmallText, SmallFontData } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { type BonusHudState } from '@crimson/bonuses/hud.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { survivalLevelThreshold } from '@crimson/gameplay.ts';

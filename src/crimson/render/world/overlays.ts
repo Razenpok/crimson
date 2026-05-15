@@ -1,9 +1,9 @@
 // Port of crimson/render/world/overlays.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 

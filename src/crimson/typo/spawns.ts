@@ -1,7 +1,7 @@
 // Port of crimson/typo/spawns.py
 
-import { Vec2 } from '@grim/geom.ts';
 import { RGBA } from '@grim/color.ts';
+import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import { CreatureTypeId } from '@crimson/creatures/spawn.ts';
 

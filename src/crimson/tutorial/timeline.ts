@@ -12,7 +12,6 @@ import {
 } from '@crimson/creatures/spawn.ts';
 import { TutorialState } from './state.ts';
 
-
 const _TUTORIAL_STAGE_TEXT: readonly string[] = [
   "In this tutorial you'll learn how to play Crimsonland",
   'First learn to move by pushing the arrow keys.',

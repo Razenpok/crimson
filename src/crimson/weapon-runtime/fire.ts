@@ -7,10 +7,9 @@ import { f32, NATIVE_TAU, headingFromDeltaF32 } from '@crimson/math-parity.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
 import { perkActive } from '@crimson/perks/helpers.ts';
 import { playerTakeDamage } from '@crimson/player-damage.ts';
-import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import { SecondarySpawnSpec } from '@crimson/projectiles/runtime/secondary-pool.ts';
+import { ProjectileTemplateId, SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
-import type { CreatureState } from '@crimson/creatures/runtime.ts';
 import type { PlayerInput } from '@crimson/sim/input.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import { WEAPON_TABLE, WeaponId, weaponEntryForProjectileTypeId } from '@crimson/weapons.ts';
@@ -24,6 +23,7 @@ import type {
 } from './fire-recipes.ts';
 import { resolveFireRecipe } from './fire-recipes.ts';
 import { ownerRefForPlayer, ownerRefForPlayerProjectiles, travelBudgetForTypeId } from './spawn.ts';
+import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 export const WEAPON_COUNT_SIZE = Math.max(...WEAPON_TABLE.map((e) => e.weaponId)) + 1;
 

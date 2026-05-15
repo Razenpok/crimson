@@ -8,19 +8,19 @@ import {
 } from '@grim/assets.ts';
 import type { CrimsonConfig } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
-import { GroundRenderer } from '@grim/terrain-render.ts';
 import * as wgl from '@wgl';
+import { GroundRenderer } from '@grim/terrain-render.ts';
 import { creatureCorpseFrameForType } from '@crimson/creatures/anim.ts';
 import type { CreaturePool } from '@crimson/creatures/runtime.ts';
-import type { PlayerState } from '@crimson/sim/state-types.ts';
+import type { GameplayState } from '@crimson/gameplay.ts';
 import { RenderFrame } from '@crimson/render/frame.ts';
 import type { RtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
   FxQueueTextures,
   bakeTerrainFxBatch,
 } from '@crimson/render/terrain-fx.ts';
+import type { PlayerState } from '@crimson/sim/state-types.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
-import type { GameplayState } from '@crimson/gameplay.ts';
 
 export class RenderResources {
   private _assetsUrl: string;

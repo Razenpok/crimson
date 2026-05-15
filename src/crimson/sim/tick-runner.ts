@@ -9,8 +9,8 @@ import {
   InputStatus,
   ResolvedTick,
 } from './input-providers.ts';
-import type { DeterministicSession } from './sessions.ts';
 import type { GameCommand } from './input-providers.ts';
+import type { DeterministicSession } from './sessions.ts';
 import type { PlayerInput } from './input.ts';
 
 export class TickRunnerConfig {

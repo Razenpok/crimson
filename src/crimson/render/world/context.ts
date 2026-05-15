@@ -1,12 +1,12 @@
 // Port of crimson/render/world/context.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { Vec2 } from '@grim/geom.ts';
+import * as wgl from '@wgl';
 import { ProjectileTemplateId } from '@crimson/projectiles/types.ts';
-import type { RenderFrame } from '@crimson/render/frame.ts';
-import { RAD_TO_DEG } from './constants.ts';
 import * as viewport from './viewport.ts';
+import { RAD_TO_DEG } from './constants.ts';
+import type { RenderFrame } from '@crimson/render/frame.ts';
 import type { WorldRenderer } from './renderer.ts';
 
 export class WorldRenderCtx {

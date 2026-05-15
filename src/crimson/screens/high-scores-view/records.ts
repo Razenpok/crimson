@@ -1,7 +1,7 @@
 // Port of crimson/screens/high_scores_view/records.py
 
-import { GameMode } from '@crimson/game-modes.ts';
 import type { GameState, HighScoresRequest } from '@crimson/game/types.ts';
+import { GameMode } from '@crimson/game-modes.ts';
 import { QuestLevel } from '@crimson/quests/level.ts';
 import {
   type HighScoreRecord,

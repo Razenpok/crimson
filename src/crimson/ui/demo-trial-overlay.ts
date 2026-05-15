@@ -1,14 +1,14 @@
 // Port of crimson/ui/demo_trial_overlay.py
 
-import * as wgl from '@wgl';
-import { Vec2 } from '@grim/geom.ts';
 import { InputState } from '@grim/input.ts';
-import { clamp } from '@grim/math.ts';
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
+import { Vec2 } from '@grim/geom.ts';
+import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { DemoTrialOverlayInfo } from '@crimson/demo-trial.ts';
-import { UiButtonState, buttonDraw, buttonUpdate, buttonWidth } from './perk-menu.ts';
 import { drawMenuCursor } from './cursor.ts';
+import { UiButtonState, buttonDraw, buttonUpdate, buttonWidth } from './perk-menu.ts';
 
 export const DEMO_PURCHASE_URL = 'http://buy.crimsonland.com';
 const _DEMO_HEADER_TEXT = "You've been playing the Demo version of";

@@ -1,7 +1,7 @@
 // Port of grim/sfx.py
 
-import { type ConsoleState } from './console.ts';
 import { fetchPaq } from './paq.ts';
+import { type ConsoleState } from './console.ts';
 import { SFX_NATIVE_ORDER, SFX_SPECS, type SfxId } from './sfx-map.ts';
 
 export const SFX_PAK_NAME = 'sfx.paq';

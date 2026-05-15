@@ -1,8 +1,8 @@
 // Port of crimson/render/projectile_draw/primary_bullet.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { RAD_TO_DEG, projOrigin } from './common.ts';
 import type { ProjectileDrawCtx } from './types.ts';
 

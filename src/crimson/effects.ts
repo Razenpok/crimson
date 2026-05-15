@@ -5,13 +5,13 @@ import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import type { CallerStatic, CrandLike } from '@grim/rand.ts';
 import { Crand } from '@grim/rand.ts';
-import type { CreatureState } from './creatures/runtime.ts';
 import { creatureLifecycleIsCollidable } from './creatures/lifecycle.ts';
 import { EffectId } from './effects-atlas.ts';
 import { f32 } from './math-parity.ts';
 import { OwnerRef } from './owner-ref.ts';
 import type { CreatureDamageApplier } from './projectiles/types.ts';
 import { RngCallerStatic } from './rng-caller-static.ts';
+import type { CreatureState } from './creatures/runtime.ts';
 
 export const EFFECT_POOL_SIZE = 0x200;
 export const PARTICLE_POOL_SIZE = 0x80;

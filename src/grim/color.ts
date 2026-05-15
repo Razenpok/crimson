@@ -1,7 +1,7 @@
 // Port of grim/color.py
 
-import * as wgl from '@wgl';
 import { clamp } from './math.ts';
+import * as wgl from '@wgl';
 
 export class RGBA {
   readonly r: number;

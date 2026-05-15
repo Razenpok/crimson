@@ -1,8 +1,8 @@
 // Port of grim/music.py
 
-import { type CrandLike } from './rand.ts';
 import { fetchPaq } from './paq.ts';
 import { type ConsoleState } from './console.ts';
+import { type CrandLike } from './rand.ts';
 
 export const MUSIC_PAK_NAME = 'music.paq';
 

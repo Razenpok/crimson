@@ -1,19 +1,19 @@
 // Port of crimson/world/standalone_tick_harness.py
 
-import type { WorldRuntime } from '@crimson/world/runtime.ts';
 import { GameMode } from '@crimson/game-modes.ts';
-import { FrameContext, LocalInputProvider } from '@crimson/sim/input-providers.ts';
-import { PlayerInput } from '@crimson/sim/input.ts';
-import { DeterministicSession } from '@crimson/sim/sessions.ts';
-import { TickBatchResult, TickRunner, TickRunnerConfig } from '@crimson/sim/tick-runner.ts';
-import { FixedStepClock } from '@crimson/sim/clock.ts';
 import { applyPresentationOutputs, applySimMetadataBatch } from '@crimson/sim/batch-apply.ts';
+import { FixedStepClock } from '@crimson/sim/clock.ts';
+import { advanceTickRunnerFrame } from '@crimson/sim/frame-pump.ts';
+import { PlayerInput } from '@crimson/sim/input.ts';
+import { FrameContext, LocalInputProvider } from '@crimson/sim/input-providers.ts';
 import {
   applyPostApplyReaction,
   buildPostApplyReaction,
   PostApplyReaction
 } from '@crimson/sim/presentation-reactions.ts';
-import { advanceTickRunnerFrame } from '@crimson/sim/frame-pump.ts';
+import { DeterministicSession } from '@crimson/sim/sessions.ts';
+import { TickBatchResult, TickRunner, TickRunnerConfig } from '@crimson/sim/tick-runner.ts';
+import type { WorldRuntime } from '@crimson/world/runtime.ts';
 
 export type WorldTickInputBuilder = (ctx: FrameContext) => readonly PlayerInput[];
 

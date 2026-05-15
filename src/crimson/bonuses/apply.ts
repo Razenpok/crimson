@@ -1,26 +1,26 @@
 // Port of crimson/bonuses/apply.py
 
 import type { Vec2 } from '@grim/geom.ts';
-import { perkCountGet } from '@crimson/perks/helpers.ts';
 import { PerkId } from '@crimson/perks/ids.ts';
+import { perkCountGet } from '@crimson/perks/helpers.ts';
 import type { GameplayState, PlayerState } from '@crimson/sim/state-types.ts';
 import type { BonusApplyHandler } from './apply-context.ts';
 import { BonusApplyCtx } from './apply-context.ts';
-import { BONUS_BY_ID, BonusId } from './ids.ts';
-import { applyPoints } from './points.ts';
-import { applyEnergizer } from './energizer.ts';
-import { applyWeaponPowerUp } from './weapon-power-up.ts';
 import { applyDoubleExperience } from './double-experience.ts';
-import { applyReflexBoost } from './reflex-boost.ts';
-import { applyFreeze } from './freeze.ts';
-import { applyShield } from './shield.ts';
-import { applyMedikit } from './medikit.ts';
-import { applySpeed } from './speed.ts';
+import { applyEnergizer } from './energizer.ts';
 import { applyFireBullets } from './fire-bullets.ts';
-import { applyShockChain } from './shock-chain.ts';
-import { applyWeapon } from './weapon.ts';
 import { applyFireblast } from './fireblast.ts';
+import { applyFreeze } from './freeze.ts';
+import { BONUS_BY_ID, BonusId } from './ids.ts';
+import { applyMedikit } from './medikit.ts';
 import { applyNuke } from './nuke.ts';
+import { applyPoints } from './points.ts';
+import { applyReflexBoost } from './reflex-boost.ts';
+import { applyShield } from './shield.ts';
+import { applyShockChain } from './shock-chain.ts';
+import { applySpeed } from './speed.ts';
+import { applyWeapon } from './weapon.ts';
+import { applyWeaponPowerUp } from './weapon-power-up.ts';
 import type { CreatureState } from '@crimson/creatures/runtime.ts';
 
 const _BONUS_APPLY_HANDLERS: Map<BonusId, BonusApplyHandler> = new Map([

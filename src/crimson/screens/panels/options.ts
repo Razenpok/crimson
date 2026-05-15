@@ -1,13 +1,13 @@
 // Port of crimson/screens/panels/options.py
 
-import * as wgl from '@wgl';
-import { Vec2, Rect } from '@grim/geom.ts';
-
 import { type RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
-import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { InputState } from '@grim/input.ts';
 import { audioSetSfxVolume, audioSetMusicVolume } from '@grim/audio.ts';
 import { applyDetailPreset } from '@grim/config.ts';
+import { drawSmallText, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { Vec2, Rect } from '@grim/geom.ts';
+import * as wgl from '@wgl';
+import { type GameState } from '@crimson/game/types.ts';
 import {
   UiButtonState,
   buttonDraw,
@@ -15,12 +15,6 @@ import {
   buttonWidth,
 } from '@crimson/ui/perk-menu.ts';
 import { requireRuntimeResources } from '@crimson/screens/assets.ts';
-import { type GameState } from '@crimson/game/types.ts';
-import {
-  PanelMenuView,
-  PANEL_TIMELINE_START_MS,
-  PANEL_TIMELINE_END_MS,
-} from './base.ts';
 import {
   MENU_LABEL_ROW_OPTIONS,
   MENU_LABEL_ROW_HEIGHT,
@@ -29,6 +23,11 @@ import {
   uiElementAnim,
 } from '@crimson/screens/menu.ts';
 import { drawScreenFade } from '@crimson/screens/transitions.ts';
+import {
+  PanelMenuView,
+  PANEL_TIMELINE_START_MS,
+  PANEL_TIMELINE_END_MS,
+} from './base.ts';
 import { mouseInsideRectWithPadding } from './hit-test.ts';
 
 const KEY_LEFT = 37;

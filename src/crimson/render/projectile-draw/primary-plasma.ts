@@ -1,10 +1,10 @@
 // Port of crimson/render/projectile_draw/primary_plasma.py
 
-import * as wgl from '@wgl';
 import { TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
+import * as wgl from '@wgl';
 import { fxDetailEnabled } from '@grim/config.ts';
 import { EFFECT_ID_ATLAS_TABLE_BY_ID, SIZE_CODE_GRID, EffectId } from '@crimson/effects-atlas.ts';
 import { PLASMA_PARTICLE_TYPES } from '@crimson/sim/world-defs.ts';
