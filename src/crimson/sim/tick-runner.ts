@@ -21,7 +21,6 @@ export class TickRunnerConfig {
   }
 }
 
-const DEFAULT_TICK_RUNNER_CONFIG = new TickRunnerConfig();
 export class TickBatchResult {
   ticksCompleted: number;
   batchStatus: InputStatus;
@@ -52,7 +51,7 @@ export class TickRunner {
   }) {
     this._session = opts.session;
     this._inputProvider = opts.inputProvider;
-    this._config = opts.config ?? DEFAULT_TICK_RUNNER_CONFIG;
+    this._config = opts.config ?? new TickRunnerConfig();
   }
 
   beginFrame(frameCtx: FrameContext): void {
@@ -86,7 +85,7 @@ export class TickRunner {
     const completedResults: TickResult[] = [];
 
     for (let tickOffset = 0; tickOffset < ticksRequested; tickOffset++) {
-      const tickIndex = startTick + tickOffset;
+      const tickIndex = int(startTick + tickOffset);
       const tickSupply = this._inputProvider.pullTick(tickIndex, tickDt);
       const status = tickSupply.status;
 
@@ -110,10 +109,10 @@ export class TickRunner {
         break;
       }
 
-      const sourceTick = TickRunner._validatedSourceTick(
+      const sourceTick = TickRunner._validatedSourceTick({
         tickSupply,
-        tickIndex,
-      );
+        expectedTickIndex: tickIndex,
+      });
 
       const tickInputs: PlayerInput[] = [...sourceTick.inputs];
       const commands: GameCommand[] = [...sourceTick.commands];
@@ -136,15 +135,16 @@ export class TickRunner {
     return new TickBatchResult({
       ticksCompleted,
       batchStatus,
-      nextTickIndex: startTick + ticksCompleted,
+      nextTickIndex: int(startTick) + int(ticksCompleted),
       completedResults,
     });
   }
 
-  private static _validatedSourceTick(
-    tickSupply: { status: InputStatus; tick: ResolvedTick | null },
-    expectedTickIndex: number,
-  ): ResolvedTick {
+  private static _validatedSourceTick(opts: {
+    tickSupply: { status: InputStatus; tick: ResolvedTick | null };
+    expectedTickIndex: number;
+  }): ResolvedTick {
+    const { tickSupply, expectedTickIndex } = opts;
     const sourceTick = tickSupply.tick;
     if (sourceTick === null) {
       throw new Error('ready tick supply must carry a resolved tick');
