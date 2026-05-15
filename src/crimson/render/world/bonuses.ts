@@ -11,7 +11,7 @@ import { WEAPON_BY_ID } from '@crimson/weapons.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
-function bonusIconSrc(texture: wgl.Texture, iconId: number): wgl.Rectangle {
+export function bonusIconSrc(texture: wgl.Texture, iconId: number): wgl.Rectangle {
   const grid = 4;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
@@ -20,7 +20,7 @@ function bonusIconSrc(texture: wgl.Texture, iconId: number): wgl.Rectangle {
   return wgl.makeRectangle(col * cellW, row * cellH, cellW, cellH);
 }
 
-function weaponIconSrc(texture: wgl.Texture, iconIndex: number): wgl.Rectangle {
+export function weaponIconSrc(texture: wgl.Texture, iconIndex: number): wgl.Rectangle {
   const grid = 8;
   const cellW = texture.width / grid;
   const cellH = texture.height / grid;
@@ -30,7 +30,7 @@ function weaponIconSrc(texture: wgl.Texture, iconIndex: number): wgl.Rectangle {
   return wgl.makeRectangle(col * cellW, row * cellH, cellW * 2, cellH);
 }
 
-function bonusFade(timeLeft: number, timeMax: number): number {
+export function bonusFade(timeLeft: number, timeMax: number): number {
   if (timeLeft <= 0.0 || timeMax <= 0.0) return 0.0;
   if (timeLeft < 0.5) return clamp(timeLeft * 2.0, 0.0, 1.0);
   const age = timeMax - timeLeft;
@@ -91,9 +91,9 @@ export function drawBonusPickups(
     }
 
     const meta = BONUS_BY_ID.get(bonusId);
-    let iconId = (meta !== undefined && meta.iconId !== null) ? meta.iconId : null;
+    let iconId = (meta !== undefined && meta.iconId !== null) ? int(meta.iconId) : null;
     if (iconId === null || iconId < 0) continue;
-    if (bonusId === BonusId.POINTS && bonus.amount === 1000) {
+    if (bonusId === BonusId.POINTS && int(bonus.amount) === 1000) {
       iconId += 1;
     }
 
