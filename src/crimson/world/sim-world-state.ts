@@ -16,7 +16,7 @@ import { GameplayState } from '@crimson/gameplay.ts';
 function _weaponDamageScaleMap(): Map<number, number> {
   const table = new Map<number, number>();
   for (const entry of WEAPON_TABLE) {
-    const wid = entry.weaponId;
+    const wid = int(entry.weaponId);
     if (wid <= 0) continue;
     table.set(wid, Number(entry.damageScale));
   }
