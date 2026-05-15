@@ -9,6 +9,20 @@ export const QUEST_COUNT = QUEST_STAGE_COUNT * QUESTS_PER_STAGE;
 export type QuestStageMajor = number;
 export type QuestStageMinor = number;
 
+function _pythonRepr(value: string): string {
+  const text = String(value);
+  const quote = text.includes("'") && !text.includes('"') ? '"' : "'";
+  let out = quote;
+  for (const ch of text) {
+    if (ch === '\\' || ch === quote) {
+      out += '\\' + ch;
+    } else {
+      out += ch;
+    }
+  }
+  return out + quote;
+}
+
 export class QuestLevel {
   public readonly major: number;
   public readonly minor: number;
@@ -31,19 +45,19 @@ export class QuestLevel {
     const trimmed = String(value).trim();
     const parts = trimmed.split('.');
     if (parts.length !== 2) {
-      throw new Error(`invalid quest level: '${value}'`);
+      throw new Error(`invalid quest level: ${_pythonRepr(value)}`);
     }
     const majorText = parts[0].trim();
     const minorText = parts[1].trim();
     if (!/^[+-]?\d+$/.test(majorText) || !/^[+-]?\d+$/.test(minorText)) {
-      throw new Error(`invalid quest level: '${value}'`);
+      throw new Error(`invalid quest level: ${_pythonRepr(value)}`);
     }
     const major = int(Number(majorText));
     const minor = int(Number(minorText));
     try {
       return new QuestLevel({ major, minor });
     } catch {
-      throw new Error(`invalid quest level: '${value}'`);
+      throw new Error(`invalid quest level: ${_pythonRepr(value)}`);
     }
   }
 
