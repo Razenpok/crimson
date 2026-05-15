@@ -13,14 +13,11 @@ export const Q3_TERRAIN_SLOTS: TerrainSlotTriplet = [4, 5, 4] as const;
 export const Q4_TERRAIN_SLOTS: TerrainSlotTriplet = [6, 7, 6] as const;
 export const DEFAULT_TERRAIN_SLOTS: TerrainSlotTriplet = Q1_TERRAIN_SLOTS;
 
-export const UNLOCK_TERRAIN_SLOTS: ReadonlyArray<readonly [number, TerrainSlotTriplet]> = [
-  // after quest 4.10 "The End of All"
-  [40, Q4_TERRAIN_SLOTS],
-  // after quest 3.10 "Zombie Masters"
-  [30, Q3_TERRAIN_SLOTS],
-  // after quest 2.10 "Spideroids"
-  [20, Q2_TERRAIN_SLOTS],
-];
+export const UNLOCK_TERRAIN_SLOTS: ReadonlyMap<number, TerrainSlotTriplet> = new Map([
+  [40, Q4_TERRAIN_SLOTS],  // after quest 4.10 "The End of All"
+  [30, Q3_TERRAIN_SLOTS],  // after quest 3.10 "Zombie Masters"
+  [20, Q2_TERRAIN_SLOTS],  // after quest 2.10 "Spideroids"
+]);
 
 const _TEXTURE_ID_BY_TERRAIN_SLOT: Record<number, TextureId> = {
   0: TextureId.TER_Q1_BASE,
@@ -47,7 +44,7 @@ export function chooseUnlockTerrainSlots(opts: { unlockIndex: number; rng: Crand
   const unlockIndex = opts.unlockIndex;
   const rng = opts.rng;
   // Keep the thresholds descending to preserve the native chained 1/8 roll order.
-  for (const [threshold, slots] of UNLOCK_TERRAIN_SLOTS) {
+  for (const [threshold, slots] of UNLOCK_TERRAIN_SLOTS.entries()) {
     let caller: RngCallerStatic | null = null;
     if (threshold === 40) {
       caller = RngCallerStatic.UNLOCK_TERRAIN_Q4;
