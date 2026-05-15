@@ -55,7 +55,6 @@ export class PerkPromptUi {
   static rect(
     opts: { resources: RuntimeResources; scale?: number },
   ): Rect {
-    const _scale = opts.scale ?? 1.0;
     const hinge = PerkPromptUi.hinge();
     const tex = getTexture(opts.resources, TextureId.UI_MENU_ITEM);
     const barW = tex.width * PERK_PROMPT_BAR_SCALE;
