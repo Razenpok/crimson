@@ -35,6 +35,11 @@ import {
 import { buildHighscoreRecordForGameOver } from './components/highscore-record-builder.ts';
 
 const WORLD_SIZE = 1024.0;
+const KEY_ENTER = 13;
+const KEY_KP_ENTER = 335;
+const KEY_BACKSPACE = 8;
+const KEY_TAB = 9;
+const KEY_ESCAPE = 27;
 
 export class TypoShooterMode extends BaseGameplayMode {
   constructor(opts: {
@@ -132,35 +137,35 @@ export class TypoShooterMode extends BaseGameplayMode {
 
   protected _handleInput(): void {
     if (this._gameOverActive) {
-      if (InputState.wasKeyPressed(27)) {
+      if (InputState.wasKeyPressed(KEY_ESCAPE)) {
         this._action = 'back_to_menu';
         this.closeRequested = true;
       }
       return;
     }
 
-    if (InputState.wasKeyPressed(9)) {
+    if (InputState.wasKeyPressed(KEY_TAB)) {
       this._paused = !this._paused;
     }
 
-    if (InputState.wasKeyPressed(27)) {
+    if (InputState.wasKeyPressed(KEY_ESCAPE)) {
       this._action = 'open_pause_menu';
       return;
     }
   }
 
   private _enqueueTypingCommands(): void {
-    const enterPressed = InputState.wasKeyPressed(13) || InputState.wasKeyPressed(0x100D);
+    const enterPressed = InputState.wasKeyPressed(KEY_ENTER) || InputState.wasKeyPressed(KEY_KP_ENTER);
     if (enterPressed && this.state.typo.typing.text) {
       this.enqueueInputCommand(new TypoSubmitCommand({ playerIndex: 0 }));
     }
 
     // Native processes at most one keychar per frame via `console_input_poll`.
-    if (InputState.wasKeyPressed(8) || InputState.wasKeyPressedRepeat(8)) {
+    if (InputState.wasKeyPressed(KEY_BACKSPACE) || InputState.wasKeyPressedRepeat(KEY_BACKSPACE)) {
       this.enqueueInputCommand(new TypoBackspaceCommand({ playerIndex: 0 }));
     } else {
       const codepoint = InputState.getCharPressed();
-      if (codepoint !== 13 && codepoint !== 8 && codepoint >= 0x20 && codepoint <= 0xFF) {
+      if (codepoint !== KEY_ENTER && codepoint !== KEY_BACKSPACE && codepoint >= 0x20 && codepoint <= 0xFF) {
         const ch = String.fromCharCode(codepoint);
         if (ch) {
           this.enqueueInputCommand(new TypoCharCommand({ playerIndex: 0, ch: ch[0] }));
