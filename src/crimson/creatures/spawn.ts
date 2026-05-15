@@ -53,7 +53,7 @@ class ValueError extends Error {
 
 
 export class UnsupportedSpawnTemplateError extends ValueError {
-  /** Raised when a spawn template id is outside the supported rewrite coverage. */
+  // Raised when a spawn template id is outside the supported rewrite coverage.
 
   constructor(message: string) {
     super(message);
@@ -746,7 +746,7 @@ function applyTint(c: CreatureInit, tint: TintRGBA): void {
 }
 
 
-/** Resolve a partial/optional tint into concrete RGBA multipliers. */
+// Resolve a partial/optional tint into concrete RGBA multipliers.
 export function resolveTint(tint: Tint | null): TintRGBA {
   if (tint === null) {
     return [1.0, 1.0, 1.0, 1.0];
@@ -1053,19 +1053,17 @@ function registerTemplate(...templateIds: SpawnId[]): (fn: TemplateFn) => Templa
 }
 
 
-/**
- * Advance a spawn slot timer by `frameDt`, returning a spawned template id if triggered.
- *
- * Modeled after `creature_update_all`'s spawn-slot tick:
- *   timer -= dt
- *   if timer < 0:
- *     timer += interval
- *     if count < limit:
- *       count += 1
- *       spawn child_template_id
- *
- * Note: the original only adds `interval` once (no loop), so large dt can keep the timer negative.
- */
+// Advance a spawn slot timer by `frameDt`, returning a spawned template id if triggered.
+//
+// Modeled after `creature_update_all`'s spawn-slot tick:
+//   timer -= dt
+//   if timer < 0:
+//     timer += interval
+//     if count < limit:
+//       count += 1
+//       spawn child_template_id
+//
+// Note: the original only adds `interval` once (no loop), so large dt can keep the timer negative.
 export function tickSpawnSlot(slot: SpawnSlotInit, frameDt: number): SpawnId | null {
   const timer = f32(slot.timer);
   const interval = f32(slot.interval);
@@ -1145,12 +1143,10 @@ export const SURVIVAL_UPDATE_MAIN_SPAWN_POS_CALLERS = new SurvivalSpawnPosCaller
 });
 
 
-/**
- * Pure model of `survival_spawn_creature` (crimsonland.exe 0x00407510).
- *
- * Note: this is not a `creature_spawn_template` spawn id; it picks a `type_id` and stats
- * dynamically based on `playerExperience`.
- */
+// Pure model of `survival_spawn_creature` (crimsonland.exe 0x00407510).
+//
+// Note: this is not a `creature_spawn_template` spawn id; it picks a `type_id` and stats
+// dynamically based on `playerExperience`.
 export function buildSurvivalSpawnCreature(pos: Vec2, rng: CrandLike, opts: { playerExperience: number }): CreatureInit {
   const xp = int(opts.playerExperience);
 
@@ -1369,21 +1365,19 @@ export function randSurvivalSpawnPos(
 }
 
 
-/**
- * Advance survival enemy wave spawning, returning updated cooldown + spawned creatures.
- *
- * Modeled after `survival_update` (crimsonland.exe 0x00407cd0) wave spawns:
- *   spawn_cooldown -= player_count * frame_dt_ms
- *   while spawn_cooldown < 0:
- *     interval_ms = 500 - int(survival_elapsed_ms) / 1800
- *     if interval_ms < 0:
- *       extra = (1 - interval_ms) >> 1
- *       interval_ms += extra * 2
- *       spawn `extra` creatures at random edges
- *     interval_ms = max(1, interval_ms)
- *     spawn_cooldown += interval_ms
- *     spawn 1 creature at a random edge
- */
+// Advance survival enemy wave spawning, returning updated cooldown + spawned creatures.
+//
+// Modeled after `survival_update` (crimsonland.exe 0x00407cd0) wave spawns:
+//   spawn_cooldown -= player_count * frame_dt_ms
+//   while spawn_cooldown < 0:
+//     interval_ms = 500 - int(survival_elapsed_ms) / 1800
+//     if interval_ms < 0:
+//       extra = (1 - interval_ms) >> 1
+//       interval_ms += extra * 2
+//       spawn `extra` creatures at random edges
+//     interval_ms = max(1, interval_ms)
+//     spawn_cooldown += interval_ms
+//     spawn 1 creature at a random edge
 export function tickSurvivalWaveSpawns(
   spawnCooldown: number,
   frameDtMs: number,
@@ -1451,11 +1445,9 @@ function spawnCall(templateId: SpawnId, pos: Vec2, heading: number): SpawnTempla
 }
 
 
-/**
- * Return scripted survival spawns for the current stage (aka `survival_update` milestones).
- *
- * Modeled after `survival_update` (crimsonland.exe 0x00407cd0) stage 0..10 gate checks.
- */
+// Return scripted survival spawns for the current stage (aka `survival_update` milestones).
+//
+// Modeled after `survival_update` (crimsonland.exe 0x00407cd0) stage 0..10 gate checks.
 export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: number }): [number, SpawnTemplateCall[]] {
   stage = int(stage);
   const level = int(opts.playerLevel);
@@ -1569,7 +1561,7 @@ export function advanceSurvivalSpawnStage(stage: number, opts: { playerLevel: nu
 }
 
 
-/** Pure model of `creature_spawn` (0x00428240) as used by `rush_mode_update` (0x004072b0). */
+// Pure model of `creature_spawn` (0x00428240) as used by `rush_mode_update` (0x004072b0).
 export function buildRushModeSpawnCreature(
   pos: Vec2,
   tintRgba: TintRGBA,
@@ -1604,7 +1596,7 @@ export function buildRushModeSpawnCreature(
 }
 
 
-/** Advance rush-mode edge wave spawning (pure model of `rush_mode_update` / 0x004072b0). */
+// Advance rush-mode edge wave spawning (pure model of `rush_mode_update` / 0x004072b0).
 export function tickRushModeSpawns(
   spawnCooldown: number,
   frameDtMs: number,
@@ -1659,7 +1651,7 @@ export function tickRushModeSpawns(
 }
 
 
-/** Spawn pack triggered by the stage-3 fire-key transition in `tutorial_timeline_update` (0x00408990). */
+// Spawn pack triggered by the stage-3 fire-key transition in `tutorial_timeline_update` (0x00408990).
 export function buildTutorialStage3FireSpawns(): SpawnTemplateCall[] {
   const heading = Math.PI;
   return [
@@ -1670,7 +1662,7 @@ export function buildTutorialStage3FireSpawns(): SpawnTemplateCall[] {
 }
 
 
-/** Spawn pack triggered by the stage-4 "all clear" transition in `tutorial_timeline_update` (0x00408990). */
+// Spawn pack triggered by the stage-4 "all clear" transition in `tutorial_timeline_update` (0x00408990).
 export function buildTutorialStage4ClearSpawns(): SpawnTemplateCall[] {
   const heading = Math.PI;
   return [
@@ -1681,16 +1673,14 @@ export function buildTutorialStage4ClearSpawns(): SpawnTemplateCall[] {
 }
 
 
-/**
- * Spawn packs triggered by the stage-5 repeat loop in `tutorial_timeline_update` (0x00408990).
- *
- * `repeat_spawn_count` is the incremented counter value (1..7). When it reaches 8, the tutorial
- * transitions instead of spawning more creatures.
- *
- * Note: the original also stores the returned creature pointer from template `0x27` in
- * `tutorial_hint_bonus_ptr` and rewrites its packed bonus args (`link_index` low/high 16-bit fields)
- * depending on `repeat_spawn_count`. This helper only reproduces the `creature_spawn_template` calls.
- */
+// Spawn packs triggered by the stage-5 repeat loop in `tutorial_timeline_update` (0x00408990).
+//
+// `repeat_spawn_count` is the incremented counter value (1..7). When it reaches 8, the tutorial
+// transitions instead of spawning more creatures.
+//
+// Note: the original also stores the returned creature pointer from template `0x27` in
+// `tutorial_hint_bonus_ptr` and rewrites its packed bonus args (`link_index` low/high 16-bit fields)
+// depending on `repeat_spawn_count`. This helper only reproduces the `creature_spawn_template` calls.
 export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): SpawnTemplateCall[] {
   const n = int(repeatSpawnCount);
   if (n < 1 || 8 <= n) {
@@ -1723,7 +1713,7 @@ export function buildTutorialStage5RepeatSpawns(repeatSpawnCount: number): Spawn
 }
 
 
-/** Spawn pack triggered by the stage-6 "no perks pending" transition in `tutorial_timeline_update` (0x00408990). */
+// Spawn pack triggered by the stage-6 "no perks pending" transition in `tutorial_timeline_update` (0x00408990).
 export function buildTutorialStage6PerksDoneSpawns(): SpawnTemplateCall[] {
   const heading = Math.PI;
   return [
@@ -2476,13 +2466,12 @@ export function buildSpawnPlan(
   rng: CrandLike,
   env: SpawnEnv,
 ): SpawnPlan {
-  /** Pure plan builder modeled after `creature_spawn_template` (0x00430AF0).
-   *
-   * The plan lists:
-   *   - every creature allocated and configured directly by the template
-   *   - any spawn-slot configurations (deferred child spawns)
-   *   - side-effects like burst FX
-   */
+  // Pure plan builder modeled after `creature_spawn_template` (0x00430AF0).
+  //
+  // The plan lists:
+  //   - every creature allocated and configured directly by the template
+  //   - any spawn-slot configurations (deferred child spawns)
+  //   - side-effects like burst FX
 
   const [ctx, finalHeading] = PlanBuilder.start(templateId, pos, heading, rng, env);
 
