@@ -9,7 +9,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PlayerPerkTickCtx } from '@crimson/perks/runtime/player-tick-context.ts';
 
-export function tickHotTempered(ctx: PlayerPerkTickCtx): void {
+function tickHotTempered(ctx: PlayerPerkTickCtx): void {
   if (!perkActive(ctx.player, PerkId.HOT_TEMPERED)) {
     ctx.player.hotTemperedTimer = 0.0;
     return;

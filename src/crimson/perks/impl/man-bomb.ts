@@ -8,7 +8,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PlayerPerkTickCtx } from '@crimson/perks/runtime/player-tick-context.ts';
 
-export function tickManBomb(ctx: PlayerPerkTickCtx): void {
+function tickManBomb(ctx: PlayerPerkTickCtx): void {
   if (!perkActive(ctx.player, PerkId.MAN_BOMB)) {
     ctx.player.manBombTimer = 0.0;
     return;

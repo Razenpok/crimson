@@ -10,7 +10,7 @@ import { RngCallerStatic } from '@crimson/rng-caller-static.ts';
 import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import type { PlayerPerkTickCtx } from '@crimson/perks/runtime/player-tick-context.ts';
 
-export function tickFireCough(ctx: PlayerPerkTickCtx): void {
+function tickFireCough(ctx: PlayerPerkTickCtx): void {
   if (!perkActive(ctx.player, PerkId.FIRE_CAUGH)) {
     ctx.player.fireCoughTimer = 0.0;
     return;
