@@ -1,6 +1,6 @@
 // Port of crimson/world/standalone_tick_harness.py
 
-import { WorldRuntime } from '@crimson/world/runtime.ts';
+import type { WorldRuntime } from '@crimson/world/runtime.ts';
 import { GameMode } from '@crimson/game-modes.ts';
 import { FrameContext, LocalInputProvider } from '@crimson/sim/input-providers.ts';
 import { PlayerInput } from '@crimson/sim/input.ts';
@@ -79,8 +79,8 @@ export class StandaloneTickHarness {
       gameMode: this.gameMode,
       detailPreset: int(detailPreset),
       violenceDisabled: int(violenceDisabled),
-      gameTuneStarted: runtime.simWorld.gameTuneStarted,
-      demoModeActive: runtime.demoModeActive,
+      gameTuneStarted: Boolean(runtime.simWorld.gameTuneStarted),
+      demoModeActive: Boolean(runtime.demoModeActive),
       perkProgressionEnabled: false,
       applyWorldDtSteps: true,
     });
@@ -153,8 +153,9 @@ export class StandaloneTickHarness {
     runtime.terrainRuntime.processPending();
 
     const [runner, session] = this._ensureRunner(runtime);
-    session.demoModeActive = runtime.demoModeActive;
+    session.demoModeActive = Boolean(runtime.demoModeActive);
 
+    dt = Number(dt);
     const ticksRequested = int(this.clock.advance(dt));
     const advance = advanceTickRunnerFrame({
       runner,
