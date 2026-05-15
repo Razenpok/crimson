@@ -73,7 +73,7 @@ import type { GameplayState } from '@crimson/gameplay.ts';
 interface ReplayRecorder {
   tickIndex: number;
   recordedTickCount: number;
-  recordTick(inputs: readonly (readonly PlayerInput[])[], commands?: readonly GameCommand[]): number;
+  recordTick(inputs: readonly PlayerInput[], commands?: readonly GameCommand[]): number;
   finish(): object;
 }
 
@@ -1515,7 +1515,7 @@ export class BaseGameplayMode {
       let replayTickIndex = tickResult.replayTickIndex;
       if (replayTickIndex === null && recorder !== null) {
         replayTickIndex = recorder.recordTick(
-          [tickResult.sourceTick.inputs],
+          [...tickResult.sourceTick.inputs],
           tickResult.sourceTick.commands,
         );
         tickResult.replayTickIndex = replayTickIndex;
