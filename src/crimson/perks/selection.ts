@@ -16,8 +16,9 @@ import type { GameplayState } from '@crimson/sim/state-types.ts';
 export const PERK_ID_MAX: number = (() => {
   let maxId = 0;
   for (const perkId of PERK_BY_ID.keys()) {
-    if (perkId > maxId) {
-      maxId = perkId;
+    const id = int(perkId);
+    if (id > maxId) {
+      maxId = id;
     }
   }
   return maxId;
@@ -64,10 +65,10 @@ export function perkSelectRandom(
   // Port of `perk_select_random` (0x0042fbd0).
   for (let i = 0; i < 1000; i++) {
     const perkId = state.rng.rand({ caller: RngCallerStatic.PERK_SELECT_RANDOM }) % PERK_ID_MAX + 1;
-    if (!(perkId >= 0 && perkId < state.perkAvailable.length)) {
+    if (!(0 <= int(perkId) && int(perkId) < state.perkAvailable.length)) {
       continue;
     }
-    if (!state.perkAvailable[perkId]) {
+    if (!state.perkAvailable[int(perkId)]) {
       continue;
     }
     if (perkCanOffer(state, player, perkId, { gameMode: opts.gameMode, playerCount: opts.playerCount })) {
@@ -120,7 +121,7 @@ export function perkGenerateChoices(
   const offerableMask = perkOfferableMask(state, player, { gameMode, playerCount });
   const playerPerkCounts = player.perkCounts;
   const playerWeaponId = player.weapon.weaponId;
-  const deathClockActive = int(playerPerkCounts[PerkId.DEATH_CLOCK]) > 0;
+  const deathClockActive = int(playerPerkCounts[int(PerkId.DEATH_CLOCK)]) > 0;
   const flamethrowerId = WeaponId.FLAMETHROWER;
 
   let pyromaniacAllowed = playerWeaponId === flamethrowerId;
@@ -159,7 +160,7 @@ export function perkGenerateChoices(
   if (
     state.questLevel !== null &&
     state.questLevel.equal(new QuestLevel({ major: 3, minor: 4 })) &&
-    int(playerPerkCounts[PerkId.MONSTER_VISION]) === 0
+    int(playerPerkCounts[int(PerkId.MONSTER_VISION)]) === 0
   ) {
     choices[0] = PerkId.MONSTER_VISION;
     choiceIndex = 1;
@@ -209,7 +210,7 @@ export function perkGenerateChoices(
         continue;
       }
 
-      if (stackable || int(playerPerkCounts[perkId]) < 1 || attempts > 29_999) {
+      if (stackable || int(playerPerkCounts[int(perkId)]) < 1 || attempts > 29_999) {
         break;
       }
     }
