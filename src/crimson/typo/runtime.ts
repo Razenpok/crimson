@@ -21,7 +21,8 @@ function _requireSinglePlayerTypo(command: { playerIndex: number }): void {
   }
 }
 
-function _typeclickSfx(world: WorldState, caller: RngCallerStatic): SfxId {
+function _typeclickSfx(world: WorldState, opts: { caller: RngCallerStatic }): SfxId {
+  const caller = opts.caller;
   if ((world.state.rng.rand({ caller }) & 1) === 0) {
     return SfxId.UI_TYPECLICK_01;
   }
@@ -35,19 +36,18 @@ export function applyTypoCommand(
   _requireSinglePlayerTypo(command);
   const typo = world.state.typo;
   const typing = typo.typing;
-  const commandTypeName = command.constructor.name;
 
   if (command instanceof TypoCharCommand) {
     if (command.ch) {
       typing.pushChar(command.ch);
       world.state.sfxQueue.push(
-        _typeclickSfx(world, RngCallerStatic.TYPO_GAMEPLAY_TYPECLICK_CHAR),
+        _typeclickSfx(world, { caller: RngCallerStatic.TYPO_GAMEPLAY_TYPECLICK_CHAR }),
       );
     }
   } else if (command instanceof TypoBackspaceCommand) {
     typing.backspace();
     world.state.sfxQueue.push(
-      _typeclickSfx(world, RngCallerStatic.TYPO_GAMEPLAY_TYPECLICK_BACKSPACE),
+      _typeclickSfx(world, { caller: RngCallerStatic.TYPO_GAMEPLAY_TYPECLICK_BACKSPACE }),
     );
   } else if (command instanceof TypoSubmitCommand) {
     if (!typing.text) return;
@@ -77,6 +77,7 @@ export function applyTypoCommand(
       typo.pendingReload = true;
     }
   } else {
+    const commandTypeName = Object.getPrototypeOf(command).constructor.name;
     throw new Error(`unhandled Typ-o command: ${commandTypeName}`);
   }
 }
