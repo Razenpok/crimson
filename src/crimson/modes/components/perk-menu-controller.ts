@@ -241,8 +241,8 @@ export class PerkMenuController {
 
     const click = InputState.wasMouseButtonPressed(0);
 
-    const masterOwned = ctx.player.perkCounts[PerkId.PERK_MASTER] > 0;
-    const expertOwned = ctx.player.perkCounts[PerkId.PERK_EXPERT] > 0;
+    const masterOwned = int(ctx.player.perkCounts[PerkId.PERK_MASTER]) > 0;
+    const expertOwned = int(ctx.player.perkCounts[PerkId.PERK_EXPERT]) > 0;
     const computed = perkMenuComputeLayout(this._layout, {
       screenW,
       origin,
@@ -322,8 +322,8 @@ export class PerkMenuController {
     const origin = uiOrigin(screenW, screenH, scale);
     const slideX = perkMenuPanelSlideX(this._timelineMs, { width: this._layout.panelSize.x });
 
-    const masterOwned = ctx.player.perkCounts[PerkId.PERK_MASTER] > 0;
-    const expertOwned = ctx.player.perkCounts[PerkId.PERK_EXPERT] > 0;
+    const masterOwned = int(ctx.player.perkCounts[PerkId.PERK_MASTER]) > 0;
+    const expertOwned = int(ctx.player.perkCounts[PerkId.PERK_EXPERT]) > 0;
     const computed = perkMenuComputeLayout(this._layout, {
       screenW,
       origin,
