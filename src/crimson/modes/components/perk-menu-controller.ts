@@ -29,7 +29,7 @@ export type PlaySfxFn = (sfxId: SfxId) => void;
 export type OnCloseFn = () => void;
 
 const UI_TEXT_COLOR = wgl.makeColor(220 / 255, 220 / 255, 220 / 255, 1.0);
-const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, 0.5);
+const UI_SPONSOR_COLOR = wgl.makeColor(1.0, 1.0, 1.0, int(255 * 0.5) / 255);
 
 export class PerkMenuUiContext {
   readonly player: PlayerState;
@@ -123,12 +123,12 @@ export class PerkMenuController {
     font: SmallFontData,
     opts: { violenceDisabled: number; preserveBugs: boolean },
   ): string {
-    const key = `${perkId}:${opts.violenceDisabled}:${opts.preserveBugs ? 1 : 0}`;
+    const key = `${perkId}:${int(opts.violenceDisabled)}:${opts.preserveBugs ? 1 : 0}`;
     const cached = this._wrappedDescCache.get(key);
     if (cached !== undefined) {
       return cached;
     }
-    const desc = perkDisplayDescription(perkId, { violenceDisabled: opts.violenceDisabled, preserveBugs: opts.preserveBugs });
+    const desc = perkDisplayDescription(perkId, { violenceDisabled: int(opts.violenceDisabled), preserveBugs: opts.preserveBugs });
     const wrapped = PerkMenuController._wrapSmallTextNative(
       font,
       desc,
@@ -256,7 +256,7 @@ export class PerkMenuController {
     const preserveBugs = ctx.preserveBugs;
     for (let idx = 0; idx < choices.length; idx++) {
       const perkId = choices[idx];
-      const label = perkDisplayName(perkId, { violenceDisabled: ctx.violenceDisabled, preserveBugs });
+      const label = perkDisplayName(perkId, { violenceDisabled: int(ctx.violenceDisabled), preserveBugs });
       const itemPos = computed.listPos.offset({ dx: 0.0, dy: idx * computed.listStepY });
       const rect = menuItemHitRect(ctx.resources, label, { pos: itemPos, scale });
       if (rect.contains(ctx.mouse)) {
@@ -369,7 +369,7 @@ export class PerkMenuController {
     const preserveBugs = ctx.preserveBugs;
     for (let idx = 0; idx < choices.length; idx++) {
       const perkId = choices[idx];
-      const label = perkDisplayName(perkId, { violenceDisabled: ctx.violenceDisabled, preserveBugs });
+      const label = perkDisplayName(perkId, { violenceDisabled: int(ctx.violenceDisabled), preserveBugs });
       const itemPos = computed.listPos.offset({ dx: 0.0, dy: idx * computed.listStepY });
       const rect = menuItemHitRect(ctx.resources, label, { pos: itemPos, scale });
       const hovered = rect.contains(ctx.mouse) || idx === this._selectedIndex;
@@ -378,11 +378,11 @@ export class PerkMenuController {
 
     const selected = choices[this._selectedIndex];
     let desc = perkDisplayDescription(selected, {
-      violenceDisabled: ctx.violenceDisabled,
+      violenceDisabled: int(ctx.violenceDisabled),
       preserveBugs,
     });
     desc = this._prewrappedPerkDesc(selected, ctx.resources.smallFont, {
-      violenceDisabled: ctx.violenceDisabled,
+      violenceDisabled: int(ctx.violenceDisabled),
       preserveBugs,
     });
     drawUiText(ctx.resources, desc, computed.desc.topLeft, {
