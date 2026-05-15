@@ -55,6 +55,15 @@ function parseFloatArg(value: string): number {
   return Number.isNaN(v) ? 0.0 : v;
 }
 
+function parseDemoTrialMsArg(value: string): number {
+  const parsed = parseFloatArg(value);
+  if (Number.isNaN(parsed)) return 0;
+  if (!Number.isFinite(parsed)) {
+    throw new RangeError('cannot convert float infinity to integer');
+  }
+  return int(parsed);
+}
+
 function applyDebugConsoleDefaults(console: ConsoleState, opts: { debug: boolean }): void {
   const { debug } = opts;
   if (!debug) return;
@@ -155,13 +164,7 @@ function bootCommandHandlers(
       con.log.log('demoTrialSetPlaytime <ms>');
       return;
     }
-    let value: number;
-    try {
-      value = int(parseFloatArg(args[0]));
-    } catch {
-      value = 0;
-    }
-    if (!Number.isFinite(value)) value = 0;
+    const value = parseDemoTrialMsArg(args[0]);
     state.status.gameSequenceId = Math.max(0, value);
     state.status.saveIfDirty();
     con.log.log(
@@ -174,13 +177,7 @@ function bootCommandHandlers(
       con.log.log('demoTrialSetGrace <ms>');
       return;
     }
-    let value: number;
-    try {
-      value = int(parseFloatArg(args[0]));
-    } catch {
-      value = 0;
-    }
-    if (!Number.isFinite(value)) value = 0;
+    const value = parseDemoTrialMsArg(args[0]);
     state.demoTrialElapsedMs = Math.max(0, value);
     con.log.log(
       `demo trial: quest grace=${state.demoTrialElapsedMs}ms (total ${DEMO_QUEST_GRACE_TIME_MS}ms)`,
@@ -308,7 +305,7 @@ export function runGame(
     skipIntro: config.noIntro,
     resources: null,
     audio: null,
-    sessionStart: performance.now(),
+    sessionStart: performance.now() / 1000.0,
     rtxMode: modeFromRtxFlag(config.rtx),
     pendingNetworkSession: config.pendingNetworkSession,
   });
