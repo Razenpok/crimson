@@ -168,7 +168,7 @@ export class SecondaryProjectilePool {
     entry.detonationScale = 1.0;
 
     const rule = secondaryRuleForTypeId(typeId);
-    if (rule.tag === 'detonation') {
+    if (rule.tag === 'DetonationRule') {
       // Detonation uses explicit timer/scale fields now.
       entry.detonationT = 0.0;
       entry.detonationScale = timeToLive;
@@ -176,12 +176,12 @@ export class SecondaryProjectilePool {
       return index;
     }
 
-    if (rule.tag === 'rocket' || rule.tag === 'homing_rocket' || rule.tag === 'rocket_minigun') {
+    if (rule.tag === 'RocketRule' || rule.tag === 'HomingRocketRule' || rule.tag === 'RocketMinigunRule') {
       entry.vel = Vec2.fromHeading(angle).mul(rule.baseSpeed);
       entry.speed = f32(timeToLive);
     }
 
-    if (rule.tag === 'homing_rocket') {
+    if (rule.tag === 'HomingRocketRule') {
       // Native `fx_spawn_secondary_projectile` seeds seeker target_id at spawn via
       // `creature_find_nearest(&player_aim_x, -1, 0.0)`.
       if (creatures !== null) {
@@ -258,7 +258,7 @@ export class SecondaryProjectilePool {
 
       const rule = secondaryRuleForTypeId(entry.typeId);
 
-      if (rule.tag === 'detonation') {
+      if (rule.tag === 'DetonationRule') {
         if (runtimeState !== null) {
           runtimeState.cameraShakePulses = 4;
         }
@@ -312,7 +312,7 @@ export class SecondaryProjectilePool {
         continue;
       }
 
-      if (rule.tag !== 'rocket' && rule.tag !== 'homing_rocket' && rule.tag !== 'rocket_minigun') {
+      if (rule.tag !== 'RocketRule' && rule.tag !== 'HomingRocketRule' && rule.tag !== 'RocketMinigunRule') {
         continue;
       }
 
@@ -321,19 +321,19 @@ export class SecondaryProjectilePool {
 
       // Update velocity + countdown.
       const speedMag = entry.vel.length();
-      if (rule.tag === 'rocket') {
+      if (rule.tag === 'RocketRule') {
         if (speedMag < rule.speedCap) {
           const factor = 1.0 + dt * rule.accelFactorScale;
           entry.vel = entry.vel.mul(factor);
         }
         entry.speed = f32(entry.speed - dt * rule.ttlDecayScale);
-      } else if (rule.tag === 'rocket_minigun') {
+      } else if (rule.tag === 'RocketMinigunRule') {
         if (speedMag < rule.speedCap) {
           const factor = 1.0 + dt * rule.accelFactorScale;
           entry.vel = entry.vel.mul(factor);
         }
         entry.speed = f32(entry.speed - dt * rule.ttlDecayScale);
-      } else if (rule.tag === 'homing_rocket') {
+      } else if (rule.tag === 'HomingRocketRule') {
         // Type 2: homing projectile.
         let targetId = entry.targetId;
         if (!(targetId >= 0 && targetId < creatures.length) || !creatures[targetId].active) {
@@ -420,7 +420,7 @@ export class SecondaryProjectilePool {
         let extraDecals = 0;
         let extraRadius = 0.0;
         let freezeShardTargetPos = false;
-        if (rule.tag === 'rocket') {
+        if (rule.tag === 'RocketRule') {
           detScale = rule.detonationScale;
           damageSpeedMul = rule.damageSpeedMul;
           damageBase = rule.damageBase;
@@ -429,14 +429,14 @@ export class SecondaryProjectilePool {
           extraDecals = rule.extraDecals;
           extraRadius = rule.extraRadius;
           freezeShardTargetPos = rule.freezeShardTargetPos;
-        } else if (rule.tag === 'homing_rocket') {
+        } else if (rule.tag === 'HomingRocketRule') {
           detScale = rule.detonationScale;
           damageSpeedMul = rule.damageSpeedMul;
           damageBase = rule.damageBase;
           extraDecals = rule.extraDecals;
           extraRadius = rule.extraRadius;
           freezeShardTargetPos = rule.freezeShardTargetPos;
-        } else if (rule.tag === 'rocket_minigun') {
+        } else if (rule.tag === 'RocketMinigunRule') {
           detScale = rule.detonationScale;
           damageSpeedMul = rule.damageSpeedMul;
           damageBase = rule.damageBase;
@@ -500,9 +500,9 @@ export class SecondaryProjectilePool {
           if (effects !== null) {
             let shardPos = entry.pos;
             let freezeAngleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_FREEZE_SHARD_ANGLE;
-            if (rule.tag === 'homing_rocket') {
+            if (rule.tag === 'HomingRocketRule') {
               freezeAngleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_SEEKER_ROCKET_FREEZE_SHARD_ANGLE;
-            } else if (rule.tag === 'rocket_minigun') {
+            } else if (rule.tag === 'RocketMinigunRule') {
               freezeAngleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_MINIGUN_FREEZE_SHARD_ANGLE;
             }
             if (freezeShardTargetPos) {
@@ -523,17 +523,17 @@ export class SecondaryProjectilePool {
             const center = creatures[hitIdx].pos;
             let angleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_DECAL_ANGLE;
             let radiusCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_DECAL_RADIUS;
-            if (rule.tag === 'homing_rocket') {
+            if (rule.tag === 'HomingRocketRule') {
               angleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_SEEKER_ROCKET_DECAL_ANGLE;
               radiusCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_SEEKER_ROCKET_DECAL_RADIUS;
-            } else if (rule.tag === 'rocket_minigun') {
+            } else if (rule.tag === 'RocketMinigunRule') {
               angleCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_MINIGUN_DECAL_ANGLE;
               radiusCaller = RngCallerStatic.SECONDARY_PROJECTILE_UPDATE_ROCKET_MINIGUN_DECAL_RADIUS;
             }
             for (let i = 0; i < int(extraDecals); i++) {
               const angle = (rng.rand({ caller: angleCaller }) % 628) * 0.01;
               let radius: number;
-              if (rule.tag === 'homing_rocket') {
+              if (rule.tag === 'HomingRocketRule') {
                 radius = rng.rand({ caller: radiusCaller }) & 0x3F;
               } else {
                 radius = rng.rand({ caller: radiusCaller }) % Math.max(1, int(extraRadius));

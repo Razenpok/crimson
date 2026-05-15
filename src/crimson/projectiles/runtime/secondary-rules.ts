@@ -3,11 +3,11 @@
 import { SecondaryProjectileTypeId } from '@crimson/projectiles/types.ts';
 
 export class DetonationRule {
-  readonly tag = 'detonation';
+  readonly tag = 'DetonationRule';
 }
 
 export class RocketRule {
-  readonly tag = 'rocket';
+  readonly tag = 'RocketRule';
   readonly baseSpeed: number;
   readonly accelFactorScale: number;
   readonly speedCap: number;
@@ -51,7 +51,7 @@ export class RocketRule {
 }
 
 export class HomingRocketRule {
-  readonly tag = 'homing_rocket';
+  readonly tag = 'HomingRocketRule';
   readonly baseSpeed: number;
   readonly targetAccel: number;
   readonly maxVelocity: number;
@@ -89,7 +89,7 @@ export class HomingRocketRule {
 }
 
 export class RocketMinigunRule {
-  readonly tag = 'rocket_minigun';
+  readonly tag = 'RocketMinigunRule';
   readonly baseSpeed: number;
   readonly accelFactorScale: number;
   readonly speedCap: number;
