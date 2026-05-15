@@ -179,8 +179,8 @@ export class RushMode extends BaseGameplayMode {
     session: LanSession,
     _dtTick: number,
   ): boolean {
-    session.detailPreset = this._deterministicDetailPreset();
-    session.violenceDisabled = this._deterministicViolenceDisabled();
+    session.detailPreset = int(this._deterministicDetailPreset());
+    session.violenceDisabled = int(this._deterministicViolenceDisabled());
     return true;
   }
 
