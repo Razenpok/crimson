@@ -3,7 +3,6 @@
 import * as wgl from '@wgl';
 import { RuntimeResources, TextureId, getTexture } from '@grim/assets.ts';
 import { RGBA } from '@grim/color.ts';
-import { fxDetailEnabled } from '@grim/config.ts';
 import { Vec2 } from '@grim/geom.ts';
 import { clamp } from '@grim/math.ts';
 import { CreatureFlags, CreatureTypeId } from '@crimson/creatures/spawn.ts';
@@ -26,7 +25,7 @@ import * as viewport from './viewport.ts';
 
 import { drawAimCursor } from '@crimson/ui/cursor.ts';
 
-const CREATURE_TEXTURE_IDS: Record<string, TextureId> = {
+const _CREATURE_TEXTURE_IDS: Record<string, TextureId> = {
   alien: TextureId.ALIEN,
   lizard: TextureId.LIZARD,
   spider_sp1: TextureId.SPIDER_SP1,
@@ -35,7 +34,7 @@ const CREATURE_TEXTURE_IDS: Record<string, TextureId> = {
   zombie: TextureId.ZOMBIE,
 };
 
-const NATIVE_CREATURE_SPRITE_DRAW_ORDER: CreatureTypeId[] = [
+const _NATIVE_CREATURE_SPRITE_DRAW_ORDER: CreatureTypeId[] = [
   CreatureTypeId.ZOMBIE,
   CreatureTypeId.SPIDER_SP1,
   CreatureTypeId.SPIDER_SP2,
@@ -201,7 +200,7 @@ function drawBackground(
   );
 }
 
-function effectSrcRectFromTexture(
+export function effectSrcRect(
   texture: wgl.Texture,
   effectId: EffectId,
 ): wgl.Rectangle | null {
@@ -236,11 +235,11 @@ function buildDrawContext(
   const monsterVision = frame.players.length > 0 && perkActive(frame.players[0], PerkId.MONSTER_VISION);
   let monsterVisionSrc: wgl.Rectangle | null = null;
   if (monsterVision) {
-    monsterVisionSrc = effectSrcRectFromTexture(particlesTexture, EffectId.AURA);
+    monsterVisionSrc = effectSrcRect(particlesTexture, EffectId.AURA);
   }
   // Native uses `effect_select_texture(0x10)` (EffectId.AURA) for creature overlays
   // (monster vision, shadow, poison aura).
-  const poisonSrc = effectSrcRectFromTexture(particlesTexture, EffectId.AURA);
+  const poisonSrc = effectSrcRect(particlesTexture, EffectId.AURA);
 
   return new WorldDrawContext({
     camera,
@@ -295,7 +294,7 @@ function iterActiveCreatureOverlayPass(creatures: CreatureState[]): CreatureStat
 
 function iterNativeCreatureSpritePass(creatures: CreatureState[]): CreatureState[] {
   const result: CreatureState[] = [];
-  for (const typeId of NATIVE_CREATURE_SPRITE_DRAW_ORDER) {
+  for (const typeId of _NATIVE_CREATURE_SPRITE_DRAW_ORDER) {
     for (const creature of creatures) {
       if (creature.active && creature.typeId === typeId) {
         result.push(creature);
@@ -371,7 +370,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
     const lifecycleStage = creature.lifecycleStage;
 
     const typeId = creature.typeId;
-    const asset = CREATURE_ASSET.get(typeId) ?? null;
+    const asset = CREATURE_ASSET.get(typeId)!;
     const texture = creatureTexture(resources, asset);
 
     if (texture === null) {
@@ -381,8 +380,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
       continue;
     }
 
-    const info = CREATURE_ANIM.get(typeId);
-    if (!info) continue;
+    const info = CREATURE_ANIM.get(typeId)!;
 
     let tintRgba = creature.tint;
 
@@ -409,7 +407,7 @@ function drawCreatures(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawContext 
 
     const sizeScale = clamp(creature.size / 64.0, 0.25, 2.0);
     const config = frame.config;
-    const fxDetail = config !== null ? fxDetailEnabled(config.display, 0) : true;
+    const fxDetail = config !== null ? config.display.fxDetailEnabled(0, true) : true;
     // Mirrors `creature_render_type`: the "shadow-ish" pass is gated by fx_detail_0
     // and is disabled when the Monster Vision perk is active.
     const shadow = fxDetail && (!frame.players.length || !perkActive(frame.players[0], PerkId.MONSTER_VISION));
@@ -468,7 +466,7 @@ function drawFreezeOverlay(renderCtx: WorldRenderCtx, opts: { ctx: WorldDrawCont
   const freezeTimer = renderCtx.frame.state.bonuses.freeze;
   if (freezeTimer <= 0.0) return;
 
-  const src = effectSrcRectFromTexture(ctx.particlesTexture, EffectId.FREEZE_SHATTER);
+  const src = effectSrcRect(ctx.particlesTexture, EffectId.FREEZE_SHATTER);
   if (src === null) return;
 
   const fade = freezeTimer >= 1.0 ? 1.0 : clamp(freezeTimer, 0.0, 1.0);
@@ -558,8 +556,8 @@ function iterVisibleAimPlayers(renderCtx: WorldRenderCtx): PlayerState[] {
   const frame = renderCtx.frame;
   const players = frame.players;
   if (!frame.lanLocalAimIndicatorsOnly) return [...players];
-  const localSlot = frame.lanLocalPlayerSlotIndex;
-  return players.filter((player) => player.index === localSlot);
+  const localSlot = int(frame.lanLocalPlayerSlotIndex);
+  return players.filter((player) => int(player.index) === localSlot);
 }
 
 export function drawAimIndicators(
@@ -630,7 +628,7 @@ export function drawAimEnhancements(
 
 function creatureTexture(resources: RuntimeResources, assetName: string | null): wgl.Texture | null {
   if (assetName === null) return null;
-  const textureId = CREATURE_TEXTURE_IDS[assetName];
+  const textureId = _CREATURE_TEXTURE_IDS[assetName];
   if (textureId === undefined) return null;
   return getTexture(resources, textureId);
 }
