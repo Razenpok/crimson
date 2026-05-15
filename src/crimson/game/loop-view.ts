@@ -791,7 +791,6 @@ export class GameLoopView implements View {
     gameplay.bindAudio(this.state.audio, this.state.rng);
     gameplay.setRtxMode(this.state.rtxMode);
     gameplay.bindScreenFade(this.state);
-    gameplay.bindRuntimeResources(this.state.resources);
     gameplay.open();
 
     if (gameplay instanceof QuestMode) {
