@@ -1,5 +1,7 @@
 // Port of crimson/perks/__init__.py
 
+// Perk metadata and deterministic perk runtime modules.
+
 export {
   PERK_BY_ID,
   PERK_DEFAULT_FLAGS,
