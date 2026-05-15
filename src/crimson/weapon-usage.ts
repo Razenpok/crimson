@@ -7,7 +7,7 @@ import { WeaponId } from '@crimson/weapons.ts';
 // - tracked weapon ids map 1:1 to slots 1..52
 // - weapon id 53 has no safe slot in this table
 export const WEAPON_USAGE_SLOT_COUNT = 53;
-const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = WeaponId.PISTOL;
+const WEAPON_USAGE_TRACKED_WEAPON_ID_MIN = int(WeaponId.PISTOL);
 const WEAPON_USAGE_TRACKED_WEAPON_ID_MAX = WEAPON_USAGE_SLOT_COUNT - 1;
 
 export type WeaponUsageCount = number;
