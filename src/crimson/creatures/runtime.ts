@@ -629,16 +629,15 @@ function _creatureInteractionPlaguebearerContactFlag(ctx: _CreatureInteractionCt
 }
 
 function _creatureInteractionContactKillSmall(ctx: _CreatureInteractionCtx): void {
-  /** Kill small creatures that make contact, matching native `creature_update_all`.
-   *
-   * Native logic (see decompile around 0x004276d6) sets `health = 0.0` and
-   * decrements lifecycle_stage by frame_dt whenever:
-   * - distance to the target player is < 30.0, and
-   * - creature `size` is <= 30.0.
-   *
-   * This path does not call `creature_handle_death`, so it intentionally skips XP
-   * awards + bonus spawns. The corpse staging still increments kill_count later.
-   */
+  // Kill small creatures that make contact, matching native `creature_update_all`.
+  //
+  // Native logic (see decompile around 0x004276d6) sets `health = 0.0` and
+  // decrements lifecycle_stage by frame_dt whenever:
+  // - distance to the target player is < 30.0, and
+  // - creature `size` is <= 30.0.
+  //
+  // This path does not call `creature_handle_death`, so it intentionally skips XP
+  // awards + bonus spawns. The corpse staging still increments kill_count later.
 
   const creature = ctx.creature;
   if (!creatureLifecycleIsAlive(creature.lifecycleStage)) return;
@@ -698,7 +697,7 @@ export class CreaturePool {
   }
 
   _plaguebearerSpreadInfection(originIndex: number): void {
-    /** Port of `FUN_00425d80` (infects nearby creatures when Plaguebearer is active). */
+    // Port of `FUN_00425d80` (infects nearby creatures when Plaguebearer is active).
 
     originIndex = int(originIndex);
     if (!(originIndex >= 0 && originIndex < this._entries.length)) return;
@@ -836,7 +835,7 @@ export class CreaturePool {
   }
 
   spawnInit(init: CreatureInit): number | null {
-    /** Materialize a single `CreatureInit` into the runtime pool. */
+    // Materialize a single `CreatureInit` into the runtime pool.
 
     const idx = this._allocSlot();
     if (idx === null) return null;
@@ -881,11 +880,10 @@ export class CreaturePool {
     const rng = opts?.rng ?? null;
     const detailPreset = opts?.detailPreset ?? 5;
     const effects = opts?.effects ?? null;
-    /** Materialize a pure `SpawnPlan` into the runtime pool.
-     *
-     * Returns:
-     *   (plan_index_to_pool_index, primary_pool_index_or_none)
-     */
+    // Materialize a pure `SpawnPlan` into the runtime pool.
+    //
+    // Returns:
+    //   (plan_index_to_pool_index, primary_pool_index_or_none)
 
     if (this._freeSlotCount() < plan.creatures.length) {
       return [[], null];
@@ -980,7 +978,7 @@ export class CreaturePool {
       effects?: EffectPool | null;
     },
   ): [number[], number | null] {
-    /** Build a spawn plan and materialize it into the pool. */
+    // Build a spawn plan and materialize it into the pool.
 
     const env = opts?.env ?? null;
     const detailPreset = opts?.detailPreset ?? 5;
@@ -996,12 +994,11 @@ export class CreaturePool {
   }
 
   update(dt: number, opts: { options: CreatureUpdateOptions }): CreatureUpdateResult {
-    /** Advance the creature runtime pool by `dt` seconds.
-     *
-     * Notes:
-     * - Death side effects should be initiated by damage call sites.
-     * - This is not a full port of `creature_update_all`; it targets the Survival subset.
-     */
+    // Advance the creature runtime pool by `dt` seconds.
+    //
+    // Notes:
+    // - Death side effects should be initiated by damage call sites.
+    // - This is not a full port of `creature_update_all`; it targets the Survival subset.
 
     dt = f32(dt);
     const options = opts.options;
@@ -1506,7 +1503,7 @@ export class CreaturePool {
     fxQueue: FxQueue | null;
     keepCorpse?: boolean;
   }): CreatureDeath {
-    /** Run one-shot death side effects and return the `CreatureDeath` event. */
+    // Run one-shot death side effects and return the `CreatureDeath` event.
 
     const state = opts.state;
     const players = opts.players;
@@ -1606,7 +1603,7 @@ export class CreaturePool {
     entry.vel = new Vec2();
     entry.forceTarget = 0;
 
-    entry.flags = init.flags || 0;
+    entry.flags = init.flags ?? 0;
     entry.aiMode = init.aiMode;
 
     let hp = init.health ?? 0.0;
@@ -1668,12 +1665,11 @@ export class CreaturePool {
       violenceDisabled?: number;
     },
   ): void {
-    /** Advance the post-death lifecycle_stage ramp and queue corpse decals.
-     *
-     * This matches the `lifecycle_stage` death staging inside `creature_update_all`:
-     * - while lifecycle_stage > 0: decrement quickly and slide backwards
-     * - once lifecycle_stage <= 0: queue a corpse decal and fade out until < -10, then deactivate.
-     */
+    // Advance the post-death lifecycle_stage ramp and queue corpse decals.
+    //
+    // This matches the `lifecycle_stage` death staging inside `creature_update_all`:
+    // - while lifecycle_stage > 0: decrement quickly and slide backwards
+    // - once lifecycle_stage <= 0: queue a corpse decal and fade out until < -10, then deactivate.
 
     const dt = opts.dt;
     const worldWidth = opts.worldWidth;
@@ -1770,12 +1766,11 @@ export class CreaturePool {
   }
 
   finalizePostRenderLifecycle(): void {
-    /** Mirror render-time corpse culling from native `creature_render_type`.
-     *
-     * Native deactivates entries only after draw once `lifecycle_stage < -10.0`. Keeping
-     * this outside `creature_update_all` preserves slot-allocation timing for same-tick
-     * survival/rush spawns.
-     */
+    // Mirror render-time corpse culling from native `creature_render_type`.
+    //
+    // Native deactivates entries only after draw once `lifecycle_stage < -10.0`. Keeping
+    // this outside `creature_update_all` preserves slot-allocation timing for same-tick
+    // survival/rush spawns.
 
     for (const creature of this._entries) {
       if (!creature.active) continue;
