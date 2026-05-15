@@ -34,15 +34,18 @@ export class TerrainSetup {
   }
 }
 
-function advanceRandomTerrainPreludeRng(rng: CrandLike): void {
+function _advanceRandomTerrainPreludeRng(rng: CrandLike): void {
   // Native `terrain_generate_random()` consumes three CRT draws before the
   // unlock-gated variant rolls. The values are not used by the rewrite, but
   // the state advance is required for parity.
   rng.advance(TERRAIN_RANDOM_PRELUDE_DRAWS);
 }
 
-function advanceTerrainStampingRng(rng: CrandLike, width: number, height: number): void {
-  rng.advance(terrainStampingDraws({ width, height }));
+function _advanceTerrainStampingRng(
+  rng: CrandLike,
+  opts: { width: number; height: number },
+): void {
+  rng.advance(terrainStampingDraws({ width: opts.width, height: opts.height }));
 }
 
 export function advanceUnlockTerrain(
@@ -54,10 +57,10 @@ export function advanceUnlockTerrain(
   // Mutates the authoritative RNG to match native `terrain_generate_random()`
   // and returns the minimal render boundary data needed by the detached terrain
   // renderer.
-  advanceRandomTerrainPreludeRng(rng);
+  _advanceRandomTerrainPreludeRng(rng);
   const terrainSlots = chooseUnlockTerrainSlots({ unlockIndex: opts.unlockIndex, rng });
   const terrainSeed = rng.state;
-  advanceTerrainStampingRng(rng, opts.width, opts.height);
+  _advanceTerrainStampingRng(rng, { width: opts.width, height: opts.height });
   return new TerrainSetup({ terrainSlots, terrainSeed });
 }
 
@@ -67,6 +70,6 @@ export function advanceExplicitTerrain(
 ): TerrainSetup {
   // Advance RNG through explicit terrain generation when slots are fixed.
   const terrainSeed = rng.state;
-  advanceTerrainStampingRng(rng, opts.width, opts.height);
+  _advanceTerrainStampingRng(rng, { width: opts.width, height: opts.height });
   return new TerrainSetup({ terrainSlots: opts.terrainSlots, terrainSeed });
 }
