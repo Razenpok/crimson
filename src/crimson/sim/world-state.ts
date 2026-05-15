@@ -195,7 +195,7 @@ export class WorldState {
     for (let idx = 0; idx < creatureEntries.length; idx++) {
       const creature = creatureEntries[idx];
       if (creature.active && Number(creature.hp) <= 0.0) {
-        freezeCorpseIndicesAtTickStart.add(idx);
+        freezeCorpseIndicesAtTickStart.add(int(idx));
       }
     }
 
@@ -657,10 +657,7 @@ export class WorldState {
       if (!(creature.active && creature.hp > 0.0)) continue;
 
       const typeId = creature.typeId;
-      const info = CREATURE_ANIM.get(typeId);
-      if (info === undefined) {
-        throw new Error(`missing creature animation info for type ${typeId}`);
-      }
+      const info = CREATURE_ANIM.get(typeId)!;
 
       const [newPhase] = creatureAnimAdvancePhase(
         creature.animPhase,
@@ -671,7 +668,7 @@ export class WorldState {
           size: Number(creature.size),
           localScale: Number(creature.moveScale),
           flags: creature.flags,
-          aiMode: creature.aiMode,
+          aiMode: int(creature.aiMode),
         },
       );
       creature.animPhase = newPhase;
