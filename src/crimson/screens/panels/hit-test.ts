@@ -2,7 +2,7 @@
 
 import { type SupportsXY, Vec2 } from '@grim/geom.ts';
 
-/** Port of `ui_mouse_inside_rect_with_padding` (0x00403430). */
+// Port of `ui_mouse_inside_rect_with_padding` (0x00403430).
 export function mouseInsideRectWithPadding(
   mouse: SupportsXY,
   opts: { pos: Vec2; width: number; height: number; leftPad?: number; topPad?: number },
