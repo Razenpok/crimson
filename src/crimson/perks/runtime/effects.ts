@@ -7,7 +7,7 @@ import { PerksUpdateEffectsCtx, creatureFindInRadius } from './effects-context.t
 import { PERKS_UPDATE_EFFECT_STEPS } from './manifest.ts';
 
 // Backward-compatible re-export used by HUD target hover wiring.
-export const _creatureFindInRadius = creatureFindInRadius;
+const _creatureFindInRadius = creatureFindInRadius;
 
 const _PERKS_UPDATE_EFFECT_STEPS = PERKS_UPDATE_EFFECT_STEPS;
 
