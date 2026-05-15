@@ -20,7 +20,6 @@ import {
   bakeTerrainFxBatch,
 } from '@crimson/render/terrain-fx.ts';
 import type { TerrainFxBatch } from '@crimson/sim/terrain-fx.ts';
-import { terrainFxBatchIsEmpty } from '@crimson/sim/terrain-fx.ts';
 import type { GameplayState } from '@crimson/gameplay.ts';
 
 export class RenderResources {
@@ -149,7 +148,7 @@ export class RenderResources {
     corpseFrameForType: (creatureTypeId: number) => number = creatureCorpseFrameForType,
   ): void {
     if (this.ground === null || this.fxTextures === null) return;
-    if (terrainFxBatchIsEmpty(batch)) return;
+    if (batch.isEmpty()) return;
     bakeTerrainFxBatch(this.ground, { batch, textures: this.fxTextures, corpseFrameForType });
   }
 
@@ -158,7 +157,7 @@ export class RenderResources {
     opts: { corpseFrameForType?: (creatureTypeId: number) => number } = {},
   ): void {
     const corpseFrameForType = opts.corpseFrameForType ?? creatureCorpseFrameForType;
-    if (terrainFxBatchIsEmpty(batch)) return;
+    if (batch.isEmpty()) return;
     const ground = this.ground;
     if (ground === null || ground.textureFailed || this.fxTextures === null) return;
     if (ground.renderTargetReady()) {

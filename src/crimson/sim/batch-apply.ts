@@ -2,8 +2,7 @@
 
 import type { PresentationStepCommands } from './presentation-step.ts';
 import type { DeterministicStepResult } from './step-pipeline.ts';
-import type { TerrainFxBatch } from './terrain-fx.ts';
-import { EMPTY_TERRAIN_FX_BATCH, terrainFxBatchIsEmpty } from './terrain-fx.ts';
+import { TerrainFxBatch } from './terrain-fx.ts';
 import type { WorldEvents } from './world-state.ts';
 import type { TickResult } from './hooks.ts';
 export interface SimMetadataSink {
@@ -29,7 +28,7 @@ export class PresentationTickOutput {
     this.tickIndex = opts.tickIndex;
     this.dtSim = opts.dtSim;
     this.presentation = opts.presentation;
-    this.terrainFx = opts.terrainFx ?? EMPTY_TERRAIN_FX_BATCH;
+    this.terrainFx = opts.terrainFx ?? new TerrainFxBatch();
   }
 }
 export function applySimMetadataTickResult(opts: {
@@ -100,7 +99,7 @@ export function applyPresentationOutputs(opts: {
         updateCamera(Number(output.dtSim));
       }
     }
-    if (applyTerrainFx != null && !terrainFxBatchIsEmpty(output.terrainFx)) {
+    if (applyTerrainFx != null && !output.terrainFx.isEmpty()) {
       applyTerrainFx(output.terrainFx);
     }
     if (onOutputApplied != null) {

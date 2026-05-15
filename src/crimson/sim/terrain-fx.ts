@@ -65,12 +65,6 @@ export class TerrainFxBatch {
   }
 }
 
-export function terrainFxBatchIsEmpty(batch: TerrainFxBatch): boolean {
-  return batch.isEmpty();
-}
-
-export const EMPTY_TERRAIN_FX_BATCH = new TerrainFxBatch();
-
 export class TerrainFxScratch {
   decals = new FxQueue();
   corpses = new FxQueueRotated();
