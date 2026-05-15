@@ -122,6 +122,24 @@ export class QuestSpawnState {
   completed = false;
   playHitSfx = false;
   playCompletionMusic = false;
+
+  constructor(opts: {
+    spawnEntries?: readonly SpawnEntry[];
+    spawnTimelineMs?: number;
+    noCreaturesTimerMs?: number;
+    completionTransitionMs?: number;
+    completed?: boolean;
+    playHitSfx?: boolean;
+    playCompletionMusic?: boolean;
+  } = {}) {
+    this.spawnEntries = Array.from(opts.spawnEntries ?? []);
+    this.spawnTimelineMs = opts.spawnTimelineMs ?? this.spawnTimelineMs;
+    this.noCreaturesTimerMs = opts.noCreaturesTimerMs ?? this.noCreaturesTimerMs;
+    this.completionTransitionMs = opts.completionTransitionMs ?? this.completionTransitionMs;
+    this.completed = opts.completed ?? this.completed;
+    this.playHitSfx = opts.playHitSfx ?? this.playHitSfx;
+    this.playCompletionMusic = opts.playCompletionMusic ?? this.playCompletionMusic;
+  }
 }
 
 export function survivalMidStep(ctx: MidStepContext, spawn: SurvivalSpawnState): void {

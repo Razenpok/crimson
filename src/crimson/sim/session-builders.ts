@@ -128,8 +128,7 @@ export function buildQuestSession(opts: {
 
   opts.world.creatures.captureSpawnEventsAuthoritative = false;
 
-  const questState = new QuestSpawnState();
-  questState.spawnEntries = [...opts.spawnEntries];
+  const questState = new QuestSpawnState({ spawnEntries: opts.spawnEntries });
 
   const session = new DeterministicSession({
     world: opts.world,
