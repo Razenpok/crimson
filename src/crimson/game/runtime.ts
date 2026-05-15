@@ -14,6 +14,7 @@ import { loadMusicTrack, queueTrack } from '@grim/music.ts';
 
 import { GameMode } from '@crimson/game-modes.ts';
 import { setDebugEnabled } from '@crimson/debug.ts';
+import { downloadMissingPaqs } from '@crimson/assets-fetch.ts';
 import { ensureGameStatus } from '@crimson/persistence/save-status.ts';
 import { cycleRtxRenderMode, modeFromRtxFlag, parseRtxRenderMode } from '@crimson/render/rtx/mode.ts';
 import {
@@ -321,7 +322,7 @@ export function runGame(
   );
   console.log.log(`status: ${status.path.split(/[\\/]/).pop() ?? status.path} loaded`);
   console.log.log(`assets: ${assetsDir}`);
-  void runtimeDownloadTargets(assetsDir);
+  downloadMissingPaqs(assetsDir, console, { names: runtimeDownloadTargets(assetsDir) });
   requireRuntimeAssets(assetsDir);
   console.log.log(`assets: required archives ready (${REQUIRED_RUNTIME_PAQS.join(', ')})`);
   console.log.log(`commands: ${console.commands.size} registered`);
