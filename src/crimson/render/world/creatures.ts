@@ -67,7 +67,7 @@ export function drawCreatureSprite(
     // The observed pass is slightly bigger than the main sprite and offset
     // down-right by ~1px at default sizes.
     const alpha = shadowAlpha !== null
-      ? shadowAlpha / 255
+      ? int(shadowAlpha) / 255
       : int(clamp(opts.tint.a * 255.0 * 0.4, 0.0, 255.0) + 0.5) / 255;
     const shadowTint = wgl.makeColor(0, 0, 0, alpha);
     const shadowScale = 1.07;
