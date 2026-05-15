@@ -2,7 +2,8 @@
 
 import { Vec2 } from '@grim/geom.ts';
 import { Crand } from '@grim/rand.ts';
-import { SpawnEnv, SpawnId, buildSpawnPlan, spawnIdLabel } from '@crimson/creatures/spawn.ts';
+import { RunViewHooks } from '@grim/app.ts';
+import { SPAWN_ID_TO_TEMPLATE, SpawnEnv, SpawnId, buildSpawnPlan, spawnIdLabel } from '@crimson/creatures/spawn.ts';
 import { allQuests } from '@crimson/quests/index.ts';
 import { QuestContext, type QuestDefinition, type SpawnEntry } from '@crimson/quests/types.ts';
 
@@ -31,6 +32,12 @@ const QUEST_TITLES = new Map<string, string>(
 
 const SEP_RE = /[\\/]+/;
 
+interface ViewRunHooksSource {
+  shouldClose?: () => boolean;
+  closeRequested?: boolean;
+  consumeScreenshotRequest?: () => boolean;
+}
+
 export function safeRelpath(name: string): string {
   const parts = String(name).split(SEP_RE).filter((part) => part.length > 0);
   if (parts.length === 0) {
@@ -44,30 +51,27 @@ export function safeRelpath(name: string): string {
   return parts.join('/');
 }
 
-export function viewRunHooks(view: object): {
-  shouldClose: () => boolean;
-  consumeScreenshotRequest: () => boolean;
-} {
-  return {
+export function viewRunHooks(view: ViewRunHooksSource): RunViewHooks {
+  return new RunViewHooks({
     shouldClose(): boolean {
-      const shouldCloseFn = (view as { shouldClose?: unknown }).shouldClose;
-      if (typeof shouldCloseFn === 'function') {
+      const shouldCloseFn = view.shouldClose;
+      if (shouldCloseFn !== undefined) {
         return Boolean(shouldCloseFn.call(view));
       }
-      const closeRequested = (view as { closeRequested?: unknown }).closeRequested;
+      const closeRequested = view.closeRequested;
       if (typeof closeRequested === 'boolean') {
         return closeRequested;
       }
       return false;
     },
     consumeScreenshotRequest(): boolean {
-      const consumeFn = (view as { consumeScreenshotRequest?: unknown }).consumeScreenshotRequest;
-      if (typeof consumeFn === 'function') {
+      const consumeFn = view.consumeScreenshotRequest;
+      if (consumeFn !== undefined) {
         return Boolean(consumeFn.call(view));
       }
       return false;
     },
-  };
+  });
 }
 
 export function extractOne(_paqPath: string, _assetsRoot: string): number {
@@ -223,6 +227,75 @@ function pythonAsciiRepr(text: string): string {
   return out + quote;
 }
 
+function pythonStr(value: number | boolean | null): string {
+  if (value === null) return 'None';
+  if (typeof value === 'boolean') return value ? 'True' : 'False';
+  return String(value);
+}
+
+function hexLower(value: number, width: number): string {
+  return int(value).toString(16).padStart(width, '0');
+}
+
+type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
+
+function sortJsonValue(value: JsonValue): JsonValue {
+  if (Array.isArray(value)) {
+    return value.map((item) => sortJsonValue(item));
+  }
+  if (value !== null && typeof value === 'object') {
+    const out: { [key: string]: JsonValue } = {};
+    for (const key of Object.keys(value).sort()) {
+      out[key] = sortJsonValue(value[key]);
+    }
+    return out;
+  }
+  return value;
+}
+
+function spawnPlanJsonValue(plan: ReturnType<typeof buildSpawnPlan>): JsonValue {
+  return {
+    creatures: plan.creatures.map((c) => ({
+      ai_link_parent: c.aiLinkParent,
+      ai_mode: c.aiMode,
+      ai_timer: c.aiTimer,
+      bonus_duration_override: c.bonusDurationOverride,
+      bonus_id: c.bonusId,
+      contact_damage: c.contactDamage,
+      flags: c.flags,
+      heading: c.heading,
+      health: c.health,
+      max_health: c.maxHealth,
+      move_speed: c.moveSpeed,
+      orbit_angle: c.orbitAngle,
+      orbit_radius: c.orbitRadius,
+      origin_template_id: c.originTemplateId,
+      phase_seed: c.phaseSeed,
+      pos: { x: c.pos.x, y: c.pos.y },
+      ranged_projectile_type: c.rangedProjectileType,
+      reward_value: c.rewardValue,
+      size: c.size,
+      spawn_slot: c.spawnSlot,
+      target_offset: c.targetOffset === null ? null : { x: c.targetOffset.x, y: c.targetOffset.y },
+      tint: c.tint === null ? null : [...c.tint],
+      type_id: c.typeId,
+    })),
+    spawn_slots: plan.spawnSlots.map((slot) => ({
+      child_template_id: slot.childTemplateId,
+      count: slot.count,
+      interval: slot.interval,
+      limit: slot.limit,
+      owner_creature: slot.ownerCreature,
+      timer: slot.timer,
+    })),
+    effects: plan.effects.map((fx) => ({
+      count: fx.count,
+      pos: { x: fx.pos.x, y: fx.pos.y },
+    })),
+    primary: plan.primary,
+  };
+}
+
 export function parseIntAuto(text: string): number {
   const raw = String(text).trim();
   const sign = raw.startsWith('-') || raw.startsWith('+') ? raw[0] : '';
@@ -249,14 +322,19 @@ export function parseIntAuto(text: string): number {
         ? /^[0-7]+$/
         : /^[01]+$/;
   const underscorePattern = radix === 16
-    ? /^[0-9a-fA-F]+(?:_[0-9a-fA-F]+)*$/
+    ? /^_?[0-9a-fA-F]+(?:_[0-9a-fA-F]+)*$/
     : radix === 10
       ? /^[0-9]+(?:_[0-9]+)*$/
       : radix === 8
-        ? /^[0-7]+(?:_[0-7]+)*$/
-        : /^[01]+(?:_[01]+)*$/;
+        ? /^_?[0-7]+(?:_[0-7]+)*$/
+        : /^_?[01]+(?:_[01]+)*$/;
   const validUnderscores = underscorePattern.test(digits);
-  const decimalWithInvalidLeadingZero = radix === 10 && normalizedDigits.length > 1 && normalizedDigits.startsWith('0');
+  const decimalWithInvalidLeadingZero = (
+    radix === 10 &&
+    normalizedDigits.length > 1 &&
+    normalizedDigits.startsWith('0') &&
+    /[1-9]/.test(normalizedDigits)
+  );
   if (
     normalizedDigits.length === 0 ||
     !digitPattern.test(normalizedDigits) ||
@@ -297,6 +375,105 @@ export function parseVec2(text: string): Vec2 {
   return new Vec2(x, y);
 }
 
-export function cmdSpawnPlan(_opts: object): void {
-  throw new DesktopCliUnavailableError('spawn-plan');
+export function cmdSpawnPlan(opts: {
+  template: string;
+  seed?: string;
+  pos?: string;
+  heading?: number;
+  terrainW?: number;
+  terrainH?: number;
+  demoModeActive?: boolean;
+  hardcore?: boolean;
+  questFailRetryCount?: number;
+  asJson?: boolean;
+}): string[] {
+  const templateText = opts.template;
+  const seedText = opts.seed ?? '0xBEEF';
+  const posText = opts.pos ?? '512,512';
+  const heading = opts.heading ?? 0.0;
+  const terrainW = opts.terrainW ?? 1024.0;
+  const terrainH = opts.terrainH ?? 1024.0;
+  const demoModeActive = opts.demoModeActive ?? true;
+  const hardcore = opts.hardcore ?? false;
+  const questFailRetryCount = opts.questFailRetryCount ?? 0;
+  const templateIdRaw = parseIntAuto(templateText);
+  const templateId = int(templateIdRaw) as SpawnId;
+  if (!SPAWN_ID_TO_TEMPLATE.has(templateId)) {
+    throw new Error(`invalid spawn template id: ${pythonAsciiRepr(templateText)}`);
+  }
+  const seed = parseIntAuto(seedText);
+  const rng = new Crand(seed);
+  const spawnPos = parseVec2(posText);
+  const env = new SpawnEnv({
+    terrainWidth: terrainW,
+    terrainHeight: terrainH,
+    demoModeActive,
+    hardcore,
+    questFailRetryCount,
+  });
+  const plan = buildSpawnPlan(templateId, spawnPos, heading, rng, env);
+  if (opts.asJson ?? false) {
+    const planJson = spawnPlanJsonValue(plan) as { [key: string]: JsonValue };
+    const payload: JsonValue = {
+      template_id: int(templateId),
+      pos: [spawnPos.x, spawnPos.y],
+      heading,
+      seed,
+      env: {
+        terrain_width: terrainW,
+        terrain_height: terrainH,
+        demo_mode_active: demoModeActive,
+        hardcore,
+        quest_fail_retry_count: questFailRetryCount,
+      },
+      primary: planJson.primary,
+      creatures: planJson.creatures,
+      spawn_slots: planJson.spawn_slots,
+      effects: planJson.effects,
+      rng_state: rng.state,
+    };
+    return [JSON.stringify(sortJsonValue(payload), null, 2)];
+  }
+
+  const lines = [
+    `template_id=0x${hexLower(templateId, 2)} (${int(templateId)}) creature=${spawnIdLabel(templateId)}`,
+    `pos=(${spawnPos.x.toFixed(1)},${spawnPos.y.toFixed(1)}) ` +
+      `heading=${heading.toFixed(6)} seed=0x${hexLower(seed, 8)} rng_state=0x${hexLower(rng.state, 8)}`,
+    'env=' +
+      `demo_mode_active=${pythonStr(demoModeActive)} ` +
+      `hardcore=${pythonStr(hardcore)} ` +
+      `quest_fail_retry_count=${questFailRetryCount} ` +
+      `terrain=${terrainW.toFixed(0)}x${terrainH.toFixed(0)}`,
+    `primary=${plan.primary} creatures=${plan.creatures.length} slots=${plan.spawnSlots.length} effects=${plan.effects.length}`,
+    '',
+    'creatures:',
+  ];
+  plan.creatures.forEach((c, idx) => {
+    const primary = idx === plan.primary ? '*' : ' ';
+    lines.push(
+      `${primary}${String(idx).padStart(2, '0')} type=${pythonStr(c.typeId).padEnd(14)} ` +
+      `ai=${String(c.aiMode).padStart(2)} flags=0x${hexLower(c.flags, 3)} ` +
+      `pos=(${c.pos.x.toFixed(1).padStart(7)},${c.pos.y.toFixed(1).padStart(7)}) ` +
+      `health=${pythonStr(c.health).padStart(6)} size=${pythonStr(c.size).padStart(6)} ` +
+      `link=${pythonStr(c.aiLinkParent).padStart(3)} slot=${pythonStr(c.spawnSlot).padStart(3)}`,
+    );
+  });
+  if (plan.spawnSlots.length > 0) {
+    lines.push('', 'spawn_slots:');
+    plan.spawnSlots.forEach((slot, idx) => {
+      lines.push(
+        `${String(idx).padStart(2, '0')} owner=${String(slot.ownerCreature).padStart(2, '0')} ` +
+        `timer=${slot.timer.toFixed(2)} count=${String(slot.count).padStart(3)} ` +
+        `limit=${String(slot.limit).padStart(3)} interval=${slot.interval.toFixed(3)} ` +
+        `child=0x${hexLower(slot.childTemplateId, 2)}`,
+      );
+    });
+  }
+  if (plan.effects.length > 0) {
+    lines.push('', 'effects:');
+    for (const fx of plan.effects) {
+      lines.push(`burst x=${fx.pos.x.toFixed(1)} y=${fx.pos.y.toFixed(1)} count=${fx.count}`);
+    }
+  }
+  return lines;
 }
