@@ -13,11 +13,7 @@ export type DrawUiText = (text: string, pos: Vec2, color: wgl.Color, scale: numb
 export type MeasureUiTextWidth = (text: string, scale: number) => number;
 export type MeasureUiLineHeight = (scale: number) => number;
 
-export interface TutorialPanelRectResult {
-  rect: wgl.Rectangle;
-  lines: string[];
-  lineH: number;
-}
+export type TutorialPanelRectResult = [wgl.Rectangle, string[], number];
 
 function splitLines(text: string): string[] {
   const lines = text.split(/\r\n|\r|\n/);
@@ -49,7 +45,7 @@ export function tutorialPromptPanelRect(
   const screenW = wgl.getScreenWidth();
   const x = (screenW - width) * 0.5;
   const rect = wgl.makeRectangle(x, opts.pos.y, width, height);
-  return { rect, lines, lineH };
+  return [rect, lines, lineH];
 }
 
 function drawRectOutline(
@@ -81,7 +77,7 @@ export function drawTutorialPromptPanel(
 ): void {
   if (opts.alpha <= 1e-3) return;
   const scale = 1.0;
-  const { rect, lines, lineH } = tutorialPromptPanelRect(
+  const [rect, lines, lineH] = tutorialPromptPanelRect(
     text,
     {
       measureTextWidth: opts.measureTextWidth,

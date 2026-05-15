@@ -250,7 +250,7 @@ export class TutorialMode extends BaseGameplayMode {
     const resources = this.renderResources.resources;
 
     if (stage === 8) {
-      const { rect } = tutorialPromptPanelRect(
+      const [rect] = tutorialPromptPanelRect(
         overlay.promptText,
         {
           measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
@@ -419,7 +419,7 @@ export class TutorialMode extends BaseGameplayMode {
     const stage = int(tutorial.stageIndex);
 
     if (stage === 8) {
-      const { rect } = tutorialPromptPanelRect(
+      const [rect] = tutorialPromptPanelRect(
         overlay.promptText,
         {
           measureTextWidth: (text: string, scale: number) => this._uiTextWidth(text, scale),
