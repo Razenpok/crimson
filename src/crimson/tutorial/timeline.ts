@@ -13,7 +13,7 @@ import {
 import { TutorialState } from './state.ts';
 
 
-const TUTORIAL_STAGE_TEXT: readonly string[] = [
+const _TUTORIAL_STAGE_TEXT: readonly string[] = [
   "In this tutorial you'll learn how to play Crimsonland",
   'First learn to move by pushing the arrow keys.',
   'Now pick up the bonuses by walking over them',
@@ -25,7 +25,7 @@ const TUTORIAL_STAGE_TEXT: readonly string[] = [
   'Great! Now you are ready to start playing Crimsonland',
 ];
 
-const TUTORIAL_HINT_TEXT: readonly string[] = [
+const _TUTORIAL_HINT_TEXT: readonly string[] = [
   'This is the speed powerup, it makes you move faster!',
   'This is a weapon powerup. Picking it up gives you a new weapon.',
   'This powerup doubles all experience points you gain while it\'s active.',
@@ -35,7 +35,7 @@ const TUTORIAL_HINT_TEXT: readonly string[] = [
   '',
 ];
 
-const TUTORIAL_HINT_TEXT_BUGS: readonly string[] = [
+const _TUTORIAL_HINT_TEXT_BUGS: readonly string[] = [
   'This is the speed powerup, it makes you move faster!',
   'This is a weapon powerup. Picking it you gets a new weapon.',
   'This powerup doubles all experience points you gain while it\'s active.',
@@ -116,14 +116,14 @@ export function tutorialStage5BonusCarrierConfig(repeatSpawnCount: number): [Bon
 }
 
 
-function clamp01(value: number): number {
+function _clamp01(value: number): number {
   if (value <= 0.0) return 0.0;
   if (value >= 1.0) return 1.0;
   return value;
 }
 
 
-function tickStageTransition(
+function _tickStageTransition(
   stageIndex: number,
   transitionTimerMs: number,
   frameDtMs: number,
@@ -155,7 +155,7 @@ function tickStageTransition(
 }
 
 
-function promptAlpha(opts: { stageIndex: number; stageTimerMs: number; transitionTimerMs: number }): number {
+function _promptAlpha(opts: { stageIndex: number; stageTimerMs: number; transitionTimerMs: number }): number {
   let stageIndex = int(opts.stageIndex);
   let stageTimerMs = int(opts.stageTimerMs);
   let transitionTimerMs = int(opts.transitionTimerMs);
@@ -180,11 +180,11 @@ function promptAlpha(opts: { stageIndex: number; stageTimerMs: number; transitio
     }
   }
 
-  return clamp01(alpha);
+  return _clamp01(alpha);
 }
 
 
-function tickHint(
+function _tickHint(
   state: TutorialState,
   frameDtMs: number,
   hintBonusDied: boolean,
@@ -212,11 +212,11 @@ function tickHint(
     state.hintAlpha = 1000;
   }
 
-  const hintTextTable = state.preserveBugs ? TUTORIAL_HINT_TEXT_BUGS : TUTORIAL_HINT_TEXT;
+  const hintTextTable = state.preserveBugs ? _TUTORIAL_HINT_TEXT_BUGS : _TUTORIAL_HINT_TEXT;
   const idx = int(state.hintIndex);
   const text = (idx >= 0 && idx < hintTextTable.length) ? hintTextTable[idx] : '';
   const alpha = text ? int(state.hintAlpha) * 0.001 : 0.0;
-  return [hintSpawns, text, clamp01(alpha)];
+  return [hintSpawns, text, _clamp01(alpha)];
 }
 
 
@@ -258,7 +258,7 @@ export function tickTutorialTimeline(
   const state = cloneState(stateIn);
   state.stageTimerMs = int(state.stageTimerMs) + dtMs;
 
-  const [stageIndex, transitionTimerMs] = tickStageTransition(
+  const [stageIndex, transitionTimerMs] = _tickStageTransition(
     state.stageIndex,
     state.stageTransitionTimerMs,
     dtMs,
@@ -266,16 +266,16 @@ export function tickTutorialTimeline(
   state.stageIndex = int(stageIndex);
   state.stageTransitionTimerMs = int(transitionTimerMs);
 
-  let basePromptText = (stageIndex >= 0 && stageIndex < TUTORIAL_STAGE_TEXT.length)
-    ? TUTORIAL_STAGE_TEXT[stageIndex]
+  let basePromptText = (stageIndex >= 0 && stageIndex < _TUTORIAL_STAGE_TEXT.length)
+    ? _TUTORIAL_STAGE_TEXT[stageIndex]
     : '';
-  let basePromptAlpha = promptAlpha({ stageIndex, stageTimerMs: state.stageTimerMs, transitionTimerMs });
+  let basePromptAlpha = _promptAlpha({ stageIndex, stageTimerMs: state.stageTimerMs, transitionTimerMs });
   if (stageIndex === 6 && int(perkPendingCount) < 1) {
     basePromptText = '';
     basePromptAlpha = 0.0;
   }
 
-  const [hintSpawns, hintText, hintAlphaVal] = tickHint(state, dtMs, hintBonusDied);
+  const [hintSpawns, hintText, hintAlphaVal] = _tickHint(state, dtMs, hintBonusDied);
 
   const baseForceExperience = stageIndex !== 6 ? 0 : null;
 
