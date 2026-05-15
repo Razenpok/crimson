@@ -8,4 +8,3 @@ export * as tier5 from './tier5.ts';
 
 export { allQuests, questByLevel } from './registry.ts';
 export { QuestContext, QuestDefinition, SpawnEntry } from './types.ts';
-export type { QuestBuilder } from './types.ts';
