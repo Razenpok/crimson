@@ -931,8 +931,11 @@ export class GameLoopView implements View {
     if (info !== null && info.visible) {
       this._demoTrialOverlayView()?.draw(info);
     }
-    this.state.console.draw();
-    this.state.console.drawFpsCounter();
+    // WebGL loads runtime resources asynchronously; Python reaches this draw path only after resources exist.
+    if (this.state.resources !== null) {
+      this.state.console.draw();
+      this.state.console.drawFpsCounter();
+    }
   }
 
   private _drawWithGamma(): void {
