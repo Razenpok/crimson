@@ -665,8 +665,8 @@ export class GameLoopView implements View {
 
     const modeRaw = this.state.config.gameplay.mode;
     let modeId: GameMode;
-    if (Object.values(GameMode).includes(modeRaw as GameMode)) {
-      modeId = modeRaw as GameMode;
+    if (Object.values(GameMode).includes(modeRaw)) {
+      modeId = modeRaw;
     } else {
       modeId = GameMode.DEMO;
     }

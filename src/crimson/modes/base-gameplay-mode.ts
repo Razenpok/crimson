@@ -1312,10 +1312,11 @@ export class BaseGameplayMode {
 
     let newProvider: LocalInputProvider | LanRuntimeInputProvider;
     if (opts.isNetworked) {
-      newProvider = this._networkInputProvider;
-      (newProvider as LanRuntimeInputProvider).bindRuntime(opts.lanRuntime);
-      (newProvider as LanRuntimeInputProvider).setRole(opts.role ?? '');
-      (newProvider as LanRuntimeInputProvider).setBeforePop(null);
+      const lanProvider = this._networkInputProvider;
+      lanProvider.bindRuntime(opts.lanRuntime);
+      lanProvider.setRole(opts.role ?? '');
+      lanProvider.setBeforePop(null);
+      newProvider = lanProvider;
     } else {
       newProvider = new LocalInputProvider({
         playerCount: Math.max(0, this.simWorld.players.length),
