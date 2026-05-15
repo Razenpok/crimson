@@ -12,7 +12,7 @@ import type { PlayerState } from '@crimson/sim/state-types.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
-const LAN_PLAYER_RING_RGB: [number, number, number][] = [
+const _LAN_PLAYER_RING_RGB: [number, number, number][] = [
   // Match existing trooper torso tint colors for P1/P2.
   [77, 77, 255],
   [255, 140, 89],
@@ -26,8 +26,8 @@ function byteChannel(value: number): number {
 }
 
 export function lanPlayerRingRgb(playerIndex: number): [number, number, number] {
-  const idx = Math.max(0, Math.min(LAN_PLAYER_RING_RGB.length - 1, int(playerIndex)));
-  return LAN_PLAYER_RING_RGB[idx];
+  const idx = Math.max(0, Math.min(_LAN_PLAYER_RING_RGB.length - 1, int(playerIndex)));
+  return _LAN_PLAYER_RING_RGB[idx];
 }
 
 function drawRing(
@@ -119,9 +119,9 @@ export function drawPlayerTrooperSprite(
   if (perkActive(player, PerkId.RADIOACTIVE) && alpha > 1e-3) {
     const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(EffectId.AURA);
     if (atlas !== undefined) {
-      const auraGrid = SIZE_CODE_GRID[atlas.sizeCode];
+      const auraGrid = SIZE_CODE_GRID[int(atlas.sizeCode)];
       if (auraGrid) {
-        const atlasFrame = atlas.frame;
+        const atlasFrame = int(atlas.frame);
         const col = atlasFrame % auraGrid;
         const row = Math.floor(atlasFrame / auraGrid);
         const cellW = particlesTexture.width / auraGrid;
@@ -149,7 +149,7 @@ export function drawPlayerTrooperSprite(
   const shadowTint = wgl.makeColor(0, 0, 0, int(90 * alpha + 0.5) / 255);
   let overlayTint = tint;
   if (renderFrame.players.length > 1) {
-    const index = player.index;
+    const index = int(player.index);
     if (index === 0) {
       overlayTint = wgl.makeColor(77 / 255, 77 / 255, 255 / 255, tint.a);
     } else {
@@ -205,9 +205,9 @@ export function drawPlayerTrooperSprite(
     if (player.shieldTimer > 1e-3 && alpha > 1e-3) {
       const atlas = EFFECT_ID_ATLAS_TABLE_BY_ID.get(EffectId.SHIELD_RING);
       if (atlas !== undefined) {
-        const shieldGrid = SIZE_CODE_GRID[atlas.sizeCode];
+        const shieldGrid = SIZE_CODE_GRID[int(atlas.sizeCode)];
         if (shieldGrid) {
-          const atlasFrame = atlas.frame;
+          const atlasFrame = int(atlas.frame);
           const col = atlasFrame % shieldGrid;
           const row = Math.floor(atlasFrame / shieldGrid);
           const cellW = particlesTexture.width / shieldGrid;
@@ -252,7 +252,7 @@ export function drawPlayerTrooperSprite(
 
     if (player.muzzleFlashAlpha > 1e-3 && alpha > 1e-3) {
       const weapon = WEAPON_BY_ID.get(player.weapon.weaponId)!;
-      const flags = weapon.flags ?? 0;
+      const flags = weapon.flags !== null ? int(weapon.flags) : 0;
       if ((flags & 0x8) === 0) {
         const flashAlpha = clamp(player.muzzleFlashAlpha * 0.8, 0.0, 1.0) * alpha;
         if (flashAlpha > 1e-3) {
