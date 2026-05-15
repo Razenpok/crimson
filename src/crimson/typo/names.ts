@@ -199,7 +199,7 @@ export class CreatureNameTable {
   }
 
   isUnique(name: string, opts: { excludeIdx: number; activeMask: readonly boolean[] }): boolean {
-    const excludeIdx = opts.excludeIdx;
+    const excludeIdx = int(opts.excludeIdx);
     const activeMask = opts.activeMask;
     for (let idx = 0; idx < this.names.length; idx++) {
       if (idx === excludeIdx) continue;
