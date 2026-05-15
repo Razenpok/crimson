@@ -1606,18 +1606,18 @@ export class CreaturePool {
     entry.flags = init.flags ?? 0;
     entry.aiMode = init.aiMode;
 
-    let hp = init.health ?? 0.0;
+    let hp = init.health ? init.health : 0.0;
     if (hp <= 0.0) hp = 1.0;
     entry.hp = f32(hp);
-    entry.maxHp = f32(init.maxHealth ?? hp);
+    entry.maxHp = f32(init.maxHealth ? init.maxHealth : hp);
 
-    entry.moveSpeed = f32(init.moveSpeed ?? 1.0);
-    entry.rewardValue = f32(init.rewardValue ?? 0.0);
-    entry.size = f32(init.size ?? 50.0);
-    entry.contactDamage = f32(init.contactDamage ?? 0.0);
+    entry.moveSpeed = f32(init.moveSpeed ? init.moveSpeed : 1.0);
+    entry.rewardValue = f32(init.rewardValue ? init.rewardValue : 0.0);
+    entry.size = f32(init.size ? init.size : 50.0);
+    entry.contactDamage = f32(init.contactDamage ? init.contactDamage : 0.0);
 
     entry.targetOffset = init.targetOffset !== null ? f32Vec2(init.targetOffset) : null;
-    entry.orbitAngle = f32(init.orbitAngle ?? 0.0);
+    entry.orbitAngle = f32(init.orbitAngle ? init.orbitAngle : 0.0);
     let orbitRadius: number;
     if (init.orbitRadius !== null) {
       orbitRadius = init.orbitRadius;
