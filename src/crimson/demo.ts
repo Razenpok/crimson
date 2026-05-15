@@ -62,16 +62,14 @@ function weaponName(weaponId: WeaponId, opts: { preserveBugs?: boolean } = {}): 
   return weaponDisplayName(weaponId, { preserveBugs });
 }
 
-/**
- * Attract-mode demo scaffold.
- *
- * Modeled after the classic demo helpers in crimsonland.exe:
- *   - demo_setup_variant_0 @ 0x00402ED0
- *   - demo_setup_variant_1 @ 0x004030F0
- *   - demo_setup_variant_2 @ 0x00402FE0
- *   - demo_setup_variant_3 @ 0x00403250
- *   - demo_mode_start       @ 0x00403390
- */
+// Attract-mode demo scaffold.
+//
+// Modeled after the classic demo helpers in crimsonland.exe:
+//   - demo_setup_variant_0 @ 0x00402ED0
+//   - demo_setup_variant_1 @ 0x004030F0
+//   - demo_setup_variant_2 @ 0x00402FE0
+//   - demo_setup_variant_3 @ 0x00403250
+//   - demo_mode_start       @ 0x00403390
 export class DemoView {
   state: GameState;
   private _runtime: WorldRuntime;
