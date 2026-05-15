@@ -93,8 +93,8 @@ export class TutorialMode extends BaseGameplayMode {
       world: this.simWorld.worldState,
       worldSize: this.worldSize,
       damageScaleByType: this.simWorld.damageScaleByType,
-      detailPreset: this._deterministicDetailPreset(),
-      violenceDisabled: this._deterministicViolenceDisabled(),
+      detailPreset: int(this._deterministicDetailPreset()),
+      violenceDisabled: int(this._deterministicViolenceDisabled()),
       gameTuneStarted: this.simWorld.gameTuneStarted,
       demoModeActive: this.demoModeActive,
     });
@@ -327,8 +327,8 @@ export class TutorialMode extends BaseGameplayMode {
       const session = this._simSession;
       if (session !== null) {
         const elapsedBeforeMs = session.elapsedMs;
-        session.detailPreset = this._deterministicDetailPreset();
-        session.violenceDisabled = this._deterministicViolenceDisabled();
+        session.detailPreset = int(this._deterministicDetailPreset());
+        session.violenceDisabled = int(this._deterministicViolenceDisabled());
         this._frameInputState = inputState;
         try {
           this._runDeterministicSessionTicks({
