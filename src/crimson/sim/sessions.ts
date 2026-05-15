@@ -108,10 +108,19 @@ export type PostStepHook = (ctx: PostStepContext) => void;
 export class SurvivalSpawnState {
   stage = 0;
   spawnCooldownMs = 0.0;
+
+  constructor(opts: { stage?: number; spawnCooldownMs?: number } = {}) {
+    this.stage = opts.stage ?? this.stage;
+    this.spawnCooldownMs = opts.spawnCooldownMs ?? this.spawnCooldownMs;
+  }
 }
 
 export class RushSpawnState {
   spawnCooldownMs = 0.0;
+
+  constructor(opts: { spawnCooldownMs?: number } = {}) {
+    this.spawnCooldownMs = opts.spawnCooldownMs ?? this.spawnCooldownMs;
+  }
 }
 
 export class QuestSpawnState {
@@ -271,7 +280,7 @@ export function rushInputTransform(inputs: PlayerInput[]): PlayerInput[] {
 // Shared timing helper
 // ---------------------------------------------------------------------------
 
-function sessionTiming(
+function _sessionTiming(
   state: { timeScaleActive: boolean; bonuses: { reflexBoost: number } },
   dt: number,
 ): FrameTiming {
@@ -304,6 +313,8 @@ export interface DeterministicSessionOpts {
   deferCameraShakeUpdate?: boolean;
   finalizePostRenderLifecycle?: boolean;
   elapsedUsesRawDt?: boolean;
+  elapsedMs?: number;
+  terrainFx?: TerrainFxScratch;
   midStepHook?: MidStepHook | null;
   postStepHook?: PostStepHook | null;
   beforeStepHook?: (() => void) | null;
@@ -354,8 +365,8 @@ export class DeterministicSession {
     this.deferCameraShakeUpdate = opts.deferCameraShakeUpdate ?? false;
     this.finalizePostRenderLifecycle = opts.finalizePostRenderLifecycle ?? false;
     this.elapsedUsesRawDt = opts.elapsedUsesRawDt ?? false;
-    this.elapsedMs = 0.0;
-    this.terrainFx = new TerrainFxScratch();
+    this.elapsedMs = opts.elapsedMs ?? 0.0;
+    this.terrainFx = opts.terrainFx ?? new TerrainFxScratch();
     this.midStepHook = opts.midStepHook ?? null;
     this.postStepHook = opts.postStepHook ?? null;
     this.beforeStepHook = opts.beforeStepHook ?? null;
@@ -369,7 +380,7 @@ export class DeterministicSession {
   }
 
   timingForDt(dt: number): FrameTiming {
-    return sessionTiming(this.world.state, dt);
+    return _sessionTiming(this.world.state, dt);
   }
 
   stepTick(opts: {
@@ -529,7 +540,7 @@ export class DeterministicSession {
     const presentationPlanMs = presT1 - presT0;
 
     if (recordingRng !== null) {
-      presentationRngTrace.drawsTotal = recordingRng.calls;
+      presentationRngTrace.drawsTotal = int(recordingRng.calls);
     }
 
     const terrainFxBatch = this.terrainFx.takeBatch();
@@ -542,8 +553,10 @@ export class DeterministicSession {
       presentationPlanMs,
       presentationRngTrace,
       terrainFx: terrainFxBatch,
-      postApplySfx: postApplySfx.length > 0 ? postApplySfx : [],
     });
+    if (postApplySfx.length > 0) {
+      step.postApplySfx = Array.from(postApplySfx);
+    }
 
     if (step.presentation.triggerGameTune) {
       this.gameTuneStarted = true;
