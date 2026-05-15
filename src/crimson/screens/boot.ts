@@ -44,8 +44,21 @@ function debugLoadingHoldSeconds(): number {
   if (!raw) {
     return 0.0;
   }
-  const value = Number(raw);
-  if (!Number.isFinite(value)) {
+  const digits = String.raw`\d(?:_?\d)*`;
+  const decimalPattern = new RegExp(
+    String.raw`^[+-]?(?:(?:${digits}(?:\.(?:${digits})?)?|\.(?:${digits}))(?:[eE][+-]?${digits})?)$`,
+  );
+  let value: number;
+  if (/^[+-]?nan$/i.test(raw)) {
+    value = Number.NaN;
+  } else if (/^[+-]?inf(?:inity)?$/i.test(raw)) {
+    value = raw.startsWith('-') ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+  } else if (decimalPattern.test(raw)) {
+    value = Number(raw.replaceAll('_', ''));
+  } else {
+    return 0.0;
+  }
+  if (Number.isNaN(value)) {
     return 0.0;
   }
   return Math.max(0.0, value);
