@@ -430,8 +430,8 @@ export class SurvivalMode extends BaseGameplayMode {
     session: LanSession,
     _dtTick: number,
   ): boolean {
-    session.detailPreset = this._deterministicDetailPreset();
-    session.violenceDisabled = this._deterministicViolenceDisabled();
+    session.detailPreset = int(this._deterministicDetailPreset());
+    session.violenceDisabled = int(this._deterministicViolenceDisabled());
     this._updatePerkUi({
       dtUiMs,
       allowInput: role === 'host',
@@ -467,13 +467,13 @@ export class SurvivalMode extends BaseGameplayMode {
     const sessionSpawnCooldownMs = this._spawnState.spawnCooldownMs;
 
     if (frameTick !== null) {
-      this._lanLastTickIndex = frameTick;
+      this._lanLastTickIndex = int(frameTick);
       this._storeNetRuntimeSnapshot({
-        tickIndex: frameTick,
+        tickIndex: int(frameTick),
         elapsedMs: sessionElapsedMs,
         stage: sessionStage,
         spawnCooldownMs: sessionSpawnCooldownMs,
-        perkPendingCount: this.state.perkSelection.pendingCount,
+        perkPendingCount: int(this.state.perkSelection.pendingCount),
       });
     }
 
@@ -505,7 +505,7 @@ export class SurvivalMode extends BaseGameplayMode {
     if (this._simSession !== null) {
       this._simSession.elapsedMs = rs.elapsedMs;
     }
-    this._spawnState.stage = rs.stage;
+    this._spawnState.stage = int(rs.stage);
     this._spawnState.spawnCooldownMs = rs.spawnCooldownMs;
   }
 
