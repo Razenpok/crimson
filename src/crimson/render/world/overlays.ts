@@ -7,12 +7,12 @@ import { clamp } from '@grim/math.ts';
 import { RAD_TO_DEG } from './constants.ts';
 import { WorldRenderCtx } from './context.ts';
 
-function grim2dCircleSegmentsFilled(radius: number): number {
+export function grim2dCircleSegmentsFilled(radius: number): number {
   // grim_draw_circle_filled (grim.dll): segments = trunc(radius * 0.125 + 12.0)
   return Math.max(3, int(radius * 0.125 + 12.0));
 }
 
-function grim2dCircleSegmentsOutline(radius: number): number {
+export function grim2dCircleSegmentsOutline(radius: number): number {
   // grim_draw_circle_outline (grim.dll): segments = trunc(radius * 0.2 + 14.0)
   return Math.max(3, int(radius * 0.2 + 14.0));
 }
@@ -128,7 +128,7 @@ export function directionArrowTint(
   let alpha = opts.alpha;
   alpha = clamp(alpha, 0.0, 1.0);
   if (renderCtx.frame.players.length === 2) {
-    if (playerIndex === 0) {
+    if (int(playerIndex) === 0) {
       return wgl.makeColor(204 / 255, 230 / 255, 255 / 255, int(153.0 * alpha + 0.5) / 255);
     }
     return wgl.makeColor(255 / 255, 230 / 255, 204 / 255, int(153.0 * alpha + 0.5) / 255);
@@ -155,7 +155,7 @@ export function drawDirectionArrows(
 
   for (const player of renderCtx.frame.players) {
     if (player.health <= 0.0) continue;
-    const index = player.index;
+    const index = int(player.index);
     if (!directionArrowEnabled(renderCtx, index)) continue;
 
     const heading = player.heading;
