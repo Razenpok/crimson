@@ -13,9 +13,15 @@ export function parseRtxRenderMode(raw: string): RtxRenderMode {
 }
 
 export function modeFromRtxFlag(enabled: boolean): RtxRenderMode {
-  return enabled ? RtxRenderMode.RTX : RtxRenderMode.CLASSIC;
+  if (enabled) {
+    return RtxRenderMode.RTX;
+  }
+  return RtxRenderMode.CLASSIC;
 }
 
 export function cycleRtxRenderMode(mode: RtxRenderMode): RtxRenderMode {
-  return mode === RtxRenderMode.RTX ? RtxRenderMode.CLASSIC : RtxRenderMode.RTX;
+  if (mode === RtxRenderMode.RTX) {
+    return RtxRenderMode.CLASSIC;
+  }
+  return RtxRenderMode.RTX;
 }
