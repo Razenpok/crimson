@@ -387,24 +387,62 @@ function _readPlayerBindBlock(view: DataView, playerIndex: number): RawPlayerBin
   };
 }
 
-function _writePlayerBindBlock(view: DataView, playerIndex: number, player: CrimsonPlayerControls): void {
+function _parsedPlayerBindBlock(view: DataView, opts: { playerIndex: number }): RawPlayerBindBlock {
+  return _readPlayerBindBlock(view, opts.playerIndex);
+}
+
+function _encodePlayerBindBlock(player: CrimsonPlayerControls): RawPlayerBindBlock {
+  return {
+    moveForward: player.moveCodes[0],
+    moveBackward: player.moveCodes[1],
+    turnLeft: player.moveCodes[2],
+    turnRight: player.moveCodes[3],
+    fire: player.fireCode,
+    reservedKeys: [int(_DEFAULT_WIRE_RESERVED_KEYS[0]), int(_DEFAULT_WIRE_RESERVED_KEYS[1])],
+    aimLeft: player.keyboardAimCodes[0],
+    aimRight: player.keyboardAimCodes[1],
+    axisAimY: player.aimAxisCodes[0],
+    axisAimX: player.aimAxisCodes[1],
+    axisMoveY: player.moveAxisCodes[0],
+    axisMoveX: player.moveAxisCodes[1],
+    padding: [int(_DEFAULT_WIRE_PADDING[0]), int(_DEFAULT_WIRE_PADDING[1]), int(_DEFAULT_WIRE_PADDING[2])],
+  };
+}
+
+function _encodePrimaryKeybinds(
+  players: readonly CrimsonPlayerControls[],
+): [RawPlayerBindBlock, RawPlayerBindBlock] {
+  return [_encodePlayerBindBlock(players[0]), _encodePlayerBindBlock(players[1])];
+}
+
+function _encodeExtendedKeybinds(
+  players: readonly CrimsonPlayerControls[],
+): [RawPlayerBindBlock, RawPlayerBindBlock] {
+  return [_encodePlayerBindBlock(players[2]), _encodePlayerBindBlock(players[3])];
+}
+
+function _writeEncodedPlayerBindBlock(view: DataView, playerIndex: number, encoded: RawPlayerBindBlock): void {
   const offset = _bindBlockOffset(playerIndex);
-  _writeI32(view, offset + 0x00, player.moveCodes[0]);
-  _writeI32(view, offset + 0x04, player.moveCodes[1]);
-  _writeI32(view, offset + 0x08, player.moveCodes[2]);
-  _writeI32(view, offset + 0x0C, player.moveCodes[3]);
-  _writeI32(view, offset + 0x10, player.fireCode);
-  _writeI32(view, offset + 0x14, _DEFAULT_WIRE_RESERVED_KEYS[0]);
-  _writeI32(view, offset + 0x18, _DEFAULT_WIRE_RESERVED_KEYS[1]);
-  _writeI32(view, offset + 0x1C, player.keyboardAimCodes[0]);
-  _writeI32(view, offset + 0x20, player.keyboardAimCodes[1]);
-  _writeI32(view, offset + 0x24, player.aimAxisCodes[0]);
-  _writeI32(view, offset + 0x28, player.aimAxisCodes[1]);
-  _writeI32(view, offset + 0x2C, player.moveAxisCodes[0]);
-  _writeI32(view, offset + 0x30, player.moveAxisCodes[1]);
-  _writeI32(view, offset + 0x34, _DEFAULT_WIRE_PADDING[0]);
-  _writeI32(view, offset + 0x38, _DEFAULT_WIRE_PADDING[1]);
-  _writeI32(view, offset + 0x3C, _DEFAULT_WIRE_PADDING[2]);
+  _writeI32(view, offset + 0x00, encoded.moveForward);
+  _writeI32(view, offset + 0x04, encoded.moveBackward);
+  _writeI32(view, offset + 0x08, encoded.turnLeft);
+  _writeI32(view, offset + 0x0C, encoded.turnRight);
+  _writeI32(view, offset + 0x10, encoded.fire);
+  _writeI32(view, offset + 0x14, encoded.reservedKeys[0]);
+  _writeI32(view, offset + 0x18, encoded.reservedKeys[1]);
+  _writeI32(view, offset + 0x1C, encoded.aimLeft);
+  _writeI32(view, offset + 0x20, encoded.aimRight);
+  _writeI32(view, offset + 0x24, encoded.axisAimY);
+  _writeI32(view, offset + 0x28, encoded.axisAimX);
+  _writeI32(view, offset + 0x2C, encoded.axisMoveY);
+  _writeI32(view, offset + 0x30, encoded.axisMoveX);
+  _writeI32(view, offset + 0x34, encoded.padding[0]);
+  _writeI32(view, offset + 0x38, encoded.padding[1]);
+  _writeI32(view, offset + 0x3C, encoded.padding[2]);
+}
+
+function _writePlayerBindBlock(view: DataView, playerIndex: number, player: CrimsonPlayerControls): void {
+  _writeEncodedPlayerBindBlock(view, playerIndex, _encodePlayerBindBlock(player));
 }
 
 function _parsedPlayerBindBlockIsUninitialized(rawBlock: RawPlayerBindBlock): boolean {
@@ -469,6 +507,40 @@ function _decodeDirectionArrow(view: DataView, playerIndex: number): boolean {
   throw new Error(`unsupported extended direction arrow flag value: ${value}`);
 }
 
+function _encodeDirectionArrowFlags(
+  players: readonly CrimsonPlayerControls[],
+): [[number, number], [number, number]] {
+  const primary: [number, number] = [1, 1];
+  for (let idx = 0; idx < 2; idx++) {
+    primary[idx] = players[idx].showDirectionArrow ? 1 : 0;
+  }
+  const extended: [number, number] = [
+    players[2].showDirectionArrow ? EXT_DIRECTION_ARROW_ON : EXT_DIRECTION_ARROW_OFF,
+    players[3].showDirectionArrow ? EXT_DIRECTION_ARROW_ON : EXT_DIRECTION_ARROW_OFF,
+  ];
+  return [primary, extended];
+}
+
+function _decodeMovement(value: number): MovementControlType {
+  const raw = int(value);
+  if (raw === 0) {
+    return MovementControlType.STATIC;
+  }
+  return raw as MovementControlType;
+}
+
+function _decodeAimScheme(value: number): AimScheme {
+  return int(value) as AimScheme;
+}
+
+function _decodeGameMode(value: number): GameMode {
+  return int(value) as GameMode;
+}
+
+function _decodeHighScoreDateMode(value: number): HighScoreDateMode {
+  return int(value) as HighScoreDateMode;
+}
+
 function _decodePlayerName(raw: Uint8Array): string {
   const zero = raw.indexOf(0);
   const end = zero >= 0 ? zero : raw.length;
@@ -512,6 +584,10 @@ function _encodeSavedNamesBlob(names: readonly string[]): Uint8Array {
     out[start + Math.min(encoded.length, SAVED_NAME_ENTRY_SIZE - 1)] = 0;
   }
   return out;
+}
+
+function _savedNameOrderValues(): number[] {
+  return Array.from({ length: SAVED_NAME_SLOT_COUNT }, (_, idx) => idx);
 }
 
 export function defaultCrimsonConfig(path: string = '<memory>'): CrimsonConfig {
@@ -588,13 +664,11 @@ export function decodeCrimsonCfg(path: string, blob: Uint8Array): CrimsonConfig 
   }
 
   const players = [0, 1, 2, 3].map((idx) => _playerControlsFromParsedBindBlock(
-    _readPlayerBindBlock(view, idx),
+    _parsedPlayerBindBlock(view, { playerIndex: idx }),
     {
       playerIndex: idx,
-      movement: _readI32(view, 0x1C + idx * 4) === 0
-        ? MovementControlType.STATIC
-        : (_readI32(view, 0x1C + idx * 4) as MovementControlType),
-      aimScheme: _readI32(view, 0x44 + idx * 4) as AimScheme,
+      movement: _decodeMovement(_readI32(view, 0x1C + idx * 4)),
+      aimScheme: _decodeAimScheme(_readI32(view, 0x44 + idx * 4)),
       showDirectionArrow: _decodeDirectionArrow(view, idx),
     },
   )) as [CrimsonPlayerControls, CrimsonPlayerControls, CrimsonPlayerControls, CrimsonPlayerControls];
@@ -619,7 +693,7 @@ export function decodeCrimsonCfg(path: string, blob: Uint8Array): CrimsonConfig 
       musicVolume: view.getFloat32(0x468, true),
     }),
     gameplay: new CrimsonGameplayConfig({
-      mode: _readI32(view, 0x18) as GameMode,
+      mode: _decodeGameMode(_readI32(view, 0x18)),
       playerCount: _requireRange(_readI32(view, 0x14), { minimum: 1, maximum: 4, field: 'player_count' }),
       hardcore: Boolean(view.getUint8(0x448)),
       questLevel: null,
@@ -644,7 +718,7 @@ export function decodeCrimsonCfg(path: string, blob: Uint8Array): CrimsonConfig 
       }),
       savedNames: _decodeSavedNames(blob.slice(0xA8, 0x180)),
       showInternetScores: Boolean(view.getUint8(0x46D)),
-      scoreDateMode: int(view.getUint8(0x02)) as HighScoreDateMode,
+      scoreDateMode: _decodeHighScoreDateMode(view.getUint8(0x02)),
     }),
     controls: new CrimsonControlsConfig({
       players,
@@ -654,14 +728,19 @@ export function decodeCrimsonCfg(path: string, blob: Uint8Array): CrimsonConfig 
   });
 }
 
+function _canonicalWireData(): Uint8Array {
+  return new Uint8Array(CRIMSON_CFG_SIZE);
+}
+
 export function encodeCrimsonCfg(config: CrimsonConfig): Uint8Array {
-  const data = new Uint8Array(CRIMSON_CFG_SIZE);
+  const data = _canonicalWireData();
   const view = new DataView(data.buffer);
+  const [primaryDirectionArrows, extendedDirectionArrows] = _encodeDirectionArrowFlags(config.controls.players);
   view.setUint8(0x00, config.audio.soundDisabled ? 1 : 0);
   view.setUint8(0x01, config.audio.musicDisabled ? 1 : 0);
   view.setUint8(0x02, int(config.profile.scoreDateMode));
-  view.setUint8(0x04, config.controls.players[0].showDirectionArrow ? 1 : 0);
-  view.setUint8(0x05, config.controls.players[1].showDirectionArrow ? 1 : 0);
+  view.setUint8(0x04, primaryDirectionArrows[0]);
+  view.setUint8(0x05, primaryDirectionArrows[1]);
   view.setUint8(0x0E, config.display.fxDetailEnabled(0) ? 1 : 0);
   view.setUint8(0x10, config.display.fxDetailEnabled(1) ? 1 : 0);
   view.setUint8(0x11, config.display.fxDetailEnabled(2) ? 1 : 0);
@@ -682,8 +761,9 @@ export function encodeCrimsonCfg(config: CrimsonConfig): Uint8Array {
     maximum: SAVED_NAME_SLOT_COUNT,
     field: 'saved_name_count',
   }));
+  const savedNameOrder = _savedNameOrderValues();
   for (let idx = 0; idx < SAVED_NAME_SLOT_COUNT; idx++) {
-    _writeI32(view, 0x88 + idx * 4, idx);
+    _writeI32(view, 0x88 + idx * 4, savedNameOrder[idx]);
   }
   data.set(_encodeSavedNamesBlob(config.profile.savedNames), 0xA8);
   data.set(_encodePlayerNameBuffer(config.profile.playerName), 0x180);
@@ -699,11 +779,16 @@ export function encodeCrimsonCfg(config: CrimsonConfig): Uint8Array {
   _writeI32(view, 0x1BC, config.display.width);
   _writeI32(view, 0x1C0, config.display.height);
   view.setUint8(0x1C4, config.display.windowed ? 1 : 0);
-  for (let idx = 0; idx < 4; idx++) {
-    _writePlayerBindBlock(view, idx, config.controls.players[idx]);
+  const primaryKeybinds = _encodePrimaryKeybinds(config.controls.players);
+  const extendedKeybinds = _encodeExtendedKeybinds(config.controls.players);
+  for (let idx = 0; idx < 2; idx++) {
+    _writeEncodedPlayerBindBlock(view, idx, primaryKeybinds[idx]);
   }
-  view.setUint8(0x2C8, config.controls.players[2].showDirectionArrow ? EXT_DIRECTION_ARROW_ON : EXT_DIRECTION_ARROW_OFF);
-  view.setUint8(0x2C9, config.controls.players[3].showDirectionArrow ? EXT_DIRECTION_ARROW_ON : EXT_DIRECTION_ARROW_OFF);
+  for (let idx = 2; idx < 4; idx++) {
+    _writeEncodedPlayerBindBlock(view, idx, extendedKeybinds[idx - 2]);
+  }
+  view.setUint8(0x2C8, extendedDirectionArrows[0]);
+  view.setUint8(0x2C9, extendedDirectionArrows[1]);
   view.setUint8(0x448, config.gameplay.hardcore ? 1 : 0);
   view.setUint8(0x449, config.gameplay.showInfoTexts ? 1 : 0);
   _writeI32(view, 0x450, 1);
