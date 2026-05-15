@@ -131,16 +131,16 @@ export class PerkPromptState {
   private _promptOpenRequested(opts: { config: CrimsonConfig; playerCount: number }): boolean {
     const { config } = opts;
     const playerCount = int(opts.playerCount);
-    const fireKey = config.controls.player(0).fireCode;
+    const fireKey = int(config.controls.player(0).fireCode);
     const pickKey = config.controls.pickPerkCode;
     if (inputCodeIsPressed(pickKey, { playerIndex: 0 }) && !inputCodeIsDown(fireKey, { playerIndex: 0 })) {
       return true;
     }
     const fireCodes = [
-      config.controls.player(0).fireCode,
-      config.controls.player(1).fireCode,
-      config.controls.player(2).fireCode,
-      config.controls.player(3).fireCode,
+      int(config.controls.player(0).fireCode),
+      int(config.controls.player(1).fireCode),
+      int(config.controls.player(2).fireCode),
+      int(config.controls.player(3).fireCode),
     ];
     return this.hover && inputPrimaryJustPressed({ fireCodes, playerCount });
   }
