@@ -17,7 +17,7 @@ export function registerQuest(opts: {
   terrainSlots?: TerrainSlotTriplet | null;
 }): (builder: QuestBuilder) => QuestBuilder {
   function _builderName(builderFn: QuestBuilder): string {
-    return builderFn.name || String(builderFn);
+    return builderFn.name;
   }
 
   return (builder: QuestBuilder): QuestBuilder => {
