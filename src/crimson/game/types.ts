@@ -202,6 +202,7 @@ export interface GameplayScreen extends Screen, PauseBackground {
 
   bindStatus(status: GameStateStatus | null): void;
   bindScreenFade(fade: GameState | null): void;
+  bindRuntimeResources(resources: RuntimeResources | null): void;
   bindAudio(audio: AudioState | null, audioRng: Crand): void;
   setLanRuntime(opts: {
     enabled: boolean;

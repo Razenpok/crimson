@@ -4,9 +4,10 @@ import * as wgl from '@wgl';
 import { Vec2 } from '@grim/geom.ts';
 import { type CrimsonConfig, fxDetailEnabled } from '@grim/config.ts';
 import { type AudioState, audioUpdate, audioStopMusic } from '@grim/audio.ts';
+import type { RuntimeResources } from '@grim/assets.ts';
 import { type ConsoleState } from '@grim/console.ts';
 import { type CrandLike } from '@grim/rand.ts';
-import { type SmallFontData, loadSmallFont, measureSmallTextWidth } from '@grim/fonts/small.ts';
+import { type SmallFontData, measureSmallTextWidth } from '@grim/fonts/small.ts';
 import { drawSmallText } from '@grim/fonts/small.ts';
 import { SfxId } from '@grim/sfx-map.ts';
 import { InputState } from '@grim/input.ts';
@@ -602,6 +603,10 @@ export class BaseGameplayMode {
     this._screenFade = fade;
   }
 
+  bindRuntimeResources(resources: RuntimeResources | null): void {
+    this.renderResources.resources = resources;
+  }
+
   bindAudio(audio: AudioState | null, audioRng: CrandLike): void {
     this.audio = audio;
     this.audioRng = audioRng;
@@ -1018,7 +1023,7 @@ export class BaseGameplayMode {
     if (this._screenFade !== null && this._screenFade.resources !== null) {
       this.renderResources.resources = this._screenFade.resources;
     }
-    this._small = loadSmallFont(this._assetsRoot);
+    this._small = this.renderResources.resources.smallFont;
     this._hudState = new HudState();
 
     this._gameOverActive = false;

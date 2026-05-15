@@ -114,8 +114,8 @@ export class RenderResources {
 
   open(opts: { terrainSeed: number }): void {
     const { terrainSeed } = opts;
+    const resources = this.resources;
     this.close();
-    const resources = runtimeResourcesFor(this._assetsUrl);
     this._resources = resources;
 
     const base = getTexture(resources, TextureId.TER_Q1_BASE);
