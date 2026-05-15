@@ -42,6 +42,7 @@ export class RenderResources {
   get resources(): RuntimeResources {
     let resources = this._resources;
     if (resources === null) {
+      // WebGL asset loading can finish before gameplay resource wiring runs; keep this lazy fallback instead of Python's assertion.
       resources = runtimeResourcesFor(this._assetsUrl);
       this._resources = resources;
     }
