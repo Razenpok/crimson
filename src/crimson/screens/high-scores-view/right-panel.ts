@@ -286,7 +286,7 @@ function drawRightPanelQuestOptions(
   const modeId = view.state.config.gameplay.mode;
   let modeSelected = 0;
   for (let idx = 0; idx < modeItems.length; idx++) {
-    if (modeItems[idx][1] === (modeId as number)) {
+    if (modeItems[idx][1] === modeId) {
       modeSelected = idx;
       break;
     }
