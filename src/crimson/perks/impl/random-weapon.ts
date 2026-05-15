@@ -7,7 +7,7 @@ import { PerkHooks } from '@crimson/perks/runtime/hook-types.ts';
 import { weaponPickRandomAvailable } from '@crimson/weapon-runtime/availability.ts';
 import { weaponAssignPlayer } from '@crimson/weapon-runtime/assign.ts';
 
-export function applyRandomWeapon(ctx: PerkApplyCtx): void {
+function applyRandomWeapon(ctx: PerkApplyCtx): void {
   const current = ctx.owner.weapon.weaponId;
   let weaponId = current;
   for (let i = 0; i < 100; i++) {
