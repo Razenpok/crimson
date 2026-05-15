@@ -1,7 +1,8 @@
 // Port of crimson/tutorial/runtime.py
 
 import { SfxId } from '@grim/sfx-map.ts';
-import { CreatureFlags, SpawnId } from '@crimson/creatures/spawn.ts';
+import { CreatureFlags } from '@crimson/creatures/runtime.ts';
+import { SpawnId } from '@crimson/creatures/spawn.ts';
 import { survivalCheckLevelUp } from '@crimson/gameplay.ts';
 import type { PlayerInput } from '@crimson/sim/input.ts';
 import { WorldState } from '@crimson/sim/world-state.ts';
@@ -9,31 +10,29 @@ import { TutorialOverlayState } from './state.ts';
 import { type TutorialFrameActions, tickTutorialTimeline } from './timeline.ts';
 import type { PostStepContext } from '@crimson/sim/sessions.ts';
 
-export type TutorialWorldState = WorldState;
 
-
-export function tutorialBeforeStep(world: TutorialWorldState): void {
+export function tutorialBeforeStep(world: WorldState): void {
   const tutorial = world.state.tutorial;
-  tutorial.preserveBugs = world.state.preserveBugs;
+  tutorial.preserveBugs = Boolean(world.state.preserveBugs);
   const hintRef = tutorial.hintBonusCreatureRef;
   tutorial.hintBonusAliveBeforeTick = false;
-  if (hintRef === null || !(hintRef >= 0 && hintRef < world.creatures.entries.length)) {
+  if (hintRef === null || !(0 <= int(hintRef) && int(hintRef) < world.creatures.entries.length)) {
     return;
   }
   const entry = world.creatures.entries[int(hintRef)];
-  tutorial.hintBonusAliveBeforeTick = entry.active && entry.hp > 0.0;
+  tutorial.hintBonusAliveBeforeTick = Boolean(entry.active && entry.hp > 0.0);
 }
 
 
 export function tutorialInputTransform(
-  world: TutorialWorldState,
+  world: WorldState,
   inputs: PlayerInput[],
 ): PlayerInput[] {
   const tutorial = world.state.tutorial;
   if (inputs.length > 0) {
     const primary = inputs[0];
     tutorial.moveActiveThisTick = primary.move.lengthSq() > 0.0;
-    tutorial.fireActiveThisTick = primary.firePressed || primary.fireDown;
+    tutorial.fireActiveThisTick = Boolean(primary.firePressed || primary.fireDown);
   } else {
     tutorial.moveActiveThisTick = false;
     tutorial.fireActiveThisTick = false;
@@ -42,7 +41,7 @@ export function tutorialInputTransform(
 }
 
 
-function tutorialOverlayFromActions(actions: TutorialFrameActions): TutorialOverlayState {
+function _tutorialOverlayFromActions(actions: TutorialFrameActions): TutorialOverlayState {
   return new TutorialOverlayState({
     promptText: String(actions.promptText),
     promptAlpha: actions.promptAlpha,
@@ -57,18 +56,18 @@ export function tutorialPostStep(ctx: PostStepContext): void {
   const tutorial = state.tutorial;
   const hintRef = tutorial.hintBonusCreatureRef;
   let hintAliveAfter = false;
-  if (hintRef !== null && hintRef >= 0 && hintRef < ctx.world.creatures.entries.length) {
+  if (hintRef !== null && 0 <= int(hintRef) && int(hintRef) < ctx.world.creatures.entries.length) {
     const entry = ctx.world.creatures.entries[int(hintRef)];
-    hintAliveAfter = entry.active && entry.hp > 0.0;
+    hintAliveAfter = Boolean(entry.active && entry.hp > 0.0);
   }
-  const hintBonusDied = tutorial.hintBonusAliveBeforeTick && !hintAliveAfter;
+  const hintBonusDied = Boolean(tutorial.hintBonusAliveBeforeTick && !hintAliveAfter);
 
   const [updatedTutorial, actions] = tickTutorialTimeline(
     tutorial,
     {
       frameDtMs: ctx.dtSimMs,
-      anyMoveActive: tutorial.moveActiveThisTick,
-      anyFireActive: tutorial.fireActiveThisTick,
+      anyMoveActive: Boolean(tutorial.moveActiveThisTick),
+      anyFireActive: Boolean(tutorial.fireActiveThisTick),
       creaturesNoneActive: !ctx.world.creatures.iterActive().length,
       bonusPoolEmpty: !state.bonusPool.iterActive().length,
       perkPendingCount: int(state.perkSelection.pendingCount),
@@ -79,7 +78,7 @@ export function tutorialPostStep(ctx: PostStepContext): void {
   updatedTutorial.fireActiveThisTick = false;
   updatedTutorial.hintBonusAliveBeforeTick = false;
   state.tutorial = updatedTutorial;
-  state.tutorialOverlay = tutorialOverlayFromActions(actions);
+  state.tutorialOverlay = _tutorialOverlayFromActions(actions);
 
   const players = ctx.world.players;
   if (players.length > 0) {
@@ -90,7 +89,7 @@ export function tutorialPostStep(ctx: PostStepContext): void {
     }
   }
 
-  if (actions.playLevelupSfx) {
+  if (Boolean(actions.playLevelupSfx)) {
     state.sfxQueue.push(SfxId.UI_LEVELUP);
   }
 
@@ -127,7 +126,7 @@ export function tutorialPostStep(ctx: PostStepContext): void {
     }
     const [dropId, dropAmount] = actions.stage5BonusCarrierDrop;
     updatedTutorial.hintBonusCreatureRef = int(primary);
-    if (primary >= 0 && primary < ctx.world.creatures.entries.length) {
+    if (0 <= int(primary) && int(primary) < ctx.world.creatures.entries.length) {
       const creature = ctx.world.creatures.entries[int(primary)];
       creature.flags |= CreatureFlags.BONUS_ON_DEATH;
       creature.bonusId = dropId;

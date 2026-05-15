@@ -67,6 +67,8 @@ import {
   tickSpawnSlot,
 } from './spawn.ts';
 
+export { CreatureFlags };
+
 export const CREATURE_POOL_SIZE = 0x180;
 export const CONTACT_DAMAGE_PERIOD = 0.5;
 
